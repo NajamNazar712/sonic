@@ -35,7 +35,7 @@
                                                     @php
                                                         $count = $index + 1;
                                                     @endphp
-                                                    <h3 class="display-inline card-title lead success">International Rates {{$rate_status->box_id}}</h3>
+                                                    <h3 class="display-inline card-title lead success">International Rates {{$count}}</h3>
                                                 </div>
                                                 @if($rate_status->box_id != 1)
                                                     <div class="col-md-6 text-right">
@@ -735,6 +735,7 @@
             });
 
             var box_no = box_id;
+            var new_count = {{$count}}
             var wa_rows = @json($w_index);
             var cash_count = @json($ch_index);
             var ins_count = @json($in_index);
@@ -964,11 +965,12 @@
 
             $('#add_more_rates_hubs').on('click', function () {
                 box_no++;
+                new_count++;
                 var box_div = '<div class="parent_box_div_'+ box_no +'"><div class="card-header border-success">\n' +
                     '                                    <input type="hidden" value="'+ box_no +'" name="box_ids[]">\n' +
                     '                                    <div class="row">\n' +
                     '                                        <div class="col-md-6">\n' +
-                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ box_no +'</h3>\n' +
+                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ new_count +'</h3>\n' +
                     '                                        </div>\n' +
                     '                                        <div class="col-md-6 text-right">\n' +
                     '                                            <span class="btn btn-danger rounded btn-sm-width rate_box_close_'+ box_no +'" box="'+ box_no +'"><i class="ft-trash"></i></span>\n' +
