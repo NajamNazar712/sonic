@@ -1028,7 +1028,7 @@ use Yajra\Datatables\Datatables;
                 $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
             }
 
-            if (session('role_id') != 1 || $hub = $request->get('hub')) {
+            if (session('role_id') != 1 || $request->get('hub')) {
                 $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
             }
 
