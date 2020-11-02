@@ -27,7 +27,14 @@ class ShipperReportsController extends Controller
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes]);
     }
     public function sales_list(Request $request){
-            $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+        if (!in_array(session('user_id'), [167, 1159, 2035, 4740, 4758])) {
+            $connection = 'reports';
+        }
+        else {
+            $connection = 'mysql';
+        }
+
+            $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
                 ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -35,31 +42,31 @@ class ShipperReportsController extends Controller
                 ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
                 ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
                 ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-                ->leftJoin('shipments_journey as sj', function ($join) {
+                ->leftJoin('shipments_journey as sj', function ($join) use($connection) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
                         ->where('sj.id','=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
-                ->leftJoin('pending_payment_shipments as pps', function ($join) {
+                ->leftJoin('pending_payment_shipments as pps', function ($join) use($connection) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
                         ->where('pps.id','=',
-                            DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
                 })
-                ->leftJoin('done_payment_shipments as dps', function ($join) {
+                ->leftJoin('done_payment_shipments as dps', function ($join) use($connection) {
                     $join->on('dps.shipment_id', '=', 'shipments.id')
                         ->where('dps.id','=',
-                            DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
                 })
-                ->leftjoin('shipment_items as si', function ($join) {
+                ->leftjoin('shipment_items as si', function ($join) use($connection) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
                         ->where('si.id', '=',
-                            DB::connection('reports')->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
+                            DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
-                ->leftJoin('shipments_journey as dr', function ($join) {
+                ->leftJoin('shipments_journey as dr', function ($join) use($connection) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
                         ->where('dr.id', '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37))'));
+                            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37))'));
                 })
                 ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date')
