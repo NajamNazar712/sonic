@@ -222,7 +222,7 @@ class AdminInternationalRatesController extends Controller
             $rate_remark->admin_id = Auth::id();
             $rate_remark->save();
         }
-        return redirect()->back()->with('success', 'Rates added successfully!');
+        return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
 
     }
 	 public function edit_rates_index($id){
