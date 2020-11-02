@@ -2,25 +2,26 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\AdminReportsEmailController;
-use Carbon\Carbon;
+use App\Http\Controllers\Admins\AccountBlockageEmailDraftController;
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 
-class OutstandingShipmentEmail extends Command
+class NonActivityShipmentBookings extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:outstandingshipments';
+    protected $signature = 'email:NonActivityShipmentBookings';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Outstanding Shipment Report';
+    protected $description = 'NonActivityShipmentBookings';
 
     /**
      * Create a new command instance.
@@ -39,8 +40,8 @@ class OutstandingShipmentEmail extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
-        $end_date = Carbon::yesterday()->endOfDay()->addHours(10)->toDateTimeString();
-        $response = AdminReportsEmailController::outstanding_shipments($start_date, $end_date);
+        $date = Carbon::today()->subDays(15);
+        $response = AccountBlockageEmailDraftController::shipper_booking_order($date);
+        NotificationsController::send(95, $date, $response);
     }
 }

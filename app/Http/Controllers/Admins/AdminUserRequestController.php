@@ -23,6 +23,7 @@ class AdminUserRequestController extends Controller
         $this->middleware('Permission');
     }
     public function user_requests_index(){
+        //dd(session('role_id'));
         $hubs=City::select('id','name')->where('hub',1)->get();
         $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
             ->join('admin_departments as ad','ad.id','=','ar.department_id')
@@ -35,55 +36,18 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admin_departments as ad','ad.id','=','admin_user_requests.department')
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
-        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status')
-            ->whereIn('admin_user_requests.status',[0,1])
+            ->leftjoin('admins as ac','ac.id','=','admin_user_requests.forwarded_by')
+        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by')->orderBy('admin_user_requests.created_at','desc');
 
-           ;
-        if(session('role_id') != 1 ){
+            if(session('role_id') != 1 && session('department_id') != 2){
+                $users->whereIn('admin_user_requests.status',[0,1]);
+            };
+
+        if(session('role_id') != 1 && session('department_id') != 2){
             $users->where('ad.id',session('department_id'));
         }
 
         $datatables = Datatables::of($users)
-            ->editColumn('verified_by_hr_at', function($user) {
-                if($user->verified_by_hr_at == null){
-                    return '-';
-                }
-                else{
-                    return $user->verified_by_hr_at;
-                }
-            })
-            ->editColumn('trax_id', function ($user) {
-                if($user->trax_id == null){
-                    return '-';
-                }
-                else{
-                    return $user->trax_id;
-                }
-            })
-            ->editColumn('verified_by_hr', function ($user) {
-                if($user->verified_by_hr == null){
-                    return '-';
-                }
-                else{
-                    return $user->verified_by_hr;
-                }
-            })
-            ->editColumn('request_created_at', function ($user) {
-                if($user->request_created_at == null){
-                    return '-';
-                }
-                else{
-                    return $user->request_created_at;
-                }
-            })
-            ->editColumn('admin', function ($user) {
-                if($user->admin == null){
-                    return '-';
-                }
-                else{
-                    return $user->admin;
-                }
-            })
             ->addColumn('requested_from_date', function($user){
                 if($user->request_created_at){
                     Carbon::setWeekendDays([
@@ -108,22 +72,57 @@ class AdminUserRequestController extends Controller
                     return 'Requested';
                 }
                 else if($user->status == 1){
-                    return 'Verified';
+                    return 'HR Verified';
+                }
+                else if($user->status == 2){
+                    return 'Admin Verified';
+                }
+                else if($user->status == 3){
+                    return 'Request Completed';
+                }
+            })
+            ->addColumn('verified_from_date', function($user){
+                if($user->verified_by_hr_at){
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
+                    $verified_date = Carbon::parse($user->verified_by_hr_at);
+                    $forwarded_date = Carbon::parse($user->forwarded_at);
+                    $days = $verified_date->diffInDays($forwarded_date);
+                    if($days <= 0){
+                        return '-';
+                    }
+                    else{
+                        return $days . 'days';
+                    }
+                }
+                else{
+                    return '-';
                 }
             })
             ->addColumn('action', function($user) {
                 $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Verify Info</div></button>';
                 $add_role = '<button type="button" class="dropdown-item addrole"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Add Role</div></button>';
-                if(session('role_id') == 1 || (session('department_id') == 2 && $user->status == 0)) {
+                $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
+                $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
+
+                if(session('role_id') == 1 || ((session('department_id') == 2) && ($user->status == 0 || $user->status == 3 ))) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                    if($user->status == 0){
+
+                    if ((session('department_id') == 2 && $user->status == 0) || (session('role_id') == 1 && $user->status == 0)) {
                         $dropdown .= $verify;
                     }
-                    if(session('role_id') == 1 && $user->status == 1) {
+                    if (session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
+                    }
+                    if (session('role_id') == 1 && $user->status == 2) {
+                        $dropdown .= $forwarded_by;
+                    }
+                    if ((session('role_id') == 1 && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
+                        $dropdown .= $view_details;
                     }
                     return $dropdown;
                 }
@@ -148,18 +147,10 @@ class AdminUserRequestController extends Controller
         $admin = new AdminUserRequest();
 
         $admin->name = $request->input('name');
-        $admin->email = $request->input('email');
-        if($request->has('trax_id')){
-            $admin->trax_id = $request->input('trax_id');
-        }
-        $admin->phone_number = $request->input('phone_number');
-        $admin->cnic = $request->input('cnic');
         $admin->department = $request->input('department');
         $admin->designation = $request->input('designation');
-        $admin->default_hub_id = $request->input('default_hub');
         $admin->request_added_by = Auth::id();
         $admin->request_created_at = Carbon::now();
-
         $admin->save();
 
         if ($request->has('hub_ids')) {
@@ -222,11 +213,9 @@ class AdminUserRequestController extends Controller
             }
         }
         else {
-            AdminUserRequestHub::where('admin_user_request_id', $id)->delete();
+            AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
         }
-
             return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been verified!']);
-
     }
 
     public function user_email(Request $request) {
@@ -286,8 +275,20 @@ class AdminUserRequestController extends Controller
     public function user_save(Request $request, $id) {
 
         $admin_user_request = AdminUserRequest::find($id);
+        $admin_user_request->name = $request->input('name');
+        $admin_user_request->trax_id = $request->input('trax_id');
+        $admin_user_request->email = $request->input('email');
+        $admin_user_request->phone_number = $request->input('phone_number');
+        $admin_user_request->cnic = $request->input('cnic');
+        $admin_user_request->department = $request->input('department');
+        $admin_user_request->designation = $request->input('designation');
+        $admin_user_request->default_hub_id = $request->input('default_hub');
+        $admin_user_request->verified_by_hr = Auth::id();
+        $admin_user_request->verified_by_hr_at = Carbon::now();
+        $admin_user_request->password = bcrypt($request->input('password'));
         $admin_user_request->status = 2;
         $admin_user_request->save();
+
 
         if( $admin_user_request->status == 2) {
 
@@ -342,34 +343,22 @@ class AdminUserRequestController extends Controller
                 AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
             }
 
-            return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been Saved!']);
+            return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been Saved!']);
         }
         else {
             return redirect()->route('admin.access_denied');
          }
     }
 
-   /* public function user_assign_hub(Request $request){
-        $user_ids = explode(',' , $request->id);
-        foreach($user_ids as $user_id){
+  public function forward(Request $request){
+        $admin_user = $request->id;
+        $user = AdminUserRequest::find($admin_user);
+        $user->forwarded_by = Auth::id();
+        $user->forwarded_at = Carbon::now();
+        $user->status = 3;
+        $user->save();
 
-            foreach($request->input('hubs') as $hub_id) {
-                $admin_hub_exist = AdminUserRequestHub::where('admin_user_requests_id',$user_id)->where('hub_id',$hub_id)->first();
+        return response()->json(['success'=>'Request Forwarded']);
 
-                if($admin_hub_exist)
-                {
-                    break;
-                    // dd($admin_hub_exist);
-
-                }
-                else{
-                    $admin_user_request_hub = new AdminUserRequestHub();
-                    $admin_user_request_hub->hubs_id = $hub_id;
-                    $admin_user_request_hub->admin_user_request_id = $user_id;
-                    $admin_user_request_hub->save();
-                }
-            }
-        }
-        return redirect()->back()->with(['status'=>1,'success'=>"Hubs has been Assigned successfully!"]);
-    }*/
+  }
 }

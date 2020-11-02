@@ -1120,15 +1120,21 @@ class AdminReportsEmailController extends Controller
             ->where('sjd.created_at', '>=', $start_date)
             ->where('sjd.created_at', '<=', $end_date)
             ->get();
+
+        $serial_overall = 0;
+        $outstanding_shipments_array_overall['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
+        $outstanding_shipments_array_overall[] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
+
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         foreach ($hubs as $hub){
-            $serial[$hub->name] = 0;
-            $outstanding_shipments_array[$hub->name]['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
-            $outstanding_shipments_array[$hub->name][] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
+            // $serial[$hub->name] = 0;
+            // $outstanding_shipments_array[$hub->name]['header'] = ['S. No.', 'Tracking Number', 'Consignee', 'Address', 'Destination', 'Hub', 'Account No.', 'Shipper', 'Service Type', 'Amount', 'Recovery Status', 'Current Status', 'Payment Status', 'Operation Status Date/Time', 'Verification Status Date/Time', 'Rider Name', 'Remarks', 'DNCC', 'SDN', 'Aging'];
+            // $outstanding_shipments_array[$hub->name][] = ['S. No.' => '', 'Tracking Number' => '', 'Consignee' => '', 'Address' => '', 'Destination' => '', 'Hub' => '', 'Account No.' => '', 'Shipper' => '', 'Service Type' => '', 'Amount' => '', 'Recovery Status' => '', 'Current Status' => '', 'Payment Status' => '', 'Operation Status Date/Time' => '', 'Verification Status Date/Time' => '', 'Rider Name' => '', 'Remarks' => '', 'DNCC' => '', 'SDN' => '', 'Aging' => ''];
             if(count($shipments) > 0){
                 foreach ($shipments as $shipment){
                     if($hub->id == $shipment->hub_id){
-                        $serial[$hub->name]++;
+                        // $serial[$hub->name]++;
+                        $serial_overall++;
                         if(in_array($shipment->recovery_status, [4,5,6])){
                             $recovery_status = "Outstanding";
                         }else if($shipment->recovery_status == 7){
@@ -1159,46 +1165,89 @@ class AdminReportsEmailController extends Controller
                         else{
                             $sdn = '-';
                         }
-                        $outstanding_shipments_array[$hub->name][] = ['S. No.' => $serial[$hub->name], 'Tracking Number' => strval($shipment->tracking_number), 'Consignee' => $shipment->consignee, 'Address' => $shipment->address, 'Destination' => $shipment->destination, 'Hub' => $shipment->hub, 'Account No.' => str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT), 'Shipper' => $shipper, 'Service Type' => $shipment->service_type, 'Amount' => $shipment->sum_amount, 'Recovery Status' => $recovery_status, 'Current Status' => $shipment->current_status, 'Payment Status' => $shipment->payment_status, 'Operation Status Date/Time' => $shipment->operation_status_date, 'Verification Status Date/Time' => $shipment->verification_status_date, 'Rider Name' => $shipment->rider_name, 'Remarks' => '', 'DNCC' => str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT), 'SDN' => $sdn, 'Aging' => $aging];
+                        // $outstanding_shipments_array[$hub->name][] = ['S. No.' => $serial[$hub->name], 'Tracking Number' => strval($shipment->tracking_number), 'Consignee' => $shipment->consignee, 'Address' => $shipment->address, 'Destination' => $shipment->destination, 'Hub' => $shipment->hub, 'Account No.' => str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT), 'Shipper' => $shipper, 'Service Type' => $shipment->service_type, 'Amount' => $shipment->sum_amount, 'Recovery Status' => $recovery_status, 'Current Status' => $shipment->current_status, 'Payment Status' => $shipment->payment_status, 'Operation Status Date/Time' => $shipment->operation_status_date, 'Verification Status Date/Time' => $shipment->verification_status_date, 'Rider Name' => $shipment->rider_name, 'Remarks' => '', 'DNCC' => str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT), 'SDN' => $sdn, 'Aging' => $aging];
+
+                        $outstanding_shipments_array_overall[] = ['S. No.' => $serial_overall, 'Tracking Number' => strval($shipment->tracking_number), 'Consignee' => $shipment->consignee, 'Address' => $shipment->address, 'Destination' => $shipment->destination, 'Hub' => $shipment->hub, 'Account No.' => str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT), 'Shipper' => $shipper, 'Service Type' => $shipment->service_type, 'Amount' => $shipment->sum_amount, 'Recovery Status' => $recovery_status, 'Current Status' => $shipment->current_status, 'Payment Status' => $shipment->payment_status, 'Operation Status Date/Time' => $shipment->operation_status_date, 'Verification Status Date/Time' => $shipment->verification_status_date, 'Rider Name' => $shipment->rider_name, 'Remarks' => '', 'DNCC' => str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT), 'SDN' => $sdn, 'Aging' => $aging];
                     }
                 }
             }
         }
-        foreach ($hubs as $hub){
-            if(count($outstanding_shipments_array[$hub->name]) > 2){
-                $cell_st = [
-                    'font' => ['bold' => true],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-                ];
+        // foreach ($hubs as $hub){
+        //     if(count($outstanding_shipments_array[$hub->name]) > 2){
+        //         $cell_st = [
+        //             'font' => ['bold' => true],
+        //             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        //             'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        //         ];
 
-                $spreadsheet = new Spreadsheet();
-                $sheet = $spreadsheet->getActiveSheet();
-                $sheet->getDefaultColumnDimension()->setWidth(20);
-                $sheet->getStyle("B2:B4000")->getNumberFormat()
-                    ->setFormatCode(
-                        \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
-                    );
-                $sheet->fromArray($outstanding_shipments_array[$hub->name], NULL, 'A2', true);
-                $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
-                $title = 'Outstanding Shipments ' . $hub->name;
-                if(strlen($title) > 31){
-                    $title = substr($title, 0, 28);
-                    $title = $title . '...';
-                }
-                $sheet->setTitle($title);
-                $writer = new Xlsx($spreadsheet);
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
-                header('Cache-Control: max-age=0');
-                $date_file_name = Carbon::today()->format('Y_m_d');
-                $file_name_without_path = "reports/outstanding_shipment_report_" . strtolower($hub->name) . "_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/outstanding_shipment_report_" . strtolower($hub->name) . "_"  . $date_file_name . ".xlsx";
-                $writer->save($file_name);
+        //         $spreadsheet = new Spreadsheet();
+        //         $sheet = $spreadsheet->getActiveSheet();
+        //         $sheet->getDefaultColumnDimension()->setWidth(20);
+        //         $sheet->getStyle("B2:B4000")->getNumberFormat()
+        //             ->setFormatCode(
+        //                 \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
+        //             );
+        //         $sheet->fromArray($outstanding_shipments_array[$hub->name], NULL, 'A2', true);
+        //         $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
+        //         $title = 'Outstanding Shipments ' . $hub->name;
+        //         if(strlen($title) > 31){
+        //             $title = substr($title, 0, 28);
+        //             $title = $title . '...';
+        //         }
+        //         $sheet->setTitle($title);
+        //         $writer = new Xlsx($spreadsheet);
+        //         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        //         header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
+        //         header('Cache-Control: max-age=0');
+        //         $date_file_name = Carbon::today()->format('Y_m_d');
+        //         $file_name_without_path = "reports/outstanding_shipment_report_" . strtolower($hub->name) . "_" . $date_file_name . ".xlsx";
+        //         $file_name = public_path() . "/reports/outstanding_shipment_report_" . strtolower($hub->name) . "_"  . $date_file_name . ".xlsx";
+        //         $writer->save($file_name);
 
-                NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
+        //         NotificationsController::send(76, $hub->id, url('/') . '/' . $file_name_without_path);
 
+        //     }
+        // }
+
+        if(count($outstanding_shipments_array_overall) > 2){
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->getStyle("B2:B4000")->getNumberFormat()
+                ->setFormatCode(
+                    \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
+                );
+            $sheet->fromArray($outstanding_shipments_array_overall, NULL, 'A2', true);
+            $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
+            $title = 'Outstanding Shipments';
+            if(strlen($title) > 31){
+                $title = substr($title, 0, 28);
+                $title = $title . '...';
             }
+            $sheet->setTitle($title);
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="outstanding_shipment_report.xlsx"');
+            header('Cache-Control: max-age=0');
+
+            if ($start_date != $end_date) {
+                $date_file_name = Carbon::parse($start_date)->format('Y_m_d') . '_' .  Carbon::parse($end_date)->format('Y_m_d');
+            }
+            else {
+                $date_file_name = Carbon::parse($start_date)->format('Y_m_d');
+            }
+
+            $file_name_without_path = "reports/outstanding_shipment_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/outstanding_shipment_report_"  . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            NotificationsController::send(76, 0, url('/') . '/' . $file_name_without_path);
         }
     }
 
@@ -1386,7 +1435,7 @@ class AdminReportsEmailController extends Controller
                 $total_count = 0;
                 $sdn_data[$hub->id]['name'] = $hub->name;
                 $sdn_data[$hub->id]['count'] = 0;
-                $outstanding_sdn = StationDepositNote::where('hub_id', $hub->id)->whereIn('status', [0,1])->get();
+                $outstanding_sdn = StationDepositNote::where('hub_id', $hub->id)->where('status', 1)->get();
                 foreach ($outstanding_sdn as $sdn) {
                     $start = Carbon::parse($sdn->created_at);
                     $difference = $start->diffInDays($now);
