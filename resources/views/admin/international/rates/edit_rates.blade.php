@@ -874,10 +874,16 @@
                     });
                     ins_count++;
                 });
+                if($('#cash_handling_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
+                if($('#insurance_charges_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
 
                 $('#cash_handling_switch_{{$rate_status->box_id}}').on("change" , function() {
-                    console.log($(this).is(":checked"));
-                    console.log(1);
                     if($(this).is(":checked") === true){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
                         $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',false);

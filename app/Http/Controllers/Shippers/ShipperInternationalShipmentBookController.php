@@ -244,7 +244,12 @@ class ShipperInternationalShipmentBookController extends Controller
         $products = Product::all();
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
-        $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        if(session('account_type') == 1){
+            $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+        }
+        else{
+            $charges_modes = ChargesModes::whereIn('id' , [3])->pluck('charges_mode','id');
+        }
 
         return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
@@ -618,7 +623,12 @@ class ShipperInternationalShipmentBookController extends Controller
                 $products = Product::pluck('product_name', 'id');
 
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
-                $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+                if(session('account_type') == 1){
+                    $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+                }
+                else{
+                    $charges_modes = ChargesModes::whereIn('id' , [3])->pluck('charges_mode','id');
+                }
                 $city_name = array();
                 foreach ($cities as $city) {
                     $city_name[$city->name] = $city->name;
