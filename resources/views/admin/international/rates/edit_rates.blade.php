@@ -815,7 +815,7 @@
 
                 });
 
-                $('body').on('click','button.add_more_cash_slabs_{{$rate_status->vox_id}}',function () {
+                $('body').on('click','button.add_more_cash_slabs_{{$rate_status->box_id}}',function () {
                     let htmdiv = '<div class="row" id="cash_handle_'+ {{$rate_status->box_id}} +'_'+ cash_count +'">\n' +
                         '                                                <div class="col-md-2 text-center">\n' +
                         '                                                    <fieldset class="form-group">\n' +
@@ -874,16 +874,22 @@
                     });
                     ins_count++;
                 });
+                if($('#cash_handling_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
+                if($('#insurance_charges_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
 
                 $('#cash_handling_switch_{{$rate_status->box_id}}').on("change" , function() {
-                    console.log($(this).is(":checked"));
-                    console.log(1);
                     if($(this).is(":checked") === true){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                        $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
+                        $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',false);
                     }else if($(this).is(":checked") === false){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-                        $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
+                        $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',true);
 
                     }
                 });
@@ -892,10 +898,10 @@
                 $('#insurance_charges_switch_{{$rate_status->box_id}}').on("change" , function() {
                     if($(this).is(":checked") === true){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                        $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
+                        $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',false);
                     }else if($(this).is(":checked") === false){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-                        $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
+                        $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',true);
 
                     }
                 });
