@@ -6192,37 +6192,11 @@ class NotificationsController extends Controller
                         ->select('users.id as user_id', 'ss.id as status','users.phone as phone')->get();
 
                     foreach($deliveries as $delivery){
-                        if($delivery->user_id == 3304 && $delivery->status == 14){
+                        if($delivery->user_id == 3324 && $delivery->status == 14){
                             $to = $delivery->phone;
-                            self::sms($body, $to);
                         }
                     }
-
-                    /*foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
-                        $shipment = $delivery_note_shipment->shipment;
-
-                        if ($shipment->shipper_status_id != 12) {
-                            $shipper = $shipment->user;
-
-                            $to = $shipper->phone;
-
-                            foreach ($shipment_fields as $key => $field) {
-                                if (strpos($body, '[' . $key . ']') !== FALSE) {
-                                    $body = str_replace('[' . $key . ']', $shipment[$field], $body);
-                                }
-                            }
-
-                            if (strpos($body, '[company_name]') !== FALSE) {
-                                $body = str_replace('[company_name]', $shipper->name, $body);
-                            }
-
-                            if (strpos($body, '[status]') !== FALSE) {
-                                $body = str_replace('[status]', $shipment->status_shipper->name, $body);
-                            }
-
-                            self::sms($body, $to);
-                        }
-                    }*/
+                    self::sms($body, $to);
                 }
             }
         }
