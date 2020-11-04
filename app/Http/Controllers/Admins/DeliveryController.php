@@ -269,7 +269,7 @@ class DeliveryController extends Controller
 
         return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
     }
-	
+
 	public function note_consolidation_check(Request $request){
         $missing_shipments = array();
         foreach ($request->consolidation_ids as $id){
@@ -581,10 +581,10 @@ class DeliveryController extends Controller
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0)->where('status', '!=', 4)->get();
         if($delivery_notes){
             foreach ($delivery_notes as $note) {
-              
-                    $delivery_note_details[$note->id] = $note; 
+
+                    $delivery_note_details[$note->id] = $note;
                     $flag = false;
-               
+
             }
         }
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
@@ -1672,6 +1672,17 @@ class DeliveryController extends Controller
                     continue;
                 }
 
+                if(in_array($selected_reason, [3, 4, 12])){
+                    $phone_number = $shipment_details->consignee_phone_number_1;
+                    $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
+                        $query->where('consignee_phone_number_1', $phone_number)
+                            ->orWhere('consignee_phone_number_1', $phone_number);
+                    })
+                        ->where('shipper_status_id', 14);
+                    if($previous_delivered_shipments->exists()){
+                        continue;
+                    }
+                }
                 $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
                 if($restrict_parcels_attempt->exists() && $selected_status != 12 && $selected_status != 14){
                     $restrict_parcels_attempt = $restrict_parcels_attempt->first();
@@ -1896,6 +1907,20 @@ class DeliveryController extends Controller
                         ShipmentOpenBoxJourneyController::add($shipment,4,Auth::id());
                     }
                 }
+                if($request->has($status_drop) && $request->has($statusId)){
+                    if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                        $current_shipment = Shipment::find($shipment);
+                        $phone_number = $current_shipment->consignee_phone_number_1;
+                        $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
+                            $query->where('consignee_phone_number_1', $phone_number)
+                                ->orWhere('consignee_phone_number_1', $phone_number);
+                        })
+                        ->where('shipper_status_id', 14);
+                        if($previous_delivered_shipments->exists()){
+                            continue;
+                        }
+                    }
+                }
                 if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
                     if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -1908,7 +1933,7 @@ class DeliveryController extends Controller
                         } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
-                        
+
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
@@ -2454,7 +2479,7 @@ class DeliveryController extends Controller
                 $verification = 0;
             }
             $current_time = Carbon::now();
-            
+
             $shipment_count = 0;
             $dispute_shipments = array();
             $delivered_status_array = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46);
@@ -2477,6 +2502,20 @@ class DeliveryController extends Controller
                     if($shipment_details->booking_type_id == 5 && ($request->has($status_drop) && $request->status_drop[$shipment] == 12)){
                         continue;
                     }
+                    if($request->has($status_drop) && $request->has($reasonId)){
+                        if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                            $current_shipment = Shipment::find($shipment);
+                            $phone_number = $current_shipment->consignee_phone_number_1;
+                            $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
+                                $query->where('consignee_phone_number_1', $phone_number)
+                                    ->orWhere('consignee_phone_number_1', $phone_number);
+                            })
+                                ->where('shipper_status_id', 14);
+                            if($previous_delivered_shipments->exists()){
+                                continue;
+                            }
+                        }
+                    }
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
 
                     if($verify_fake){
@@ -2491,7 +2530,7 @@ class DeliveryController extends Controller
                         }
                     }
                     if($request->has($open_box_shipment)){
-                        
+
                             $shipment_details->open_box = 1;
                             $shipment_details->save();
                             if($verification){
@@ -2499,8 +2538,8 @@ class DeliveryController extends Controller
                             }else{
                                 ShipmentOpenBoxJourneyController::add($shipment, 4, Auth::id());
                             }
-                        
-                        
+
+
                     }
 
                     if ($request->has($status_drop) && $request->status_drop[$shipment] == 14) {
@@ -2865,7 +2904,7 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Shipments not found!');
         }
         }
-        
+
 
     }
 
@@ -3877,7 +3916,7 @@ class DeliveryController extends Controller
                         $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/'.$sdn->deposit_slip, now()->addMinutes(5));
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="'.$img.'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
-                   
+
                 }else{
                     return '-';
                 }
@@ -4032,7 +4071,7 @@ class DeliveryController extends Controller
             return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
         }
         foreach($deposit_rows as $row){
-           
+
             $file_name = 'deposit_slip_'.$row;
             $deposit_details = new StationDepositNoteSlip();
             $deposit_details->station_deposit_note_id = $sdn_id;
