@@ -11,32 +11,43 @@
             <div class="card-body">
                 @include('client.inc.messages')
 
-                    <form id="track_form" class="form-inline justify-content-center" novalidate="novalidate">
-                        <div class="col-3">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
+                    <form id="track_form" class="justify-content-center m-2"  novalidate="novalidate">
+                       <div class="row">
+                            <div class="col-3">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Report From">
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
+                                    </div>
+                                    <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Report To">
                                 </div>
-                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Report From">
                             </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o small-calender-icon"></span>
-                                        </span>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <select name="rider" id="rider" class="form-control select2" >
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Report To">
                             </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group">
-                                <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
-                            </div>
-                        </div>
+                           <div class="col-3">
+                               <div class="form-group">
+                                   <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
+                               </div>
+                           </div>
+                       </div>
                     </form>
 
                 <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -52,6 +63,7 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Created At</th>
                     </tr>
                     </thead>
                 </table>
@@ -129,6 +141,10 @@
 
     <script>
         $(document).ready(function() {
+            $('#track_form #rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Search Rider',
+                allowClear:true
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -153,6 +169,7 @@
                             head.push('Vendor');
                             head.push('Address');
                             head.push('Status');
+                            head.push('Created At');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -166,6 +183,7 @@
                                 row.push(values.vendor);
                                 row.push(values.address);
                                 row.push(values.status);
+                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },
@@ -230,6 +248,7 @@
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.rider = $('select[name="rider"]').val();
                     }
                 },
                 rowId: 'id',
@@ -245,6 +264,7 @@
                     {data: 'vendor', name: 'usi.vendor', class: 'text_center align-middle vendor'},
                     {data: 'address', name: 'usi.pickup_address', class: 'text_center align-middle address'},
                     {data: 'status', name: 'vprs.id', class: 'text_center align-middle status'},
+                    {data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'text_center align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

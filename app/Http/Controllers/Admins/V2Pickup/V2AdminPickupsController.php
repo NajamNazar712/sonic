@@ -1599,30 +1599,34 @@ class V2AdminPickupsController extends Controller
 
                 $shipper = $pickup_request->shipper;
                 $pickup_address = $pickup_request->pickup_address;
-                $sales_person = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
-                    ->join('users as us', 'us.id', '=', 'sale_person_tags.user_id')
-                    ->join('shipper_contacts as sc', 'sc.shipper_id', '=', 'us.id')
+                $poc = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
+                    ->leftjoin('users as us', 'us.id', '=', 'sale_person_tags.user_id')
+                    ->leftjoin('shipper_contacts as sc', 'sc.shipper_id', '=', 'us.id')
                     ->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
-                ->select('ad.name','sc.phone_number','sc.poc')->get();
-                $poc = $sales_person ->toArray();
-
+                ->select('ad.name as admin_name','ad.phone_number as admin_phone_number','sc.phone_number as phone_number','sc.poc')->get()->toArray();
+//dd($poc);
                 $pocName="";
                 $phoneNo="";
                 $names="";
                 $i = 0;
                 foreach($poc as  $data)
                 {
+                    if($i==null){
+                        if($i==0){
+                            $pocName.= ''.$data['poc'];
+                            $phoneNo.=' '.$data['admin_phone_number'].',';
+                            $phoneNo.=''.$data['phone_number'];
+                            $names=$data['admin_name'];
+                            $i++;
+                        }else{
+                            $pocName.= ','.$data['poc'];
+                            $phoneNo.=','.$data['phone_number'];
+                            $phoneNo.=','.$data['admin_phone_number'];
 
-                    if($i==0){
-                        $pocName.= ''.$data['poc'];
-                        $phoneNo.=''.$data['phone_number'];
-                        $names=$data['name'];
-                        $i++;
+                        }
                     }else{
-                        $pocName.= ','.$data['poc'];
-                        $phoneNo.=','.$data['phone_number'];
+                        dd($poc);
                     }
-
 
                 }
                 $color = '';

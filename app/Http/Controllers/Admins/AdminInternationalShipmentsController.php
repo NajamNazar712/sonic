@@ -137,7 +137,7 @@ class AdminInternationalShipmentsController extends Controller
                         $shipment = Shipment::where('tracking_number', $row['tracking_number']);
                         if($shipment->exists()){
                             $shipment = $shipment->first();
-                            if(InternationalShipment::where('shipment_id', $shipment->id)->exists()){
+                            if(InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number')->exists()){
                                 $errors['Row #' . $row_id][] = 'International Tracking Number is already added #' . $row['tracking_number'];
                             }
                         }
@@ -153,9 +153,8 @@ class AdminInternationalShipmentsController extends Controller
                         $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id);
-                        if(!$international_shipment->exists()){
-                            $international_shipment = new InternationalShipment();
-                            $international_shipment->shipment_id = $shipment_id;
+                        if($international_shipment->exists()){
+                            $international_shipment = $international_shipment->first();
                             $international_shipment->international_tracking_number = $international_tracking_number;
                             $international_shipment->save();
                         }
