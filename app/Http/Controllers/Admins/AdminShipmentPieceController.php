@@ -69,7 +69,7 @@ class AdminShipmentPieceController extends Controller
                     $shipment_piece_request->added_by = Auth::id();
                     $shipment_piece_request->status = 1;
                     $shipment_piece_request->department_id = session('department_id');
-                    $shipment_piece_request->pieces = session('pieces');
+                    $shipment_piece_request->pieces = $shipment->pieces;
                     $shipment_piece_request->save();
 
                     $shipment->shipper_status_id = 62;

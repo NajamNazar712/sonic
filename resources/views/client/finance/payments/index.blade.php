@@ -189,7 +189,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Payment ID');
-                            head.push('Oder ID');
+                            head.push('Order ID');
                             head.push('Shipper');
                             head.push('City');
                             head.push('Phone No(s).');
@@ -214,7 +214,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.id_padded);
-                                row.push(values.Order_ID);
+                                row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
