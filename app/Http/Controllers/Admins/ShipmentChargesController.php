@@ -219,7 +219,7 @@ class ShipmentChargesController extends Controller
 
                     if ($account_type_id == 2) {
                         if ($base) {
-                            $weight_difference = $weight - $base_weight_charge->range_up;
+                            $weight_difference = $weight - $base_weight_charge->range_down;
 
                             if ($weight_difference > 0) {
                                 $charges = $charges * (ROUND($weight_difference, 0));
