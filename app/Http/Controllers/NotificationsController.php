@@ -3527,7 +3527,12 @@ class NotificationsController extends Controller
                         if ($target_revenue > 0) {
                             $all_shipments_target_revenue = $target_revenue * $target_shipments;
                             $total_target_revenue_avg += $all_shipments_target_revenue;
-                            $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            if($all_shipments_target_revenue > 0){
+                                $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            }
+                            else{
+                                $target_revenue_achieved = 0;
+                            }
                         }
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';

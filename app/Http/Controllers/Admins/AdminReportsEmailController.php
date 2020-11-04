@@ -114,7 +114,11 @@ class AdminReportsEmailController extends Controller
                 if ($target_revenue > 0) {
                     $all_shipments_target_revenue = $target_revenue * $target_shipments;
                     $total_target_revenue_avg += $all_shipments_target_revenue;
-                    $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $all_shipments_target_revenue) * 100;
+                    if($all_shipments_target_revenue > 0){
+                        $target_revenue_achieved = ($revenue[$sale_person_shipment->admin_id] / $all_shipments_target_revenue) * 100;
+                    }else{
+                        $target_revenue_achieved = 0;
+                    }
                 }
             }
             $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => round($target_shipments_achieved, 2).'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $all_shipments_target_revenue, 'Target Revenue Achieved %' => round($target_revenue_achieved, 2).'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
