@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Old Number of Pieces</th>
                         <th class="border-primary border-darken-1">Date & Time Entered</th>
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
@@ -174,6 +175,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Old Number of Pieces');
                             head.push('Date & Time Entered');
                             head.push('Request Status');
                             head.push('Last Status By Date');
@@ -189,6 +191,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.Old_number_of_pieces);
                                 row.push(values.created_at);
                                 row.push(values.request_status);
                                 row.push(values.last_updated_at);
