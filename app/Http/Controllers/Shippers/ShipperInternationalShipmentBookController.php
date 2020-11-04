@@ -49,7 +49,12 @@ class ShipperInternationalShipmentBookController extends Controller
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
-        $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        if(session('account_type') == 1){
+            $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
+        }
+        else{
+            $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
+        }
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
         if($air_waybill->exists()){
             $air_waybill = $air_waybill->first();
@@ -245,19 +250,17 @@ class ShipperInternationalShipmentBookController extends Controller
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         if(session('account_type') == 1){
-            $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
         }
         else{
-            $charges_modes = ChargesModes::whereIn('id' , [3])->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
         }
 
         return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
     public function excel_store(Request $request) {
-//        return $request;
         $user_id = session('user_id');
         $account_type_id = session('account_type');
-//        dd($request->all('form'));
         $names = [
             'pickup_address_id' => 'Pickup Address ID',
             'information_display' => 'Information Display',
@@ -624,10 +627,10 @@ class ShipperInternationalShipmentBookController extends Controller
 
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
                 if(session('account_type') == 1){
-                    $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+                    $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
                 }
                 else{
-                    $charges_modes = ChargesModes::whereIn('id' , [3])->pluck('charges_mode','id');
+                    $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
                 }
                 $city_name = array();
                 foreach ($cities as $city) {
