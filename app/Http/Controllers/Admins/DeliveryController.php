@@ -1678,7 +1678,7 @@ class DeliveryController extends Controller
                         $query->where('consignee_phone_number_1', $phone_number)
                             ->orWhere('consignee_phone_number_1', $phone_number);
                     })
-                        ->where('shipper_status_id', 14);
+                        ->where('shipper_status_id', DB::raw(14));
                     if($previous_delivered_shipments->exists()){
                         continue;
                     }
@@ -1915,7 +1915,7 @@ class DeliveryController extends Controller
                             $query->where('consignee_phone_number_1', $phone_number)
                                 ->orWhere('consignee_phone_number_1', $phone_number);
                         })
-                        ->where('shipper_status_id', 14);
+                            ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
                             continue;
                         }
@@ -2510,7 +2510,7 @@ class DeliveryController extends Controller
                                 $query->where('consignee_phone_number_1', $phone_number)
                                     ->orWhere('consignee_phone_number_1', $phone_number);
                             })
-                                ->where('shipper_status_id', 14);
+                                ->where('shipper_status_id', DB::raw(14));
                             if($previous_delivered_shipments->exists()){
                                 continue;
                             }
