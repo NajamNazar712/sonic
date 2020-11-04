@@ -815,7 +815,9 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::cash_handling($shipment_id);
                         ShipmentChargesController::insurance($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                        if($shipment->business_category_id == 1) {
+                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                        }
                     }
 
 
@@ -1369,7 +1371,9 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::cash_handling($shipment_id);
                         ShipmentChargesController::insurance($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                        if($shipment->business_category_id == 1) {
+                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                        }
                     }
 
                     if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
