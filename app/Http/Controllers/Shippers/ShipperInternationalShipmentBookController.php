@@ -50,10 +50,10 @@ class ShipperInternationalShipmentBookController extends Controller
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         if(session('account_type') == 1){
-            $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 4)->get();
         }
         else{
-            $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 3)->get();
         }
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
         if($air_waybill->exists()){
@@ -250,12 +250,11 @@ class ShipperInternationalShipmentBookController extends Controller
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         if(session('account_type') == 1){
-            $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 4)->get();
         }
         else{
-            $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
+            $charges_modes = ChargesModes::where('id' , 3)->get();
         }
-
         return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
     public function excel_store(Request $request) {
