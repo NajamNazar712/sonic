@@ -65,34 +65,6 @@ class ShipperInternationalShipmentBookController extends Controller
 
     public function store(Request $request) {
         $user_id = session('user_id');
-
-        $check = NonServiceArea::pluck('name')->toArray();
-        $msg_string = null;
-        $str_arr = null;
-        if (isset($request->consignee_address)) {
-            $consignee_address = $request->input('consignee_address');
-            $str_arr = preg_split("/[ ,]+/", $consignee_address);
-            foreach ($check as $nsa) {
-                foreach ($str_arr as $arr_value) {
-                    if (strtolower($nsa) == strtolower($arr_value)) {
-                        if ($msg_string != null) {
-                            $msg_string = $msg_string . ', ' . $arr_value;
-                        } else {
-                            $msg_string = $arr_value;
-                        }
-                    }
-                }
-            }
-            if($msg_string != null){
-                $check_previous_nsa_deliveries = explode( ',', $msg_string);
-                foreach ($check_previous_nsa_deliveries as $nsa_delivery){
-                    
-                }
-            }
-        } else {
-            $city_check = City::select('name')->where('id', $request->input('consignee_city'))->first();
-            $consignee_address = 'TRAX Office ' . $city_check['name'];
-        }
         $service_type_id = 1;
 
         if ($request->input('pickup_address') == 0) {
