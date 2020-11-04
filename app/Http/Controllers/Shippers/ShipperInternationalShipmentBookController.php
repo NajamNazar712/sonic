@@ -410,7 +410,12 @@ class ShipperInternationalShipmentBookController extends Controller
                 $row_id = $key + 2;
 
                 if (!isset($row['charges_mode_id'])) {
-                    $rows[$key]['charges_mode_id'] = 4;
+                    if($account_type_id == 1){
+                        $rows[$key]['charges_mode_id'] = 4;
+                    }
+                    else{
+                        $rows[$key]['charges_mode_id'] = 3;
+                    }
                 }
                 $rows[$key]['service_type_id'] = 1;
                 $row['service_type_id'] = 1;
