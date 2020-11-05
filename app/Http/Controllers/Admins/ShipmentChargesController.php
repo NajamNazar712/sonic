@@ -824,7 +824,7 @@ class ShipmentChargesController extends Controller
                                     $today = Carbon::today();
 
 
-                                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('box_id',
+                                    $discount_charge = InternationalRatesDiscountCharges::where('user_id', $shipment->user_id)->where('box_id',
                                         $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
 
 
