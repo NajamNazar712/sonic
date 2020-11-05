@@ -4987,6 +4987,7 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td>' . $serial_number[$origin] . '</td>
                           <td>' . $shipment->tracking_number . '</td>
+                          <td>' . $shipment->order_id . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $shipment->shipping_mode->mode . '</td>
                           <td>' . $date . '</td>
@@ -5192,6 +5193,7 @@ class AdminFinanceController extends Controller
                         <tr>
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
+                          <th class="color secondary">Order ID</th>
                           <th class="color secondary">Destination</th>
                           <th class="color secondary">Shipping Mode</th>
                           <th class="color secondary">Arrival Date</th>
