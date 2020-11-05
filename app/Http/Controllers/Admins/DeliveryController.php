@@ -2842,6 +2842,7 @@ class DeliveryController extends Controller
 
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
+                    NotificationsController::send(104, $delivery_note_id);
                     if(!empty($zero_cod_shipments)){
                         foreach ($zero_cod_shipments as $shipment_id) {
                             NotificationsController::send(35, $shipment_id);
@@ -4629,6 +4630,7 @@ class DeliveryController extends Controller
     }
     public function receive_delivery_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
+        dd($delivery_note_id);
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
         $shipments = array();

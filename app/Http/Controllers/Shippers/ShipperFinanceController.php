@@ -45,6 +45,7 @@ class ShipperFinanceController extends Controller
         ->leftJoin('user_bank_infos as ubi', function ($join) {
             $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
         })
+          ->leftJoin('shipments','shipments.id','=','dps.shipment_id')
         ->leftJoin('user_bank_infos as ubi_default', function ($join) {
             $join->on('ubi_default.user_id', '=', 'u.id')
                 ->where('ubi_default.default_bank', DB::raw(1));
@@ -440,7 +441,6 @@ class ShipperFinanceController extends Controller
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
                               <td>' . $type . '</td>
-                              <td>' . $shipment->order_id . '</td>
                               <td>' . (($pickup_address->vendor) ? $pickup_address->vendor : '') . '</td>
                               <td>' . $pickup_address->city->name . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
@@ -531,7 +531,6 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>S. No.</strong></td>
                               <td class="color primary"><strong>Tracking No.</strong></td>
                               <td class="color primary"><strong>Type</strong></td>
-                              <td class="color primary"><strong>Order ID</strong></td>
                               <td class="color primary"><strong>Vendor</strong></td>
                               <td class="color primary"><strong>Origin</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>

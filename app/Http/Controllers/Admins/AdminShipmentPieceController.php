@@ -69,6 +69,7 @@ class AdminShipmentPieceController extends Controller
                     $shipment_piece_request->added_by = Auth::id();
                     $shipment_piece_request->status = 1;
                     $shipment_piece_request->department_id = session('department_id');
+                    $shipment_piece_request->pieces = $shipment->pieces;
                     $shipment_piece_request->save();
 
                     $shipment->shipper_status_id = 62;
@@ -388,7 +389,7 @@ class AdminShipmentPieceController extends Controller
             ->leftjoin('shipment_pieces_request_statuses as ss', 'ss.id', '=', 'shipment_pieces_requests.request_status_id')
             ->leftjoin('admins','admins.id', '=', 'shipment_pieces_requests.last_updated_by_admin')
             ->leftjoin('users as lub','lub.id', '=', 'shipment_pieces_requests.last_updated_by_user')
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at','shipment_pieces_requests.last_updated_at','shipment_pieces_requests.last_updated_by_admin', 'shipment_pieces_requests.last_updated_by_user', 'lub.name as updated_by_shipper', 'admins.name as updated_by_admin','shipment_pieces_requests.created_at','shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status')
+            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'shipments.booking_type_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub','shipments.amount', 'ss.name as request_status', 'shipment_pieces_requests.created_at','shipment_pieces_requests.last_updated_at','shipment_pieces_requests.last_updated_by_admin', 'shipment_pieces_requests.last_updated_by_user', 'lub.name as updated_by_shipper', 'admins.name as updated_by_admin','shipment_pieces_requests.created_at','shipment_pieces_requests.request_status_id', 'shipment_pieces_requests.status','shipment_pieces_requests.pieces')
             ->where('shipment_pieces_requests.status', 2);
 
         if (session('role_id') != 1) {

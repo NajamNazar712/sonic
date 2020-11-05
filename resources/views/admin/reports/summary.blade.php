@@ -221,6 +221,7 @@
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Order ID</th>
                             <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Payment Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
@@ -416,6 +417,7 @@
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper');
+                            head.push('Vendor');
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Service Type');
@@ -436,6 +438,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.vendor);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
@@ -494,6 +497,7 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
