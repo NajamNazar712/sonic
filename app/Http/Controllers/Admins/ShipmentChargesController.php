@@ -1085,7 +1085,9 @@ class ShipmentChargesController extends Controller
 
     static public function replacement($id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 2){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
@@ -1419,7 +1421,9 @@ class ShipmentChargesController extends Controller
 
     static public function try_and_buy($id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 1){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
@@ -1474,7 +1478,9 @@ class ShipmentChargesController extends Controller
 
     static public function packaging_material($id, $type, $charges) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 1){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         $today = Carbon::today();
@@ -1597,7 +1603,9 @@ class ShipmentChargesController extends Controller
 
     static public function intercept($id, $previous_consignee_city_id, $new_consignee_city_id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 1){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
