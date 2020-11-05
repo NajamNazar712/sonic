@@ -337,9 +337,6 @@ class ShipperInternationalShipmentBookController extends Controller
             'payment_mode_id' => ['required', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [4]);
-            })],
             'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
 
         ];
@@ -404,6 +401,17 @@ class ShipperInternationalShipmentBookController extends Controller
             }
             else{
                 $rules['order_id'] = ['nullable', 'between:0,100'];
+            }
+
+            if($account_type_id == 1){
+                $rules['charges_mode_id'] = ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                    $query->where('id', 4);
+                })];
+            }
+            else{
+                $rules['charges_mode_id'] = ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                    $query->where('id', 3);
+                })];
             }
 
             foreach ($rows as $key => $row) {
