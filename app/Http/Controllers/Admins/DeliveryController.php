@@ -1655,6 +1655,7 @@ class DeliveryController extends Controller
         }
         $selected_status = $request->selected_status;
         $password = $request->password;
+        $invalid_reason_shipments = array();
         $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
         if(!$delivery_password->exists()){
             return response()->json(['status' => 0, 'error' => 'Wrong Password']);
@@ -1672,17 +1673,21 @@ class DeliveryController extends Controller
                     continue;
                 }
 
-                if(in_array($selected_reason, [3, 4, 12])){
-                    $phone_number = $shipment_details->consignee_phone_number_1;
-                    $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
-                        $query->where('consignee_phone_number_1', $phone_number)
-                            ->orWhere('consignee_phone_number_1', $phone_number);
-                    })
-                        ->where('shipper_status_id', DB::raw(14));
-                    if($previous_delivered_shipments->exists()){
-                        continue;
+                if($selected_status != 14){
+                    if(in_array($selected_reason, [3, 4, 12])){
+                        $phone_number = $shipment_details->consignee_phone_number_1;
+                        $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
+                            $query->where('consignee_phone_number_1', $phone_number)
+                                ->orWhere('consignee_phone_number_1', $phone_number);
+                        })
+                            ->where('shipper_status_id', DB::raw(14));
+                        if($previous_delivered_shipments->exists()){
+                            $invalid_reason_shipments[] = $shipment_details->tracking_number;
+                            continue;
+                        }
                     }
                 }
+
                 $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $shipment_details->user_id)->where('status', 1);
                 if($restrict_parcels_attempt->exists() && $selected_status != 12 && $selected_status != 14){
                     $restrict_parcels_attempt = $restrict_parcels_attempt->first();
@@ -1872,7 +1877,13 @@ class DeliveryController extends Controller
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
 
-            return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
+            if(count($invalid_reason_shipments) > 0){
+                $invalid_shipments = implode(", ", $invalid_reason_shipments);
+                return response()->json(['status'=>1, 'success' => 'Statuses updated successfully but some shipments can\'t be updated due to invalid reasons!', 'invalid_shipments' => $invalid_shipments]);
+            }
+            else{
+                return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
+            }
         } else {
             return response()->json(['status'=>0, 'error' => 'Delivery note not found!']);
         }
@@ -1884,7 +1895,7 @@ class DeliveryController extends Controller
         $shipments = explode(',', $request->shipment_ids);
 
         $open_box_ids = explode(',', $request->open_box_ids);
-
+        $invalid_reason_shipments = array();
         $delivery_note_id = $request->delivery_note_id;
         $password = $request->password;
         if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
@@ -1917,6 +1928,7 @@ class DeliveryController extends Controller
                         })
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
+                            $invalid_reason_shipments[] = $current_shipment->tracking_number;
                             continue;
                         }
                     }
@@ -1999,7 +2011,13 @@ class DeliveryController extends Controller
                 $delivery_note_data->pending_status = 1;
             }
             $delivery_note_data->save();
-            return redirect()->back()->with('success', 'Statuses updated successfully!');
+            if(count($invalid_reason_shipments) > 0){
+                $invalid_shipments = implode(", ", $invalid_reason_shipments);
+                return redirect()->back()->with('success', 'Statuses updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+            }
+            else{
+                return redirect()->back()->with('success', 'Statuses updated successfully!');
+            }
         } else {
             return redirect()->back()->with('error', 'Delivery note not found!');
         }
@@ -2466,6 +2484,7 @@ class DeliveryController extends Controller
         $delivery_note = DeliveryNote::find($delivery_note_id);
         $zero_cod_shipments = array();
         $shipments = explode(',', $request->shipment_ids);
+        $invalid_reason_shipments = array();
 //        $shipments = $request->shipment_ids;
         if(count($shipments)  == $delivery_note->shipments_count){
             if($delivery_note) {
@@ -2503,16 +2522,19 @@ class DeliveryController extends Controller
                         continue;
                     }
                     if($request->has($status_drop) && $request->has($reasonId)){
-                        if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
-                            $current_shipment = Shipment::find($shipment);
-                            $phone_number = $current_shipment->consignee_phone_number_1;
-                            $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
-                                $query->where('consignee_phone_number_1', $phone_number)
-                                    ->orWhere('consignee_phone_number_1', $phone_number);
-                            })
-                                ->where('shipper_status_id', DB::raw(14));
-                            if($previous_delivered_shipments->exists()){
-                                continue;
+                        if($request->status_drop[$shipment] != 14){
+                            if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                                $current_shipment = Shipment::find($shipment);
+                                $phone_number = $current_shipment->consignee_phone_number_1;
+                                $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
+                                    $query->where('consignee_phone_number_1', $phone_number)
+                                        ->orWhere('consignee_phone_number_1', $phone_number);
+                                })
+                                    ->where('shipper_status_id', DB::raw(14));
+                                if($previous_delivered_shipments->exists()){
+                                    $invalid_reason_shipments[] = $current_shipment->tracking_number;
+                                    continue;
+                                }
                             }
                         }
                     }
@@ -2887,14 +2909,25 @@ class DeliveryController extends Controller
                             NotificationsController::send(35, $shipment_id);
                         }
                     }
-
-                    return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
+                    if(count($invalid_reason_shipments) > 0){
+                        $invalid_shipments = implode(", ", $invalid_reason_shipments);
+                        return redirect()->back()->with('success', 'Delivery Note verified and updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                    }
+                    else{
+                        return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
+                    }
                 } else {
                     $delivery_note_data = DeliveryNote::find($delivery_note_id);
                     $delivery_note_data->last_updated_at = $current_time;
                     $delivery_note_data->updated_by = Auth::id();
                     $delivery_note_data->save();
-                    return redirect()->back()->with('success', 'Delivery Note updated successfully!');
+                    if(count($invalid_reason_shipments) > 0){
+                        $invalid_shipments = implode(", ", $invalid_reason_shipments);
+                        return redirect()->back()->with('success', 'Delivery Note updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                    }
+                    else{
+                        return redirect()->back()->with('success', 'Delivery Note updated successfully!');
+                    }
                 }
             } else {
                 return redirect()->back()->with('error', 'Delivery note not found!');
