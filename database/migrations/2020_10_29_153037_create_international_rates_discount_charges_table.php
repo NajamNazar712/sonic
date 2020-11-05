@@ -17,10 +17,10 @@ class CreateInternationalRatesDiscountChargesTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('box_id');
-            $table->decimal('weight',8,2)->nullable();
-            $table->decimal('cash',8,2)->nullable();
-            $table->decimal('insurance',8,2)->nullable();
-            $table->decimal('return',8,2)->nullable();
+            $table->string('weight')->nullable();
+            $table->string('cash')->nullable();
+            $table->string('insurance')->nullable();
+            $table->string('return')->nullable();
             $table->timestamp('to')->nullable();
             $table->timestamp('from')->nullable();
             $table->string('title')->nullable();
