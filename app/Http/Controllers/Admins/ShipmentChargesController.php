@@ -553,7 +553,7 @@ class ShipmentChargesController extends Controller
         else{
             $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
             if($box_id != null){
-                $result = self::calculate_weight($shipment->user_id,$box_id, $shipment->actual_weight);
+                $result = self::calculate_international_weight($shipment->user_id,$box_id, $shipment->actual_weight);
             }
             else{
                 $result = false;
