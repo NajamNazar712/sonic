@@ -2960,6 +2960,7 @@
                                                     </div>
                                                 </div>{{--Row--}}
                                             @endif
+
                                         </div>{{--weight addition div--}}
                                         <div class="mb-2">
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="sameday_door_weightadd"><i class="la la-plus"></i></button>
