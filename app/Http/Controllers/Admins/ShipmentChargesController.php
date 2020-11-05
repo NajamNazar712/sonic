@@ -1933,7 +1933,7 @@ class ShipmentChargesController extends Controller
 
     static public function international_box_id($user_id, $city_id){
         $city = City::find($city_id);
-        $international_hub_id = $city->hub->id;
+        $international_hub_id = $city->hub_id;
         $box_id = NULL;
         $international_rate_hub = InternationalRatesHub::where('user_id', $user_id)->where('hub_id', $international_hub_id)->select('box_id');
         if($international_rate_hub->exists()){
