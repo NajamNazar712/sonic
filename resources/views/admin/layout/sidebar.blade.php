@@ -529,6 +529,24 @@
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Dispute</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || count(array_intersect([107,108], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Telenor</span></a>
+
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(108, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.delivery.index') }}">Bulk Delivered</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(119, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.delivery.misroute.history.index') }}">Return Update</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(141, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.month_closing.index') }}">Month Closing</a></li>
                     @endif
