@@ -7169,7 +7169,8 @@ if(session('department_id') == 7){
            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7453,7 +7454,8 @@ if(session('department_id') == 7){
                     ->where('spt.status','=',0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9049,11 +9051,19 @@ if(session('department_id') == 7){
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
     public function approveDocuments($id, $approve, $reason){
+
         $user = User::find($id);
+        $user_document = UserDocumentAttachment::where('user_id',$id)->first();
         if($approve == 1){
             $user->documents_status = 2;
             $user->documents_status_reason = null;
             $user->save();
+            $user_document->approved_at = Carbon::now();
+            $user_document->approved_by = Auth::id();
+            $user_document->save();
+            $user_document->approved_at = Carbon::now();
+            $user_document->approved_by = Auth::id();
+            $user_document->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
             
         }
@@ -9138,6 +9148,8 @@ if(session('department_id') == 7){
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $user_attachment->blank_cheque_image = $filename;
             }
+            $user_attachment->uploaded_at = Carbon::now();
+            $user_attachment->uploaded_by = Auth::id();
             $user_attachment->save();
         }
         else{
@@ -9179,6 +9191,8 @@ if(session('department_id') == 7){
             }
             
             $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->uploaded_at = Carbon::now();
+            $new_user_attachment->uploaded_by = Auth::id();
             $new_user_attachment->save();
 
 
