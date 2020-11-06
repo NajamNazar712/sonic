@@ -3721,13 +3721,13 @@ use Yajra\Datatables\Datatables;
             }
 
             if($sale_persons = $request->get('sale_persons')){
-                $negative = $negative->whereIn('a.id', $sale_persons);
+                $datatable = $datatable->whereIn('a.id', $sale_persons);
             }
             if($status = $request->get('status_select')){
                 if($status == 1){
-                    $datatable= $datatable->where('shipment_exist', '=',null);
+                    $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '=', null);
                 }else{
-                    $datatable= $datatable->where('shipment_exist', '<>',null);
+                    $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '<>', null);
                 }
             }
 

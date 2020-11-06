@@ -25,7 +25,7 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <select name="status_select" class="select2" id="status_select" class="select2">
+                                <select name="status_select" class="select2" id="status_select">
                                     <option value="1">Highlighted</option>
                                     <option value="2">Non Highlighted</option>
                                 </select>
