@@ -156,7 +156,12 @@ class ProcessShipmentBookingDB implements ShouldQueue
                 $delivery_type_id = 1;
             }
             else{
-                $delivery_type_id = $this->booking['delivery_type_id'];
+                if($business_category_id == 2){
+                    $delivery_type_id = 1;
+                }
+                else{
+                    $delivery_type_id = $this->booking['delivery_type_id'];
+                }
             }
 
             if ($delivery_type_id == 2) {

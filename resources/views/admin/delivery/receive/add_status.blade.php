@@ -1007,6 +1007,27 @@
                     }else{
                         all_reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        if(data.invalid_shipments){
+                            $.each(data.invalid_shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            });
+                            swal({
+                                title: 'These shipments can\'t be updated due to invalid reasons',
+                                text: atext,
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'OK',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            });
+                        }
                     }
                 });
             });
