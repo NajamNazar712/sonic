@@ -151,7 +151,7 @@ class AdminNsaAccountShipmentController extends Controller
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
         ];
-        $fields = [0 => 'tracking_number', 1 => 'international_tracking_number'];
+        $fields = [0 => 'tracking_number'];
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -220,7 +220,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
                         }
-                        if (!Shipment::join('nsa_shipments as ns', 'ns.shipment_id', '=', 'shipments.id')->where('tracking_number', $row['tracking_number'])->where('ns.status', 0)->exists()) {
+                        if (!Shipment::join('nsa_account_shipments as nas', 'nas.shipment_id', '=', 'shipments.id')->where('tracking_number', $row['tracking_number'])->where('nas.status', 0)->exists()) {
                             $errors['Row #' . $row_id][] = 'Shipment is already updated #' . $row['tracking_number'];
                         }
                     }
@@ -242,7 +242,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                     }
 
-                    $nsa_shipments = NsaAccountShipment::whereIn('shipment_ids', $shipment_ids)->where('status', 0);
+                    $nsa_shipments = NsaAccountShipment::whereIn('shipment_id', $shipment_ids)->where('status', 0);
 
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
@@ -335,7 +335,7 @@ class AdminNsaAccountShipmentController extends Controller
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as delivered with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
                 else{
                     $errors = array_map(function ($row, $errors) {
@@ -351,5 +351,125 @@ class AdminNsaAccountShipmentController extends Controller
             }
 
         }
+    }
+
+    public function return_index(){
+        return view('admin.telenor.return');
+    }
+
+    public function return_shipment_info(Request $request){
+        $tracking_number = $request->tracking_number;
+        $shipment = Shipment::join('nsa_account_shipments as nas', 'nas.shipment_id', '=', 'shipments.id')->where('tracking_number', $tracking_number);
+        if($shipment->exists()){
+            $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number', 'nas.status as status')->first();
+            if($shipment->status == 0){
+                $data['id'] = $shipment->id;
+                $data['tracking_number'] = $shipment->tracking_number;
+                $data['status'] = $shipment->status;
+                return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
+            }
+            else{
+                if($shipment->status == 1){
+                    return response()->json(['status' => 0, 'error' => 'Shipment already marked as Returned']);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'Shipment already marked as delivered']);
+                }
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Shipment not found!']);
+        }
+    }
+
+    public function return_submit(Request $request){
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $nsa_shipments = NsaAccountShipment::whereIn('shipment_id', $shipment_ids)->where('status', 0);
+        if ($nsa_shipments->exists()) {
+            $nsa_shipments = $nsa_shipments->get();
+            $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+            $rider_id = $settings->setting_value;
+            $valid_shipments = array();
+            $shipments_count = 0;
+            $total_cod_amount = 0;
+            foreach ($nsa_shipments as $nsa_shipment) {
+                if (!in_array($nsa_shipment->shipment_id, $valid_shipments)) {
+                    $shipment_details = Shipment::find($nsa_shipment->shipment_id);
+                    if ($shipment_details) {
+                        $valid_shipments[] = $nsa_shipment->shipment_id;
+                        $shipments_count++;
+
+                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
+                            $total_cod_amount += $shipment_details->amount;
+                        }
+                    }
+                }
+                $nsa_shipment->status = 2;
+                $nsa_shipment->save();
+            }
+
+            $order = false;
+            if ($shipments_count != 0) {
+                $note = DeliveryNote::create([
+                    'hub_id' => 202,
+                    'rider_id' => $rider_id,
+                    'route_id' => 2,
+                    'shipments_count' => $shipments_count,
+                    'admin_id' => 50,
+                    'total_cod_amount' => $total_cod_amount,
+                    'password' => NULL,
+                    'last_updated_at' => Carbon::now(),
+                    'special_rider' => 0,
+                    'order' => $order
+                ]);
+
+                if ($note) {
+                    if (!$order) {  //Default
+                        sort($valid_shipments); //sort_valid_shipments;
+                    }
+                    $serial = 1;
+                    foreach ($valid_shipments as $index => $shipment) {
+                        DeliveryNoteShipment::create([
+                            'delivery_note_id' => $note->id,
+                            'shipment_id' => $shipment,
+                            'notification' => 0,
+                            'rider_information' => 0,
+                            'ordering' => $serial
+                        ]);
+                        $serial++;
+                    }
+
+                    foreach ($valid_shipments as $index => $shipment) {
+                        $shipment_data = Shipment::find($shipment);
+                        $shipment_data->shipper_status_id = 20;
+                        $shipment_data->consignee_status_id = 20;
+                        $shipment_data->save();
+
+                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                        ShipmentsJourneyController::add($shipment, 12,12, 34, NULL, NULL, 50, $note->id, NULL, 0);
+                        ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
+
+                        DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
+                    }
+
+                    DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
+                }
+
+                $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 50]);
+                if ($note) {
+                    foreach ($valid_shipments as $shipment_id) {
+                        $shipment = Shipment::where('id', $shipment_id);
+
+                        $shipment = $shipment->first();
+                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                        $shipment->shipper_status_id = 23;
+                        $shipment->consignee_status_id = 23;
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                    }
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Shipment(s) Marked as Return Successfully');
     }
 }

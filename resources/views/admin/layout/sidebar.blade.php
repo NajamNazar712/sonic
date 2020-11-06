@@ -540,7 +540,7 @@
                                 @endif
                                 @if (session('role_id') == 1 || in_array(119, session('permissions')))
                                     <li><a class="menu-item"
-                                           href="{{ route('admin.delivery.misroute.history.index') }}">Return Update</a>
+                                           href="{{ route('admin.telenor.return.index') }}">Return Update</a>
                                     </li>
                                 @endif
                             </ul>

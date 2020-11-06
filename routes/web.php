@@ -2385,6 +2385,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('return')->name('return.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@return_index')->name('index');
+            Route::post('shipment_info', 'Admins\AdminNsaAccountShipmentController@return_shipment_info')->name('shipment_info');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@return_submit')->name('submit');
         });
     });
