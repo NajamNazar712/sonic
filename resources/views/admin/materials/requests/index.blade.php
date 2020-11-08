@@ -383,26 +383,26 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        {
-                            text: '<i class="la la-plus"></i> Add Request',
-                            className: 'btn btn-primary add_request',
-                            enabled: true,
-                            action: function (e, dt, node, config) {
-                                $('#AddRequestModal').modal('show');
-                            }
-                        },
-                        @if (session('role_id') == 1 || in_array(221, session('permissions')))
-                    {
-                        text: '<i class="la la-align-justify"></i> View Inventory',
-                        className: 'btn btn-primary view_inventory',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            var url = '{{route('admin.packaging.inventory.index')}}';
-                            var win = window.open(url, '_blank');
-                            win.focus();
-                        }
-                    },
-                        @endif
+                    {{--    {--}}
+                    {{--        text: '<i class="la la-plus"></i> Add Request',--}}
+                    {{--        className: 'btn btn-primary add_request',--}}
+                    {{--        enabled: true,--}}
+                    {{--        action: function (e, dt, node, config) {--}}
+                    {{--            $('#AddRequestModal').modal('show');--}}
+                    {{--        }--}}
+                    {{--    },--}}
+                    {{--    @if (session('role_id') == 1 || in_array(221, session('permissions')))--}}
+                    {{--{--}}
+                    {{--    text: '<i class="la la-align-justify"></i> View Inventory',--}}
+                    {{--    className: 'btn btn-primary view_inventory',--}}
+                    {{--    enabled: true,--}}
+                    {{--    action: function (e, dt, node, config) {--}}
+                    {{--        var url = '{{route('admin.packaging.inventory.index')}}';--}}
+                    {{--        var win = window.open(url, '_blank');--}}
+                    {{--        win.focus();--}}
+                    {{--    }--}}
+                    {{--},--}}
+                    {{--    @endif--}}
                     {
                         extend: 'excel',
                         className: 'btn btn-primary',

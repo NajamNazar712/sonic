@@ -160,6 +160,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('sizes','Shippers\ShipperPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
             Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
+
+            Route::prefix('cart')->name('cart.')->group(function (){
+                Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
+                Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
+            });
         });
     });
     Route::prefix('return')->name('return.')->group(function (){
