@@ -335,7 +335,7 @@
        var selected_rows = [];
        var table = $('#datatable').DataTable({
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-           scrollX: true,
+           scrollX: true, scrollY: '800px',
            buttons: [
                     {
                         text: 'Set Commission',
