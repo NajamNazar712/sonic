@@ -2442,6 +2442,7 @@ class GlobalSettingsController extends Controller
                 foreach($delviery_notes as $delviery_note)
                 {
                     $start = $delviery_note->status_verified_at;
+                    $start = Carbon::parse($start);
                     $difference = $start->diffInDays($now);
                     if($difference > 2)
                     {
@@ -2479,6 +2480,7 @@ class GlobalSettingsController extends Controller
                 foreach($delviery_notes as $delviery_note)
                 {
                     $start = $delviery_note->status_updated_at;
+                    $start = Carbon::parse($start);
                     $difference = $start->diffInDays($now);
                     if($difference > 2)
                     {

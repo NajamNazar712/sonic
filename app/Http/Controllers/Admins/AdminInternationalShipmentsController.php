@@ -131,7 +131,7 @@ class AdminInternationalShipmentsController extends Controller
                                 }
                             }
                         }
-                        if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 1)->exists()) {
+                        if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
                             $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
                         }
                         $shipment = Shipment::where('tracking_number', $row['tracking_number']);
