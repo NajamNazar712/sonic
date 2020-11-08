@@ -236,7 +236,7 @@
                             </li>
                         @endif
                     </ul>
-                   <ul class="menu-content">
+                   {{--<ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Master Cargo</span></a>
                                 <ul class="menu-content">
@@ -286,7 +286,7 @@
                                 </ul>
                             </li>
                         @endif
-                    </ul>
+                    </ul>--}}
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([386], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Runner</span></a>
