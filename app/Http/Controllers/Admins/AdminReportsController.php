@@ -1027,11 +1027,11 @@ use Yajra\Datatables\Datatables;
         public function outstanding_shipments_list(Request $request){
             $count = DB::connection('reports')->table('delivery_note_shipments');
 
-            if (session('role_id') != 1 || $request->get('search_shipping_mode')) {
+            if (session('role_id') != 1 || $request->get('hub') || $request->get('search_shipping_mode')) {
                 $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
             }
 
-            if (session('role_id') != 1) {
+            if (session('role_id') != 1 || $request->get('hub')) {
                 $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
             }
 

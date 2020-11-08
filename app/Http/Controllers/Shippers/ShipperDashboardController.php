@@ -220,8 +220,7 @@ class ShipperDashboardController extends Controller
                             <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-
-                    if ($shipments->shipper_status_id > 1) {
+                    if ($shipments->shipper_status_id > 1 && (session('user_type') == 1 || in_array(5, session('permissions')))) {
                         $dropdown .= $view_charges_button;
 
                         $options = TRUE;
