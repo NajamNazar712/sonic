@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\TelenorCallApiController;
+use App\Http\Models\TelenorCallResponse;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class TelenorCall extends Command
@@ -38,6 +40,13 @@ class TelenorCall extends Command
      */
     public function handle()
     {
-        TelenorCallApiController::call();
+        $start_date = Carbon::yesterday()->format('Y-m-d');
+        $start_date = $start_date . '16:00:00';
+        $date = Carbon::today()->format('Y-m-d');
+        $end_date = $date . '16:00:00';
+
+        $void_shipments = TelenorCallResponse::whereDate('created_at', $date)->where('status', 1)->pluck('shipment_id')->toArray();
+
+        TelenorCallApiController::call($start_date, $end_date, $void_shipments);
     }
 }

@@ -2,18 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Shipment;
 use App\Http\Models\Telenor;
+use App\Http\Models\TelenorCallResponse;
+use App\http\Models\TelenorCallSession;
 use App\Mail\Notifications;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class TelenorCallApiController extends Controller
 {
-    public function call(){
-        
+    static public function call($start_date, $end_date, $void_shipments){
+        $shipments = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_phone_number_1 as phone_number')
+            ->where('sj.shipper_status_id', DB::raw(14))
+            ->where('sj.verification', DB::raw(1))
+            ->where('sj.created_at', '>=', $start_date)
+            ->where('sj.verification', '<=', $end_date)
+            ->whereNotIn('shipments.id', $void_shipments);
+
+        if($shipments->exists()){
+            $shipments = $shipments->get();
+            foreach ($shipments as $shipment){
+                $telenor_call_response = new TelenorCallResponse();
+                $telenor_call_response->shipment_id = $shipment->id;
+                $telenor_call_response->tracking_number = $shipment->tracking_number;
+                $telenor_call_response->save();
+
+                $this->telenor($shipment, $telenor_call_response);
+            }
+        }
     }
     
     private function telenor_generate_session_id($base_uri, $call) {
@@ -24,17 +46,17 @@ class TelenorCallApiController extends Controller
 
             $response = $client->get('auth.jsp', [
                 'query' => [
-                    'msisdn' => '923426687475',
-                    'password' => 'T3l3n0rPassw0rd333'
+                    'msisdn' => '923477459355',
+                    'password' => 'Traxrobocall0345'
                 ]
             ]);
 
             $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
 
             if ($xml['response'] == 'OK') {
-                Telenor::truncate();
+                TelenorCallSession::truncate();
 
-                $telenor = new Telenor();
+                $telenor = new TelenorCallSession();
 
                 $telenor->session_id = $xml['data'];
 
@@ -64,7 +86,7 @@ class TelenorCallApiController extends Controller
                     $telenor->save();
                 }
 
-                $call->status = 1;
+                $call->status = 0;
 
                 $call->save();
 
@@ -85,7 +107,7 @@ class TelenorCallApiController extends Controller
             return FALSE;
         }
     }
-    private function telenor($call) {
+    private function telenor($shipment, $call) {
         $base_uri = 'https://telenorcsms.com.pk:27677/corporate_sms2/api/';
 
         $generate_session_id = FALSE;
