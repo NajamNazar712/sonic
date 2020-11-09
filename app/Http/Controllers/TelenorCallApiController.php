@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class TelenorCallApiController extends Controller
 {
     public function call(){
-
+        
     }
     
     private function telenor_generate_session_id($base_uri, $call) {
