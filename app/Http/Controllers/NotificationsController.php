@@ -5173,10 +5173,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
                     foreach ($hub_shipment as $origin_shipment) {
@@ -5186,9 +5183,6 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
                             $html .= '</tr>';
                             $serial++;
                         }
@@ -5216,10 +5210,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
                     foreach ($zone_hub_shipments as $zone_hub_shipment) {
@@ -5230,9 +5221,6 @@ class NotificationsController extends Controller
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
                                 $html .= '</tr>';
                                 $serial++;
                             }
@@ -5267,10 +5255,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
                     foreach ($hub_shipments as $hub_shipment) {
@@ -5281,10 +5266,6 @@ class NotificationsController extends Controller
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
-                                $html .= '</tr>';
                                 $serial++;
                             }
                         }
