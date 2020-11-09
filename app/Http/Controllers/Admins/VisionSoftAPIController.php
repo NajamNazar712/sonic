@@ -745,7 +745,7 @@ class VisionSoftAPIController extends Controller
                                 'pin_tr_date' => $today->format('m/d/Y'),
                                 'pin_hub_id' => $station_deposit_note->hub_id,
                                 'pin_sdn_number' => $station_deposit_note->id,
-                                'pin_bank' => $station_deposit_note->banks_list_id,
+                                'pin_bank' => $station_deposit_note->bank->name,
                                 'pin_amount' => $station_deposit_note->sdn_amount,
                                 'pin_adj_amount' => $station_deposit_note->adjustment_amount,
                                 'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
@@ -785,7 +785,7 @@ class VisionSoftAPIController extends Controller
                                     'pin_tr_date' => $today->format('m/d/Y'),
                                     'pin_hub_id' => $station_deposit_note->hub_id,
                                     'pin_sdn_number' => $station_deposit_note->id,
-                                    'pin_bank' => $slip->bank_id,
+                                    'pin_bank' => $slip->bank->name,
                                     'pin_amount' => $slip->amount,
                                     'pin_adj_amount' => 0,
                                     'pin_adj_stmt_head_id' => 0
