@@ -101,12 +101,12 @@ class DeliveryController extends Controller
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -116,7 +116,7 @@ class DeliveryController extends Controller
                     ->where('sjd.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
             })
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->join('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
