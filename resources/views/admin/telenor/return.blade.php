@@ -40,7 +40,7 @@
                                 <input type="hidden" name="shipment_ids" id="shipment_ids" class="shipment_ids">
 
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="receive" class="btn btn-primary receive" value="Confirm" disabled="disabled">Receive</button>
+                                    <button type="submit" name="receive" class="btn btn-primary receive" value="Confirm" disabled="disabled">Return</button>
                                 </div>
                             </form>
                         </div>

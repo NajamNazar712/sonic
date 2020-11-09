@@ -4050,6 +4050,11 @@ class AdminFinanceController extends Controller
                     $status = strtolower($row['status']);
                     if($status == "paid"){
                         if ($done_payment->status != 1) {
+                            $payment_clear = new VisionSoftCodPaymentClear();
+                            $payment_clear->payment_id = $payment_id;
+                            $payment_clear->status = 1;
+                            $payment_clear->save();
+
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status = 1;
 
@@ -4077,6 +4082,11 @@ class AdminFinanceController extends Controller
                     }
                     elseif($status == "reverted"){
                         if ($done_payment->status != 2 && $done_payment->status != 1) {
+                            $payment_clear = new VisionSoftCodPaymentClear();
+                            $payment_clear->payment_id = $payment_id;
+                            $payment_clear->status = 2;
+                            $payment_clear->save();
+
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status = 2;
 

@@ -21,19 +21,12 @@ class ShipperResourcesController extends Controller
         return view('client.documents.index');
     }
     public function get_network_list(Request $request){
-
         $zones = Zone::where('status', 1)->get();
         if($zones){
-            $cell_st =[
-                'font' =>['bold' => true],
-                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-            ];
-            $spreadsheet = new Spreadsheet();
+            $city_list_array = array();
+            $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
+            $serial = 1;
             foreach ($zones as $index => $zone){
-                $city_list_array = array();
-                $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class'];
-                $serial = 1;
                 foreach ($zone->zone_cities as $city) {
                     $city_check = City::where('id', $city->id)->first();
                     if ($city_check->status == 1) {
@@ -49,19 +42,24 @@ class ShipperResourcesController extends Controller
                             } else {
                                 $class_name = "D";
                             }
-                            $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name];
+                            $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name];
                             $serial++;
                         }
                     }
                 }
-                $spreadsheet->setActiveSheetIndex($index);
-                $sheet = $spreadsheet->getActiveSheet();
-                $sheet->getDefaultColumnDimension()->setWidth(20);
-                $sheet->fromArray($city_list_array,NULL,'A2',true);
-                $sheet->getStyle("A2:D2")->applyFromArray($cell_st);
-                $sheet->setTitle($zone->name);
-                $spreadsheet->createSheet();
             }
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->fromArray($city_list_array,NULL,'A2',true);
+            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->setTitle('Network List');
+            $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
