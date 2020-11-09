@@ -1733,7 +1733,7 @@ class AdminReportsEmailController extends Controller
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND verification = 1)'));
             })
-            ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
+            ->select('shipments.tracking_number as tracking_number', 'h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
             ->where('shipments.booking_type_id', '=', DB::raw(5))
             ->whereBetween('sj.created_at', [$start_date, $end_date])
             ->get();
@@ -1745,8 +1745,8 @@ class AdminReportsEmailController extends Controller
                 foreach ($shipments as $shipment){
                     if($shipment->status == 1 || $shipment->status == 2){
                         if($hub->id == $shipment->hub_id){
-                            $hub_shipments[$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'poc' => $shipment->poc, 'vendor' => $shipment->vendor, 'phone' => $shipment->phone, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
-                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'poc' => $shipment->poc, 'vendor' => $shipment->vendor, 'phone' => $shipment->phone, 'zone_id' => $hub->zone_id, 'zone_name' => $hub->zone->name, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
+                            $hub_shipments[$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
+                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'zone_id' => $hub->zone_id, 'zone_name' => $hub->zone->name, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
 //                            if (array_key_exists($hub->id, $hub_shipments)) {
 //                                if (array_key_exists($shipment->origin_id, $hub_shipments[$hub->id])) {
 //                                    if($shipment->status == 1){
