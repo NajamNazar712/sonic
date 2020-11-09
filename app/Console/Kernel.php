@@ -66,7 +66,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\KeyAccountDashboard',
         'App\Console\Commands\ReversePickupSummary',
         'App\Console\Commands\OverallVendorPickup',
-        'App\Console\Commands\NotPickedShippersSummary'
+        'App\Console\Commands\NotPickedShippersSummary',
+        'App\Console\Commands\Escalation',
+        'App\Console\Commands\EscalationTagging'
 
 
         ];

@@ -50,9 +50,9 @@ class ReversePickupSummary extends Command
             else{
                 $cut_off_time = $settings->setting_value . ':00';
             }
-            $start_date = Carbon::yesterday()->subDay(1)->format('Y-m-d');
+            $start_date = Carbon::today()->subDay(1)->format('Y-m-d');
             $start_date = $start_date . ' ' . $cut_off_time;
-            $end_date = Carbon::yesterday()->format('Y-m-d');
+            $end_date = Carbon::today()->format('Y-m-d');
             $end_date = $end_date . ' ' . $cut_off_time;
             $response = AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
         }
