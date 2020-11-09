@@ -7,6 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
+use App\Http\Models\InternationalRatesCashHandlingCharges;
+use App\Http\Models\InternationalRatesDiscountCharges;
+use App\Http\Models\InternationalRatesHub;
+use App\Http\Models\InternationalRatesInsuranceCharges;
+use App\Http\Models\InternationalRatesReturnCharges;
+use App\Http\Models\InternationalRatesStatus;
+use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -436,10 +443,122 @@ class ShipmentChargesController extends Controller
         }
     }
 
+    static public function calculate_international_weight($user_id, $box_id, $weight){
+        $rate_status = InternationalRatesStatus::where('user_id', $user_id)->where('box_id', $box_id)->where('status', 1);
+
+        if($rate_status->exists()){
+            $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+            if($weight_charge->exists()){
+                $weight_charge = $weight_charge->first();
+
+                $today = Carbon::today();
+
+                $discount_charge = InternationalRatesDiscountCharges::where('user_id', $user_id)->where('box_id', $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->weight;
+                }
+                else {
+                    $discount = 0;
+                }
+                if ($weight_charge->weight_addition == 0) {
+                    $charges = $weight_charge->local_charges;
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
+                    $result = array();
+
+                    if ($charges < $discount) {
+                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                    }
+                    else {
+                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($weight > 1) {
+                        $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
+                    }
+                    else {
+                        $result['chargeable_weight'] = $weight;
+                    }
+
+                    return $result;
+                }
+                else {
+                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+
+                    $charges = ($weight_charge->local_charges * $multiplier);
+
+                    $result = array();
+
+                    $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
+
+                    $previous = TRUE;
+
+                    while ($previous) {
+                        $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+
+                        if ($weight_charge->exists()) {
+                            $weight_charge = $weight_charge->first();
+
+                            if ($weight_charge->weight_addition == 0) {
+                                $charges += $weight_charge->local_charges;
+
+                                $previous = FALSE;
+                            }
+                            else {
+                                $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+
+                                $charges += ($weight_charge->local_charges * $multiplier);
+
+                            }
+                        }
+                        else {
+                            $previous = FALSE;
+                        }
+                    }
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
+                    if ($charges < $discount) {
+                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                    }
+                    else {
+                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    return $result;
+                }
+
+            }
+        }
+
+    }
     static public function weight($id) {
         $shipment = Shipment::find($id);
-
-        $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+        if($shipment->business_category_id == 1){
+            $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+        }
+        else{
+            $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
+            if($box_id != null){
+                $result = self::calculate_international_weight($shipment->user_id,$box_id, $shipment->actual_weight);
+            }
+            else{
+                $result = false;
+            }
+        }
 
         if ($result) {
             $shipment->weight_charges = $result['weight_charges'];
@@ -527,10 +646,84 @@ class ShipmentChargesController extends Controller
         }
     }
 
+    static public function calculate_international_cash_handling($user_id, $box_id, $amount) {
+
+        $rate_status = InternationalRatesStatus::where('user_id', $user_id)->where('box_id', $box_id)->where('cash_handling_charges', 1)->where('status', 1);
+        if ($rate_status->exists()) {
+
+            $cash_handling_charge = InternationalRatesCashHandlingCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+
+            if ($cash_handling_charge->exists()) {
+                $cash_handling_charge = $cash_handling_charge->first();
+
+                $today = Carbon::today();
+
+                $discount_charge = InternationalRatesDiscountCharges::where('user_id', $user_id)->where('box_id', $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->cash;
+                }
+                else {
+                    $discount = 0;
+                }
+
+                $result = array();
+
+                $charges = $cash_handling_charge->charges;
+
+                if ($charges != 0) {
+                    if (strpos($charges, '%') !== FALSE) {
+                        $charges = (floatval(str_replace('%', '', $charges)) / 100) * $amount;
+                    }
+                    else {
+                        $charges = floatval($charges);
+                    }
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
+                    if ($charges < $discount) {
+                        $result['cash_handling_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                    }
+                    else {
+                        $result['cash_handling_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                    }
+                }
+                else {
+                    $result['cash_handling_charges'] = 0;
+                }
+
+                return $result;
+            }
+            else {
+                return FALSE;
+            }
+        }
+        else {
+            return FALSE;
+        }
+    }
+
     static public function cash_handling($id) {
         $shipment = Shipment::find($id);
-
-        $result = self::calculate_cash_handling($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->amount);
+        if($shipment->business_category_id == 1){
+            $result = self::calculate_cash_handling($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->amount);
+        }
+        else{
+            $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
+            if($box_id != null){
+                $result = self::calculate_international_cash_handling($shipment->user_id, $box_id, $shipment->amount);
+            }else{
+                $result = false;
+            }
+        }
 
         if ($result) {
             $shipment->cash_handling_charges = $result['cash_handling_charges'];
@@ -541,65 +734,248 @@ class ShipmentChargesController extends Controller
 
     static public function insurance($id) {
         $shipment = Shipment::find($id);
-
-        $account_type_id = $shipment->user->account_type_id;
-
         if ($shipment->amount != 0) {
-            if ($account_type_id == 1) {
-                $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
-            }
-            else {
-                $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
-            }
+            if ($shipment->business_category_id == 1) {
+                $account_type_id = $shipment->user->account_type_id;
 
-            if ($rate_status->exists()) {
-                $charges = 0;
+                if ($account_type_id == 1) {
+                    $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
+                } else {
+                    $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
+                }
 
-                foreach ($shipment->items as $item) {
-                    $price = $item->price;
+                if ($rate_status->exists()) {
+                    $charges = 0;
 
-                    if ($item->insurance == 1) {
-                        if ($account_type_id == 1) {
-                            $insurance_charge = InsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
-                        }
-                        else {
-                            $insurance_charge = CorporateInsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
-                        }
+                    foreach ($shipment->items as $item) {
+                        $price = $item->price;
 
-                        if ($insurance_charge->exists()) {
-                            $insurance_charge = $insurance_charge->first();
-
-                            $today = Carbon::today();
-
+                        if ($item->insurance == 1) {
                             if ($account_type_id == 1) {
-                                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                            }
-                            else {
-                                $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                            }
-
-                            if ($discount_charge->exists()) {
-                                $discount_charge = $discount_charge->first();
-
-                                $discount = $discount_charge->insurance;
-                            }
-                            else {
-                                $discount = 0;
+                                $insurance_charge = InsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
+                            } else {
+                                $insurance_charge = CorporateInsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
                             }
 
-                            $item_charges = $insurance_charge->charges;
+                            if ($insurance_charge->exists()) {
+                                $insurance_charge = $insurance_charge->first();
 
-                            if (strpos($item_charges, '%') !== FALSE) {
-                                $charges += (floatval(str_replace('%', '', $item_charges)) / 100) * $price;
-                            }
-                            else {
-                                $charges += floatval($item_charges);
+                                $today = Carbon::today();
+
+                                if ($account_type_id == 1) {
+                                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                                } else {
+                                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                                }
+
+                                if ($discount_charge->exists()) {
+                                    $discount_charge = $discount_charge->first();
+
+                                    $discount = $discount_charge->insurance;
+                                } else {
+                                    $discount = 0;
+                                }
+
+                                $item_charges = $insurance_charge->charges;
+
+                                if (strpos($item_charges, '%') !== FALSE) {
+                                    $charges += (floatval(str_replace('%', '', $item_charges)) / 100) * $price;
+                                } else {
+                                    $charges += floatval($item_charges);
+                                }
                             }
                         }
                     }
+
+                    if ($charges != 0) {
+                        if (strpos($discount, '%') !== FALSE) {
+                            $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                        } else {
+                            $discount = floatval($discount);
+                        }
+
+                        if ($charges < $discount) {
+                            $shipment->insurance_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                        } else {
+                            $shipment->insurance_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                        }
+
+                        $shipment->save();
+                    }
                 }
 
-                if ($charges != 0) {
+            } else {
+                $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
+                if($box_id != null){
+                    $rate_status = InternationalRatesStatus::where('user_id', $shipment->user_id)->where('box_id', $box_id)->where('insurance_charges', 1)->where('status', 1);
+                    if ($rate_status->exists()) {
+                        $charges = 0;
+
+                        foreach ($shipment->items as $item) {
+                            $price = $item->price;
+
+                            if ($item->insurance == 1) {
+                                $insurance_charge = InternationalRatesInsuranceCharges::where('user_id', $shipment->user_id)->where('box_id', $box_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
+
+
+                                if ($insurance_charge->exists()) {
+                                    $insurance_charge = $insurance_charge->first();
+
+                                    $today = Carbon::today();
+
+
+                                    $discount_charge = InternationalRatesDiscountCharges::where('user_id', $shipment->user_id)->where('box_id',
+                                        $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+
+                                    if ($discount_charge->exists()) {
+                                        $discount_charge = $discount_charge->first();
+
+                                        $discount = $discount_charge->insurance;
+                                    } else {
+                                        $discount = 0;
+                                    }
+
+                                    $item_charges = $insurance_charge->charges;
+
+                                    if (strpos($item_charges, '%') !== FALSE) {
+                                        $charges += (floatval(str_replace('%', '', $item_charges)) / 100) * $price;
+                                    } else {
+                                        $charges += floatval($item_charges);
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($charges != 0) {
+                            if (strpos($discount, '%') !== FALSE) {
+                                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                            } else {
+                                $discount = floatval($discount);
+                            }
+
+                            if ($charges < $discount) {
+                                $shipment->insurance_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                            } else {
+                                $shipment->insurance_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                            }
+
+                            $shipment->save();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static public function return($id) {
+        $shipment = Shipment::find($id);
+        if($shipment->business_category_id == 1){
+            $account_type_id = $shipment->user->account_type_id;
+
+            if ($account_type_id == 1) {
+                $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
+            }
+            else {
+                $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
+            }
+
+            if ($rate_status->exists()) {
+                if ($account_type_id == 1) {
+                    $return_charge = ReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                }
+                else {
+                    $return_charge = CorporateReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                }
+
+                $today = Carbon::today();
+
+                if ($account_type_id == 1) {
+                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+                else {
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->return;
+                }
+                else {
+                    $discount = 0;
+                }
+
+                if ($return_charge->exists()) {
+                    $return_charge = $return_charge->first();
+
+                    $class = 0;
+
+                    if ($shipment->shipping_mode_id == 4) {
+                        if ($shipment->same_day_timing_id == 1) {
+                            $type_of_charges = 0;
+                        }
+                        else {
+                            $type_of_charges = 1;
+                        }
+                    }
+                    else {
+                        if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                            $type_of_charges = 0;
+                        }
+                        else {
+                            $type_of_charges = 1;
+
+                            $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+
+                            if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                                $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                            }
+                            else {
+                                $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                            }
+
+                            if ($zone_class_city->exists()) {
+                                $zone_class_city = $zone_class_city->first();
+
+                                $class = $zone_class_city->class;
+                            }
+                        }
+                    }
+
+                    if ($type_of_charges == 0) {
+                        $charges = $return_charge->local;
+                    }
+                    else {
+                        if ($class == 1) {
+                            if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($return_charge->national_charges_class_1);
+                            }
+                        }
+                        else if ($class == 2) {
+                            if (strpos($return_charge->national_charges_class_2, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_2)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($return_charge->national_charges_class_2);
+                            }
+                        }
+                        else if ($class == 3) {
+                            if (strpos($return_charge->national_charges_class_3, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_3)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($return_charge->national_charges_class_3);
+                            }
+                        }
+                        else {
+                            $charges = $return_charge->national_charges_class_0;
+                        }
+                    }
+
                     if (strpos($discount, '%') !== FALSE) {
                         $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
                     }
@@ -608,143 +984,60 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->insurance_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                        $shipment->return_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->insurance_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                        $shipment->return_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
                 }
             }
         }
-    }
+        else{
+            $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
+            if($box_id != null){
+                $rate_status = InternationalRatesStatus::where('user_id', $shipment->user_id)->where('box_id', $box_id)->where('return_charges', 1)->where('status', 1);
+                if($rate_status->exists()){
+                    $return_charge = InternationalRatesReturnCharges::where('user_id', $shipment->user_id)->where('box_id', $box_id);
+                    $today = Carbon::today();
 
-    static public function return($id) {
-        $shipment = Shipment::find($id);
+                    $discount_charge = InternationalRatesDiscountCharges::where('user_id', $shipment->user_id)->where('box_id', $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if ($discount_charge->exists()) {
+                        $discount_charge = $discount_charge->first();
 
-        $account_type_id = $shipment->user->account_type_id;
-
-        if ($account_type_id == 1) {
-            $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
-        }
-        else {
-            $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
-        }
-
-        if ($rate_status->exists()) {
-            if ($account_type_id == 1) {
-                $return_charge = ReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
-            }
-            else {
-                $return_charge = CorporateReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
-            }
-
-            $today = Carbon::today();
-
-            if ($account_type_id == 1) {
-                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-            }
-            else {
-                $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-            }
-
-            if ($discount_charge->exists()) {
-                $discount_charge = $discount_charge->first();
-
-                $discount = $discount_charge->return;
-            }
-            else {
-                $discount = 0;
-            }
-
-            if ($return_charge->exists()) {
-                $return_charge = $return_charge->first();
-
-                $class = 0;
-
-                if ($shipment->shipping_mode_id == 4) {
-                    if ($shipment->same_day_timing_id == 1) {
-                        $type_of_charges = 0;
+                        $discount = $discount_charge->return;
                     }
                     else {
-                        $type_of_charges = 1;
+                        $discount = 0;
                     }
-                }
-                else {
-                    if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
-                        $type_of_charges = 0;
-                    }
-                    else {
-                        $type_of_charges = 1;
 
-                        $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+                    if ($return_charge->exists()) {
+                        $return_charge = $return_charge->first();
 
-                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
-                            $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                        $charges = $return_charge->local;
+
+
+                        if (strpos($discount, '%') !== FALSE) {
+                            $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
                         }
                         else {
-                            $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                            $discount = floatval($discount);
                         }
 
-                        if ($zone_class_city->exists()) {
-                            $zone_class_city = $zone_class_city->first();
-
-                            $class = $zone_class_city->class;
-                        }
-                    }
-                }
-
-                if ($type_of_charges == 0) {
-                    $charges = $return_charge->local;
-                }
-                else {
-                    if ($class == 1) {
-                        if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
-                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        if ($charges < $discount) {
+                            $shipment->return_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                         }
                         else {
-                            $charges = intval($return_charge->national_charges_class_1);
+                            $shipment->return_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                         }
-                    }
-                    else if ($class == 2) {
-                        if (strpos($return_charge->national_charges_class_2, '%') !== FALSE) {
-                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_2)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
-                        }
-                        else {
-                            $charges = intval($return_charge->national_charges_class_2);
-                        }
-                    }
-                    else if ($class == 3) {
-                        if (strpos($return_charge->national_charges_class_3, '%') !== FALSE) {
-                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_3)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
-                        }
-                        else {
-                            $charges = intval($return_charge->national_charges_class_3);
-                        }
-                    }
-                    else {
-                        $charges = $return_charge->national_charges_class_0;
-                    }
-                }
 
-                if (strpos($discount, '%') !== FALSE) {
-                    $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                        $shipment->save();
+                    }
                 }
-                else {
-                    $discount = floatval($discount);
-                }
-
-                if ($charges < $discount) {
-                    $shipment->return_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                }
-                else {
-                    $shipment->return_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
-                }
-
-                $shipment->save();
             }
         }
+
     }
 
     static public function calculate_fuel_surcharge($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
@@ -792,7 +1085,9 @@ class ShipmentChargesController extends Controller
 
     static public function replacement($id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 2){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
@@ -1126,7 +1421,9 @@ class ShipmentChargesController extends Controller
 
     static public function try_and_buy($id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 2){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
@@ -1181,7 +1478,9 @@ class ShipmentChargesController extends Controller
 
     static public function packaging_material($id, $type, $charges) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 2){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         $today = Carbon::today();
@@ -1304,7 +1603,9 @@ class ShipmentChargesController extends Controller
 
     static public function intercept($id, $previous_consignee_city_id, $new_consignee_city_id) {
         $shipment = Shipment::find($id);
-
+        if($shipment->business_category_id == 2){
+            return false;
+        }
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
@@ -1628,5 +1929,17 @@ class ShipmentChargesController extends Controller
 
         }
 
+    }
+
+    static public function international_box_id($user_id, $city_id){
+        $city = City::find($city_id);
+        $international_hub_id = $city->hub_id;
+        $box_id = NULL;
+        $international_rate_hub = InternationalRatesHub::where('user_id', $user_id)->where('hub_id', $international_hub_id)->select('box_id');
+        if($international_rate_hub->exists()){
+            $international_rate_hub = $international_rate_hub->first();
+            $box_id = $international_rate_hub->box_id;
+        }
+        return $box_id;
     }
 }

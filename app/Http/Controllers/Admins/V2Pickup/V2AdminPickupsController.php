@@ -10,9 +10,12 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
+use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -109,10 +112,8 @@ class V2AdminPickupsController extends Controller
             })
 
             ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper',
-                'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,
-                'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider',
-                'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date')
+
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date','v2_pickup_requests.reverse_pickup')
             ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
 
         if (session('role_id') != 1) {
@@ -126,6 +127,9 @@ class V2AdminPickupsController extends Controller
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
+                    if($pickup_request->reverse_pickup == 1){
+                        return 'reverse_pickup_row';
+                    }
                     if ($pickup_request->vendor != null) {
                         return 'vendor_row';
                     }
@@ -811,7 +815,9 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::cash_handling($shipment_id);
                         ShipmentChargesController::insurance($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                        if($shipment->business_category_id == 1) {
+                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                        }
                     }
 
 
@@ -1365,7 +1371,9 @@ class V2AdminPickupsController extends Controller
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::cash_handling($shipment_id);
                         ShipmentChargesController::insurance($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
+                        if($shipment->business_category_id == 1) {
+                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                        }
                     }
 
                     if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
@@ -1577,6 +1585,9 @@ class V2AdminPickupsController extends Controller
                             <td class="color primary"><strong>Contact Person</strong></td>
                             <td class="color primary"><strong>Vendor</strong></td>
                             <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Sales Person</strong></td>
+                            <td class="color primary"><strong>Person of Contact</strong></td>
+                            <td class="color primary"><strong>Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
                             <td class="color primary"><strong>Pickup Date</strong></td>
@@ -1592,6 +1603,36 @@ class V2AdminPickupsController extends Controller
 
                 $shipper = $pickup_request->shipper;
                 $pickup_address = $pickup_request->pickup_address;
+                $poc = SalePersonTag::join('admins as ad' , 'ad.id' , '=', 'sale_person_tags.admin_id')
+                    ->leftjoin('users as us', 'us.id', '=', 'sale_person_tags.user_id')
+                    ->leftjoin('shipper_contacts as sc', 'sc.shipper_id', '=', 'us.id')
+                    ->where('sale_person_tags.status',0)->where('us.id',$shipper->id)
+                ->select('ad.name as admin_name','ad.phone_number as admin_phone_number','sc.phone_number as phone_number','sc.poc')->get()->toArray();
+//dd($poc);
+                $pocName="";
+                $phoneNo="";
+                $names="";
+                $i = 0;
+                foreach($poc as  $data)
+                {
+                    if($i==null){
+                        if($i==0){
+                            $pocName.= ''.$data['poc'];
+                            $phoneNo.=' '.$data['admin_phone_number'].',';
+                            $phoneNo.=''.$data['phone_number'];
+                            $names=$data['admin_name'];
+                            $i++;
+                        }else{
+                            $pocName.= ','.$data['poc'];
+                            $phoneNo.=','.$data['phone_number'];
+                            $phoneNo.=','.$data['admin_phone_number'];
+
+                        }
+                    }else{
+                        dd($poc);
+                    }
+
+                }
                 $color = '';
                 if($pickup_address->vendor != null){
                     $color = 'vendor_pickup_row';
@@ -1604,6 +1645,9 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_address['poc'] . '</td>
                             <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
+                            <td>'.$names.'</td>
+                            <td>'.$pocName.'</td>
+                            <td>'. $phoneNo.'</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
@@ -1629,12 +1673,12 @@ class V2AdminPickupsController extends Controller
 
                       <hr>
         ';
-        if(count($reverse_pickup_shipment_ids) > 0){
-            $airway_bill_html = '';
-            $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
-            $html .= $airway_bill_html;
+            if(count($reverse_pickup_shipment_ids) > 0){
+                $airway_bill_html = '';
+                $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
+                $html .= $airway_bill_html;
 //                return response()->json(['status' => 0, 'shipment_ids' => $reverse_pickup_shipment_ids, 'rider_name' => $rider->name]);
-        }
+            }
         }
 
         $html .= '
@@ -2228,6 +2272,9 @@ class V2AdminPickupsController extends Controller
 
             $pickup_note_requests = $pickup_note->pickup_note_requests;
             $reverse_pickup_shipment_ids = array();
+            $total_booked = 0;
+            $total_rider_picked = 0;
+            $total_arrived = 0;
             foreach ($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = $pickup_note_request->pickup_request;
 
@@ -2259,14 +2306,35 @@ class V2AdminPickupsController extends Controller
                             <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
                           </tr>
           ';
-
+                $total_booked += $pickup_request['booked'];
+                $total_rider_picked += $rider_pickuped;
+                $total_arrived += $pickup_request_received_shipments;
                 $serial_number++;
             }
 
 
             $html .= '
+                        <tr>
+                          <td colspan="6" style="font-weight: bold; text-align: center;">Total</td>
+                          <td  style="font-weight: bold">' . $total_booked . '</td>
+                          <td  style="font-weight: bold">' .$total_rider_picked . '</td>
+                          <td  style="font-weight: bold">' .$total_arrived. '</td>
+                          <td  style="font-weight: bold">-</td>
+                          
+                        </tr>
                         </tbody>
                       </table>
+                      <br>
+                      <div>Operation Staff Receiver</div>
+                      <br>
+                      <br>
+                      <div>
+                        Name : __________________________
+                      </div> 
+                      <br>
+                      <div>
+                        Signature : ______________________
+                      </div>           
 
                       <hr>
         ';
@@ -2274,7 +2342,7 @@ class V2AdminPickupsController extends Controller
 
 
         $html .= '
-                    </div>
+                    
 
                     <script>
                       window.onload = function() {

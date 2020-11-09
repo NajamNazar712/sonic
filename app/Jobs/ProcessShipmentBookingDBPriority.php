@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\Shipper\User;
@@ -81,10 +82,10 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
             $consignee_name = $this->booking['consignee_name'];
             $consignee_address = $this->booking['consignee_address'];
-            $consignee_phone_number_1 = substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0);
+            $consignee_phone_number_1 = $this->booking['consignee_phone_number_1'];
 
             if (!empty(trim($this->booking['consignee_phone_number_2']))) {
-                $consignee_phone_number_2 = substr_replace($this->booking['consignee_phone_number_2'], '-', 4, 0);
+                $consignee_phone_number_2 = $this->booking['consignee_phone_number_2'];
             } else {
                 $consignee_phone_number_2 = NULL;
             }
@@ -146,22 +147,28 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                 $pieces_quantity = $this->booking['pieces_quantity'];
             }
         }
+        $business_category_id = $this->booking['business_category_id'];
         if ($this->booking['account_type_id'] == 1) {
-            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity, $self_collection);
+            $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity, $self_collection, $business_category_id);
         }
         else {
             if($service_type_id == 5){
                 $delivery_type_id = 1;
             }
             else{
-                $delivery_type_id = $this->booking['delivery_type_id'];
+                if($business_category_id == 2){
+                    $delivery_type_id = 1;
+                }
+                else{
+                    $delivery_type_id = $this->booking['delivery_type_id'];
+                }
             }
 
             if ($delivery_type_id == 2) {
                 $consignee_address = 'TRAX Office ' . $this->booking['consignee_city_name'];
             }
 
-            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection);
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
         }
         if($this->booking['substitute_user_id'] != null){
             $substitute_user_shipment = new SubstituteUserShipment();
@@ -175,6 +182,13 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
         }
         else{
             $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+        }
+
+        if($this->booking['business_category_id'] == 2){
+            $international_shipment = new InternationalShipment();
+            $international_shipment->shipment_id = $shipment_id;
+            $international_shipment->postal_code = $this->booking['postal_code'];
+            $international_shipment->save();
         }
 
         if($this->booking['order_date'] != null){

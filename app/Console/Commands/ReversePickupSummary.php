@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
+use App\Http\Models\Admin\GlobalSettings;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -39,8 +40,21 @@ class ReversePickupSummary extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::yesterday()->startOfDay()->toDateTimeString();
-        $end_date = Carbon::yesterday()->endOfDay()->toDateTimeString();
-        $response = AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if((int)$settings->setting_value < 10){
+                $cut_off_time = '0' . $settings->setting_value . ':00';
+            }
+            else{
+                $cut_off_time = $settings->setting_value . ':00';
+            }
+            $start_date = Carbon::today()->subDay(1)->format('Y-m-d');
+            $start_date = $start_date . ' ' . $cut_off_time;
+            $end_date = Carbon::today()->format('Y-m-d');
+            $end_date = $end_date . ' ' . $cut_off_time;
+            $response = AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
+        }
     }
 }

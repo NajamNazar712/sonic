@@ -463,6 +463,8 @@
                                 }
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>'+ details.order_information.pieces +'</td>';
+                                shipment += '<td><strong>Business Category</strong></td>';
+                                shipment += '<td>'+ details.order_information.business_category +'</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';

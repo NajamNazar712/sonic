@@ -24,6 +24,7 @@
 										<th class="border-primary border-darken-1">ID</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">GST</th>
+										<th class="border-primary border-darken-1">Business Category</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Added Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
@@ -95,6 +96,7 @@
                             head.push('S. No.');
                             head.push('Name');
                             head.push('GST');
+                            head.push('Business Category');
                             head.push('Status');
                             head.push('Created Datetime');
                             head.push('Updated Datetime');
@@ -105,6 +107,7 @@
                                 row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.GST);
+                                row.push(values.business_category);
                                 row.push(values.status);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
@@ -128,6 +131,13 @@
 						className: 'btn btn-primary add',
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.management.zonal.add.index') }}';
+						}
+					},
+					{
+						text: 'Add International',
+						className: 'btn btn-primary add_international',
+						action: function (e, dt, node, config) {
+							window.location = '{{ route('admin.management.zonal.add.international.index') }}';
 						}
 					},
 					@endif
@@ -156,6 +166,7 @@
 					{data: 'id', name: 'zones.id', class: 'align-middle id'},
 					{data: 'name', name: 'zones.name', class: 'align-middle name'},
 					{data: 'gst', name: 'zones.gst', class: 'align-middle gst'},
+					{data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
 					{data: 'status', name: 'zones.status', class: 'align-middle status'},
 					{data: 'created_at', name: 'zones.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'zones.updated_at', class: 'align-middle updated_at'},
@@ -176,6 +187,7 @@
                         '<option value="0">Inactive</option>' +
                         '<option value="1">Active</option>' +
                         '</select>';
+					var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
 						var column = this;
@@ -186,6 +198,12 @@
                         }
                         else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.business_category')){
+                            $(business_category).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -207,6 +225,19 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+					var data = $.map({!! $business_categories !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+
+						return obj;
+					});
+					$("#business_category").prepend('<option value="" selected></option>').select2({
+						data: data,
+						placeholder: "Select Business Category",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 					this.api().table().columns.adjust();
 				}
 			});
@@ -219,6 +250,11 @@
 						var link = '{{ route('admin.management.zonal.update.index', ["id" => 0]) }}';
 
 						window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+					}
+					if ($(this).hasClass('international_edit')) {
+						var international_link = '{{ route('admin.management.zonal.update.international.index', ["id" => 0]) }}';
+
+						window.location = international_link.substr(0, international_link.lastIndexOf('/')) + '/' + id;
 					}
 					if ($(this).hasClass('activate')) {
                         swal({

@@ -171,9 +171,11 @@
                                                         <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                     @endif
-                                                    <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
-                                                    <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
-                                                    <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
+                                                    @if($service_type_check_id == 2 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][special_instructions]" value="{{$ro['special_instructions']}}">
                                                     <input type="hidden" name="form[{{$no}}][estimated_weight]" value="{{$ro['estimated_weight']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">

@@ -63,6 +63,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -820,10 +821,11 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[12, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
@@ -859,6 +861,7 @@
                         '</select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
+                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -874,6 +877,11 @@
                                 } ).wrap(td);
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true);
+                                } ).wrap(td);
+                        }else if($(header).is('.business_category')){
+                            $(business_category).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true);
                                 } ).wrap(td);
@@ -933,6 +941,20 @@
                     $("#payment_select").prepend('<option value="" selected></option>').select2({
                         data:data4,
                         placeholder: "Select Payment",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data5 = $.map({!! $business_categories !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+                    $("#business_category").prepend('<option value="" selected></option>').select2({
+                        data: data5,
+                        placeholder: "Select Business Category",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

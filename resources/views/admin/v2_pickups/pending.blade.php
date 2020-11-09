@@ -69,6 +69,7 @@
 {{--                                    <th class="border-primary border-darken-1">Shipment(s) Received</th>--}}
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Contact Person</th>
+{{--                                    <th class="border-primary border-darken-1">Booking Type</th>--}}
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Contact No(s).</th>
                                     <th class="border-primary border-darken-1">Address</th>
@@ -199,6 +200,9 @@
     <style>
         .btn-min-width {
             min-width: 5.5rem;
+        }
+        .reverse_pickup_row{
+            background-color: #bfefe2;
         }
 @foreach($legends as $legend)
     @if($legend->id == 1)
@@ -457,6 +461,7 @@
                 // {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
+                // {data: 'type', name: 'booking_types.booking_type', class: 'align-middle type'},
                 {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},

@@ -105,6 +105,22 @@
         </div>
     </div>
 </div>
+<div class="modal fade text-left" id="addInternationalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addInternationalCity"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Add International City</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="addInternationalCityDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <!--Confirm Modal -->
 <div class="modal fade text-left" id="editCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editCity"
@@ -118,6 +134,22 @@
                 </button>
             </div>
             <div class="modal-body" id="editCityDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade text-left" id="editInternationalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editCity"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit International City</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editInternationalCityDiv">
 
             </div>
         </div>

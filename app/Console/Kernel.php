@@ -63,7 +63,12 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\VisionSoftApi',
         'App\Console\Commands\OutstandingSDNReport',
         'App\Console\Commands\TelenorSalesReport',
-        'App\Console\Commands\KeyAccountDashboard'
+        'App\Console\Commands\KeyAccountDashboard',
+        'App\Console\Commands\ReversePickupSummary',
+        'App\Console\Commands\OverallVendorPickup',
+        'App\Console\Commands\NotPickedShippersSummary',
+        'App\Console\Commands\Escalation',
+        'App\Console\Commands\EscalationTagging'
 
 
         ];
@@ -207,6 +212,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('summary:reversepickup')->dailyAt($cut_off_time)->runInBackground();
+            $schedule->command('overall:vendorpickup')->dailyAt($cut_off_time)->runInBackground();
+        }
+        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.
