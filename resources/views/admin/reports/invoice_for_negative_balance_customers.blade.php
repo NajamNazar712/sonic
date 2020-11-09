@@ -240,7 +240,7 @@
                     { data:'amount' ,name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
                     { data:'charges' ,name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
                     { data:'payable' ,name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
-                    { data:'status' ,name: 'status', class: 'align-middle status'}
+                    { orderable: false, data:'status' ,name: 'status', class: 'align-middle status'}
 
                 ],
                 rowCallback: function(row, data, index) {
