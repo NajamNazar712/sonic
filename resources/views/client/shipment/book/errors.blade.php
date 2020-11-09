@@ -488,10 +488,6 @@
                 placeholder: 'Charges Mode'
             });
 
-            $('.phone_number').inputmask({
-                'mask': '9999-9999999',
-                'clearIncomplete': true
-            });
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');
