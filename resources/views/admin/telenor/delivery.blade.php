@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Telenor Bulk Deliver')
+@section('title', 'Telenor Bulk Delivery')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Telenor Bulk Deliver
+                    Telenor Bulk Delivery
                 </h1>
 
                 <div class="card">
