@@ -729,7 +729,7 @@ class VisionSoftAPIController extends Controller
     static public function bank_deposits(){
         $date = Carbon::yesterday();
         $today = Carbon::today();
-        $station_deposit_notes = StationDepositNote::whereDate('created_at', $date)->where('status', '=', 2);
+        $station_deposit_notes = StationDepositNote::whereDate('updated_at', $date)->where('status', '=', 2);
         if($station_deposit_notes->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $station_deposit_notes = $station_deposit_notes->get();
