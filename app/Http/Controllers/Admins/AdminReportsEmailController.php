@@ -1223,10 +1223,14 @@ class AdminReportsEmailController extends Controller
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->getStyle("B2:B4000")->getNumberFormat()
+            $sheet->getStyle("B")->getNumberFormat()
                 ->setFormatCode(
                     \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                 );
+            $sheet->getStyle("D")->getNumberFormat()
+            ->setFormatCode(
+                \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+            );
             $sheet->fromArray($outstanding_shipments_array_overall, NULL, 'A2', true);
             $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
             $title = 'Outstanding Shipments';
