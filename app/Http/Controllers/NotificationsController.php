@@ -5898,6 +5898,63 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to,$cc);
 
                 }
+                else if($id == 93){
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                        // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
+                    }
+                }
+                else if($id == 94){
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $user = User::find($reference_2_id);
+
+                    $to = array();
+
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    self::email($subject, $body, $to);
+                }
+                else if($id == 95){
+
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                        // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
+
+                    }
+                }
+                else if($id == 96){
+                    $to = array();
+                    $id = 3324;
+                    $user = User::find($id);
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    $file = $reference_2_id;
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    self::email($subject, $body, $to);
+                }
                 else if($id == 99) {
                     $date = Carbon::yesterday()->toDateString();
                     $date_from = $date . ' 08:00:00';
