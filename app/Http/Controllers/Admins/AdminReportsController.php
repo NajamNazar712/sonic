@@ -5110,11 +5110,24 @@ class AdminReportsController extends Controller
         if($status = $request->get('search_status')){
             $datatable->where('ss.id', '=', $status);
         }
+
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
+
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+            $datatable->whereBetween('dr.created_at', [$from, $to]);
+        }
+
+        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
+            $today = Carbon::today();
+            $datatable->whereDate('dr.created_at', $today);
+        }
+
         return $datatable->make(true);
     }
     public function gst_index(){
@@ -5835,14 +5848,23 @@ class AdminReportsController extends Controller
                 return number_format($diff_amount);
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 0) ? 'Created' : 'Deposited';
+                if ($sdn->status == 0) {
+                    return 'Created';
+                }
+                else if ($sdn->status == 0) {
+                    return 'Deposited';
+                }
+                else {
+                    return 'Resolved';
+                }
             })
             ->filterColumn('status', function ($query, $keyword) {
-
                 if ($keyword == 0) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 1) {
-                    $query->where('station_deposit_notes.status', '>=', $keyword);
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }

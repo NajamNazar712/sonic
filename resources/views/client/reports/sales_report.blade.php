@@ -296,7 +296,7 @@
                 }
             });
 
-            var from_date = $('#dr_search_date_from').pickadate({
+            var dr_from_date = $('#dr_search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -312,17 +312,16 @@
                         var toDate = moment(to_date_formatted);
 
                         if (currentDate.format('x') > toDate.format('x')) {
-                            to_date.pickadate('picker').clear();
+                            dr_to_date.pickadate('picker').clear();
                         }
 
                         var afterDate = currentDate.add(30, 'days');
-                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
-
-
+                        dr_to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
                     }
                 }
             });
-            var to_date = $('#dr_search_date_to').pickadate({
+
+            var dr_to_date = $('#dr_search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -338,11 +337,11 @@
                         var fromDate = moment(from_date_formatted);
 
                         if (currentDate.format('x') < fromDate.format('x')) {
-                            from_date.pickadate('picker').clear();
+                            dr_from_date.pickadate('picker').clear();
                         }
 
                         var beforeDate = currentDate.subtract(30, 'days');
-                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+                        dr_from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
             });

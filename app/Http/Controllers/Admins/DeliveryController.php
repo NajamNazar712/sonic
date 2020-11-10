@@ -3937,14 +3937,23 @@ class DeliveryController extends Controller
                 return $dropdown;
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 0) ? 'Created' : 'Deposited';
+                if ($sdn->status == 0) {
+                    return 'Created';
+                }
+                else if ($sdn->status == 0) {
+                    return 'Deposited';
+                }
+                else {
+                    return 'Resolved';
+                }
             })
             ->filterColumn('status', function ($query, $keyword) {
-
                 if ($keyword == 0) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 1) {
-                    $query->where('station_deposit_notes.status', '>=', $keyword);
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }
