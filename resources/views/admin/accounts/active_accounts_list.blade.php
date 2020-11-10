@@ -409,7 +409,7 @@
                             }
                         }
                     },
-                    {
+                   /* {
                         text: 'Set Segment',
                         className: 'btn btn-primary set_segment',
                         enabled:false,
@@ -417,7 +417,6 @@
                             if(selected_rows != ''){
 
                                 $('#SetSegment').modal('show');
-                                 console.log(selected_rows);
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
                                     console.log(segment);
@@ -495,7 +494,7 @@
                             }
 
                         }
-                    },
+                    },*/
                     {
                         text: 'Approve Commission',
                         className: 'btn btn-primary approve_commission',
