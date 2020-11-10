@@ -6196,7 +6196,7 @@ class NotificationsController extends Controller
                         ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
                         ->join('users', 'shipments.user_id', '=', 'users.id')
                         ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status','users.phone as phone')->get();
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')->get();
 
                     foreach($deliveries as $delivery){
                         if($delivery->user_id == 3324 && $delivery->status == 14){
