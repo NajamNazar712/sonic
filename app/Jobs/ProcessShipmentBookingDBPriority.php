@@ -148,6 +148,14 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             }
         }
         $business_category_id = $this->booking['business_category_id'];
+        if($business_category_id == 1){
+            if (strpos($consignee_phone_number_1, '-') !== 4) {
+                $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
+            }
+            if ($consignee_phone_number_2 != null && strpos($consignee_phone_number_2, '-') !== 4) {
+                $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
+            }
+        }
         if ($this->booking['account_type_id'] == 1) {
             $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges,$pieces_quantity, $self_collection, $business_category_id);
         }
