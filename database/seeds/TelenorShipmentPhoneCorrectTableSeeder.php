@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Models\Shipment;
 use Illuminate\Database\Seeder;
 
 class TelenorShipmentPhoneCorrectTableSeeder extends Seeder
