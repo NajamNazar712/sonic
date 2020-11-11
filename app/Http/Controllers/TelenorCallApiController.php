@@ -361,7 +361,7 @@ class TelenorCallApiController extends Controller
 
     //Get Feedback Response
     static public function response_call($date){
-        $telenor_call_responses = TelenorCallResponse::where('status', 1)->whereNotNull('call_id')->whereNull('response')->whereDate('created_at', $date);
+        $telenor_call_responses = TelenorCallResponse::where('status', 1)->whereNotNull('call_id')->where('response_status', '!=', 1)->whereDate('created_at', $date);
         $api_errors = TelenorApiError::pluck('code', 'id')->toArray();
         if($telenor_call_responses->exists()){
             $telenor_call_responses = $telenor_call_responses->get();
