@@ -793,7 +793,9 @@ class Permission
             'telenor.delivery.submit' => 399,
             'telenor.return.index' => 400,
             'telenor.return.shipment_info' => 400,
-            'telenor.return.submit' => 400
+            'telenor.return.submit' => 400,
+            'telenor.call.index' => 402,
+            'telenor.call.list' => 402
         ],
 
         'shipper' => [

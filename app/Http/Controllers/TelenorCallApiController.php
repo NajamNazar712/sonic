@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\Telenor;
+use App\http\Models\TelenorApiError;
 use App\Http\Models\TelenorCallResponse;
 use App\http\Models\TelenorCallSession;
 use App\Mail\Notifications;
@@ -16,29 +17,7 @@ use Illuminate\Support\Facades\Mail;
 
 class TelenorCallApiController extends Controller
 {
-    static public function call($start_date, $end_date, $void_shipments){
-        $shipments = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_phone_number_1 as phone_number')
-            ->where('sj.shipper_status_id', DB::raw(14))
-            ->where('sj.verification', DB::raw(1))
-            ->where('sj.created_at', '>=', $start_date)
-            ->where('sj.verification', '<=', $end_date)
-            ->whereNotIn('shipments.id', $void_shipments);
-
-        if($shipments->exists()){
-            $shipments = $shipments->get();
-            foreach ($shipments as $shipment){
-                $telenor_call_response = new TelenorCallResponse();
-                $telenor_call_response->shipment_id = $shipment->id;
-                $telenor_call_response->tracking_number = $shipment->tracking_number;
-                $telenor_call_response->save();
-
-                $this->telenor($shipment, $telenor_call_response);
-            }
-        }
-    }
-    
-    private function telenor_generate_session_id($base_uri, $call) {
+    static private function telenor_generate_session_id($base_uri, $calls, $multiple) {
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
 
         try {
@@ -86,9 +65,20 @@ class TelenorCallApiController extends Controller
                     $telenor->save();
                 }
 
-                $call->status = 0;
 
-                $call->save();
+                $error_id = 2;
+                if($multiple == 1){
+                    foreach ($calls as $call){
+                        $call->status = 3;
+                        $call->error_id = $error_id;
+                        $call->save();
+                    }
+                }
+                else{
+                    $calls->status = 3;
+                    $calls->error_id = $error_id;
+                    $calls->save();
+                }
 
                 return FALSE;
             }
@@ -100,20 +90,114 @@ class TelenorCallApiController extends Controller
 
             $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-            $call->status = 1;
+
+            $error_id = 2;
+            $call->status = 3;
+            $call->error_id = $error_id;
 
             $call->save();
 
             return FALSE;
         }
     }
-    private function telenor($shipment, $call) {
+    static private function telenor_ping($base_uri) {
+        $telenor = TelenorCallSession::latest()->first();
+
+        if ($telenor) {
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+
+            try {
+                $error = FALSE;
+
+                $response = $client->get('ping.jsp', [
+                    'query' => [
+                        'session_id' => $telenor->session_id
+                    ]
+                ]);
+
+                $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
+
+                if ($xml['response'] == 'OK') {
+                    $telenor->touch();
+                }
+                else {
+                    $error = TRUE;
+                }
+
+                if ($error) {
+                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $subject = '[Error] CALL API';
+                    $body = 'Error in Ping CALL API.<br/>Response Received: ' . json_encode($xml);
+
+                    $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                }
+            }
+            catch (RequestException $e) {
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $subject = '[Error] CALL API';
+                $body = 'Error in Ping CALL API.<br/>No Response';
+
+                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            }
+        }
+        else {
+            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $subject = '[Error] CALL API';
+            $body = 'Error in Ping CALL API.<br/>No Entry';
+
+            $mail = Mail::to($to)->send(new Notifications($subject, $body));
+        }
+    }
+
+    //Feedback Call
+    static public function call($date, $start_date, $end_date, $void_shipments){
+        $shipments = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_phone_number_1 as phone_number')
+            ->where('sj.shipper_status_id', DB::raw(14))
+            ->where('sj.verification', DB::raw(1))
+            ->where('sj.created_at', '>=', $start_date)
+            ->where('sj.verification', '<=', $end_date)
+            ->whereNotIn('shipments.id', $void_shipments);
+        $api_errors = TelenorApiError::pluck('code', 'id')->toArray();
+        $phone_numbers = '';
+        if($shipments->exists()){
+            $shipments = $shipments->get();
+            foreach ($shipments as $key => $shipment){
+                $phone_number = str_replace('-', '', $shipment->phone_number);
+                $phone_number_length = strlen($phone_number);
+                $phone_number_start = substr($phone_number, 0, 2);
+                $check = false;
+                if($phone_number_start == 03 && $phone_number_length == 11){
+                    $telenor_call_response[$key] = TelenorCallResponse::where('shipment_id', $shipment->id)->whereDate('created_at', $date);
+                    if($telenor_call_response[$key]->exists()){
+                        $telenor_call_response[$key] = $telenor_call_response[$key]->first();
+                    }
+                    else{
+                        $telenor_call_response[$key] = new TelenorCallResponse();
+                        $telenor_call_response[$key]->shipment_id = $shipment->id;
+                        $telenor_call_response[$key]->tracking_number = $shipment->tracking_number;
+                        $telenor_call_response[$key]->save();
+                    }
+                    if($phone_numbers == ''){
+                        $phone_numbers = $phone_number;
+                    }
+                    else{
+                        $phone_numbers = $phone_numbers . ',' . $phone_number;
+                    }
+                    $check = true;
+                }
+            }
+            if($check){
+                self::telenor($telenor_call_response, $phone_numbers, $api_errors, NULL);
+            }
+        }
+    }
+    static private function telenor($calls, $phone_numbers, $api_errors, $response) {
         $base_uri = 'https://telenorcsms.com.pk:27677/corporate_sms2/api/';
 
         $generate_session_id = FALSE;
 
-        $telenor = Telenor::latest()->first();
-
+        $telenor = TelenorCallSession::latest()->first();
         if ($telenor) {
             $now = Carbon::now();
             $last = Carbon::parse($telenor->created_at);
@@ -127,70 +211,89 @@ class TelenorCallApiController extends Controller
         else {
             $generate_session_id = TRUE;
         }
+        if($response == NULL){
+            $send_call = FALSE;
 
-        $send_call = FALSE;
+            if ($generate_session_id) {
+                $result = self::telenor_generate_session_id($base_uri, $calls, 1);
 
-        if ($generate_session_id) {
-            $result = $this->telenor_generate_session_id($base_uri, $call);
+                if ($result) {
+                    $send_call = TRUE;
+                }
+            }
+            else {
+                if ($telenor->status == 1) {
+                    $send_call = TRUE;
+                }
+            }
 
-            if ($result) {
-                $send_call = TRUE;
+            if ($send_call) {
+                self::telenor_call($base_uri, $phone_numbers, $calls, $api_errors);
             }
         }
-        else {
-            if ($telenor->status == 1) {
-                $send_call = TRUE;
-            }
-        }
+        else{
+            $get_call_response = FALSE;
 
-        if ($send_call) {
-            $this->telenor_call($base_uri, $call);
+            if ($generate_session_id) {
+                $result = self::telenor_generate_session_id($base_uri, $calls, 0);
+
+                if ($result) {
+                    $get_call_response = TRUE;
+                }
+            }
+            else {
+                if ($telenor->status == 1) {
+                    $get_call_response = TRUE;
+                }
+            }
+
+            if ($get_call_response) {
+                self::telenor_call_response($base_uri, $calls, $api_errors);
+            }
         }
     }
-
-    private function telenor_call($base_uri, $sms, $retry = FALSE) {
-        $telenor = Telenor::latest()->first();
+    static private function telenor_call($base_uri, $phone_numbers, $calls, $api_errors, $retry = FALSE) {
+        $telenor = TelenorCallSession::latest()->first();
 
         if ($telenor) {
             $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-
             try {
                 $error = FALSE;
-
-                $response = $client->get('sendsms.jsp', [
+                $destination = $phone_numbers;
+                $response = $client->get('make_feedback_call.jsp', [
                     'query' => [
                         'session_id' => $telenor->session_id,
-                        'to' => $sms->to,
-                        'text' => $sms->body,
-                        'mask' => 'TRAX'
+                        'to' => $destination,
+                        'file_id' => 3536,
+                        'max_retries' => 2,
+                        'valid_options' => 1,
+                        'valid_feedback_file_id' => 3537,
+                        'invalid_feedback_file_id' => 3538
                     ]
                 ]);
 
                 $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
-
                 if ($xml['response'] == 'OK') {
-                    $sms->status = 3;
+                    $data = explode(',', $xml['data']);
+                    $index = 0;
+                    foreach ($calls as $call){
+                        $call->status = 1;
+                        $call->call_id = $data[$index];
+                        $call->save();
+                        $index++;
+                    }
 
-                    $sms->save();
-
-                    $this->telenor_ping($base_uri);
+                    self::telenor_ping($base_uri);
                 }
                 else if ($xml['response'] == 'Error') {
-                    if ($xml['data'] == 'Error 201' || $xml['data'] == 'Error 101' || $xml['data'] == 'Error 502') {
-                        $sms->status = 2;
-
-                        $sms->save();
-                    }
-                    else {
-                        $error = TRUE;
-                    }
+                    $error = TRUE;
                 }
                 else if ($xml['data'] == 'Error 102') {
                     if (!$retry) {
-                        $result = $this->telenor_generate_session_id($base_uri, $sms);
+                        $result = self::telenor_generate_session_id($base_uri, $calls);
 
                         if ($result) {
-                            $this->telenor_sms($base_uri, $sms, TRUE);
+                            self::telenor_call($base_uri, $phone_numbers, $calls, $api_errors, TRUE);
                         }
                         else {
                             $error = TRUE;
@@ -206,42 +309,170 @@ class TelenorCallApiController extends Controller
 
                 if ($error) {
                     $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                    $subject = '[Error] SMS API';
-                    $body = 'Error in CALL API.<br/>CALL ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($xml);
+                    $subject = '[Error] CALL API';
+                    foreach ($calls as $call) {
+                        $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>Response Received: ' . json_encode($xml);
 
-                    $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                        $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-                    $telenor->status = 0;
+                        $telenor->status = 0;
 
-                    $telenor->save();
-
-                    $sms->status = 1;
-
-                    $sms->save();
+                        $telenor->save();
+                        $error_id = array_search($xml['data'], $api_errors);
+                        $call->status = 3;
+                        $call->error_id = $error_id;
+                        $call->error_code = $xml['data'];
+                        $call->save();
+                    }
                 }
             }
             catch (RequestException $e) {
                 $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API';
-                $body = 'Error in CALL API.<br/>CALL ID: ' . $sms->id . '<br/>No Response';
+                $subject = '[Error] CALL API';
+                foreach ($calls as $call) {
+                    $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Response';
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                    $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-                $sms->status = 1;
-
-                $sms->save();
+                    $error_id = array_search($xml['data'], $api_errors);
+                    $call->status = 3;
+                    $call->error_id = $error_id;
+                    $call->error_code = $xml['data'];
+                    $call->save();
+                }
             }
         }
         else {
             $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-            $subject = '[Error] SMS API';
-            $body = 'Error in CALL API.<br/>CALL ID: ' . $sms->id . '<br/>No Entry';
+            $subject = '[Error] CALL API';
+            foreach ($calls as $call) {
+                $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Entry';
+
+                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+
+                $error_id = 1;
+                $call->status = 3;
+                $call->error_id = $error_id;
+                $call->save();
+            }
+        }
+    }
+    //Feedback Call
+
+    //Get Feedback Response
+    static public function response_call($date){
+        $telenor_call_responses = TelenorCallResponse::where('status', 1)->whereNotNull('call_id')->whereNull('response')->whereDate('created_at', $date);
+        $api_errors = TelenorApiError::pluck('code', 'id')->toArray();
+        if($telenor_call_responses->exists()){
+            $telenor_call_responses = $telenor_call_responses->get();
+            foreach ($telenor_call_responses as $telenor_call_response){
+                self::telenor($telenor_call_response, NULL, $api_errors, 1);
+            }
+        }
+    }
+    static private function telenor_call_response($base_uri, $call, $api_errors, $retry = FALSE) {
+        $telenor = TelenorCallSession::latest()->first();
+        if ($telenor) {
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            try {
+                $error = FALSE;
+                $response = $client->get('querycall.jsp', [
+                    'query' => [
+                        'session_id' => $telenor->session_id,
+                        'call_id' => $call->call_id
+                    ]
+                ]);
+
+                $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
+                if ($xml['response'] == 'OK') {
+                    if($xml['data']['status'] == 1){
+                        if($xml['data']['optionSelected'] >= 2){
+                            $option_selected = 2;
+                        }
+                        else{
+                            $option_selected = 1;
+                        }
+                    }
+                    else{
+                        $option_selected = 3;
+                    }
+                    $call->status = 2;
+                    $call->response = $option_selected;
+                    $call->response_status = $xml['data']['status'];
+
+                    $call->save();
+
+                    self::telenor_ping($base_uri);
+                }
+                else if ($xml['response'] == 'Error') {
+                    $error = TRUE;
+                }
+                else if ($xml['data'] == 'Error 102') {
+                    if (!$retry) {
+                        $result = self::telenor_generate_session_id($base_uri, $call);
+
+                        if ($result) {
+                            self::telenor_call_response($base_uri, $call, $api_errors, TRUE);
+                        }
+                        else {
+                            $error = TRUE;
+                        }
+                    }
+                    else {
+                        $error = TRUE;
+                    }
+                }
+                else {
+                    $error = TRUE;
+                }
+
+                if ($error) {
+                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $subject = '[Error] CALL API';
+                    $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>Response Received: ' . json_encode($xml);
+
+                    $mail = Mail::to($to)->send(new Notifications($subject, $body));
+
+                    $telenor->status = 1;
+
+                    $telenor->save();
+
+
+                    $error_id = array_search($xml['data'], $api_errors);
+                    $call->status = 3;
+                    $call->error_id = $error_id;
+                    $call->error_code = $xml['data'];
+                    $call->save();
+                }
+            }
+            catch (RequestException $e) {
+                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $subject = '[Error] CALL API';
+                $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Response';
+
+                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+
+
+                $error_id = array_search($xml['data'], $api_errors);
+                $call->status = 3;
+                $call->error_id = $error_id;
+                $call->error_code = $xml['data'];
+                $call->save();
+            }
+        }
+        else {
+            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $subject = '[Error] CALL API';
+            $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Entry';
 
             $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
-            $sms->status = 1;
 
-            $sms->save();
+            $error_id = 1;
+            $call->status = 3;
+            $call->error_id = $error_id;
+            $call->save();
         }
     }
+    //Get Feedback Response
 }

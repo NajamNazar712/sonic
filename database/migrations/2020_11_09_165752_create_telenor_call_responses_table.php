@@ -17,8 +17,12 @@ class CreateTelenorCallResponsesTable extends Migration
             $table->increments('id');
             $table->integer('shipment_id');
             $table->bigInteger('tracking_number');
+            $table->integer('call_id')->nullable();
             $table->integer('status')->default(0);
             $table->integer('response')->nullable();
+            $table->integer('response_status')->nullable();
+            $table->integer('error_id')->nullable();
+            $table->string('error_code')->nullable();
             $table->timestamps();
         });
     }

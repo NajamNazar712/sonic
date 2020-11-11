@@ -2388,6 +2388,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_info', 'Admins\AdminNsaAccountShipmentController@return_shipment_info')->name('shipment_info');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@return_submit')->name('submit');
         });
+
+        Route::prefix('call')->name('call.')->group(function () {
+            Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
+            Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
+        });
     });
 });
 
