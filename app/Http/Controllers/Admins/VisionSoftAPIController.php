@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\VisionSoft\VisionSoftArrivalRevenue;
@@ -871,8 +872,8 @@ class VisionSoftAPIController extends Controller
                             } else {
                                 $bank_deposit = new VisionSoftBankDeposit();
                                 $bank_deposit->sdn_id = $station_deposit_note->id;
-                                $bank_deposit->bank_id = $station_deposit_note->banks_list_id;
-                                $bank_deposit->amount = $station_deposit_note->sdn_amount;
+                                $bank_deposit->bank_id = $slip->bank_id;
+                                $bank_deposit->amount = $slip->sdn_amount;
                                 $bank_deposit->save();
                             }
                         } catch (RequestException $e) {
@@ -931,14 +932,15 @@ class VisionSoftAPIController extends Controller
         $date = Carbon::today();
         $today = Carbon::today();
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('updated_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
+        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('updated_at', $date)->whereNotIn('id',$vision_daily_exp_ids)->whereNotNull('finance_approved_by');
         if($petty_cash_statements->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $petty_cash_statements = $petty_cash_statements->get();
             if(count($petty_cash_statements) > 0){
                 foreach ($petty_cash_statements as $petty_cash_statement){
-                    $petty_cash_statement_details = $petty_cash_statement->petty_cash_statement_details()->where('status', 1);
-                    if($petty_cash_statement_details){
+                    $petty_cash_statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash_statement->id)->where('status', 1);
+                    if($petty_cash_statement_details->exists()){
+                        $petty_cash_statement_details = $petty_cash_statement_details->get();
                         foreach ($petty_cash_statement_details as $petty_cash_statement_detail) {
                             try{
                                 $response = $client->post('DailyExp', [

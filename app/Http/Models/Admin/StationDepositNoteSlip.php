@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class StationDepositNoteSlip extends Model
 {
     public function bank(){
-        return $this->belongsTo('App\Http\Models\Shipper\UserBankInfo', 'bank_id', 'id');
+        return $this->belongsTo('App\Http\Models\BanksList', 'bank_id', 'id');
     }
 }
