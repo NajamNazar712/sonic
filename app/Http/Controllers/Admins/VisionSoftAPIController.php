@@ -431,7 +431,7 @@ class VisionSoftAPIController extends Controller
                     ->whereDate('sj.created_at', $date)
                     ->where('sj.verification', DB::raw(1));
             })
-            ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges', 'shipments.intercept_charges as intercept_charges')
+            ->select('u.id as account_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.weight_charges as weight_charges', 'shipments.insurance_charges as insurance_charges', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.packaging_charges as packing_charges', 'shipments.packaging_material_charges as packaging_charges', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges', 'shipments.intercept_charges as intercept_charges', 'sj.shipper_status_id')
             ->get();
         VisionSoftDellRetRevenue::truncate();
         if(count($shipments) > 0){
@@ -440,26 +440,53 @@ class VisionSoftAPIController extends Controller
                 if(array_key_exists($shipment->account_id, $user_shipments)){
                     if(array_key_exists($shipment->origin_city_id, $user_shipments[$shipment->account_id])){
                         if(array_key_exists($shipment->service_type_id, $user_shipments[$shipment->account_id][$shipment->origin_city_id])){
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] += $shipment->try_and_buy_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['weight_charges'] += $shipment->weight_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['insurance_charges'] += $shipment->insurance_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['fuel_surcharge'] += $shipment->fuel_surcharge;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packing_charges'] += $shipment->packing_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packaging_charges'] += $shipment->packaging_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] += $shipment->nsa_osa_charges;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] += $shipment->replacement_charges;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] += $shipment->cash_handling_charges;
+
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] += $shipment->gst;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] += $shipment->return_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] += $shipment->intercept_charges;
+
+                            if ($shipment->shipper_status_id == 14) {
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] += $shipment->try_and_buy_charges;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] += $shipment->replacement_charges;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] += $shipment->cash_handling_charges;
+                            }
+                            else {
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] += $shipment->return_charges;
+                            }
                         }
                         else{
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_id'] = $shipment->account_id;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['weight_charges'] = $shipment->weight_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['insurance_charges'] = $shipment->insurance_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['fuel_surcharge'] = $shipment->fuel_surcharge;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packing_charges'] = $shipment->packing_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packaging_charges'] = $shipment->packaging_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
-                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
                             $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
+
+                            if ($shipment->shipper_status_id == 14) {
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = 0;
+                            }
+                            else {
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = 0;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = 0;
+                                $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = 0;
+                            }
                         }
                     }
                     else{
@@ -467,13 +494,29 @@ class VisionSoftAPIController extends Controller
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
-                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['weight_charges'] = $shipment->weight_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['insurance_charges'] = $shipment->insurance_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['fuel_surcharge'] = $shipment->fuel_surcharge;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packing_charges'] = $shipment->packing_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packaging_charges'] = $shipment->packaging_charges;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
-                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
-                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
-                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
                         $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
+
+                        if ($shipment->shipper_status_id == 14) {
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = 0;
+                        }
+                        else {
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = 0;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = 0;
+                            $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = 0;
+                        }
                     }
                 }
                 else{
@@ -481,13 +524,29 @@ class VisionSoftAPIController extends Controller
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['account_name'] = $shipment->account_name;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['service_type_id'] = $shipment->service_type_id;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['origin_city_id'] = $shipment->origin_city_id;
-                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['weight_charges'] = $shipment->weight_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['insurance_charges'] = $shipment->insurance_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['fuel_surcharge'] = $shipment->fuel_surcharge;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packing_charges'] = $shipment->packing_charges;
+                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['packaging_charges'] = $shipment->packaging_charges;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['nsa_osa_charges'] = $shipment->nsa_osa_charges;
-                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
-                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['gst'] = $shipment->gst;
-                    $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
                     $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['intercept_charges'] = $shipment->intercept_charges;
+
+                    if ($shipment->shipper_status_id == 14) {
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = $shipment->replacement_charges;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = $shipment->cash_handling_charges;
+
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = 0;
+                    }
+                    else {
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['return_charges'] = $shipment->return_charges;
+
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['try_and_buy_charges'] = 0;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['replacement_charges'] = 0;
+                        $user_shipments[$shipment->account_id][$shipment->origin_city_id][$shipment->service_type_id]['cash_handling_charges'] = 0;
+                    }
                 }
             }
             if(count($user_shipments) > 0){
@@ -508,6 +567,11 @@ class VisionSoftAPIController extends Controller
                                                 'pin_account_id' => $shipment_charges['account_id'],
                                                 'pin_origin_city' => $shipment_charges['origin_city_id'],
                                                 'pin_service_type' => $shipment_charges['service_type_id'],
+                                                'pin_weight_charges' => ($shipment_charges['weight_charges'] != null) ? $shipment_charges['weight_charges'] : 0,
+                                                'pin_insurance_charges' => ($shipment_charges['insurance_charges'] != null) ? $shipment_charges['insurance_charges'] : 0,
+                                                'pin_packing_charges' => ($shipment_charges['packing_charges'] != null) ? $shipment_charges['packing_charges'] : 0,
+                                                'pin_fuel_surcharge' => ($shipment_charges['fuel_surcharge'] != null) ? $shipment_charges['fuel_surcharge'] : 0,
+                                                'pin_packaging_charges' => ($shipment_charges['packaging_charges'] != null) ? $shipment_charges['packaging_charges'] : 0,
                                                 'pin_try_buy_charges' => ($shipment_charges['try_and_buy_charges'] != null) ? $shipment_charges['try_and_buy_charges'] : 0,
                                                 'pin_nsa_osa_charges' => ($shipment_charges['nsa_osa_charges'] != null) ? $shipment_charges['nsa_osa_charges'] : 0,
                                                 'pin_replacement_charges' => ($shipment_charges['replacement_charges'] != null) ? $shipment_charges['replacement_charges'] : 0,
@@ -530,6 +594,11 @@ class VisionSoftAPIController extends Controller
                                             $new_charges->shipper_id = $shipment_charges['account_id'];
                                             $new_charges->origin_city_id = $shipment_charges['origin_city_id'];
                                             $new_charges->service_type_id = $shipment_charges['service_type_id'];
+                                            $new_charges->weight_charges = ($shipment_charges['weight_charges'] != null) ? $shipment_charges['weight_charges'] : 0;
+                                            $new_charges->insurance_charges = ($shipment_charges['insurance_charges'] != null) ? $shipment_charges['insurance_charges'] : 0;
+                                            $new_charges->packing_charges = ($shipment_charges['packing_charges'] != null) ? $shipment_charges['packing_charges'] : 0;
+                                            $new_charges->fuel_surcharge = ($shipment_charges['fuel_surcharge'] != null) ? $shipment_charges['fuel_surcharge'] : 0;
+                                            $new_charges->packaging_charges = ($shipment_charges['packaging_charges'] != null) ? $shipment_charges['packaging_charges'] : 0;
                                             $new_charges->try_and_buy_charges = ($shipment_charges['try_and_buy_charges'] != null) ? $shipment_charges['try_and_buy_charges'] : 0;
                                             $new_charges->nsa_osa_charges = ($shipment_charges['nsa_osa_charges'] != null) ? $shipment_charges['nsa_osa_charges'] : 0;
                                             $new_charges->replacement_charges = ($shipment_charges['replacement_charges'] != null) ? $shipment_charges['replacement_charges'] : 0;
@@ -862,7 +931,7 @@ class VisionSoftAPIController extends Controller
         $date = Carbon::today();
         $today = Carbon::today();
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('created_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
+        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('updated_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
         if($petty_cash_statements->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $petty_cash_statements = $petty_cash_statements->get();
