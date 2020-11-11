@@ -6173,20 +6173,25 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 104) {
-                    $delivery_note = DeliveryNote::find($reference_1_id);
+                    $to = array();
+                    $delivery_note_id = $reference_1_id;
 
-                    $deliveries = $delivery_note::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                    $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
                         ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
                         ->join('users', 'shipments.user_id', '=', 'users.id')
                         ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status','users.phone as phone')->get();
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
+                        ->where('users.id',3324)
+                        ->where('delivery_notes.id',$delivery_note_id)
+                        ->get();
 
                     foreach($deliveries as $delivery){
                         if($delivery->user_id == 3324 && $delivery->status == 14){
                             $to = $delivery->phone;
                         }
+                        self::sms($body, $to);
                     }
-                    self::sms($body, $to);
+
                 }
             }
         }

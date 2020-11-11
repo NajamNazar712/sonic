@@ -3666,7 +3666,8 @@ class AdminReportsController extends Controller
     public function negative_balance_customers_index()
     {
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes'=>$shipping_modes]);
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes'=>$shipping_modes,'salesperson' => $salesperson]);
 
     }
     public function negative_balance_customers_list(Request $request)
@@ -3676,18 +3677,21 @@ class AdminReportsController extends Controller
 
         $negative = DB::connection('reports')->table('pending_payment_shipments')->join('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
             ->join('users as u','u.id','=','s.user_id')
-            ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
+            ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+            ->leftjoin('admins as a','a.id','=','st.admin_id')
+            ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
             ->where('payable','<',0)
+            ->where('st.status',0)
             ->groupBy('u.id');
 
         $datatable = Datatables::of($negative)
             ->setRowAttr([
-                'class' => function ($datatable) {
-                    if ($datatable->shipment_exist == null) {
+                'class' => function ($user) {
+                    if ($user->shipment_exist == null) {
                         return 'bg-warning';
                     }
                 }
-                ])
+            ])
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
@@ -3699,11 +3703,31 @@ class AdminReportsController extends Controller
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('status', function ($user) {
+                if ($user->shipment_exist == null) {
+                    return 'Highlighted';
+                }
+                else{
+                    return 'Non highlighted';
+                }
             });
 
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
         }
+
+        if($sale_persons = $request->get('sale_persons')){
+            $datatable = $datatable->whereIn('a.id', $sale_persons);
+        }
+        if($status = $request->get('status_select')){
+            if($status == 1){
+                $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '=', null);
+            }else{
+                $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '<>', null);
+            }
+        }
+
         return $datatable->make(true);
 
     }
