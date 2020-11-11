@@ -398,6 +398,7 @@ class TelenorCallApiController extends Controller
                     }
                     $call->status = 2;
                     $call->response = $option_selected;
+                    $call->phone_number = $xml['data']['msisdn'];
                     $call->response_status = $xml['data']['status'];
 
                     $call->save();
