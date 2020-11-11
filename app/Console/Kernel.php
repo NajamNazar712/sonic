@@ -68,7 +68,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\OverallVendorPickup',
         'App\Console\Commands\NotPickedShippersSummary',
         'App\Console\Commands\Escalation',
-        'App\Console\Commands\EscalationTagging'
+        'App\Console\Commands\EscalationTagging',
+        'App\Console\Commands\TelenorCall',
+        'App\Console\Commands\TelenorCallResponse'
 
 
         ];
@@ -215,6 +217,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
+        $schedule->command('telenor:call')->dailyAt('13:00')->runInBackground();
+        $schedule->command('telenor:callresponse')->dailyAt('15:00')->runInBackground();
+        $schedule->command('telenor:call')->dailyAt('16:00')->runInBackground();
+        $schedule->command('telenor:callresponse')->dailyAt('18:00')->runInBackground();
     }
 	 /**
      * Register the commands for the application.
