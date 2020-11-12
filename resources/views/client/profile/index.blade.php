@@ -118,6 +118,12 @@
                                                     <td>{{$reference->name}}</td>
                                                 </tr>
                                             @endif
+                                            @if($user->account_type_id == 2)
+                                                <tr>
+                                                    <td><b>Invoice Grouping</b></td>
+                                                    <td></td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
