@@ -388,6 +388,7 @@ class TelenorCallApiController extends Controller
                 ]);
 
                 $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
+//                dd($xml);
                 if ($xml['response'] == 'OK') {
                     if($xml['data']['status'] == 1){
                         if($xml['data']['optionSelected'] >= 2){

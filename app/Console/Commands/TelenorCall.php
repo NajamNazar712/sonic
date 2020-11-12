@@ -45,7 +45,7 @@ class TelenorCall extends Command
         $date = Carbon::today()->format('Y-m-d');
         $end_date = $date . '16:00:00';
 
-        $void_shipments = TelenorCallResponse::whereDate('created_at', $date)->whereIn('status', [1, 2, 3])->whereIn('response_status', [0,1])->pluck('shipment_id')->toArray();
+        $void_shipments = TelenorCallResponse::whereDate('created_at', $date)->whereIn('status', [1, 2, 3])->whereIn('response', [1,2])->pluck('shipment_id')->toArray();
 
         TelenorCallApiController::call($date, $start_date, $end_date, $void_shipments);
     }
