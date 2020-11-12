@@ -23,17 +23,22 @@ class ShipperAccountController extends Controller
             $days = $settings->setting_value;
             $date = Carbon::now()->subDays($days);
             $active_users = User::where('status', 3)->where('created_at', '<', $date)->pluck('id')->toArray();
-            $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
-            $result = array_diff($active_users,$shipments);
 
-            if (count($result) > 0)
-            {
-                foreach ($result as $status) {
-                    User::where('id', $status)->Update(['status' => 4,'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
-                    NotificationsController::send(57, $status);
-                    NotificationsController::send(58, $status);
+            if(count($active_users) > 0){
+                $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
+                $result = array_diff($active_users,$shipments);
+                dd($result);
+
+                if (count($result) > 0)
+                {
+                    foreach ($result as $status) {
+                        User::where('id', $status)->Update(['status' => 4,'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                        NotificationsController::send(57, $status);
+                        NotificationsController::send(58, $status);
+                    }
                 }
             }
+
         }
 //            $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
 //            $days = $settings->setting_value;
