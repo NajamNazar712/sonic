@@ -27,12 +27,13 @@ class ShipperAccountController extends Controller
             if(count($active_users) > 0){
                 $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
                 $result = array_diff($active_users,$shipments);
+                dd($result);
                 if (count($result) > 0)
                 {
                     foreach ($result as $status) {
                         User::where('id', $status)->Update(['status' => 4,'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
-                        NotificationsController::send(57, $status);
-                        NotificationsController::send(58, $status);
+//                        NotificationsController::send(57, $status);
+//                        NotificationsController::send(58, $status);
                     }
                 }
             }
