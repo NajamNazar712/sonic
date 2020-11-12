@@ -558,7 +558,7 @@ class VisionSoftAPIController extends Controller
                             if(count($user_shipment_service) > 0){
                                 foreach ($user_shipment_service as $shipment_charges){
                                     try {
-                                        $response = $client->post('ArrivalRevenue', [
+                                        $response = $client->post('DellRetRevenue', [
                                             'form_params' => [
                                                 'pin_code' => 6,
                                                 'pin_kp' => 'A',
