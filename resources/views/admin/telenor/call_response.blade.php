@@ -101,7 +101,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.shipment.poc_kam_tagged_accounts.list') }}',
+                        url: '{{ route('admin.telenor.call.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
