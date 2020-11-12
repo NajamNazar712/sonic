@@ -1048,4 +1048,24 @@ class ShipperDashboardController extends Controller
         }
         return view('client.profile.contacts')->with(['sale_person' => $admin, 'contacts' => $contacts]);
     }
+
+    public function update_invoice_sort(Request $request){
+        $id = session('user_id');
+        $user = User::find($id);
+        if($user){
+            $action = $request->action;
+            if($action){
+                if($user->invoice_group_by == 0){
+                    $user->invoice_group_by = 1;
+                }else{
+                    $user->invoice_group_by = 0;
+                }
+                $user->save();
+            }
+            else{
+
+            }
+        }
+
+    }
 }
