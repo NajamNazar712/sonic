@@ -12,7 +12,7 @@ class UpdateModulePermissionForTelenorCallTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 336, 'name' => 'Telenor Calls', 'module_id' => 6),
+            array('id' => 402, 'name' => 'Telenor Calls', 'module_id' => 6),
         ));
     }
 }
