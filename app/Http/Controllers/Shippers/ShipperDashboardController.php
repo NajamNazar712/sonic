@@ -1054,16 +1054,24 @@ class ShipperDashboardController extends Controller
         $user = User::find($id);
         if($user){
             $action = $request->action;
-            if($action){
+
+            if($action == 'true'){
                 if($user->invoice_group_by == 0){
                     $user->invoice_group_by = 1;
+                    $user->save();
+                    return response()->json(['status' => 1, 'success'=>'Invoice successfully updated!']);
                 }else{
-                    $user->invoice_group_by = 0;
+                    return response()->json(['status' => 0, 'error'=>'Invoice already updated']);
                 }
-                $user->save();
             }
             else{
-
+                if($user->invoice_group_by == 1){
+                    $user->invoice_group_by = 0;
+                    $user->save();
+                    return response()->json(['status' => 1, 'success'=>'Invoice successfully updated!']);
+                }else{
+                    return response()->json(['status' => 0, 'error'=>'Invoice already updated']);
+                }
             }
         }
 

@@ -125,11 +125,11 @@
                                                         <div class="form-group">
                                                             <label for="switchery" class="font-medium-2 text-bold-600 mr-1"><strong>Single</strong></label>
                                                             @if($user->invoice_group_by)
-                                                                <input type="checkbox" id="invoice_group_switch" data-size="sm" class="switchery igb-switch" />
-                                                            @else
                                                                 <input type="checkbox" id="invoice_group_switch" data-size="sm" class="switchery igb-switch" checked/>
+                                                            @else
+                                                                <input type="checkbox" id="invoice_group_switch" data-size="sm" class="switchery igb-switch"/>
                                                             @endif
-                                                            <label for="switchery" class="font-medium-2 text-bold-600 ml-1"><strong>rigin Wise</strong></label>
+                                                            <label for="switchery" class="font-medium-2 text-bold-600 ml-1"><strong>Origin Wise</strong></label>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1353,7 +1353,7 @@
             $('#invoice_group_switch').on('change',function(){
                 var invoice_switch_btn = document.querySelector('.switchery.igb-switch');
                 if (invoice_switch_btn.checked === true) {
-                    partial_booking(true);
+                    update_invoicing_sort(true);
 
                 } else if (invoice_switch_btn.checked === false) {
                     update_invoicing_sort(false);
