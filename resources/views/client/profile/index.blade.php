@@ -125,9 +125,9 @@
                                                         <div class="form-group">
                                                             <label for="switchery" class="font-medium-2 text-bold-600 mr-1"><strong>Single</strong></label>
                                                             @if($user->invoice_group_by)
-                                                                <input type="checkbox" id="invoice_group_switch" data-size="sm" class="switchery igb-switch" checked/>
+                                                                <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch" checked/>
                                                             @else
-                                                                <input type="checkbox" id="invoice_group_switch" data-size="sm" class="switchery igb-switch"/>
+                                                                <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch"/>
                                                             @endif
                                                             <label for="switchery" class="font-medium-2 text-bold-600 ml-1"><strong>Origin Wise</strong></label>
                                                         </div>
