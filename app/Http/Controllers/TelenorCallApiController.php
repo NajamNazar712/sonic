@@ -265,7 +265,7 @@ class TelenorCallApiController extends Controller
                         'session_id' => $telenor->session_id,
                         'to' => $destination,
                         'file_id' => 3536,
-                        'max_retries' => 2,
+                        'max_retries' => 1,
                         'valid_options' => 1,
                         'valid_feedback_file_id' => 3537,
                         'invalid_feedback_file_id' => 3538
@@ -391,11 +391,14 @@ class TelenorCallApiController extends Controller
 //                dd($xml);
                 if ($xml['response'] == 'OK') {
                     if($xml['data']['status'] == 1){
-                        if($xml['data']['optionSelected'] >= 2){
+                        if($xml['data']['optionSelected'] == 1){
+                            $option_selected = 1;
+                        }
+                        elseif ($xml['data']['optionSelected'] >= 2){
                             $option_selected = 2;
                         }
                         else{
-                            $option_selected = 1;
+                            $option_selected = 3;
                         }
                     }
                     else{
