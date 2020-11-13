@@ -558,7 +558,7 @@ class VisionSoftAPIController extends Controller
                             if(count($user_shipment_service) > 0){
                                 foreach ($user_shipment_service as $shipment_charges){
                                     try {
-                                        $response = $client->post('ArrivalRevenue', [
+                                        $response = $client->post('DellRetRevenue', [
                                             'form_params' => [
                                                 'pin_code' => 6,
                                                 'pin_kp' => 'A',
@@ -929,16 +929,16 @@ class VisionSoftAPIController extends Controller
     }
     //14
     static public function daily_exp(){
-        $date = Carbon::today();
+        $date = Carbon::yesterday();
         $today = Carbon::today();
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereDate('updated_at', $date)->whereNotIn('id',$vision_daily_exp_ids)->whereNotNull('finance_approved_by');
+        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereNotNull('finance_approved_by')->whereDate('finance_approved_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
         if($petty_cash_statements->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $petty_cash_statements = $petty_cash_statements->get();
             if(count($petty_cash_statements) > 0){
                 foreach ($petty_cash_statements as $petty_cash_statement){
-                    $petty_cash_statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash_statement->id)->where('status', 1);
+                    $petty_cash_statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash_statement->id)->where('status', 2);
                     if($petty_cash_statement_details->exists()){
                         $petty_cash_statement_details = $petty_cash_statement_details->get();
                         foreach ($petty_cash_statement_details as $petty_cash_statement_detail) {
