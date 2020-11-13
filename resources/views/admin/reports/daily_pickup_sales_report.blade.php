@@ -20,13 +20,6 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group ml-1">
-                            <select name="shipping_mode" class="select2" id="shipping_mode">
-                                @foreach($shipping_mode as $shipping)
-                                    <option value="{{ $shipping->id }}">{{ $shipping->mode }}</option>
-                                @endforeach
-                            </select>
-                        </div>
                         @if(session('role_id') == 4 )
                         <div class="form-group ml-1">
                             <select name="sales_person" class="select2" id="sales_person">
@@ -128,11 +121,6 @@
                 placeholder: 'Select City',
                 allowClear:true
             });
-            $('#search_form #shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
-                placeholder: 'Select Shipping Mode',
-                allowClear:true
-            });
             $('#search_form #sales_person').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Sales Person',
@@ -163,7 +151,7 @@
                 // blockPagePermanently();
                 var search_date = $('#search_form input[name="search_date_formatted"]').val();
                 var city = $('#city').val();
-                var shipping_mode = $('#shipping_mode').val();
+                var shipping_modes = $('#shipping_mode').val();
                 var sales = '';
                 @if(session('role_id') == 4)
                 sales = $('#sales_person').val();
@@ -175,7 +163,6 @@
                         '_token': '{{ csrf_token() }}',
                         'date': search_date,
                         'city': city,
-                        'shipping_mode':shipping_mode,
                         'sales_person': sales,
                         'sales_tagging':1
                     }
