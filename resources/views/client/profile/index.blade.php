@@ -120,16 +120,16 @@
                                             @endif
                                             @if($user->account_type_id == 2)
                                                 <tr>
-                                                    <td><b>Invoice Grouping</b></td>
+                                                    <td style="vertical-align: middle;"><b>Invoice Grouping</b></td>
                                                     <td>
-                                                        <div class="form-group">
-                                                            <label for="switchery" class="font-medium-2 text-bold-600 mr-1"><strong>Single</strong></label>
+                                                        <div class="form-group mb-0">
+                                                            <label for="switchery" class="font-medium-2 text-bold-600 mr-1">Single</label>
                                                             @if($user->invoice_group_by)
                                                                 <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch" checked/>
                                                             @else
                                                                 <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch"/>
                                                             @endif
-                                                            <label for="switchery" class="font-medium-2 text-bold-600 ml-1"><strong>Origin Wise</strong></label>
+                                                            <label for="switchery" class="font-medium-2 text-bold-600 ml-1">Origin Wise</label>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -637,8 +637,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/selectize/selectize.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
 
 
     <style>
@@ -1348,7 +1348,7 @@
                 $('#AddBankModal').modal('show')
             });
             var invoice_switch = document.querySelector('.igb-switch');
-            var switchery = new Switchery(invoice_switch);
+            var switchery = new Switchery(invoice_switch,{ size: 'small'});
 
             $('#invoice_group_switch').on('change',function(){
                 var invoice_switch_btn = document.querySelector('.switchery.igb-switch');
