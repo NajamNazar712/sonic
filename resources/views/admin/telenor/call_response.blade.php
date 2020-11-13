@@ -101,7 +101,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.shipment.poc_kam_tagged_accounts.list') }}',
+                        url: '{{ route('admin.telenor.call.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -159,7 +159,7 @@
                     url: '{{ route('admin.telenor.call.list') }}',
                 },
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false,searchable: false,name: 'serial_number',class: 'align-middle serial_number',targets: 0, render: function (data, type, row) { return '';}},
                     {data: 'tracking_number_link',name: 'telenor_call_responses.tracking_number',class: 'align-middle text_center tracking_number'},

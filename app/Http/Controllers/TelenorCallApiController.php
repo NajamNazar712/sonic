@@ -265,7 +265,7 @@ class TelenorCallApiController extends Controller
                         'session_id' => $telenor->session_id,
                         'to' => $destination,
                         'file_id' => 3536,
-                        'max_retries' => 2,
+                        'max_retries' => 1,
                         'valid_options' => 1,
                         'valid_feedback_file_id' => 3537,
                         'invalid_feedback_file_id' => 3538
@@ -361,7 +361,11 @@ class TelenorCallApiController extends Controller
 
     //Get Feedback Response
     static public function response_call($date){
-        $telenor_call_responses = TelenorCallResponse::where('status', 1)->whereNotNull('call_id')->where('response_status', '!=', 1)->whereDate('created_at', $date);
+        $telenor_call_responses = TelenorCallResponse::whereIn('status', [1,2])->whereNotNull('call_id')
+            ->where(function ($query) {
+                $query->whereNotIn('response', [1, 2])
+                    ->orWhereNull('response');
+            })->whereDate('created_at', $date);
         $api_errors = TelenorApiError::pluck('code', 'id')->toArray();
         if($telenor_call_responses->exists()){
             $telenor_call_responses = $telenor_call_responses->get();
@@ -384,13 +388,17 @@ class TelenorCallApiController extends Controller
                 ]);
 
                 $xml = json_decode(json_encode(simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)), TRUE);
+//                dd($xml);
                 if ($xml['response'] == 'OK') {
                     if($xml['data']['status'] == 1){
-                        if($xml['data']['optionSelected'] >= 2){
+                        if($xml['data']['optionSelected'] == 1){
+                            $option_selected = 1;
+                        }
+                        elseif ($xml['data']['optionSelected'] >= 2){
                             $option_selected = 2;
                         }
                         else{
-                            $option_selected = 1;
+                            $option_selected = 3;
                         }
                     }
                     else{
