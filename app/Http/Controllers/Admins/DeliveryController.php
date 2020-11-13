@@ -101,12 +101,12 @@ class DeliveryController extends Controller
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -3937,14 +3937,23 @@ class DeliveryController extends Controller
                 return $dropdown;
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 0) ? 'Created' : 'Deposited';
+                if ($sdn->status == 0) {
+                    return 'Created';
+                }
+                else if ($sdn->status == 0) {
+                    return 'Deposited';
+                }
+                else {
+                    return 'Resolved';
+                }
             })
             ->filterColumn('status', function ($query, $keyword) {
-
                 if ($keyword == 0) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 1) {
-                    $query->where('station_deposit_notes.status', '>=', $keyword);
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }

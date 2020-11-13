@@ -12,7 +12,7 @@ class UpdateModulePermissionForAppEfficiencyReport extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 397, 'name' => 'App Efficiency Report - View', 'module_id' => 9),
+            array('id' => 401, 'name' => 'App Efficiency Report - View', 'module_id' => 9),
         ));
     }
 }

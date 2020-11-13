@@ -541,6 +541,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
+        Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('city.edit');
         Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');

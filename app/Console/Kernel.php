@@ -87,7 +87,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
         $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
@@ -213,8 +213,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
-        $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
-        $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('summary:reversepickup')->dailyAt($cut_off_time)->runInBackground();
+            $schedule->command('overall:vendorpickup')->dailyAt($cut_off_time)->runInBackground();
+        }
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
     }
 	 /**

@@ -84,7 +84,7 @@ class AdminZonalManagementController extends Controller
     }
 
     public function add_index() {
-        $cities = City::where('status', 1)->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
 
         return view('admin.management.zonal.add.index')->with('cities', $cities);
     }
@@ -123,7 +123,7 @@ class AdminZonalManagementController extends Controller
     }
 
     public function update_index($id) {
-        $cities = City::where('status', 1)->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
         $zone = Zone::find($id);
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
         $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
@@ -217,9 +217,8 @@ class AdminZonalManagementController extends Controller
 
 
     public function add_international_index() {
-        $cities = City::where('status', 1)->get();
 
-        return view('admin.management.zonal.add.international_index')->with('cities', $cities);
+        return view('admin.management.zonal.add.international_index');
     }
 
     public function add_international_store(Request $request) {
@@ -235,10 +234,9 @@ class AdminZonalManagementController extends Controller
     }
 
     public function update_international_index($id) {
-        $cities = City::where('status', 1)->get();
         $zone = Zone::find($id);
 
-        return view('admin.management.zonal.update.international_index')->with(['cities' => $cities, 'zone' => $zone]);
+        return view('admin.management.zonal.update.international_index')->with(['zone' => $zone]);
     }
 
     public function update_international_store(Request $request, $id) {

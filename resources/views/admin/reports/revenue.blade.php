@@ -89,7 +89,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(3)}}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -100,9 +100,31 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
                         </div>
 
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+
+                            <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Delivered/Returned Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+
+                            <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Delivered/Returned Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                        </div>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -307,6 +329,35 @@
                     }
                 }
             });
+
+            var from_date = $('#dr_search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#dr_search_date_to').pickadate('picker').set('min', $('#dr_search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var to_date = $('#dr_search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#dr_search_date_from').pickadate('picker').set('max', $('#dr_search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -445,6 +496,8 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
+                        d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[10, 'desc']],
