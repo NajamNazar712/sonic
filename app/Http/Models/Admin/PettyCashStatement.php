@@ -15,7 +15,7 @@ class PettyCashStatement extends Model
         return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
     }
     public function shipment(){
-        return $this->hasOne('App\Http\Models\Shipment');
+        return $this->belongsTo('App\Http\Models\Shipment');
     }
 
 }

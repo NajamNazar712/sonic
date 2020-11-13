@@ -348,18 +348,18 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(220, session('permissions')))
-                    {
-                        text: '<i class="la la-plus"></i> Assign Master Warehouse',
-                        className: 'btn btn-primary assign_warehouse',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddMasterWarehouseModal').modal('show');
+{{--                        @if (session('role_id') == 1 || in_array(220, session('permissions')))--}}
+{{--                    {--}}
+{{--                        text: '<i class="la la-plus"></i> Assign Master Warehouse',--}}
+{{--                        className: 'btn btn-primary assign_warehouse',--}}
+{{--                        enabled: true,--}}
+{{--                        action: function (e, dt, node, config) {--}}
+{{--                            $('#AddMasterWarehouseModal').modal('show');--}}
 
-                        }
-                    },
-                    @endif
-                        @if (session('role_id') == 1 || in_array(219, session('permissions')))
+{{--                        }--}}
+{{--                    },--}}
+{{--                    @endif--}}
+                    @if (session('role_id') == 1 || in_array(219, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Warehouse',
                         className: 'btn btn-primary add_warehouse',
@@ -369,7 +369,7 @@
 
                         }
                     },
-                        @endif{
+                    @endif{
                         extend: 'excel',
                         title: 'Warehouses',
                         text: '<i class="la la-file-excel-o"></i> Excel',

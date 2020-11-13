@@ -160,6 +160,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('sizes','Shippers\ShipperPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
             Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
+
+            Route::prefix('cart')->name('cart.')->group(function (){
+                Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
+                Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
+            });
         });
     });
     Route::prefix('return')->name('return.')->group(function (){
@@ -537,6 +542,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
+        Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('city.edit');
         Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');

@@ -2361,7 +2361,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -2378,7 +2378,8 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }
-                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk'];
+                    
+                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
                     self::email($subject, $body, $to);
@@ -5219,6 +5220,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
                     foreach ($zone_hub_shipments as $zone_hub_shipment) {
@@ -5270,6 +5272,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
                     foreach ($hub_shipments as $hub_shipment) {
@@ -5910,7 +5913,64 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, $cc);
 
-                } else if ($id == 99) {
+                else if($id == 93){
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                        // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
+                    }
+                }
+                else if($id == 94){
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $user = User::find($reference_2_id);
+
+                    $to = array();
+
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    self::email($subject, $body, $to);
+                }
+                else if($id == 95){
+
+                    if($reference_2_id){
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
+                        // dd($user_emails);
+                        if(count($user_emails) >= 0){
+                            foreach($user_emails as $email){
+                                $to = $email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
+
+                    }
+                }
+                else if($id == 96){
+                    $to = array();
+                    $id = 3324;
+                    $user = User::find($id);
+                    if($user){
+                        $to[] = $user->email;
+                    }
+                    $file = $reference_2_id;
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    self::email($subject, $body, $to);
+                }
+				 else if ($id == 99) {
                     $date = Carbon::yesterday()->toDateString();
                     $date_from = $date . ' 08:00:00';
                     $next_day = Carbon::parse($date)->addDay(1);
