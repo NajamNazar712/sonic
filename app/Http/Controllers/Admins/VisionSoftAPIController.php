@@ -959,9 +959,9 @@ class VisionSoftAPIController extends Controller
                                         'pin_stmt_id' => $petty_cash_statement_detail->id,
                                         'pin_stmt_ref_no' => $petty_cash_statement_detail->reference_no,
                                         'pin_tracking_number' => $petty_cash_statement->shipment->tracking_number,
-                                        'pin_creation_date' => $petty_cash_statement->created_at,
-                                        'pin_period_from_date' => $petty_cash_statement->from,
-                                        'pin_period_to_date' => $petty_cash_statement->to,
+                                        'pin_creation_date' => Carbon::parse($petty_cash_statement->created_at)->format('m/d/Y'),
+                                        'pin_period_from_date' => Carbon::parse($petty_cash_statement->from)->format('m/d/Y'),
+                                        'pin_period_to_date' => Carbon::parse($petty_cash_statement->to)->format('m/d/Y'),
                                         'pin_statement_head_id' => $petty_cash_statement->id
                                     ]
                                 ]);
