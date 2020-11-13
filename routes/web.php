@@ -275,6 +275,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
     Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
+    Route::post('update_invoice_sort','Shippers\ShipperDashboardController@update_invoice_sort')->name('update_invoice_sort');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
