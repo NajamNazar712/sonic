@@ -157,6 +157,7 @@ class TelenorCallApiController extends Controller
             ->where('sj.verification', DB::raw(1))
             ->where('sj.created_at', '>=', $start_date)
             ->where('sj.verification', '<=', $end_date)
+            ->where('shipments.user_id', 3324)
             ->whereNotIn('shipments.id', $void_shipments);
         $api_errors = TelenorApiError::pluck('code', 'id')->toArray();
         $phone_numbers = '';

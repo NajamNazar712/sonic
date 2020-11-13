@@ -217,10 +217,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
-        $schedule->command('telenor:call')->dailyAt('13:00')->runInBackground();
-        $schedule->command('telenor:callresponse')->dailyAt('15:00')->runInBackground();
-        $schedule->command('telenor:call')->dailyAt('16:00')->runInBackground();
-        $schedule->command('telenor:callresponse')->dailyAt('18:00')->runInBackground();
+        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
+        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
     }
 	 /**
      * Register the commands for the application.
