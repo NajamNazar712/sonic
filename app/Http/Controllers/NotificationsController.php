@@ -5219,7 +5219,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
@@ -5271,7 +5271,7 @@ class NotificationsController extends Controller
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
@@ -5912,7 +5912,7 @@ class NotificationsController extends Controller
                     $to[] = 'shafay.tariq@trax.pk';
 
                     self::email($subject, $body, $to, $cc);
-
+                }
                 else if($id == 93){
                     if($reference_2_id){
                         $subject = $notification->subject;
