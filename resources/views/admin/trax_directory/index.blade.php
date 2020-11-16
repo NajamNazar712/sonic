@@ -69,9 +69,6 @@
                     params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.trax_directory.list') }}',
-                       /* data: {
-                            'page': 'all',
-                        },*/
                         data: params,
                         success: function (result) {
                             head = [];
