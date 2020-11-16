@@ -6936,7 +6936,12 @@ class AdminReportsController extends Controller
             $city = $city->first();
             $serial = 1;
             foreach($shipping_modes as $mode){
-
+                $booked = 0;
+                $received = 0;
+                $cod_collection = 0;
+                $actual_weight = 0;
+                $chargeable_weight = 0;
+                $revenue_wo_gst = 0;
                    $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
                     $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -7019,7 +7024,14 @@ class AdminReportsController extends Controller
             }
         }
         else{
+            $serial = 1;
             foreach($shipping_modes as $mode){
+                $booked = 0;
+                $received = 0;
+                $cod_collection = 0;
+                $actual_weight = 0;
+                $chargeable_weight = 0;
+                $revenue_wo_gst = 0;
 
                 $booked= DB::connection('reports')->table('shipments')
                     ->whereBetween('shipments.created_at',[$date_from,$date_to])
