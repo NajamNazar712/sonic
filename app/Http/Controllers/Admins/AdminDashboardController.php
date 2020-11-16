@@ -8018,7 +8018,6 @@ if(session('department_id') == 7){
 
     public function updateCity(Request $request,$id){
         $city_id = City::where('id',$id)->first();
-        dd($request);
         if($request->postType == 'city'){
             City::where('id',$id)->update([
                 'name'=>$request->cityName,
