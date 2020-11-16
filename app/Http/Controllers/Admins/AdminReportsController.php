@@ -7034,7 +7034,7 @@ class AdminReportsController extends Controller
                 $data[$mode->id]['booked'] = $booked;
                 $data[$mode->id]['received'] = $received;
                 $data[$mode->id]['revenue_wo_gst'] = $revenue_wo_gst;
-                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $actual_weight / $received : 0;
+                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $revenue_wo_gst/$received:0;
                 $data[$mode->id]['actual_weight'] = $actual_weight;
                 $data[$mode->id]['avg_actual_weight'] = ($received != 0) ? $actual_weight / $received : 0;
                 $data[$mode->id]['avg_rev_actual_weight'] = ($actual_weight != 0) ? $revenue_wo_gst / $actual_weight:0;
@@ -7110,7 +7110,7 @@ class AdminReportsController extends Controller
                 $data[$mode->id]['booked'] = $booked;
                 $data[$mode->id]['received'] = $received;
                 $data[$mode->id]['revenue_wo_gst'] = $revenue_wo_gst;
-                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $actual_weight / $received : 0;
+                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $revenue_wo_gst/$received:0;
                 $data[$mode->id]['actual_weight'] = $actual_weight;
                 $data[$mode->id]['avg_actual_weight'] = ($received != 0) ? $actual_weight / $received : 0;
                 $data[$mode->id]['avg_rev_actual_weight'] = ($actual_weight != 0) ? $revenue_wo_gst / $actual_weight:0;
