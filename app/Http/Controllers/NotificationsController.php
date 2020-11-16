@@ -5956,62 +5956,33 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 }
                 else if($id == 99) {
-                    $date = Carbon::yesterday()->toDateString();
-                    $date_from = $date . ' 08:00:00';
-                    $next_day = Carbon::parse($date)->addDay(1);
-                    $date_to = $next_day->toDateString();
-                    $date_to = $date_to . ' 07:59:59';
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $data = $reference_1_id;
 
-                    $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
-                        ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
-                        ->join('v2_pickup_request_attempts as vpra','vpra.pickup_request_id','=','v2_pickup_requests.id')
-                        ->join('v2_pickup_request_not_pick_reasons as npr','npr.id','=','vpra.reason_id')
-                        ->leftjoin('sale_person_tags as st','st.user_id','=','u.id')
-                        ->join('admins as a','a.id','=','st.admin_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason','a.id as admin_id','a.name as sales_person','a.email as saleperson_email')
-                        ->where('v2_pickup_requests.status_id', 3)
-                        ->where('st.status',0)
-                        ->whereNotNull('vpra.reason_id')
-                        ->wherebetween('v2_pickup_requests.created_at',[$date_from,$date_to])
-                        ->get();
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked Reason</th>';
+                    $html .= '</tr></thead><tbody>';
 
-                    if (count($pickup_requests) > 0) {
-                        $pickup_data = array();
-
-                        foreach($pickup_requests as $index => $pickup)
-                        {
-                            $pickup_data[$pickup->admin_id][] = $pickup;
-                        }
-                        foreach ($pickup_data as $admin_id => $data) {
-                            $subject = $notification->subject;
-                            $body = $notification->body;
-
-                            $html = '<table style="width:100%;">';
-                            $html .= '<thead><tr>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked Reason</th>';
-                            $html .= '</tr></thead><tbody>';
-
-                            foreach($data as $pickup_data){
-                                $html .= '<tr>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['requested_date'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['shipper_name'] . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['reason'] . '</td>';
-                                $html .= '</tr>';
-                                $to = array();
-                                $to[] = $pickup_data['saleperson_email'];
-                            }
-                            $html .= '</tbody></table>';
-                            if (strpos($body, '[preview]') !== FALSE) {
-                                $body = str_replace('[preview]', $html, $body);
-                            }
-                            if (strpos($body, '[sales_person]') !== FALSE) {
-                                $body = str_replace('[sales_person]',$pickup->sales_person , $body);
-                            }
-                            self::email($subject, $body, $to);
-                        }
+                    foreach($data as $pickup_data){
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['requested_date'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['shipper_name'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['reason'] . '</td>';
+                        $html .= '</tr>';
+                        $to = $pickup_data['saleperson_email'];
                     }
+                    $html .= '</tbody></table>';
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+                    if (strpos($body, '[sales_person]') !== FALSE) {
+                        $body = str_replace('[sales_person]',$pickup->sales_person , $body);
+                    }
+                    self::email($subject, $body, $to);
                 }
                 else if($id == 100){
                     $date = Carbon::yesterday()->toDateString();
@@ -6043,8 +6014,6 @@ class NotificationsController extends Controller
                         $html .= '</tr></thead><tbody>';
 
                         foreach ($pickup_requests as $pickup) {
-                            $to = array();
-                            $to[] = $pickup->saleperson_email;
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
