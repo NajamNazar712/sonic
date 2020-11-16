@@ -4592,9 +4592,6 @@ class NotificationsController extends Controller
                     if (strpos($subject, '[request_id]') !== FALSE) {
                         $subject = str_replace('[request_id]', $crm_request_id, $subject);
                     }
-                    if (strpos($subject, '[escalation]') !== FALSE) {
-                        $subject = str_replace('[escalation]', $escalation, $subject);
-                    }
                     if (strpos($subject, '[case_nature]') !== FALSE) {
                         $subject = str_replace('[case_nature]', $crm_request->nature->name, $subject);
                     }
@@ -4604,9 +4601,6 @@ class NotificationsController extends Controller
 
                     if (strpos($body, '[request_id]') !== FALSE) {
                         $body = str_replace('[request_id]', $crm_request_id, $body);
-                    }
-                    if (strpos($body, '[escalation]') !== FALSE) {
-                        $body = str_replace('[escalation]', $escalation, $body);
                     }
                     if (strpos($body, '[case_nature]') !== FALSE) {
                         $body = str_replace('[case_nature]', $crm_request->nature->name, $body);
@@ -5665,6 +5659,7 @@ class NotificationsController extends Controller
                           else{
                               $amount = $shipment->amount;
                           }
+                          $total_charges = $amount;
                           $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
                       } else {
                           if($shipment->charges_mode_id == 1){
