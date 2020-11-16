@@ -23,7 +23,6 @@
 								</button>
 							</div>
 							<div class="modal-body text-center">
-							
 								<form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
 									@method('POST')
 									@csrf
@@ -54,6 +53,21 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+							<div class="row justify-content-center mb-4">
+								<div class="col-4">
+									<fieldset class="form-group">
+										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+											@foreach($roles as $role)
+												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
+											@endforeach
+										</select>
+									</fieldset>
+								</div>
+								<div class="col-2">
+									<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+								</div>
+							</div>
+
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -103,6 +117,11 @@
                 width:'100%',
                 allowClear:true
             });
+			$('#search_roles').select2({
+				width:'100%',
+				placeholder:"Search Roles",
+				allowClear:true,
+			});
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -252,7 +271,12 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
 				serverSide: true,
-				ajax: '{{ route('admin.user_management.users.list') }}',
+				ajax: {
+					url: '{{ route('admin.user_management.users.list') }}',
+					data: function (d) {
+						d.search_roles = $('#search_roles').val();
+				}
+				},
 				rowId: 'id',
 				order: [[10, 'desc']],
 				columns: [
@@ -324,6 +348,9 @@
                     });
 					this.api().table().columns.adjust();
 				}
+			});
+			$('#search_filter_btn').on('click',function () {
+				table.draw();
 			});
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
