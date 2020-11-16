@@ -5632,36 +5632,6 @@ if(session('department_id') == 7){
                         $packaging_charges->save();
                     }
                 }
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
-                    foreach ($pendingpackagings as $pendingpackaging) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $pendingpackaging->type_id;
-                        $packaging_charges->size_id = $pendingpackaging->size_id;
-                        $packaging_charges->charges = $pendingpackaging->charges;
-                        $packaging_charges->save();
-                    }
-                }
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
-                    foreach ($pendingpackagings as $pendingpackaging) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $pendingpackaging->type_id;
-                        $packaging_charges->size_id = $pendingpackaging->size_id;
-                        $packaging_charges->charges = $pendingpackaging->charges;
-                        $packaging_charges->save();
-                    }
-                }
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
-                    foreach ($pendingpackagings as $pendingpackaging) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $pendingpackaging->type_id;
-                        $packaging_charges->size_id = $pendingpackaging->size_id;
-                        $packaging_charges->charges = $pendingpackaging->charges;
-                        $packaging_charges->save();
-                    }
-                }
                 if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         DiscountCharge::create([

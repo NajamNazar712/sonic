@@ -29,7 +29,8 @@ class UserManagementController extends Controller
 
     public function user_index() {
       $hubs=City::select('id','name')->where('hub',1)->get();
-      return view('admin.user_management.user.index')->with(['hubs'=>$hubs]);
+        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
     }
 
     public function user_list(Request $request) {
@@ -45,6 +46,9 @@ class UserManagementController extends Controller
                 ->where(function ($sub_query) {
                     $sub_query->where('ad.id', session('department_id'));
                 });
+        }
+        if($search_roles = $request->get('search_roles')){
+            $admin_roles = $users->whereIn('ar.id', $search_roles);
         }
         $datatables = Datatables::of($users)
         ->editColumn('role', function($user) {
