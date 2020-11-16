@@ -5980,7 +5980,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $html, $body);
                     }
                     if (strpos($body, '[sales_person]') !== FALSE) {
-                        $body = str_replace('[sales_person]',$pickup->sales_person , $body);
+                        $body = str_replace('[sales_person]',$pickup_data['sales_person'] , $body);
                     }
                     self::email($subject, $body, $to);
                 }
