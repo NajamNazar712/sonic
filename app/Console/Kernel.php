@@ -68,7 +68,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\OverallVendorPickup',
         'App\Console\Commands\NotPickedShippersSummary',
         'App\Console\Commands\Escalation',
-        'App\Console\Commands\EscalationTagging'
+        'App\Console\Commands\EscalationTagging',
+        'App\Console\Commands\CancelShipment'
 
 
         ];
