@@ -118,6 +118,29 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="SetSegment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SetSegment"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Set Segment</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id1">
+                    <select name="Set_segment" id="set_segment" class="form-control select2">
+                        @foreach($segments as $segment)
+                            <option value="{{ $segment->id }}" > {{ $segment->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="setsegmentSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -386,6 +409,92 @@
                             }
                         }
                     },
+                   /* {
+                        text: 'Set Segment',
+                        className: 'btn btn-primary set_segment',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+
+                                $('#SetSegment').modal('show');
+                                $('#setsegmentSubmit').on('click',function () {
+                                    var segment = parseInt($('#set_segment').val());
+                                    console.log(segment);
+                                    swal({
+                                        text: 'Are you sure, you want to set Segment?',
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function(confirm) {
+                                        if (confirm) {
+                                            if (segment) {
+                                                $.ajax({
+                                                    url: '{!! route('admin.accounts.set.segment_bulk') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'segment_id': segment,
+                                                        'shipper_ids[]': selected_rows,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                })
+                                                    .done(function (data) {
+                                                        if (data) {
+                                                            $('#SetSegment').modal('hide');
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rows = [];
+
+                                                        table.rows().deselect();
+                                                        $('#set_segment').val('').trigger('change');
+                                                        $('#SetSegment').modal('hide');
+                                                        table.draw(true);
+                                                        table.button('.bulk_tagging').disable();
+                                                        table.button('.set_segment').disable();
+                                                        table.button('.set_commission').disable();
+                                                        table.button('.approve_commission').disable();
+
+                                                    });
+                                            } else {
+                                                var error = "Account Not Selected!";
+                                                toastr.error(error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+
+                            }else{
+                                var error = "Account Not selected!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                        }
+                    },*/
                     {
                         text: 'Approve Commission',
                         className: 'btn btn-primary approve_commission',
@@ -553,6 +662,7 @@
                                         table.button('.bulk_tagging').enable();
                                         table.button('.set_commission').enable();
                                         table.button('.approve_commission').enable();
+                                        table.button('.set_segment').enable();
                                     }
                                 }
                             });
@@ -582,6 +692,7 @@
                                         table.button('.bulk_tagging').disable();
                                         table.button('.set_commission').disable();
                                         table.button('.approve_commission').disable();
+                                        table.button('.set_segment').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -840,6 +951,11 @@
             placeholder: "Select Sales Person",
             width:'100%',
             dropdownParent:$('#SalesTagModal1')
+        });
+        $("#set_segment").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Segment",
+            width:'100%',
+            dropdownParent:$('#SetSegment')
         });
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);

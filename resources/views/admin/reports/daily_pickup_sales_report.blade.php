@@ -151,6 +151,7 @@
                 // blockPagePermanently();
                 var search_date = $('#search_form input[name="search_date_formatted"]').val();
                 var city = $('#city').val();
+                var shipping_modes = $('#shipping_mode').val();
                 var sales = '';
                 @if(session('role_id') == 4)
                 sales = $('#sales_person').val();
