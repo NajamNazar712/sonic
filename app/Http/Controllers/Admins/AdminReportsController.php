@@ -6952,7 +6952,7 @@ class AdminReportsController extends Controller
                         });
                 })->whereBetween('shipments.created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id','!=',1069)->where('shipping_mode_id', $mode->id)->count();
 
-                    $received= DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
+                $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
                     $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
                         ->whereExists(function($sub_query) use ($city) {
@@ -6960,7 +6960,12 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $city->id);
                         });
-                })->whereBetween('shipments.created_at', [$date_from, $date_to])->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipping_mode_id', $mode->id)->count();
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
+                })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipping_mode_id', $mode->id)->count();
 
                  $revenue_wo_gst= DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
                     $query->from('user_shipping_infos')
