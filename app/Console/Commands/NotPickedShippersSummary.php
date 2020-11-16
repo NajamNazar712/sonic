@@ -57,7 +57,6 @@ class NotPickedShippersSummary extends Command
             ->join('admins as a','a.id','=','spt.admin_id')
             ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper_name','npr.name as reason','a.id as admin_id','a.name as sales_person','a.email as saleperson_email')
             ->where('v2_pickup_requests.status_id', 3)
-            ->where('st.status',0)
             ->whereNotNull('vpra.reason_id')
             ->wherebetween('v2_pickup_requests.created_at',[$date_from,$date_to])
             ->get();
