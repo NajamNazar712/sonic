@@ -123,6 +123,31 @@ class V2PickupCronController extends Controller
         }
     }
 
+    static public function cancelled_after_ten_days(){
+        Carbon::setWeekendDays([
+            Carbon::SUNDAY
+        ]);
+        $date = Carbon::today()->subWeekDays(10)->toDateString();
+
+        $pickup_request_ids = V2PickupRequest::whereIn('status_id', [1,3])->where('created_at', '<', $date)->pluck('id')->toArray();
+        if(count($pickup_request_ids) > 0){
+            foreach ($pickup_request_ids as $pickup_request_id){
+
+                $pickup_request_shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->pluck('shipment_id')->toArray();
+                if(count($pickup_request_shipment_ids) > 0){
+                    foreach ($pickup_request_shipment_ids as $shipment_id){
+                        V2AdminPickupsController::cancel($shipment_id);
+                    }
+                }
+
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $pickup_request->booked = 0;
+                $pickup_request->status_id = 4;
+                $pickup_request->save();
+            }
+        }
+
+    }
     static public function clean_data(){
         $pickup_requests = V2PickupRequest::where('attempts', '>',1)->whereIn('status_id',[1,2,3])->select('id')->get();
         $current = Carbon::now()->day(5)->month(7)->startOfDay();

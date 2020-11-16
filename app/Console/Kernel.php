@@ -69,6 +69,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotPickedShippersSummary',
         'App\Console\Commands\Escalation',
         'App\Console\Commands\EscalationTagging',
+        'App\Console\Commands\OldPickupCancel',
 //        'App\Console\Commands\TelenorCall',
 //        'App\Console\Commands\TelenorCallResponse'
 
@@ -183,6 +184,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:canceltendaysolder')->dailyAt($arrival_cut_off_time);
         }
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 
