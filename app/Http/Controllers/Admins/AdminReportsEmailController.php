@@ -1559,7 +1559,7 @@ class AdminReportsEmailController extends Controller
     static public function telenor_sales_report($date){
 
         $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
-        $date_from = $date_from . ' 09:00:00';
+        $date_from = '2020-10-16 09:00:00';
         $next_day = Carbon::parse($date)->addDay(1);
         $date_to = $next_day->toDateString();
         $date_to = $date_to . ' 08:59:59';
