@@ -5938,11 +5938,12 @@ class NotificationsController extends Controller
                 }
                 else if($id == 96){
                     $to = array();
-                    $id = 3324;
-                    $user = User::find($id);
-                    if($user){
-                        $to[] = $user->email;
-                    }
+//                    $id = 3324;
+//                    $user = User::find($id);
+//                    if($user){
+//                        $to[] = $user->email;
+//                    }
+                    $to[] = 'anas.anwer@trax.pk';
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
