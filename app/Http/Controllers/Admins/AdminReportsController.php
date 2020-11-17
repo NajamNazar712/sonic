@@ -2383,7 +2383,7 @@ class AdminReportsController extends Controller
         $total_avg_actual_weight = 0;
         $total_avg_rev_actual_weight = 0;
         $total_avg_chargeable_weight = 0;
-
+        $shipping_mode_wise_data = array();
         foreach($shipping_mode_wise_details as $shipping_mode_total){
           $total_shipping_booked += $shipping_mode_total['booked'];
           $total_shipping_received += $shipping_mode_total['received'];
@@ -2398,6 +2398,8 @@ class AdminReportsController extends Controller
           $total_shipping_collection_amount += $shipping_mode_total['collection_amount'];
           $total_shipping_avg_amount_collection += $shipping_mode_total['avg_amount_collection'];
           $total_shipping_rev_amount_collection += $shipping_mode_total['revenue_amount_collection'];
+
+            $shipping_mode_wise_data[] = [$shipping_mode_total['serial'],$shipping_mode_total['mode'],number_format(round($shipping_mode_total['booked'])),$shipping_mode_total['received'],number_format($shipping_mode_total['revenue_wo_gst']),number_format($shipping_mode_total['avg_parcel_rev']) ,number_format($shipping_mode_total['actual_weight']),number_format($shipping_mode_total['avg_actual_weight']),round($shipping_mode_total['avg_rev_actual_weight']),number_format($shipping_mode_total['chargeable_weight']),number_format($shipping_mode_total['avg_chargeable_weight']),round($shipping_mode_total['avg_rev_chargeable_weight']),$shipping_mode_total['collection_amount'],$shipping_mode_total['avg_amount_collection'],round( $shipping_mode_total['revenue_amount_collection']) .'%'];
         }
         $total_avg_revenue = ($total_shipping_received != 0) ? $total_shipping_revenue_wo_gst / $total_shipping_received:0;
         $total_avg_actual_weight = ($total_shipping_received != 0) ? $total_shipping_actual_weight / $total_shipping_received:0;
@@ -2408,9 +2410,9 @@ class AdminReportsController extends Controller
         $total_rev_on_cash_collection = ($total_shipping_collection_amount != 0) ? $total_shipping_revenue_wo_gst / $total_shipping_collection_amount:0;
         $total_rev_on_cash_collection = $total_rev_on_cash_collection * 100;
 
-        $shipping_mode_wise_footer[] = ['Grand Total.',' ',$total_shipping_booked,$total_shipping_received,$total_shipping_revenue_wo_gst,$total_shipping_avg_parcel_revenue ,$total_shipping_actual_weight,$total_avg_actual_weight,$total_avg_rev_actual_weight,$total_shipping_chargeable_weight,$total_avg_chargeable_weight,$total_avg_rev_chargeable_weight,$total_shipping_collection_amount,$total_avg_cash_collection,$total_rev_on_cash_collection];
+        $shipping_mode_wise_footer[] = ['Grand Total.',' ',number_format(round($total_shipping_booked)),$total_shipping_received,number_format(round($total_shipping_revenue_wo_gst)),number_format($total_shipping_avg_parcel_revenue) ,number_format($total_shipping_actual_weight),number_format($total_avg_actual_weight),number_format($total_avg_rev_actual_weight),number_format($total_shipping_chargeable_weight),number_format($total_avg_chargeable_weight),number_format($total_avg_rev_chargeable_weight),$total_shipping_collection_amount,number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection) .'%'];
 
-        $shipping_mode_wise_details = array_merge($shipping_mode_wise_header,$shipping_mode_wise_details,$shipping_mode_wise_footer);
+        $shipping_mode_wise_details = array_merge($shipping_mode_wise_header,$shipping_mode_wise_data,$shipping_mode_wise_footer);
 
         $spreadsheet = new Spreadsheet();
         $cell_st =[
@@ -2444,6 +2446,7 @@ class AdminReportsController extends Controller
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
         $sheet->getStyle('D3:R3')->applyFromArray($cell_st);
         $sheet->fromArray($shipping_mode_wise_details,NULL,'D3',true);
+        $sheet->getStyle('D8:R8')->applyFromArray($total_cell_st);
         $count_shipping_mode = count($shipping_mode_wise_details);
         $count_shipping_mode += 7;
       /*  $count_hubs = count($hubs);
@@ -2465,10 +2468,13 @@ class AdminReportsController extends Controller
             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
-        $shipper_cell = 'D'.$count_shipping_mode; //D12
-        $shipper_last_cell = 'R'.$count_shipping_mode; //R12
+        $shipper_cell = 'D'.$count_shipping_mode; //D13
+        $shipper_last_cell = 'R'.$count_shipping_mode; //R13
         $sheet->fromArray($details,NULL,$shipper_cell,true);
         $count_details = count($details);
+        $total_hub = $count_shipping_mode + $count_details-1;
+        $total_style_cell = "D$total_hub".":R".$total_hub;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
         $count_details = $count_details + $count_shipping_mode + 4;
 
         //shipper_details
@@ -2476,6 +2482,7 @@ class AdminReportsController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
+
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
@@ -2486,7 +2493,10 @@ class AdminReportsController extends Controller
         $details_shipper_last_cell = 'R'.$count_details;
        // $sheet->fromArray($details_shipper,NULL,'D15',true);
         $sheet->fromArray($details_shipper,NULL,$details_shipper_cell,true);
-
+        $total_shipper_count = count($details_shipper);
+        $total_shipper = $total_shipper_count + $count_details -1;
+        $total_style_cell = "D$total_shipper".":T".$total_shipper;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
         $sheet->setTitle('Daily Pickup Sales Report');
 
        /* $hub_all_rows = "D3".":R".$count_hub_rows;
