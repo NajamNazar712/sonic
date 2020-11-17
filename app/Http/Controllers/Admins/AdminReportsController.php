@@ -1246,12 +1246,8 @@ class AdminReportsController extends Controller
     }
 
     public function daily_pickup_sales_export_to_excel(Request $request){
-        if(session('role_id') == 1){
-            $sales_tagging = false;
-        }else{
-            $sales_tagging = true;
-        }
-        $response = self::daily_pickup_sales_report_create($request->city,$request->date,$request->sales_person,$sales_tagging);
+
+        $response = self::daily_pickup_sales_report_create($request->city,$request->date,$request->sales_person,$request->sales_tagging);
 
 //         if($response['status']){
         return $response;
@@ -6930,7 +6926,11 @@ class AdminReportsController extends Controller
     }
 
     static public function daily_pickup_sales_shipping_mode_wise($date_from,$date_to,$hub = null, $sales_tagging){
-
+        if(session('role_id') == 1){
+            $sales_tagging = false;
+        }else{
+            $sales_tagging = true;
+        }
         $data = array();
         $shipping_modes = ShippingMode::all();
 
