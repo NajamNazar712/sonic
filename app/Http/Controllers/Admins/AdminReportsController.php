@@ -36,7 +36,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
-use Auth;
 
 class AdminReportsController extends Controller
 {
