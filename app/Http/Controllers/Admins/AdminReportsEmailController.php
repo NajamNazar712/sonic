@@ -1223,10 +1223,18 @@ class AdminReportsEmailController extends Controller
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->getStyle("B2:B4000")->getNumberFormat()
+            $sheet->getStyle("B")->getNumberFormat()
                 ->setFormatCode(
                     \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                 );
+            $sheet->getStyle("C")->getNumberFormat()
+            ->setFormatCode(
+                \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+            );
+            $sheet->getStyle("D")->getNumberFormat()
+            ->setFormatCode(
+                \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+            );
             $sheet->fromArray($outstanding_shipments_array_overall, NULL, 'A2', true);
             $sheet->getStyle("A2:T2")->applyFromArray($cell_st);
             $title = 'Outstanding Shipments';
@@ -1249,6 +1257,7 @@ class AdminReportsEmailController extends Controller
 
             $file_name_without_path = "reports/outstanding_shipment_report_" . $date_file_name . ".xlsx";
             $file_name = public_path() . "/reports/outstanding_shipment_report_"  . $date_file_name . ".xlsx";
+            $writer->setPreCalculateFormulas(false);
             $writer->save($file_name);
 
             NotificationsController::send(76, 0, url('/') . '/' . $file_name_without_path);
@@ -1733,7 +1742,7 @@ class AdminReportsEmailController extends Controller
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::connection('reports')->raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND verification = 1)'));
             })
-            ->select('h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
+            ->select('shipments.tracking_number as tracking_number', 'h.id as hub_id', 'h.name as hub_name', 'oc.id as origin_id', 'oc.name as origin_name', 'sj.shipper_status_id as status')
             ->where('shipments.booking_type_id', '=', DB::raw(5))
             ->whereBetween('sj.created_at', [$start_date, $end_date])
             ->get();
@@ -1745,8 +1754,8 @@ class AdminReportsEmailController extends Controller
                 foreach ($shipments as $shipment){
                     if($shipment->status == 1 || $shipment->status == 2){
                         if($hub->id == $shipment->hub_id){
-                            $hub_shipments[$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'poc' => $shipment->poc, 'vendor' => $shipment->vendor, 'phone' => $shipment->phone, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
-                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'poc' => $shipment->poc, 'vendor' => $shipment->vendor, 'phone' => $shipment->phone, 'zone_id' => $hub->zone_id, 'zone_name' => $hub->zone->name, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
+                            $hub_shipments[$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
+                            $zone_shipments[$hub->zone_id][$hub->id][$shipment->origin_id][] = ['tracking_number' => $shipment->tracking_number, 'zone_id' => $hub->zone_id, 'zone_name' => $hub->zone->name, 'origin_id' => $shipment->origin_id, 'origin_name' => $shipment->origin_name, 'hub_id' => $hub->id, 'hub_name' => $hub->name];
 //                            if (array_key_exists($hub->id, $hub_shipments)) {
 //                                if (array_key_exists($shipment->origin_id, $hub_shipments[$hub->id])) {
 //                                    if($shipment->status == 1){

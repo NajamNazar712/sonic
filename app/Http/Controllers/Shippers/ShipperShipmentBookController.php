@@ -1206,6 +1206,10 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>
                               <tr>
+                                <td class="color primary border twice-bottom twice-left"><strong>Business Category</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->business_category->name . '</strong></td>
+                              </tr>
+                              <tr>
                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
                                 <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
                               </tr>
