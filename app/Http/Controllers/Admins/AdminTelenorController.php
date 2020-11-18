@@ -21,7 +21,7 @@ class AdminTelenorController extends Controller
 
     public function telenor_response_list(){
         $telenor = TelenorCallResponse::leftjoin('telenor_api_errors as tae', 'tae.id', '=', 'telenor_call_responses.error_id')
-        ->select('telenor_call_responses.id', 'telenor_call_responses.tracking_number', 'telenor_call_responses.status', 'telenor_call_responses.response', 'telenor_call_responses.response_status', 'telenor_call_responses.created_at', 'tae.text as error');
+            ->select('telenor_call_responses.id', 'telenor_call_responses.tracking_number', 'telenor_call_responses.status', 'telenor_call_responses.response', 'telenor_call_responses.response_status', 'telenor_call_responses.created_at', 'tae.text as error');
         $datatables = Datatables::of($telenor)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
