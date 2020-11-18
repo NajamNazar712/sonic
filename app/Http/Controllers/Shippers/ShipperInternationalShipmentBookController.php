@@ -45,11 +45,16 @@ class ShipperInternationalShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::join('international_rates_hubs as irh', 'irh.hub_id', '=', 'cities.hub_id')->where('irh.user_id', session('user_id'))->where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->select('cities.id', 'cities.name', 'cities.hub_id')->get();
+        $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
-        $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        if(session('account_type') == 1){
+            $charges_modes = ChargesModes::where('id' , 4)->get();
+        }
+        else{
+            $charges_modes = ChargesModes::where('id' , 3)->get();
+        }
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
         if($air_waybill->exists()){
             $air_waybill = $air_waybill->first();
@@ -59,13 +64,12 @@ class ShipperInternationalShipmentBookController extends Controller
         }
 //        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
 
-        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
+        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
         return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
     }
 
     public function store(Request $request) {
         $user_id = session('user_id');
-
         $service_type_id = 1;
 
         if ($request->input('pickup_address') == 0) {
@@ -240,19 +244,21 @@ class ShipperInternationalShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->pluck('c.name');
+        $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->pluck('c.name');
         $products = Product::all();
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
-        $charges_modes = ChargesModes::whereIn('id', [4])->get();
-
+        if(session('account_type') == 1){
+            $charges_modes = ChargesModes::where('id' , 4)->get();
+        }
+        else{
+            $charges_modes = ChargesModes::where('id' , 3)->get();
+        }
         return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
     public function excel_store(Request $request) {
-//        return $request;
         $user_id = session('user_id');
         $account_type_id = session('account_type');
-//        dd($request->all('form'));
         $names = [
             'pickup_address_id' => 'Pickup Address ID',
             'information_display' => 'Information Display',
@@ -611,14 +617,19 @@ class ShipperInternationalShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->get();
+                $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->get();
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
                 })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
                 $products = Product::pluck('product_name', 'id');
 
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
-                $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
+                if(session('account_type') == 1){
+                    $charges_modes = ChargesModes::where('id' , 4)->pluck('charges_mode','id');
+                }
+                else{
+                    $charges_modes = ChargesModes::where('id' , 3)->pluck('charges_mode','id');
+                }
                 $city_name = array();
                 foreach ($cities as $city) {
                     $city_name[$city->name] = $city->name;

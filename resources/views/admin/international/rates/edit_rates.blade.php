@@ -35,7 +35,7 @@
                                                     @php
                                                         $count = $index + 1;
                                                     @endphp
-                                                    <h3 class="display-inline card-title lead success">International Rates {{$rate_status->box_id}}</h3>
+                                                    <h3 class="display-inline card-title lead success">International Rates {{$count}}</h3>
                                                 </div>
                                                 @if($rate_status->box_id != 1)
                                                     <div class="col-md-6 text-right">
@@ -149,7 +149,7 @@
                                                     </div>
                                                     <div class="col-md-2">
                                                         <div class="form-group ">
-                                                            <input type="checkbox" name="cash_handling_switch_{{$rate_status->box_id}}" class="switchery cash_handling_switch" data-color="success" data-size="sm" {{ ($rate_status->cash_handling_charges == 1) ? 'checked' : '' }}/>
+                                                            <input type="checkbox" name="cash_handling_switch_{{$rate_status->box_id}}" id="cash_handling_switch_{{$rate_status->box_id}}" class="switchery cash_handling_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->cash_handling_charges == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -234,7 +234,7 @@
                                                     </div>
                                                     <div class="col-md-2">
                                                         <div class="form-group ">
-                                                            <input type="checkbox" name="insurance_charges_switch_{{$rate_status->box_id}}" class="switchery insurance_charges_switch" data-color="success" data-size="sm" {{ ($rate_status->insurance_charges == 1) ? 'checked' : '' }}/>
+                                                            <input type="checkbox" name="insurance_charges_switch_{{$rate_status->box_id}}" id="insurance_charges_switch_{{$rate_status->box_id}}" class="switchery insurance_charges_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->insurance_charges == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -320,7 +320,7 @@
                                                     </div>
                                                     <div class="col-md-2">
                                                         <div class="form-group ">
-                                                            <input type="checkbox" name="return_charges_switch_{{$rate_status->box_id}}" class="switchery return_charges_switch" data-color="success" data-size="sm" {{ ($rate_status->return_charges == 1) ? 'checked' : '' }}/>
+                                                            <input type="checkbox" name="return_charges_switch_{{$rate_status->box_id}}" id="return_charges_switch_{{$rate_status->box_id}}" class="switchery return_charges_switch_{{$rate_status->box_id}}" data-color="success" data-size="sm" {{ ($rate_status->return_charges == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -398,7 +398,7 @@
                                                             </div>
                                                             <div class="input-group-prepend">
                                                                   <span class="input-group-text">
-                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['weight'] != null) ? 'checked' : '' }}/>
+                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" id="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['weight'] != null) ? 'checked' : '' }}/>
                                                                   </span>
                                                             </div>
                                                             <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['weight'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['weight']}}">
@@ -413,7 +413,7 @@
                                                             </div>
                                                             <div class="input-group-prepend">
                                                                   <span class="input-group-text" id="">
-                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['cash'] != null) ? 'checked' : '' }}/>
+                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" id="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['cash'] != null) ? 'checked' : '' }}/>
                                                                   </span>
                                                             </div>
                                                             <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['cash'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['cash']}}">
@@ -428,7 +428,7 @@
                                                             </div>
                                                             <div class="input-group-prepend">
                                                                   <span class="input-group-text" id="">
-                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['insurance'] != null) ? 'checked' : '' }}/>
+                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" id="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" {{ ($discount_charges[$rate_status->box_id]['insurance'] != null) ? 'checked' : '' }}/>
                                                                   </span>
                                                             </div>
                                                             <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['insurance'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['insurance']}}">
@@ -443,7 +443,7 @@
                                                             </div>
                                                             <div class="input-group-prepend">
                                                                   <span class="input-group-text">
-                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] != null) ? 'checked' : '' }}/>
+                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" id="discount_return_switch_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] != null) ? 'checked' : '' }}/>
                                                                   </span>
                                                             </div>
                                                             <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" {{ ($discount_charges[$rate_status->box_id]['return'] == null) ? 'disabled' : '' }} value="{{$discount_charges[$rate_status->box_id]['return']}}">
@@ -451,7 +451,6 @@
                                                     </fieldset>
                                                 </div>
                                             </div>
-
                                             @else
                                                 <div class="row mt-1">
                                                     <div class="col-md-6">
@@ -483,7 +482,7 @@
                                                                 </div>
                                                                 <div class="input-group-prepend">
                                                                   <span class="input-group-text">
-                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                    <input type="checkbox" class="switchery discount_switch_{{$rate_status->box_id}}" name="discount_weight_switch_{{$rate_status->box_id}}" id="discount_weight_switch_{{$rate_status->box_id}}" data-size="xs" />
                                                                   </span>
                                                                 </div>
                                                                 <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_weight_{{$rate_status->box_id}}" disabled>
@@ -498,7 +497,7 @@
                                                                 </div>
                                                                 <div class="input-group-prepend">
                                                                   <span class="input-group-text" id="">
-                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                    <input type="checkbox" name="discount_cash_switch_{{$rate_status->box_id}}" id="discount_cash_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
                                                                   </span>
                                                                 </div>
                                                                 <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_cash_{{$rate_status->box_id}}" disabled>
@@ -513,7 +512,7 @@
                                                                 </div>
                                                                 <div class="input-group-prepend">
                                                                   <span class="input-group-text" id="">
-                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
+                                                                    <input type="checkbox" name="discount_insurance_switch_{{$rate_status->box_id}}" id="discount_insurance_switch_{{$rate_status->box_id}}" class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" />
                                                                   </span>
                                                                 </div>
                                                                 <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_insurance_{{$rate_status->box_id}}" disabled>
@@ -528,7 +527,7 @@
                                                                 </div>
                                                                 <div class="input-group-prepend">
                                                                   <span class="input-group-text">
-                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}"/>
+                                                                    <input type="checkbox"  class="switchery discount_switch_{{$rate_status->box_id}}" data-size="xs" name="discount_return_switch_{{$rate_status->box_id}}" id="discount_return_switch_{{$rate_status->box_id}}"/>
                                                                   </span>
                                                                 </div>
                                                                 <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent discount-inp" name="discount_return_{{$rate_status->box_id}}" disabled>
@@ -678,10 +677,6 @@
                 regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
             });
 
-            var cashhandlingswitch = document.querySelector('.switchery.cash_handling_switch');
-            var insuranceChargesSwitch = document.querySelector('.switchery.insurance_charges_switch');
-            var returnChargesSwitch = document.querySelector('.switchery.return_charges_switch');
-
             $('.wa_switch').on('change',function(){
                 var wid = $(this).attr('name');
                 var wswitch = document.querySelector('input[name="'+ wid +'"]');
@@ -735,11 +730,15 @@
             });
 
             var box_no = box_id;
+            var new_count = {{$count}}
             var wa_rows = @json($w_index);
             var cash_count = @json($ch_index);
             var ins_count = @json($in_index);
 
             @foreach($rate_statuses as $rate_status)
+            {{--var cashhandlingswitch = document.querySelector('.switchery.cash_handling_switch_{{$rate_status->box_id}}');--}}
+            {{--var insuranceChargesSwitch = document.querySelector('.switchery.insurance_charges_switch_{{$rate_status->box_id}}');--}}
+            {{--var returnChargesSwitch = document.querySelector('.switchery.return_charges_switch_{{$rate_status->box_id}}');--}}
                 $('body').on('click','button.wa_btn_{{$rate_status->box_id}}',function () {
                     let html = '<div class="row" id="wa_row_'+ {{$rate_status->box_id}} +'_'+ wa_rows +'">\n' +
                         '                                                    <div class="col text-center">\n' +
@@ -816,7 +815,7 @@
 
                 });
 
-                $('body').on('click','button.add_more_cash_slabs_{{$rate_status->vox_id}}',function () {
+                $('body').on('click','button.add_more_cash_slabs_{{$rate_status->box_id}}',function () {
                     let htmdiv = '<div class="row" id="cash_handle_'+ {{$rate_status->box_id}} +'_'+ cash_count +'">\n' +
                         '                                                <div class="col-md-2 text-center">\n' +
                         '                                                    <fieldset class="form-group">\n' +
@@ -832,7 +831,7 @@
                         '                                                    <fieldset class="form-group">\n' +
                         '                                                        <input name="cash_charges['+ {{$rate_status->box_id}} +']['+cash_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent validated"></fieldset></div><div class="col">\n' +
                         '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 weight_close"><i class="ft-x"></i></span></div></div>';
-                    $('.cash-handling-div-1').append(htmdiv);
+                    $('.cash-handling-div-{{$rate_status->box_id}}').append(htmdiv);
                     masks();
                     $("#cash_handle_'+ {{$rate_status->box_id}} +'_"+cash_count+" .validated").each(function(){
                         $( this ).rules( "add", {
@@ -875,71 +874,80 @@
                     });
                     ins_count++;
                 });
+                if($('#cash_handling_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
+                if($('#insurance_charges_switch_{{$rate_status->box_id}}').is(":checked") === false){
+                    $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
+                    $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',true);
+                }
 
-                cashhandlingswitch.onchange = function () {
-                    if(cashhandlingswitch.checked === true){
+                $('#cash_handling_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    if($(this).is(":checked") === true){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                        $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
-                    }else if(cashhandlingswitch.checked === false){
+                        $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',false);
+                    }else if($(this).is(":checked") === false){
                         $('.cash-handling-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-                        $('.cash-handling-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
+                        $('.add_more_cash_slabs_{{$rate_status->box_id}}').prop('disabled',true);
 
                     }
-                };
+                });
 
                 // InsuranceOvernight
-                insuranceChargesSwitch.onchange = function () {
-                    if(insuranceChargesSwitch.checked === true){
+                $('#insurance_charges_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    if($(this).is(":checked") === true){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                        $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',false);
-                    }else if(insuranceChargesSwitch.checked === false){
+                        $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',false);
+                    }else if($(this).is(":checked") === false){
                         $('.insurance-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-                        $('.insurance-charges-btn-{{$rate_status->box_id}}').find('button').prop('disabled',true);
+                        $('.add_more_ins_slabs_{{$rate_status->box_id}}').prop('disabled',true);
 
                     }
-                };
+                });
 
                 // Return Overnight
-                returnChargesSwitch.onchange = function () {
-                    if(returnChargesSwitch.checked === true){
+                $('#return_charges_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    if($(this).is(":checked") === true){
                         $('.return-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',false);
-                    }else if(returnChargesSwitch.checked === false){
+                    }else if($(this).is(":checked") === false){
                         $('.return-charges-div-{{$rate_status->box_id}}').find('input').prop('disabled',true);
-
                     }
-                };
+                });
 
                 //for discounts Overnight
-                var ondiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discount_switch_{{$rate_status->box_id}}'));
+                {{--var ondiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discount_switch_{{$rate_status->box_id}}'));--}}
 
 
-                ondiscountSwitch[0].onchange = function () {
-                    ONdiscount(ondiscountSwitch[0]);
-                };
-                ondiscountSwitch[1].onchange = function () {
-                    ONdiscount(ondiscountSwitch[1]);
-                };
-                ondiscountSwitch[2].onchange = function () {
-                    ONdiscount(ondiscountSwitch[2]);
-                };
-                ondiscountSwitch[3].onchange = function () {
-                    ONdiscount(ondiscountSwitch[3]);
-                };
+                $('#discount_weight_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_cash_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_insurance_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
+                $('#discount_return_switch_{{$rate_status->box_id}}').on("change" , function() {
+                    ONdiscount{{$rate_status->box_id}}($(this));
+                });
 
-                function ONdiscount(eve) {
-                    if(eve.checked === true){
-
+                function ONdiscount{{$rate_status->box_id}}(eve) {
+                    console.log({{$rate_status->box_id}});
+                    if(eve.is(":checked") === true){
                         $(eve).parent().parent().next().prop('disabled',false);
                         $('input[name="discount_title_'+ {{$rate_status->box_id}} +'"]').prop('disabled',false);
                         $('input[name="daterange_'+ {{$rate_status->box_id}} +'"]').prop('disabled',false);
 
-                    }else if(eve.checked === false){
+                    }else if(eve.is(":checked") === false){
                         $(eve).parent().parent().next().prop('disabled',true);
 
-                        if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true){
+                        if($('#discount_weight_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_cash_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_insurance_switch_{{$rate_status->box_id}}').is(":checked") === true || $('#discount_return_switch_{{$rate_status->box_id}}').is(":checked") === true){
+                            console.log(false);
                             $('input[name="discount_title_'+ {{$rate_status->box_id}} + '"]').prop('disabled',false);
                             $('input[name="daterange_' + {{$rate_status->box_id}} + '"]').prop('disabled',false);
                         }else{
+                            console.log(true);
                             $('input[name="discount_title_' + {{$rate_status->box_id}} + '"]').prop('disabled',true);
                             $('input[name="daterange_' + {{$rate_status->box_id}} + '"]').prop('disabled',true);
                         }
@@ -964,11 +972,12 @@
 
             $('#add_more_rates_hubs').on('click', function () {
                 box_no++;
+                new_count++;
                 var box_div = '<div class="parent_box_div_'+ box_no +'"><div class="card-header border-success">\n' +
                     '                                    <input type="hidden" value="'+ box_no +'" name="box_ids[]">\n' +
                     '                                    <div class="row">\n' +
                     '                                        <div class="col-md-6">\n' +
-                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ box_no +'</h3>\n' +
+                    '                                            <h3 class="display-inline card-title lead success">International Rates '+ new_count +'</h3>\n' +
                     '                                        </div>\n' +
                     '                                        <div class="col-md-6 text-right">\n' +
                     '                                            <span class="btn btn-danger rounded btn-sm-width rate_box_close_'+ box_no +'" box="'+ box_no +'"><i class="ft-trash"></i></span>\n' +
