@@ -11,9 +11,12 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
-
-                    <div class="col-4">
+                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="row mb-2 justify-content-center">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+                    <div class="col-4 mb-2">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -90,7 +93,7 @@
                     </tr>
                     </thead>
                 </table>
-
+                </form>
             </div>
         </div>
     </div>
@@ -102,6 +105,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -163,6 +167,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     {{--<script src="{{asset('js/main-1.0.js')}}" type="text/javascript"></script>--}}
 
@@ -282,6 +287,7 @@
                 serverSide: true,ajax: {
                     url: '{{ route('admin.reports.booked_and_cancelled.list') }}',
                     data: function (d) {
+                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_modes').val();
                         d.search_service_type = $('#search_service_type').val();
                         d.search_status = $('#search_status').val();
@@ -293,7 +299,7 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle origin'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle origin'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle origin'},
@@ -312,7 +318,43 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+
             $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+            //Selectize
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+
                 table.draw();
             });
 
