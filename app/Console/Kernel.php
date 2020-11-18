@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OperationForecastHourlyUpdate',
         '\App\Console\Commands\ReturnNoteImageArchive',
         '\App\Console\Commands\StationDepositNoteImageArchive',
-		'\App\Console\Commands\ReturnDeliveredToShipperEmail',
+        '\App\Console\Commands\ReturnDeliveredToShipperEmail',
         '\App\Console\Commands\DebriefingEmail',
         '\App\Console\Commands\ClearPickupRequest',
         '\App\Console\Commands\ClearPickupNote',
@@ -37,29 +37,29 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ClearDefaultBankDuration',
 //        '\App\Console\Commands\OvernightCargoReport',
 //        '\App\Console\Commands\OverlandCargoReport',
-		'\App\Console\Commands\AccountReconciliationReportFromStart',
+        '\App\Console\Commands\AccountReconciliationReportFromStart',
         '\App\Console\Commands\AccountReconciliationReportCurrent',
-		'\App\Console\Commands\BusinessProjectionAndRetention',
-		'\App\Console\Commands\CRMDelayInDelivery',
-		'\App\Console\Commands\CRMPaymentComplains',
-		'\App\Console\Commands\RiderDeliveryImageArchive',
-		'\App\Console\Commands\BlacklistConsigneeRatioCalculation',
+        '\App\Console\Commands\BusinessProjectionAndRetention',
+        '\App\Console\Commands\CRMDelayInDelivery',
+        '\App\Console\Commands\CRMPaymentComplains',
+        '\App\Console\Commands\RiderDeliveryImageArchive',
+        '\App\Console\Commands\BlacklistConsigneeRatioCalculation',
         '\App\Console\Commands\CancelledShipmentEmail',
         '\App\Console\Commands\ArrivalAutoNotPicked',
         '\App\Console\Commands\PickupCancel',
         '\App\Console\Commands\PickupRegenerate',
-		'\App\Console\Commands\PickupReport',
-		'\App\Console\Commands\CancelledPickupRequestEmail',
-		'\App\Console\Commands\CompletedAgingReport',
-		'\App\Console\Commands\PendingCashCollectionReport',
-		'\App\Console\Commands\ZeroChargesReport',
-		'\App\Console\Commands\StationRecoveryReport',
-		'\App\Console\Commands\V2PickupCleanDuplicateData',
-		'\App\Console\Commands\QAReportPettyCash',
-		'\App\Console\Commands\SelfCollection',
-		'\App\Console\Commands\OutstandingShipmentEmail',
+        '\App\Console\Commands\PickupReport',
+        '\App\Console\Commands\CancelledPickupRequestEmail',
+        '\App\Console\Commands\CompletedAgingReport',
+        '\App\Console\Commands\PendingCashCollectionReport',
+        '\App\Console\Commands\ZeroChargesReport',
+        '\App\Console\Commands\StationRecoveryReport',
+        '\App\Console\Commands\V2PickupCleanDuplicateData',
+        '\App\Console\Commands\QAReportPettyCash',
+        '\App\Console\Commands\SelfCollection',
+        '\App\Console\Commands\OutstandingShipmentEmail',
         'App\Console\Commands\ShipmentPieceOnHold',
-		'App\Console\Commands\PendingPaymentShipmentsCount',
+        'App\Console\Commands\PendingPaymentShipmentsCount',
         'App\Console\Commands\VisionSoftApi',
         'App\Console\Commands\OutstandingSDNReport',
         'App\Console\Commands\TelenorSalesReport',
@@ -69,11 +69,12 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotPickedShippersSummary',
         'App\Console\Commands\Escalation',
         'App\Console\Commands\EscalationTagging',
-        'App\Console\Commands\TelenorCall',
-        'App\Console\Commands\TelenorCallResponse'
+//        'App\Console\Commands\TelenorCall',
+//        'App\Console\Commands\TelenorCallResponse'
 
 
-        ];
+
+    ];
 
     /**
      * Define the application's command schedule.
@@ -88,7 +89,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
         $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
@@ -123,16 +124,16 @@ class Kernel extends ConsoleKernel
             $schedule->command('email:notattemptedagingreport')->dailyAt($time)->runInBackground();
         }
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
-         $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
+        $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
 
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-		$schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
-		$schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
-		$schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+        $schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
+        $schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
@@ -159,9 +160,9 @@ class Kernel extends ConsoleKernel
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
 
-		$schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
-		$schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
-		$schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
+        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+        $schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
+        $schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
 
@@ -210,19 +211,22 @@ class Kernel extends ConsoleKernel
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
-		$schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
+        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
-        $schedule->command('summary:reversepickup')->dailyAt('08:00')->runInBackground();
-        $schedule->command('overall:vendorpickup')->dailyAt('08:00')->runInBackground();
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('summary:reversepickup')->dailyAt($cut_off_time)->runInBackground();
+            $schedule->command('overall:vendorpickup')->dailyAt($cut_off_time)->runInBackground();
+        }
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
-        $schedule->command('telenor:call')->dailyAt('13:00')->runInBackground();
-        $schedule->command('telenor:callresponse')->dailyAt('15:00')->runInBackground();
-        $schedule->command('telenor:call')->dailyAt('16:00')->runInBackground();
-        $schedule->command('telenor:callresponse')->dailyAt('18:00')->runInBackground();
+//        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
+//        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
     }
-	 /**
+    /**
      * Register the commands for the application.
      *
      * @return void
