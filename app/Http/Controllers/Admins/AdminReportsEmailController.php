@@ -1257,6 +1257,7 @@ class AdminReportsEmailController extends Controller
 
             $file_name_without_path = "reports/outstanding_shipment_report_" . $date_file_name . ".xlsx";
             $file_name = public_path() . "/reports/outstanding_shipment_report_"  . $date_file_name . ".xlsx";
+            $writer->setPreCalculateFormulas(false);
             $writer->save($file_name);
 
             NotificationsController::send(76, 0, url('/') . '/' . $file_name_without_path);
