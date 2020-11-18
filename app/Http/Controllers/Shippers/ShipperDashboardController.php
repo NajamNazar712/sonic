@@ -112,7 +112,8 @@ class ShipperDashboardController extends Controller
 
                $poc = $details->where('scu.tier_id',2)->get();
                $kam = $details->where('scu.tier_id',3)->get();
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam]);
+
+               return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam]);
         }
     }
 

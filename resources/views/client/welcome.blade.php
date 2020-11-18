@@ -28,48 +28,48 @@
                     </div>
                 @endif
                 @if(count($poc)> 0)
-                    @foreach($poc as $p)
-                        <div class="row justify-content-center">
-                              <div class="col-6">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <td><b>POC Name</b></td>
-                                            <td><b>POC Phone</b></td>
-                                            <td><b>POC Email</b></td>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><h4>{{$p['name']}}</h4></td>
-                                                <td><h4>{{$p['phone']}}</h4></td>
-                                                <td><h4>{{$p['email']}}</h4></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                              </div>
-                        </div>
-                    @endforeach
-                @endif
-                @if(count($kam)> 0)
-                    @foreach($kam as $k)
-                        <div class="row justify-content-center">
-                            <div class="col-6">
+                    <div class="row justify-content-center">
+                          <div class="col-6">
                                 <table class="table table-bordered">
                                     <thead>
-                                        <td><b>KAM Name</b></td>
-                                        <td><b>KAM Phone</b></td>
-                                        <td><b>KAM Email</b></td>
+                                        <td><b>POC Name</b></td>
+                                        <td><b>POC Phone</b></td>
+                                        <td><b>POC Email</b></td>
                                     </thead>
                                     <tbody>
+                                    @foreach($poc as $p)
                                         <tr>
-                                            <td><h4>{{$k['name']}}</h4></td>
-                                            <td><h4>{{$k['phone']}}</h4></td>
-                                            <td><h4>{{$k['email']}}</h4></td>
+                                            <td><h4>{{$p['name']}}</h4></td>
+                                            <td><h4>{{$p['phone']}}</h4></td>
+                                            <td><h4>{{$p['email']}}</h4></td>
                                         </tr>
+                                    @endforeach
                                     </tbody>
                                 </table>
-                            </div>
+                          </div>
+                    </div>
+                @endif
+                @if(count($kam)> 0)
+                    <div class="row justify-content-center">
+                        <div class="col-6">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <td><b>KAM Name</b></td>
+                                    <td><b>KAM Phone</b></td>
+                                    <td><b>KAM Email</b></td>
+                                </thead>
+                                <tbody>
+                                @foreach($kam as $k)
+                                    <tr>
+                                        <td><h4>{{$k['name']}}</h4></td>
+                                        <td><h4>{{$k['phone']}}</h4></td>
+                                        <td><h4>{{$k['email']}}</h4></td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
                         </div>
-                     @endforeach
+                    </div>
                 @endif
             </div>
         </div>
