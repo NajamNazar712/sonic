@@ -118,7 +118,7 @@
                                                     <td>{{$reference->name}}</td>
                                                 </tr>
                                             @endif
-                                            @if($user->account_type_id == 2)
+                                            {{--@if($user->account_type_id == 2)
                                                 <tr>
                                                     <td style="vertical-align: middle;"><b>Invoice Grouping</b></td>
                                                     <td>
@@ -133,7 +133,7 @@
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            @endif
+                                            @endif--}}
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
@@ -1347,7 +1347,7 @@
             $('#showBankModel').click(function () {
                 $('#AddBankModal').modal('show')
             });
-            var invoice_switch = document.querySelector('.igb-switch');
+            /*var invoice_switch = document.querySelector('.igb-switch');
             var switchery = new Switchery(invoice_switch,{ size: 'small'});
 
             $('#invoice_group_switch').on('change',function(){
@@ -1376,7 +1376,7 @@
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
-            }
+            }*/
 
 
         });
