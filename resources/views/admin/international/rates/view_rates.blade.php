@@ -80,32 +80,32 @@
                                                 <div class="row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[1][1]" value="{{ $weight_charge->range_up }}">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_up[1][1]" value="{{ $weight_charge->range_up }}" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[1][1]" value="{{ $weight_charge->range_down }}">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="range_down[1][1]" value="{{ $weight_charge->range_down }}" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" disabled class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[1][1]" {{ ($weight_charge->weight_addition == 1) ? 'checked' : '' }}/>
+                                                            <input type="checkbox" disabled class="switchery wa_switch" data-color="success" data-size="sm" name="wa_switch[1][1]" {{ ($weight_charge->weight_addition == 1) ? 'checked' : '' }} />
                                                         </div>
                                                     </div>
                                                     <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required" value="{{ $weight_charge->spkg }}">
+                                                                <input type="text" class="touchspin-color input-sm spkg" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required" value="{{ $weight_charge->spkg }}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[1][1]" value="{{ $weight_charge->local_charges }}">
+                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" name="local_charges[1][1]" value="{{ $weight_charge->local_charges }}" disabled>
                                                         </fieldset>
                                                     </div>
 
@@ -183,18 +183,18 @@
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="cash_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $cash_charges->range_up }}">
+                                                            <input name="cash_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $cash_charges->range_up }}" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="cash_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $cash_charges->range_down }}">
+                                                            <input name="cash_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $cash_charges->range_down }}" disabled>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="cash_charges[1][1]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  value="{{$cash_charges->charges}}">
+                                                            <input name="cash_charges[1][1]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  value="{{$cash_charges->charges}}" disabled>
                                                         </fieldset>
                                                     </div>
 
@@ -258,12 +258,12 @@
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_up }}">
+                                                            <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_up }}" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_down }}">
+                                                            <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_down }}" disabled>
                                                         </fieldset>
                                                     </div>
 

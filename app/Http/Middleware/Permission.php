@@ -454,7 +454,7 @@ class Permission
             'reports.daily_monthly_adjustment.list' => 373,
             'reports.daily_monthly_adjustment.summary_list' => 373,
             'reports.petty_cash_expense_summary.index' => 395,
-            'reports.app_efficiency.index' => 397,
+            'reports.app_efficiency.index' => 401,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -787,7 +787,15 @@ class Permission
             'open_parcel_history.info' => 392,
 
             'international.tracking_upload.index' => 398,
-            'international.tracking_upload.list' => 398
+            'international.tracking_upload.list' => 398,
+
+            'telenor.delivery.index' => 399,
+            'telenor.delivery.submit' => 399,
+            'telenor.return.index' => 400,
+            'telenor.return.shipment_info' => 400,
+            'telenor.return.submit' => 400,
+            'telenor.call.index' => 402,
+            'telenor.call.list' => 402
         ],
 
         'shipper' => [

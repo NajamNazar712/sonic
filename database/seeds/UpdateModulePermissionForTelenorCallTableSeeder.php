@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionForAppEfficiencyReport extends Seeder
+class UpdateModulePermissionForTelenorCallTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionForAppEfficiencyReport extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 401, 'name' => 'App Efficiency Report - View', 'module_id' => 9),
+            array('id' => 402, 'name' => 'Telenor Calls', 'module_id' => 6),
         ));
     }
 }

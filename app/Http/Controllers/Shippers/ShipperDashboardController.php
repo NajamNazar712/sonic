@@ -220,8 +220,7 @@ class ShipperDashboardController extends Controller
                             <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-
-                    if ($shipments->shipper_status_id > 1) {
+                    if ($shipments->shipper_status_id > 1 && (session('user_type') == 1 || in_array(5, session('permissions')))) {
                         $dropdown .= $view_charges_button;
 
                         $options = TRUE;
@@ -1048,5 +1047,33 @@ class ShipperDashboardController extends Controller
             $contacts = null;
         }
         return view('client.profile.contacts')->with(['sale_person' => $admin, 'contacts' => $contacts]);
+    }
+
+    public function update_invoice_sort(Request $request){
+        $id = session('user_id');
+        $user = User::find($id);
+        if($user){
+            $action = $request->action;
+
+            if($action == 'true'){
+                if($user->invoice_group_by == 0){
+                    $user->invoice_group_by = 1;
+                    $user->save();
+                    return response()->json(['status' => 1, 'success'=>'Invoice successfully updated!']);
+                }else{
+                    return response()->json(['status' => 0, 'error'=>'Invoice already updated']);
+                }
+            }
+            else{
+                if($user->invoice_group_by == 1){
+                    $user->invoice_group_by = 0;
+                    $user->save();
+                    return response()->json(['status' => 1, 'success'=>'Invoice successfully updated!']);
+                }else{
+                    return response()->json(['status' => 0, 'error'=>'Invoice already updated']);
+                }
+            }
+        }
+
     }
 }

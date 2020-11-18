@@ -2885,9 +2885,9 @@ class NotificationsController extends Controller
 //                                $cc[] = $department_head_email;
 //                            }
 
-                            $bcc = array('danish.zahid@trax.pk');
+
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc, $bcc);
+                            self::email($subject, $body, $to, $cc);
 
                         }
                     }
@@ -3519,7 +3519,12 @@ class NotificationsController extends Controller
                         if ($target_revenue > 0) {
                             $all_shipments_target_revenue = $target_revenue * $target_shipments;
                             $total_target_revenue_avg += $all_shipments_target_revenue;
-                            $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            if($all_shipments_target_revenue > 0){
+                                $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            }
+                            else{
+                                $target_revenue_achieved = 0;
+                            }
                         }
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
@@ -5165,47 +5170,40 @@ class NotificationsController extends Controller
                     $html = '<table style="width:100%;">';
                     $html .= '<thead><tr>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickups Pending For Today</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
-                    $check = false;
                     foreach ($hub_shipment as $origin_shipment) {
-                        if ($origin_shipment['pending'] == 0) {
-                            continue;
-                        } else {
-                            $check = true;
+                        foreach ($origin_shipment as $index => $data) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
+                            $html .= '</tr>';
+                            $serial++;
                         }
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
-                        $html .= '</tr>';
-                        $serial++;
                     }
 
                     $html .= '</tbody></table>';
-                    if ($check == true) {
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $html, $body);
-                        }
-
-                        $to = array();
-                        $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id);
-                        if ($operation_admins->exists()) {
-                            $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
-                        }
-//              $cc = array();
-//
-//              $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub_shipment['id']);
-//
-//              if ($general_managers->exists()) {
-//                  $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
-//              }
-                        self::email($subject, $body, $to);
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
                     }
+
+                    $to = array();
+                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id);
+                    if ($operation_admins->exists()) {
+                        $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
+                    }
+                    self::email($subject, $body, $to);
                 } else if ($id == 79) {
                     $date = Carbon::today()->toDateString();
                     $zone_hub_shipments = $reference_2_id;
@@ -5215,56 +5213,49 @@ class NotificationsController extends Controller
                     $html = '<table style="width:100%;">';
                     $html .= '<thead><tr>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickups Pending For Today</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
-                    $check = false;
                     foreach ($zone_hub_shipments as $zone_hub_shipment) {
                         foreach ($zone_hub_shipment as $origin_shipment) {
-                            if ($origin_shipment['pending'] == 0) {
-                                continue;
-                            } else {
-                                $check = true;
+                            foreach ($origin_shipment as $index => $data) {
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
+                                $html .= '</tr>';
+                                $serial++;
                             }
-                            $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
-                            $html .= '</tr>';
-                            $serial++;
                         }
                     }
                     $html .= '</tbody></table>';
-                    if ($check == true) {
-                        if (strpos($subject, '[zone]') !== FALSE) {
-                            $subject = str_replace('[zone]', $zone->name, $subject);
-                        }
-                        if (strpos($subject, '[date]') !== FALSE) {
-                            $subject = str_replace('[date]', $date, $subject);
-                        }
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $html, $body);
-                        }
-
-                        $to = array();
-
-                        $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->join('cities', 'cities.id', '=', 'admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id', '=', $zone->id);
-                        if ($operation_admins->exists()) {
-                            $to = array_merge($to, $operation_admins->pluck('email')->toArray());
-                        }
-//                    $cc = array();
-//
-//                    $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone_id);
-//
-//                    if ($general_managers->exists()) {
-//                        $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
-//                    }
-
-                        self::email($subject, $body, $to);
+                    if (strpos($subject, '[zone]') !== FALSE) {
+                        $subject = str_replace('[zone]', $zone->name, $subject);
                     }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->join('cities', 'cities.id', '=', 'admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id', '=', $zone->id);
+                    if ($operation_admins->exists()) {
+                        $to = array_merge($to, $operation_admins->pluck('email')->toArray());
+                    }
+
+                    self::email($subject, $body, $to);
                 } else if ($id == 80) {
                     $date = $reference_1_id;
                     $hub_shipments = $reference_2_id;
@@ -5273,48 +5264,45 @@ class NotificationsController extends Controller
                     $html = '<table style="width:100%;">';
                     $html .= '<thead><tr>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">No. of Reverse Pickups Pending Yesterday</th>
-                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">No. of Reverse Pickups Picked Yesterday</th>';
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Vendor</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Poc</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone</th>';
                     $html .= '</tr></thead><tbody>';
                     $serial = 1;
-                    $check = false;
                     foreach ($hub_shipments as $hub_shipment) {
                         foreach ($hub_shipment as $origin_shipment) {
-                            if ($origin_shipment['pending'] == 0 && $origin_shipment['picked'] == 0) {
-                                continue;
-                            } else {
-                                $check = true;
+                            foreach ($origin_shipment as $index => $data) {
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['tracking_number'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['origin_name'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['hub_name'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['vendor'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['poc'] . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data['phone'] . '</td>';
+                                $html .= '</tr>';
+                                $serial++;
                             }
-                            $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['origin_name'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['hub_name'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['pending'] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin_shipment['picked'] . '</td>';
-                            $html .= '</tr>';
-                            $serial++;
                         }
                     }
                     $html .= '</tbody></table>';
-                    if ($check == true) {
-                        if (strpos($subject, '[date]') !== FALSE) {
-                            $subject = str_replace('[date]', $date, $subject);
-                        }
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $html, $body);
-                        }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
 
-                        $to = array();
-//              $cc = array();
+                    $to = array();
 
-                        $department_head = Admin::where('role_id', 3)->where('status', 1);
+                    $department_head = Admin::where('role_id', 3)->where('status', 1);
 
-                        if ($department_head->exists()) {
-                            $to = array_merge($to, $department_head->pluck('email')->toArray());
-                            self::email($subject, $body, $to);
-                        }
+                    if ($department_head->exists()) {
+                        $to = array_merge($to, $department_head->pluck('email')->toArray());
+                        self::email($subject, $body, $to);
                     }
                 } else if ($id == 81) {
                     $subject = $notification->subject;
@@ -6185,20 +6173,25 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 104) {
-                    $delivery_note = DeliveryNote::find($reference_1_id);
+                    $to = array();
+                    $delivery_note_id = $reference_1_id;
 
-                    $deliveries = $delivery_note::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                    $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
                         ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
                         ->join('users', 'shipments.user_id', '=', 'users.id')
                         ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status','users.phone as phone')->get();
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
+                        ->where('users.id',3324)
+                        ->where('delivery_notes.id',$delivery_note_id)
+                        ->get();
 
                     foreach($deliveries as $delivery){
                         if($delivery->user_id == 3324 && $delivery->status == 14){
                             $to = $delivery->phone;
                         }
+                        self::sms($body, $to);
                     }
-                    self::sms($body, $to);
+
                 }
             }
         }

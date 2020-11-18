@@ -1678,7 +1678,7 @@ class DeliveryController extends Controller
                         $phone_number = $shipment_details->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
                             $query->where('consignee_phone_number_1', $phone_number)
-                                ->orWhere('consignee_phone_number_1', $phone_number);
+                                ->orWhere('consignee_phone_number_2', $phone_number);
                         })
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
@@ -1924,7 +1924,7 @@ class DeliveryController extends Controller
                         $phone_number = $current_shipment->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
                             $query->where('consignee_phone_number_1', $phone_number)
-                                ->orWhere('consignee_phone_number_1', $phone_number);
+                                ->orWhere('consignee_phone_number_2', $phone_number);
                         })
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
@@ -2528,7 +2528,7 @@ class DeliveryController extends Controller
                                 $phone_number = $current_shipment->consignee_phone_number_1;
                                 $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
                                     $query->where('consignee_phone_number_1', $phone_number)
-                                        ->orWhere('consignee_phone_number_1', $phone_number);
+                                        ->orWhere('consignee_phone_number_2', $phone_number);
                                 })
                                     ->where('shipper_status_id', DB::raw(14));
                                 if($previous_delivered_shipments->exists()){

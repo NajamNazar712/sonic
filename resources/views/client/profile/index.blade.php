@@ -118,6 +118,22 @@
                                                     <td>{{$reference->name}}</td>
                                                 </tr>
                                             @endif
+                                            @if($user->account_type_id == 2)
+                                                <tr>
+                                                    <td style="vertical-align: middle;"><b>Invoice Grouping</b></td>
+                                                    <td>
+                                                        <div class="form-group mb-0">
+                                                            <label for="switchery" class="font-medium-2 text-bold-600 mr-1">Single</label>
+                                                            @if($user->invoice_group_by)
+                                                                <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch" checked/>
+                                                            @else
+                                                                <input type="checkbox" id="invoice_group_switch" data-size="xs" class="switchery igb-switch"/>
+                                                            @endif
+                                                            <label for="switchery" class="font-medium-2 text-bold-600 ml-1">Origin Wise</label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
@@ -621,7 +637,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/selectize/selectize.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
+
 
     <style>
         .selectize-control .selectize-input {
@@ -647,6 +665,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
 
 
 
@@ -1328,6 +1347,37 @@
             $('#showBankModel').click(function () {
                 $('#AddBankModal').modal('show')
             });
+            var invoice_switch = document.querySelector('.igb-switch');
+            var switchery = new Switchery(invoice_switch,{ size: 'small'});
+
+            $('#invoice_group_switch').on('change',function(){
+                var invoice_switch_btn = document.querySelector('.switchery.igb-switch');
+                if (invoice_switch_btn.checked === true) {
+                    update_invoicing_sort(true);
+
+                } else if (invoice_switch_btn.checked === false) {
+                    update_invoicing_sort(false);
+                }
+            });
+
+            function update_invoicing_sort(action){
+                $.ajax({
+                    url: '{!! route('cod.update_invoice_sort') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'action': action,
+                    }
+                }).done(function(data){
+                    if(data.status){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            }
+
 
         });
     </script>
