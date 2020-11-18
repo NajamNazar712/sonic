@@ -1227,6 +1227,10 @@ class AdminReportsEmailController extends Controller
                 ->setFormatCode(
                     \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                 );
+            $sheet->getStyle("C")->getNumberFormat()
+            ->setFormatCode(
+                \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+            );
             $sheet->getStyle("D")->getNumberFormat()
             ->setFormatCode(
                 \PHPExcel_Style_NumberFormat::FORMAT_TEXT
