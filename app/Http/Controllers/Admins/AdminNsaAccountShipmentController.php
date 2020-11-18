@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -211,8 +212,20 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
                         }
-                        if (!Shipment::join('nsa_account_shipments as nas', 'nas.shipment_id', '=', 'shipments.id')->where('tracking_number', $row['tracking_number'])->where('nas.status', 0)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
+
+                        $settings = GlobalSettings::where('type', 'nsa_accounts');
+                        $nsa_accounts = array();
+                        if($settings->exists()){
+                            $settings = $settings->first();
+                            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+                        }
+                        if(count($nsa_accounts) > 0){
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 1)->exists()) {
+                                $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
+                            }
+                        }
+                        else{
+                            $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
                         }
                     }
                 }
@@ -232,7 +245,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                     }
 
-                    $nsa_shipments = NsaAccountShipment::whereIn('shipment_id', $shipment_ids)->where('status', 0);
+                    $nsa_shipments = Shipment::whereIn('id', $shipment_ids);
 
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
@@ -242,19 +255,38 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipments_count = 0;
                         $total_cod_amount = 0;
                         foreach ($nsa_shipments as $nsa_shipment) {
-                            if (!in_array($nsa_shipment->shipment_id, $valid_shipments)) {
-                                $shipment_details = Shipment::find($nsa_shipment->shipment_id);
-                                if ($shipment_details) {
-                                    $valid_shipments[] = $nsa_shipment->shipment_id;
+                            if (!in_array($nsa_shipment->id, $valid_shipments)) {
+                                if ($nsa_shipment) {
+                                    V2AdminPickupsController::cancel($nsa_shipment->id);
+
+                                    $status_id = 2;
+
+                                    ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+
+                                    if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
+                                        $status_id = 4;
+
+                                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                                    }
+
+                                    $nsa_shipment->shipper_status_id = $status_id;
+                                    $nsa_shipment->consignee_status_id = $status_id;
+                                    $nsa_shipment->actual_weight = 0.5;
+
+                                    $nsa_shipment->save();
+
+                                    ShipmentChargesController::weight($nsa_shipment->id);
+                                    ShipmentChargesController::cash_handling($nsa_shipment->id);
+                                    ShipmentChargesController::insurance($nsa_shipment->id);
+                                    ShipmentChargesController::fuel_surcharge($nsa_shipment->id);
+                                    $valid_shipments[] = $nsa_shipment->id;
                                     $shipments_count++;
 
-                                    if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                                        $total_cod_amount += $shipment_details->amount;
+                                    if ($nsa_shipment->booking_type_id != 4 || ($nsa_shipment->booking_type_id == 4 && $nsa_shipment->charges_mode_id == 2)) {
+                                        $total_cod_amount += $nsa_shipment->amount;
                                     }
                                 }
                             }
-                            $nsa_shipment->status = 2;
-                            $nsa_shipment->save();
                         }
 
                         $order = false;
@@ -333,32 +365,27 @@ class AdminNsaAccountShipmentController extends Controller
 
     public function return_shipment_info(Request $request){
         $tracking_number = $request->tracking_number;
-        $shipment = Shipment::join('nsa_account_shipments as nas', 'nas.shipment_id', '=', 'shipments.id')->where('tracking_number', $tracking_number);
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $nsa_accounts = array();
+        if($settings->exists()){
+            $settings = $settings->first();
+            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+        }
+        $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', 1)->whereIn('user_id', $nsa_accounts);
         if($shipment->exists()){
-            $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number', 'nas.status as status')->first();
-            if($shipment->status == 0){
-                $data['id'] = $shipment->id;
-                $data['tracking_number'] = $shipment->tracking_number;
-                $data['status'] = $shipment->status;
-                return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
-            }
-            else{
-                if($shipment->status == 1){
-                    return response()->json(['status' => 0, 'error' => 'Shipment already marked as Returned']);
-                }
-                else{
-                    return response()->json(['status' => 0, 'error' => 'Shipment already marked as delivered']);
-                }
-            }
+            $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number')->first();
+            $data['id'] = $shipment->id;
+            $data['tracking_number'] = $shipment->tracking_number;
+            return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
         }
         else{
-            return response()->json(['status' => 0, 'error' => 'Shipment not found!']);
+            return response()->json(['status' => 0, 'error' => 'Shipment already updated']);
         }
     }
 
     public function return_submit(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
-        $nsa_shipments = NsaAccountShipment::whereIn('shipment_id', $shipment_ids)->where('status', 0);
+        $nsa_shipments = Shipment::whereIn('id', $shipment_ids)->where('shipper_status_id', 1);
         if ($nsa_shipments->exists()) {
             $nsa_shipments = $nsa_shipments->get();
             $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
@@ -367,19 +394,39 @@ class AdminNsaAccountShipmentController extends Controller
             $shipments_count = 0;
             $total_cod_amount = 0;
             foreach ($nsa_shipments as $nsa_shipment) {
-                if (!in_array($nsa_shipment->shipment_id, $valid_shipments)) {
-                    $shipment_details = Shipment::find($nsa_shipment->shipment_id);
-                    if ($shipment_details) {
-                        $valid_shipments[] = $nsa_shipment->shipment_id;
+                if (!in_array($nsa_shipment->id, $valid_shipments)) {
+                    if ($nsa_shipment) {
+                        V2AdminPickupsController::cancel($nsa_shipment->id);
+
+                        $status_id = 2;
+
+                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+
+                        if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
+                            $status_id = 4;
+
+                            ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                        }
+
+                        $nsa_shipment->shipper_status_id = $status_id;
+                        $nsa_shipment->consignee_status_id = $status_id;
+                        $nsa_shipment->actual_weight = 0.5;
+
+                        $nsa_shipment->save();
+
+                        ShipmentChargesController::weight($nsa_shipment->id);
+                        ShipmentChargesController::cash_handling($nsa_shipment->id);
+                        ShipmentChargesController::insurance($nsa_shipment->id);
+                        ShipmentChargesController::fuel_surcharge($nsa_shipment->id);
+
+                        $valid_shipments[] = $nsa_shipment->id;
                         $shipments_count++;
 
-                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                            $total_cod_amount += $shipment_details->amount;
+                        if ($nsa_shipment->booking_type_id != 4 || ($nsa_shipment->booking_type_id == 4 && $nsa_shipment->charges_mode_id == 2)) {
+                            $total_cod_amount += $nsa_shipment->amount;
                         }
                     }
                 }
-                $nsa_shipment->status = 2;
-                $nsa_shipment->save();
             }
 
             $order = false;
