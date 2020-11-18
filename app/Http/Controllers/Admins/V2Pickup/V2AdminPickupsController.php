@@ -2096,8 +2096,10 @@ class V2AdminPickupsController extends Controller
 
     public function rider_receiving_index(){
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders ]);
+        $cities = City::select('id','name')->get();
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ]);
     }
+
 
     public function rider_receiving_check_pickup(Request $request){
         $pickup_date = $request->pickup_date;
@@ -2328,4 +2330,31 @@ class V2AdminPickupsController extends Controller
 
         return $html;
     }
+    public function rider_receiving_list(Request $request){
+
+        $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
+            ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
+            ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked as total_booking');
+
+        $datatable = Datatables::of($rider)
+            ->editColumn('note_id', function ($rider) {
+                if($rider->note_id != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                        ;
+                }
+            });
+
+        if($city = $request->get('search_city')){
+            $datatable = $rider->where('r.city_id', $city);
+        }
+
+        if($search_rider = $request->get('search_rider')){
+            $datatable = $rider->where('r.id', '=',$search_rider);
+        }
+
+        return $datatable->make(true);
+
+    }
+
 }
