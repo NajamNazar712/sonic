@@ -172,10 +172,16 @@ class AdminAPIController extends Controller
                             $url = 'uploads/return_notes/' . $return_note_image->image;
                             if (file_exists($url)) {
                                 File::delete($url);
-                            } else {
-                                $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
-                                if ($exists) {
-                                    Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
+                            }
+                            else {
+                                $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
+                                if($exists){
+                                    Storage::disk('public')->delete('uploads/return_notes/'.$return_note_image->image);
+                                }else{
+                                    $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                    if ($exists) {
+                                        Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
+                                    }
                                 }
                             }
                             ReturnNoteImage::where('id', $image_id)->delete();
