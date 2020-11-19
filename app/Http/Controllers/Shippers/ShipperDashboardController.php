@@ -94,8 +94,18 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
-        $quote = Inspiring::quote();
-        return view('client.welcome')->with(['quote' => $quote]);
+//        $quote = Inspiring::quote();
+        $shipper_id = session('user_id');
+        $sales_person_data = array();
+        if($shipper_id){
+            $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
+            if($sales_person_tag){
+                $sales_person_tag = Admin::find($sales_person_tag->admin_id);
+                $sales_person_data['name'] = $sales_person_tag->name;
+                $sales_person_data['phone'] = $sales_person_tag->phone_number;
+            }
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data]);
+        }
     }
 
     public function orders_index() {

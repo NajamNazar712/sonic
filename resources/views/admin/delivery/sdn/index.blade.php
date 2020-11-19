@@ -453,6 +453,7 @@
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Created</option>' +
                         '<option value="1">Deposited</option>' +
+                        '<option value="2">Resolved</option>' +
                         '</select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
