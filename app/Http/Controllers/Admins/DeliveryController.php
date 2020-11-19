@@ -1674,7 +1674,7 @@ class DeliveryController extends Controller
                 }
 
                 if($selected_status != 14){
-                    if(in_array($selected_reason, [3, 4, 12])){
+                    if(in_array($selected_reason, [3, 4, 12, 34, 50])){
                         $phone_number = $shipment_details->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
                             $query->where('consignee_phone_number_1', $phone_number)
@@ -1919,7 +1919,7 @@ class DeliveryController extends Controller
                     }
                 }
                 if($request->has($status_drop) && $request->has($statusId)){
-                    if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                    if(in_array($request->reason_drop[$shipment], [3, 4, 12, 34, 50])){
                         $current_shipment = Shipment::find($shipment);
                         $phone_number = $current_shipment->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
@@ -2523,7 +2523,7 @@ class DeliveryController extends Controller
                     }
                     if($request->has($status_drop) && $request->has($reasonId)){
                         if($request->status_drop[$shipment] != 14){
-                            if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                            if(in_array($request->reason_drop[$shipment], [3, 4, 12, 34, 50])){
                                 $current_shipment = Shipment::find($shipment);
                                 $phone_number = $current_shipment->consignee_phone_number_1;
                                 $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
