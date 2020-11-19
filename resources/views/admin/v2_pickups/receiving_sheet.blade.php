@@ -16,65 +16,67 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <div class="row justify-content-center mb-2" id="search_form">
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="search_rider" id="search_rider" class="form-control select2">
-                                            @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
+                            <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="row justify-content-center mb-2" id="search_form">
+                                    <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_rider" id="search_rider" class="form-control select2">
+                                                @foreach($riders as $rider)
+                                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
 
-                                <div class="col-3">
-                                    <fieldset class="form-group">
-                                        <select name="search_city" id="search_city" class="form-control select2">
-                                            @foreach($cities as $city)
-                                                <option value="{{$city->id}}">{{$city->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
+                                    <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_city" id="search_city" class="form-control select2">
+                                                @foreach($cities as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
 
-                                {{-- <div class="col-3">
-                                     <div class="form-group input-group">
-                                         <div class="input-group-prepend">
-                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                 <span class="la la-calendar-o"></span>
-                             </span>
+                                    {{-- <div class="col-3">
+                                         <div class="form-group input-group">
+                                             <div class="input-group-prepend">
+                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                     <span class="la la-calendar-o"></span>
+                                 </span>
+                                             </div>
+                                             <input type="text" name="pickup_date" class="form-control bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Date" data-rule-required="true" data-msg-required="Date is required">
                                          </div>
-                                         <input type="text" name="pickup_date" class="form-control bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Date" data-rule-required="true" data-msg-required="Date is required">
-                                     </div>
-                                 </div>--}}
-                                <div class="col-3">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
+                                     </div>--}}
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                            </div>
+                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
+                                            </div>
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Receiving Sheet To">
                                         </div>
-                                        <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
                                     </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o small-calender-icon"></span>
-                                        </span>
-                                        </div>
-                                        <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Receiving Sheet To">
-                                    </div>
+
                                 </div>
 
-                            </div>
-
-                            <div class="row justify-content-center">
-                                <div class="col-2">
-                                    <button type="button" id="search_filter_btn"  class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                <div class="row justify-content-center">
+                                    <div class="col-2">
+                                        <button type="submit" id="search_filter_btn"  class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -317,6 +319,12 @@
                 width: '100%',
                 allowClear: true
             });
+
+           /* $('#track_form').bind('submit', function (e) {
+                //e.preventDefault();
+
+                table.draw();
+            });*/
 
 
             /* $('#search_filter_btn').on('click', function () {

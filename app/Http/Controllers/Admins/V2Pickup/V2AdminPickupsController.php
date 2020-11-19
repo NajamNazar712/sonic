@@ -2335,6 +2335,7 @@ class V2AdminPickupsController extends Controller
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
+        /*    ->join('cities as c','c.id','=','r.city_id')*/
             ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked as total_booking');
 
         $datatable = Datatables::of($rider)
@@ -2345,13 +2346,18 @@ class V2AdminPickupsController extends Controller
                 }
             });
 
-        if($city = $request->get('search_city')){
-            $datatable = $rider->where('r.city_id', $city);
-        }
+       /* if($city = $request->get('search_city')){
+            $datatable->where('r.city_id','=',$city);
+        }*/
 
         if($search_rider = $request->get('search_rider')){
-            $datatable = $rider->where('r.id', '=',$search_rider);
+            $datatable->where('r.id','=',$search_rider);
         }
+       /* if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
+        }*/
 
         return $datatable->make(true);
 
