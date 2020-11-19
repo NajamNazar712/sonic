@@ -1636,14 +1636,14 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->end_date = $sales_target->end_date;
                     $sales_person_log->sales_person_id = $sales_target->sales_person_id;
                     $sales_person_log->target_days = $sales_target->target_days;
-                    $sales_person_log->target_week = $sales_target->target_week;
+                    $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
                     $sales_person_log->save();
 
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
                     $sales_target->target_days = $request->target_shipment_days;
-                    $sales_target->target_week = $request->target_shipment_week;
+                    $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
                     $sales_target->save();
 
@@ -1666,8 +1666,25 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_list(Request $request){
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_week', 'sale_person_targets.average_revenue');
-        return Datatables::of($targets)->make(true);
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue');
+
+        $datatables = Datatables::of($targets)
+            ->addColumn('action', function($user) {
+                $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Info</div></button>';
+                $delete = '<button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="las la-trash"></i></div><div class="col-9 offset-1">Delete</div></button>';
+
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                       /* $dropdown .= $edit;*/
+                        $dropdown .= $delete;
+
+                    return $dropdown;
+            });
+        //return Datatables::of($targets)->make(true);
+        return $datatables->make(true);
     }
     public function sales_person_targets_history(){
         return view('admin.settings.sales_person.history');
