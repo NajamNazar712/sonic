@@ -2951,8 +2951,8 @@ class AdminCargoController extends Controller
 
     public function mapping_index()
     {
-        $junctions = City::select(['id', 'name'])->where('hub', 1)->get();
-        $cities = City::all();
+        $junctions = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
+        $cities = City::where('business_category_id', 1)->get();
         $admins = Admin::where('status', 1)->select(['id', 'name'])->get();
         return view('admin.cargo.mapping')->with(['cities' => $cities, 'junctions' => $junctions, 'admins' => $admins]);
     }

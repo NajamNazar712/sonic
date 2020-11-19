@@ -488,6 +488,7 @@
                 placeholder: 'Charges Mode'
             });
 
+
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');
