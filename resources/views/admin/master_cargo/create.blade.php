@@ -157,10 +157,18 @@
                                                             <input type="text" name="phone_number" class="form-control rounded-right phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                                                         </div>
                                                     </div>
-                                                    <div class="col-12">
+
+                                                    <div class="w-100"></div>
+
+                                                    <div class="col">
                                                         <div class="form-group">
                                                             <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                                             </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -443,6 +451,12 @@
 
                         $('#master_cargo_consignment form input.phone_number').inputmask({
                             'mask': '9999-9999999',
+                            'clearIncomplete': true
+                        });
+                        $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
+
+                        $('#master_cargo_consignment form input.cnic').inputmask({
+                            'mask': "99999-9999999-9",
                             'clearIncomplete': true
                         });
                         $.each(data.shipping_modes, function(index, shipping_mode) {
