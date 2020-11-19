@@ -108,10 +108,19 @@ class ShipperDashboardController extends Controller
             $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
                         ->join('admins as a','a.id','=','scu.user_id')
                         ->where('sales_commissions.shipper_id',session('user_id'))
-                        ->select('a.name as name','a.email as email','a.phone_number as phone');
+                        ->wherein('scu.tier_id',[2,3])
+                        ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->get();
 
-               $poc = $details->where('scu.tier_id',2)->get();
-               $kam = $details->where('scu.tier_id',3)->get();
+               $poc = array();
+               $kam = array();
+               foreach($details as $detail){
+                   if($detail->tier_id == 2){
+                       $poc[] = $detail;
+                   }
+                   else{
+                       $kam[] = $detail;
+                   }
+               }
 
                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam]);
         }
