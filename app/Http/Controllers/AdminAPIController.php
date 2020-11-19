@@ -75,7 +75,8 @@ class AdminAPIController extends Controller
             }
         }
     }
-    
+
+
     public function return_note_details(Request $request){
         $admin_id = $request->admin_id;
         $return_note_id = $request->return_note_id;
