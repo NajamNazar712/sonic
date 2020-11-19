@@ -11,12 +11,13 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="row mb-2 justify-content-center">
-                        <div class="form-group">
-                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                        </div>
-                    <div class="col-4 mb-2">
+
+                <div class="row mb-2 justify-content-center">
+                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="col-4 mb-1">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -25,7 +26,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="search_shippimg_modes" id="search_shipping_modes" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -43,7 +44,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 mt-1 mb-1">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
                                 @foreach($statuses as $status)
@@ -52,7 +53,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -62,7 +63,7 @@
                             <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" data-value="">
                         </div>
                     </div>
-                    <div class="col-4">
+                        <div class="col-4 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -95,8 +96,10 @@
                 </table>
                 </form>
             </div>
+            </div>
         </div>
     </div>
+
 
 
 @endsection
