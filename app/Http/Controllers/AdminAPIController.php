@@ -75,66 +75,7 @@ class AdminAPIController extends Controller
             }
         }
     }
-
-//    public function return_note_details(Request $request){
-//        $admin_id = $request->admin_id;
-//        $return_note_id = $request->return_note_id;
-//        if($return_note_id){
-//            $return_note = ReturnNote::find($return_note_id);
-//            if($return_note){
-//                if($return_note->status == 1 || $return_note->status == 3){
-//                    if($return_note->image !== null){
-//                        $details = array();
-//                        $img_url = '';
-//                        $url = 'uploads/return_notes/' . $return_note->image;
-//                        if(file_exists($url)){
-//                            $img_url = asset('uploads/return_notes/' . $return_note->image);
-//                        }
-//                        /*else{
-//                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
-//                            if($exists){
-//                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
-//                            }
-//                        }*/
-//                        $details['return_note_id'] = $return_note_id;
-//                        $details['images'] = array('id' => 0,'image'=> $img_url);
-//                        return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
-//                    }else{
-//                        $return_note_images = ReturnNoteImage::where('return_note_id', $return_note_id);
-//                        if($return_note_images->exists()){
-//                            $return_note_images = $return_note_images->get();
-//                            $details = array();
-//                            foreach ($return_note_images as $return_note_image) {
-//                                $img_url = '';
-//                                $url = 'uploads/return_notes/' . $return_note_image->image;
-//                                if(file_exists($url)){
-//                                    $img_url = asset('uploads/return_notes/' . $return_note_image->image);
-//                                }
-//                                /*else{
-//                                    $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
-//                                    if($exists){
-//                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
-//                                    }
-//                                }*/
-//                                $details['images'][] = array('id' => $return_note_image->id,'image'=> $img_url);
-//                            }
-//                            return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
-//                        }else{
-//                            return response()->json(['status' => 0, 'message' => 'No images found!', 'information' => '']);
-//                        }
-//                    }
-//                }else{
-//                    return response()->json(['status' => 1, 'message' => 'Return Note not ready for image upload!']);
-//                }
-//            }else{
-//                return response()->json(['status' => 1, 'message' => 'Return Note Image not found!']);
-//            }
-//        }else {
-//            return response()->json(['status' => 1, 'message' => 'No return note scanned!']);
-//        }
-//    }
-
-
+    
     public function return_note_details(Request $request){
         $admin_id = $request->admin_id;
         $return_note_id = $request->return_note_id;
@@ -149,12 +90,12 @@ class AdminAPIController extends Controller
                         if(file_exists($url)){
                             $img_url = asset('uploads/return_notes/' . $return_note->image);
                         }
-                        /*else{
+                        else{
                             $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
                             if($exists){
                                 $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
                             }
-                        }*/
+                        }
                         $details['return_note_id'] = $return_note_id;
                         $details['images'] = array('id' => 0,'image'=> $img_url);
                         return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
@@ -171,14 +112,14 @@ class AdminAPIController extends Controller
                                 }else{
                                     $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
                                     if($exists){
-                                        $img_url = Storage::disk('public')->url('uploads/return_notes/'.$return_note_image->image);
+                                        $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
                                     }
-                                    /*else{
+                                    else{
                                         $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
                                         if($exists){
                                             $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
                                         }
-                                    }*/
+                                    }
                                 }
                                 $details['images'][] = array('id' => $return_note_image->id,'image'=> $img_url);
                             }
@@ -199,25 +140,6 @@ class AdminAPIController extends Controller
     }
 
     public function history_update_image(Request $request)
-    {
-        $return_note_id = $request->return_note_id;
-        $image = $request->image;
-        if ($image == 0) {
-            $return_note = ReturnNote::find($return_note_id);
-            if ($return_note) {
-                $return_note->image = NULL;
-                $return_note->save();
-                return response()->json(['status' => 0, 'success' => 'Image Insert successfully!']);
-            }
-            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
-        } else {
-            ReturnNoteImage::insert(['return_note_id' => 'return_note_id', 'image' => '$image']);
-            return response()->json(['status' => 0, 'success' => 'Image insert successfully!']);
-        }
-        return response()->json(['status' => 1, 'error' => 'Image not found!']);
-    }
-
-    public function test(Request $request)
     {
         $rules = [
             'added_at' => ['required'],
@@ -249,12 +171,12 @@ class AdminAPIController extends Controller
                             $url = 'uploads/return_notes/' . $return_note_image->image;
                             if (file_exists($url)) {
                                 File::delete($url);
-                            } /*else {
+                            } else {
                             $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
                             if ($exists) {
                                 Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
                             }
-                        }*/
+                        }
                             ReturnNoteImage::where('id', $image_id)->delete();
                         }
                     }
