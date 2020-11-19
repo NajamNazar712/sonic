@@ -2381,7 +2381,9 @@ class NotificationsController extends Controller
                     $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
-                    self::email($subject, $body, $to);
+                    foreach ($to as $individual_to) {
+                        self::email($subject, $body, $individual_to);
+                    }
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
