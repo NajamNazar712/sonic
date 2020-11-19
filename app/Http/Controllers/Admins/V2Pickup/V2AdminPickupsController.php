@@ -307,7 +307,7 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
-                $pickup_request->current_rider_id = $rider_id;
+         +       $pickup_request->current_rider_id = $rider_id;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
 
@@ -317,6 +317,9 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_attempt->attempt_date = Carbon::now();
                 $pickup_request_attempt->assigned_by = Auth::id();
                 $pickup_request_attempt->save();
+                foreach($pickup_request_ids as $sms_pickup_request_id){
+                    NotificationsController::send(106, $rider_id, $sms_pickup_request_id);
+                }
 
                 if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                     $allowed_pickup_requests[] = $pickup_request_id;
@@ -353,6 +356,10 @@ class V2AdminPickupsController extends Controller
                     $pickups++;
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
+                    }
+
+                    foreach($pickup_request_ids as $sms_pickup_request_id){
+                        NotificationsController::send(106, $rider_id, $sms_pickup_request_id);
                     }
                 }
 
@@ -410,10 +417,12 @@ class V2AdminPickupsController extends Controller
                             if ($shipment->booking_type_id == 5) {
                                 NotificationsController::send(77, $rider_id, $shipment->id);
                             }
-                        }
-                    }
-                }
 
+                        }
+
+                    }
+
+                }
             }
             return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         }else{
