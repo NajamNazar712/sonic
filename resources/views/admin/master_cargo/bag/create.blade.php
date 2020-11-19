@@ -137,7 +137,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-maxlength="13" data-msg-maxlength="Seal Number can not be greater then 13 numbers" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number') }}" data-msg-remote="Seal Number must be unique">
+                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
                                                         </div>
                                                     </div>
 
@@ -522,6 +522,13 @@
                             'allowPlus': false
                         });
 
+                        $('#cargo_consignment form input.seal_number').on('change', function(){
+                            var seal = this.value;
+                            if(seal.length != 12 && seal.length != 13 && seal.length != 6){
+                                this.value = '';
+                            }
+                        });
+
                         $('#cargo_consignment form input.actual_weight').inputmask({
                             'alias': 'decimal',
                             'allowMinus': false,
@@ -545,7 +552,7 @@
                             $('#cargo_consignment form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
                         });
 
-                        $('#cargo_consignment form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
+                        $('#cargo_consignment form .transport_mode').select2({
                             width: '100%',
                             placeholder: 'Transport Mode*'
                         }).bind('change', function() {
@@ -566,7 +573,7 @@
 
                         transport_mode_vendors = data.transport_mode_vendors;
 
-                        $('#cargo_consignment form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
+                        $('#cargo_consignment form .transport_mode_vendor').select2({
                             width: '100%',
                             placeholder: 'Vendor*'
                         }).bind('change', function() {
@@ -583,6 +590,7 @@
                                 $('#cargo_consignment #vendor_name-error').remove();
                             }
                         });
+                        $('#cargo_consignment form .transport_mode').val(2).trigger('change');
                         UnblockPagePermanently();
                         $('#cargo_consignment form').validate({
                             errorClass: 'danger',

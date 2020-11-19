@@ -64,6 +64,7 @@
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
                                     <th class="border-primary border-darken-1">Aging</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -84,6 +85,31 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="SealNumberUpdateModal" data-backdrop="static" role="dialog" aria-labelledby="SealNumberUpdateModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Update Seal Number</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="edit_seal_number_form" class="form mb-1 justify-content-center" novalidate="novalidate">
+                        <input type="hidden" name="bag_id" id="bag_id" value="">
+                        <div class="row justify-content-center">
+                            <div class="col-4 form-group">
+                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required">
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="track" class="btn btn-primary" value="Track">Update</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -224,6 +250,7 @@
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
+                    {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -249,7 +276,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.shipping_mode')){
                             $(mode_drop_select).appendTo($(search))
@@ -389,6 +416,27 @@
                     });
             });
 
+
+            $('#edit_seal_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#edit_seal_number').on('change', function(){
+                var seal = this.value;
+                if(seal.length != 12 && seal.length != 13 && seal.length != 6){
+                    this.value = '';
+                }
+            });
+            $('body').on('click','button.edit_seal_number',function () {
+                var id = $(this).parents('tr').attr('id');
+                var current_seal_number = parseInt(table.row($(this).parents('tr')).data().seal_number);
+                $('#bag_id').val(id);
+                $('#edit_seal_number').val(current_seal_number);
+                $('#SealNumberUpdateModal').modal('show');
+            });
+
             $('#bag_type_search_form #bag_type').select2({
                 width: '125px',
                 placeholder: 'Bag Type'
@@ -428,6 +476,63 @@
                 'allowPlus': false
             }).bind('input', function() {
                 table.draw();
+            });
+
+            $('#edit_seal_number_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    var seal_number = $('#edit_seal_number').val();
+                    var bag_id = $('#bag_id').val();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update seal number!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            if(id){
+                                $.ajax({
+                                    url: '{!! route('admin.master_cargo.bag.update_seal_number') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'id':bag_id,
+                                        'seal_number':seal_number,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                }).done(function (data) {
+                                    if(data.status === 1){
+                                        table.draw();
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+
+                                });
+                            }
+                        }
+                    });
+                }
             });
         });
     </script>

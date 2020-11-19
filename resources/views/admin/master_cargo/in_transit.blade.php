@@ -61,7 +61,6 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Master Cargo No.</th>
-                                    <th class="border-primary border-darken-1">Master Cargo Type</th>
                                     <th class="border-primary border-darken-1">Bag Quantity</th>
                                     <th class="border-primary border-darken-1">Short Received Bags</th>
                                     <th class="border-primary border-darken-1">No. of Shipments</th>
@@ -233,7 +232,6 @@
                             head = [];
                             head.push('S.No');
                             head.push('Master Cargo No.');
-                            head.push('Master Cargo Type');
                             head.push('Bag Quantity');
                             head.push('Short Received Bags');
                             head.push('No. of Shipments');
@@ -261,7 +259,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.id_padded);
-                                row.push(values.cargo_type);
                                 row.push(values.bags_count);
                                 row.push(values.short_received_bags_count);
                                 row.push(values.shipments_count);
@@ -324,7 +321,7 @@
                         text: 'Onward forwarding',
                         className: 'btn btn-primary onward_junction',
                         action: function (e, dt, node, config) {
-                            window.location = '{{ route('admin.master_cargo.create.index') }}';
+                            window.location = '{{ route('admin.master_cargo.create.index', ['id' => 1]) }}';
                         }
                     }
                     @endif,
@@ -356,7 +353,6 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
-                    {data: 'cargo_type', name: 'master_cargoes.type', class: 'align-middle cargo_type'},
                     {data: 'bags', name: 'master_cargoes.bags', class: 'align-middle bags'},
                     {data: 'short_received_bags', name: 'master_cargoes.bags', class: 'align-middle short_received_bags'},
                     {data: 'shipments', name: 'master_cargoes.shipments', class: 'align-middle text-center shipments'},
@@ -394,10 +390,6 @@
                     var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
-                    var cargo_type_select = '<select name="cargo_type_select" id="cargo_type_select" class="select2 form-control">' +
-                        '<option value="1">Normal</option>' +
-                        '<option value="2">Return</option>' +
-                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -426,12 +418,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.cargo_type')){
-                            $(cargo_type_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -451,12 +437,6 @@
                     $("#mode_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
                         placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#cargo_type_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

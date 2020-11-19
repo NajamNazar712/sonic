@@ -9,7 +9,11 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Create Master Cargo
+                    @if($id == 1)
+                        Create Onward Forwarding Cargo
+                    @else
+                        Create Master Cargo
+                    @endif
                 </h1>
 
                 <div class="card">
@@ -64,10 +68,7 @@
                                     <div class="modal-content">
                                         <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.create.store') }}" novalidate="novalidate">
                                             {{ csrf_field() }}
-
-                                            <input type="hidden" name="cargo_type" class="cargo_type">
-
-
+                                            <input type="hidden" name="onward_forwarding" value="{{$id}}">
                                             <input type="hidden" name="bag_ids" class="bag_ids">
 
                                             <div class="modal-header">
@@ -226,7 +227,6 @@
                     @endif
             var bag_ids = [];
             var hub_id = 0;
-            var cargo_type = 0;
             var shipping_mode_id = 0;
 
             var table = $('#datatable').DataTable({
@@ -281,7 +281,6 @@
                                 'bag_number': bag_number,
                                 'hub_id': hub_id,
                                 'shipping_mode_id': shipping_mode_id,
-                                'cargo_type': cargo_type,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,
@@ -319,10 +318,6 @@
                                             shipping_mode_id = data.details.shipping_mode.id;
 
                                             // $('#information .shipping_mode').html(data.details.shipping_mode.name);
-                                        }
-
-                                        if (cargo_type == 0) {
-                                            cargo_type = data.details.cargo_type;
                                         }
 
                                         $('#add_bag_form button.add').prop('disabled', false);
@@ -377,7 +372,6 @@
                     method: 'POST',
                     data: {
                         'bag_ids': bag_ids,
-                        'cargo_type': cargo_type,
                         '_token': '{{ csrf_token() }}'
                     },
                     timeout: 5000,
@@ -389,7 +383,6 @@
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },
                     success: function (data) {
-                        $('#master_cargo_consignment form .cargo_type').val(cargo_type);
                         // $('#master_cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
                         $('#master_cargo_consignment form .bag_ids').val(bag_ids);
 
@@ -505,6 +498,7 @@
                                 $('#master_cargo_consignment #vendor_name-error').remove();
                             }
                         });
+                        $('#master_cargo_consignment form .transport_mode').val(2).trigger('change');
                         UnblockPagePermanently();
                         $('#master_cargo_consignment form').validate({
                             errorClass: 'danger',
@@ -591,7 +585,6 @@
                         $('#information .scanned').html(bag_ids.length);
 
                         hub_id = 0;
-                        cargo_type = 0;
                         shipping_mode_id = 0;
 
 

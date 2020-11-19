@@ -236,7 +236,7 @@
                             </li>
                         @endif
                     </ul>
-                   {{--<ul class="menu-content">
+                   <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Master Cargo</span></a>
                                 <ul class="menu-content">
@@ -260,7 +260,7 @@
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(26, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.create.index') }}">Create</a></li>
+                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.create.index', ['id' => 0]) }}">Create</a></li>
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
@@ -286,7 +286,7 @@
                                 </ul>
                             </li>
                         @endif
-                    </ul>--}}
+                    </ul>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([386], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Runner</span></a>
