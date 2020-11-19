@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Old shipments Pieces</th>
                         <th class="border-primary border-darken-1">Date & Time Entered</th>
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
@@ -174,6 +175,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Old shipment pieces');
                             head.push('Date & Time Entered');
                             head.push('Request Status');
                             head.push('Last Status By Date');
@@ -189,6 +191,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.pieces);
                                 row.push(values.created_at);
                                 row.push(values.request_status);
                                 row.push(values.last_updated_at);
@@ -231,7 +234,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -240,6 +243,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'pieces', name: 'shipment_pieces_requests.pieces', class: 'align-middle pieces'},
                     {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},

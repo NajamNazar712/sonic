@@ -2381,7 +2381,9 @@ class NotificationsController extends Controller
                     $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
-                    self::email($subject, $body, $to);
+                    foreach ($to as $individual_to) {
+                        self::email($subject, $body, $individual_to);
+                    }
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
@@ -2833,15 +2835,15 @@ class NotificationsController extends Controller
                     if ($shipper) {
                         $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
                         if ($terms) {
-                            $yes_link = '<a href="' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) .'"><b>Yes</b></a>';
-                            $yes = 'To accept terms and conditions:'. PHP_EOL . $yes_link;
-                            $download_link = '<a href="'. route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) .'">Download CRF</a>';
-                            $download = 'To download CRF document:'. PHP_EOL . $download_link;
+                            $yes_link = '<a href="' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . '"><b>Yes</b></a>';
+                            $yes = 'To accept terms and conditions:' . PHP_EOL . $yes_link;
+                            $download_link = '<a href="' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . '">Download CRF</a>';
+                            $download = 'To download CRF document:' . PHP_EOL . $download_link;
                             $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
                             $button = $yes;
                             $link = $download;
-/*                            $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
-                            $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';*/
+                            /*                            $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
+                                                        $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';*/
                             if (strpos($subject, '[shipper_name]') !== FALSE) {
                                 $subject = str_replace('[shipper_name]', $shipper->name, $subject);
                             }
@@ -2877,7 +2879,7 @@ class NotificationsController extends Controller
                             }
 
 
-                            if($sale_person_email){
+                            if ($sale_person_email) {
                                 $cc[] = $sale_person_email;
                             }
 
@@ -3665,7 +3667,7 @@ class NotificationsController extends Controller
                     $html .= '<tr>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-					$html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($ratio_count) . '%</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$actual_weight_count, 2, '.', '') . '</td>';
@@ -4226,6 +4228,7 @@ class NotificationsController extends Controller
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
+                                $to[] = 'sarosh.tariq@trax.pk';
                                 if ($check == true) {
                                     self::email($subject, $body, $to, $cc);
                                 }
@@ -4592,9 +4595,6 @@ class NotificationsController extends Controller
                     if (strpos($subject, '[request_id]') !== FALSE) {
                         $subject = str_replace('[request_id]', $crm_request_id, $subject);
                     }
-                    if (strpos($subject, '[escalation]') !== FALSE) {
-                        $subject = str_replace('[escalation]', $escalation, $subject);
-                    }
                     if (strpos($subject, '[case_nature]') !== FALSE) {
                         $subject = str_replace('[case_nature]', $crm_request->nature->name, $subject);
                     }
@@ -4604,9 +4604,6 @@ class NotificationsController extends Controller
 
                     if (strpos($body, '[request_id]') !== FALSE) {
                         $body = str_replace('[request_id]', $crm_request_id, $body);
-                    }
-                    if (strpos($body, '[escalation]') !== FALSE) {
-                        $body = str_replace('[escalation]', $escalation, $body);
                     }
                     if (strpos($body, '[case_nature]') !== FALSE) {
                         $body = str_replace('[case_nature]', $crm_request->nature->name, $body);
@@ -5081,64 +5078,63 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 76) {
-                  if ($reference_1_id != 0) {
-                    $hub = City::find($reference_1_id);
-                    $hub_id = $hub->id;
-                  }
-
-                  $date = Carbon::today()->format('Y m d');
-                  $subject = $notification->subject;
-                  $body = $notification->body;
-
-                  if (strpos($subject, '[hub]') !== FALSE) {
                     if ($reference_1_id != 0) {
-                      $subject = str_replace('[hub]', $hub->name, $subject);
+                        $hub = City::find($reference_1_id);
+                        $hub_id = $hub->id;
                     }
-                    else {
-                      $subject = str_replace('[hub]', 'Overall', $subject);
+
+                    $date = Carbon::today()->format('Y m d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    if (strpos($subject, '[hub]') !== FALSE) {
+                        if ($reference_1_id != 0) {
+                            $subject = str_replace('[hub]', $hub->name, $subject);
+                        } else {
+                            $subject = str_replace('[hub]', 'Overall', $subject);
+                        }
                     }
-                  }
 
-                  if (strpos($subject, '[date]') !== FALSE) {
-                      $subject = str_replace('[date]', $date, $subject);
-                  }
-
-                  if (strpos($body, '[date]') !== FALSE) {
-                      $body = str_replace('[date]', $date, $body);
-                  }
-
-                  $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
-
-                  if (strpos($body, '[link]') !== FALSE) {
-                      $body = str_replace('[link]', $link, $body);
-                  }
-
-                  $to = array();
-                  $cc = array();
-                  $bcc = array();
-
-                  if ($reference_1_id != 0) {
-                    $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                        $query->where('hub_id', $hub_id);
-                    });
-                    if ($to_admins->exists()) {
-                        $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
                     }
-                    $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
-                        $query->where('hub_id', $hub_id);
-                    });
-                    if ($cc_admins->exists()) {
-                        $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
-                    }
-                  }
-                  else {
-                    $to[] = 'faizan.ahmed@trax.pk';
-                    $cc[] = 'fawad.ahmed@trax.pk';
-                    $bcc[] = 'muhammad.yousuf@trax.pk';
-                  }
 
-                  self::email($subject, $body, $to, $cc, $bcc);
-              } else if ($id == 77) {
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $cc = array();
+                    $bcc = array();
+
+                    if ($reference_1_id != 0) {
+                        $to_admins = Admin::whereIn('role_id', [10, 17, 25, 30])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                            $query->where('hub_id', $hub_id);
+                        });
+                        if ($to_admins->exists()) {
+                            $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                        }
+                        $cc_admins = Admin::whereIn('role_id', [8, 9, 3, 2])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                            $query->where('hub_id', $hub_id);
+                        });
+                        if ($cc_admins->exists()) {
+                            $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
+                        }
+                    } else {
+                        $to[] = 'faizan.ahmed@trax.pk';
+                        $cc[] = 'fawad.ahmed@trax.pk';
+                        $bcc[] = 'muhammad.yousuf@trax.pk';
+                    }
+
+                    self::email($subject, $body, $to, $cc, $bcc);
+                }
+                else if ($id == 77) {
                     $rider_id = $reference_1_id;
                     $shipment_id = $reference_2_id;
                     $rider = Rider::find($rider_id);
@@ -5659,12 +5655,13 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination->name . '</td>';
                         if ($shipment->packaging_charges == null) {
-                          if($shipment->charges_mode_id == 1){
+                           if($shipment->charges_mode_id == 1){
                               $amount = $shipment->received_amount;
                           }
                           else{
                               $amount = $shipment->amount;
                           }
+                          $total_charges = $amount;
                           $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
                       } else {
                           if($shipment->charges_mode_id == 1){
@@ -5676,8 +5673,7 @@ class NotificationsController extends Controller
                           $packaging = $shipment->packaging_charges;
                           $total_charges = $amount + $packaging;
                           $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_charges . '</td>';
-                      }
-                        $html .= '</tr>';
+                      }                        $html .= '</tr>';
                     }
 
                     $html .= '</tbody></table>';
@@ -5695,6 +5691,7 @@ class NotificationsController extends Controller
                     if ($finance->exists()) {
                         $to = array_merge($to, $finance->pluck('email')->toArray());
                     }
+                    $to[] = 'sarosh.tariq@trax.pk';
 
                     self::email($subject, $body, $to);
 
@@ -5802,21 +5799,20 @@ class NotificationsController extends Controller
 
 //                    $admin = Admin::whereIn('role_id', [23, 46, 3])->where('status', 1);
 
-	//              $to[] = 'hassan@trax.pk';
-	//              if ($admin->exists()) {
-	//                  $to = array_merge($to, $admin->pluck('email')->toArray());
-	//              }
-	              $to[] = 'syed.sharique@trax.pk';
-	              $to[] = 'balaj.khan@trax.pk';
-	              $to[] = 'bilal.shah@trax.pk';
+                    //              $to[] = 'hassan@trax.pk';
+                    //              if ($admin->exists()) {
+                    //                  $to = array_merge($to, $admin->pluck('email')->toArray());
+                    //              }
+                    $to[] = 'syed.sharique@trax.pk';
+                    $to[] = 'balaj.khan@trax.pk';
+                    $to[] = 'bilal.shah@trax.pk';
 
 
                     self::email($subject, $body, $to);
 
-                }
-                else if($id == 89){
+                } else if ($id == 89) {
 
-                    $finance = Admin::whereIn('id', [60 , 12])->where('status', 1);
+                    $finance = Admin::whereIn('id', [60, 12])->where('status', 1);
 
                     $to = array();
 
@@ -5832,8 +5828,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     self::email($subject, $body, $to);
-                }
-                else if($id == 90){
+                } else if ($id == 90) {
                     $to = array();
                     $finance = Admin::whereIn('id', [12, 60, 79, 216])->where('status', 1);
                     if ($finance->exists()) {
@@ -5845,11 +5840,10 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     self::email($subject, $body, $to);
-                }
-                else if ($id == 91) {
+                } else if ($id == 91) {
                     $user = User::find($reference_1_id);
                     $pin = $reference_2_id;
-                    if($user){
+                    if ($user) {
                         if (strpos($body, '[user_name]') !== FALSE) {
                             $body = str_replace('[user_name]', $user->name, $body);
                         }
@@ -5860,8 +5854,7 @@ class NotificationsController extends Controller
                         $to = $user->phone;
                         self::sms($body, $to);
                     }
-                }
-                else if($id == 92){
+                } else if ($id == 92) {
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $done_payment = DonePayment::find($reference_1_id);
@@ -5885,20 +5878,19 @@ class NotificationsController extends Controller
                         $body = str_replace('[payment_id]', $payment_id, $body);
                     }
 
-                    if($user){
+                    if ($user) {
                         $to[] = $user->email;
                     }
 
-                    if($sale_person_email){
+                    if ($sale_person_email) {
                         $cc[] = $sale_person_email;
                     }
                     $to[] = 'wajiha.majeed@trax.pk';
                     $to[] = 'shafay.tariq@trax.pk';
 
-                    self::email($subject, $body, $to,$cc);
-
+                    self::email($subject, $body, $to, $cc);
                 }
-                else if($id == 93){
+				else if($id == 93){
                     if($reference_2_id){
                         $subject = $notification->subject;
                         $body = $notification->body;
@@ -5912,36 +5904,32 @@ class NotificationsController extends Controller
                         }
                     }
                 }
-                else if($id == 94){
+				else if($id == 94){
 
-                    $subject = $notification->subject;
+				 	$subject = $notification->subject;
                     $body = $notification->body;
                     $user = User::find($reference_2_id);
-
-                    $to = array();
-
-                    if($user){
+					if($user){
                         $to[] = $user->email;
                     }
                     self::email($subject, $body, $to);
                 }
-                else if($id == 95){
-
-                    if($reference_2_id){
+                else if($id == 95) {
+                    if ($reference_2_id) {
                         $subject = $notification->subject;
                         $body = $notification->body;
                         $user_emails = User::whereIn('id', $reference_2_id)->pluck('email')->toArray();
                         // dd($user_emails);
-                        if(count($user_emails) >= 0){
-                            foreach($user_emails as $email){
+                        if (count($user_emails) >= 0) {
+                            foreach ($user_emails as $email) {
                                 $to = $email;
                                 self::email($subject, $body, $to);
+
                             }
                         }
-
                     }
                 }
-                else if($id == 96){
+				else if($id == 96){
                     $to = array();
                     $id = 3324;
                     $user = User::find($id);
@@ -5955,35 +5943,33 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to);
                 }
-                else if($id == 99) {
-                    $subject = $notification->subject;
-                    $body = $notification->body;
-                    $data = $reference_1_id;
-
-                    $html = '<table style="width:100%;">';
-                    $html .= '<thead><tr>
-                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
-                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
-                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked Reason</th>';
-                    $html .= '</tr></thead><tbody>';
-
-                    foreach($data as $pickup_data){
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['requested_date'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['shipper_name'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['reason'] . '</td>';
-                        $html .= '</tr>';
-                        $to = $pickup_data['saleperson_email'];
-                    }
-                    $html .= '</tbody></table>';
-                    if (strpos($body, '[preview]') !== FALSE) {
-                        $body = str_replace('[preview]', $html, $body);
-                    }
-                    if (strpos($body, '[sales_person]') !== FALSE) {
-                        $body = str_replace('[sales_person]',$pickup_data['sales_person'] , $body);
-                    }
-                    self::email($subject, $body, $to);
-                }
+				else if($id == 99) {
+				    $subject = $notification->subject;
+				    $body = $notification->body;
+				    $data = $reference_1_id;
+				    $html = '<table style="width:100%;">';
+				    $html .= '<thead><tr>
+				    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+				    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+				    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked Reason</th>';
+				    $html .= '</tr></thead><tbody>';
+				    foreach($data as $pickup_data){
+				        $html .= '<tr>';
+				        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['requested_date'] . '</td>';
+				        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['shipper_name'] . '</td>';
+				        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_data['reason'] . '</td>';
+				        $html .= '</tr>';
+				        $to = $pickup_data['saleperson_email'];
+				    }
+				    $html .= '</tbody></table>';
+				    if (strpos($body, '[preview]') !== FALSE) {
+				        $body = str_replace('[preview]', $html, $body);
+				    }
+				    if (strpos($body, '[sales_person]') !== FALSE) {
+				        $body = str_replace('[sales_person]',$pickup_data['sales_person'] , $body);
+				    }
+				    self::email($subject, $body, $to);
+				}
                 else if($id == 100){
                     $date = Carbon::yesterday()->toDateString();
                     $date_from = $date . ' 08:00:00';
@@ -6014,6 +6000,8 @@ class NotificationsController extends Controller
                         $html .= '</tr></thead><tbody>';
 
                         foreach ($pickup_requests as $pickup) {
+                            $to = array();
+                            $to[] = $pickup->saleperson_email;
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
@@ -6088,7 +6076,8 @@ class NotificationsController extends Controller
                         $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
                     }
                     self::email($subject, $body, $to);
-                } else if ($id == 102) {
+                }
+                else if ($id == 102) {
                     $date = Carbon::today()->toDateString();
                     $zone_hub_shipments = $reference_2_id;
                     $subject = $notification->subject;
@@ -6140,7 +6129,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 103) {
+                }
+                else if ($id == 103) {
                     $date = $reference_1_id;
                     $hub_shipments = $reference_2_id;
                     $subject = $notification->subject;
@@ -6189,6 +6179,27 @@ class NotificationsController extends Controller
                         $to = array_merge($to, $department_head->pluck('email')->toArray());
                         self::email($subject, $body, $to);
                     }
+                }
+                else if ($id == 104) {
+                    $to = array();
+                    $delivery_note_id = $reference_1_id;
+
+                    $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                        ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
+                        ->join('users', 'shipments.user_id', '=', 'users.id')
+                        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
+                        ->where('users.id',3324)
+                        ->where('delivery_notes.id',$delivery_note_id)
+                        ->get();
+
+                    foreach($deliveries as $delivery){
+                        if($delivery->user_id == 3324 && $delivery->status == 14){
+                            $to = $delivery->phone;
+                        }
+                        self::sms($body, $to);
+                    }
+
                 }
             }
         }

@@ -233,7 +233,7 @@ class RegisterController extends Controller
             Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
             $user_attachment->blank_cheque_image = $filename;
         }
-        
+        $user_attachment->uploaded_at = Carbon::now();
         $user_attachment->save();
 
         

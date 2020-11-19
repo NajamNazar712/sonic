@@ -78,6 +78,8 @@
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Document Uploaded At</th>
+                                        <th class="border-primary border-darken-1">Document Approved At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
@@ -288,6 +290,8 @@
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
                         head.push('Account Disable Remarks');
+                        head.push('Documents Uploaded At');
+                        head.push('Documents Approved At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
                         head.push('Intl Rates Status');
@@ -318,6 +322,8 @@
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_remarks);
+                            row.push(values.documents_uploaded_at);
+                            row.push(values.documents_approved_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
                             row.push(values.international_rate_status);
@@ -640,6 +646,8 @@
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', orderable: false, searchable: false},
+                {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at', orderable: false, searchable: false},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},

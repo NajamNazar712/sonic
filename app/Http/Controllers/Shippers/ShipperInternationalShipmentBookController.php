@@ -70,7 +70,6 @@ class ShipperInternationalShipmentBookController extends Controller
 
     public function store(Request $request) {
         $user_id = session('user_id');
-
         $service_type_id = 1;
 
         if ($request->input('pickup_address') == 0) {
