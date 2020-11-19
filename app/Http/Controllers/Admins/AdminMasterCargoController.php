@@ -1764,7 +1764,7 @@ class AdminMasterCargoController extends Controller
             $cargo_consignment = $cargo_consignment->first();
 
             if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
-                if ($cargo_consignment->status_id == 1) {
+                if ($cargo_consignment->status_id == 1 || $cargo_consignment->status_id == 6) {
                     $details = array();
 
                     $details['id'] = $cargo_consignment->id;
