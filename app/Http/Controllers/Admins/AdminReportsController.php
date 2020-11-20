@@ -3824,9 +3824,9 @@ class AdminReportsController extends Controller
         }
         if($status = $request->get('status_select')){
             if($status == 1){
-                $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '=', null);
+                $datatable = $datatable->havingRaw('shipment_exist is null');
             }else{
-                $datatable = $datatable->where(DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "')"), '<>', null);
+                $datatable = $datatable->havingRaw('shipment_exist is not null');
             }
         }
 
