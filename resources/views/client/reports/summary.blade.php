@@ -358,7 +358,7 @@
                         if (currentDate.format('x') > toDate.format('x')) {
                             to_date.pickadate('picker').clear();
                         }
-                        var afterDate = currentDate.add(30, 'days');
+                        var afterDate = currentDate.add(31, 'days');
 
                         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
                         to_date.pickadate('picker').set({'select': afterDate.toDate()},{muted: true});
@@ -386,7 +386,7 @@
                             from_date.pickadate('picker').clear();
                         }
 
-                        var beforeDate = currentDate.subtract(30, 'days');
+                        var beforeDate = currentDate.subtract(31, 'days');
                         from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
@@ -417,7 +417,7 @@
             //                 to_date.pickadate('picker').clear();
             //             }
             //
-            //             var afterDate = currentDate.add(30, 'days');
+            //             var afterDate = currentDate.add(31, 'days');
             //             to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
             //
             //
@@ -443,7 +443,7 @@
             //                 from_date.pickadate('picker').clear();
             //             }
             //
-            //             var beforeDate = currentDate.subtract(30, 'days');
+            //             var beforeDate = currentDate.subtract(31, 'days');
             //             from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
             //         }
             //     }

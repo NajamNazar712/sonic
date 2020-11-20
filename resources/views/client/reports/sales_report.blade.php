@@ -264,7 +264,7 @@
                             to_date.pickadate('picker').clear();
                         }
 
-                        var afterDate = currentDate.add(30, 'days');
+                        var afterDate = currentDate.add(31, 'days');
                         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
 
 
@@ -290,7 +290,7 @@
                             from_date.pickadate('picker').clear();
                         }
 
-                        var beforeDate = currentDate.subtract(30, 'days');
+                        var beforeDate = currentDate.subtract(31, 'days');
                         from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
@@ -315,7 +315,7 @@
                             dr_to_date.pickadate('picker').clear();
                         }
 
-                        var afterDate = currentDate.add(30, 'days');
+                        var afterDate = currentDate.add(31, 'days');
                         dr_to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
                     }
                 }
@@ -340,7 +340,7 @@
                             dr_from_date.pickadate('picker').clear();
                         }
 
-                        var beforeDate = currentDate.subtract(30, 'days');
+                        var beforeDate = currentDate.subtract(31, 'days');
                         dr_from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
