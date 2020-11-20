@@ -1711,7 +1711,7 @@
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                                 swal({
-                                                    title: 'Already Delivered Shipments found to same Consignee',
+                                                    title: 'Delivered shipment(s) found on same consignee details before.',
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
