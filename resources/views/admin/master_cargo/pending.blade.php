@@ -511,7 +511,7 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if(confirm){
-                            if(id){
+                            if(bag_id && seal_number){
                                 $.ajax({
                                     url: '{!! route('admin.master_cargo.bag.update_seal_number') !!}',
                                     method: 'POST',
