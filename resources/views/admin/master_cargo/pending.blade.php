@@ -524,6 +524,7 @@
                                     if(data.status === 1){
                                         table.draw();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        $('#SealNumberUpdateModal').modal('hide');
                                     }else{
                                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }

@@ -2790,9 +2790,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function update_seal_number(Request $request){
-        return $request->bag_id;
-        if(Bag::where('seal_number', $request->seal_number)->where('id', '!=', $request->bag_id)){
-            $bag = Bag::find($request->bag_id);
+        if(Bag::where('seal_number', $request->seal_number)->where('id', '!=', $request->id)){
+            $bag = Bag::find($request->id);
             $bag->seal_number = $request->seal_number;
             $bag->save();
 
