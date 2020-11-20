@@ -1706,7 +1706,7 @@
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
-                                                var html = '<p>These shipments can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel:</p><br>';
+                                                var html = '<p>These shipment(s) can\'t be update on following reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel:</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
