@@ -6186,18 +6186,25 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                     }
                 } else if ($id == 106) {
-                    $subject = $notification->subject;
+
                     $body = $notification->body;
                     $pickup_request_id = $reference_2_id;
-                    $rider = Rider::find($reference_1_id);
+                    $riders = $reference_1_id;
+                    $old_rider_id = $riders['old'];
+                    $new_rider_id = $riders['new'];
+
+//                    $rider = Rider::find($rider);
+                    $old_rider = Rider::find($old_rider_id);
+                    $new_rider = Rider::find($new_rider_id);
                     $admin_id = Auth::id();
                     $admin = Admin::find($admin_id);
 
 
-                    $to = array();
-
-                    if (strpos($body, '[rider_name]') !== FALSE) {
-                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    if (strpos($body, '[old_rider_name]') !== FALSE) {
+                        $body = str_replace('[old_rider_name]', $old_rider->name, $body);
+                    }
+                    if (strpos($body, '[new_rider_name]') !== FALSE) {
+                        $body = str_replace('[new_rider_name]', $new_rider->name, $body);
                     }
                     if (strpos($body, '[pickup_request_id]') !== FALSE) {
                         $body = str_replace('[pickup_request_id]', $pickup_request_id, $body);
@@ -6206,11 +6213,43 @@ class NotificationsController extends Controller
                         $body = str_replace('[pickup_coordinator_name]', $admin->name, $body);
                     }
 
-                    if ($rider) {
-                        $to[] = str_replace('-', '', $rider->phone);
+                    if ($old_rider) {
+                        $to = $old_rider->phone;
+                        self::sms($body, $to);
+                    }
+                }
+                else if ($id == 107) {
+
+                    $body = $notification->body;
+                    $pickup_request_id = $reference_2_id;
+                    $riders = $reference_1_id;
+                    $old_rider_id = $riders['old'];
+                    $new_rider_id = $riders['new'];
+
+//                    $rider = Rider::find($rider);
+                    $old_rider = Rider::find($old_rider_id);
+                    $new_rider = Rider::find($new_rider_id);
+                    $admin_id = Auth::id();
+                    $admin = Admin::find($admin_id);
+
+
+                    if (strpos($body, '[old_rider_name]') !== FALSE) {
+                        $body = str_replace('[old_rider_name]', $old_rider->name, $body);
+                    }
+                    if (strpos($body, '[new_rider_name]') !== FALSE) {
+                        $body = str_replace('[new_rider_name]', $new_rider->name, $body);
+                    }
+                    if (strpos($body, '[pickup_request_id]') !== FALSE) {
+                        $body = str_replace('[pickup_request_id]', $pickup_request_id, $body);
+                    }
+                    if (strpos($body, '[pickup_coordinator_name]') !== FALSE) {
+                        $body = str_replace('[pickup_coordinator_name]', $admin->name, $body);
                     }
 
-                    self::sms($subject, $body, $to);
+                    if ($old_rider) {
+                        $to = $old_rider->phone;
+                        self::sms($body, $to);
+                    }
                 }
 
             }

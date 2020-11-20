@@ -339,11 +339,11 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 106)
         {
-            $details['fields'] = ['rider_name','pickup_request_id','pickup_coordinator_name'];
+            $details['fields'] = ['old_rider_name','pickup_request_id','pickup_coordinator_name','new_rider_name'];
         }
         else if ($id == 107)
         {
-            $details['fields'] = ['rider_name','pickup_request_id','pickup_coordinator_name'];
+            $details['fields'] = ['old_rider_name','pickup_request_id','pickup_coordinator_name','new_rider_name'];
         }
 
 		return $details;

@@ -14,7 +14,7 @@ class UpdateNotificationForReassigningShipmentsSMS extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 106, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'SMS', 'type_id' => 2, 'subject' => 'Sending SMS to Riders for reassining of shipments','body'=>'Dear [rider_name]'.PHP_EOL.'Pickup Request ID [pickup_request_id] has been reassigned by the Coordinator [pickup_coordinator_name] to Rider [rider_name].' . PHP_EOL . '[preview]', 'updated_by'=> 3, 'status'=> 0)
+            array('id' => 106, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'SMS for reassigning of shipments', 'type_id' => 2, 'body'=>'Dear [old_rider_name]'.PHP_EOL.'Pickup Request ID [pickup_request_id] has been reassigned by the Coordinator [pickup_coordinator_name] to Rider [new_rider_name].', 'updated_by'=> 3, 'status'=> 1)
         ));
     }
 }
