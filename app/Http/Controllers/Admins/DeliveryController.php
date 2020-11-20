@@ -1646,7 +1646,6 @@ class DeliveryController extends Controller
 
     }
     public function receive_delivery_status_submit_all(Request $request){
-
         $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
@@ -1878,8 +1877,7 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
 
             if(count($invalid_reason_shipments) > 0){
-                $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return response()->json(['status'=>1, 'success' => 'Statuses updated successfully but some shipments can\'t be updated due to invalid reasons!', 'invalid_shipments' => $invalid_shipments]);
+                return response()->json(['status'=>2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments]);
             }
             else{
                 return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
@@ -2013,7 +2011,7 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
             if(count($invalid_reason_shipments) > 0){
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return redirect()->back()->with('success', 'Statuses updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
             }
             else{
                 return redirect()->back()->with('success', 'Statuses updated successfully!');
@@ -2911,7 +2909,7 @@ class DeliveryController extends Controller
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with('success', 'Delivery Note verified and updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
@@ -2923,7 +2921,7 @@ class DeliveryController extends Controller
                     $delivery_note_data->save();
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with('success', 'Delivery Note updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note updated successfully!');
