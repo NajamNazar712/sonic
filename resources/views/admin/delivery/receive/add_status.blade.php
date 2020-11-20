@@ -1007,27 +1007,6 @@
                     }else{
                         all_reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        if(data.invalid_shipments){
-                            $.each(data.invalid_shipments, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
-                            swal({
-                                title: 'These shipments can\'t be updated due to invalid reasons',
-                                text: atext,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'OK',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            });
-                        }
                     }
                 });
             });
@@ -1717,17 +1696,52 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
-
-                                        } else {
+                                            location.reload();
+                                        }
+                                        else if(data.status === 2){
+                                            var tracking_numbers = '';
+                                            var route = '{!! route('admin.tracking.index') !!}';
+                                            if(data.invalid_shipments){
+                                                console.log(data.invalid_shipments);
+                                                $.each(data.invalid_shipments, function(index, tracking_number) {
+                                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                                });
+                                                var html = '<p>These shipments can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel:</p><br>';
+                                                html += tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    title: 'Already Delivered Shipments found to same Consignee',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        confirm: {
+                                                            text: 'OK',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                }).then(function(confirm) {
+                                                    if (confirm) {
+                                                        location.reload();
+                                                    }
+                                                    else{
+                                                        location.reload();
+                                                    }
+                                                });
+                                            }
+                                        }else {
                                             UnblockPagePermanently();
                                             toastr.error(data.error, 'Error!', {
                                                 positionClass: 'toast-top-center',
                                                 containerId: 'toast-top-center'
                                             });
-
+                                            location.reload();
                                         }
-                                        location.reload();
-
                                     });
                                 }
                             }

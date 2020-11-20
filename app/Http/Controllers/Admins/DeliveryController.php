@@ -1877,8 +1877,7 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
 
             if(count($invalid_reason_shipments) > 0){
-                $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
+                return response()->json(['status'=>2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments]);
             }
             else{
                 return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
