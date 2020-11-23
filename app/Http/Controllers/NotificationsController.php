@@ -6180,7 +6180,7 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 }
-                else if ($id == 104) {
+                /*else if ($id == 104) {
                     $to = array();
                     $delivery_note_id = $reference_1_id;
 
@@ -6200,7 +6200,7 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                     }
 
-                }
+                }*/
             }
         }
     }
