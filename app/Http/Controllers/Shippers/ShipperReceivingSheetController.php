@@ -26,6 +26,8 @@ use Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
+use App\Jobs\ProcessGulAhmedShipmentConfirmation;
+
 class ShipperReceivingSheetController extends Controller
 {
     public function __construct() {
@@ -92,6 +94,26 @@ class ShipperReceivingSheetController extends Controller
             $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
 
             $receiving_sheet_shipment->save();
+        }
+
+        if ($user_id == 7828) {
+            $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+            $confirmation_shipments = array();
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                $confirmation_shipment = array();
+
+                $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                $confirmation_shipment['reference_number'] = $shipment->order_id;
+                $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                $confirmation_shipments[] = $confirmation_shipment;
+            }
+
+            dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
         }
 
         return ['status' => 0, 'success' => 'Receiving Sheet has been Created', 'receiving_sheet_id' => $receiving_sheet_id];
@@ -217,6 +239,22 @@ class ShipperReceivingSheetController extends Controller
 
                             $receiving_sheet->save();
 
+                            if ($shipment->user_id == 7828) {
+                                $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                                $confirmation_shipments = array();
+
+                                $confirmation_shipment = array();
+
+                                $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                                $confirmation_shipment['reference_number'] = $shipment->order_id;
+                                $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                                $confirmation_shipments[] = $confirmation_shipment;
+
+                                dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                            }
+
                             return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
                         }
                         else {
@@ -234,6 +272,22 @@ class ShipperReceivingSheetController extends Controller
                         $receiving_sheet->booked = $receiving_sheet->booked + 1;
 
                         $receiving_sheet->save();
+
+                        if ($shipment->user_id == 7828) {
+                            $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                            $confirmation_shipments = array();
+
+                            $confirmation_shipment = array();
+
+                            $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                            $confirmation_shipment['reference_number'] = $shipment->order_id;
+                            $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                            $confirmation_shipments[] = $confirmation_shipment;
+
+                            dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                        }
 
                         return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
                     }
