@@ -8367,8 +8367,9 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
-        return view('admin.management.add_route_form')->with('cities',$city);
+        $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $riders = Rider::where('status', 1)->select(['id','name'])->get();
+        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders]);
     }
     public function addRouteDetails(Request $request){
 //        return $request;
@@ -8385,7 +8386,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::create([
+        $route = Route::create([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8393,13 +8394,20 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if($rider){
+            $rider->route_id = $route->id;
+            $rider->save();
+        }
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
+        $riders = Rider::where('status',1)->select(['id','name'])->get();
+        $current_rider = Rider::where('route_id',$id)->select('id')->get();
         $route = Route::find($id);
-
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider' => $current_rider]);
     }
     public function editRouteDetails(Request $request, $id){
         $validations = [
@@ -8415,7 +8423,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::where('id',$id)->update([
+        $route = Route::where('id',$id)->update([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8423,6 +8431,11 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+        $rider = Rider::where('route_id',$id)->select('id','name')->first();
+        if($rider){
+            $rider->route_id = $id ;
+            $rider->save();
+        }
         return redirect()->back()->with('success','Route updated successfully');
     }
     public function routeStatus(Request $request){

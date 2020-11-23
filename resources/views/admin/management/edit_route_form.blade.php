@@ -53,6 +53,19 @@
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
+                <select name="rider_id" id="rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                   {{-- <option value="{{$riders->id}}" selected>{{$riders->name}}</option>--}}
+                    @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
                 <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required">{{$route->junction}}</textarea>
             </fieldset>
         </div>
@@ -69,6 +82,10 @@
     $('.select2').select2({
         dropdownParent: $("#editRoute")
     });
+    var rider_id = {{$current_rider}};
+    console.log(rider_id);
+    $('#rider_id').val(rider_id).trigger('change');
+    //$('#rider_id').val('').trigger('change');
 
     $( "#editRouteForm" ).validate({
 
