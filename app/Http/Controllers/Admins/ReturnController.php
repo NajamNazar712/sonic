@@ -2744,6 +2744,22 @@ class ReturnController extends Controller
                 }
             }
         }
+
+        $files = File::glob(asset('storage/uploads/return_notes/*.*'));
+        $now = Carbon::now();
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $created = date("F d Y H:i:s.",filemtime($file));
+                $file_name = pathinfo($file);
+                if($now->diffInDays($created) > 1){
+                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                    $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                    if($exists){
+                        File::delete($file);
+                    }
+                }
+            }
+        }
     }
 
     public function cx_sales_index(){
@@ -3153,10 +3169,17 @@ class ReturnController extends Controller
                         if(file_exists($url)){
                             $img_url = asset('uploads/return_notes/' . $return_note_image->image);
                         }else{
-                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                            $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
                             if($exists){
-                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
                             }
+                            else{
+                                $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                                if($exists){
+                                    $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                }
+                            }
+
                         }
                         $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
                     }
