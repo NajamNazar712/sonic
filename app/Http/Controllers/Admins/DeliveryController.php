@@ -4709,7 +4709,6 @@ class DeliveryController extends Controller
     }
     public function receive_delivery_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        dd($delivery_note_id);
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
         $shipments = array();
