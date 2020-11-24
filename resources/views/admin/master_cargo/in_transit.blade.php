@@ -911,7 +911,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    var cargo_number = $(form).find('.master_cargo_number').val();
+                    var cargo_number = parseInt($(form).find('.master_cargo_number').val());
 
                     var index = $.inArray(cargo_number, master_cargo_consignment_ids);
 
@@ -970,7 +970,7 @@
                             });
                     }
                     else {
-                        toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error('Master cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                     return false;

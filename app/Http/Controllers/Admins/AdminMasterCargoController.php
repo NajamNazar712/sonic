@@ -588,6 +588,7 @@ class AdminMasterCargoController extends Controller
             return 'false';
         }
     }
+
     public function create_store(Request $request) {
         $shipments = 0;
         $quantity = 0;
@@ -810,6 +811,7 @@ class AdminMasterCargoController extends Controller
 
         return $datatables->make(true);
     }
+
     public function master_cargo_pending_index() {
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
@@ -1424,6 +1426,7 @@ class AdminMasterCargoController extends Controller
         $html = $this::master_cargo_print($request->id);
         return $html;
     }
+
     public static function master_cargo_print($master_cargo_id, $type = NULL) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -2623,6 +2626,7 @@ class AdminMasterCargoController extends Controller
             return back()->withErrors('Missing Bag Number!');
         }
     }
+
     public function master_cargo_bag_receive_index() {
         if (session('bag_number')) {
             $bag = Bag::find(session('bag_number'));
@@ -2634,6 +2638,7 @@ class AdminMasterCargoController extends Controller
             return redirect()->route('admin.master_cargo.bag.in_transit.index')->withErrors('Kindly reselect a Bag Number!');
         }
     }
+
     public function master_cargo_bag_receive_shipment_details(Request $request) {
 
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -2872,6 +2877,7 @@ class AdminMasterCargoController extends Controller
         //dispute end for junction
         return redirect()->route('admin.master_cargo.bag.in_transit.index')->with('success', 'Bag Number# ' . $bag->seal_number . ' has been Received');
     }
+
     public function master_cargo_in_transit_bag_short_received(Request $request) {
         $tracking_numbers = array();
         $bag = Bag::find($request->id);
