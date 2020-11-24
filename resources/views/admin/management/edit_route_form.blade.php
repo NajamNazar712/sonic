@@ -82,10 +82,17 @@
     $('.select2').select2({
         dropdownParent: $("#editRoute")
     });
-    var rider_id = {{$current_rider->id}};
+    var rider_id = @json($current_rider_id);
 
-    $('#rider_id').val(rider_id).trigger('change');
-    //$('#rider_id').val('').trigger('change');
+    if(rider_id === null){
+        $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Rider*'
+        });
+    }
+    else{
+        $('#rider_id').val(rider_id).trigger('change');
+    }
 
     $( "#editRouteForm" ).validate({
 

@@ -41,9 +41,39 @@
                             <input type="hidden" name="status" id="cstatus">
                             <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
                             <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
-
-
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade text-left" id="assign_location" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignLocations"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Assign Locations</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="row">
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="users" id="users" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($users as $user)
+                                            <option value="{{$user->id}}">{{$user->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                <label for="phone" class="font-weight-bold">Pickup Locations</label>
+                                <div class="form-group">
+                                    <input type="text" name="pickup_address_id" id="pickup_address_id" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,6 +92,11 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
+            $('#users').select2({
+                width:'100%',
+                placeholder:"Search Users",
+                allowClear:true,
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -142,6 +177,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.route.ajax') }}',
+                rowId: 'id',
                 order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -199,6 +235,22 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
+                }
+            });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+                $('input:hidden[name=id]').val();
+
+                var name = table.row( $(this).parents('tr') ).data().name;
+                var trax_id = table.row( $(this).parents('tr') ).data().trax_id;
+                var email = table.row( $(this).parents('tr') ).data().email;
+
+                $('#name').val(name);
+                $('#trax_id').val(trax_id);
+                $('#email').val(email);
+
+                if ($(this).hasClass('assign_location')) {
+                    $('#assign_location').modal('show');
                 }
             });
 

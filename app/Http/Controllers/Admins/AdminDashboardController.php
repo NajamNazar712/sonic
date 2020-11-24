@@ -8305,7 +8305,8 @@ if(session('department_id') == 7){
     }
     //route management
     public function routeView(){
-        return view('admin.management.route_management');
+        $users = User::select('id','name')->get();
+        return view('admin.management.route_management')->with(['users' => $users]);
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
@@ -8353,6 +8354,9 @@ if(session('department_id') == 7){
                         }
                     }
 
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" data-toggle="modal" data-target="#assignlocation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+
+
                     $dropdown .= '
                         </div>
                       </div>
@@ -8394,20 +8398,32 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
-        $rider_id = $request->rider_id;
-        $rider = Rider::find($rider_id);
-        if($rider){
-            $rider->route_id = $route->id;
-            $rider->save();
+        if(Rider::where('route_id','=',$route->id)->exists()){
+            return redirect()->back()->with('error', 'Route id already exists !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $route->id;
+                $rider->save();
+            }
         }
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
         $riders = Rider::where('status',1)->select(['id','name'])->get();
-        $current_rider = Rider::where('route_id',$id)->select('id')->first();
+        $current_rider = Rider::where('route_id',$id);
+        if($current_rider->exists()){
+            $current_rider = $current_rider->select('id')->first();
+            $current_rider_id = $current_rider->id;
+        }
+        else{
+            $current_rider_id = NULL;
+        }
         $route = Route::find($id);
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider' => $current_rider]);
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id]);
     }
     public function editRouteDetails(Request $request, $id){
         $validations = [
@@ -8431,11 +8447,17 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
-        $rider_id = $request->rider_id;
-        $rider = Rider::find($rider_id);
-        if($rider){
-            $rider->route_id = $id;
-            $rider->save();
+
+        if(Rider::where('route_id','=',$id)->exists()){
+            return redirect()->back()->with('success', 'Details Updated !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $id;
+                $rider->save();
+            }
         }
         return redirect()->back()->with('success','Route updated successfully');
     }
