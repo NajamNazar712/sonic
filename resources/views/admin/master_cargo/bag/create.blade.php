@@ -592,66 +592,66 @@
                         });
                         $('#cargo_consignment form .transport_mode').val(2).trigger('change');
                         UnblockPagePermanently();
-                        $('#cargo_consignment form').validate({
-                            errorClass: 'danger',
-                            successClass: 'success',
-                            errorPlacement: function(error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            normalizer: function(value) {
-                                return $.trim(value);
-                            },
-                            submitHandler: function(form) {
-                                var pressed_button = $(this.submitButton);
-
-                                $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-
-                                $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                                blockPagePermanently();
-
-                                swal({
-                                    text: 'Are you sure you want to submit?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                }).then(function(confirm) {
-                                    if(confirm) {
-                                        swal({
-                                            title: 'Please Wait!',
-                                            text: 'Your cargo is being created!',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-
-                                        form.submit();
-                                    }
-                                    else {
-                                        $(form).find('button[type=submit]').prop('disabled', false);
-
-                                        UnblockPagePermanently();
-                                    }
-                                });
-                            }
-                        });
                     }
                 });
+            });
+            $('#cargo_consignment form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
+
+                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    blockPagePermanently();
+
+                    swal({
+                        text: 'Are you sure you want to submit?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Your Bag is being created!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            form.submit();
+                        }
+                        else {
+                            $(form).find('button[type=submit]').prop('disabled', false);
+
+                            UnblockPagePermanently();
+                        }
+                    });
+                }
             });
 
             $('#camera_scan_initiate').bind('click', function() {
