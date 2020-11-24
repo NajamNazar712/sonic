@@ -2886,15 +2886,16 @@ class AdminMasterCargoController extends Controller
     }
 
     public function update_seal_number(Request $request){
-        if(Bag::where('seal_number', $request->seal_number)->where('id', '!=', $request->id)){
+        $existing = Bag::where('seal_number', $request->seal_number)->where('id', '!=', $request->id);
+        if($existing->exists()){
+            return ['status' => 0, 'error' => 'Seal Number must be unique!'];
+        }
+        else{
             $bag = Bag::find($request->id);
             $bag->seal_number = $request->seal_number;
             $bag->save();
 
             return ['status' => 1, 'success' => 'Seal Number updated successfully!'];
-        }
-        else{
-            return ['status' => 0, 'error' => 'Seal Number must be unique!'];
         }
     }
 
