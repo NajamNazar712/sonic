@@ -2315,7 +2315,7 @@ class AdminMasterCargoController extends Controller
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
             ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
-            ->where('status_id', 2);
+            ->where('master_cargoes.status_id', 2);
 
         if (session('role_id') != 1) {
             $receive_cargo = $receive_cargo->where(function ($query) {
@@ -2375,18 +2375,18 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if ($tracking_number = $request->get('tracking_number')) {
+        if($request->has('tracking_number') || $request->has('bag_number')){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
-                ->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
-                ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
+                ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
+            if ($tracking_number = $request->get('tracking_number')) {
+                $datatables->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
+                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
 
-        if ($bag_number = $request->get('bag_number')) {
-            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
-                ->where('b.seal_number', '=', $bag_number);
+            if ($bag_number = $request->get('bag_number')) {
+                $datatables->where('b.seal_number', '=', $bag_number);
+            }
         }
 
         return $datatables->make(true);
@@ -2470,18 +2470,18 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if ($tracking_number = $request->get('tracking_number')) {
+        if($request->has('tracking_number') || $request->has('bag_number')){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
-                ->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
-                ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
+                ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
+            if ($tracking_number = $request->get('tracking_number')) {
+                $datatables->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
+                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
 
-        if ($bag_number = $request->get('bag_number')) {
-            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
-                ->where('b.seal_number', '=', $bag_number);
+            if ($bag_number = $request->get('bag_number')) {
+                $datatables->where('b.seal_number', '=', $bag_number);
+            }
         }
 
         return $datatables->make(true);
