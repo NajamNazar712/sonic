@@ -308,7 +308,6 @@ class V2AdminPickupsController extends Controller
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
-                $riders['old'] = $pickup_request->current_rider_id;
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
@@ -321,13 +320,6 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_attempt->attempt_date = Carbon::now();
                 $pickup_request_attempt->assigned_by = Auth::id();
                 $pickup_request_attempt->save();
-
-
-                if($pickup_request->current_rider_id != null)
-                {
-                    NotificationsController::send(106, $riders, $pickup_request_id);
-                    NotificationsController::send(107, $riders, $pickup_request_id);
-                }
 
                 if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                     $allowed_pickup_requests[] = $pickup_request_id;
