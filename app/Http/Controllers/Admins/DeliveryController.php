@@ -2009,6 +2009,26 @@ class DeliveryController extends Controller
                 $delivery_note_data->pending_status = 1;
             }
             $delivery_note_data->save();
+            $delivered_status = array(14, 30, 36, 37);
+            $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->updated_by = Auth::id();
+            $delivery_note_data->save();
+            
             if(count($invalid_reason_shipments) > 0){
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
                 return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
