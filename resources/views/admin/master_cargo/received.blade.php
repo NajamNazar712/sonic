@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Master Cargo History')
+@section('title', 'Master Cargo Received')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Master Cargo History
+                    Master Cargo Received
                 </h1>
 
                 <div class="card">
@@ -53,7 +53,6 @@
                                     <th class="border-primary border-darken-1">Contact No.</th>
                                     <th class="border-primary border-darken-1">Transit Date</th>
                                     <th class="border-primary border-darken-1">Transit By</th>
-                                    <th class="border-primary border-darken-1">Status</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -147,7 +146,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.master_cargo.history.list') }}',
+                        url: '{{ route('admin.master_cargo.received.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -170,7 +169,6 @@
                             head.push('Contact No.');
                             head.push('Transit Datetime');
                             head.push('Transit By');
-                            head.push('Status');
 
 
                             $.each(result.data, function(index, values) {
@@ -195,7 +193,6 @@
                                 row.push(values.phone_number);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
-                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -225,7 +222,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.master_cargo.history.list') }}',
+                    url: '{{ route('admin.master_cargo.received.list') }}',
                     data: function (d) {
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.bag_number = $('#bag_number_search_form #bag_number').val();
@@ -252,8 +249,7 @@
                     {data: 'vehicle', name: 'master_cargoes.vehicle', class: 'align-middle vehicle'},
                     {data: 'phone_number', name: 'master_cargoes.phone_number', class: 'align-middle phone_number'},
                     {data: 'transit_at', name: 'master_cargoes.created_at', class: 'align-middle transit_at'},
-                    {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
-                    {data: 'status', name: 'status', class: 'align-middle status'}
+                    {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -266,7 +262,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
@@ -279,11 +274,6 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.shipping_mode')){
                             $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -317,19 +307,6 @@
                     $("#mode_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
                         placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data2 = $.map({!! $cargo_status !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
-
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data2,
-                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

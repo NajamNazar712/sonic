@@ -1748,7 +1748,7 @@ class AdminMasterCargoController extends Controller
             }
         }
 
-        $cities = City::select(['id', 'name'])->whereIn('id', $city_ids);
+        $cities = City::select(['id', 'name'])->where('business_category_id', 1)->whereIn('id', $city_ids);
 
         if (session('role_id') != 1) {
             $cities = $cities->whereIn('id', session('hubs'));
@@ -2296,6 +2296,102 @@ class AdminMasterCargoController extends Controller
         return ['status' => 0, 'success' => 'Master Cargo Excel Details', 'details' => $details];
     }
 
+    public function master_cargo_received_index(){
+        $shipping_mode = ShippingMode::all();
+        $cargo_status = MasterCargoStatus::all();
+        $transport_vendor = TransportModeVendor::all();
+        $transport_mode = TransportMode::all();
+        return view('admin.master_cargo.received')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
+    }
+
+    public function master_cargo_received_list(Request $request){
+        $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
+            ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
+            ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
+            ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
+            ->join('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
+            ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
+            ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
+            ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.builty_number', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
+            ->where('status_id', 2);
+
+        if (session('role_id') != 1) {
+            $receive_cargo = $receive_cargo->where(function ($query) {
+                $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'));
+            });
+        }
+
+        $datatables = Datatables::of($receive_cargo)
+            ->addColumn('id_padded', function ($master_cargo) {
+                return str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('bags_count', function ($master_cargo) {
+                return $master_cargo->bags;
+            })
+            ->addColumn('shipments_count', function ($master_cargo) {
+                return $master_cargo->shipments;
+            })
+            ->addColumn('short_received_bags_count', function ($master_cargo) {
+                return $master_cargo->short_received_bags;
+            })
+            ->addColumn('bags', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->bags . '</button>';
+            })
+            ->addColumn('short_received_bags', function ($master_cargo) {
+                if($master_cargo->short_received_bags > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received_bags . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('shipments', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->shipments . '</button>';
+            })
+            ->filterColumn('master_cargoes.id', function ($query, $keyword) {
+                return $query->where('master_cargoes.id', '=', $keyword);
+            })
+            ->filterColumn('shipping_mode',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('mcs.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            });
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
+                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
+                ->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
+                ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+        if ($bag_number = $request->get('bag_number')) {
+            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
+                ->join('bags as b', 'b.id', '=', 'mcb.bag_id')
+                ->where('b.seal_number', '=', $bag_number);
+        }
+
+        return $datatables->make(true);
+    }
+
     public function master_cargo_history_index(){
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
@@ -2367,7 +2463,7 @@ class AdminMasterCargoController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('ccs.id',$keyword);
+                    $query->where('mcs.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');

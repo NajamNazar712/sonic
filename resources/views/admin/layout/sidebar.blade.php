@@ -280,6 +280,10 @@
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(124, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.received.index') }}">Received</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(124, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.master_cargo.history.index') }}">History</a></li>
                                     @endif
 

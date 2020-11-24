@@ -1191,6 +1191,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_history_list')->name('list');
         });
 
+        Route::prefix('received')->name('received.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_received_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_received_list')->name('list');
+        });
+
         Route::prefix('mapping')->name('mapping.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@mapping_index')->name('index');
             Route::get('list', 'Admins\AdminCargoController@mapping_list')->name('list');
