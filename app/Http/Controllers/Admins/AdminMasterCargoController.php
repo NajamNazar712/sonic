@@ -704,7 +704,7 @@ class AdminMasterCargoController extends Controller
                     ShipmentOpenBoxJourneyController::add($shipment_id,1,Auth::id());
                 }
 
-                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->seal_number, $bag->builty_number);
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id, $bag->builty_number);
             }
 
             return redirect()->route('admin.master_cargo.bag.create.index')->with(['success' => 'Bag Created with Bag Number: ' . $bag->seal_number]);
