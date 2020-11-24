@@ -82,8 +82,8 @@
     $('.select2').select2({
         dropdownParent: $("#editRoute")
     });
-    var rider_id = {{$current_rider}};
-    console.log(rider_id);
+    var rider_id = {{$current_rider->id}};
+
     $('#rider_id').val(rider_id).trigger('change');
     //$('#rider_id').val('').trigger('change');
 

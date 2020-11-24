@@ -8405,7 +8405,7 @@ if(session('department_id') == 7){
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
         $riders = Rider::where('status',1)->select(['id','name'])->get();
-        $current_rider = Rider::where('route_id',$id)->select('id')->get();
+        $current_rider = Rider::where('route_id',$id)->select('id')->first();
         $route = Route::find($id);
         return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider' => $current_rider]);
     }
@@ -8431,9 +8431,10 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
-        $rider = Rider::where('route_id',$id)->select('id','name')->first();
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
         if($rider){
-            $rider->route_id = $id ;
+            $rider->route_id = $id;
             $rider->save();
         }
         return redirect()->back()->with('success','Route updated successfully');
