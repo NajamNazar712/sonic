@@ -533,7 +533,7 @@ class AdminMasterCargoController extends Controller
 
         $details = array();
 
-        $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->get();
+        $details['junctions'] = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
 
         $details['transport_modes'] = TransportMode::all();
 
@@ -1040,7 +1040,7 @@ class AdminMasterCargoController extends Controller
 
         $details = array();
 
-        $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->get();
+        $details['junctions'] = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
 
         $details['transport_modes'] = TransportMode::all();
 
