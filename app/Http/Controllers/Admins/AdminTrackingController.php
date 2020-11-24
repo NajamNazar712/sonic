@@ -714,7 +714,10 @@ class AdminTrackingController extends Controller
                         }
 
                         if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+                            if ($journey->shipper_status_id == 3) {
+                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                            }
+                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
                                 $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             }
                             else {
