@@ -16,6 +16,7 @@ class UpdateMasterCargoForOnwardForwardingTable extends Migration
         Schema::table('master_cargoes', function (Blueprint $table) {
             $table->integer('onward_forwarding')->default(0);
             $table->string('cnic')->nullable()->after('phone_number');
+            $table->dropColumn('type');
         });
     }
 
@@ -29,6 +30,7 @@ class UpdateMasterCargoForOnwardForwardingTable extends Migration
         Schema::table('master_cargoes', function (Blueprint $table) {
             $table->dropColumn('onward_forwarding');
             $table->dropColumn('cnic');
+            $table->integer('type');
         });
     }
 }
