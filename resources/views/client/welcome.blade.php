@@ -9,7 +9,7 @@
                 <h1 class="mb-5">Welcome to Sonic..</h1>
                 @if(count($sales_person_data)> 0)
                     <div class="row justify-content-center">
-                        <div class="col-6">
+                        <div class="col-8">
                             <table class="table table-bordered">
                                 <thead>
                                 <td><b>Sales Person Name</b></td>
@@ -29,7 +29,7 @@
                 @endif
                 @if(count($poc)> 0)
                     <div class="row justify-content-center">
-                          <div class="col-6">
+                          <div class="col-8">
                                 <table class="table table-bordered">
                                     <thead>
                                         <td><b>POC Name</b></td>
@@ -51,7 +51,7 @@
                 @endif
                 @if(count($kam)> 0)
                     <div class="row justify-content-center">
-                        <div class="col-6">
+                        <div class="col-8">
                             <table class="table table-bordered">
                                 <thead>
                                     <td><b>KAM Name</b></td>
