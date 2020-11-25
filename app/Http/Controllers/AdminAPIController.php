@@ -156,7 +156,7 @@ class AdminAPIController extends Controller
         }
         $admin_id = $request->admin_id;
         $old_image_ids = array();
-        $old_image_ids = $request->old_image_ids;
+        $old_image_ids = ($request->old_image_ids != '')? $request->old_image_ids:[];
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
         if ($return_note) {
@@ -184,7 +184,7 @@ class AdminAPIController extends Controller
                                         Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
                                     }
                                 }
-                        }
+                            }
                             ReturnNoteImage::where('id', $image_id)->delete();
                         }
                     }
