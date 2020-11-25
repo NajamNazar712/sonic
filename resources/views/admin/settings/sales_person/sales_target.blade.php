@@ -16,66 +16,6 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                           {{-- <div class="modal fade text-left" id="viewdetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditDetails"
-                                 aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary white">
-                                            <h4 class="modal-title white">Edit Details </h4>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            <div class="row">
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="usr" class="font-weight-bold">Sales Person</label>
-                                                    <div class="form-group">
-                                                        <input type="text" name="name" id="name" class="form-control">
-                                                    </div>
-                                                </div>
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="phone" class="font-weight-bold">Start Date</label>
-                                                    <div class="form-group">
-                                                        <input type="text" name="phone_number" id="phone_number" class="form-control" readonly>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="cnic" class="font-weight-bold">End Date</label>
-                                                    <div class="form-group">
-                                                        <input type="text" name="cnic" id="cnic" class="form-control" readonly>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="email" class="font-weight-bold">Target Shipments/Day</label>
-                                                    <div class="form-group">
-                                                        <input type="text" name="department" id="department" class="form-control" readonly>
-                                                    </div>
-                                                </div>
-
-
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="email" class="font-weight-bold">Target Shipments/Month</label>
-                                                    <div class="form-group">
-                                                        <input type="email" name="email" id="email" class="form-control" readonly>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                                    <label for="email" class="font-weight-bold">Average Revenue</label>
-                                                    <div class="form-group">
-                                                        <input type="text" name="default_hub" id="default_hub" class="form-control" readonly>
-                                                    </div>
-                                                </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>--}}
 
                             <div class="row justify-content-center">
                                 <div class="col-5 mb-2">
@@ -145,9 +85,10 @@
                                         <th class="border-primary border-darken-1">Start Date</th>
                                         <th class="border-primary border-darken-1">End Date</th>
                                         <th class="border-primary border-darken-1">Target Shipments/Day</th>
+                                        <th class="border-primary border-darken-1">Revenue Target/Day</th>
                                         <th class="border-primary border-darken-1">Target Shipments/Month</th>
+                                        <th class="border-primary border-darken-1">Revenue Target/Month</th>
                                         <th class="border-primary border-darken-1">Average Revenue</th>
-                                        <th class="border-primary border-darken-1"></th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -182,8 +123,8 @@
                 $('#start_date').val(start.format('YYYY-MM-DD'));
                 $('#end_date').val(end.format('YYYY-MM-DD'));
             });
-            
-            
+
+
             $('#sales_person_select').select2({
                 placeholder:'Sales Person Select',
                 width:'100%'
@@ -226,7 +167,9 @@
                             head.push('Start Date');
                             head.push('End Date');
                             head.push('Target Shipments/Day');
+                            head.push('Revenue Target/Day');
                             head.push('Target Shipments/Month');
+                            head.push('Revenue Shipments/Month');
                             head.push('Average Revenue');
 
                             $.each(result.data, function(index, values) {
@@ -237,7 +180,9 @@
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
+                                row.push(values.per_day_revenue_target);
                                 row.push(values.target_month);
+                                row.push(values.per_month_revenue_target);
                                 row.push(values.average_revenue);
 
                                 body.push(row);
@@ -277,10 +222,10 @@
                     {data: 'start_date', name: 'sale_person_targets.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_targets.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_targets.target_days', class: 'align-middle target_days'},
+                    {data: 'per_day_revenue_target', name: 'per_day_revenue_target', class: 'align-middle per_day_revenue_target'},
                     {data: 'target_month', name: 'sale_person_targets.target_month ', class: 'align-middle target_month'},
+                    {data: 'per_month_revenue_target', name: 'per_month_revenue_target', class: 'align-middle per_month_revenue_target'},
                     {data: 'average_revenue', name: 'sale_person_targets.average_revenue', class: 'align-middle average_revenue'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

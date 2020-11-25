@@ -1666,25 +1666,10 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_list(Request $request){
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue');
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month','sale_person_targets.average_revenue',DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'),DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status',1);
 
-        $datatables = Datatables::of($targets)
-            ->addColumn('action', function($user) {
-                $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Info</div></button>';
-                $delete = '<button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="las la-trash"></i></div><div class="col-9 offset-1">Delete</div></button>';
-
-                    $dropdown = '
-                    <div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">';
-
-                       /* $dropdown .= $edit;*/
-                        $dropdown .= $delete;
-
-                    return $dropdown;
-            });
-        //return Datatables::of($targets)->make(true);
-        return $datatables->make(true);
+        $datatable = Datatables::of($targets);
+        return $datatable->make(true);
     }
     public function sales_person_targets_history(){
         return view('admin.settings.sales_person.history');
