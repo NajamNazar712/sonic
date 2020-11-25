@@ -38,16 +38,6 @@
                                         </fieldset>
                                     </div>
 
-                                    {{-- <div class="col-3">
-                                         <div class="form-group input-group">
-                                             <div class="input-group-prepend">
-                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                     <span class="la la-calendar-o"></span>
-                                 </span>
-                                             </div>
-                                             <input type="text" name="pickup_date" class="form-control bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Date" data-rule-required="true" data-msg-required="Date is required">
-                                         </div>
-                                     </div>--}}
                                     <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
@@ -55,7 +45,7 @@
                                                     <span class="la la-calendar-o small-calender-icon"></span>
                                                 </span>
                                             </div>
-                                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
+                                            <input type="text" name="search_date_from"  data-value="{{$default_date}}"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
                                         </div>
                                     </div>
                                     <div class="col-3">
@@ -65,7 +55,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Receiving Sheet To">
+                                            <input type="text" name="search_date_to"  data-value="{{$default_date}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Receiving Sheet To">
                                         </div>
                                     </div>
 
@@ -87,8 +77,8 @@
                             <th class="border-primary border-darken-1 ">Pickup Note Date</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Total Shipment</th>
-                            <th class="border-primary border-darken-1">Picked Via App</th>
                              <th class="border-primary border-darken-1">Arrived at Origin</th>
+                            <th class="border-primary border-darken-1">Picked Via App</th>
                         </thead>
                     </table>
                 </div>
@@ -128,19 +118,7 @@
                 width: '100%',
                 allowClear: true
             });
-            /*  var pickup_date = $('#pickup_date').pickadate({
-                  firstDay: 1,
-                  clear: 'Clear',
-                  format:'dd mmmm, yyyy',
-                  selectYears: true,
-                  selectMonths: true,
-                  max: '{!! Carbon\Carbon::now() !!}',
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#pickup_date_root').css('top','40px');
-                },
-            });*/
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -159,8 +137,8 @@
                             head.push('Pickup Note Date');
                             head.push('Rider Name');
                             head.push('Total Shipment');
-                            head.push('Picked Via App');
                             head.push('Arrived at Origin');
+                            head.push('Picked Via App');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -170,8 +148,8 @@
                                 row.push(values.date);
                                 row.push(values.rider);
                                 row.push(values.total_shipment);
-                                row.push(values.type);
                                 row.push(values.total_arrived);
+                                row.push(values.type);
                                 body.push(row);
                             });
                         },
@@ -220,7 +198,7 @@
                         title: 'Rider Receiving Sheet',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o "></i> Excel',
-                    },
+                    },'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -244,12 +222,12 @@
                 order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id '},
+                    {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id'},
                     {data: 'date', name: 'v2_pickup_notes.created_at', class: 'align-middle text_center date'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text_center rider'},
                     {data: 'total_shipment', name: 'total_shipment', class: 'text_center align-middle total_shipment'},
-                    {data: 'type', name: 'rpal.type_id', class: 'align-middle type'},
                     {data: 'total_arrived', name: 'total_arrived', class: 'text_center align-middle total_arrived'},
+                    {data: 'type', name: 'rpal.type_id', class: 'align-middle type'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -267,7 +245,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.total_shipment') || $(header).is('.total_arrived')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.type')) {
                             $(type_select).appendTo($(search)).on('change', function () {
@@ -336,9 +314,31 @@
             }
 
             $('.datatable tbody').on('click', 'tr td.note_id button.print', function() {
-                print(parseInt($(this).children('.note_id').html()));
+                print(parseInt($(this).children('.id').html()));
             });
+            $('#datatable tbody').on('click','tr td.note_id .btn-group', function() {
 
+                var rider = table.row($(this).parents('tr')).data().rider;
+                var date = table.row($(this).parents('tr')).data().date;
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.rider_receiving.check_pickup') !!}',
+                    method: 'POST',
+                    data: {
+                        'rider_id': rider,
+                        'pickup_date': date,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        print(data.pickup_note_id);
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                    }
+                });
+
+
+            });
 
             /* $('#search_filter_btn').on('click', function () {
                  var errors = 0;

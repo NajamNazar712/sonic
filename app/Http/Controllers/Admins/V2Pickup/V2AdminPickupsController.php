@@ -2095,10 +2095,11 @@ class V2AdminPickupsController extends Controller
     }
 
     public function rider_receiving_index(){
-        $pickup_actions = PickupAction::select('id','name')->whereIn('id',[3,4])->get();
+        $pickup_actions = PickupAction::all();
+        $default_date = Carbon::now();
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
         $cities = City::select('id','name')->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ,'pickup_actions'=>$pickup_actions ]);
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ,'pickup_actions'=>$pickup_actions,'default_date' => $default_date]);
     }
 
     public function rider_receiving_check_pickup(Request $request){
@@ -2331,6 +2332,7 @@ class V2AdminPickupsController extends Controller
         return $html;
     }
     public function rider_receiving_list(Request $request){
+
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
@@ -2364,14 +2366,17 @@ class V2AdminPickupsController extends Controller
                 }
             })
             ->editColumn('type', function ($rider) {
-                if($rider->type == 3){
-                    return 'Not Pick';
+                if($rider->type == 1){
+                    return 'Navigate';
                 }
-                else if($rider->type == 4){
-                    return  'Pick';
+                else if($rider->type == 2){
+                    return  'Call';
+                }
+                else if($rider->type == 3){
+                    return  'Not Pick';
                 }
                 else{
-                    return '-';
+                    return 'Pick';
                 }
             })
         ;
