@@ -156,8 +156,7 @@ class AdminAPIController extends Controller
         }
         $admin_id = $request->admin_id;
         $old_image_ids = array();
-        $pictures = array();
-        $old_image_ids = $request->old_image_ids;
+        $old_image_ids = ($request->old_image_ids != '')? $request->old_image_ids:[];
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
         if ($return_note) {
