@@ -146,7 +146,7 @@ class AdminAPIController extends Controller
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
             'pictures' => ['array','nullable'],
-            'pictures.*image' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048'],
+            'pictures.*image' => ['nullable', 'image', 'mimes:jpeg,png', 'max:5120'],
             'old_image_ids' => ['array', 'min:0']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
