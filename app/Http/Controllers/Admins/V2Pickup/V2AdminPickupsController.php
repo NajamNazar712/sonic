@@ -246,8 +246,10 @@ class V2AdminPickupsController extends Controller
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
         $pickup_request_ids = explode(',' , $pickup_request_ids);
+        //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
-
+        $riders = array();
+        $riders['new'] = $rider_id;
         if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
@@ -302,6 +304,7 @@ class V2AdminPickupsController extends Controller
         foreach ($pickup_request_ids as $pickup_request_id) {
 //            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
             $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>',$today);
+
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
@@ -328,7 +331,10 @@ class V2AdminPickupsController extends Controller
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id == $rider_id){
                     continue;
-                }else{
+                }
+                else
+                {
+                    $riders['old'] = $pickup_request->current_rider_id;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
@@ -354,6 +360,9 @@ class V2AdminPickupsController extends Controller
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
                     }
+                    NotificationsController::send(106, $riders, $pickup_request_id);
+                    NotificationsController::send(107, $riders, $pickup_request_id);
+
                 }
 
             }
@@ -410,10 +419,12 @@ class V2AdminPickupsController extends Controller
                             if ($shipment->booking_type_id == 5) {
                                 NotificationsController::send(77, $rider_id, $shipment->id);
                             }
-                        }
-                    }
-                }
 
+                        }
+
+                    }
+
+                }
             }
             return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         }else{

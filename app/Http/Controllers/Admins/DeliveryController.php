@@ -101,12 +101,12 @@ class DeliveryController extends Controller
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -753,7 +753,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
             ->where('delivery_notes.status', 0);
 
 
@@ -2011,6 +2011,26 @@ class DeliveryController extends Controller
                 $delivery_note_data->pending_status = 1;
             }
             $delivery_note_data->save();
+            $delivered_status = array(14, 30, 36, 37);
+            $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->updated_by = Auth::id();
+            $delivery_note_data->save();
+
             if(count($invalid_reason_shipments) > 0){
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
                 return redirect()->back()->with('success', 'Statuses updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
@@ -4010,14 +4030,23 @@ class DeliveryController extends Controller
                 return $dropdown;
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 0) ? 'Created' : 'Deposited';
+                if ($sdn->status == 0) {
+                    return 'Created';
+                }
+                else if ($sdn->status == 0) {
+                    return 'Deposited';
+                }
+                else {
+                    return 'Resolved';
+                }
             })
             ->filterColumn('status', function ($query, $keyword) {
-
                 if ($keyword == 0) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 1) {
-                    $query->where('station_deposit_notes.status', '>=', $keyword);
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }

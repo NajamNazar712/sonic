@@ -1317,8 +1317,9 @@
                 $('#edit_comment_' + last_comment).on('click', function (e) {
                 var comment_id = $(this).attr("value");
                 e.preventDefault();
+                var text_edit  = "Are you sure, you want to edit this comment as Internal? \n \t "+comment;
                 swal({
-                    text: 'Are you sure, you want to edit this comment as Internal?\n\t "' + comment + '"',
+                    text: text_edit,
                     icon: 'info',
                     buttons: {
                         cancel: {
@@ -1843,8 +1844,10 @@
             $('#edit_comment_{{$comment->id}}').on('click', function (e) {
                 var comment_id = $(this).attr("value");
                 e.preventDefault();
+                var cmt = @json($comment->comment);
+                var text_edit  = "Are you sure, you want to edit this comment as Internal? \n \t "+cmt;
                 swal({
-                    text: 'Are you sure, you want to edit this comment as Internal?\n\t "{{$comment->comment}}"',
+                    text: text_edit,
                     icon: 'info',
                     buttons: {
                         cancel: {

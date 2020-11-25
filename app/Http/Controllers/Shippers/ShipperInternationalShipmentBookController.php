@@ -44,7 +44,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $date = Carbon::today();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = City::where('status', 1)->where('business_category_id', 2)->where('hub', 0)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
