@@ -2386,7 +2386,7 @@ class V2AdminPickupsController extends Controller
                 else if($rider->type == 3){
                     return  'Not Pick';
                 }
-                else{
+                else if($rider->type == 4){
                     return 'Pick';
                 }
             })
