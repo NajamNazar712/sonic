@@ -155,6 +155,8 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
         $admin_id = $request->admin_id;
+        $old_image_ids = array();
+        $pictures = array();
         $old_image_ids = $request->old_image_ids;
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
