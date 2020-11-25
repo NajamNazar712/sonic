@@ -73,7 +73,7 @@
 
                                 <div class="row justify-content-center">
                                     <div class="col-2">
-                                        <button type="submit" id="search_filter_btn"  class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                        <button type="button" id="search_filter_btn"  class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
                                 </div>
                             </form>
@@ -86,10 +86,9 @@
                             <th class="border-primary border-darken-1 ">Pickup Note#</th>
                             <th class="border-primary border-darken-1 ">Pickup Note Date</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
-                            <th class="border-primary border-darken-1">Total Booking</th>
-                            {{-- <th class="border-primary border-darken-1">Picked Via App</th>
-                             <th class="border-primary border-darken-1">Arrived at Origin</th>--}}
-                        </tr>
+                            <th class="border-primary border-darken-1">Total Shipment</th>
+                            <th class="border-primary border-darken-1">Picked Via App</th>
+                             <th class="border-primary border-darken-1">Arrived at Origin</th>
                         </thead>
                     </table>
                 </div>
@@ -119,6 +118,16 @@
 
     <script>
         $(document).ready(function () {
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select Rider*',
+                width: '100%',
+                allowClear: true
+            });
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select City*',
+                width: '100%',
+                allowClear: true
+            });
             /*  var pickup_date = $('#pickup_date').pickadate({
                   firstDay: 1,
                   clear: 'Clear',
@@ -149,7 +158,7 @@
                             head.push('Pickup Note#');
                             head.push('Pickup Note Date');
                             head.push('Rider Name');
-                            head.push('Total Booking');
+                            head.push('Total Shipment');
                             head.push('Picked Via App');
                             head.push('Arrived at Origin');
 
@@ -157,12 +166,12 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.note_id);
-                                row.push(values.shipper_name);
-                                row.push(values.bookings);
-                                row.push(values.address);
-                                row.push(values.origin);
-                                row.push(values.booking_date);
+                                row.push(values.id);
+                                row.push(values.date);
+                                row.push(values.rider);
+                                row.push(values.total_shipment);
+                                row.push(values.type);
+                                row.push(values.total_arrived);
                                 body.push(row);
                             });
                         },
@@ -208,7 +217,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Receiving Sheet',
+                        title: 'Rider Receiving Sheet',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
@@ -238,9 +247,9 @@
                     {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id '},
                     {data: 'date', name: 'v2_pickup_notes.created_at', class: 'align-middle text_center date'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text_center rider'},
-                    {data: 'total_booking', name: 'vpr.booked', class: 'text_center align-middle total_booking'},
-                    /*  {data: 'origin', name: 'c.name', class: 'text_center align-middle origin'},
-                      {data: 'booking_date', name: 'receiving_sheets.created_at', class: 'text_center align-middle booking_date'},*/
+                    {data: 'total_shipment', name: 'total_shipment', class: 'text_center align-middle total_shipment'},
+                    {data: 'type', name: 'rpal.type_id', class: 'align-middle type'},
+                    {data: 'total_arrived', name: 'total_arrived', class: 'text_center align-middle total_arrived'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -252,16 +261,18 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
-                        '</select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var type_select = '<select name="type_select" id="type_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.type')) {
+                            $(type_select).appendTo($(search)).on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -273,15 +284,29 @@
                             }
                         }
                     });
+                    var pickup_actions = $.map({!! $pickup_actions !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $('#type_select').prepend('<option value="" selected></option>').select2({
+                        data: pickup_actions,
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
 
             });
+            $('#search_filter_btn').bind('click', function (e) {
+                table.draw();
+            });
 
-
-
-
-            /*   function print(id) {
+              function print(id) {
                    $.ajax({
                        url: '{!! route('admin.v2_pickups.rider_receiving.print') !!}',
                     method: 'POST',
@@ -308,23 +333,11 @@
                             tab.focus();
                         }
                     });
-            }*/
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Rider*',
-                width: '100%',
-                allowClear: true
-            });
-            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select City*',
-                width: '100%',
-                allowClear: true
-            });
+            }
 
-           /* $('#track_form').bind('submit', function (e) {
-                //e.preventDefault();
-
-                table.draw();
-            });*/
+            $('.datatable tbody').on('click', 'tr td.note_id button.print', function() {
+                print(parseInt($(this).children('.note_id').html()));
+            });
 
 
             /* $('#search_filter_btn').on('click', function () {

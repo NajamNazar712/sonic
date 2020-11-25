@@ -2095,11 +2095,11 @@ class V2AdminPickupsController extends Controller
     }
 
     public function rider_receiving_index(){
+        $pickup_actions = PickupAction::select('id','name')->whereIn('id',[3,4])->get();
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
         $cities = City::select('id','name')->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ]);
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ,'pickup_actions'=>$pickup_actions ]);
     }
-
 
     public function rider_receiving_check_pickup(Request $request){
         $pickup_date = $request->pickup_date;
@@ -2331,12 +2331,30 @@ class V2AdminPickupsController extends Controller
         return $html;
     }
     public function rider_receiving_list(Request $request){
-
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
-        /*    ->join('cities as c','c.id','=','r.city_id')*/
-            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked as total_booking');
+            ->leftjoin('v2_rider_pickup_action_logs as rpal','rpal.pickup_note_id','=','v2_pickup_notes.id')
+            ->leftjoin('pickup_actions as pa','pa.id','=','rpal.type_id')
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked','rpal.type_id as type',DB::raw('SUM(vpr.booked) as total_shipment'),'vpr.received',DB::raw('SUM(vpr.received) as total_arrived'))->groupBy('v2_pickup_notes.id');
+
+
+        if($city = $request->get('search_city')) {
+            $rider = $rider->join('cities as c', function ($join) use ($city) {
+                $join->on('c.id', '=', 'vpr.city_id')
+                    ->where('vpr.city_id', $city);
+            });
+        }
+
+        if($search_rider = $request->get('search_rider')){
+            $rider =  $rider->where('r.id','=',$search_rider);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider = $rider->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
+        }
 
         $datatable = Datatables::of($rider)
             ->editColumn('note_id', function ($rider) {
@@ -2344,20 +2362,19 @@ class V2AdminPickupsController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
                         ;
                 }
-            });
-
-       /* if($city = $request->get('search_city')){
-            $datatable->where('r.city_id','=',$city);
-        }*/
-
-        if($search_rider = $request->get('search_rider')){
-            $datatable->where('r.id','=',$search_rider);
-        }
-       /* if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
-        }*/
+            })
+            ->editColumn('type', function ($rider) {
+                if($rider->type == 3){
+                    return 'Not Pick';
+                }
+                else if($rider->type == 4){
+                    return  'Pick';
+                }
+                else{
+                    return '-';
+                }
+            })
+        ;
 
         return $datatable->make(true);
 
