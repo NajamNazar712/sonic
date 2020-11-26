@@ -1176,7 +1176,12 @@ class AdminMasterCargoController extends Controller
             else{
                 $text = 'Master';
             }
-            return redirect()->route('admin.master_cargo.create.index')->with(['success' => ' Cargo Created with Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
+            if($request->onward_forwarding == 1){
+                return redirect()->route('admin.master_cargo.create.index')->with(['success' => ' Cargo Created with Onward Forwarded Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
+            }
+            else{
+                return redirect()->route('admin.master_cargo.create.index')->with(['success' => ' Cargo Created with Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
+            }
         }
         else {
             return back()->withErrors('All Bags have already been added to another Master Cargo!');
