@@ -6171,7 +6171,6 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-//              $cc = array();
 
                     $department_head = Admin::where('role_id', 3)->where('status', 1);
 
@@ -6180,27 +6179,15 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 }
-                /*else if ($id == 104) {
+                else if ($id == 104) {
                     $to = array();
-                    $delivery_note_id = $reference_1_id;
+                    $data = $reference_1_id;
 
-                    $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
-                        ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
-                        ->join('users', 'shipments.user_id', '=', 'users.id')
-                        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
-                        ->where('users.id',3324)
-                        ->where('delivery_notes.id',$delivery_note_id)
-                        ->get();
-
-                    foreach($deliveries as $delivery){
-                        if($delivery->user_id == 3324 && $delivery->status == 14){
-                            $to = $delivery->phone;
-                        }
+                    if($data->user_id == 3324 && $data->status == 14){
+                        $to = $data->phone;
                         self::sms($body, $to);
                     }
-
-                }*/
+                }
             }
         }
     }

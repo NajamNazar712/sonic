@@ -2921,7 +2921,20 @@ class DeliveryController extends Controller
 
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
-//                    NotificationsController::send(104, $delivery_note_id);
+
+                    $notification_deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                        ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
+                        ->join('users', 'shipments.user_id', '=', 'users.id')
+                        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
+                        ->where('users.id',3324)
+                        ->where('delivery_notes.id',$delivery_note_id);
+                    if($notification_deliveries->exists()){
+                        $notification_deliveries = $notification_deliveries->get();
+                        foreach($notification_deliveries as $n_delivery){
+                            NotificationsController::send(104, $n_delivery);
+                        }
+                    }
                     if(!empty($zero_cod_shipments)){
                         foreach ($zero_cod_shipments as $shipment_id) {
                             NotificationsController::send(35, $shipment_id);
