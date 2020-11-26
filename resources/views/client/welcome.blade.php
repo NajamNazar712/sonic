@@ -11,7 +11,7 @@
                     <div class="col-8">
                         <table class="table table-bordered">
                             @if(count($sales_person_data)> 0)
-                                <thead class="mb-1">
+                                <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"><b>Sales Person Name</b></th>
                                         <th class="border-primary border-darken-1"><b>Sales Person Phone</b></th>
@@ -27,7 +27,7 @@
                                 </tbody>
                             @endif
                             @if(count($poc)> 0)
-                                <thead class="mb-1">
+                                <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"><b>POC Name</b></th>
                                         <th class="border-primary border-darken-1"><b>POC Phone</b></th>
