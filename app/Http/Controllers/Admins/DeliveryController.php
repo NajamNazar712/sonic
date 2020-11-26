@@ -1682,7 +1682,7 @@ class DeliveryController extends Controller
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
                             $invalid_reason_shipments[] = $shipment_details->tracking_number;
-                            continue;
+//                            continue;
                         }
                     }
                 }
@@ -1927,7 +1927,7 @@ class DeliveryController extends Controller
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
                             $invalid_reason_shipments[] = $current_shipment->tracking_number;
-                            continue;
+//                            continue;
                         }
                     }
                 }
@@ -2031,7 +2031,7 @@ class DeliveryController extends Controller
             
             if(count($invalid_reason_shipments) > 0){
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
+                return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
             }
             else{
                 return redirect()->back()->with('success', 'Statuses updated successfully!');
@@ -2551,7 +2551,7 @@ class DeliveryController extends Controller
                                     ->where('shipper_status_id', DB::raw(14));
                                 if($previous_delivered_shipments->exists()){
                                     $invalid_reason_shipments[] = $current_shipment->tracking_number;
-                                    continue;
+//                                    continue;
                                 }
                             }
                         }
@@ -2942,7 +2942,7 @@ class DeliveryController extends Controller
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
+                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'error' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
@@ -2954,7 +2954,7 @@ class DeliveryController extends Controller
                     $delivery_note_data->save();
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'error' => 'These shipments: ' . $invalid_shipments . ' can\'t be updated due to following selected reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel!']);
+                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'error' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note updated successfully!');

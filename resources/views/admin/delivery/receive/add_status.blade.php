@@ -1712,11 +1712,10 @@
                                             var tracking_numbers = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
                                             if(data.invalid_shipments){
-                                                console.log(data.invalid_shipments);
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
-                                                var html = '<p>These shipment(s) can\'t be update on following reasons: Address Incomplete, Address Untraceable, Out-of-Service Area, Non-Service Area, NSA / OSA parcel:</p><br>';
+                                                var html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
