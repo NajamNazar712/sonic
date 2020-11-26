@@ -887,7 +887,7 @@
                 'allowPlus': false,
                 'digits': 2,
                 'min': 0.1,
-                'max': 10000
+                'max': 100000
             });
 
             $('.amount').inputmask({

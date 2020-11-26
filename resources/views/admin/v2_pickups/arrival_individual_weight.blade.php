@@ -34,7 +34,7 @@
                                 </div>
 
                                 <div class="form-group ml-1">
-                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000">
+                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
                                 </div>
 
                                 <div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
@@ -136,7 +136,7 @@
 
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000" disabled="disabled">
+                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@
                         </div>
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000]" data-msg-range="Weight needs to be from 0.01 to 10000" disabled="disabled">
+                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
                             </div>
                         </div>
 

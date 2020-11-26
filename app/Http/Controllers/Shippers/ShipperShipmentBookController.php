@@ -1851,7 +1851,7 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+            'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
@@ -2013,7 +2013,7 @@ class ShipperShipmentBookController extends Controller
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
                         } else {
-                            if (in_array($row['order_id'], $order_ids)) {
+                            if (in_array($row['order_id'], $order_ids, true)) {
                                 $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
                             }
                             else {
@@ -3251,7 +3251,7 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+            'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
@@ -3412,7 +3412,7 @@ class ShipperShipmentBookController extends Controller
                             $order_id_row[$row['order_id']] = $row_id;
                         }
                         else {
-                            if (in_array($row['order_id'], $order_ids)) {
+                            if (in_array($row['order_id'], $order_ids, true)) {
                                 $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
                             }
                             else {
@@ -4140,7 +4140,7 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+            'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
@@ -4302,7 +4302,7 @@ class ShipperShipmentBookController extends Controller
                             $order_ids[] = $row['order_id'];
                             $order_id_row[$row['order_id']] = $row_id;
                         } else {
-                            if (in_array($row['order_id'], $order_ids)) {
+                            if (in_array($row['order_id'], $order_ids, true)) {
                                 $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
                             }
                             else {
