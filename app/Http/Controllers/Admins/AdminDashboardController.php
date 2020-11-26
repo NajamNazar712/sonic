@@ -2202,8 +2202,8 @@ if(session('department_id') == 7){
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -2237,8 +2237,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -2272,8 +2272,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -2307,8 +2307,8 @@ if(session('department_id') == 7){
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -3880,8 +3880,8 @@ if(session('department_id') == 7){
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -3915,8 +3915,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -3950,8 +3950,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -3985,8 +3985,8 @@ if(session('department_id') == 7){
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -6149,8 +6149,8 @@ if(session('department_id') == 7){
         $shipper_id = $id;
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             $on_validations = [
-                'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'on_wa_local_charges.*' => 'required|numeric',
                 'on_class_0_charges.*' => 'required|numeric',
                 'on_class_1_charges.*' => 'required',
@@ -6184,8 +6184,8 @@ if(session('department_id') == 7){
         //overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
             $ol_validations = [
-                'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'ol_wa_local_charges.*' => 'required|numeric',
                 'ol_class_0_charges.*' => 'required|numeric',
                 'ol_class_1_charges.*' => 'required',
@@ -6219,8 +6219,8 @@ if(session('department_id') == 7){
         //overland
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
             $detain_validations = [
-                'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'detain_wa_local_charges.*' => 'required|numeric',
                 'detain_class_0_charges.*' => 'required|numeric',
                 'detain_class_1_charges.*' => 'required',
@@ -6254,8 +6254,8 @@ if(session('department_id') == 7){
         //sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
             $sameday_validations = [
-                'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
