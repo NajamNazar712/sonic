@@ -271,10 +271,11 @@
                     }
                 },
                 order: [[14, 'desc']],
+                rowId: 'id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number_hyperlink', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'account_number', name: 'u.id', class: 'align-middle account_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -391,11 +392,6 @@
 
                     var data3 = $.map({!! $products !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-
-                    var data3 = $.map({!! $products !!}, function (obj) {
                         obj.text = obj.product_name;
 
                         return obj;
