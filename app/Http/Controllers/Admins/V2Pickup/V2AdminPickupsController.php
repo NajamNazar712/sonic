@@ -1612,10 +1612,7 @@ class V2AdminPickupsController extends Controller
                             $phoneNo.=','.$data['admin_phone_number'];
 
                         }
-                    }else{
-                        dd($poc);
                     }
-
                 }
                 $color = '';
                 if($pickup_address->vendor != null){
