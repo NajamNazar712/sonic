@@ -47,6 +47,9 @@ class AdminAPIController extends Controller
             $user = Admin::where('email', $request->input('email_address'));
             if ($user->exists()) {
                 $user = $user->first();
+                if($user->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
                 if(Hash::check($request->input('password'), $user->password)){
                     $information = array();
 
