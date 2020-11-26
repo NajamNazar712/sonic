@@ -763,6 +763,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_list')->name('list');
             Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
         });
