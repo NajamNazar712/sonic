@@ -2931,8 +2931,10 @@ class DeliveryController extends Controller
                         ->where('delivery_notes.id',$delivery_note_id);
                     if($notification_deliveries->exists()){
                         $notification_deliveries = $notification_deliveries->get();
-                        foreach($notification_deliveries as $n_delivery){
-                            NotificationsController::send(104, $n_delivery);
+                        if($notification_deliveries->user_id == 3324 && $notification_deliveries->status == 14) {
+                            foreach ($notification_deliveries as $n_delivery) {
+                                NotificationsController::send(104, $n_delivery);
+                            }
                         }
                     }
                     if(!empty($zero_cod_shipments)){
