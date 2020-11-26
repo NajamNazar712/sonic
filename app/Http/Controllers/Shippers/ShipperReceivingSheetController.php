@@ -20,6 +20,8 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\GulAhmedPickupAddress;
+
 
 use Auth;
 
@@ -619,11 +621,40 @@ class ShipperReceivingSheetController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Shipper</strong></td>
                             <td>' . $shipment->user->name . '</td>
+            ';
+
+            $user_id = $shipment->user_id;
+
+            if ($user_id == 7828) {
+                $main_details .= '
+                            <td rowspan="8" class="text-center align-middle">
+                ';
+            }
+            else {
+                $main_details .= '
                             <td rowspan="7" class="text-center align-middle">
+                ';
+            }
+
+            $main_details .= '
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
+            ';
+
+            if ($user_id == 7828) {
+                $warehouse = GulAhmedPickupAddress::where('pickup_address_id', $shipment->pickup_address_id)->first();
+
+                $main_details .= '
+                          <tr>
+                            <td class="color secondary"><strong>Warehouse/Store ID</strong></td>
+                            <td>' . $warehouse->warehouse_id . '</td>
+                          </tr>
+                ';
+            }
+
+            $main_details .= '
                           <tr>
                             <td class="color secondary"><strong>Person of Contact</strong></td>
                             <td>' . $shipment->pickup_address->poc . '</td>
