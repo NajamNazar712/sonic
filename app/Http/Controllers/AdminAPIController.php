@@ -48,6 +48,9 @@ class AdminAPIController extends Controller
             $user = Admin::where('email', $request->input('email_address'));
             if ($user->exists()) {
                 $user = $user->first();
+                if($user->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
                 if (Hash::check($request->input('password'), $user->password)) {
                     $information = array();
 
@@ -66,7 +69,7 @@ class AdminAPIController extends Controller
                         $information['api_token'] = $api_token;
                     }
 
-                    return response()->json(['status' => 0, 'message' => 'Logged In Succesfully', 'information' => $information]);
+                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Password']);
                 }
@@ -155,7 +158,8 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
         $admin_id = $request->admin_id;
-        $old_image_ids = $request->old_image_ids;
+        $old_image_ids = array();
+        $old_image_ids = ($request->old_image_ids != '')? $request->old_image_ids:[];
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
         if ($return_note) {
@@ -183,7 +187,7 @@ class AdminAPIController extends Controller
                                         Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
                                     }
                                 }
-                        }
+                            }
                             ReturnNoteImage::where('id', $image_id)->delete();
                         }
                     }

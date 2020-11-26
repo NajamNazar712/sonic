@@ -994,7 +994,7 @@ class ShipperReceivingSheetController extends Controller
                 $shipment_ids[] = $receiving_sheet_shipment->shipment->id;
             }
 
-            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, TRUE);
+            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, NULL);
 
             $html .= '
                         </div>
