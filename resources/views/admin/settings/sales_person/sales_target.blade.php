@@ -71,7 +71,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <div class="input-group">
+                                                    <div class="input-group justify-content-center">
                                                         <button type="submit" class="btn btn-primary">Update</button>
                                                     </div>
                                                 </div>
@@ -246,7 +246,7 @@
                     {data: 'end_date', name: 'sale_person_targets.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_targets.target_days', class: 'align-middle target_days'},
                     {data: 'per_day_revenue_target', name: 'per_day_revenue_target', class: 'align-middle per_day_revenue_target'},
-                    {data: 'target_month', name: 'sale_person_targets.target_month ', class: 'align-middle target_month'},
+                    {data: 'target_month', name: 'sale_person_targets.target_month', class: 'align-middle target_month'},
                     {data: 'per_month_revenue_target', name: 'per_month_revenue_target', class: 'align-middle per_month_revenue_target'},
                     {data: 'average_revenue', name: 'sale_person_targets.average_revenue', class: 'align-middle average_revenue'},
                 ],
@@ -265,7 +265,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.per_day_revenue_target') || $(header).is('.per_month_revenue_target')) {
                             $(td).appendTo($(search));
                         }
                         else {
