@@ -15,6 +15,7 @@ use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\RouteLocations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -2930,6 +2931,16 @@ class AdminPickupsController extends Controller
                     $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
                 }
             }
+            $admin_settings = GlobalSettings::where('type','auto_assign_admin');
+            if($admin_settings->exists()){
+                $admin_settings = $admin_settings->first();
+                if($admin_settings->setting_value != 0 && $admin_settings->setting_value != null){
+                    $admin_id = $admin_settings->setting_value;
+                }
+                else{
+                    $admin_id = NULL;
+                }
+            }
             if($rider_cut_off_time != null){
                 if(Carbon::now() > $rider_cut_off_time){
                     return false;
@@ -2950,7 +2961,13 @@ class AdminPickupsController extends Controller
             $today = Carbon::today();
             $today->hour($arrival_cut_off_time)->minute(0)->second(0);
             $rider_id = NULL;
-            $global_admin_id = NULL;
+            $global_admin_id = $admin_id;
+
+            $pickup_request = V2PickupRequest::find($pickup_request_id);
+            $pickup_address_id = $pickup_request->pickup_address_id;
+            $route = RouteLocations::where('pickup_address_id',$pickup_address_id)->select('route_id')->first();
+            $rider = Rider::where('route_id',$route->route_id)->select('id')->first();
+            $rider_id = $rider->id;
             $pickup_request = V2PickupRequest::find($pickup_request_id);
             $pickup_address_id = $pickup_request->pickup_address_id;
 
@@ -3051,6 +3068,7 @@ class AdminPickupsController extends Controller
 //                            }
 //                        }
                 }
+
 
     }
 

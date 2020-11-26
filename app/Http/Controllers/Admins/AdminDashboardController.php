@@ -9533,6 +9533,7 @@ if(session('department_id') == 7){
               $location->pickup_address_id = $pickup_address;
               $location->save();
           }
+
       }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
