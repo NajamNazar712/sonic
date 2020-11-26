@@ -7,29 +7,25 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
-                @if(count($sales_person_data)> 0)
-                    <div class="row justify-content-center">
-                        <div class="col-8">
-                            <table class="table table-bordered">
-                                <thead>
-                                <td><b>Sales Person Name</b></td>
-                                <td><b>Sales Person Phone</b></td>
-                                <td><b>Sales Person Email</b></td>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td><h4>{{$sales_person_data['name']}}</h4></td>
-                                    <td><h4>{{$sales_person_data['phone']}}</h4></td>
-                                    <td><h4>{{$sales_person_data['email']}}</h4></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                @endif
                 <div class="row justify-content-center">
                     <div class="col-8">
                         <table class="table table-bordered">
+                            @if(count($sales_person_data)> 0)
+                                <thead>
+                                    <tr>
+                                        <td><b>Sales Person Name</b></td>
+                                        <td><b>Sales Person Phone</b></td>
+                                        <td><b>Sales Person Email</b></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><h4>{{$sales_person_data['name']}}</h4></td>
+                                        <td><h4>{{$sales_person_data['phone']}}</h4></td>
+                                        <td><h4>{{$sales_person_data['email']}}</h4></td>
+                                    </tr>
+                                </tbody>
+                            @endif
                             @if(count($poc)> 0)
                                 <thead>
                                     <tr>
