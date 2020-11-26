@@ -20,7 +20,7 @@ class UpdateCompletedAgingReportAddDeliveryColumnAndRenameColumns extends Migrat
         });
     }
 
-    /**
+    /**s
      * Reverse the migrations.
      *
      * @return void

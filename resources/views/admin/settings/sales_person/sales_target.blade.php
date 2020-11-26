@@ -16,58 +16,69 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
-                            <div class="row justify-content-center">
-                                <div class="col-5">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
-                                        {{ csrf_field() }}
-                                        <div class="form-group">
-                                            <input id="daterange" type="text" name="daterange" class="form-control" data-msg-required="Date Range is required" data-rule-required="true" required="required" value="" />
-                                            <input type="hidden" name="start_date" id="start_date">
-                                            <input type="hidden" name="end_date" id="end_date">
-                                        </div>
-                                        
-
-                                        <div class="form-group">
-                                            <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
-                                                @foreach($sales_person as $person)
-                                                    <option value="{{$person->id}}">{{$person->name}}</option>
-                                                @endforeach
-                                                </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Target Shipments/Day</span>
+                                <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
+                                    {{ csrf_field() }}
+                                    <div class="row justify-content-center">
+                                        <div class="col-5">
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Select Date">
                                                 </div>
-                                                <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
-                                                
+                                            </div>
+
+
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
+                                                        @foreach($sales_person as $person)
+                                                            <option value="{{$person->id}}">{{$person->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Target Shipments/Day</span>
+                                                        </div>
+                                                        <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Target Shipments/Month</span>
+                                                        </div>
+                                                        <input type="text" name="target_shipment_month" id="target_shipment_month" class="form-control class" placeholder="Target Shipments/Month*" data-rule-required="true" data-msg-required="Target Shipments/Month is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Average Revenue</span>
+                                                        </div>
+                                                        <input type="text" name="average_revenue" class="form-control class" placeholder="Average Revenue*" data-rule-required="true" data-msg-required="Average Revenue is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Target Shipments/Week</span>
-                                                </div>
-                                                <input type="text" name="target_shipment_week" id="target_shipment_week" class="form-control class" placeholder="Target Shipments/Week*" data-rule-required="true" data-msg-required="Target Shipments/Week is required" value="">
-                                                
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Average Revenue</span>
-                                                </div>
-                                                <input type="text" name="average_revenue" class="form-control class" placeholder="Average Revenue*" data-rule-required="true" data-msg-required="Average Revenue is required" value="">
-                                                
-                                            </div>
-                                        </div>
-                                        
-
-                                        <button type="submit" class="btn btn-primary">Update</button>
-                                    </form>
-                                </div>
-                            </div>
+                                    </div>
+                                </form>
                         </div>
                     </div>
                 </div>
@@ -85,7 +96,9 @@
                                         <th class="border-primary border-darken-1">Start Date</th>
                                         <th class="border-primary border-darken-1">End Date</th>
                                         <th class="border-primary border-darken-1">Target Shipments/Day</th>
-                                        <th class="border-primary border-darken-1">Target Shipments/Week</th>
+                                        <th class="border-primary border-darken-1">Revenue Target/Day</th>
+                                        <th class="border-primary border-darken-1">Target Shipments/Month</th>
+                                        <th class="border-primary border-darken-1">Revenue Target/Month</th>
                                         <th class="border-primary border-darken-1">Average Revenue</th>
                                     </tr>
                                     </thead>
@@ -102,27 +115,39 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            $('#daterange').daterangepicker({
-                opens: 'left',
-                timePicker:false,
-                todayHighlight: true,
-                dateLimit:{days:7},
-              }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-                $('#start_date').val(start.format('YYYY-MM-DD'));
-                $('#end_date').val(end.format('YYYY-MM-DD'));
+
+            var search_date_from = $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#search_date_root').css('bottom','40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
             });
-            
-            
+
+
             $('#sales_person_select').select2({
                 placeholder:'Sales Person Select',
                 width:'100%'
@@ -143,7 +168,7 @@
             $('#target_shipment_days').on('change', function(){
                 var days = $(this).val();
 
-                $('#target_shipment_week').val(days * 6);
+                $('#target_shipment_month').val(days * 30);
             });
         });
 
@@ -165,20 +190,22 @@
                             head.push('Start Date');
                             head.push('End Date');
                             head.push('Target Shipments/Day');
-                            head.push('Target Shipments/Week');
+                            head.push('Revenue Target/Day');
+                            head.push('Target Shipments/Month');
+                            head.push('Revenue Shipments/Month');
                             head.push('Average Revenue');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
 
                                 row.push(index + 1);
                                 row.push(values.sales_person);
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
-                                row.push(values.target_week);
-                                
+                                row.push(values.per_day_revenue_target);
+                                row.push(values.target_month);
+                                row.push(values.per_month_revenue_target);
                                 row.push(values.average_revenue);
 
                                 body.push(row);
@@ -218,9 +245,10 @@
                     {data: 'start_date', name: 'sale_person_targets.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_targets.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_targets.target_days', class: 'align-middle target_days'},
-                    {data: 'target_week', name: 'sale_person_targets.target_week', class: 'align-middle target_week'},
-                    {data: 'average_revenue', name: 'sale_person_targets.average_revenue', class: 'align-middle average_revenue'}
-
+                    {data: 'per_day_revenue_target', name: 'per_day_revenue_target', class: 'align-middle per_day_revenue_target'},
+                    {data: 'target_month', name: 'sale_person_targets.target_month ', class: 'align-middle target_month'},
+                    {data: 'per_month_revenue_target', name: 'per_month_revenue_target', class: 'align-middle per_month_revenue_target'},
+                    {data: 'average_revenue', name: 'sale_person_targets.average_revenue', class: 'align-middle average_revenue'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -237,7 +265,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
