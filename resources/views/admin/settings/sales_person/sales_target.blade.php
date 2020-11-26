@@ -22,7 +22,7 @@
                                         <div class="col-5">
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
+                                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Select Date">
                                                 </div>
                                             </div>
 
