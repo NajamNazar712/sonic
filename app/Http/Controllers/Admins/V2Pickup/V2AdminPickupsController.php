@@ -248,8 +248,10 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = explode(',' , $pickup_request_ids);
         //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
+        $rider_ids = $request->input('rider');
         $riders = array();
         $riders['new'] = $rider_id;
+        $riders['new_phone'] = $rider_ids;
         if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
@@ -311,6 +313,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->current_rider_id = $rider_ids;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
 
@@ -334,7 +337,9 @@ class V2AdminPickupsController extends Controller
                 }
                 else
                 {
-                    $riders['old'] = $pickup_request->current_rider_id;
+                    $riders['old_rider_id'] = $pickup_request->current_rider_id;
+                    $riders['new_rider_id'] = $rider_id;
+
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();

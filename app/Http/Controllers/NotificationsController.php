@@ -6190,14 +6190,14 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $pickup_request_id = $reference_2_id;
                     $riders = $reference_1_id;
-                    $old_rider_id = $riders['old'];
-                    $new_rider_id = $riders['new'];
+                    $old_rider_id = $riders['old_rider_id'];
+                    $new_rider_id = $riders['new_rider_id'];
 
 //                    $rider = Rider::find($rider);
                     $old_rider = Rider::find($old_rider_id);
                     $new_rider = Rider::find($new_rider_id);
-                    $admin_id = Auth::id();
-                    $admin = Admin::find($admin_id);
+                    $admin_name = V2PickupRequest::find($pickup_request_id)->last_admin->name;
+
 
 
                     if (strpos($body, '[old_rider_name]') !== FALSE) {
@@ -6207,30 +6207,28 @@ class NotificationsController extends Controller
                         $body = str_replace('[new_rider_name]', $new_rider->name, $body);
                     }
                     if (strpos($body, '[pickup_request_id]') !== FALSE) {
-                        $body = str_replace('[pickup_request_id]', $pickup_request_id, $body);
+                        $body = str_replace('[pickup_request_id]', str_pad($pickup_request_id, 6, '0', STR_PAD_LEFT), $body);
                     }
                     if (strpos($body, '[pickup_coordinator_name]') !== FALSE) {
-                        $body = str_replace('[pickup_coordinator_name]', $admin->name, $body);
+                        $body = str_replace('[pickup_coordinator_name]', $admin_name, $body);
                     }
 
-                    if ($old_rider) {
-                        $to = $old_rider->phone;
-                        self::sms($body, $to);
-                    }
+                    $to = $old_rider->phone;
+                    self::sms($body, $to);
+
                 }
                 else if ($id == 107) {
 
                     $body = $notification->body;
                     $pickup_request_id = $reference_2_id;
                     $riders = $reference_1_id;
-                    $old_rider_id = $riders['old'];
-                    $new_rider_id = $riders['new'];
+                    $old_rider_id = $riders['old_rider_id'];
+                    $new_rider_id = $riders['new_rider_id'];
 
 //                    $rider = Rider::find($rider);
                     $old_rider = Rider::find($old_rider_id);
                     $new_rider = Rider::find($new_rider_id);
-                    $admin_id = Auth::id();
-                    $admin = Admin::find($admin_id);
+                    $admin_name = V2PickupRequest::find($pickup_request_id)->last_admin->name;
 
 
                     if (strpos($body, '[old_rider_name]') !== FALSE) {
@@ -6240,16 +6238,15 @@ class NotificationsController extends Controller
                         $body = str_replace('[new_rider_name]', $new_rider->name, $body);
                     }
                     if (strpos($body, '[pickup_request_id]') !== FALSE) {
-                        $body = str_replace('[pickup_request_id]', $pickup_request_id, $body);
+                        $body = str_replace('[pickup_request_id]', str_pad($pickup_request_id, 6, '0', STR_PAD_LEFT), $body);
                     }
                     if (strpos($body, '[pickup_coordinator_name]') !== FALSE) {
-                        $body = str_replace('[pickup_coordinator_name]', $admin->name, $body);
+                        $body = str_replace('[pickup_coordinator_name]', $admin_name, $body);
                     }
 
-                    if ($old_rider) {
-                        $to = $old_rider->phone;
+                        $to = $new_rider->phone;
                         self::sms($body, $to);
-                    }
+
                 }
 
             }
