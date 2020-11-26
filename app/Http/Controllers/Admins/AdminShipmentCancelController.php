@@ -228,6 +228,9 @@ class AdminShipmentCancelController extends Controller
         })
         ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         return $datatables->make(true);
     }
 
