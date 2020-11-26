@@ -71,7 +71,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <div class="input-group">
+                                                    <div class="input-group justify-content-center">
                                                         <button type="submit" class="btn btn-primary">Update</button>
                                                     </div>
                                                 </div>
