@@ -6183,10 +6183,9 @@ class NotificationsController extends Controller
                     $to = array();
                     $data = $reference_1_id;
 
-                    if($data->user_id == 3324 && $data->status == 14){
-                        $to = $data->phone;
-                        self::sms($body, $to);
-                    }
+                    $to = $data->phone;
+                    self::sms($body, $to);
+                    
                 }
             }
         }

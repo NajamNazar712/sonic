@@ -2922,7 +2922,6 @@ class DeliveryController extends Controller
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
 
-                    
                     if(!empty($zero_cod_shipments)){
                         foreach ($zero_cod_shipments as $shipment_id) {
                             NotificationsController::send(35, $shipment_id);
