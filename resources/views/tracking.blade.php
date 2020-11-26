@@ -201,7 +201,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
         <ul class="nav navbar-nav flex-row">
           <li class="nav-item">
             <a class="navbar-brand" href="{{route('cod.dashboard')}}">
-                <img class="brand-logo sonic" alt="Sonic" src="{{ asset('img/sonic_logo_white.png') }}">
+                <img class="brand-logo sonic" alt="Sonic" src="{{ asset('img/sonic_logo_white_new.png') }}">
                 <img class="brand-logo trax" alt="Trax" src="{{ asset('img/trax_logo_white_new.png') }}">
             </a>
           </li>

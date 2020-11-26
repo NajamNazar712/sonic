@@ -4838,7 +4838,11 @@ class DeliveryController extends Controller
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+                if($deliveries->pending_status == 1){
+                    $link .= "<br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                }
+                return $link;
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
