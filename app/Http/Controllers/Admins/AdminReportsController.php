@@ -1297,9 +1297,9 @@ class AdminReportsController extends Controller
     }
     static public function daily_pickup_sales_report_create($search_city = NULL, $date,$sales_person = NULL,$sales_tagging = FALSE){
 
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 08:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 07:59A');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
         $only_date = Carbon::parse($date)->toDateString();
         $hubs = array();
         $city = array();
@@ -2697,8 +2697,8 @@ class AdminReportsController extends Controller
                     $details['shipper'][$c->id][$s->id] = $s->name;
                     foreach ($months_array as $month) {
 
-                        $firstDayOfMonth = Carbon::parse($month)->firstOfMonth()->format('Y-m-d 07:59A');
-                        $firstDayOfNextMonth = Carbon::parse($month)->addMonth()->format('Y-m-d 08:00A');
+                        $firstDayOfMonth = Carbon::parse($month)->firstOfMonth()->format('Y-m-d 05:59A');
+                        $firstDayOfNextMonth = Carbon::parse($month)->addMonth()->format('Y-m-d 06:00A');
 
                         $details['parcels'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)
                             ->whereExists(function($query) use ($firstDayOfMonth, $firstDayOfNextMonth) {
@@ -3245,9 +3245,9 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_list(Request $request){
         $from = $request->get('search_date_from');
-        $from = Carbon::parse($from)->setTimeFromTimeString('07:59:59');
+        $from = Carbon::parse($from)->setTimeFromTimeString('05:59:59');
         $to = $request->get('search_date_to');
-        $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('08:00:00');
+        $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
 
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -3623,9 +3623,9 @@ class AdminReportsController extends Controller
                         $custom_date_from = Carbon::parse($date);
                         $custom_date_to = Carbon::parse($date);
 
-                        $custom_date_from_time = $custom_date_from->setTimeFromTimeString('07:59:59');
+                        $custom_date_from_time = $custom_date_from->setTimeFromTimeString('05:59:59');
 
-                        $custom_date_to_time = $custom_date_to->addDay()->setTimeFromTimeString('08:00:00');
+                        $custom_date_to_time = $custom_date_to->addDay()->setTimeFromTimeString('06:00:00');
 
                         if($hub != null){
                             $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($custom_date_from_time,$custom_date_to_time) {

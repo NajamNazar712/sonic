@@ -47,9 +47,9 @@ class AdminReportsEmailController extends Controller
 {
     static public function sale_person_numbers($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 08:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 07:59A');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 05:59A');
         $revenue = array();
         $avg_revenue = array();
         $contribution = array();
@@ -222,9 +222,9 @@ class AdminReportsEmailController extends Controller
 
     static public function hub_wise_split($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 08:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 07:59A');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 05:59A');
         $total_shipments = 0;
         $ratio = array();
         $avg_actual_weight = array();
@@ -338,7 +338,7 @@ class AdminReportsEmailController extends Controller
         $new_date_to = $date_to;
         $week_holiday_date_to = Carbon::yesterday()->format('Y-m-d');
         $holiday_date_to = $new_date_to->format('Y-m-d');
-        $new_date_to = $new_date_to->format('Y-m-d 07:59A');
+        $new_date_to = $new_date_to->format('Y-m-d 05:59A');
         $total_shipments = 0;
         $revenue = array();
         $avg_revenue = array();
