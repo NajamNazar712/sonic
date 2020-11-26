@@ -16,7 +16,7 @@ class CreateRouteLocationsTable extends Migration
         Schema::create('route_locations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('pickup_address_id');
-            $table->integer('shipper_id');
+            $table->integer('route_id');
             $table->timestamps();
         });
     }

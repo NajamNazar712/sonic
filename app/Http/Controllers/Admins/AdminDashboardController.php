@@ -66,6 +66,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
+use App\RouteLocations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -8305,7 +8306,7 @@ if(session('department_id') == 7){
     }
     //route management
     public function routeView(){
-        $users = User::select('id','name')->get();
+        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
         return view('admin.management.route_management')->with(['users' => $users]);
     }
     public function routeListAjax(){
@@ -9516,6 +9517,24 @@ if(session('department_id') == 7){
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
             return redirect()->back()->with('success','Hub city added successfully');
         }
+    }
+
+    public function assign_locations_submit(Request $request){
+        $request->validate([
+            'route_id' => 'required',
+            'pickup_address' =>'required']);
+
+       $route_id = $request->route_id;
+       $pickup_addresses = $request->pickup_address;
+      if($route_id){
+          foreach($pickup_addresses as $pickup_address){
+              $location = new RouteLocations();
+              $location->route_id = $route_id;
+              $location->pickup_address_id = $pickup_address;
+              $location->save();
+          }
+      }
+        return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
 }
 

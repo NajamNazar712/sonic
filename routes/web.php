@@ -555,6 +555,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRouteView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
+            Route::post('/assign_location', 'Admins\AdminDashboardController@assign_locations_submit')->name('assign_location');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
             Route::get('','Admins\AdminDashboardController@riderView')->name('index');
