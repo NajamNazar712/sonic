@@ -16,64 +16,69 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
-                            <div class="row justify-content-center">
-                                <div class="col-5 mb-2">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
-                                        {{ csrf_field() }}
-
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <div class="input-group-prepend">
-													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-														<span class="la la-calendar-o"></span>
-													</span>
+                                <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
+                                    {{ csrf_field() }}
+                                    <div class="row justify-content-center">
+                                        <div class="col-5">
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
                                                 </div>
-                                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Receiving Sheet From">
+                                            </div>
+
+
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
+                                                        @foreach($sales_person as $person)
+                                                            <option value="{{$person->id}}">{{$person->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Target Shipments/Day</span>
+                                                        </div>
+                                                        <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Target Shipments/Month</span>
+                                                        </div>
+                                                        <input type="text" name="target_shipment_month" id="target_shipment_month" class="form-control class" placeholder="Target Shipments/Month*" data-rule-required="true" data-msg-required="Target Shipments/Month is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Average Revenue</span>
+                                                        </div>
+                                                        <input type="text" name="average_revenue" class="form-control class" placeholder="Average Revenue*" data-rule-required="true" data-msg-required="Average Revenue is required" value="">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        
-
-                                        <div class="form-group">
-                                            <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
-                                                @foreach($sales_person as $person)
-                                                    <option value="{{$person->id}}">{{$person->name}}</option>
-                                                @endforeach
-                                                </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Target Shipments/Day</span>
-                                                </div>
-                                                <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
-                                                
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Target Shipments/Month</span>
-                                                </div>
-                                                <input type="text" name="target_shipment_month" id="target_shipment_month" class="form-control class" placeholder="Target Shipments/Month*" data-rule-required="true" data-msg-required="Target Shipments/Month is required" value="">
-                                                
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Average Revenue</span>
-                                                </div>
-                                                <input type="text" name="average_revenue" class="form-control class" placeholder="Average Revenue*" data-rule-required="true" data-msg-required="Average Revenue is required" value="">
-                                                
-                                            </div>
-                                        </div>
-                                        
-
-                                        <button type="submit" class="btn btn-primary">Update</button>
-                                    </form>
-                                </div>
-                            </div>
+                                    </div>
+                                </form>
                         </div>
                     </div>
                 </div>
