@@ -246,8 +246,10 @@ class V2AdminPickupsController extends Controller
     public function pending_assign(Request $request) {
         $pickup_request_ids = $request->input('pickup_request_ids');
         $pickup_request_ids = explode(',' , $pickup_request_ids);
+        //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
-
+        $riders = array();
+        $riders['new'] = $rider_id;
         if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
@@ -302,6 +304,7 @@ class V2AdminPickupsController extends Controller
         foreach ($pickup_request_ids as $pickup_request_id) {
 //            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
             $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>',$today);
+
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
@@ -328,7 +331,10 @@ class V2AdminPickupsController extends Controller
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id == $rider_id){
                     continue;
-                }else{
+                }
+                else
+                {
+                    $riders['old'] = $pickup_request->current_rider_id;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
@@ -354,6 +360,9 @@ class V2AdminPickupsController extends Controller
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
                     }
+                    NotificationsController::send(106, $riders, $pickup_request_id);
+                    NotificationsController::send(107, $riders, $pickup_request_id);
+
                 }
 
             }
@@ -410,10 +419,12 @@ class V2AdminPickupsController extends Controller
                             if ($shipment->booking_type_id == 5) {
                                 NotificationsController::send(77, $rider_id, $shipment->id);
                             }
-                        }
-                    }
-                }
 
+                        }
+
+                    }
+
+                }
             }
             return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         }else{
@@ -1601,10 +1612,7 @@ class V2AdminPickupsController extends Controller
                             $phoneNo.=','.$data['admin_phone_number'];
 
                         }
-                    }else{
-                        dd($poc);
                     }
-
                 }
                 $color = '';
                 if($pickup_address->vendor != null){
@@ -2095,8 +2103,11 @@ class V2AdminPickupsController extends Controller
     }
 
     public function rider_receiving_index(){
+        $pickup_actions = PickupAction::all();
+        $default_date = Carbon::now();
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders ]);
+        $cities = City::select('id','name')->get();
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders , 'cities' => $cities ,'pickup_actions'=>$pickup_actions,'default_date' => $default_date]);
     }
 
     public function rider_receiving_check_pickup(Request $request){
@@ -2328,4 +2339,58 @@ class V2AdminPickupsController extends Controller
 
         return $html;
     }
+    public function rider_receiving_list(Request $request){
+
+        $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
+            ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
+            ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
+            ->leftjoin('v2_rider_pickup_action_logs as rpal','rpal.pickup_note_id','=','v2_pickup_notes.id')
+            ->leftjoin('pickup_actions as pa','pa.id','=','rpal.type_id')
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked','rpal.type_id as type',DB::raw('SUM(vpr.booked) as total_shipment'),'vpr.received',DB::raw('SUM(vpr.received) as total_arrived'))->groupBy('v2_pickup_notes.id');
+
+
+        if($city = $request->get('search_city')) {
+            $rider = $rider->join('cities as c', function ($join) use ($city) {
+                $join->on('c.id', '=', 'vpr.city_id')
+                    ->where('vpr.city_id', $city);
+            });
+        }
+
+        if($search_rider = $request->get('search_rider')){
+            $rider =  $rider->where('r.id','=',$search_rider);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider = $rider->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
+        }
+
+        $datatable = Datatables::of($rider)
+            ->editColumn('note_id', function ($rider) {
+                if($rider->note_id != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                        ;
+                }
+            })
+            ->editColumn('type', function ($rider) {
+                if($rider->type == 1){
+                    return 'Navigate';
+                }
+                else if($rider->type == 2){
+                    return  'Call';
+                }
+                else if($rider->type == 3){
+                    return  'Not Pick';
+                }
+                else if($rider->type == 4){
+                    return 'Pick';
+                }
+            })
+        ;
+
+        return $datatable->make(true);
+
+    }
+
 }

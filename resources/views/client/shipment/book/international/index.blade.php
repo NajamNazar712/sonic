@@ -355,8 +355,8 @@
     <script>
 
         $(document).ready(function() {
-            var consignee_cities = @json($consignee_cities);
-            console.log(consignee_cities);
+            var cities = @json($cities);
+            console.log(cities);
             var order_date = $('#order_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -523,7 +523,6 @@
                         }
                     }).done(function (data) {
                         if(data.status){
-                            $('#consignee_city').val(data.details.city_id).trigger('change');
                             $('input[name="consignee_name"]').val(data.details.name);
                             $('#consignee_address').val(data.details.address);
                             $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
