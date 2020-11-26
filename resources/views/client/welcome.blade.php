@@ -27,36 +27,34 @@
                         </div>
                     </div>
                 @endif
-                @if(count($poc)> 0)
-                    <div class="row justify-content-center">
-                          <div class="col-8">
-                                <table class="table table-bordered">
-                                    <thead>
+                <div class="row justify-content-center">
+                    <div class="col-8">
+                        <table class="table table-bordered">
+                            @if(count($poc)> 0)
+                                <thead>
+                                    <tr>
                                         <td><b>POC Name</b></td>
                                         <td><b>POC Phone</b></td>
                                         <td><b>POC Email</b></td>
-                                    </thead>
-                                    <tbody>
-                                    @foreach($poc as $p)
-                                        <tr>
-                                            <td><h4>{{$p['name']}}</h4></td>
-                                            <td><h4>{{$p['phone']}}</h4></td>
-                                            <td><h4>{{$p['email']}}</h4></td>
-                                        </tr>
-                                    @endforeach
-                                    </tbody>
-                                </table>
-                          </div>
-                    </div>
-                @endif
-                @if(count($kam)> 0)
-                    <div class="row justify-content-center">
-                        <div class="col-8">
-                            <table class="table table-bordered">
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($poc as $p)
+                                    <tr>
+                                        <td><h4>{{$p['name']}}</h4></td>
+                                        <td><h4>{{$p['phone']}}</h4></td>
+                                        <td><h4>{{$p['email']}}</h4></td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            @endif
+                            @if(count($kam)> 0)
                                 <thead>
-                                    <td><b>KAM Name</b></td>
-                                    <td><b>KAM Phone</b></td>
-                                    <td><b>KAM Email</b></td>
+                                    <tr>
+                                        <td><b>KAM Name</b></td>
+                                        <td><b>KAM Phone</b></td>
+                                        <td><b>KAM Email</b></td>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($kam as $k)
@@ -67,10 +65,10 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-                            </table>
-                        </div>
+                            @endif
+                        </table>
                     </div>
-                @endif
+                </div>
             </div>
         </div>
     </div>
