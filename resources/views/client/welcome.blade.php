@@ -62,28 +62,11 @@
                                 @endforeach
                                 </tbody>
                             @endif
-                            @if(count($pickup_riders)> 0)
-                                <thead>
-                                <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1"><b>Courier Name</b></th>
-                                    <th class="border-primary border-darken-1"><b>Courier Phone</b></th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach($pickup_riders as $rider)
-                                    <tr>
-                                        <td><h4>{{$rider->name}}</h4></td>
-                                        <td><h4>{{$rider->phone}}</h4></td>
-                                        <td></td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            @endif
                         </table>
+                        @if(count($pickup_riders)> 0)
                         <h2>Pickup Courier Details</h2>
                         <table class="table table-bordered">
-                            @if(count($pickup_riders)> 0)
+
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1"><b>Courier Name</b></th>
@@ -98,8 +81,8 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-                            @endif
                         </table>
+                        @endif
                     </div>
                 </div>
             </div>
