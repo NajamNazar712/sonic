@@ -2979,7 +2979,7 @@ class AdminPickupsController extends Controller
             $end_date = Carbon::now()->endOfDay();
             $today = Carbon::today();
             $today->hour($arrival_cut_off_time)->minute(0)->second(0);
-            $rider_id = NULL;
+
             $global_admin_id = $admin_id;
 
 
