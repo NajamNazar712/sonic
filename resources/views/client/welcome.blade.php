@@ -12,10 +12,10 @@
                         <table class="table table-bordered">
                             @if(count($sales_person_data)> 0)
                                 <thead>
-                                    <tr>
-                                        <td><b>Sales Person Name</b></td>
-                                        <td><b>Sales Person Phone</b></td>
-                                        <td><b>Sales Person Email</b></td>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"><b>Sales Person Name</b></th>
+                                        <th class="border-primary border-darken-1"><b>Sales Person Phone</b></th>
+                                        <th class="border-primary border-darken-1"><b>Sales Person Email</b></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -28,10 +28,10 @@
                             @endif
                             @if(count($poc)> 0)
                                 <thead>
-                                    <tr>
-                                        <td><b>POC Name</b></td>
-                                        <td><b>POC Phone</b></td>
-                                        <td><b>POC Email</b></td>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"><b>POC Name</b></th>
+                                        <th class="border-primary border-darken-1"><b>POC Phone</b></th>
+                                        <th class="border-primary border-darken-1"><b>POC Email</b></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -46,10 +46,10 @@
                             @endif
                             @if(count($kam)> 0)
                                 <thead>
-                                    <tr>
-                                        <td><b>KAM Name</b></td>
-                                        <td><b>KAM Phone</b></td>
-                                        <td><b>KAM Email</b></td>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"><b>KAM Name</b></th>
+                                        <th class="border-primary border-darken-1"><b>KAM Phone</b></th>
+                                        <th class="border-primary border-darken-1"><b>KAM Email</b></th>
                                     </tr>
                                 </thead>
                                 <tbody>

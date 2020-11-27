@@ -33,5 +33,8 @@ class V2PickupRequest extends Model
     public function pickup_note_request(){
         return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupNoteRequest','id','pickup_request_id')->latest('id');
     }
+    public function last_admin() {
+        return $this->belongsTo('App\Http\Models\Admin\Admin', 'last_updated_by', 'id');
+    }
     protected $guarded = [];
 }

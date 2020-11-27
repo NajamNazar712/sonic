@@ -248,8 +248,10 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = explode(',' , $pickup_request_ids);
         //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
+        $rider_ids = $request->input('rider');
         $riders = array();
         $riders['new'] = $rider_id;
+        $riders['new_phone'] = $rider_ids;
         if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
@@ -311,6 +313,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->current_rider_id = $rider_ids;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
 
@@ -334,7 +337,9 @@ class V2AdminPickupsController extends Controller
                 }
                 else
                 {
-                    $riders['old'] = $pickup_request->current_rider_id;
+                    $riders['old_rider_id'] = $pickup_request->current_rider_id;
+                    $riders['new_rider_id'] = $rider_id;
+
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
@@ -2270,10 +2275,15 @@ class V2AdminPickupsController extends Controller
             }
             $rider_pickuped = 0;
             $pickup_request_received_shipments = 0;
+            $pickup_date = '';
             $rider_pickups = V2RiderPickup::where('pickup_note_id', $pickup_note_request->pickup_note_id)->where('pickup_request_id', $pickup_request->id);
             if($rider_pickups->exists()){
-                $rider_pickups = $rider_pickups->first();
+                $rider_pickups = $rider_pickups->latest()->first();
                 $rider_pickuped = $rider_pickups->shipments;
+                if($rider_pickups->added_at != ''){
+                    $pickup_date = Carbon::parse($rider_pickups->added_at)->format('Y-m-d');
+                }
+
             }
             $pickup_request_received_shipments = count($pickup_request->pickup_request_received_shipments);
             $html .= '
@@ -2287,7 +2297,7 @@ class V2AdminPickupsController extends Controller
                             <td>' . $pickup_request['booked'] . '</td>
                             <td>' . $rider_pickuped . '</td>
                             <td>' . $pickup_request_received_shipments . '</td>
-                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
+                            <td>' . $pickup_date . '</td>
                           </tr>
           ';
             $total_booked += $pickup_request['booked'];
