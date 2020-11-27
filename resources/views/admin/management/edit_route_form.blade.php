@@ -79,7 +79,7 @@
 
 <script type="text/javascript">
 
-    $('.select2').select2({
+    $('#editRouteForm .select2').select2({
         dropdownParent: $("#editRoute")
     });
     var rider_id = @json($current_rider_id);
