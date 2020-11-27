@@ -382,9 +382,8 @@ class V2AdminPickupsController extends Controller
 
                     $pickup_note->save();
 
-                    $pickup_note_id = $pickup_note->id;
                 }
-
+                $pickup_note_id = $pickup_note->id;
             }
             else {
                 $pickup_note = new V2PickupNote();
