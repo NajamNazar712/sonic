@@ -74,7 +74,7 @@
                                 </ul>
                             </li>
                         @endif
-                            @if (session('role_id') == 1 || session('sales_coordinator'))
+                            @if (session('role_id') == 1 || (session('sales_coordinator') == TRUE))
                                 <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
                             @endif
                     </ul>
