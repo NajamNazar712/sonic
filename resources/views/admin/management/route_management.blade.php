@@ -95,15 +95,15 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
-          /*  $('#pickup_address').select2({
+            $('#pickup_address').select2({
                 width:'100%',
                 placeholder:"Search Pickup Addresses",
                 allowClear:true,
-            });*/
-            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+            });
+           /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Search Pickup Address'
-            });
+            });*/
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];

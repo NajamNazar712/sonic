@@ -9526,18 +9526,16 @@ if(session('department_id') == 7){
 
        $route_id = $request->route_id;
        $pickup_addresses = $request->pickup_address;
+       
+       RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
 
-        if (RouteLocations::where('pickup_address_id',$pickup_addresses)->exists()) {
-            RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
-            if($route_id){
-                foreach($pickup_addresses as $pickup_address){
-                    $location = new RouteLocations();
-                    $location->route_id = $route_id;
-                    $location->pickup_address_id = $pickup_address;
-                    $location->save();
-                }
-        }
-
+        if($route_id){
+            foreach($pickup_addresses as $pickup_address){
+                $location = new RouteLocations();
+                $location->route_id = $route_id;
+                $location->pickup_address_id = $pickup_address;
+                $location->save();
+            }
       }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
