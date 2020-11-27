@@ -7,6 +7,7 @@ use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
 use App\Http\Models\RiderCategory;
+use App\Http\Models\Route;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -44,7 +45,7 @@ use App\Http\Models\PickupNoteStatus;
 use App\Http\Models\Zone;
 
 use Auth;
-use Illuminate\Routing\Route;
+
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
