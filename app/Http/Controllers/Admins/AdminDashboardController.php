@@ -9526,7 +9526,7 @@ if(session('department_id') == 7){
 
        $route_id = $request->route_id;
        $pickup_addresses = $request->pickup_address;
-       
+
        RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
 
         if($route_id){
