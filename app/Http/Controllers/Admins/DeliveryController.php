@@ -2929,7 +2929,7 @@ class DeliveryController extends Controller
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'error' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
+                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
@@ -2941,7 +2941,7 @@ class DeliveryController extends Controller
                     $delivery_note_data->save();
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'error' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
+                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note updated successfully!');
