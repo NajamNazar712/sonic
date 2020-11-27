@@ -17,7 +17,7 @@ class V2PickupCronController extends Controller
 {
     static public function arrival_not_picked(){
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-        $arrival_cut_off_time = '8';
+        $arrival_cut_off_time = '6';
         if ($settings->exists()) {
             $settings = $settings->first();
             $arrival_cut_off_time = $settings->setting_value;
