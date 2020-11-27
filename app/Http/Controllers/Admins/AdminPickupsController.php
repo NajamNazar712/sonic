@@ -2927,8 +2927,8 @@ class AdminPickupsController extends Controller
 
         $pickup_request = V2PickupRequest::find($pickup_request_id);
         $pickup_address_id = $pickup_request->pickup_address_id;
-        if($route = RouteLocations::where('pickup_address_id',$pickup_address_id)->exists()){
-            $route = $route->first();
+        if(RouteLocations::where('pickup_address_id',$pickup_address_id)->exists()){
+            $route = RouteLocations::where('pickup_address_id',$pickup_address_id)->first();
             $route_status = Route::find($route->route_id);
             if($route_status->status != 1 ){
                 return false;
@@ -2979,7 +2979,7 @@ class AdminPickupsController extends Controller
             $end_date = Carbon::now()->endOfDay();
             $today = Carbon::today();
             $today->hour($arrival_cut_off_time)->minute(0)->second(0);
-            $rider_id = NULL;
+
             $global_admin_id = $admin_id;
 
 
