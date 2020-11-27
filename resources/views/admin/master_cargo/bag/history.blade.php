@@ -219,7 +219,7 @@
                     {data: 'actual_weight', name: 'bags.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
-                    {data: 'status', name: 'bs.name', class: 'align-middle status'},
+                    {data: 'status', name: 'bs.id', class: 'align-middle status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
