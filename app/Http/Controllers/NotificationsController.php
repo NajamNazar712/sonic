@@ -2362,7 +2362,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -2382,7 +2382,9 @@ class NotificationsController extends Controller
                     $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
-                    self::email($subject, $body, $to);
+                    foreach ($to as $individual_to) {
+                        self::email($subject, $body, $individual_to);
+                    }
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
@@ -6158,7 +6160,6 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-//              $cc = array();
 
                     $department_head = Admin::where('role_id', 3)->where('status', 1);
 
@@ -6166,26 +6167,28 @@ class NotificationsController extends Controller
                         $to = array_merge($to, $department_head->pluck('email')->toArray());
                         self::email($subject, $body, $to);
                     }
-                } else if ($id == 104) {
-                    $to = array();
-                    $delivery_note_id = $reference_1_id;
-
-                    $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                }
+				/*else if ($id == 104) {
+                    $notification_deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
                         ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
                         ->join('users', 'shipments.user_id', '=', 'users.id')
                         ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status', 'shipments.consignee_phone_number_1 as phone')
-                        ->where('users.id', 3324)
-                        ->where('delivery_notes.id', $delivery_note_id)
-                        ->get();
+                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
+                        ->where('users.id',3324)
+                        ->where('delivery_notes.id',$delivery_note_id);
+                    if($notification_deliveries->exists()){
+                        $notification_deliveries = $notification_deliveries->get();
+                        foreach($notification_deliveries as $n_delivery){
+                            $notification_body = $body;
 
-                    foreach ($deliveries as $delivery) {
-                        if ($delivery->user_id == 3324 && $delivery->status == 14) {
-                            $to = $delivery->phone;
+                            $data = $reference_1_id;
+
+                            $to = $data->phone;
+                            self::sms($notification->body, $to);
                         }
-                        self::sms($body, $to);
                     }
-                } else if ($id == 106) {
+                } */
+				else if ($id == 106) {
 
                     $body = $notification->body;
                     $pickup_request_id = $reference_2_id;

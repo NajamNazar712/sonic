@@ -305,6 +305,14 @@
             width: auto !important;
             text-align: left;
         }
+        .checkbox_overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
     </style>
 @endsection
 
@@ -930,7 +938,7 @@
                                     {name: 'product_type', class: 'align-middle product_type'},
                                     {name: 'product_description', class: 'align-middle product_description'},
                                     {name: 'item_price', class: 'align-middle item_price'},
-                                    {name: 'receiving', class: 'align-middle receiving'},
+                                    {name: 'receiving', class: 'align-middle receiving position-relative'},
 
                                 ],
                                 rowCallback: function(row, data, index) {
@@ -958,7 +966,7 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
+                                        var inp = "<div class='checkbox_overlay'></div><input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         $('#cod').text(data.total_cod);

@@ -467,6 +467,15 @@
             width: auto !important;
             text-align: left;
         }
+
+        .checkbox_overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
     </style>
 @endsection
 
@@ -1007,27 +1016,6 @@
                     }else{
                         all_reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        if(data.invalid_shipments){
-                            $.each(data.invalid_shipments, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
-                            swal({
-                                title: 'These shipments can\'t be updated due to invalid reasons',
-                                text: atext,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'OK',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            });
-                        }
                     }
                 });
             });
@@ -1335,7 +1323,7 @@
                                     {name: 'product_type', class: 'align-middle product_type'},
                                     {name: 'product_description', class: 'align-middle product_description'},
                                     {name: 'item_price', class: 'align-middle item_price'},
-                                    {name: 'receiving', class: 'align-middle receiving'},
+                                    {name: 'receiving', class: 'align-middle receiving position-relative'},
 
                                 ],
                                 rowCallback: function(row, data, index) {
@@ -1363,12 +1351,11 @@
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
                                         trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
+                                        var inp = "<div class='checkbox_overlay'></div><input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         $('#cod').text(data.total_cod);
                                     });
-
 
                                 }else{
                                     //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -1494,6 +1481,8 @@
             });
 
             function item_scanned_cod_change(bought){
+                console.log(trybuy_ids);
+
                 var check = $(bought);
                 var id = parseInt($(bought).parents('tr').attr('id'));
                 var price = $(bought).parents('tr').find('td.item_price').text();
@@ -1512,9 +1501,9 @@
                     }
                 }
             }
-            // $('body').on('click','.receiving input:checkbox',function () {
+            /*// $('body').on('click','.receiving input:checkbox',function () {
             //     item_scanned_cod_change($(this));
-            // });
+            // });*/
 
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
@@ -1717,17 +1706,51 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
-
-                                        } else {
+                                            location.reload();
+                                        }
+                                        else if(data.status === 2){
+                                            var tracking_numbers = '';
+                                            var route = '{!! route('admin.tracking.index') !!}';
+                                            if(data.invalid_shipments){
+                                                $.each(data.invalid_shipments, function(index, tracking_number) {
+                                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                                });
+                                                var html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
+                                                html += tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    title: 'Delivered shipment(s) found on same consignee details before.',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        confirm: {
+                                                            text: 'OK',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                }).then(function(confirm) {
+                                                    if (confirm) {
+                                                        location.reload();
+                                                    }
+                                                    else{
+                                                        location.reload();
+                                                    }
+                                                });
+                                            }
+                                        }else {
                                             UnblockPagePermanently();
                                             toastr.error(data.error, 'Error!', {
                                                 positionClass: 'toast-top-center',
                                                 containerId: 'toast-top-center'
                                             });
-
+                                            location.reload();
                                         }
-                                        location.reload();
-
                                     });
                                 }
                             }

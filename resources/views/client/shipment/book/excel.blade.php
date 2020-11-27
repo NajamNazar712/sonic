@@ -283,7 +283,7 @@
 										</tr>
 										<tr role="row">
 											<td>Estimated Weight (kg)</td>
-											<td class="text-center">10000</td>
+											<td class="text-center">100000</td>
 										</tr>
 										<tr role="row">
 											<td>Collection Amount</td>
