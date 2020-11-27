@@ -40,6 +40,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\Reference;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\Rider;
+use App\Http\Models\Route;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use App\http\Models\ShipperContact;
