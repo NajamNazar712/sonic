@@ -39,6 +39,7 @@ use App\Http\Models\RateRemark;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Reference;
 use App\Http\Models\ReturnCharge;
+use App\Http\Models\Rider;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use App\http\Models\ShipperContact;
@@ -57,6 +58,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
+use App\RouteLocations;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -121,8 +123,12 @@ class ShipperDashboardController extends Controller
                        $kam[] = $detail;
                    }
                }
+            $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
+            $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
 
-               return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam]);
+            $riders = Rider::whereIn('route_id', $route_ids)->select('phone', 'name')->get();
+
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
         }
     }
 
