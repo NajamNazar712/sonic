@@ -6195,23 +6195,26 @@ class NotificationsController extends Controller
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
                     $shipper_name = $pickup_request->shipper->name;
                     $reason = V2PickupRequestNotPickReason::find($reason_id);
-
-                    if (strpos($body, '[sales_person]') !== FALSE) {
-                        $body = str_replace('[sales_person]', $pickup_request->name, $body);
-                    }
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $pickup_name->name, $body);
-                    }
-                    if (strpos($body, '[reason]') !== FALSE) {
-                        $body = str_replace('[reason]', $reason->name, $body);
-                    }
-                    $shipper_id = $pickup_request->shipper->id;
                     $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
                     if($sales_person){
-                        $sale_person_phone = Admin::find($sale_person->admin_id)->phone_number;
+                        $shipper_id = $pickup_request->shipper->id;
+
+                        $sales_person = Admin::find($sale_person->admin_id);
+                        $sales_person_name = $sales_person->name;
+                        $sale_person_phone = $sales_person->phone_number;
+                        if (strpos($body, '[sales_person]') !== FALSE) {
+                            $body = str_replace('[sales_person]', $sales_person_name, $body);
+                        }
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper_name, $body);
+                        }
+                        if (strpos($body, '[reason]') !== FALSE) {
+                            $body = str_replace('[reason]', $reason->name, $body);
+                        }
+
                         $to = $sale_person_phone;
                         self::sms($body, $to);
-                    }
+                        }
                 }
 				else if ($id == 106) {
 
