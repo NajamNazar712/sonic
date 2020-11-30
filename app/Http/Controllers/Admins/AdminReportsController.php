@@ -1023,7 +1023,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.outstanding_shipments_report')->with(['hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
     }
     public function outstanding_shipments_list(Request $request){
-        if (Auth::id() == 1) {
+        if (Auth::id() == 3) {
             $connection = 'mysql';
         }
         else {
