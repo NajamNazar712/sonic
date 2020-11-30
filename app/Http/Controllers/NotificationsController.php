@@ -6188,6 +6188,31 @@ class NotificationsController extends Controller
                         }
                     }
                 } */
+
+                else if ($id == 105) {
+                    $pickup_request_id = $reference_1_id;
+                    $reason_id = $reference_2_id;
+                    $pickup_request = V2PickupRequest::find($pickup_request_id);
+                    $shipper_name = $pickup_request->shipper->name;
+                    $reason = V2PickupRequestNotPickReason::find($reason_id);
+
+                    if (strpos($body, '[sales_person]') !== FALSE) {
+                        $body = str_replace('[sales_person]', $pickup_request->name, $body);
+                    }
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $pickup_name->name, $body);
+                    }
+                    if (strpos($body, '[reason]') !== FALSE) {
+                        $body = str_replace('[reason]', $reason->name, $body);
+                    }
+                    $shipper_id = $pickup_request->shipper->id;
+                    $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
+                    if($sales_person){
+                        $sale_person_phone = Admin::find($sale_person->admin_id)->phone_number;
+                        $to = $sale_person_phone;
+                        self::sms($body, $to);
+                    }
+                }
 				else if ($id == 106) {
 
                     $body = $notification->body;
