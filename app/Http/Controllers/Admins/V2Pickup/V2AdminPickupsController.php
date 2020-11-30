@@ -469,7 +469,7 @@ class V2AdminPickupsController extends Controller
                     if($pickup_note_requests_count == 0){
                         V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
                     }
-
+                    NotificationsController::send(105, $pickup_request_id, $reason_id);
                 }
             }
             return redirect()->back()->with('success', 'Pickup(s) updated successfully!');
