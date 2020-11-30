@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Product;
 use App\Http\Models\PickupType;
+use App\Http\Models\Segment;
 class RegisterController extends Controller
 {
     /*
@@ -73,10 +74,11 @@ class RegisterController extends Controller
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
         $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
+        $segments = Segment::all();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'sales_persons' => $sales_persons, 'average_shipment_durations' => $average_shipment_durations]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'sales_persons' => $sales_persons, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments]);
     }
     /**
      * Get a validator for an incoming registration request.

@@ -75,6 +75,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\City;
 use App\Http\Models\UserDefaultBankDuration;
 use Auth;
+use App\Http\Models\Segment;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -548,8 +549,9 @@ class ShipperDashboardController extends Controller
         $email_ids = implode(',', $email_ids);
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
+        $segments = Segment::all();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'segments' => $segments]);
     }
 
     public function verifyPincode(Request $request)

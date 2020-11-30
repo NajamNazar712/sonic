@@ -119,6 +119,13 @@
                                         <td>{{$reference->name}}</td>
                                     </tr>
                                 @endif
+                                @if($user->segment_id != null)
+                                <tr>
+                                    <td><b>Segment</b></td>
+                                   <td>{{$user->segment->name}}
+                                   </td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <td><b>API Key</b></td>
                                     <td>{{$user->api_token}}</td>
