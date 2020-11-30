@@ -30,6 +30,7 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
                                 </ul>
                             </li>
                         @endif
