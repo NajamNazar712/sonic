@@ -227,6 +227,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('sales')->name('sales.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
+
+            Route::prefix('telenor')->name('telenor.')->group(function (){
+                Route::get('','Shippers\ShipperReportsController@sales_telenor_index')->name('index');
+                Route::get('list','Shippers\ShipperReportsController@sales_telenor_list')->name('list');
+            });
         });
         Route::prefix('summary')->name('summary.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
