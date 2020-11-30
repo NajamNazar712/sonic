@@ -6194,10 +6194,11 @@ class NotificationsController extends Controller
                     $reason_id = $reference_2_id;
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
                     $shipper_name = $pickup_request->shipper->name;
+                    $shipper_id = $pickup_request->shipper->id;
                     $reason = V2PickupRequestNotPickReason::find($reason_id);
-                    $sale_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
+                    $sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
                     if($sale_person){
-                        $shipper_id = $pickup_request->shipper->id;
+
 
                         $sales_person = Admin::find($sale_person->admin_id);
                         $sales_person_name = $sales_person->name;

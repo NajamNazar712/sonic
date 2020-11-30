@@ -127,7 +127,9 @@ class ShipperDashboardController extends Controller
             $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
             $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
             $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+
             $riders = Rider::whereIn('route_id', $routes)->select('phone', 'name')->get();
+
 
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
         }
