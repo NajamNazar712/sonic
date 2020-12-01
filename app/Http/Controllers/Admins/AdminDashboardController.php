@@ -8594,6 +8594,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
+
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
