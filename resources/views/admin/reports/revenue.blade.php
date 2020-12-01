@@ -136,6 +136,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
+                        <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -378,6 +379,7 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Account No.');
+                            head.push('Business Category');
                             head.push('Shipper');
                             head.push('Order ID');
                             head.push('Status');
@@ -417,6 +419,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
+                                row.push(values.business_category_id);
                                 row.push(values.shipper);
                                 row.push(values.order_id);
                                 row.push(values.current_status);
@@ -505,6 +508,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
+                    { data:'business_category_id' ,name: 'shipments.business_category_id', class: 'align-middle business_category_id'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
