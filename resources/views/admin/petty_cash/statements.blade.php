@@ -64,6 +64,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
 
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -112,6 +113,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var hub_ids = [];
             var search_hub = $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Hub',
                 width:'100%',
@@ -169,6 +171,8 @@
                         data: params,
                         success: function (result) {
                             head = [];
+
+
                             head.push('S.No');
                             head.push('Statement No.');
                             head.push('Hub');
@@ -219,9 +223,85 @@
                 buttons:[
                     {
                         className: 'btn btn-primary',
+                        text: 'Station Approved',
+                    },
+                    {
+                        className: 'btn btn-primary',
+                        text: 'Operation Approved',
+                    },
+                    {
+                        className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
                         action: function (e, dt, node, config) {
                             window.location = '{{ route('admin.petty_cash.make.index')  }}'
+                        }
+                    },
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    id = parseInt(row.id());
+
+                                    hub_id = $(row.node()).data('id');
+
+                                    var allow = false;
+
+                                    if(hub_ids.length == 0) {
+                                        hub_ids.push(hub_id);
+
+                                        allow = true;
+                                    }
+                                    else if(hub_ids[0] == hub_id) {
+                                        allow = true;
+                                    }
+
+                                    if (allow) {
+                                        row.select();
+
+                                        var index = $.inArray(id, selected_rows);
+
+                                        if (index === -1) {
+                                            selected_rows.push(id);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.assign_rider').disable();
+
+                                        hub_ids.splice(index, 1);
+                                    }
+                                }
+                            });
                         }
                     },
                     {
@@ -230,6 +310,12 @@
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -252,6 +338,7 @@
                 rowId: 'statement_id',
                 order: [1, 'desc'],
                 columns: [
+                    {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
@@ -272,7 +359,11 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
+
 
                 },
                 initComplete: function() {
@@ -291,7 +382,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') ) {
+                        if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -316,7 +407,6 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-
                     this.api().table().columns.adjust();
                 }
             });
@@ -402,6 +492,18 @@
                             tab.focus();
                         }
                     });
+            }
+        });
+        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            var id = parseInt($(this).parent('tr').attr('statement_id'));
+            console.log(statement_id);
+            var index = $.inArray(statement_id, selected_rows);
+
+            if (index === -1) {
+                selected_rows.push(statement_id);
+            }
+            else {
+                selected_rows.splice(index, 1);
             }
         });
     </script>
