@@ -48,6 +48,11 @@ Route::name('api.')->group(function () {
             Route::post('pending', 'APIController@return_confirmation_pending_update')->name('pending');
 
         });
+
+
+        Route::prefix('shopify')->name('shopify.')->group(function() {
+            Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
+        });
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
@@ -98,4 +103,7 @@ Route::name('api.')->group(function () {
         });
 
     });
+
+
+
 });
