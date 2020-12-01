@@ -269,8 +269,8 @@
                         }
 
                     });
+                    $('#assign_location').modal('show');
                 }
-                $('#assign_location').modal('show');
             });
 
 
