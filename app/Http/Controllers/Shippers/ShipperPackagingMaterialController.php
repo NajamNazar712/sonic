@@ -196,10 +196,22 @@ class ShipperPackagingMaterialController extends Controller
                 $total_charges -= floatval($discount_packaging);
             }
         }
-        
+
+        $check = false;
         if ($request->input('address_select') != 0) {
             $address_id = $request->input('address_select');
             $user_address = UserShippingInfo::find($address_id);
+            if($request->has('mode_of_payment') && $request->mode_of_payment != NULL){
+                $check = true;
+            }
+        }
+        else{
+            if(($request->has('new_pickup_city') && $request->new_pickup_city != NULL) && ($request->has('new_pickup_address') && $request->new_pickup_address != NULL && $request->new_pickup_address != '') && ($request->has('new_pickup_person_of_contact') && $request->new_pickup_person_of_contact != NULL) && ($request->has('new_pickup_phone_number') && $request->new_pickup_phone_number != NULL) && ($request->has('mode_of_payment') && $request->mode_of_payment != NULL)){
+                $check = true;
+            }
+        }
+        if($check == false){
+            return redirect()->back()->with('error', 'Information Incomplete!');
         }
 
         $user_id = session('user_id');
