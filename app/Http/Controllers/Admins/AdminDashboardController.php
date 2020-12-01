@@ -66,6 +66,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
+use App\RouteLocations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -8305,7 +8306,8 @@ if(session('department_id') == 7){
     }
     //route management
     public function routeView(){
-        return view('admin.management.route_management');
+        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
+        return view('admin.management.route_management')->with(['users' => $users]);
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
@@ -8353,6 +8355,9 @@ if(session('department_id') == 7){
                         }
                     }
 
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" data-toggle="modal" data-target="#assignlocation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+
+
                     $dropdown .= '
                         </div>
                       </div>
@@ -8367,8 +8372,9 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
-        return view('admin.management.add_route_form')->with('cities',$city);
+        $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $riders = Rider::where('status', 1)->select(['id','name'])->get();
+        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders]);
     }
     public function addRouteDetails(Request $request){
 //        return $request;
@@ -8385,7 +8391,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::create([
+        $route = Route::create([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8393,13 +8399,32 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+        if(Rider::where('route_id','=',$route->id)->exists()){
+            return redirect()->back()->with('error', 'Route id already exists !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $route->id;
+                $rider->save();
+            }
+        }
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
+        $riders = Rider::where('status',1)->select(['id','name'])->get();
+        $current_rider = Rider::where('route_id',$id);
+        if($current_rider->exists()){
+            $current_rider = $current_rider->select('id')->first();
+            $current_rider_id = $current_rider->id;
+        }
+        else{
+            $current_rider_id = NULL;
+        }
         $route = Route::find($id);
-
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id]);
     }
     public function editRouteDetails(Request $request, $id){
         $validations = [
@@ -8415,7 +8440,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::where('id',$id)->update([
+        $route = Route::where('id',$id)->update([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8423,6 +8448,18 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+
+        if(Rider::where('route_id','=',$id)->exists()){
+            return redirect()->back()->with('success', 'Details Updated !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $id;
+                $rider->save();
+            }
+        }
         return redirect()->back()->with('success','Route updated successfully');
     }
     public function routeStatus(Request $request){
@@ -9480,6 +9517,27 @@ if(session('department_id') == 7){
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
             return redirect()->back()->with('success','Hub city added successfully');
         }
+    }
+
+    public function assign_locations_submit(Request $request){
+        $request->validate([
+            'route_id' => 'required',
+            'pickup_address' =>'required']);
+
+       $route_id = $request->route_id;
+       $pickup_addresses = $request->pickup_address;
+
+       RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
+
+        if($route_id){
+            foreach($pickup_addresses as $pickup_address){
+                $location = new RouteLocations();
+                $location->route_id = $route_id;
+                $location->pickup_address_id = $pickup_address;
+                $location->save();
+            }
+      }
+        return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
 }
 

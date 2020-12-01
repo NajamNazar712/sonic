@@ -158,6 +158,8 @@ class Permission
             'master_cargo.receive.store' => 31,
             'master_cargo.history.index' => 124,
             'master_cargo.history.list' => 124,
+            'master_cargo.received.index' => 124,
+            'master_cargo.received.list' => 124,
             'master_cargo.receive.quick.index' => 31,
             'master_cargo.receive.quick.bag_details' => 31,
             'master_cargo.receive.quick.store' => 31,
