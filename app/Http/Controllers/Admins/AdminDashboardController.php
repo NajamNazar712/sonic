@@ -7616,11 +7616,11 @@ if(session('department_id') == 7){
 
                 }
 
-                if($result->account_type_id == 1){
+//                if($result->account_type_id == 1){
                     if(($result->rate_status == 0 && $result->status == 2) && (session('role_id') == 1 || in_array(8, session('permissions')))){
                         $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
                     }
-                }
+//                }
 
                 if($result->account_type_id == 1){
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {

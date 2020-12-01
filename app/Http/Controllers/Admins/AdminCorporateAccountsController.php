@@ -6370,4 +6370,18 @@ class AdminCorporateAccountsController extends Controller
             return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
         }
     }
+    public function rejectReasonSubmit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $reject_reason = $request->rejected_reason;
+        $user = User::find($shipper_id);
+        if($user->status != 3){
+            $user->status = 5;
+        }
+        $user->rejected_reason = $reject_reason;
+        $user->rate_status = 2;
+        $user->save();
+        NotificationsController::send(64, $shipper_id );
+        return ['success' => 'Rates has been rejected!'];
+    }
 }
