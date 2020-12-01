@@ -1426,7 +1426,7 @@ class RiderAPIController extends Controller {
 
                 $rider_pickup->shipments = $request->shipments;
 
-                $picture_path = 'rider_pickup/' . $rider_pickup->pickup_note_id . '.png';
+                $picture_path = 'rider_pickup/' . $rider_pickup->pickup_request_id . '.png';
                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                 $rider_pickup->picture_path = $picture_path;
 
