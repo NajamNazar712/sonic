@@ -441,6 +441,20 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label for="segments">Segments:
+                                    <span class="danger">*</span>
+                                </label>
+                                <div>
+                                    <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
+                                        @foreach($segments as $segment)
+                                            <option value="{{$segment->id}}" {{ old('segment') == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group row">
@@ -738,6 +752,9 @@
             $('#bank_city').select2({
                 width: '100%',
             });
+            $('#segments').select2({
+                width: '100%',
+            });
 
             var weekly = [1, 2, 3, 4, 5, 6, 7];
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -811,6 +828,7 @@
                 $("#profile-form").find(".danger").removeClass("danger");
                 $("#city_id").val("{{$user->city_id}}").trigger('change');
                 $("#product_id").val("{{$user->product_id}}").trigger('change');
+                $("$segments").val("{{$user->segments}}").trigger('change');
                 $("#tabs").show();
             });
             $('#cancel-button-bank').click(function () {
