@@ -1753,7 +1753,7 @@ class V2AdminPickupsController extends Controller
                 }
             })
             ->editColumn('picture_path', function ($rider_pickup) {
-                if ($rider_pickup->picture_path != null) {
+                if ($rider_pickup->pickup_type == 0) {
                     return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                 } else {
                     return '';
