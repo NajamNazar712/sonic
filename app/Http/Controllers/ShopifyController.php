@@ -25,12 +25,12 @@ class ShopifyController extends Controller
 
     public function invoice_settings(Request $request){
         Log::info('Hit');
-//        Log::info(print_r($request, true));
+        Log::info(json_decode($request));
         $user_id = $request->user_id;
         $rules = [
             'address' => ['string', 'max:255'],
             'message' => ['string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048']
+            'image' => ['nullable', 'image', 'max:2048']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
