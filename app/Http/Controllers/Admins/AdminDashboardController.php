@@ -8355,7 +8355,7 @@ if(session('department_id') == 7){
                         }
                     }
 
-                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" data-toggle="modal" data-target="#assignlocation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
 
 
                     $dropdown .= '
@@ -9528,7 +9528,10 @@ if(session('department_id') == 7){
        $route_id = $request->route_id;
        $pickup_addresses = $request->pickup_address;
 
-       RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
+       foreach($pickup_addresses as $address){
+           RouteLocations::where('pickup_address_id',$address)->delete();
+       }
+        RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
             foreach($pickup_addresses as $pickup_address){
