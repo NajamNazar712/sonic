@@ -443,6 +443,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group row">
+                                <div class="form-group col-md-9">
                                 <label for="segments">Segments:
                                     <span class="danger">*</span>
                                 </label>
@@ -828,7 +829,7 @@
                 $("#profile-form").find(".danger").removeClass("danger");
                 $("#city_id").val("{{$user->city_id}}").trigger('change');
                 $("#product_id").val("{{$user->product_id}}").trigger('change');
-                $("$segments").val("{{$user->segments}}").trigger('change');
+                $("$segments").val("{{$user->segment_id}}").trigger('change');
                 $("#tabs").show();
             });
             $('#cancel-button-bank').click(function () {

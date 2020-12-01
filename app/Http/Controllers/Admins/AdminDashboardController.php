@@ -7757,7 +7757,7 @@ if(session('department_id') == 7){
     }
 
 
-    public function updateProfile(Request $request)
+    public function (Request $request)
     {
         $user_id = $request->user_id;
 
