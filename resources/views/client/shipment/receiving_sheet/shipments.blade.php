@@ -45,6 +45,8 @@
 										<th class="border-primary border-darken-1">Warehouse/Store ID</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
+										<th class="border-primary border-darken-1">Estimated Weight</th>
+										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 									</tr>
 								</thead>
@@ -107,6 +109,8 @@
                             head.push('Warehouse/Store ID');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Estimated Weight');
+                            head.push('Amount');
                             head.push('Booking Date');
 
                             $.each(result.data, function(index, values) {
@@ -119,6 +123,8 @@
                                 row.push(values.warehouse_id);
                                 row.push(values.origin_city);
                                 row.push(values.destination_city);
+                                row.push(values.estimated_weight);
+                                row.push(values.amount);
                                 row.push(values.booking_date);
 
                                 body.push(row);
@@ -158,22 +164,24 @@
                         d.search_date = $('input[name="search_date_formatted"]').val();
                     }
                 },
-				order: [[7, 'desc']],
+				order: [[9, 'desc']],
 				searchable: false,
 				columns: [
-					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
 					{data: 'receiving_sheet', name: 'rs.id', class: 'align-middle receiving_sheet p-1'},
 					{data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
 					{data: 'warehouse_id', name: 'gapa.warehouse_id', class: 'align-middle warehouse_id'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
+					{data: 'estimated_weight', name: 'shipments.estimated_weight', class: 'align-middle estimated_weight'},
+					{data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				}
 			});
 
