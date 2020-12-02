@@ -32,9 +32,9 @@
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="active" aria-labelledby="active-tab" aria-expanded="true">
                         {{--<p>Macaroon candy canes tootsie roll wafer lemon drops liquorice--}}
-                            {{--jelly-o tootsie roll cake. Marzipan liquorice soufflé cotton--}}
-                            {{--candy jelly cake jelly-o sugar plum marshmallow. Dessert--}}
-                            {{--cotton candy macaroon chocolate sugar plum cake donut.</p>--}}
+                        {{--jelly-o tootsie roll cake. Marzipan liquorice soufflé cotton--}}
+                        {{--candy jelly cake jelly-o sugar plum marshmallow. Dessert--}}
+                        {{--cotton candy macaroon chocolate sugar plum cake donut.</p>--}}
                         <div class="table-responsive">
                             <br>
                             <table class="table" style="font-size: 14px">
@@ -120,11 +120,11 @@
                                     </tr>
                                 @endif
                                 @if($user->segment_id != null)
-                                <tr>
-                                    <td><b>Segment</b></td>
-                                   <td>{{$user->segment->name}}
-                                   </td>
-                                </tr>
+                                    <tr>
+                                        <td><b>Segment</b></td>
+                                        <td>{{$user->segment->name}}
+                                        </td>
+                                    </tr>
                                 @endif
                                 <tr>
                                     <td><b>API Key</b></td>
@@ -135,11 +135,11 @@
                         </div>
                         <br>
                         @if (session('role_id') == 1 || in_array(111, session('permissions')))
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="edit-1" type="button" class="btn btn-primary btn-block">Edit</button>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="edit-1" type="button" class="btn btn-primary btn-block">Edit</button>
+                                </div>
                             </div>
-                        </div>
                         @endif
                     </div>
                     <div class="tab-pane" id="link" role="tabpanel" aria-labelledby="link-tab" aria-expanded="false">
@@ -241,11 +241,11 @@
                         </div>
                         <br>
                         @if (session('role_id') == 1 || in_array(112, session('permissions')))
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="edit-2" type="button" class="btn btn-primary btn-block">Edit</button>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="edit-2" type="button" class="btn btn-primary btn-block">Edit</button>
+                                </div>
                             </div>
-                        </div>
                         @endif
                     </div>
                     <div class="tab-pane" id="linkEmail" role="tabpanel" aria-labelledby="linkEmail-tab" aria-expanded="false">
@@ -272,10 +272,10 @@
 
                             <ul class="list-group">
                                 @if(count($emails) > 0)
-                                @foreach($emails as $email)
-                                    <li class="list-group-item">{{$email->email}}</li>
-                                @endforeach
-                                    @else
+                                    @foreach($emails as $email)
+                                        <li class="list-group-item">{{$email->email}}</li>
+                                    @endforeach
+                                @else
                                     <li class="list-group-item">No Emails Found</li>
                                 @endif
 
@@ -285,9 +285,9 @@
                     </div>
                 </div>
                 {{--<div class="row justify-content-center">--}}
-                    {{--<div class="col-3">--}}
-                        {{--<button type="button" class="btn btn-success btn-block">Edit</button>--}}
-                    {{--</div>--}}
+                {{--<div class="col-3">--}}
+                {{--<button type="button" class="btn btn-success btn-block">Edit</button>--}}
+                {{--</div>--}}
                 {{--</div>--}}
 
             </div>
@@ -308,7 +308,7 @@
                                         <label>Company Name:</label>
                                         {{--<span class="danger">*</span>--}}
                                         @if(session('role_id') == 1 || in_array(250, session('permissions')))
-                                        <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required>
+                                            <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required>
                                         @else
                                             <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required readonly>
                                         @endif
@@ -444,47 +444,47 @@
                         <div class="col-md-6">
                             <div class="form-group row">
                                 <div class="form-group col-md-9">
-                                <label for="segments">Segments:
-                                    <span class="danger">*</span>
-                                </label>
-                                <div>
-                                    <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
-                                        @foreach($segments as $segment)
-                                            <option value="{{$segment->id}}" {{ old('segment') == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
-                                        @endforeach
-                                    </select>
+                                    <label for="segments">Segments:
+                                        <span class="danger">*</span>
+                                    </label>
+                                    <div>
+                                        <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
+                                            @foreach($segments as $segment)
+                                                <option value="{{$segment->id}}" {{ old('segment') == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <div class="col-md-9">
-                                        <label>STRN Number</label>
-                                        <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-9">
+                                            <label>STRN Number</label>
+                                            <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-9">
+                                            <label>Brand Name</label>
+                                            <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <div class="col-md-9">
-                                        <label>Brand Name</label>
-                                        <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="form-actions right">
+                            <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Update
+                            </button>
                         </div>
-                    </div>
-                    <div class="form-actions right">
-                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
-                             Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Update
-                        </button>
-                    </div>
                 </form>
 
                 <form id="bank-form" class="form form-horizontal" style="display: none" method="post" action="{{route('admin.accounts.update.bank')}}">
@@ -551,20 +551,20 @@
                                     </div>
                                 </div>
                             </div>
-                                @if($user->account_type_id == 2)
+                            @if($user->account_type_id == 2)
                                 <div class="col-6">
-                                <div class="form-group row">
-                                    <div class="form-group col-md-9">
-                                        <label>Invoicing Cycle</label>
-                                        <span class="danger">*</span>
-                                        <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
-                                            @foreach($invoicing_cycle as $cycle)
-                                            <option value="{{$cycle->id}}" {{ ($user_bank_default->invoicing_cycle_id != null)? $user_bank_default->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
-                                            @endforeach
-                                        </select>
+                                    <div class="form-group row">
+                                        <div class="form-group col-md-9">
+                                            <label>Invoicing Cycle</label>
+                                            <span class="danger">*</span>
+                                            <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
+                                                @foreach($invoicing_cycle as $cycle)
+                                                    <option value="{{$cycle->id}}" {{ ($user_bank_default->invoicing_cycle_id != null)? $user_bank_default->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div id="generation_div" class="d-none"></div>
+                                    <div id="generation_div" class="d-none"></div>
                                 </div>
 
 
@@ -612,10 +612,10 @@
                     </div>
                     <div class="form-actions right">
                         <button id="cancel-button-bank" type="button" class="btn btn-warning mr-1">
-                             Cancel
+                            Cancel
                         </button>
                         <button type="submit" class="btn btn-primary">
-                             Update
+                            Update
                         </button>
                     </div>
                 </form>
@@ -812,7 +812,7 @@
                 }
                 $('#generation_date').val(gdate).trigger('change');
             }
-            
+
             $('#edit-1').click(function () {
                 $("#profile-form").show();
                 $("#tabs").hide();
@@ -931,7 +931,7 @@
                 },
                 submitHandler: function(form) {
 
-                        form.submit();
+                    form.submit();
 
                 }
             });
