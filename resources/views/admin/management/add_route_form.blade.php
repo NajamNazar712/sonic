@@ -80,7 +80,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        $('.select2').select2({
+        $('#addRouteForm .select2').select2({
             dropdownParent: $("#addRoute")
         });
 
