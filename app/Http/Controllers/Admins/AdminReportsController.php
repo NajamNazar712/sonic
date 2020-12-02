@@ -5253,8 +5253,7 @@ class AdminReportsController extends Controller
         }
 
         if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
-            $today = Carbon::today();
-            $datatable->whereDate('dr.created_at', $today);
+            $datatable->where('false');
         }
 
         return $datatable->make(true);
