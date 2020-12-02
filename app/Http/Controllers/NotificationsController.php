@@ -6168,27 +6168,12 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 }
-				/*else if ($id == 104) {
-                    $notification_deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
-                        ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
-                        ->join('users', 'shipments.user_id', '=', 'users.id')
-                        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                        ->select('users.id as user_id', 'ss.id as status','shipments.consignee_phone_number_1 as phone')
-                        ->where('users.id',3324)
-                        ->where('delivery_notes.id',$delivery_note_id);
-                    if($notification_deliveries->exists()){
-                        $notification_deliveries = $notification_deliveries->get();
-                        foreach($notification_deliveries as $n_delivery){
-                            $notification_body = $body;
-
-                            $data = $reference_1_id;
-
-                            $to = $data->phone;
-                            self::sms($notification->body, $to);
-                        }
-                    }
-                } */
-
+                else if ($id == 104) {
+                        $shipment_id = $reference_1_id;
+                        $phone = Shipment::find($shipment_id)->consignee_phone_number_1;
+                        $to = $phone;
+                        self::sms($body, $to);
+                }
                 else if ($id == 105) {
                     $pickup_request_id = $reference_1_id;
                     $reason_id = $reference_2_id;
@@ -6279,9 +6264,7 @@ class NotificationsController extends Controller
                         $to = $new_rider->phone;
                         self::sms($body, $to);
 
-                }
-
-            }
+                }            }
         }
     }
     static public function custom($type, $subject, $body, $to) {
