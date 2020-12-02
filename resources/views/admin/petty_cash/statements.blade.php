@@ -59,6 +59,9 @@
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
+                    <div class="col-2">
+                        <button type="button" id="search_station" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Station Approved</button>
+                    </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -157,9 +160,6 @@
                     }
                 }
             });
-            $('#search_filter_btn').on('click',function () {
-                table.draw();
-            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -222,14 +222,128 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                     {
-                        className: 'btn btn-primary',
+                        className: 'btn btn-primary station station',
                         text: 'Station Approved',
-                    },
-                    {
-                        className: 'btn btn-primary',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+
+                            $('input:hidden[name=statement_ids]').val(selected_rows);
+
+                            if(selected_rows.length === 0){
+                                table.button('.station').disable();
+                                return false;
+                            }
+                            else if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'statement_ids': selected_rows
+                                            }
+                                        }).done(function(data){
+                                            if(data.status){
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                table.button('.station').disable();
+                                                table.draw(true);
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+
+                                        });
+                                    }
+                                });
+
+                            }else{
+                                var error = 'Statement ID Not Found, Please Try again!';
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.adjust').disable();
+                            }
+                        }
+                    }, {
+                        className: 'btn btn-primary operation',
                         text: 'Operation Approved',
-                    },
-                    {
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+
+                            $('input:hidden[name=statement_ids]').val(selected_rows);
+
+                            if(selected_rows.length === 0){
+                                table.button('.operation').disable();
+                                return false;
+                            }
+                            else if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'statement_ids': selected_rows
+                                            }
+                                        }).done(function(data){
+                                            if(data.status){
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                table.button('.operation').disable();
+                                                table.draw(true);
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+
+                                        });
+                                    }
+                                });
+
+                            }else{
+                                var error = 'Statement ID Not Found, Please Try again!';
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.adjust').disable();
+                            }
+                        }
+                    }, {
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
                         action: function (e, dt, node, config) {
