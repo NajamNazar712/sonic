@@ -7153,6 +7153,10 @@ if(session('department_id') == 7){
             }
         }
 
+        if(in_array(403, session('permissions'))){
+            $users = $users->whereIn('iui.status', [1, 2, 3, 4]);
+        }
+
         if($sale_persons = $request->get('sale_persons')){
             $users = $users->whereIn('ad.id', $sale_persons);
         }
