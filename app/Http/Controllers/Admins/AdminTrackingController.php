@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -714,7 +716,23 @@ class AdminTrackingController extends Controller
                         }
 
                         if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+                            if ($journey->shipper_status_id == 3) {
+                                $bag = Bag::where('id', $journey->reference_1_id);
+                                if($bag->exists()){
+                                    $bag = $bag->first();
+                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+                                    if($master_cargo_bags->exists()){
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                    }
+                                    else{
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                    }
+                                }
+                                else{
+                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                }
+                            }
+                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
                                 $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             }
                             else {

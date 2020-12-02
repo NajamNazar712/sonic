@@ -114,14 +114,10 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <select name="country" class="select2" id="country" data-rule-required="true" data-msg-required="City is required">
-                                                @foreach($countries as $country)
-                                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
                                             <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
+                                                @foreach($cities as $city)
+                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
 
@@ -359,8 +355,8 @@
     <script>
 
         $(document).ready(function() {
-            var consignee_cities = @json($consignee_cities);
-            console.log(consignee_cities);
+            var cities = @json($cities);
+            console.log(cities);
             var order_date = $('#order_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -527,7 +523,6 @@
                         }
                     }).done(function (data) {
                         if(data.status){
-                            $('#consignee_city').val(data.details.city_id).trigger('change');
                             $('input[name="consignee_name"]').val(data.details.name);
                             $('#consignee_address').val(data.details.address);
                             $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
@@ -564,20 +559,7 @@
             }).bind('change', function() {
                 $(this).valid();
             });
-            $('#country').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Country*'
-            }).bind('change', function() {
-                $(this).valid();
-                var id = parseInt($(this).val());
-                $('#consignee_city option').remove();
-                $('#consignee_city').prepend('<option value="" selected="selected"></option>');
-                $.each(consignee_cities, function(index, consignee_city) {
-                    if(consignee_city.hub_id == id){
-                        $('#consignee_city').append('<option value="' + consignee_city.id + '">' + consignee_city.name + '</option>');
-                    }
-                });
-            });
+
             $('#product_type').select2({
                 width: '100%',
                 placeholder: 'Product Type*'

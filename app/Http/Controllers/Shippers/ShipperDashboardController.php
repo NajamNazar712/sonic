@@ -39,6 +39,8 @@ use App\Http\Models\RateRemark;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Reference;
 use App\Http\Models\ReturnCharge;
+use App\Http\Models\Rider;
+use App\Http\Models\Route;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use App\http\Models\ShipperContact;
@@ -57,6 +59,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
+use App\RouteLocations;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -103,10 +106,35 @@ class ShipperDashboardController extends Controller
                 $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                 $sales_person_data['name'] = $sales_person_tag->name;
                 $sales_person_data['phone'] = $sales_person_tag->phone_number;
+                $sales_person_data['email'] = $sales_person_tag->email;
             }
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data]);
+            $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
+                        ->join('admins as a','a.id','=','scu.user_id')
+                        ->where('sales_commissions.shipper_id',session('user_id'))
+                        ->wherein('scu.tier_id',[2,3])
+                        ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->get();
+
+               $poc = array();
+               $kam = array();
+               foreach($details as $detail){
+                   if($detail->tier_id == 2){
+                       $poc[] = $detail;
+                   }
+                   else{
+                       $kam[] = $detail;
+                   }
+               }
+            $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
+            $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
+            $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+
+            $riders = Rider::whereIn('route_id', $routes)->select('phone', 'name')->get();
+
+
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
         }
     }
+
 
     public function orders_index() {
         $should_not_show_status = array(32,33,34,35,36,37,38,46);

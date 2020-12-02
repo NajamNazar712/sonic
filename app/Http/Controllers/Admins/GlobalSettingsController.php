@@ -1618,8 +1618,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function sales_person_targets_submit(Request $request){
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
+        $start_date = $request->search_date_from_formatted;
+        $end_date = Carbon::parse($start_date)->addDays(30)->toDateTimeString();
         if($start_date == null || $end_date == null){
             return redirect()->back()->with('error' , 'Date not selected!');
         }
@@ -1636,14 +1636,14 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->end_date = $sales_target->end_date;
                     $sales_person_log->sales_person_id = $sales_target->sales_person_id;
                     $sales_person_log->target_days = $sales_target->target_days;
-                    $sales_person_log->target_week = $sales_target->target_week;
+                    $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
                     $sales_person_log->save();
 
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
                     $sales_target->target_days = $request->target_shipment_days;
-                    $sales_target->target_week = $request->target_shipment_week;
+                    $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
                     $sales_target->save();
 
@@ -1666,8 +1666,10 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_list(Request $request){
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_week', 'sale_person_targets.average_revenue');
-        return Datatables::of($targets)->make(true);
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month','sale_person_targets.average_revenue',DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'),DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status',1);
+
+        $datatable = Datatables::of($targets);
+        return $datatable->make(true);
     }
     public function sales_person_targets_history(){
         return view('admin.settings.sales_person.history');

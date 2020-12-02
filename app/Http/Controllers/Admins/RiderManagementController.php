@@ -154,7 +154,7 @@ class RiderManagementController extends Controller
         }else{
             $route_id = $request->route_id;
         }
-
+        Rider::where('route_id', $request->route_id)->update(['route_id' => NULL]);
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -249,6 +249,7 @@ class RiderManagementController extends Controller
 
             $rider->route_id = $route->id;
         }else{
+            Rider::where('route_id', $request->route_id)->where('id', '<>', $id)->update(['route_id' => NULL]);
             $rider->route_id = $request->route_id;
         }
         if($request->pin != '') {

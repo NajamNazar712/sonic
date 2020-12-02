@@ -16,6 +16,13 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <div class="col-4 mb-1">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -40,10 +47,13 @@
 									</tr>
 								</thead>
 							</table>
+                            </form>
 						</div>
 					</div>
 				</div>
+
 			</div>
+
 		</div>
 	</div>
 @endsection
@@ -51,11 +61,13 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script type="text/javascript">
@@ -252,10 +264,14 @@
                 language: {
                     processing: data_table_loader
                 },
-                serverSide: true,
-                ajax: '{{ route('admin.cancelled_shipments.list') }}',
-                rowId: 'id',
+                serverSide: true,ajax: {
+                    url: '{{ route('admin.cancelled_shipments.list') }}',
+                    data: function (d) {
+                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                    }
+                },
                 order: [[14, 'desc']],
+                rowId: 'id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -376,11 +392,6 @@
 
                     var data3 = $.map({!! $products !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-
-                    var data3 = $.map({!! $products !!}, function (obj) {
                         obj.text = obj.product_name;
 
                         return obj;
@@ -397,6 +408,9 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+
+
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -417,6 +431,7 @@
                     table.button('.revert').disable();
                 }
             });
+
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.revert', function() {
                 var shipment_id = parseInt($(this).parents('tr').attr('id'));
@@ -471,6 +486,43 @@
                         });
                     }
                 });
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+            //Selectize
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+
+                table.draw();
             });
 		});
 	</script>

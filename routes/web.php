@@ -565,6 +565,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRouteView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
+            Route::post('/assign_location', 'Admins\AdminDashboardController@assign_locations_submit')->name('assign_location');
+            Route::post('/view_assign_location', 'Admins\AdminDashboardController@view_assign_locations')->name('view_assign_location');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
             Route::get('','Admins\AdminDashboardController@riderView')->name('index');
@@ -773,6 +775,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_list')->name('list');
             Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
         });
@@ -1131,6 +1134,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
             });
+            Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
             Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
 
             Route::prefix('history')->name('history.')->group(function () {
@@ -1159,7 +1163,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('create')->name('create.')->group(function () {
-            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_create_index')->name('index');
+            Route::get('{id?}', 'Admins\AdminMasterCargoController@master_cargo_create_index')->name('index');
             Route::post('bag_details', 'Admins\AdminMasterCargoController@create_master_cargo_bag_details')->name('bag_details');
             Route::post('bag_cargo_details', 'Admins\AdminMasterCargoController@create_master_cargo_details')->name('cargo_details');
             Route::post('', 'Admins\AdminMasterCargoController@master_cargo_create_store')->name('store');
@@ -1198,6 +1202,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_history_index')->name('index');
             Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_history_list')->name('list');
+        });
+
+        Route::prefix('received')->name('received.')->group(function () {
+            Route::get('', 'Admins\AdminMasterCargoController@master_cargo_received_index')->name('index');
+            Route::get('list', 'Admins\AdminMasterCargoController@master_cargo_received_list')->name('list');
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {

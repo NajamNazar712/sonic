@@ -186,7 +186,7 @@
                         UnblockPagePermanently();
                         $('#add_bag_form button.add').prop('disabled', false);
                         scan_sound(2);
-                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error('Bag has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                     return false;

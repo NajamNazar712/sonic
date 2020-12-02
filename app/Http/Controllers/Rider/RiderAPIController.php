@@ -1545,6 +1545,8 @@ class RiderAPIController extends Controller {
                 if($pickup_note_requests_count == 0){
                     V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
                 }
+
+                NotificationsController::send(105, $request->pickup_request_id, $request->reason_id);
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);

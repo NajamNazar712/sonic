@@ -61,7 +61,6 @@
                                     <th class="border-primary border-darken-1">Bag No.</th>
                                     <th class="border-primary border-darken-1">Bag Type</th>
                                     <th class="border-primary border-darken-1">Master Cargo No.</th>
-                                    <th class="border-primary border-darken-1">Master Cargo Type</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -177,7 +176,6 @@
                             head.push('Bag No.');
                             head.push('Bag Type');
                             head.push('Master Cargo No.');
-                            head.push('Master Cargo Type');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipment(s)');
@@ -206,7 +204,6 @@
                                 row.push(values.seal_number);
                                 row.push(values.bag_type);
                                 row.push(values.id_padded);
-                                row.push(values.cargo_type);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments_count);
@@ -263,13 +260,12 @@
                     }
                 },
                 rowId: 'id',
-                order: [[19, 'asc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'bags.seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'bags.type', class: 'align-middle bag_type'},
                     {data: 'id_padded_link', name: 'mc.id', class: 'align-middle master_cargo_number'},
-                    {data: 'cargo_type', name: 'mc.type', class: 'align-middle cargo_type'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'bags.shipments', class: 'align-middle text-center shipments'},
@@ -309,10 +305,6 @@
                         '<option value="1">Normal</option>' +
                         '<option value="2">Return</option>' +
                         '</select>';
-                    var cargo_type_select = '<select name="cargo_type_select" id="cargo_type_select" class="select2 form-control">' +
-                        '<option value="1">Normal</option>' +
-                        '<option value="2">Return</option>' +
-                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -338,12 +330,6 @@
                         }
                         else if($(header).is('.bag_type')){
                             $(bag_type_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.cargo_type')){
-                            $(cargo_type_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -378,12 +364,6 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#bag_type_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Type",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#cargo_type_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Type",
                         width:'100%',
                         containerCssClass: 'select-xs',

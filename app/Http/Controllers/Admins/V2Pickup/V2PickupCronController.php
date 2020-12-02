@@ -25,6 +25,7 @@ class V2PickupCronController extends Controller
         // $arrival_time = Carbon::parse($arrival_cut_off_time)->toTimeString();
         $rider_id = 1837;
         $global_admin_id = 346;
+        $auto_generate_pickup_ids = array();
         $setting = GlobalSettings::where('type', 'global_rider_id');
         if($setting->exists()){
             $setting = $setting->first();
@@ -70,6 +71,7 @@ class V2PickupCronController extends Controller
                 }else{
                     $pickup_request->attempts = $pickup_request->attempts + 1;
                     $pickup_request->save();
+
                     $pickup_request_attempt = new V2PickupRequestAttempt();
                     $pickup_request_attempt->pickup_request_id = $pickup_request->id;
                     $pickup_request_attempt->rider_id = $rider_id;
@@ -77,12 +79,19 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->attempt_date = $now;
                     $pickup_request_attempt->assigned_by = $global_admin_id;
                     $pickup_request_attempt->save();
+                    $auto_generate_pickup_ids[] = $pickup_request->id;
                 }
 
             }
             V2PickupNote::where('status', 0)->update(['status' => 1]);
 
             self::remove_riders();
+            if(count($auto_generate_pickup_ids) > 0){
+                foreach ($auto_generate_pickup_ids as $pickup_request_id){
+                    AdminPickupsController::auto_pickup_assign($pickup_request_id);
+                }
+            }
+
         }
     }
     
