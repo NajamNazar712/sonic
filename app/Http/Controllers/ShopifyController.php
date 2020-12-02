@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -24,8 +25,8 @@ class ShopifyController extends Controller
     ];
 
     public function invoice_settings(Request $request){
-        Log::info('Hit');
-        Log::info(json_decode($request));
+
+        $request_data = json_decode($request->data);
         $user_id = $request->user_id;
         $rules = [
             'address' => ['string', 'max:255'],
@@ -44,19 +45,19 @@ class ShopifyController extends Controller
             $shopify_invoice = ShopifyInvoiceSetting::where('user_id', $user_id);
             if($shopify_invoice->exists()){
                 $shopify_invoice = $shopify_invoice->first();
-                $shopify_invoice->address = $request->address;
-                $shopify_invoice->message = $request->message;
+                $shopify_invoice->address = $request_data->address;
+                $shopify_invoice->message = $request_data->message;
 
             }else{
                 $shopify_invoice = new ShopifyInvoiceSetting();
                 $shopify_invoice->user_id = $user_id;
-                $shopify_invoice->address = $request->address;
-                $shopify_invoice->message = $request->message;
+                $shopify_invoice->address = $request_data->address;
+                $shopify_invoice->message = $request_data->message;
             }
 
             if ($request->image != null) {
-                Log::info('inside image');
-                $filename = 'logo_' . $user_id . '.png';
+                $time = Carbon::now()->toDateString();
+                $filename = 'logo_' . $user_id . $time . '.png';
                 $file = $request->image;
                 $picture_path = 'shopify_invoice_logos/' . $filename;
 
