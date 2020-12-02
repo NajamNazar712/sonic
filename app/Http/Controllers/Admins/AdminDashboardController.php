@@ -7294,9 +7294,10 @@ if(session('department_id') == 7){
                         return "Approved";
                     }elseif($users->international_rate_status == 2){
                         return "Requested";
-                    }
-                    else{
+                    }elseif($users->international_rate_status == 3){
                         return "Rejected";
+                    }elseif($users->international_rate_status == 4){
+                        return "Requested";
                     }
                 }
                 else{
