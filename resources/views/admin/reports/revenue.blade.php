@@ -112,7 +112,7 @@
                                 </span>
                             </div>
 
-                            <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Delivered/Returned Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Delivered/Returned Date (From)">
                         </div>
                     </div>
                     <div class="col-4">
@@ -123,7 +123,7 @@
                                 </span>
                             </div>
 
-                            <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Delivered/Returned Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Delivered/Returned Date (To)">
                         </div>
                     </div>
                     <div class="col-2">
