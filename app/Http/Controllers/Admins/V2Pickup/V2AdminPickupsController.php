@@ -2355,7 +2355,8 @@ class V2AdminPickupsController extends Controller
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
             ->leftjoin('v2_rider_pickup_action_logs as rpal','rpal.pickup_note_id','=','v2_pickup_notes.id')
             ->leftjoin('pickup_actions as pa','pa.id','=','rpal.type_id')
-            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked','rpal.type_id as type',DB::raw('SUM(vpr.booked) as total_shipment'),'vpr.received',DB::raw('SUM(vpr.received) as total_arrived'))->groupBy('v2_pickup_notes.id');
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked','rpal.type_id as type', DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_request_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'))
+            ->groupBy('v2_pickup_notes.id');
 
 
         if($city = $request->get('search_city')) {
