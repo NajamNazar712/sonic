@@ -18,7 +18,8 @@ class MasterCargoStatusTableSeeder extends Seeder
             array('id' => 2, 'name' => 'Received', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 3, 'name' => 'Dispute', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 4, 'name' => 'Cancelled', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
-            array('id' => 5, 'name' => 'Lost', 'created_at'=>$timestamp,'updated_at'=>$timestamp)
+            array('id' => 5, 'name' => 'Lost', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 6, 'name' => 'In Transit - Onward Forwarding', 'created_at'=>$timestamp,'updated_at'=>$timestamp)
         ));
     }
 }

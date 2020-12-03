@@ -11,7 +11,6 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
@@ -67,6 +66,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
+use App\RouteLocations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -1371,12 +1371,11 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
-        $shippers = User::where('status', 3)->get();
+        $shippers = User::whereIn('status', [3, 4])->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         $payment_cycles = PaymentCycle::all();
-        $segments = Segment::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'segments' => $segments]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
 
     }
     public function blockAccountsList(){
@@ -2204,8 +2203,8 @@ if(session('department_id') == 7){
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -2239,8 +2238,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -2274,8 +2273,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -2309,8 +2308,8 @@ if(session('department_id') == 7){
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -3882,8 +3881,8 @@ if(session('department_id') == 7){
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -3917,8 +3916,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -3952,8 +3951,8 @@ if(session('department_id') == 7){
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -3987,8 +3986,8 @@ if(session('department_id') == 7){
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -6151,8 +6150,8 @@ if(session('department_id') == 7){
         $shipper_id = $id;
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             $on_validations = [
-                'on_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'on_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'on_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'on_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'on_wa_local_charges.*' => 'required|numeric',
                 'on_class_0_charges.*' => 'required|numeric',
                 'on_class_1_charges.*' => 'required',
@@ -6186,8 +6185,8 @@ if(session('department_id') == 7){
         //overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
             $ol_validations = [
-                'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'ol_wa_local_charges.*' => 'required|numeric',
                 'ol_class_0_charges.*' => 'required|numeric',
                 'ol_class_1_charges.*' => 'required',
@@ -6221,8 +6220,8 @@ if(session('department_id') == 7){
         //overland
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
             $detain_validations = [
-                'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'detain_wa_local_charges.*' => 'required|numeric',
                 'detain_class_0_charges.*' => 'required|numeric',
                 'detain_class_1_charges.*' => 'required',
@@ -6256,8 +6255,8 @@ if(session('department_id') == 7){
         //sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
             $sameday_validations = [
-                'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
-                'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
+                'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
+                'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
@@ -8307,7 +8306,8 @@ if(session('department_id') == 7){
     }
     //route management
     public function routeView(){
-        return view('admin.management.route_management');
+        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
+        return view('admin.management.route_management')->with(['users' => $users]);
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
@@ -8355,6 +8355,9 @@ if(session('department_id') == 7){
                         }
                     }
 
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+
+
                     $dropdown .= '
                         </div>
                       </div>
@@ -8369,8 +8372,9 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
-        return view('admin.management.add_route_form')->with('cities',$city);
+        $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $riders = Rider::where('status', 1)->select(['id','name'])->get();
+        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders]);
     }
     public function addRouteDetails(Request $request){
 //        return $request;
@@ -8387,7 +8391,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::create([
+        $route = Route::create([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8395,13 +8399,32 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+        if(Rider::where('route_id','=',$route->id)->exists()){
+            return redirect()->back()->with('error', 'Route id already exists !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $route->id;
+                $rider->save();
+            }
+        }
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
+        $riders = Rider::where('status',1)->select(['id','name'])->get();
+        $current_rider = Rider::where('route_id',$id);
+        if($current_rider->exists()){
+            $current_rider = $current_rider->select('id')->first();
+            $current_rider_id = $current_rider->id;
+        }
+        else{
+            $current_rider_id = NULL;
+        }
         $route = Route::find($id);
-
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id]);
     }
     public function editRouteDetails(Request $request, $id){
         $validations = [
@@ -8417,7 +8440,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
-        Route::where('id',$id)->update([
+        $route = Route::where('id',$id)->update([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
@@ -8425,6 +8448,18 @@ if(session('department_id') == 7){
             'junction'=>$request->junction,
             'status'=>1
         ]);
+
+        if(Rider::where('route_id','=',$id)->exists()){
+            return redirect()->back()->with('success', 'Details Updated !');
+        }
+        else{
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if($rider){
+                $rider->route_id = $id;
+                $rider->save();
+            }
+        }
         return redirect()->back()->with('success','Route updated successfully');
     }
     public function routeStatus(Request $request){
@@ -8559,6 +8594,7 @@ if(session('department_id') == 7){
             return redirect()->back()
                 ->withErrors($validate);
         }
+
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -9484,18 +9520,41 @@ if(session('department_id') == 7){
         }
     }
 
-    public function setSegmentBulk(Request $request){
-    $segment_id = $request->segment_id;
-    $shipper_ids = $request->shipper_ids;
-    if($shipper_ids){
-        foreach($shipper_ids as $shipper_id){
-            $user = User::find($shipper_id);
-            $user->segment_id = $segment_id;
-            $user->save();
+    public function assign_locations_submit(Request $request){
+        $request->validate([
+            'route_id' => 'required',
+            'pickup_address' =>'required']);
+
+       $route_id = $request->route_id;
+       $pickup_addresses = $request->pickup_address;
+
+       foreach($pickup_addresses as $address){
+           RouteLocations::where('pickup_address_id',$address)->delete();
+       }
+        RouteLocations::where('route_id',$route_id)->delete();
+
+        if($route_id){
+            foreach($pickup_addresses as $pickup_address){
+                $location = new RouteLocations();
+                $location->route_id = $route_id;
+                $location->pickup_address_id = $pickup_address;
+                $location->save();
+            }
+      }
+        return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
+    }
+
+    public function view_assign_locations(Request $request){
+        $route_id = $request->route_id;
+        $data = array();
+        if($route_id != null){
+            $pickup_addresses = RouteLocations::where('route_id',$route_id)->select('pickup_address_id')->get();
+           foreach($pickup_addresses as $pickup_address){
+                $data[] = $pickup_address->pickup_address_id;
+           }
+            return response()->json(['pickup_address_ids' => $data]);
         }
-        return ['success'=>"Segment has been set fot the following Shippers!"];
     }
-        return ['error' => "Select some shippers first!"];
-    }
+
 }
 

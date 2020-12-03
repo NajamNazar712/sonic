@@ -753,7 +753,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
             ->where('delivery_notes.status', 0);
 
 
@@ -1646,7 +1646,6 @@ class DeliveryController extends Controller
 
     }
     public function receive_delivery_status_submit_all(Request $request){
-
         $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
@@ -1674,7 +1673,7 @@ class DeliveryController extends Controller
                 }
 
                 if($selected_status != 14){
-                    if(in_array($selected_reason, [3, 4, 12])){
+                    if(in_array($selected_reason, [3, 4, 12, 34, 50])){
                         $phone_number = $shipment_details->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
                             $query->where('consignee_phone_number_1', $phone_number)
@@ -1683,7 +1682,7 @@ class DeliveryController extends Controller
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
                             $invalid_reason_shipments[] = $shipment_details->tracking_number;
-                            continue;
+//                            continue;
                         }
                     }
                 }
@@ -1878,8 +1877,7 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
 
             if(count($invalid_reason_shipments) > 0){
-                $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return response()->json(['status'=>1, 'success' => 'Statuses updated successfully but some shipments can\'t be updated due to invalid reasons!', 'invalid_shipments' => $invalid_shipments]);
+                return response()->json(['status'=>2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments]);
             }
             else{
                 return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
@@ -1919,7 +1917,7 @@ class DeliveryController extends Controller
                     }
                 }
                 if($request->has($status_drop) && $request->has($statusId)){
-                    if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                    if(in_array($request->reason_drop[$shipment], [3, 4, 12, 34, 50])){
                         $current_shipment = Shipment::find($shipment);
                         $phone_number = $current_shipment->consignee_phone_number_1;
                         $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
@@ -1929,7 +1927,7 @@ class DeliveryController extends Controller
                             ->where('shipper_status_id', DB::raw(14));
                         if($previous_delivered_shipments->exists()){
                             $invalid_reason_shipments[] = $current_shipment->tracking_number;
-                            continue;
+//                            continue;
                         }
                     }
                 }
@@ -2011,9 +2009,29 @@ class DeliveryController extends Controller
                 $delivery_note_data->pending_status = 1;
             }
             $delivery_note_data->save();
+            $delivered_status = array(14, 30, 36, 37);
+            $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->updated_by = Auth::id();
+            $delivery_note_data->save();
+            
             if(count($invalid_reason_shipments) > 0){
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                return redirect()->back()->with('success', 'Statuses updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                return redirect()->back()->with(['success' => 'Statuses updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
             }
             else{
                 return redirect()->back()->with('success', 'Statuses updated successfully!');
@@ -2523,7 +2541,7 @@ class DeliveryController extends Controller
                     }
                     if($request->has($status_drop) && $request->has($reasonId)){
                         if($request->status_drop[$shipment] != 14){
-                            if(in_array($request->reason_drop[$shipment], [3, 4, 12])){
+                            if(in_array($request->reason_drop[$shipment], [3, 4, 12, 34, 50])){
                                 $current_shipment = Shipment::find($shipment);
                                 $phone_number = $current_shipment->consignee_phone_number_1;
                                 $previous_delivered_shipments = Shipment::where(function ($query) use ($phone_number) {
@@ -2533,7 +2551,7 @@ class DeliveryController extends Controller
                                     ->where('shipper_status_id', DB::raw(14));
                                 if($previous_delivered_shipments->exists()){
                                     $invalid_reason_shipments[] = $current_shipment->tracking_number;
-                                    continue;
+//                                    continue;
                                 }
                             }
                         }
@@ -2903,15 +2921,25 @@ class DeliveryController extends Controller
 
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
-                    NotificationsController::send(104, $delivery_note_id);
+
                     if(!empty($zero_cod_shipments)){
                         foreach ($zero_cod_shipments as $shipment_id) {
                             NotificationsController::send(35, $shipment_id);
                         }
                     }
+
+                    $delivery_note_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->pluck('shipment_id')->toArray();
+                    if(count($delivery_note_shipment_ids) > 0){
+                        foreach($delivery_note_shipment_ids as $delivery_note_shipment_id){
+                            $shipment = Shipment::find($delivery_note_shipment_id);
+                            if($shipment->user_id == 3324){
+                                NotificationsController::send(104, $delivery_note_shipment_id);
+                            }
+                        }
+                    }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with('success', 'Delivery Note verified and updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                        return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
@@ -2923,7 +2951,7 @@ class DeliveryController extends Controller
                     $delivery_note_data->save();
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
-                        return redirect()->back()->with('success', 'Delivery Note updated successfully but these shipments: ' . $invalid_shipments . ' can\'t be updated due to invalid reasons!');
+                        return redirect()->back()->with(['success' => 'Delivery Note updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
                     }
                     else{
                         return redirect()->back()->with('success', 'Delivery Note updated successfully!');
@@ -4711,7 +4739,6 @@ class DeliveryController extends Controller
     }
     public function receive_delivery_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        dd($delivery_note_id);
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
         $shipments = array();
@@ -4808,7 +4835,11 @@ class DeliveryController extends Controller
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+                if($deliveries->pending_status == 1){
+                    $link .= "<br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                }
+                return $link;
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);

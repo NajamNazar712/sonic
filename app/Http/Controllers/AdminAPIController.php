@@ -6,8 +6,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -26,11 +26,13 @@ class AdminAPIController extends Controller
         'image' => ':attribute must be an Image.'
     ];
 
-    public function verify(Request $request) {
+    public function verify(Request $request)
+    {
         return response()->json(['status' => 0, 'message' => 'API Key is Valid']);
     }
 
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $rules = [
             'email_address' => ['required', 'email'],
             'password' => ['required', 'min:6']
@@ -42,15 +44,14 @@ class AdminAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $user = Admin::where('email', $request->input('email_address'));
             if ($user->exists()) {
                 $user = $user->first();
                 if($user->status == 0){
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
-                if(Hash::check($request->input('password'), $user->password)){
+                if (Hash::check($request->input('password'), $user->password)) {
                     $information = array();
 
                     $information['id'] = $user->id;
@@ -58,8 +59,7 @@ class AdminAPIController extends Controller
 
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
-                    }
-                    else {
+                    } else {
                         $api_token = uniqid(base64_encode(str_random(60)));
 
                         $user->api_token = $api_token;
@@ -69,16 +69,16 @@ class AdminAPIController extends Controller
                         $information['api_token'] = $api_token;
                     }
 
-                    return response()->json(['status' => 0, 'message' => 'Logged In Succesfully', 'information' => $information]);
-                }else{
+                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Password']);
                 }
-            }
-            else {
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Wrong Email/Password!']);
             }
         }
     }
+
 
     public function return_note_details(Request $request){
         $admin_id = $request->admin_id;

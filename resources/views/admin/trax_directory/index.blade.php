@@ -122,7 +122,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.trax_directory.list') }}',
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[6, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'h.name', class: 'text-center align-middle city',},

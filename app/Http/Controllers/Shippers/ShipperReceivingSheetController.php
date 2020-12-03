@@ -20,11 +20,15 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\GulAhmedPickupAddress;
+
 
 use Auth;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+
+use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 
 class ShipperReceivingSheetController extends Controller
 {
@@ -92,6 +96,26 @@ class ShipperReceivingSheetController extends Controller
             $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
 
             $receiving_sheet_shipment->save();
+        }
+
+        if ($user_id == 7828) {
+            $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+            $confirmation_shipments = array();
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                $confirmation_shipment = array();
+
+                $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                $confirmation_shipment['reference_number'] = $shipment->order_id;
+                $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                $confirmation_shipments[] = $confirmation_shipment;
+            }
+
+            dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
         }
 
         return ['status' => 0, 'success' => 'Receiving Sheet has been Created', 'receiving_sheet_id' => $receiving_sheet_id];
@@ -217,6 +241,22 @@ class ShipperReceivingSheetController extends Controller
 
                             $receiving_sheet->save();
 
+                            if ($shipment->user_id == 7828) {
+                                $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                                $confirmation_shipments = array();
+
+                                $confirmation_shipment = array();
+
+                                $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                                $confirmation_shipment['reference_number'] = $shipment->order_id;
+                                $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                                $confirmation_shipments[] = $confirmation_shipment;
+
+                                dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                            }
+
                             return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
                         }
                         else {
@@ -234,6 +274,22 @@ class ShipperReceivingSheetController extends Controller
                         $receiving_sheet->booked = $receiving_sheet->booked + 1;
 
                         $receiving_sheet->save();
+
+                        if ($shipment->user_id == 7828) {
+                            $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                            $confirmation_shipments = array();
+
+                            $confirmation_shipment = array();
+
+                            $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                            $confirmation_shipment['reference_number'] = $shipment->order_id;
+                            $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                            $confirmation_shipments[] = $confirmation_shipment;
+
+                            dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                        }
 
                         return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
                     }
@@ -565,11 +621,40 @@ class ShipperReceivingSheetController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Shipper</strong></td>
                             <td>' . $shipment->user->name . '</td>
+            ';
+
+            $user_id = $shipment->user_id;
+
+            if ($user_id == 7828) {
+                $main_details .= '
+                            <td rowspan="8" class="text-center align-middle">
+                ';
+            }
+            else {
+                $main_details .= '
                             <td rowspan="7" class="text-center align-middle">
+                ';
+            }
+
+            $main_details .= '
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
+            ';
+
+            if ($user_id == 7828) {
+                $warehouse = GulAhmedPickupAddress::where('pickup_address_id', $shipment->pickup_address_id)->first();
+
+                $main_details .= '
+                          <tr>
+                            <td class="color secondary"><strong>Warehouse/Store ID</strong></td>
+                            <td>' . $warehouse->warehouse_id . '</td>
+                          </tr>
+                ';
+            }
+
+            $main_details .= '
                           <tr>
                             <td class="color secondary"><strong>Person of Contact</strong></td>
                             <td>' . $shipment->pickup_address->poc . '</td>
@@ -909,7 +994,7 @@ class ShipperReceivingSheetController extends Controller
                 $shipment_ids[] = $receiving_sheet_shipment->shipment->id;
             }
 
-            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, TRUE);
+            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, NULL);
 
             $html .= '
                         </div>
@@ -1029,5 +1114,48 @@ class ShipperReceivingSheetController extends Controller
         else{
             return redirect()->back()->with('error', 'Shipment not selected!');
         }
+    }
+
+    public function shipments_index() {
+        return view('client.shipment.receiving_sheet.shipments');
+    }
+
+    public function shipments_list(Request $request) {
+        $shipments = Shipment::join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
+            ->join('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('gul_ahmed_pickup_addresses as gapa', 'usi.id', '=', 'gapa.pickup_address_id')
+            ->select('shipments.tracking_number', 'rs.id AS receiving_sheet', 'shipments.order_id', 'gapa.warehouse_id', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'shipments.estimated_weight', 'shipments.amount')
+            ->where('shipments.packaging_material_request', 0)
+            ->where(function ($query) {
+                $query->whereNull('rs.status')->orWhere('rs.status', 0);
+            })
+            ->where(function ($query) {
+                $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
+
+        if (session('user_type') == 2) {
+            if(session('restriction') == 1) {
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $datatable = Datatables::of($shipments);
+
+        if ($date = $request->get('search_date')) {
+            $datatable->whereDate('rs.created_at', $date);
+        }
+        else {
+            $datatable->whereRaw('false');
+        }
+
+        return $datatable->make(true);
     }
 }

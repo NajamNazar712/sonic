@@ -47,9 +47,9 @@ class AdminReportsEmailController extends Controller
 {
     static public function sale_person_numbers($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 08:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 07:59A');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 05:59A');
         $revenue = array();
         $avg_revenue = array();
         $contribution = array();
@@ -222,9 +222,9 @@ class AdminReportsEmailController extends Controller
 
     static public function hub_wise_split($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 08:00A');
+        $date_from = Carbon::createFromFormat("Y-m-d H:i:s", $date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 07:59A');
+        $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $next_day)->format('Y-m-d 05:59A');
         $total_shipments = 0;
         $ratio = array();
         $avg_actual_weight = array();
@@ -338,7 +338,7 @@ class AdminReportsEmailController extends Controller
         $new_date_to = $date_to;
         $week_holiday_date_to = Carbon::yesterday()->format('Y-m-d');
         $holiday_date_to = $new_date_to->format('Y-m-d');
-        $new_date_to = $new_date_to->format('Y-m-d 07:59A');
+        $new_date_to = $new_date_to->format('Y-m-d 05:59A');
         $total_shipments = 0;
         $revenue = array();
         $avg_revenue = array();
@@ -1121,6 +1121,8 @@ class AdminReportsEmailController extends Controller
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'hc.id as hub_id', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount','s.amount as sum_amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11])
+            ->where('s.booking_type_id', '!=', 4)
+            ->whereIn('sj.shipper_status_id', [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])
             ->where('sjd.created_at', '>=', $start_date)
             ->where('sjd.created_at', '<=', $end_date)
             ->get();
@@ -1227,6 +1229,10 @@ class AdminReportsEmailController extends Controller
                 ->setFormatCode(
                     \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                 );
+            $sheet->getStyle("C")->getNumberFormat()
+            ->setFormatCode(
+                \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+            );
             $sheet->getStyle("D")->getNumberFormat()
             ->setFormatCode(
                 \PHPExcel_Style_NumberFormat::FORMAT_TEXT
@@ -1253,6 +1259,7 @@ class AdminReportsEmailController extends Controller
 
             $file_name_without_path = "reports/outstanding_shipment_report_" . $date_file_name . ".xlsx";
             $file_name = public_path() . "/reports/outstanding_shipment_report_"  . $date_file_name . ".xlsx";
+            $writer->setPreCalculateFormulas(false);
             $writer->save($file_name);
 
             NotificationsController::send(76, 0, url('/') . '/' . $file_name_without_path);

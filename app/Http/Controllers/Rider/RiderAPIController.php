@@ -1125,7 +1125,7 @@ class RiderAPIController extends Controller {
 
                 $delivered_status = array(14, 30, 36, 37);
                 $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-                $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
                     $query->where(function ($sub_query) {
                         $sub_query->where('booking_type_id', '!=', 4);
                     })
@@ -1134,7 +1134,7 @@ class RiderAPIController extends Controller {
                                 ->where('charges_mode_id', '=', 2);
                         });
                 })->sum('received_amount');
-                $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+                $count = count($delivered_shipment_ids);
                 $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
                 $delivery_note_data->delivered_shipments = $count;
                 $delivery_note_data->received_cod_amount = $dncc_amount;
@@ -1253,7 +1253,7 @@ class RiderAPIController extends Controller {
                 }
 
                 ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
-//                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
+                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
                 $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                 if(!$rider_delivery_note_status->exists()){
                     $new_status = new RiderDeliveryNoteStatus();
@@ -1545,6 +1545,8 @@ class RiderAPIController extends Controller {
                 if($pickup_note_requests_count == 0){
                     V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
                 }
+
+                NotificationsController::send(105, $request->pickup_request_id, $request->reason_id);
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);

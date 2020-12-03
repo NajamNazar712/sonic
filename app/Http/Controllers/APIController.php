@@ -304,7 +304,7 @@ class APIController extends Controller
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
@@ -357,7 +357,7 @@ class APIController extends Controller
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
@@ -1535,7 +1535,7 @@ class APIController extends Controller
           'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
           'origin_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
           'destination_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-          'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+          'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
           'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
               $query->where('user_id', $user_id)->where('status', 1);
           })],
@@ -1937,23 +1937,24 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $user_type = User::where('id',$user_id)->first();
         $rules = [
-            'warehouse_id' => ['required', Rule::exists('gul_ahmed_pickup_addresses', 'warehouse_id')],
-            'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
-            'consignee_name' => ['required', 'between:1,100'],
-            'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_date' => ['nullable', 'date_format:Y-m-d'],
-            'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-            'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
-            'item_description' => ['required', 'between:0,500'],
-            'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          'warehouse_id' => ['required', Rule::exists('gul_ahmed_pickup_addresses', 'warehouse_id')],
+          'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
+          'consignee_name' => ['required', 'between:1,100'],
+          'consignee_address' => ['required', 'between:1,255'],
+          'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+          'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+          'consignee_email_address' => ['nullable', 'filled', 'email'],
+          'order_date' => ['nullable', 'date_format:Y-m-d'],
+          'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+          'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
+          'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
+          'item_description' => ['required', 'between:0,500'],
+          'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
+          'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+          'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function($query) use($user_id) {
             $query->where('user_id', $user_id);
-        })]
+          })],
+          'reference_number' => ['nullable', 'filled', 'between:0,100']
         ];
 
 
@@ -2093,6 +2094,13 @@ class APIController extends Controller
                 $order_id = NULL;
             }
 
+            if ($request->filled('reference_number')) {
+                $reference_number = $request->input('reference_number');
+            }
+            else {
+                $reference_number = NULL;
+            }
+
             $package_type = TRUE;
 
 
@@ -2118,7 +2126,7 @@ class APIController extends Controller
                 }
             }
             $business_category_id = 1;
-            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $reference_number, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
 
             if($shipment_pre_book){
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
@@ -2215,7 +2223,7 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number ,'video'=> $video]);
                 }
             }
-            return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+            return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
         }
     }
 }

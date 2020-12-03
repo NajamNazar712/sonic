@@ -30,6 +30,7 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
                                 </ul>
                             </li>
                         @endif
@@ -98,6 +99,10 @@
             @if (session('user_type') == 1 || in_array(8, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
+                        @if (session('user_id') == 3324)
+                            <li><a class="menu-item" href="{{ route('cod.reports.sales.telenor.index') }}">Overall Sales - Telenor</a></li>
+                        @endif
+
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>

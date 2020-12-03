@@ -2208,7 +2208,7 @@ class AdminFinanceController extends Controller
 
                             $pending_payment_shipment->save();
 
-                            self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
+                            self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $payable);
 
                         }
 

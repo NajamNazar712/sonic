@@ -261,17 +261,17 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                                    ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
 
                                     if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
                                         $status_id = 4;
 
-                                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
                                     }
 
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
-                                    $nsa_shipment->actual_weight = 0.5;
+                                    $nsa_shipment->actual_weight = 0.10;
 
                                     $nsa_shipment->save();
 
@@ -400,17 +400,17 @@ class AdminNsaAccountShipmentController extends Controller
 
                         $status_id = 2;
 
-                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
 
                         if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
                             $status_id = 4;
 
-                            ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                            ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
                         }
 
                         $nsa_shipment->shipper_status_id = $status_id;
                         $nsa_shipment->consignee_status_id = $status_id;
-                        $nsa_shipment->actual_weight = 0.5;
+                        $nsa_shipment->actual_weight = 0.10;
 
                         $nsa_shipment->save();
 
