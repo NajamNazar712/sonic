@@ -1098,6 +1098,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('supply_chain')->name('supply_chain.')->group(function () {
             Route::get('','Admins\OrderManagementController@supply_chain_index')->name('supply_chain_index');
             Route::get('list','Admins\OrderManagementController@supply_chain_list')->name('supply_chain_list');
+
+            Route::prefix('shipment_on_hold')->name('shipment_on_hold.')->group(function () {
+                Route::get('','Admins\AdminSupplyChainController@shipment_on_hold_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminCargoController@shipment_on_hold_details')->name('shipment_details');
+            });
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
