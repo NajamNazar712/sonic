@@ -108,10 +108,6 @@ class AdminReportsController extends Controller
             }
         }
         $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number', function ($shipments) {
-                                $route = route('admin.tracking.index');
-                                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-          })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
