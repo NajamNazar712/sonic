@@ -38,28 +38,6 @@
 
                                             <input type="hidden" name="shipment_id" class="shipment_id">
 
-                                            <div class="form-group">
-                                                <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
-                                            </div>
-                                            <div id="replacement_div" class="d-none">
-                                                <div class="form-group">
-                                                    <div id="replacement_switch_div" class="form-group text-center p-1 border border-light rounded">
-                                                        <label class="d-block">Replacement Items Weight Breakup</label>
-                                                        <input type="checkbox" name="replacement_checkbox" class="switch" id="replacement_checkbox">
-                                                    </div>
-                                                </div>
-                                                <div id="replacement_weight_div" class="d-none">
-
-                                                    <div class="form-group">
-                                                        <input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-range="[0.01,100000]" data-msg-range="Shipment Weight needs to be from 0.01 to 100000">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Shipment Weight needs to be from 0.01 to 100000">
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
                                             <div class="form-group text-center">
                                                 <button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
                                             </div>
