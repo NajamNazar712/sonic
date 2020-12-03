@@ -1933,6 +1933,7 @@ class APIController extends Controller
         }
 
     }
+
     public function shipment_book_gul_ahmed(Request $request) {
         $user_id = $request->user_id;
         $user_type = User::where('id',$user_id)->first();
@@ -2224,6 +2225,73 @@ class APIController extends Controller
                 }
             }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
+        }
+    }
+
+    public function shipment_air_waybill_shopify_invoice(Request $request){
+        $user_id = $request->user_id;
+        return response()->json(['status' => 0]);
+        $rules = [
+            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+            'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'orders' => ['required','array', 'min:1']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+            $tracking_numbers = $request->tracking_numbers;
+
+            if ($tracking_number) {
+                $shipments = Shipment::where('tracking_number', $tracking_number)->get();
+            }
+            else {
+                $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
+            }
+
+            $air_waybill = '';
+            $valid = FALSE;
+
+            foreach ($shipments as $shipment) {
+                if ($shipment->shipper_status_id == 1) {
+                    $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+
+                    $valid = TRUE;
+                }
+            }
+
+            if ($valid) {
+                $filename = 'air_waybill.jpg';
+
+                if (!isset($request->type) || $request->type == 0) {
+                    $image = SnappyImage::loadHTML($air_waybill);
+
+                    $filename = 'air_waybill' . '.jpg';
+
+                    return $image->setOption('disable-smart-width', TRUE)->setOption('width', 1280)->download($filename);
+                }
+                else {
+                    $pdf = SnappyPDF::loadHTML($air_waybill);
+
+                    $filename = 'air_waybill' . '.pdf';
+
+                    return $pdf->download($filename);
+                }
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'Already Received']);
+            }
         }
     }
 }

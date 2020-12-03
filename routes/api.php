@@ -52,6 +52,7 @@ Route::name('api.')->group(function () {
 
         Route::prefix('shopify')->name('shopify.')->group(function() {
             Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
+            Route::get('air_waybill', 'APIController@shipment_air_waybill_shopify_invoice')->name('air_waybill');
         });
 	});
 

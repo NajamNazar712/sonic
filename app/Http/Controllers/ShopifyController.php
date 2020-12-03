@@ -72,4 +72,8 @@ class ShopifyController extends Controller
         return response()->json(['status' => 1, 'error' => 'Invalid request!']);
 
     }
+
+    static public function invoice_generate($orders){
+
+    }
 }
