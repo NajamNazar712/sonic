@@ -1527,7 +1527,10 @@ class V2AdminPickupsController extends Controller
             $pickup_note = V2PickupNote::find($id);
             $rider = Rider::find($pickup_note->rider_id);
             $route = $rider->route;
-
+            $route_name = '';
+            if($route){
+                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
+            }
             $html .= '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1549,8 +1552,8 @@ class V2AdminPickupsController extends Controller
                             <td>' . $rider->rider_category->name . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Route</strong></td>
-                            <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
+                          <td class="color secondary"><strong>Route</strong></td>
+                            <td>'. $route_name .'</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>City</strong></td>
