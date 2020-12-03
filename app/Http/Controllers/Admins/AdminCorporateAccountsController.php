@@ -1491,8 +1491,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
         }
-
-        if ((($user['rate_status'] >= 0) && $user['status'] == 1) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
+        if ((($user['rate_status'] >= 0) &&  ($user['status']==1 || $user['status']==5)) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
