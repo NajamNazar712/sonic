@@ -59,9 +59,9 @@
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
-                    <div class="col-2">
-                        <button type="button" id="search_station" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Station Approved</button>
-                    </div>
+{{--                    <div class="col-2">--}}
+{{--                        <button type="button" id="search_station" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Station Approved</button>--}}
+{{--                    </div>--}}
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -222,7 +222,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                     {
-                        className: 'btn btn-primary station station',
+                        className: 'btn btn-primary station',
                         text: 'Station Approved',
                         enabled: false,
                         action: function (e, dt, node, config) {
