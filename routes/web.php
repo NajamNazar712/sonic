@@ -2157,8 +2157,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
+            Route::get('international', 'Admins\AdminWalkInBookShipmentController@international_book')->name('international_walk_in');
 //            Route::get('order_id', 'Admins\AdminWalkInBookShipmentController@order_id')->name('order_id');
             Route::post('store', 'Admins\AdminWalkInBookShipmentController@walk_in_store')->name('store');
+            Route::post('internationl_store', 'Admins\AdminWalkInBookShipmentController@international_walk_in_store')->name('internationl_store');
             Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
