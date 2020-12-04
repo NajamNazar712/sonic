@@ -51,8 +51,8 @@ class User extends Authenticatable
     public function open_parcel(){
         return $this->hasOne('App\Http\Models\Shipper\OpenParcelHistory');
     }
-    public function segment()
+    public function segments()
     {
-        return $this->belongsTo('App\Http\Models\Segment');
+        return $this->belongsTo('App\Http\Models\Segment', 'segment_id', 'id');
     }
 }

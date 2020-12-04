@@ -122,7 +122,7 @@
                                 @if($user->segment_id != null)
                                     <tr>
                                         <td><b>Segment</b></td>
-                                        <td>{{$user->segment->name}}
+                                        <td>{{$user->segments->name}}
                                         </td>
                                     </tr>
                                 @endif
@@ -448,9 +448,9 @@
                                         <span class="danger">*</span>
                                     </label>
                                     <div>
-                                        <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
+                                        <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
                                             @foreach($segments as $segment)
-                                                <option value="{{$segment->id}}" {{ old('segment') == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
+                                                <option value="{{$segment->id}}" {{ $user->segment_id == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
