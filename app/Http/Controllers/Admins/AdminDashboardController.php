@@ -1377,7 +1377,7 @@ class AdminDashboardController extends Controller
         $products = Product::select('id','product_name')->get();
         $payment_cycles = PaymentCycle::all();
         $segments = Segment::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'segments' => $segments]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments]);
 
     }
     public function blockAccountsList(){
