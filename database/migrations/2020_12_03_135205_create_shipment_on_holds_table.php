@@ -18,7 +18,8 @@ class CreateShipmentOnHoldsTable extends Migration
             $table->integer('shipment_id');
             $table->timestamp('delivery_date');
             $table->timestamp('dispatch_date');
-            $table->integer('status')->default(0);
+            $table->integer('status')->default(1);
+            $table->integer('email_status')->default(0);
             $table->integer('added_by');
             $table->timestamps();
         });
