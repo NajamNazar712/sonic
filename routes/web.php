@@ -1103,6 +1103,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('','Admins\AdminSupplyChainController@shipment_on_hold_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminSupplyChainController@shipment_on_hold_details')->name('shipment_details');
                 Route::post('store', 'Admins\AdminSupplyChainController@shipment_on_hold_store')->name('store');
+
+                //history
+                Route::prefix('history')->name('history.')->group(function () {
+                    Route::get('', 'Admins\AdminSupplyChainController@shipment_on_hold_history')->name('index');
+                    Route::get('list', 'Admins\AdminSupplyChainController@shipment_on_hold_history_list')->name('list');
+                    Route::post('allow_dispatch_delivery', 'Admins\AdminSupplyChainController@allow_dispatch_delivery')->name('allow_dispatch_delivery');
+                });
             });
         });
 
