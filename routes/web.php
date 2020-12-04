@@ -1101,7 +1101,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('shipment_on_hold')->name('shipment_on_hold.')->group(function () {
                 Route::get('','Admins\AdminSupplyChainController@shipment_on_hold_index')->name('index');
-                Route::post('shipment_details', 'Admins\AdminCargoController@shipment_on_hold_details')->name('shipment_details');
+                Route::post('shipment_details', 'Admins\AdminSupplyChainController@shipment_on_hold_details')->name('shipment_details');
+                Route::post('store', 'Admins\AdminSupplyChainController@shipment_on_hold_store')->name('store');
             });
         });
 
