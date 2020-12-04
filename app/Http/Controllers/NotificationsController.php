@@ -101,7 +101,7 @@ class NotificationsController extends Controller
         $notification = Notification::find($id);
 
         if ($notification) {
-        if ($notification->status) {
+            if ($notification->status) {
             if ($notification->type_id == 1) {
                 $subject = $notification->subject;
             }
