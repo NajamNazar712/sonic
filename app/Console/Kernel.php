@@ -70,7 +70,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\Escalation',
        	'App\Console\Commands\EscalationTagging',
 		//'App\Console\Commands\TelenorCall',
-        //'App\Console\Commands\TelenorCallResponse'
+        //'App\Console\Commands\TelenorCallResponse',
+        'App\Console\Commands\OnHoldShipmentEmail',
 
 
     ];
@@ -224,6 +225,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
 //        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
+        $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

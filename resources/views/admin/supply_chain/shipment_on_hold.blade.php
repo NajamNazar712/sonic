@@ -102,7 +102,7 @@
 
     <script>
         $(document).ready(function() {
-            var today = '{{\Carbon\Carbon::now()->toDateString()}}';
+            var today = '{{\Carbon\Carbon::now()->addDay(1)->toDateString()}}';
             var dispatch_date = $('#dispatch_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',

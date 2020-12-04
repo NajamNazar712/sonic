@@ -26,13 +26,18 @@ class AdminSupplyChainController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if($shipment->exists()){
             $shipment = $shipment->first();
-            $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id);
-            if($on_hold_shipment->exists()){
-                return response()->json(['status' => 1, 'error' => 'Shipment already updated as On-Hold!']);
+            if(in_array($shipment->shipper_status_id, [2, 4])){
+                $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id);
+                if($on_hold_shipment->exists()){
+                    return response()->json(['status' => 1, 'error' => 'Shipment already updated as On-Hold!']);
+                }
+                else{
+                    $hub = City::find($shipment->consignee_city->hub_id)->name;
+                    return response()->json(['status' => 0, 'success' => 'Shipment found', 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $shipment->booking_type->booking_type, 'shipment_status' => $shipment->status_shipper->name]);
+                }
             }
             else{
-                $hub = City::find($shipment->consignee_city->hub_id)->name;
-                return response()->json(['status' => 0, 'success' => 'Shipment found', 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $shipment->booking_type->booking_type, 'shipment_status' => $shipment->status_shipper->name]);
+                return response()->json(['status' => 1, 'error' => 'Shipment can\'t be marked as On-Hold!']);
             }
         }
         else{
