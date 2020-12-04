@@ -7,6 +7,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
+use Illuminate\Support\Facades\Log;
 use Validator;
 use Illuminate\Validation\Rule;
 
@@ -877,7 +879,7 @@ class APIController extends Controller
 
     public function shipment_air_waybill(Request $request) {
       $user_id = $request->user_id;
-
+      Log::info($request);
       $rules = [
         'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -2230,13 +2232,10 @@ class APIController extends Controller
 
     public function shipment_air_waybill_shopify_invoice(Request $request){
         $user_id = $request->user_id;
-        return response()->json(['status' => 0]);
+
         $rules = [
-            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })],
-            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
-            'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+            'tracking_numbers' => ['required', 'array', 'min:1'],
+            'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })],
             'orders' => ['required','array', 'min:1']
@@ -2250,23 +2249,28 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
         else {
-            $tracking_number = $request->tracking_number;
             $tracking_numbers = $request->tracking_numbers;
 
-            if ($tracking_number) {
-                $shipments = Shipment::where('tracking_number', $tracking_number)->get();
-            }
-            else {
+            if ($tracking_numbers) {
                 $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
             }
 
             $air_waybill = '';
             $valid = FALSE;
+            $invoice = FALSE;
+            $shop_invoice_setting = ShopifyInvoiceSetting::where('user_id', $user_id);
+            if($shop_invoice_setting->exists()){
+                $shop_invoice_setting = $shop_invoice_setting->first();
+                $invoice = TRUE;
+            }
 
             foreach ($shipments as $shipment) {
                 if ($shipment->shipper_status_id == 1) {
                     $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
+                    if(!empty($request->orders[$shipment->tracking_number]) && $invoice){
+                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting);
+                    }
                     $valid = TRUE;
                 }
             }
