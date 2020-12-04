@@ -257,19 +257,23 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         $.ajax({
-                                            url: '{!! route('') !!}',
+                                            url: '{!! route('admin.petty_cash.statements.station_operation_approved') !!}',
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
                                                 'statement_ids': selected_rows
                                             }
                                         }).done(function(data){
-                                            if(data.status){
+                                            if(data.status == 0){
                                                 table.rows().deselect();
                                                 selected_rows = [];
                                                 table.button('.station').disable();
                                                 table.draw(true);
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else
+                                            {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                             }
 
                                         });
@@ -279,7 +283,7 @@
                             }else{
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                table.button('.adjust').disable();
+                                table.button('.station').disable();
                             }
                         }
                     }, {
@@ -318,19 +322,24 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         $.ajax({
-                                            url: '{!! route('') !!}',
+                                            url: '{!! route('admin.petty_cash.statements.station_operation_approved') !!}',
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
                                                 'statement_ids': selected_rows
                                             }
                                         }).done(function(data){
-                                            if(data.status){
+                                            if(data.status == 0){
                                                 table.rows().deselect();
                                                 selected_rows = [];
                                                 table.button('.operation').disable();
                                                 table.draw(true);
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else
+                                            {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
                                             }
 
                                         });
@@ -340,7 +349,7 @@
                             }else{
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                table.button('.adjust').disable();
+                                table.button('.operation').disable();
                             }
                         }
                     }, {
@@ -521,10 +530,37 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    this.api().table().columns.station();
-                    this.api().table().columns.operation();
+                    // this.api().table().columns.station();
+                    // this.api().table().columns.operation();
                 }
             });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.station').enable();
+                }
+                else {
+                    table.button('.station').disable();
+                }
+                if (selected_rows.length > 0) {
+                    table.button('.operation').enable();
+                }
+                else {
+                    table.button('.operation').disable();
+                }
+            });
+
             $('body').on('click','button.approve',function () {
                 var id = $(this).parents('tr').attr('id');
                 if(id){
