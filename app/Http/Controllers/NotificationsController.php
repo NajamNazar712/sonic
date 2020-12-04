@@ -6275,7 +6275,8 @@ class NotificationsController extends Controller
                 $to = $new_rider->phone;
                 self::sms($body, $to);
 
-            } else if ($id == 110) {
+            }
+            else if ($id == 110) {
                 $date = $reference_1_id;
                 $file = $reference_2_id;
                 $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
