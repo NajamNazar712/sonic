@@ -1108,6 +1108,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::prefix('history')->name('history.')->group(function () {
                     Route::get('', 'Admins\AdminSupplyChainController@shipment_on_hold_history')->name('index');
                     Route::get('list', 'Admins\AdminSupplyChainController@shipment_on_hold_history_list')->name('list');
+                    Route::post('allow_dispatch_delivery', 'Admins\AdminSupplyChainController@allow_dispatch_delivery')->name('allow_dispatch_delivery');
                 });
             });
         });
