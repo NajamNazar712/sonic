@@ -6446,6 +6446,15 @@ class AdminFinanceController extends Controller
                 $datatables->whereRaw('false');
             }
         }
+        if($request->get('payment_filter') !== null){
+           $payment_amount = $request->get('payment_filter');
+           if($payment_amount < 1000){
+//                $datatables->where('')
+           }
+           else if($payment_amount < 5000){
+
+           }
+        }
 
         return $datatables->make(true);
     }
