@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admins;
 use App\http\Models\Admins\ShipmentOnHold;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Datatables;
 
 class AdminSupplyChainController extends Controller
 {
@@ -68,5 +70,21 @@ class AdminSupplyChainController extends Controller
         else{
             return redirect()->back()->with('error', 'No Shipment Selected');
         }
+    }
+
+    public function shipment_on_hold_history(){
+
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+
+        return view('admin.supply_chain.shipment_on_hold_history')->with(['shipment_status'=>$shipment_status]);
+    }
+
+    public function shipment_on_hold_history_list(Request $request){
+        $shipment_on_hold_history = ShipmentOnHold::join('shipments as s', 'shipment_on_hold.shipment_id', '=', 's.id')
+            ->select('s.tracking_number', 'shipment_on_hold.delivery_date', 'shipment_on_hold.dispatch_date', 'shipment_on_hold.status', 'shipment_on_hold.added_by', 'shipment_on_hold.created_at', 'shipment_on_hold.updated_at');
+
+        $datatable = Datatables::of($shipment_on_hold_history);
+
+        return $datatable->make(true);
     }
 }
