@@ -109,12 +109,12 @@
     <script>
         $(document).ready(function () {
             $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Rider*',
+                placeholder: 'Select Rider',
                 width: '100%',
                 allowClear: true
             });
             $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select City*',
+                placeholder: 'Select City',
                 width: '100%',
                 allowClear: true
             });

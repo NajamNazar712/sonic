@@ -559,9 +559,9 @@ class ShipperReportsController extends Controller
             if ($sales->shipper_status_id != 25) {
                 $delivered_date = Carbon::parse($sales->delivered_or_returned)->startOfDay();
 
-                $now = Carbon::now()->startOfDay();
+                $arrival_date = Carbon::parse($sales->arrival_date)->startOfDay();
 
-                $days = $delivered_date->diffInDays($now);
+                $days = $delivered_date->diffInDays($arrival_date);
 
                 if ($days <= 15) {
                     return 'YES';

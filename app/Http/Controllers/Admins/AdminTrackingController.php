@@ -391,7 +391,12 @@ class AdminTrackingController extends Controller
         $information['phone_number'] = $rider->phone;
         $information['city'] = $rider->city->name;
         $information['category'] = $rider->rider_category->name;
-        $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        if($rider->route){
+            $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        }else{
+            $information['route'] = '';
+        }
+
 
         return $information;
     }
