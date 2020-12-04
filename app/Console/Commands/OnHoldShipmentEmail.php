@@ -62,6 +62,9 @@ class OnHoldShipmentEmail extends Command
                     $details[$index]['status'] = $shipment->status_shipper->name;
                     $details[$index]['last_status_date'] = $last_status_date;
                     $details[$index]['arrival_status_date'] = $arrival_status_date;
+
+                    $dispatch_shipment->email_status = 1;
+                    $dispatch_shipment->save();
                 }
                 NotificationsController::send(108, $today, $details);
             }
@@ -86,6 +89,9 @@ class OnHoldShipmentEmail extends Command
                     $details[$index]['status'] = $shipment->status_shipper->name;
                     $details[$index]['last_status_date'] = $last_status_date;
                     $details[$index]['arrival_status_date'] = $arrival_status_date;
+
+                    $dispatch_shipment->email_status = 2;
+                    $dispatch_shipment->save();
                 }
                 NotificationsController::send(109, $today, $details);
             }
