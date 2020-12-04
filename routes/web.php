@@ -523,6 +523,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
         Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
+        Route::post('reject/submit','Admins\AdminCorporateAccountsController@rejectReasonSubmit')->name('rejectreason.submit');
 
     });
     //ajax request

@@ -65,7 +65,7 @@ class AdminInternationalRatesController extends Controller
 
         $intl_user_information = new InternationalUsersInformation();
         $intl_user_information->user_id = $shipper_id;
-        $intl_user_information->status = 1;
+        $intl_user_information->status = 4;
         $intl_user_information->save();
 
         foreach ($box_ids as $box_id){
@@ -231,7 +231,7 @@ class AdminInternationalRatesController extends Controller
             if($user){
                 $cities = City::where('business_category_id', 2)->where('hub', 1)->select('id', 'name')->get();
                 $user_information = InternationalUsersInformation::where('user_id', $user->id)->first();
-                if($user_information->status == 1){
+                if($user_information->status == 1 || $user_information->status == 4){
                     $rate_statuses = InternationalRatesStatus::where('user_id', $user->id)->get();
                     $weight_charges = InternationalRatesWeightCharges::where('user_id', $user->id)->get();
                     $rates_hubs = InternationalRatesHub::where('user_id', $user->id)->get();
@@ -280,7 +280,13 @@ class AdminInternationalRatesController extends Controller
         if(count($box_ids) == 0){
             return redirect()->back()->with('error', 'Rates not submitted properly!');
         }
-        if ($request->approve == 1) {
+        if($request->authorize == 1){
+            $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
+            $intl_user_information->status = 1;
+            $intl_user_information->save();
+            return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+        }
+        elseif ($request->approve == 1) {
             $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
             $intl_user_information->status = 1;
             $intl_user_information->save();

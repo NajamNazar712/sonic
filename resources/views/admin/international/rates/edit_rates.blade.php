@@ -552,11 +552,16 @@
                                 </div>
                             </div>
                             <div class="text-center mt-2">
+                                <input type="hidden" name="authorize" id="authorize">
                                 <input type="hidden" name="approve" id="approve">
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
 
+
+                                    @if ($user_information->status == 4 && (session('role_id') == 1 || in_array(8, session('permissions'))))
+                                        <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                    @endif
                                     @if ($user_information->status == 2 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
@@ -1597,9 +1602,15 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var msg = "";
+                    if($('#authorize').val() == 1 || $('#approve').val() == 1){
+                        msg = "Rates are being approved!"
+                    }else{
+                        msg = 'Rates are being updated!';
+                    }
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your rates are being updated!',
+                        text: msg,
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
