@@ -1732,6 +1732,8 @@ class AdminReportsController extends Controller
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->count();
+            }
+            if($booked > 0 || $received > 0){
                 $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1788,8 +1790,6 @@ class AdminReportsController extends Controller
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
-            }
-            if($booked > 0 || $received > 0){
 
                 $row = array();
                 $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
