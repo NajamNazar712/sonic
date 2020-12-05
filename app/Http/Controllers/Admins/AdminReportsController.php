@@ -2234,7 +2234,7 @@ class AdminReportsController extends Controller
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', '=', 0)->count();
-                        $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
+                        /*$shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
                             ->whereExists(function ($query) use ($origin) {
                                 $query->from('user_shipping_infos')
                                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -2293,7 +2293,7 @@ class AdminReportsController extends Controller
                                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                                     ->whereBetween('created_at', [$date_from, $date_to])
                                     ->where('shipper_status_id', 2);
-                            })->where('shipments.packaging_material_request', '=', 0)->sum('chargeable_weight');
+                            })->where('shipments.packaging_material_request', '=', 0)->sum('chargeable_weight');*/
                     }
 
                     $shipper_avg_revenue = ($shipper_received != 0) ? $shipper_rev_wo_gst / $shipper_received : 0;
