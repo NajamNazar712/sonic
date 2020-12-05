@@ -2361,31 +2361,29 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $to = ['muhammad.yousuf@trax.pk'];
-                    self::email($subject, $body, $to);
-//                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
-//
-//                    if ($admins->exists()) {
-//                        $to = array_merge($to, $admins->pluck('email')->toArray());
-//                    }
-//
-//                    $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
-//
-//                    if ($admins->exists()) {
-//                        $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-//                    }
-//
-//                    $ceo = Admin::find(8);
-//
-//                    if ($ceo) {
-//                        $to[] = $ceo->email;
-//                    }
-//                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
-//                    $to = array_merge($to, $extra_admins);
-//
-//                    foreach ($to as $individual_to) {
-//                        self::email($subject, $body, $individual_to);
-//                    }
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
+
+                    if ($admins->exists()) {
+                        $to = array_merge($to, $admins->pluck('email')->toArray());
+                    }
+
+                    $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7)->where('admins.status', 1);
+
+                    if ($admins->exists()) {
+                        $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+                    }
+
+                    $ceo = Admin::find(8);
+
+                    if ($ceo) {
+                        $to[] = $ceo->email;
+                    }
+                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
+                    $to = array_merge($to, $extra_admins);
+
+                    foreach ($to as $individual_to) {
+                        self::email($subject, $body, $individual_to);
+                    }
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
