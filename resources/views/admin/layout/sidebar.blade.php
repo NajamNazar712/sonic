@@ -307,7 +307,14 @@
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shipment On-Hold</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(386, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.cargo.supply_chain.shipment_on_hold.index') }}">Update</a></li>
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.cargo.supply_chain.shipment_on_hold.index') }}">Update</a>
+                                        </li>
+                                    @endif
+                                    @if (session('role_id') == 1 /*|| in_array(386, session('permissions'))*/)
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.cargo.supply_chain.shipment_on_hold.history.index') }}">History</a>
+                                        </li>
                                     @endif
                                 </ul>
                             </li>
