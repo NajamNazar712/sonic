@@ -6448,12 +6448,9 @@ class AdminFinanceController extends Controller
         }
         if($request->get('payment_filter') !== null){
            $payment_amount = $request->get('payment_filter');
-           if($payment_amount < 1000){
-//                $datatables->where('')
-           }
-           else if($payment_amount < 5000){
 
-           }
+           $datatables->having('total_payable', '>', $payment_amount);
+
         }
 
         return $datatables->make(true);

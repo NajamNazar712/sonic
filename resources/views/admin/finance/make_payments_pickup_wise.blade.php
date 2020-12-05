@@ -74,9 +74,9 @@
                                     <form id="payment_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
                                         <div class="form-group">
                                             <select name="payment_filter" id="payment_filter" class="select2 payment_filter">
-                                                <option value="1000">< 1 Million</option>
-                                                <option value="5000">< 5 Million</option>
-                                                <option value="10000">< 10 Million</option>
+                                                    <option value="1000000">greater than 1M</option>
+                                                    <option value="50000000">greater than 5M</option>
+                                                    <option value="10000000">greater than 10M</option>
                                             </select>
                                         </div>
                                     </form>
@@ -388,7 +388,7 @@
                 table.draw();
             });
 
-            $('#payment_filter_form #payment_filter').select2({
+            $('#payment_filter_form #payment_filter').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Payment Filter',
                 width:'100%',
             }).bind('change', function() {
