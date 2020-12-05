@@ -43,6 +43,9 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
+                if(InternationalUsersInformation::where('user_id', $user->id)->exists()){
+                    return redirect()->back()->with('error', 'Rates already added!');
+                }
                 $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
 
                 return view('admin.international.rates.add_rates')->with(['cities' => $cities, 'shipper' => $user]);

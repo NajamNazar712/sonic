@@ -7668,6 +7668,12 @@ class AdminDashboardController extends Controller
                 if($sale_check){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
+                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
+                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
