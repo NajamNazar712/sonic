@@ -129,18 +129,7 @@ class ShopifyController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-
-                      td.replacement span {
-                        width: 22px;
-                      }
-
-                      td.replacement span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
+                      
                       p{
                       font-size: 18px;
                       }
@@ -152,15 +141,15 @@ class ShopifyController extends Controller
                   <body>
                     <div>
       ';
-            $image = asset('storage/shopify_invoice_logos/' . $invoice->image);
+
             $html .= '<div class="container-fluid">
                         <div class="row mb-2 p-1">
                             <div class="col-6 text-left">
-                             <img src="'. $image .'" width="100" class="d-block mb-1">
+                             <img src="'. asset('storage/shopify_invoice_logos/' . $invoice->image).'" width="100" class="d-block mb-1">
                             </div>
-                            <div class="col-6 text-right">Invoice for #' . $order['order'] . '</div>
-                            <div class="col-12"><h2>'. $user .'</h2></div>
-                            <h5 class="col-12">'. $invoice->address .'</h5>
+                            <div class="col-6 text-right">Invoices for #' . $order['order'] . '</div>
+                            <div class="col-12"><h2>'. $user.'</h2></div>
+                            <div class="col-12"><h5>'. $invoice->address .'</h5></div>
                             <div class="col-12 border-bottom"></div>
                         </div>
                         
