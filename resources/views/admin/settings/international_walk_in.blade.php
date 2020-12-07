@@ -21,6 +21,24 @@
                                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                                     <form id="settings_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.international_walk_in.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
+                                        <div class="row">
+                                            <div class="col-3">
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="input-group form-group">
+                                                    <div class="input-group-prepend">
+                                                        <span type="input-group-text">Add Hubs</span>
+                                                    </div>
+                                                    <div>
+                                                        <select name="hubs[1][]" id="select_box_1" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                                            @foreach($cities as $city)
+                                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div style="width: 450px; float: left; margin-left: 20px;">
                                             <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                             <div class="row">
@@ -131,14 +149,17 @@
     </div>
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+
             $('.numeric').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -157,6 +178,19 @@
                 'allowPlus': false,
                 'rightAlign': false
             });
+            $('#select_box_1').select2({
+                width:'100%',
+                placeholder:"Select Hub(s)",
+                allowClear:true
+            });
+            var box_no = 1;
+            var cities = @json($cities);
+            var city_data = $.map(cities, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+            $('#select_box_'+box_no).select2({data:city_data,placeholder:'Select Hub(s)',allowClear:true});
             $('#settings_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
