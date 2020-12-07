@@ -15,12 +15,13 @@ class CreateWalkInInternationalStandardWeightChargesTable extends Migration
     {
         Schema::create('walk_in_international_standard_weight_charges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('hub_id');
             $table->integer('shipping_mode_id');
-            $table->integer('delivery_type_id');
-            $table->integer('actual_weight');
-            $table->integer('chargeable_weight');
-            $table->integer('return_charges');
+            $table->integer('hub_actual_weight');
+            $table->integer('hub_chargeable_weight');
+            $table->integer('hub_return_charges');
+            $table->integer('door_actual_weight');
+            $table->integer('door_chargeable_weight');
+            $table->integer('door_return_charges');
             $table->timestamps();
         });
     }

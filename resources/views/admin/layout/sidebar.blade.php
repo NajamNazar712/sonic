@@ -89,7 +89,7 @@
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Walk-In</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(155, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.shipment.book.walk_in')}}">Book</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.shipment.book.walk_in')}}">Domestic Book</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(155, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.shipment.book.international_walk_in')}}">International Book</a></li>

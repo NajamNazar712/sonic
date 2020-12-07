@@ -16,6 +16,8 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
@@ -3007,100 +3009,34 @@ public function arrived_at_origin_sms_for_shipper_index(){
     }
 
     public function international_walk_in_index(){
-        $walk_in_hub_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->first();
-        $walk_in_hub_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->first();
-        $walk_in_hub_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->first();
-        $walk_in_door_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
-        $walk_in_door_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->first();
-        $walk_in_door_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->first();
+        $walk_in_standard_charges = WalkInInternationalStandardWeightCharge::all();
+
         $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
-        return view('admin.settings.international_walk_in')->with(['cities' => $cities,'walk_in_hub_ol' => $walk_in_hub_ol, 'walk_in_hub_on' => $walk_in_hub_on, 'walk_in_hub_dn' => $walk_in_hub_dn, 'walk_in_door_ol' => $walk_in_door_ol, 'walk_in_door_on' => $walk_in_door_on, 'walk_in_door_dn' => $walk_in_door_dn]);
+        return view('admin.settings.international_walk_in')->with(['cities' => $cities, 'walk_in_standard_charges' => $walk_in_standard_charges]);
     }
     public function international_walk_in_store(Request $request){
+        WalkInInternationalStandardWeightCharge::truncate();
+        WalkInInternationalStandardWeightChargeHub::truncate();
 
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
-            'actual_weight' => $request->walk_in_door_on_a,
-            'chargeable_weight_local' => $request->walk_in_door_on_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_door_on_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_door_on_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_door_on_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_door_on_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_door_on_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_on_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_on_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_on_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_on_return_class_3_charges
-        ]);
+        foreach($request->standard_charges as $index => $charge_id){
+            $standard_weight_charge = new WalkInInternationalStandardWeightCharge();
+            $standard_weight_charge->id = $charge_id;
+            $standard_weight_charge->shipping_mode_id = 2;
+            $standard_weight_charge->hub_actual_weight = $request->hub_actual_weight[$charge_id];
+            $standard_weight_charge->hub_chargeable_weight = $request->hub_chargeable_weight[$charge_id];;
+            $standard_weight_charge->hub_return_charges = $request->hub_return_charges[$charge_id];;
+            $standard_weight_charge->door_actual_weight = $request->door_actual_weight[$charge_id];;
+            $standard_weight_charge->door_chargeable_weight = $request->door_chargeable_weight[$charge_id];;
+            $standard_weight_charge->door_return_charges = $request->door_return_charges[$charge_id];;
+            $standard_weight_charge->save();
 
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
-            'actual_weight' => $request->walk_in_hub_on_a,
-            'chargeable_weight_local' => $request->walk_in_hub_on_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_hub_on_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_hub_on_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_hub_on_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_hub_on_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_hub_on_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_on_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_on_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_on_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_on_return_class_3_charges
-        ]);
-
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
-            'actual_weight' => $request->walk_in_door_ol_a,
-            'chargeable_weight_local' => $request->walk_in_door_ol_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_door_ol_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_door_ol_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_door_ol_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_door_ol_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_door_ol_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_ol_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_ol_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_ol_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_ol_return_class_3_charges
-        ]);
-
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
-            'actual_weight' => $request->walk_in_hub_ol_a,
-            'chargeable_weight_local' => $request->walk_in_hub_ol_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_hub_ol_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_hub_ol_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_hub_ol_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_hub_ol_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_hub_ol_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_ol_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_ol_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_ol_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_ol_return_class_3_charges
-        ]);
-
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
-            'actual_weight' => $request->walk_in_door_dn_a,
-            'chargeable_weight_local' => $request->walk_in_door_dn_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_door_dn_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_door_dn_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_door_dn_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_door_dn_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_door_dn_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_dn_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_dn_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_dn_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_dn_return_class_3_charges
-        ]);
-
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
-            'actual_weight' => $request->walk_in_hub_dn_a,
-            'chargeable_weight_local' => $request->walk_in_hub_dn_chargeable_weight_local,
-            'chargeable_weight_charges_class_0' => $request->walk_in_hub_dn_chargeable_weight_class_0_charges,
-            'chargeable_weight_charges_class_1' => $request->walk_in_hub_dn_chargeable_weight_class_1_charges,
-            'chargeable_weight_charges_class_2' => $request->walk_in_hub_dn_chargeable_weight_class_2_charges,
-            'chargeable_weight_charges_class_3' => $request->walk_in_hub_dn_chargeable_weight_class_3_charges,
-            'local' => $request->walk_in_hub_dn_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_dn_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_dn_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_dn_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_dn_return_class_3_charges
-        ]);
+            foreach($request->hubs[$charge_id] as $hub_id){
+                $standard_weight_charge_hub = new WalkInInternationalStandardWeightChargeHub();
+                $standard_weight_charge_hub->international_charges_id = $charge_id;
+                $standard_weight_charge_hub->hub_id = $hub_id;
+                $standard_weight_charge_hub->save();
+            }
+        }
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }

@@ -5,6 +5,7 @@ namespace App\Http\controllers\Admins;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -1099,7 +1100,7 @@ class AdminWalkInBookShipmentController extends Controller
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
         $cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
             ->select('c.name as city_name', 'c.id as city_id')->where('walk_in_cities.pickup', 1)->get();
-        $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->select('name','id')->get();
+        $consignee_cities = City::join('walk_in_international_standard_weight_charges as wiiswc', 'wiiswc.hub_id', '=', 'cities.id')->where('cities.status', 1)->where('cities.hub', 0)->where('cities.business_category_id', 2)->whereNotNull('cities.zone_id')->groupBy('cities.id')->orderBy('cities.name')->select('cities.name','cities.id')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id', 2)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
@@ -1323,6 +1324,14 @@ class AdminWalkInBookShipmentController extends Controller
         }
         else {
             return redirect()->back()->with('error', 'Invalid Service Type Selected');
+        }
+    }
+
+    public function check_international_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInInternationalStandardWeightCharge::where(['hub_id' => $request->consignee_city, 'shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            $min_charges = $min_charges['chargeable_weight'];
+            return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
 }
