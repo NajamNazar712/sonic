@@ -380,23 +380,27 @@
 <!--Shipment Charges Modal -->
 
 <!-- Global Search Sonic (Admin Side) -->
-<div class="modal fade text-left" id="GlobalSearchSonic" data-backdrop="dynamic" tabindex="-1" role="dialog" aria-labelledby="GlobalSearchSonic"
+<div class="modal fade text-left" id="GlobalSearchSonicModal" tabindex="-1" role="dialog" aria-labelledby="GlobalSearchSonicModal"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel8">Search screen</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
             <div class="modal-body">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
+                <h5>Hello World</h5>
+                <div>
+                    <form>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="submit">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
