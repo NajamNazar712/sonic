@@ -1098,6 +1098,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('supply_chain')->name('supply_chain.')->group(function () {
             Route::get('','Admins\OrderManagementController@supply_chain_index')->name('supply_chain_index');
             Route::get('list','Admins\OrderManagementController@supply_chain_list')->name('supply_chain_list');
+
+            Route::prefix('shipment_on_hold')->name('shipment_on_hold.')->group(function () {
+                Route::get('','Admins\AdminSupplyChainController@shipment_on_hold_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminSupplyChainController@shipment_on_hold_details')->name('shipment_details');
+                Route::post('store', 'Admins\AdminSupplyChainController@shipment_on_hold_store')->name('store');
+
+                //history
+                Route::prefix('history')->name('history.')->group(function () {
+                    Route::get('', 'Admins\AdminSupplyChainController@shipment_on_hold_history')->name('index');
+                    Route::get('list', 'Admins\AdminSupplyChainController@shipment_on_hold_history_list')->name('list');
+                    Route::post('allow_dispatch_delivery', 'Admins\AdminSupplyChainController@allow_dispatch_delivery')->name('allow_dispatch_delivery');
+                });
+            });
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
@@ -1430,6 +1443,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
             Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
             Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
+            Route::post('station_operation_approved','Admins\AdminPettyCashController@petty_cash_station_operation_approved_all')->name('station_operation_approved');
 
         });
         Route::prefix('approved')->name('approved.')->group(function (){

@@ -305,6 +305,24 @@
                             </li>
                         @endif
                     </ul>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || count(array_intersect([404, 405], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Shipment On-Hold</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(404, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.cargo.supply_chain.shipment_on_hold.index') }}">Update</a>
+                                        </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(405, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.cargo.supply_chain.shipment_on_hold.history.index') }}">History</a>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+                    </ul>
                 </li>
             @endif
 
@@ -1227,12 +1245,8 @@
                                         <li><a class="menu-item" href="{{ route('admin.settings.commission.percentage.index') }}">Set Commission</a></li>
                                     @endif
                                 </ul>
-
                             </li>
                         @endif
-
-
-                        
                     </ul>
                 </li>
             @endif
