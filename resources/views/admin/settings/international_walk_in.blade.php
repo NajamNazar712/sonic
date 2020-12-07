@@ -22,14 +22,12 @@
                                     <form id="settings_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.international_walk_in.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row">
-                                            <div class="col-3">
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="input-group form-group">
-                                                    <div class="input-group-prepend">
-                                                        <span type="input-group-text">Add Hubs</span>
-                                                    </div>
-                                                    <div>
+                                            <div class="col-2"></div>
+                                                <div class="col-2">
+                                                    <h3>Add Hubs</h3>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group card p-2">
                                                         <select name="hubs[1][]" id="select_box_1" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                             @foreach($cities as $city)
                                                                 <option value="{{$city->id}}">{{$city->name}}</option>
@@ -37,7 +35,6 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                            </div>
                                         </div>
                                         <div style="width: 450px; float: left; margin-left: 20px;">
                                             <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
