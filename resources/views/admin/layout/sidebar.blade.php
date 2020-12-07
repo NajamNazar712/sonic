@@ -79,7 +79,7 @@
                             @endif
                     </ul>
                 </li>
-            @endif`
+            @endif
 
 
             @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
