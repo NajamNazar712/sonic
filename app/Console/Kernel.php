@@ -159,7 +159,7 @@ class Kernel extends ConsoleKernel
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
 
-        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
         $schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
         $schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
 
