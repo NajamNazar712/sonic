@@ -6446,6 +6446,12 @@ class AdminFinanceController extends Controller
                 $datatables->whereRaw('false');
             }
         }
+        if($request->get('payment_filter') !== null){
+           $payment_amount = $request->get('payment_filter');
+
+           $datatables->having('total_payable', '>', $payment_amount);
+
+        }
 
         return $datatables->make(true);
     }
