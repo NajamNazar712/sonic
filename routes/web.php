@@ -1839,6 +1839,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
         });
+        Route::prefix('international_walk_in')->name('international_walk_in.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_walk_in_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@international_walk_in_store')->name('store');
+        });
+
         Route::prefix('auto_invoice_generation_and_due_date')->name('auto_invoice_generation_and_due_date.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_store')->name('store');

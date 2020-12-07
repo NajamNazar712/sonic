@@ -3005,4 +3005,102 @@ public function arrived_at_origin_sms_for_shipper_index(){
             return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
+
+    public function international_walk_in_index(){
+        $walk_in_hub_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->first();
+        $walk_in_door_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
+        $walk_in_door_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->first();
+        $walk_in_door_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->first();
+        return view('admin.settings.international_walk_in')->with(['walk_in_hub_ol' => $walk_in_hub_ol, 'walk_in_hub_on' => $walk_in_hub_on, 'walk_in_hub_dn' => $walk_in_hub_dn, 'walk_in_door_ol' => $walk_in_door_ol, 'walk_in_door_on' => $walk_in_door_on, 'walk_in_door_dn' => $walk_in_door_dn]);
+    }
+    public function international_walk_in_store(Request $request){
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_door_on_a,
+            'chargeable_weight_local' => $request->walk_in_door_on_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_on_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_on_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_on_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_on_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_door_on_a_local,
+            'national_charges_class_0'=> $request->walk_in_door_on_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_on_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_on_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_on_return_class_3_charges
+        ]);
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_on_a,
+            'chargeable_weight_local' => $request->walk_in_hub_on_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_on_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_on_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_on_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_on_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_hub_on_a_local,
+            'national_charges_class_0'=> $request->walk_in_hub_on_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_on_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_on_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_on_return_class_3_charges
+        ]);
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_door_ol_a,
+            'chargeable_weight_local' => $request->walk_in_door_ol_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_ol_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_ol_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_ol_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_ol_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_door_ol_a_local,
+            'national_charges_class_0'=> $request->walk_in_door_ol_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_ol_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_ol_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_ol_return_class_3_charges
+        ]);
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_ol_a,
+            'chargeable_weight_local' => $request->walk_in_hub_ol_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_ol_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_ol_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_ol_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_ol_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_hub_ol_a_local,
+            'national_charges_class_0'=> $request->walk_in_hub_ol_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_ol_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_ol_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_ol_return_class_3_charges
+        ]);
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_door_dn_a,
+            'chargeable_weight_local' => $request->walk_in_door_dn_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_dn_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_dn_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_dn_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_dn_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_door_dn_a_local,
+            'national_charges_class_0'=> $request->walk_in_door_dn_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_dn_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_dn_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_dn_return_class_3_charges
+        ]);
+
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_dn_a,
+            'chargeable_weight_local' => $request->walk_in_hub_dn_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_dn_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_dn_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_dn_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_dn_chargeable_weight_class_3_charges,
+            'local' => $request->walk_in_hub_dn_a_local,
+            'national_charges_class_0'=> $request->walk_in_hub_dn_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_dn_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_dn_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_dn_return_class_3_charges
+        ]);
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
