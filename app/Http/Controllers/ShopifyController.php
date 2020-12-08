@@ -139,7 +139,7 @@ class ShopifyController extends Controller
                     </style>
                   </head>
                   <body>
-                    <div>
+                    <div class="border pt-1">
       ';
 
             $html .= '<div class="container-fluid">
@@ -147,7 +147,7 @@ class ShopifyController extends Controller
                             <div class="col-6 text-left">
                              <img src="'. public_path('storage/shopify_invoice_logos/' . $invoice->image).'" width="100" class="d-block mb-1">
                             </div>
-                            <div class="col-6 text-right">Invoices for #' . $order['order'] . '</div>
+                            <div class="col-6 text-right"><h3>Invoices for #' . $order['order'] . '</h3></div>
                         </div>
                         <div>
                             <div><h2>'. $user.'</h2></div>
@@ -196,16 +196,16 @@ class ShopifyController extends Controller
                                  <td>Subtotal price: </td><td>'. $order['subtotal_price'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Total tax:</td><td>'. $order['total_tax'] .'</td>
+                                 <td>Total tax: </td><td>'. $order['total_tax'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Shipping</td><td>'. $order['shipping'] .'</td>
+                                 <td>Shipping: </td><td>'. $order['shipping'] .'</td>
                              </tr>
                              <tr>
                                  <td>Total price:</td><td>'. $order['total_price'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Total paid</td><td>'. $order['total_paid'] .'</td>
+                                 <td>Total paid: </td><td>'. $order['total_paid'] .'</td>
                              </tr>
                              <tr>
                                  <td>Outstanding Amount:</td><td>'. $order['outstanding_amount'] .'</td>
@@ -224,7 +224,7 @@ class ShopifyController extends Controller
                             </div>
                         </div>
                             
-                        <div>
+                        <div class="mb-2">
                             <p>'.  $invoice->message .'</p>
                         </div>
                       </div>
@@ -232,6 +232,8 @@ class ShopifyController extends Controller
                       </div>';
 
             $html .= '
+<div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     </div>
                   </body>
                 </html>
