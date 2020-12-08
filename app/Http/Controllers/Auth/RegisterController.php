@@ -122,7 +122,8 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha'
+                'g-recaptcha-response' => 'required|captcha',
+                'segment_id' => 'required'
             ]);
         }else{
             return Validator::make($data, [
@@ -163,7 +164,8 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha'
+                'g-recaptcha-response' => 'required|captcha',
+                'segment_id' => 'required'
             ]);
         }
 
@@ -330,7 +332,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -352,7 +353,7 @@ class RegisterController extends Controller
             'reference_id' => $data['reference'],
             'email_verified' => 0,
             'brand_name' => $data['brand_name'],
-            'segment_id' => $data['segment_id'],
+            'segments' => $data['segments'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);

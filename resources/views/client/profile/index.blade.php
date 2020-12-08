@@ -121,7 +121,7 @@
                                             @if($user->segment_id != null)
                                                 <tr>
                                                     <td><b>Segment</b></td>
-                                                    <td>{{$user->segment->name}}
+                                                    <td>{{$user->segments->name}}
                                                     </td>
                                                 </tr>
                                             @endif

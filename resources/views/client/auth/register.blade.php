@@ -295,7 +295,7 @@
                                                         <div>
                                                             <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($segments as $segment)
-                                                                    <option value="{{$segment->id}}" {{ old('segment') == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
+                                                                    <option value="{{$segment->id}}"> {{$segment->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
