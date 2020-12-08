@@ -218,6 +218,8 @@ class AdminInternationalRatesController extends Controller
                 $intl_discount->save();
             }
         }
+        User::where('id',$shipper_id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
+
         if($request->has('rate_remarks') && $request->rate_remarks != null){
             $rate_remark = new InternationalRatesRemark();
             $rate_remark->user_id = $shipper_id;
@@ -473,6 +475,7 @@ class AdminInternationalRatesController extends Controller
             PendingInternationalRatesReturnCharges::where('user_id', $shipper_id)->delete();
             PendingInternationalRatesDiscountCharges::where('user_id', $shipper_id)->delete();
 
+            User::where('id',$shipper_id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
             if($request->has('rate_remarks') && $request->rate_remarks != null){
                 $rate_remark = new InternationalRatesRemark();
                 $rate_remark->user_id = $shipper_id;
@@ -650,6 +653,8 @@ class AdminInternationalRatesController extends Controller
                 $rate_remark->admin_id = Auth::id();
                 $rate_remark->save();
             }
+
+            User::where('id', $shipper_id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             return redirect()->back()->with('success', 'Rates updated successfully!');
         }
 
