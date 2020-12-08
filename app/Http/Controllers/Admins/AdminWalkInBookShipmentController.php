@@ -1329,16 +1329,56 @@ class AdminWalkInBookShipmentController extends Controller
             return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
         }
     }
+    public function check_international_standard_weight(Request $request){
+        if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->pickup != null) {
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+
+            if($request->delivery_type == 1){
+                $actual_weight = $check->door_actual_weight;
+                $chargeable_weight = $check->door_chargeable_weight;
+            }
+            else{
+                $actual_weight = $check->hub_actual_weight;
+                $chargeable_weight = $check->hub_chargeable_weight;
+            }
+            if($request->pickup == false){
+                if ($request->actual_weight < $actual_weight) {
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $actual_weight]);
+                }
+            }
+
+            if ($request->charges_per_kg < $chargeable_weight) {
+                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $chargeable_weight]);
+            }
+
+            return response()->json(['status' => 2, 'error' => '']);
+        }
+        else{
+            if($request->pickup_city == null){
+                return response()->json(['status' => 3, 'error' => 'Pickup city is required']);
+            }
+            elseif($request->delivery_type == null){
+                return response()->json(['status' => 4, 'error' => 'Delivery type is required']);
+            }
+            elseif($request->consignee_city == null){
+                return response()->json(['status' => 5, 'error' => 'Consignee city is required']);
+            }
+            elseif($request->shipping_mode == null){
+                return response()->json(['status' => 6, 'error' => 'Shipping mode is required']);
+            }
+        }
+    }
 
     public function check_international_min_charges(Request $request){
         if($request->pickup_city != null && $request->consignee_city != null) {
             $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
             $min_charges = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
             if($request->delivery_type == 1){
-                $min_charges = $min_charges['door_chargeable_weight'];
+                $min_charges = $min_charges->door_chargeable_weight;
             }
             else{
-                $min_charges = $min_charges['hub_chargeable_weight'];
+                $min_charges = $min_charges->hub_chargeable_weight;
             }
             return ['status' => 1, 'min_charges' => $min_charges];
         }

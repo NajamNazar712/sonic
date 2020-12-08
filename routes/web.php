@@ -2186,6 +2186,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('international', 'Admins\AdminWalkInBookShipmentController@international_book_index')->name('international_walk_in');
             Route::post('international_store', 'Admins\AdminWalkInBookShipmentController@international_walk_in_store')->name('international_store');
             Route::post('check_international_min_charges', 'Admins\AdminWalkInBookShipmentController@check_international_min_charges')->name('check_international_min_charges');
+            Route::post('check_international_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_international_standard_weight')->name('check_international_standard_weight');
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
