@@ -3011,7 +3011,7 @@ public function arrived_at_origin_sms_for_shipper_index(){
     public function international_walk_in_index(){
         $walk_in_standard_charges = WalkInInternationalStandardWeightCharge::all();
 
-        $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
+        $cities = City::where('hub', 0)->where('business_category_id', 2)->select('id', 'name')->get();
         return view('admin.settings.international_walk_in')->with(['cities' => $cities, 'walk_in_standard_charges' => $walk_in_standard_charges]);
     }
     public function international_walk_in_store(Request $request){
