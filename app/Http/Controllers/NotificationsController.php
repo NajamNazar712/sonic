@@ -2361,7 +2361,6 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-
                     $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
 
                     if ($admins->exists()) {
@@ -2379,7 +2378,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }
-                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk'];
+                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk','muhammmad.waqas@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
                     foreach ($to as $individual_to) {
