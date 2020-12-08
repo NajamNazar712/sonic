@@ -1550,11 +1550,17 @@ class ShipperShipmentBookController extends Controller
                         if ($shipment->shipment_invoice_status) {
                             $logo = $shipment->user->logo;
                             $invoice_id = '(' . ($shipment->order_id != null) ? $shipment->order_id : '' . ')';
+                            if($type != 'pdf'){
+                                $shipper_logo = '<img src="' . public_path('storage/shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">';
+                            }
+                            else{
+                                $shipper_logo = '<img src="' . public_path('storage/shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">';
+                            }
                             $logo_invoice = '<div class="invoice p-1" style="page-break-before: always;">
                         <div class="row"><div class="col-3"><h2>Invoice ' . $invoice_id . '</h2></div></div>
                         <div class="row"><div class="col-6 text-center">
-                        <img src="' . asset('storage/shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">
-    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+                        '. $shipper_logo .'
+    </div><div class="col-6 text-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
                         
                         <div class="row align-items-start justify-content-between p-2">
                             <div class="col-12">
