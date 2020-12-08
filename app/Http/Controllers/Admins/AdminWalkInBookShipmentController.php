@@ -6,6 +6,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -1329,8 +1330,14 @@ class AdminWalkInBookShipmentController extends Controller
 
     public function check_international_min_charges(Request $request){
         if($request->pickup_city != null && $request->consignee_city != null) {
-            $min_charges = WalkInInternationalStandardWeightCharge::where(['hub_id' => $request->consignee_city, 'shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
-            $min_charges = $min_charges['chargeable_weight'];
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $min_charges = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+            if($request->delivery_type == 1){
+                $min_charges = $min_charges['door_chargeable_weight'];
+            }
+            else{
+                $min_charges = $min_charges['hub_chargeable_weight'];
+            }
             return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
