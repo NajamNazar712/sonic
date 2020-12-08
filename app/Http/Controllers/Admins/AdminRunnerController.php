@@ -24,7 +24,7 @@ class AdminRunnerController extends Controller
     }
 
     public function index(){
-        $existing_runners = RunnerDetail::where('status',0)->where('status','!=', 2)->pluck('runner_id')->toArray();
+        $existing_runners = RunnerDetail::where('status',0)->pluck('runner_id')->toArray();
         $runners = Runner::where('status', 1)->whereNotIn('id', $existing_runners)->get();
         return view('admin.runner.index')->with(['runners' => $runners]);
     }
