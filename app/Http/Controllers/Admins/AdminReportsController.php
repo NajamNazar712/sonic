@@ -2383,7 +2383,8 @@ class AdminReportsController extends Controller
 
             $shipping_mode_wise_data[] = [$shipping_mode_total['serial'],$shipping_mode_total['mode'],number_format(round($shipping_mode_total['booked'])),$shipping_mode_total['received'],number_format($shipping_mode_total['revenue_wo_gst']),number_format($shipping_mode_total['avg_parcel_rev']) ,number_format($shipping_mode_total['actual_weight']),number_format($shipping_mode_total['avg_actual_weight']),round($shipping_mode_total['avg_rev_actual_weight']),number_format($shipping_mode_total['chargeable_weight']),number_format($shipping_mode_total['avg_chargeable_weight']),round($shipping_mode_total['avg_rev_chargeable_weight']),$shipping_mode_total['collection_amount'],$shipping_mode_total['avg_amount_collection'],round( $shipping_mode_total['revenue_amount_collection']) .'%'];
         }
-        $total_avg_revenue = ($total_shipping_received != 0) ? $total_shipping_revenue_wo_gst / $total_shipping_received:0;
+
+        $total_shipping_avg_parcel_revenue = ($total_shipping_received != 0) ? $total_shipping_revenue_wo_gst / $total_shipping_received:0;
         $total_avg_actual_weight = ($total_shipping_received != 0) ? $total_shipping_actual_weight / $total_shipping_received:0;
         $total_avg_rev_actual_weight = ($total_shipping_actual_weight != 0) ? $total_shipping_revenue_wo_gst / $total_shipping_actual_weight:0;
         $total_avg_chargeable_weight = ($total_shipping_received != 0) ? $total_shipping_chargeable_weight / $total_shipping_received:0;
