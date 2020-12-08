@@ -441,6 +441,7 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
                         <div class="col-md-6">
                             <div class="form-group row">
                                 <div class="form-group col-md-9">
@@ -448,7 +449,7 @@
                                         <span class="danger">*</span>
                                     </label>
                                     <div>
-                                        <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
+                                        <select name="segment_id" id="segment_id" data-rule-required="true" data-msg-required="Segment is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($segments as $segment)
                                                 <option value="{{$segment->id}}" {{ $user->segment_id == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
                                             @endforeach
@@ -456,7 +457,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                        </div>
                                 <div class="col-md-6">
                                     <div class="form-group row">
                                         <div class="col-md-9">
@@ -465,8 +466,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group row">
                                         <div class="col-md-9">
@@ -476,7 +475,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div class="form-actions right">
                             <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                 Cancel
@@ -485,6 +483,7 @@
                                 Update
                             </button>
                         </div>
+                    </div>
                 </form>
 
                 <form id="bank-form" class="form form-horizontal" style="display: none" method="post" action="{{route('admin.accounts.update.bank')}}">

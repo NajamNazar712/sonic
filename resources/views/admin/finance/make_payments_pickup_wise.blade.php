@@ -75,7 +75,7 @@
                                         <div class="form-group">
                                             <select name="payment_filter" id="payment_filter" class="select2 payment_filter">
                                                     <option value="1000000">greater than 1M</option>
-                                                    <option value="50000000">greater than 5M</option>
+                                                    <option value="5000000">greater than 5M</option>
                                                     <option value="10000000">greater than 10M</option>
                                             </select>
                                         </div>

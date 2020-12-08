@@ -2349,6 +2349,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add/submit', 'Admins\AdminRunnerController@runner_details_add_submit')->name('add.submit');
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
+        Route::post('/view_details', 'Admins\AdminRunnerController@runner_details_view')->name('view_details');
     });
 
     Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {

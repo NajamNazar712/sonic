@@ -54,6 +54,7 @@
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Departure Date Time</th>
                             <th class="border-primary border-darken-1">Arrival Date Time</th>
+                            <th class="border-primary border-darken-1">Add Reason</th>
                         </tr>
                         </thead>
                     </table>
@@ -169,7 +170,8 @@
                     { name: 'origin', class: 'align-middle origin', width: '40px'},
                     { name: 'hub', class: 'align-middle hub', width: '40px'},
                     { name: 'departure_time', class: 'align-middle departure_time'},
-                    { name: 'arrival_time', class: 'align-middle arrival_time'}
+                    { name: 'arrival_time', class: 'align-middle arrival_time'},
+                    { name: 'comment', class: 'align-middle comment'}
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -191,8 +193,9 @@
                 '<input type="text" name="departure_time[1]" id="departure_time_1" class="form-control rounded-right time" value="" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required"></div></div>';
             var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[1]" id="arrival_date_1" class="form-control rounded-right pickadate date" value="" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required"></div>' +
                 '<div class="col form-group input-group"><input type="text" name="arrival_time[1]" id="arrival_time_1" class="form-control rounded-right time" value="" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required"></div></div>';
+            var comment = '<div class="col form-group input-group"><input type="text" name="comment[1]" id="comment_1" class="form-control rounded-right" value="" placeholder="Add Comment" ></div>';
             cities.push(first_junction_id);
-            table.row.add([1, first_origin, first_destination, departure_time, arrival_time]);
+            table.row.add([1, first_origin, first_destination, departure_time, arrival_time,comment]);
             table.draw();
             $.each(junctions,function (key,value) {
                 var city_id = parseInt(value.city_id);
@@ -209,6 +212,10 @@
             $('#origin_1').select2({
                 width: '100%',
                 placeholder: 'Select Origin',
+            });
+            $('#comment').select2({
+                width: '100%',
+                placeholder: 'Add Comment',
             });
             $('#destination_1').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -258,8 +265,9 @@
                         '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required"></div></div>';
                     var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" value="" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required"></div>' +
                         '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required"></div></div>';
+                    var comment = '<div class="col form-group input-group"><input type="text" name="comment[' + row + ']" id="comment" class="form-control rounded-right " value="" placeholder="Add Comment" ></div></div>';
                     cities.push(parseInt(old_destination));
-                    table.row.add([1, new_origin, new_destination, departure_time, arrival_time]);
+                    table.row.add([1, new_origin, new_destination, departure_time, arrival_time,comment]);
                     table.draw();
                     $.each(junctions,function (key,value) {
                         var city_id = parseInt(value.city_id);
@@ -276,6 +284,10 @@
                     $('#origin_' + row).select2({
                         width: '100%',
                         placeholder: 'Select Origin',
+                    });
+                    $('#comment' + row).select2({
+                        width: '100%',
+                        placeholder: 'Add Comment',
                     });
                     $('#destination_' + row).prepend('<option value="" selected="selected"></option>').select2({
                         width: '100%',
