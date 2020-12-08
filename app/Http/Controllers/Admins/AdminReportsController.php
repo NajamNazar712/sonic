@@ -5249,7 +5249,7 @@ class AdminReportsController extends Controller
         }
 
         if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
-            $datatable->where('false');
+            $datatable->whereRaw('false');
         }
 
         return $datatable->make(true);
