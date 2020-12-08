@@ -385,16 +385,12 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <h5>Hello World</h5>
+{{--                <h5>Hello World</h5>--}}
                 <div>
                     <form>
-                        <div class="input-group">
+                        <div class="form-group has-search">
+                            <span class="fa fa-search form-control-feedback"></span>
                             <input type="text" class="form-control" placeholder="Search">
-                            <div class="input-group-btn">
-                                <button class="btn btn-default" type="submit">
-                                    <i class="glyphicon glyphicon-search"></i>
-                                </button>
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -402,5 +398,6 @@
         </div>
     </div>
 </div>
+
 
 
