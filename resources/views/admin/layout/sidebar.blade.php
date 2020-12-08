@@ -90,9 +90,7 @@
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(155, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.shipment.book.walk_in')}}">Domestic Book</a></li>
-                                    @endif
-                                    @if (session('role_id') == 1 || in_array(155, session('permissions')))
-                                            <li><a class="menu-item" href="{{route('admin.shipment.book.international_walk_in')}}">International Book</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.shipment.book.international_walk_in')}}">International Book</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(209, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.shipment.history.walk_in_history')}}">History</a></li>
@@ -950,8 +948,6 @@
                                                     <li><a class="menu-item"
                                                            href="{{route('admin.settings.walk_in.index')}}">Domestic</a>
                                                     </li>
-                                                @endif
-                                                @if (session('role_id') == 1 || in_array(154, session('permissions')))
                                                     <li><a class="menu-item"
                                                            href="{{route('admin.settings.international_walk_in.index')}}">International</a>
                                                     </li>
