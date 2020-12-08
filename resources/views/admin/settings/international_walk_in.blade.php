@@ -21,199 +21,317 @@
                                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                                     <form id="settings_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.international_walk_in.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
-                                        @if(count($walk_in_standard_charges) > 0)
-                                            @foreach($walk_in_standard_charges as $standard_charges)
-                                                <input type="hidden" name="standard_charges[]" value="{{$standard_charges->id}}">
-                                                <div class="row justify-content-center">
-                                                    <div class="col-6">
-                                                        <div class="form-group">
-                                                            <select name="hubs[{{$standard_charges->id}}][]" id="select_box_{{$standard_charges->id}}" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Hub(s) is required">
-                                                                @foreach($cities as $city)
-                                                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div style="width: 450px; float: left; margin-left: 20px;">
-                                                    <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Actual Weight</span>
-                                                                </div>
-                                                                <input type="text" name="hub_actual_weight[{{$standard_charges->id}}]" id="hub_actual_weight_{{$standard_charges->id}}" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $standard_charges->hub_actual_weight }}">
-                                                                <div class="input-group-append">
-                                                                    <span class="input-group-text">KG</span>
+                                        <div class="card">
+                                            <div class="card-content">
+                                                <div class="box_parent_div">
+                                                    <div class="parent_box_div_1">
+                                                        <div class="card-header">
+                                                            <input type="hidden" name="box_ids[]" value="1">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <h3 class="display-inline card-title lead primary">
+                                                                        International Hub Rates 1</h3>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <label class="text-bold-600">Charges Per KG</label>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Charges</span>
+                                                        @if(count($walk_in_standard_charges) > 0)
+                                                            @foreach($walk_in_standard_charges as $standard_charges)
+                                                                <input type="hidden" name="standard_charges[]"
+                                                                       value="{{$standard_charges->id}}">
+                                                                <div class="row justify-content-center">
+                                                                    <div class="col-6">
+                                                                        <div class="form-group">
+                                                                            <select name="hubs[{{$standard_charges->id}}][]"
+                                                                                    id="select_box_{{$standard_charges->id}}"
+                                                                                    class="form-control select2"
+                                                                                    multiple="multiple" required
+                                                                                    data-rule-required="true"
+                                                                                    data-msg-required="Hub(s) is required">
+                                                                                @foreach($cities as $city)
+                                                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <input type="text" name="hub_chargeable_weight[{{$standard_charges->id}}]" id="hub_chargeable_weight_{{$standard_charges->id}}" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $standard_charges->hub_chargeable_weight }}">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <label class="text-bold-600">Return Charges</label>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Charges</span>
+                                                                <div style="width: 450px; float: left; margin-left: 20px;">
+                                                                    <h4 class="form-section mb-2 text-center"
+                                                                        style="text-align: left">Hub to Hub</h4>
+                                                                    <div class="row">
+                                                                        <div class="col">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Actual Weight</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="hub_actual_weight[{{$standard_charges->id}}]"
+                                                                                       id="hub_actual_weight_{{$standard_charges->id}}"
+                                                                                       class="form-control numeric"
+                                                                                       required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Actual Weight is required"
+                                                                                       value="{{ $standard_charges->hub_actual_weight }}">
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text">KG</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <label class="text-bold-600">Charges Per KG</label>
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Charges</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="hub_chargeable_weight[{{$standard_charges->id}}]"
+                                                                                       id="hub_chargeable_weight_{{$standard_charges->id}}"
+                                                                                       class="form-control local"
+                                                                                       placeholder="" required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Charges Per KG is required"
+                                                                                       value="{{ $standard_charges->hub_chargeable_weight }}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <label class="text-bold-600">Return Charges</label>
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Charges</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="hub_return_charges[{{$standard_charges->id}}]"
+                                                                                       id="hub_return_charges_{{$standard_charges->id}}"
+                                                                                       class="form-control local"
+                                                                                       placeholder="" required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Return Charges is required"
+                                                                                       value="{{ $standard_charges->hub_return_charges }}">
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text">%</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <input type="text" name="hub_return_charges[{{$standard_charges->id}}]" id="hub_return_charges_{{$standard_charges->id}}" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Return Charges is required" value="{{ $standard_charges->hub_return_charges }}">
-                                                                <div class="input-group-append">
-                                                                    <span class="input-group-text">%</span>
+                                                                <div style="width: 450px; float: right; margin-left: 20px;">
+                                                                    <h4 class="form-section mb-2 text-center"
+                                                                        style="text-align: right">Doorstep</h4>
+                                                                    <div class="row">
+                                                                        <div class="col">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Actual Weight</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="door_actual_weight[{{$standard_charges->id}}]"
+                                                                                       id="door_actual_weight_{{$standard_charges->id}}"
+                                                                                       class="form-control numeric"
+                                                                                       placeholder="" required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Actual Weight is required"
+                                                                                       value="{{ $standard_charges->door_actual_weight }}">
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text">KG</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <label class="text-bold-600">Charges Per KG</label>
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Charges</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="door_chargeable_weight[{{$standard_charges->id}}]"
+                                                                                       id="door_chargeable_weight_{{$standard_charges->id}}"
+                                                                                       class="form-control local"
+                                                                                       placeholder="" required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Charges Per KG is required"
+                                                                                       value="{{ $standard_charges->door_chargeable_weight}}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <label class="text-bold-600">Return Charges</label>
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <div class="input-group form-group">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text">Charges</span>
+                                                                                </div>
+                                                                                <input type="text"
+                                                                                       name="door_return_charges[{{$standard_charges->id}}]"
+                                                                                       id="door_return_charges_{{$standard_charges->id}}"
+                                                                                       class="form-control local"
+                                                                                       placeholder="" required
+                                                                                       data-rule-required="true"
+                                                                                       data-msg-required="Return Charges is required"
+                                                                                       value="{{ $standard_charges->door_return_charges }}">
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text">%</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div style="width: 450px; float: right; margin-left: 20px;">
-                                                    <h4 class="form-section mb-2 text-center" style="text-align: right">Doorstep</h4>
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Actual Weight</span>
-                                                                </div>
-                                                                <input type="text" name="door_actual_weight[{{$standard_charges->id}}]" id="door_actual_weight_{{$standard_charges->id}}" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $standard_charges->door_actual_weight }}">
-                                                                <div class="input-group-append">
-                                                                    <span class="input-group-text">KG</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <label class="text-bold-600">Charges Per KG</label>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Charges</span>
-                                                                </div>
-                                                                <input type="text" name="door_chargeable_weight[{{$standard_charges->id}}]" id="door_chargeable_weight_{{$standard_charges->id}}" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $standard_charges->door_chargeable_weight}}">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <label class="text-bold-600">Return Charges</label>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="input-group form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Charges</span>
-                                                                </div>
-                                                                <input type="text" name="door_return_charges[{{$standard_charges->id}}]" id="door_return_charges_{{$standard_charges->id}}" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Return Charges is required" value="{{ $standard_charges->door_return_charges }}">
-                                                                <div class="input-group-append">
-                                                                    <span class="input-group-text">%</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            <div class="row justify-content-center">
-                                                <input type="hidden" name="standard_charges[]" value="1">
-                                                <div class="col-6">
-                                                    <div class="form-group">
-                                                        <select name="hubs[1][]" id="select_box_1" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Hub(s) is required">
-                                                            @foreach($cities as $city)
-                                                                <option value="{{$city->id}}">{{$city->name}}</option>
                                                             @endforeach
-                                                        </select>
+                                                        @else
+                                                            <div class="row justify-content-center">
+                                                                <input type="hidden" name="standard_charges[]"
+                                                                       value="1">
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <select name="hubs[1][]" id="select_box_1"
+                                                                                class="form-control select2"
+                                                                                multiple="multiple"
+                                                                                required data-rule-required="true"
+                                                                                data-msg-required="Hub(s) is required">
+                                                                            @foreach($cities as $city)
+                                                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style="width: 450px; float: left; margin-left: 20px;">
+                                                                <h4 class="form-section mb-2 text-center"
+                                                                    style="text-align: left">Hub to Hub</h4>
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Actual Weight</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="hub_actual_weight[1]"
+                                                                                   id="hub_actual_weight_1"
+                                                                                   class="form-control numeric" required
+                                                                                   data-rule-required="true"
+                                                                                   data-msg-required="Actual Weight is required"
+                                                                                   value="">
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text">KG</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label class="text-bold-600">Charges Per KG</label>
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Charges</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="hub_chargeable_weight[1]"
+                                                                                   id="hub_chargeable_weight_1"
+                                                                                   class="form-control local"
+                                                                                   placeholder=""
+                                                                                   required data-rule-required="true"
+                                                                                   data-msg-required="Charges Per KG is required"
+                                                                                   value="">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label class="text-bold-600">Return Charges</label>
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Charges</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="hub_return_charges[1]"
+                                                                                   id="hub_return_charges_1"
+                                                                                   class="form-control local"
+                                                                                   placeholder=""
+                                                                                   required data-rule-required="true"
+                                                                                   data-msg-required="Return Charges is required"
+                                                                                   value="">
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text">%</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style="width: 450px; float: right; margin-left: 20px;">
+                                                                <h4 class="form-section mb-2 text-center"
+                                                                    style="text-align: right">Doorstep</h4>
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Actual Weight</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="door_actual_weight[1]"
+                                                                                   id="door_actual_weight_1"
+                                                                                   class="form-control numeric"
+                                                                                   placeholder=""
+                                                                                   required data-rule-required="true"
+                                                                                   data-msg-required="Actual Weight is required"
+                                                                                   value="">
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text">KG</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label class="text-bold-600">Charges Per KG</label>
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Charges</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="door_chargeable_weight[1]"
+                                                                                   id="door_chargeable_weight_1"
+                                                                                   class="form-control local"
+                                                                                   placeholder=""
+                                                                                   required data-rule-required="true"
+                                                                                   data-msg-required="Charges Per KG is required"
+                                                                                   value="">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label class="text-bold-600">Return Charges</label>
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <div class="input-group form-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text">Charges</span>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                   name="door_return_charges[1]"
+                                                                                   id="door_return_charges_1"
+                                                                                   class="form-control local"
+                                                                                   placeholder=""
+                                                                                   required data-rule-required="true"
+                                                                                   data-msg-required="Return Charges is required"
+                                                                                   value="">
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text">%</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style="width: 450px; float: left; margin-left: 20px;">
-                                                <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Actual Weight</span>
-                                                            </div>
-                                                            <input type="text" name="hub_actual_weight[1]" id="hub_actual_weight_1" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">KG</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <label class="text-bold-600">Charges Per KG</label>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Charges</span>
-                                                            </div>
-                                                            <input type="text" name="hub_chargeable_weight[1]" id="hub_chargeable_weight_1" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <label class="text-bold-600">Return Charges</label>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Charges</span>
-                                                            </div>
-                                                            <input type="text" name="hub_return_charges[1]" id="hub_return_charges_1" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Return Charges is required" value="">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style="width: 450px; float: right; margin-left: 20px;">
-                                                <h4 class="form-section mb-2 text-center" style="text-align: right">Doorstep</h4>
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Actual Weight</span>
-                                                            </div>
-                                                            <input type="text" name="door_actual_weight[1]" id="door_actual_weight_1" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Actual Weight is required" value="">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">KG</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <label class="text-bold-600">Charges Per KG</label>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Charges</span>
-                                                            </div>
-                                                            <input type="text" name="door_chargeable_weight[1]" id="door_chargeable_weight_1" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <label class="text-bold-600">Return Charges</label>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <div class="input-group form-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Charges</span>
-                                                            </div>
-                                                            <input type="text" name="door_return_charges[1]" id="door_return_charges_1" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Return Charges is required" value="">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        </div>
                                         @endif
+                                        <div class="input-group justify-content-center">
+                                            <button id="add_more_rates_hubs" type="button" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Add Rates and Hub</button>
+                                        </div>
                                         <div class="input-group justify-content-center">
                                             <button type="submit" class="btn btn-primary" style="width: 200px">Update</button>
                                         </div>
@@ -257,6 +375,138 @@
                 'allowPlus': false,
                 'rightAlign': false
             });
+
+            var box_no = 1;
+            $('#add_more_rates_hubs').on('click', function () {
+                $('.parent_box_div_'+box_no).find('button').prop('disabled', true);
+                box_no++;
+                var box_div = '<div class="parent_box_div_'+ box_no +'"><div class="card-header">' +
+                    '         <input type="hidden" value="'+ box_no +'" name="box_ids[]">' +
+                    '         <div class="row">' +
+                    '             <div class="col-md-6">' +
+                    '               <h3 class="display-inline card-title lead primary">International Hub Rates '+ box_no +'</h3>' +
+                    '             </div>' +
+                    '             <div class="col-md-6 text-right">' +
+                    '                  <span class="btn btn-danger rounded btn-sm-width rate_box_close" box="'+ box_no +'"><i class="ft-trash"></i></span>' +
+                    '             </div>' +
+                    '             </div>' +
+                    '             </div>' +
+                    '        <div class="row justify-content-center">'+
+                    '            <input type="hidden" name="standard_charges[]" value="'+ box_no +'">'+
+                    '            <div class="col-6">'+
+                    '                <div class="form-group">'+
+                    '                    <select name="hubs['+ box_no +'][]" id="select_box_1" class="form-control select2" multiple="multiple" required'+
+                    '                            data-rule-required="true" data-msg-required="Hub(s) is required">'+
+                    '                        @foreach($cities as $city)'+
+                    '                        <option value="{{$city->id}}">{{$city->name}}</option>'+
+                    '                        @endforeach'+
+                    '                    </select>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '        </div>'+
+                    '        <div style="width: 450px; float: left; margin-left: 20px;">'+
+                    '            <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>'+
+                    '            <div class="row">'+
+                    '                <div class="col">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Actual Weight</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="hub_actual_weight['+ box_no +']" id="hub_actual_weight_'+ box_no +'"'+
+                    '                               class="form-control numeric" required data-rule-required="true"'+
+                    '                               data-msg-required="Actual Weight is required" value="">'+
+                    '                        <div class="input-group-append">'+
+                    '                            <span class="input-group-text">KG</span>'+
+                    '                        </div>'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '            <label class="text-bold-600">Charges Per KG</label>'+
+                    '            <div class="row">'+
+                    '                <div class="col-12">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Charges</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="hub_chargeable_weight['+ box_no +']" id="hub_chargeable_weight_'+ box_no +'"'+
+                    '                               class="form-control local" placeholder="" required data-rule-required="true"'+
+                    '                               data-msg-required="Charges Per KG is required" value="">'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '            <label class="text-bold-600">Return Charges</label>'+
+                    '            <div class="row">'+
+                    '                <div class="col-12">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Charges</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="hub_return_charges['+ box_no +']" id="hub_return_charges_'+ box_no +'"'+
+                    '                               class="form-control local" placeholder="" required data-rule-required="true"'+
+                    '                               data-msg-required="Return Charges is required" value="">'+
+                    '                        <div class="input-group-append">'+
+                    '                            <span class="input-group-text">%</span>'+
+                    '                        </div>'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '        </div>'+
+                    '        <div style="width: 450px; float: right; margin-left: 20px;">'+
+                    '            <h4 class="form-section mb-2 text-center" style="text-align: right">Doorstep</h4>'+
+                    '            <div class="row">'+
+                    '                <div class="col">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Actual Weight</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="door_actual_weight['+ box_no +']" id="door_actual_weight_'+ box_no +'"'+
+                    '                               class="form-control numeric" placeholder="" required data-rule-required="true"'+
+                    '                               data-msg-required="Actual Weight is required" value="">'+
+                    '                        <div class="input-group-append">'+
+                    '                            <span class="input-group-text">KG</span>'+
+                    '                        </div>'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '            <label class="text-bold-600">Charges Per KG</label>'+
+                    '            <div class="row">'+
+                    '                <div class="col-12">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Charges</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="door_chargeable_weight['+ box_no +']" id="door_chargeable_weight_'+ box_no +'"'+
+                    '                               class="form-control local" placeholder="" required data-rule-required="true"'+
+                    '                               data-msg-required="Charges Per KG is required" value="">'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '            <label class="text-bold-600">Return Charges</label>'+
+                    '            <div class="row">'+
+                    '                <div class="col-12">'+
+                    '                    <div class="input-group form-group">'+
+                    '                        <div class="input-group-prepend">'+
+                    '                            <span class="input-group-text">Charges</span>'+
+                    '                        </div>'+
+                    '                        <input type="text" name="door_return_charges['+ box_no +']" id="door_return_charges_'+ box_no +'"'+
+                    '                               class="form-control local" placeholder="" required data-rule-required="true"'+
+                    '                               data-msg-required="Return Charges is required" value="">'+
+                    '                        <div class="input-group-append">'+
+                    '                            <span class="input-group-text">%</span>'+
+                    '                        </div>'+
+                    '                    </div>'+
+                    '                </div>'+
+                    '            </div>'+
+                    '        </div>'+
+                    '    </div>';
+                $('.box_parent_div').append(box_div);
+            });
+
+            $('body').on('click', 'span.rate_box_close', function(){
+                var box = $(this).attr('box');
+                $('.parent_box_div_'+box).remove();
+            });
+
             @if(count($walk_in_standard_charges) > 0)
                 @foreach($walk_in_standard_charges as $standard_charges)
                     $('#select_box_{{$standard_charges->id}}').select2({
