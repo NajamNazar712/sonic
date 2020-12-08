@@ -2119,4 +2119,40 @@ class AdminReportsEmailController extends Controller
 
         }
     }
+
+    static public function overland_aging_report()
+    {
+        $to = Carbon::today()->toDateString();
+        $from = Carbon::today()->subDays(7)->toDateString();
+        /*Carbon::setWeekendDays([
+            Carbon::SUNDAY,
+        ]);*/
+
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })->select('shipments.id as shId', 'shipments.tracking_number as tracking', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub',  'shipments.consignee_address','ss.name as current_status', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival_date','shipments.actual_weight as actual_weight','shipments.chargeable_weight as chargeable_weight',DB::raw("CONCAT(DATEDIFF(shipments_journey.created_at, sj.created_at),'','days') as aging"))
+            ->whereBetween('shipments_journey.created_at',[$from,$to])
+            ->where('sm.id',2)
+            ->groupBy('shipments.id')->get();
+
+            return $shipments;
+
+
+    }
+
 }
