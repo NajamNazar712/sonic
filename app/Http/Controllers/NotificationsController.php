@@ -2361,9 +2361,7 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $to = ['muhammad.yousuf@trax.pk','muhammad.waqas@trax.pk'];
-                    self::email($subject, $body, $to);
-                    /*$admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -2385,7 +2383,7 @@ class NotificationsController extends Controller
 
                     foreach ($to as $individual_to) {
                         self::email($subject, $body, $individual_to);
-                    }*/
+                    }
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
