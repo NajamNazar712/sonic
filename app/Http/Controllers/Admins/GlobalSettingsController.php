@@ -3149,10 +3149,10 @@ class GlobalSettingsController extends Controller
                 $runner->status = 1;
                 $runner->save();
             } else {
-                $runner->status = 0;
+                $runner->status = 2;
                 $runner->save();
             }
-            return response()->json(['status' => 1, 'success' => 'Statement Successfully Updated!']);
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
         }
     }
 }

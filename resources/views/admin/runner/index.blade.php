@@ -220,7 +220,7 @@
                 autoWidth: false,
                 ajax: '{{ route('admin.runner.list') }}',
                 rowId: 'id',
-                order: [[6, 'asc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'runner', name: 'r.name', class: 'align-middle text-center runner'},
@@ -305,7 +305,7 @@
                         if (data.runner_detail_times.length != 0) {
                             var html = '';
                             html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th>Origin</th><th>Destination</th><th>Departure Date</th><th>Departure Time</th><th>Departure Time</th><th>Arrival Date</th><th>Arrival Time</th><th>Comment</th></tr></thead>';
+                            html += '<thead><tr><th>S No.</th><th>Origin</th><th>Destination</th><th>Departure Date</th><th>Departure Time</th><th>Arrival Date</th><th>Arrival Time</th><th>Stay Time</th><th>Comment</th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.runner_detail_times, function (index, value) {
                                 var ind = index + 1;
