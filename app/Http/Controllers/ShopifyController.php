@@ -154,7 +154,7 @@ class ShopifyController extends Controller
                         </div>
                         <div>
                             <div><h5>'. $invoice->address .'</h5></div>
-                            <div class="border-bottom"></div>
+                            <div class="border-bottom mt-2 mb-2"></div>
                         </div>
                              
                          <div>
@@ -177,7 +177,7 @@ class ShopifyController extends Controller
                             $html .='<tr>
                                         <td>'. $item['quantity'] .'x</td>
                                         <td>'. $item['name'] .'</td>
-                                        <td>'. $item['price'] .'</td>
+                                        <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
                         }
 
@@ -185,7 +185,7 @@ class ShopifyController extends Controller
                             </table>
                         </div>
                              
-                         <div>
+                         <div class="mb-1">
                             <h1>Payment Details</h1>
                          </div>
                              
@@ -193,27 +193,27 @@ class ShopifyController extends Controller
                          <table class="table border">
                              <tbody>
                              <tr>
-                                 <td>Subtotal price: </td><td>'. $order['subtotal_price'] .'</td>
+                                 <td>Subtotal price: </td><td>Rs.'. $order['subtotal_price'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Total tax: </td><td>'. $order['total_tax'] .'</td>
+                                 <td>Total tax: </td><td>Rs.'. $order['total_tax'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Shipping: </td><td>'. $order['shipping'] .'</td>
+                                 <td>Shipping: </td><td>Rs.'. $order['shipping'] .'</td>
                              </tr>
                              <tr>
-                                 <td>Total price:</td><td>'. $order['total_price'] .'</td>
+                                 <td><b>Total price:</b></td><td><b>Rs.'. $order['total_price'] .'</b></td>
                              </tr>
                              <tr>
-                                 <td>Total paid: </td><td>'. $order['total_paid'] .'</td>
+                                 <td><b>Total paid: </b></td><td><b>Rs.'. $order['total_paid'] .'</b></td>
                              </tr>
                              <tr>
-                                 <td>Outstanding Amount:</td><td>'. $order['outstanding_amount'] .'</td>
+                                 <td><b>Outstanding Amount:</b></td><td><b>Rs.'. $order['outstanding_amount'] .'</b></td>
                              </tr>
                              </tbody>
                          </table>
                          </div> 
-                         <div>
+                         <div class="mb-1">
                             <h1>Shipping Details</h1>
                          </div>   
                          <div>
@@ -224,7 +224,7 @@ class ShopifyController extends Controller
                             </div>
                         </div>
                             
-                        <div class="mb-2">
+                        <div class="mb-2 mt-2">
                             <p>'.  $invoice->message .'</p>
                         </div>
                       </div>
