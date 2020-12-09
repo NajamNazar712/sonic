@@ -7786,6 +7786,7 @@ class AdminDashboardController extends Controller
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
             'cnic'=>'required|string|max:255',
+            'segment_id' => 'required'
         ]);
 
 
@@ -7803,7 +7804,7 @@ class AdminDashboardController extends Controller
         else
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id'=>$request->segment_id,
+                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id,
                 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
         }
 
