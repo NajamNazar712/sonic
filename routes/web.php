@@ -1474,6 +1474,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
         Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
         Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
+
+        Route::prefix('pending')->name('pending.')->group(function(){
+            Route::get('','Admins\AdminMonthClosingController@pending_index')->name('index');
+            Route::get('list','Admins\AdminMonthClosingController@pending_list')->name('list');
+        });
     });  
 
 

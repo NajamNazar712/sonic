@@ -350,4 +350,54 @@ class AdminMonthClosingController extends Controller
              return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )", 'untouched_shipments' => $not_updated_shipments, 'untouched' => $untouched]);
 
      }
+
+    public function pending_index(){
+        return view('admin.month_closing.pending');
+    }
+
+    public function pending_list(){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->join('crm_requests as cr','cr.shipment_id','=','shipments.id')
+            ->join('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
+            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address as consignee_address','shipments.amount as cod_amount','u.name as shipper','shipments_journey.remarks as shipment_remarks','cr.id as claim_id','crn.type as claim_type')
+            ->groupBy('shipments.id');
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
+            ->addColumn('action', function($user) {
+                $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                $dropdown .= $verify;
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+
+    }
 }
