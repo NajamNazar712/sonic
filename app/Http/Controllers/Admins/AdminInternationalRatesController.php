@@ -291,7 +291,7 @@ class AdminInternationalRatesController extends Controller
             $intl_user_information->save();
             $user = User::find($shipper_id);
             if($user->status != 3){
-                $user->status = 3;
+                $user->status = 2;
                 $user->save();
             }
             return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
