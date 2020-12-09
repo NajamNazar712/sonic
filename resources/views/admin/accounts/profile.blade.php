@@ -447,13 +447,12 @@
                                     <label for="segments">Segments:
                                         <span class="danger">*</span>
                                     </label>
-                                    <div>
-                                        <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
-                                            @foreach($segments as $segment)
-                                                <option value="{{$segment->id}}">{{$segment->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+
+                                    <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
+                                        @foreach($segments as $segment)
+                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -827,8 +826,10 @@
                 placeholder: "Select Segment",
                 width:'100%',
             });
+            @if($user->segment_id != null)
             var segment_id = {!! $user->segment_id !!};
             $('#segment_id').val(segment_id).trigger('change');
+            @endif
             $('#cancel-button-profile').click(function () {
                 $("#profile-form").hide();
                 $("#profile-form").validate().resetForm();
