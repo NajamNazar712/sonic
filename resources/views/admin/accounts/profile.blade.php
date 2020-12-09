@@ -122,7 +122,7 @@
                                 @if($user->segment_id != null)
                                     <tr>
                                         <td><b>Segment</b></td>
-                                        <td>{{$user->segments->name}}
+                                        <td>{{$user->segment->name}}
                                         </td>
                                     </tr>
                                 @endif
@@ -450,7 +450,7 @@
                                     <div>
                                         <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
                                             @foreach($segments as $segment)
-                                                <option value="{{$segment->id}}" {{ $user->segment_id == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
+                                                <option value="{{$segment->id}}">{{$segment->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
