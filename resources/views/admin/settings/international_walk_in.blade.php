@@ -422,7 +422,7 @@
             $('#add_more_rates_hubs').on('click', function () {
                 div_count++;
                 var div = '<div class="col parent_div_'+ div_count +'" id="parent_div_'+ div_count +'">' +
-                    '         <div class="input-group form-section mb-2" id="section_{{$standard_charges->id}}">\n' +
+                    '         <div class="input-group form-section mb-2" id="section_'+ div_count +'">\n' +
                     '              <div class="col display-inline">' +
                     '                   <div class="float-left">' +
                     '                        <h3><b>International Walk-In Rates ' + div_count + '</b></h3>' +
