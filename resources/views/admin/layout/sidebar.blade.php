@@ -577,6 +577,7 @@
 
                     @if (session('role_id') == 1 || in_array(141, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.month_closing.index') }}">Month Closing</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Month Closing</a></li>
                     @endif
 
                     @if (session('role_id') == 1 || count(array_intersect([107,108,119], session('permissions'))) !== 0)
