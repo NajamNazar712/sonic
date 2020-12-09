@@ -16,6 +16,8 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
@@ -36,6 +38,7 @@ use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
 use App\http\Models\Runner;
+use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
@@ -81,40 +84,46 @@ class GlobalSettingsController extends Controller
 
         $this->middleware('Permission');
     }
-    public function pickup_index(){
-        $settings = GlobalSettings::where('type','=','pickup_weight')->first();
-        return view('admin.settings.pickup')->with('settings',$settings);
-    }
-    public function add_pickup_weight(Request $request){
 
-        if($request->isMethod('post')){
+    public function pickup_index()
+    {
+        $settings = GlobalSettings::where('type', '=', 'pickup_weight')->first();
+        return view('admin.settings.pickup')->with('settings', $settings);
+    }
+
+    public function add_pickup_weight(Request $request)
+    {
+
+        if ($request->isMethod('post')) {
             $result = GlobalSettings::create([
-                'setting_value'=>$request->pickup_weight,
-                'type'=>'pickup_weight'
+                'setting_value' => $request->pickup_weight,
+                'type' => 'pickup_weight'
             ]);
-            if($result){
-                return redirect()->back()->with('success','Pickup request weight updated');
+            if ($result) {
+                return redirect()->back()->with('success', 'Pickup request weight updated');
             }
-        }else{
-           $record = GlobalSettings::where('type','pickup_weight')->get();
-            $result = GlobalSettings::where('id',$record[0]->id)->update([
-                'setting_value'=>$request->pickup_weight,
-                'type'=>'pickup_weight'
+        } else {
+            $record = GlobalSettings::where('type', 'pickup_weight')->get();
+            $result = GlobalSettings::where('id', $record[0]->id)->update([
+                'setting_value' => $request->pickup_weight,
+                'type' => 'pickup_weight'
             ]);
-            if($result){
-                return redirect()->back()->with('success','Pickup request weight updated');
+            if ($result) {
+                return redirect()->back()->with('success', 'Pickup request weight updated');
             }
         }
     }
 
-    public function shipment_cancellation_cut_off_days_index() {
+    public function shipment_cancellation_cut_off_days_index()
+    {
         $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
 
         return view('admin.settings.shipment_cancellation_cut_off_days')->with('settings', $settings);
     }
 
 
-    public function shipment_cancellation_cut_off_days_store(Request $request) {
+    public function shipment_cancellation_cut_off_days_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
 
         $settings->setting_value = $request->shipment_cancellation_cut_off_days;
@@ -123,12 +132,16 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function auto_account_disabled_days_index() {
+
+    public function auto_account_disabled_days_index()
+    {
         $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
 
         return view('admin.settings.auto_account_disabled_days')->with('settings', $settings);
     }
-    public function auto_account_disabled_days_store(Request $request) {
+
+    public function auto_account_disabled_days_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
 
         $settings->setting_value = $request->auto_account_disabled_days;
@@ -137,7 +150,9 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function non_service_area_index() {
+
+    public function non_service_area_index()
+    {
         $current_nsa = NonServiceArea::all();
 
         if ($current_nsa) {
@@ -149,7 +164,8 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.non_service_area')->with('current_nsa', $current_nsa);
     }
 
-    public function non_service_area_store(Request $request) {
+    public function non_service_area_store(Request $request)
+    {
         $new_nsa = explode(',', $request->non_service_areas);
 
         $current_nsa = NonServiceArea::pluck('name')->toArray();
@@ -172,12 +188,15 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Non Service Area(s) Updated!');
     }
 
-    public function daily_pickup_sales_cron_index(){
+    public function daily_pickup_sales_cron_index()
+    {
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time')->first();
 
         return view('admin.settings.daily_pickup_sales_cron_time')->with('settings', $settings);
     }
-    public function daily_pickup_sales_cron_store(Request $request) {
+
+    public function daily_pickup_sales_cron_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time')->first();
 
         $settings->setting_value = $request->daily_pickup_sales_cron_time;
@@ -188,7 +207,8 @@ class GlobalSettingsController extends Controller
     }
 
 
-    public function ticker_index() {
+    public function ticker_index()
+    {
         $admin_ticker = NULL;
         $shipper_ticker = NULL;
 
@@ -219,13 +239,13 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.ticker')->with(['admin_ticker' => $admin_ticker, 'shipper_ticker' => $shipper_ticker]);
     }
 
-    public function ticker_store(Request $request) {
+    public function ticker_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'admin_ticker');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'admin_ticker';
@@ -239,8 +259,7 @@ class GlobalSettingsController extends Controller
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'shipper_ticker';
@@ -253,222 +272,225 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function petty_cash_heads_index(){
+    public function petty_cash_heads_index()
+    {
         return view('admin.settings.petty_cash.account_head');
     }
-    public function petty_cash_heads_list(Request $request){
-        $heads = PettyCashAccountHead::select('id','name','status');
+
+    public function petty_cash_heads_list(Request $request)
+    {
+        $heads = PettyCashAccountHead::select('id', 'name', 'status');
         return Datatables::of($heads)
-            ->editColumn('status', function ($heads){
-                if($heads->status == 0){
+            ->editColumn('status', function ($heads) {
+                if ($heads->status == 0) {
                     return 'Inactive';
-                }else{
+                } else {
                     return 'Active';
                 }
             })
-            ->addColumn('action', function ($heads){
-                if (session('role_id') == 1 || count(array_intersect([160,161,162], session('permissions'))) !== 0) {
+            ->addColumn('action', function ($heads) {
+                if (session('role_id') == 1 || count(array_intersect([160, 161, 162], session('permissions'))) !== 0) {
 
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if(session('role_id') == 1 || in_array(160, session('permissions'))){
+                    if (session('role_id') == 1 || in_array(160, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     }
                     if ($heads->status == 1) {
-                        if(session('role_id') == 1 || in_array(162, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(162, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Inactive</div></button>';
-                        }else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
                         }
                     } else {
-                        if(session('role_id') == 1 || in_array(161, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(161, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Active</div></button>';
-                        }else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
                         }
                     }
 
                     return $dropdown;
-                }else{
+                } else {
                     return '';
                 }
             })
-        
-        ->make(true);
+            ->make(true);
     }
 
-    public function petty_cash_heads_add(Request $request){
+    public function petty_cash_heads_add(Request $request)
+    {
         $head = trim($request->head);
-        if($head){
+        if ($head) {
             $account_head = new PettyCashAccountHead();
             $account_head->name = $head;
             $account_head->save();
 
             return response()->json(['status' => 1, 'success' => 'Head of Account successfully added!']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Head of Account is empty']);
         }
     }
 
-    public function petty_cash_heads_edit(Request $request){
+    public function petty_cash_heads_edit(Request $request)
+    {
         $head = $request->head_id;
-        if($head){
+        if ($head) {
             $account_head = PettyCashAccountHead::find($head);
             $account_head->name = $request->account_head;
             $account_head->save();
 
             return response()->json(['status' => 1, 'success' => 'Head of Account successfully updated!']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
         }
     }
 
-    public function petty_cash_heads_active(Request $request){
+    public function petty_cash_heads_active(Request $request)
+    {
         $head = $request->head_id;
-        if($head){
+        if ($head) {
             $account_head = PettyCashAccountHead::find($head);
-            if($account_head->status == 0){
+            if ($account_head->status == 0) {
                 $account_head->status = 1;
                 $account_head->save();
                 return response()->json(['status' => 1, 'success' => 'Head of Account successfully activated!']);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Head of Account is already active!']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
         }
     }
 
-    public function petty_cash_heads_inactive(Request $request){
+    public function petty_cash_heads_inactive(Request $request)
+    {
         $head = $request->head_id;
-        if($head){
+        if ($head) {
             $account_head = PettyCashAccountHead::find($head);
-            if($account_head->status == 1){
+            if ($account_head->status == 1) {
                 $account_head->status = 0;
                 $account_head->save();
                 return response()->json(['status' => 1, 'success' => 'Head of Account successfully inactivated!']);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Head of Account is already inactive!']);
             }
 
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
         }
     }
 
-    public function petty_cash_titles_index(){
-        $heads = PettyCashAccountHead::where('status',1)->get();
+    public function petty_cash_titles_index()
+    {
+        $heads = PettyCashAccountHead::where('status', 1)->get();
         return view('admin.settings.petty_cash.account_title')->with(['heads' => $heads]);
     }
-    public function petty_cash_titles_list(Request $request){
-        $heads = PettyCashAccountTitle::select('id','name','status');
+
+    public function petty_cash_titles_list(Request $request)
+    {
+        $heads = PettyCashAccountTitle::select('id', 'name', 'status');
         return Datatables::of($heads)
-            ->editColumn('status', function ($heads){
-                if($heads->status == 0){
+            ->editColumn('status', function ($heads) {
+                if ($heads->status == 0) {
                     return 'Inactive';
-                }else{
+                } else {
                     return 'Active';
                 }
             })
-            ->addColumn('action', function ($heads){
-                if (session('role_id') == 1 || count(array_intersect([160,161,162], session('permissions'))) !== 0) {
+            ->addColumn('action', function ($heads) {
+                if (session('role_id') == 1 || count(array_intersect([160, 161, 162], session('permissions'))) !== 0) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if(session('role_id') == 1 || in_array(164, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(164, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
                     if ($heads->status == 1) {
-                        if(session('role_id') == 1 || in_array(166, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(166, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Inactive</div></button>';
-                        }else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
                         }
                     } else {
-                        if(session('role_id') == 1 || in_array(165, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(165, session('permissions'))) {
 
                             $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Active</div></button>';
-                        }else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
 
                         }
                     }
 
                     return $dropdown;
-                }else{
+                } else {
                     return '';
                 }
             })
-
             ->make(true);
     }
 
-    public function petty_cash_titles_add(Request $request){
+    public function petty_cash_titles_add(Request $request)
+    {
         $title = trim($request->title);
         $heads = array();
         $heads = $request->heads;
-        if($title){
+        if ($title) {
             $account_title = new PettyCashAccountTitle();
             $account_title->name = $title;
             $account_title->save();
-            foreach($heads as $head){
+            foreach ($heads as $head) {
                 $head_title = new PettyCashAccountHeadAccountTitle();
                 $head_title->petty_cash_account_head_id = $head;
                 $head_title->petty_cash_account_title_id = $account_title->id;
                 $head_title->save();
             }
             return response()->json(['status' => 1, 'success' => 'Head of Account successfully added!']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Head of Account is empty']);
         }
     }
 
-    public function petty_cash_titles_info(Request $request){
+    public function petty_cash_titles_info(Request $request)
+    {
         $title_id = $request->title_id;
         $title = PettyCashAccountTitle::find($title_id);
-        if($title){
-            $heads = PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id',$title_id)->pluck('petty_cash_account_head_id')->toArray();
+        if ($title) {
+            $heads = PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id', $title_id)->pluck('petty_cash_account_head_id')->toArray();
 
-            return response()->json(['status' => 1, 'heads' => $heads, 'title'=>$title]);
-        }
-        else{
+            return response()->json(['status' => 1, 'heads' => $heads, 'title' => $title]);
+        } else {
             return response()->json(['status' => 0, 'error' => 'Title not found!']);
         }
 
     }
 
-    public function petty_cash_titles_edit(Request $request){
+    public function petty_cash_titles_edit(Request $request)
+    {
         $title = trim($request->account_title);
         $heads = array();
         $heads = $request->heads;
         $title_id = $request->title_id;
-        if(!$title){
+        if (!$title) {
             return response()->json(['status' => 0, 'error' => 'Title not found!']);
         }
-        if(!$title_id){
+        if (!$title_id) {
             return response()->json(['status' => 0, 'error' => 'Title ID not found!']);
         }
-        if(empty($heads)){
+        if (empty($heads)) {
             return response()->json(['status' => 0, 'error' => 'Heads not selected!']);
         }
         $title_details = PettyCashAccountTitle::find($title_id);
         $title_details->name = $title;
         $title_details->save();
-        PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id',$title_id)->delete();
-        foreach ($heads as $head){
+        PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id', $title_id)->delete();
+        foreach ($heads as $head) {
             $title_heads = new PettyCashAccountHeadAccountTitle();
             $title_heads->petty_cash_account_head_id = $head;
             $title_heads->petty_cash_account_title_id = $title_id;
@@ -477,53 +499,54 @@ class GlobalSettingsController extends Controller
         return response()->json(['status' => 1, 'success' => 'Title successfully edited!']);
     }
 
-    public function petty_cash_titles_active(Request $request){
+    public function petty_cash_titles_active(Request $request)
+    {
         $title = $request->title_id;
-        if($title){
+        if ($title) {
             $account_title = PettyCashAccountTitle::find($title);
-            if($account_title->status == 0){
+            if ($account_title->status == 0) {
                 $account_title->status = 1;
                 $account_title->save();
                 return response()->json(['status' => 1, 'success' => 'Title of Account successfully activated!']);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Title of Account is already active!']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
         }
     }
 
-    public function petty_cash_titles_inactive(Request $request){
+    public function petty_cash_titles_inactive(Request $request)
+    {
         $title = $request->title_id;
-        if($title){
+        if ($title) {
             $account_title = PettyCashAccountTitle::find($title);
-            if($account_title->status == 1){
+            if ($account_title->status == 1) {
                 $account_title->status = 0;
                 $account_title->save();
                 return response()->json(['status' => 1, 'success' => 'Title of Account successfully inactivated!']);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Title of Account is already inactive!']);
             }
 
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
         }
     }
 
-	public function walk_in_index(){
-        $walk_in_hub_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->first();
-        $walk_in_hub_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->first();
-        $walk_in_hub_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->first();
-        $walk_in_door_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
-        $walk_in_door_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->first();
-        $walk_in_door_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->first();
+    public function walk_in_index()
+    {
+        $walk_in_hub_ol = WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_on = WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_dn = WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->first();
+        $walk_in_door_ol = WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
+        $walk_in_door_on = WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->first();
+        $walk_in_door_dn = WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->first();
         return view('admin.settings.walk_in')->with(['walk_in_hub_ol' => $walk_in_hub_ol, 'walk_in_hub_on' => $walk_in_hub_on, 'walk_in_hub_dn' => $walk_in_hub_dn, 'walk_in_door_ol' => $walk_in_door_ol, 'walk_in_door_on' => $walk_in_door_on, 'walk_in_door_dn' => $walk_in_door_dn]);
     }
-    public function walk_in_store(Request $request){
+
+    public function walk_in_store(Request $request)
+    {
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_on_a,
@@ -533,10 +556,10 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_door_on_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_door_on_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_on_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_on_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_on_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_on_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_on_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_door_on_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_door_on_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_door_on_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_door_on_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
@@ -547,10 +570,10 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_hub_on_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_hub_on_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_on_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_on_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_on_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_on_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_on_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_hub_on_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_hub_on_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_hub_on_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_hub_on_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
@@ -561,10 +584,10 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_door_ol_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_door_ol_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_ol_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_ol_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_ol_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_ol_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_ol_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_door_ol_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_door_ol_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_door_ol_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_door_ol_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
@@ -575,10 +598,10 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_hub_ol_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_hub_ol_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_ol_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_ol_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_ol_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_ol_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_ol_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_hub_ol_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_hub_ol_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_hub_ol_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_hub_ol_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
@@ -589,10 +612,10 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_door_dn_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_door_dn_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_dn_a_local,
-            'national_charges_class_0'=> $request->walk_in_door_dn_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_door_dn_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_door_dn_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_door_dn_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_door_dn_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_door_dn_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_door_dn_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_door_dn_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
@@ -603,24 +626,23 @@ class GlobalSettingsController extends Controller
             'chargeable_weight_charges_class_2' => $request->walk_in_hub_dn_chargeable_weight_class_2_charges,
             'chargeable_weight_charges_class_3' => $request->walk_in_hub_dn_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_dn_a_local,
-            'national_charges_class_0'=> $request->walk_in_hub_dn_return_class_0_charges,
-            'national_charges_class_1'=> $request->walk_in_hub_dn_return_class_1_charges,
-            'national_charges_class_2'=> $request->walk_in_hub_dn_return_class_2_charges,
-            'national_charges_class_3'=> $request->walk_in_hub_dn_return_class_3_charges
+            'national_charges_class_0' => $request->walk_in_hub_dn_return_class_0_charges,
+            'national_charges_class_1' => $request->walk_in_hub_dn_return_class_1_charges,
+            'national_charges_class_2' => $request->walk_in_hub_dn_return_class_2_charges,
+            'national_charges_class_3' => $request->walk_in_hub_dn_return_class_3_charges
         ]);
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	
 
-	public function debriefing_report_cut_off_time_index() {
+    public function debriefing_report_cut_off_time_index()
+    {
         $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
         if ($settings) {
             $arrival_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $arrival_cut_off_time = 12;
         }
 
@@ -628,21 +650,20 @@ class GlobalSettingsController extends Controller
 
         if ($settings) {
             $day_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $day_cut_off_time = 12;
         }
 
         return view('admin.settings.debriefing_report_cut_off_time')->with(['arrival_cut_off_time' => $arrival_cut_off_time, 'day_cut_off_time' => $day_cut_off_time]);
     }
 
-    public function debriefing_report_cut_off_time_store(Request $request) {
+    public function debriefing_report_cut_off_time_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'debriefing_report_arrival_cut_off_time';
@@ -656,8 +677,7 @@ class GlobalSettingsController extends Controller
 
         if ($start->exists()) {
             $start = $start->first();
-        }
-        else {
+        } else {
             $start = new GlobalSettings();
 
             $start->type = 'debriefing_report_day_cut_off_time';
@@ -669,13 +689,16 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-	public function auto_invoice_generation_and_due_date_index(){
+
+    public function auto_invoice_generation_and_due_date_index()
+    {
         $auto_invoice_generation = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
         $due_date_days = GlobalSettings::where('type', 'due_date_days')->first();
-        return view('admin.settings.auto_invoice_generation_and_due_date_index')->with(['auto_invoice_generation_time' => $auto_invoice_generation,'due_date_days' => $due_date_days]);
+        return view('admin.settings.auto_invoice_generation_and_due_date_index')->with(['auto_invoice_generation_time' => $auto_invoice_generation, 'due_date_days' => $due_date_days]);
     }
 
-    public function auto_invoice_generation_and_due_date_store(Request $request){
+    public function auto_invoice_generation_and_due_date_store(Request $request)
+    {
 
         $settings_invoice = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
         $settings_due_date = GlobalSettings::where('type', 'due_date_days')->first();
@@ -689,9 +712,10 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	public function fuel_factor_index(){
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
-        return view('admin.settings.fuel_factor')->with(['shippers'=>$shippers]);
+    public function fuel_factor_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.settings.fuel_factor')->with(['shippers' => $shippers]);
     }
 
     public function fuel_factor_store(Request $request)
@@ -699,7 +723,7 @@ class GlobalSettingsController extends Controller
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
-            if($request->has('all_shippers_checkbox')){
+            if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
                 $users = User::where('status', 3)->select('id', 'account_type_id')->get();
                 if (!$users->isEmpty()) {
@@ -781,7 +805,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return redirect()->back()->with('error', 'Fuel Factor failed to update!');
                 }
-            }else {
+            } else {
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
@@ -865,105 +889,106 @@ class GlobalSettingsController extends Controller
                     } else {
                         return redirect()->back()->with('error', 'Fuel Factor failed to update!');
                     }
-                }else{
+                } else {
                     return redirect()->back()->with('error', 'Shippers not selected!');
                 }
             }
         }
     }
 
-    public function return_note_restriction_bypass_index(){
+    public function return_note_restriction_bypass_index()
+    {
         $role_ids = array();
 
         $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $role_ids = array_map('intval', explode(',', $settings->text));
         }
 
         $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
 
-        return view('admin.settings.return_note_restriction_bypass')->with(['roles'=>$roles,'role_ids' => $role_ids]);
+        return view('admin.settings.return_note_restriction_bypass')->with(['roles' => $roles, 'role_ids' => $role_ids]);
     }
 
-    public function return_note_restriction_bypass_store(Request $request){
-        if($request->has('roles')){
+    public function return_note_restriction_bypass_store(Request $request)
+    {
+        if ($request->has('roles')) {
             $roles = implode(',', $request->roles);
             $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
             if ($settings->exists()) {
                 $settings = $settings->first();
-            }
-            else {
+            } else {
                 $settings = new GlobalSettings();
 
                 $settings->type = 'return_note_restriction_bypass';
                 $settings->setting_value = 0;
-               
+
             }
             $settings->text = $roles;
             $settings->save();
-        }else{
+        } else {
             GlobalSettings::where('type', 'return_note_restriction_bypass')->delete();
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function cod_cap_zones_index(){
+    public function cod_cap_zones_index()
+    {
         $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
         $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
         $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
         $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
 
-        return view('admin.settings.cod_cap_zone')->with(['class_a' => $class_a, 'class_b' => $class_b ,'class_c' => $class_c, 'class_d' => $class_d]);
+        return view('admin.settings.cod_cap_zone')->with(['class_a' => $class_a, 'class_b' => $class_b, 'class_c' => $class_c, 'class_d' => $class_d]);
     }
 
-    public function cod_cap_zones_update(Request $request){
-        if($request->class_a != null && $request->class_b != null && $request->class_c != null && $request->class_d != null)
-        {
+    public function cod_cap_zones_update(Request $request)
+    {
+        if ($request->class_a != null && $request->class_b != null && $request->class_c != null && $request->class_d != null) {
             GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->update([
-                'setting_value' =>  $request->class_a
+                'setting_value' => $request->class_a
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->update([
-                'setting_value' =>  $request->class_b
+                'setting_value' => $request->class_b
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->update([
-                'setting_value' =>  $request->class_c
+                'setting_value' => $request->class_c
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->update([
-                'setting_value' =>  $request->class_d
+                'setting_value' => $request->class_d
             ]);
             return redirect()->back()->with('success', 'Settings Updated!');
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Settings can\'t be updated');
         }
     }
 
-    public function ibft_charges_index() {
+    public function ibft_charges_index()
+    {
         $settings = GlobalSettings::where('type', 'ibft_charges');
 
         if ($settings->exists()) {
             $settings = $settings->first();
 
             $ibft_charges = $settings->setting_value;
-        }
-        else {
+        } else {
             $ibft_charges = 0;
         }
 
         return view('admin.settings.ibft_charges')->with('ibft_charges', $ibft_charges);
     }
 
-    public function ibft_charges_store(Request $request) {
+    public function ibft_charges_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'ibft_charges');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'ibft_charges';
@@ -976,28 +1001,30 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function weight_factor_index(Request $request){
+    public function weight_factor_index(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'weight_charges_factor')->first();
         $weight_factor = '';
-        if($settings){
+        if ($settings) {
             $weight_factor = $settings->setting_value;
         }
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         return view('admin.settings.weight_factor')->with(['weight_factor' => $weight_factor, 'shippers' => $shippers]);
     }
 
-    public function weight_factor_update(Request $request){
-        
+    public function weight_factor_update(Request $request)
+    {
+
         $weight_factor = $request->weight_factor;
         if ($weight_factor != null) {
-            if($request->has('all_shippers_checkbox')){
+            if ($request->has('all_shippers_checkbox')) {
 
                 $settings = GlobalSettings::where('type', 'weight_charges_factor');
-                if($settings->exists()){
+                if ($settings->exists()) {
                     $settings = $settings->first();
                     $settings->setting_value = $weight_factor;
                     $settings->save();
-                }else{
+                } else {
                     $global_settings = new GlobalSettings();
                     $global_settings->setting_value = $weight_factor;
                     $global_settings->type = 'weight_charges_factor';
@@ -1006,20 +1033,20 @@ class GlobalSettingsController extends Controller
                 $this->weight_factor_account_charges_update($weight_factor, NULL);
 
                 return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
-            }else{
+            } else {
 
                 $settings = GlobalSettings::where('type', 'weight_charges_factor');
-                if($settings->exists()){
+                if ($settings->exists()) {
                     $settings = $settings->first();
                     $settings->setting_value = $weight_factor;
                     $settings->save();
-                }else{
+                } else {
                     $global_settings = new GlobalSettings();
                     $global_settings->setting_value = $weight_factor;
                     $global_settings->type = 'weight_charges_factor';
                     $global_settings->save();
                 }
-                $this->weight_factor_account_charges_update($weight_factor,$request->shippers);
+                $this->weight_factor_account_charges_update($weight_factor, $request->shippers);
 
                 return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
             }
@@ -1029,9 +1056,10 @@ class GlobalSettingsController extends Controller
 
     }
 
-    public function weight_factor_account_charges_update($weight_factor, $shippers = NULL){
+    public function weight_factor_account_charges_update($weight_factor, $shippers = NULL)
+    {
         $shipping_modes = ShippingMode::all();
-        if($shippers == NULL){
+        if ($shippers == NULL) {
             $users = User::where('status', 3)->select('id', 'account_type_id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
@@ -1052,28 +1080,25 @@ class GlobalSettingsController extends Controller
                             if ($weight_charge->exists()) {
                                 $weight_charges = $weight_charge->get();
 
-                                foreach($weight_charges as $charge){
+                                foreach ($weight_charges as $charge) {
                                     $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
                                     $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
 
                                     if (strpos($charge->national_charges_class_1, '%') == FALSE) {
                                         $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
-                                    }
-                                    else {
+                                    } else {
                                         $national_charges_class_1 = $charge->national_charges_class_1;
                                     }
 
                                     if (strpos($charge->national_charges_class_2, '%') == FALSE) {
                                         $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
-                                    }
-                                    else {
+                                    } else {
                                         $national_charges_class_2 = $charge->national_charges_class_2;
                                     }
 
                                     if (strpos($charge->national_charges_class_3, '%') == FALSE) {
                                         $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
-                                    }
-                                    else {
+                                    } else {
                                         $national_charges_class_3 = $charge->national_charges_class_3;
                                     }
 
@@ -1125,8 +1150,7 @@ class GlobalSettingsController extends Controller
                 $weight_factor_history->save();
 
             }
-        }
-        else{
+        } else {
             $users = User::whereIn('id', $shippers)->select('id', 'account_type_id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
@@ -1222,41 +1246,46 @@ class GlobalSettingsController extends Controller
 
     }
 
-    private function calculate_weight_charges_factor($charges){
-        if($charges != 0){
+    private function calculate_weight_charges_factor($charges)
+    {
+        if ($charges != 0) {
             $weight_factor = GlobalSettings::where('type', 'weight_charges_factor');
-            if($weight_factor->exists()){
+            if ($weight_factor->exists()) {
                 $weight_factor = $weight_factor->first();
                 $weight_factor_percentage = (floatval($weight_factor->setting_value) / 100) * $charges;
                 $charges += $weight_factor_percentage;
                 return ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
-            }else{
+            } else {
                 return $charges;
             }
-        }else{
+        } else {
             return $charges;
         }
     }
-	public function stock_movement_index(Request $request){
+
+    public function stock_movement_index(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id')->first();
         $account_id = '';
         $account_name = '';
-        if($settings){
+        if ($settings) {
             $account_id = $settings->setting_value;
             $account_name = User::find($account_id)->name;
         }
         return view('admin.settings.stock_movement')->with(['account_id' => $account_id, 'account_name' => $account_name]);
     }
-    public function stock_movement_update(Request $request){
+
+    public function stock_movement_update(Request $request)
+    {
 
         $stock_movement_account_id = $request->stock_movement_account_id;
         if ($stock_movement_account_id != null) {
             $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id');
-            if($settings->exists()){
+            if ($settings->exists()) {
                 $settings = $settings->first();
                 $settings->setting_value = $stock_movement_account_id;
                 $settings->save();
-            }else{
+            } else {
                 $global_settings = new GlobalSettings();
                 $global_settings->setting_value = $stock_movement_account_id;
                 $global_settings->type = 'packaging_material_stock_movement_account_id';
@@ -1270,14 +1299,18 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('error', 'Settings can\'t be updated');
 
     }
-    public function delivery_call_verification_ratio_index(){
+
+    public function delivery_call_verification_ratio_index()
+    {
         $settings = DeliveryCallVerificationRatio::get();
         return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
     }
-    public function delivery_call_verification_ratio_update(Request $request){
+
+    public function delivery_call_verification_ratio_update(Request $request)
+    {
 //        dd($request);
         $settings = DeliveryCallVerificationRatio::truncate();
-        foreach($request->verification as $index => $call_verification){
+        foreach ($request->verification as $index => $call_verification) {
             $new_ratios = new DeliveryCallVerificationRatio();
             $new_ratios->id = $index;
             $new_ratios->min = $request->min[$index];
@@ -1289,26 +1322,26 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
     }
 
-    public function return_confirmation_pending_shipment_selection_time_index() {
+    public function return_confirmation_pending_shipment_selection_time_index()
+    {
         $settings = GlobalSettings::where('type', 'return_confirmation_pending_shipment_selection_time')->first();
 
         if ($settings) {
             $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $return_confirmation_pending_shipment_selection_time = 0;
         }
 
         return view('admin.settings.return_confirmation_pending_shipment_selection_time')->with(['return_confirmation_pending_shipment_selection_time' => $return_confirmation_pending_shipment_selection_time]);
     }
 
-    public function return_confirmation_pending_shipment_selection_time_store(Request $request) {
+    public function return_confirmation_pending_shipment_selection_time_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'return_confirmation_pending_shipment_selection_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'return_confirmation_pending_shipment_selection_time';
@@ -1321,11 +1354,14 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	public function consolidation_max_shipments_index(){
+    public function consolidation_max_shipments_index()
+    {
         $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
         return view('admin.settings.max_consolidation_shipments')->with(['settings' => $settings]);
     }
-    public function consolidation_max_shipments_update(Request $request){
+
+    public function consolidation_max_shipments_update(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
 
         $settings->setting_value = $request->max_shipments;
@@ -1336,34 +1372,37 @@ class GlobalSettingsController extends Controller
     }
 
 
-    public function crm_case_nature_types_index() {
+    public function crm_case_nature_types_index()
+    {
         $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
 
         return view('admin.settings.add_case_nature_types')->with(['case_nature' => $case_nature]);
     }
 
-    public function crm_case_nature_types_list(Request $request) {
+    public function crm_case_nature_types_list(Request $request)
+    {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
-        ->select('crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type');
+            ->select('crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type');
 
         return Datatables::of($case_nature_types)->make(true);
     }
-    public function crm_case_nature_types_store(Request $request) {
+
+    public function crm_case_nature_types_store(Request $request)
+    {
         $nature = $request->case_nature;
         $type = $request->case_nature_type;
-        if($nature == null && $type == null && $nature == '' && $type == ''){
-            if($nature == null && $nature == ''){
+        if ($nature == null && $type == null && $nature == '' && $type == '') {
+            if ($nature == null && $nature == '') {
                 return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
             }
-            if($type == null && $type == ''){
+            if ($type == null && $type == '') {
                 return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
             }
         }
         $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
         if ($case_nature_types->exists()) {
             return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
-        }
-        else {
+        } else {
             $new_case_nature_type = new CrmRequestCaseNatureType();
             $new_case_nature_type->nature_id = $nature;
             $new_case_nature_type->type = $type;
@@ -1376,27 +1415,27 @@ class GlobalSettingsController extends Controller
         }
     }
 
-    public function return_delivered_to_shipper_email_cut_off_time_index() {
-      
+    public function return_delivered_to_shipper_email_cut_off_time_index()
+    {
+
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time')->first();
 
         if ($settings) {
             $rdts_email_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $rdts_email_cut_off_time = 12;
         }
 
         return view('admin.settings.return_delivered_to_shipper_cut_off_time')->with(['rdts_email_cut_off_time' => $rdts_email_cut_off_time]);
     }
 
-    public function return_delivered_to_shipper_email_cut_off_time_store(Request $request) {
+    public function return_delivered_to_shipper_email_cut_off_time_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'return_delivered_to_shipper_cut_off_time';
@@ -1409,12 +1448,14 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function crm_reopen_count_index() {
+    public function crm_reopen_count_index()
+    {
         $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();
         return view('admin.settings.crm_reopen')->with(['settings' => $settings]);
     }
 
-    public function crm_reopen_count_submit(Request $request) {
+    public function crm_reopen_count_submit(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();
 
         $settings->setting_value = $request->count;
@@ -1424,7 +1465,9 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function multiple_sale_tagging_index() {
+
+    public function multiple_sale_tagging_index()
+    {
         $lead_admins = MultipleSaleLead::select('admin_id')->pluck('admin_id')->toArray();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 7)
@@ -1436,7 +1479,8 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.multiple_sale_person')->with(['admins' => $admins]);
     }
 
-    public function multiple_sale_tagging_list(Request $request) {
+    public function multiple_sale_tagging_list(Request $request)
+    {
         $multiple_sale_tagging = MultipleSaleLead::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_leads.admin_id')
             ->leftjoin('admins as ua', 'ua.id', '=', 'multiple_sale_leads.updated_by')
             ->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
@@ -1444,40 +1488,42 @@ class GlobalSettingsController extends Controller
             ->groupBy('a.name');
 
         return Datatables::of($multiple_sale_tagging)
-            ->editColumn('tagged_admins_count', function($leads) {
+            ->editColumn('tagged_admins_count', function ($leads) {
                 if ($leads->tagged_admins != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle tagged" data-target-id=' . $leads->id . '>' . $leads->tagged_admins . '</button>';
-                }
-                else {
+                } else {
                     return 0;
                 }
             })
-            ->addColumn('action', function ($leads){
-                    $dropdown = '
+            ->addColumn('action', function ($leads) {
+                $dropdown = '
               <div class="btn-group col">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
+                $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
 
-                    return $dropdown;
+                return $dropdown;
             })->make(true);
     }
-    public function multiple_sale_tagging_submit(Request $request) {
+
+    public function multiple_sale_tagging_submit(Request $request)
+    {
         $admin = Admin::find($request->lead);
         $existing_lead = MultipleSaleLead::where('admin_id', $admin->id)->first();
-        if(!$existing_lead){
+        if (!$existing_lead) {
             $new_lead = new MultipleSaleLead();
             $new_lead->admin_id = $admin->id;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
             return redirect()->back()->with('success', 'New Lead added successfully!');
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Same Lead already Exists!');
         }
     }
-    public function multiple_sale_tagging_assign_view(Request $request) {
+
+    public function multiple_sale_tagging_assign_view(Request $request)
+    {
         $tagged_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', $request->head_id)->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 7)
@@ -1490,18 +1536,19 @@ class GlobalSettingsController extends Controller
 //        if($tagged_admins){
 //            $admins->whereNotIn('a.id', $tagged_admins);
 //        }
-        if($admins){
+        if ($admins) {
             return response()->json(['status' => 1, 'admins' => $admins]);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'No Admins to assign!']);
         }
     }
-    public function multiple_sale_tagging_assign_submit(Request $request) {
+
+    public function multiple_sale_tagging_assign_submit(Request $request)
+    {
         $lead = MultipleSaleLead::where('admin_id', $request->lead_id)->first();
         $admins = $request->admins;
-        if($lead){
-            if($admins){
+        if ($lead) {
+            if ($admins) {
                 $lead->updated_by = Auth::id();
                 $lead->save();
                 foreach ($admins as $admin_id) {
@@ -1511,124 +1558,127 @@ class GlobalSettingsController extends Controller
                     $new_users->save();
                 }
                 return redirect()->back()->with('success', 'Users assigned Successfully!');
-            }
-            else{
+            } else {
                 return redirect()->back()->with('error', 'No Users selected!');
             }
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Invalid Lead selected!');
         }
     }
-    public function multiple_sale_tagging_assign_view_assigned(Request $request) {
+
+    public function multiple_sale_tagging_assign_view_assigned(Request $request)
+    {
         $tagged_users = MultipleSaleTagging::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_taggings.admin_id')->where('lead_id', $request->id)->select('a.name')->pluck('a.name')->toArray();
         return response()->json(['status' => 1, 'tagged_users' => $tagged_users]);
     }
 
-    public function foc_account_index(){
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+    public function foc_account_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'foc_account_tag');
         $foc_account_tags = array();
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $foc_account_tags = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.foc_account')->with(['shippers' => $shippers,'foc_account_tags' => $foc_account_tags]);
+        return view('admin.settings.foc_account')->with(['shippers' => $shippers, 'foc_account_tags' => $foc_account_tags]);
     }
 
-    public function foc_account_store(Request $request){
-        if($request->has('shippers')){
-            if(count($request->shippers) > 0){
+    public function foc_account_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
                 $shippers = implode(',', $request->shippers);
                 $settings = GlobalSettings::where('type', 'foc_account_tag');
 
                 if ($settings->exists()) {
                     $settings = $settings->first();
-                }
-                else {
+                } else {
                     $settings = new GlobalSettings();
 
                     $settings->type = 'foc_account_tag';
                     $settings->setting_value = 0;
-                    
+
                 }
                 $settings->text = $shippers;
                 $settings->save();
             }
-        return redirect()->back()->with('success', 'Settings Updated!');
-            
-        }else{
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
 
     }
-    public function minimum_chargeable_weight_index(){
+
+    public function minimum_chargeable_weight_index()
+    {
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
         $on = null;
         $ol = null;
         $det = null;
         $same_day = null;
-        foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
-            if($minimum_chargeable_weight->shipping_mode_id == 1){
+        foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+            if ($minimum_chargeable_weight->shipping_mode_id == 1) {
                 $on = $minimum_chargeable_weight->weight;
-            }
-            elseif($minimum_chargeable_weight->shipping_mode_id == 2){
+            } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
                 $ol = $minimum_chargeable_weight->weight;
-            }
-            elseif($minimum_chargeable_weight->shipping_mode_id == 3){
+            } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
                 $det = $minimum_chargeable_weight->weight;
-            }
-            else{
+            } else {
                 $same_day = $minimum_chargeable_weight->weight;
             }
         }
         return view('admin.settings.minimum_chargeable_weight')->with(['on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day]);
     }
 
-    public function minimum_chargeable_weight_update(Request $request){
+    public function minimum_chargeable_weight_update(Request $request)
+    {
         $on = MinimumChargeableWeightSetting::where('shipping_mode_id', 1)->update(['weight' => $request->on]);
         $standard_on = StandardWeightCharge::where('shipping_mode_id', 1)->first();
-        $standard_on->range_up =  $request->on;
+        $standard_on->range_up = $request->on;
         $standard_on->save();
         $ol = MinimumChargeableWeightSetting::where('shipping_mode_id', 2)->update(['weight' => $request->ol]);
         $standard_ol = StandardWeightCharge::where('shipping_mode_id', 2)->first();
-        $standard_ol->range_up =  $request->ol;
+        $standard_ol->range_up = $request->ol;
         $standard_ol->save();
         $detain = MinimumChargeableWeightSetting::where('shipping_mode_id', 3)->update(['weight' => $request->det]);
         $standard_det = StandardWeightCharge::where('shipping_mode_id', 3)->first();
-        $standard_det->range_up =  $request->det;
+        $standard_det->range_up = $request->det;
         $standard_det->save();
         $same_day = MinimumChargeableWeightSetting::where('shipping_mode_id', 4)->update(['weight' => $request->same_day]);
         $standard_same_day = StandardWeightCharge::where('shipping_mode_id', 4)->first();
-        $standard_same_day->range_up =  $request->same_day;
+        $standard_same_day->range_up = $request->same_day;
         $standard_same_day->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function sales_person_targets(){
-        $sales = DB::table('admins')->whereExists(function($query) {
-                    $query->from('admin_roles')
-                    ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
-                    ->where('department_id', '=', 7);
-                })->select('id', 'name')->where('admins.status', 1)->get();
+    public function sales_person_targets()
+    {
+        $sales = DB::table('admins')->whereExists(function ($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->where('admins.status', 1)->get();
 
         $targets = SalePersonTarget::all();
         return view('admin.settings.sales_person.sales_target')->with(['sales_person' => $sales, 'targets' => $targets]);
     }
 
-    public function sales_person_targets_submit(Request $request){
+    public function sales_person_targets_submit(Request $request)
+    {
         $start_date = $request->search_date_from_formatted;
         $end_date = Carbon::parse($start_date)->addDays(30)->toDateTimeString();
-        if($start_date == null || $end_date == null){
-            return redirect()->back()->with('error' , 'Date not selected!');
+        if ($start_date == null || $end_date == null) {
+            return redirect()->back()->with('error', 'Date not selected!');
         }
         $sales_persons = $request->sales_person;
-        if(count($sales_persons) > 0){
-            foreach($sales_persons as $person){
+        if (count($sales_persons) > 0) {
+            foreach ($sales_persons as $person) {
 
                 $sales_target = SalePersonTarget::where('sales_person_id', $person);
-                if($sales_target->exists()){
+                if ($sales_target->exists()) {
                     $sales_target = $sales_target->first();
 
                     $sales_person_log = new SalePersonTargetLog();
@@ -1647,8 +1697,8 @@ class GlobalSettingsController extends Controller
                     $sales_target->average_revenue = $request->average_revenue;
                     $sales_target->save();
 
-                    
-                }else{
+
+                } else {
                     $sale_person_target = new SalePersonTarget();
                     $sale_person_target->start_date = $start_date;
                     $sale_person_target->end_date = $end_date;
@@ -1660,53 +1710,59 @@ class GlobalSettingsController extends Controller
                 }
             }
         }
-        
+
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function sales_person_targets_list(Request $request){
+    public function sales_person_targets_list(Request $request)
+    {
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month','sale_person_targets.average_revenue',DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'),DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status',1);
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
 
         $datatable = Datatables::of($targets);
         return $datatable->make(true);
     }
-    public function sales_person_targets_history(){
+
+    public function sales_person_targets_history()
+    {
         return view('admin.settings.sales_person.history');
     }
 
-    public function sales_person_targets_history_list(Request $request){
+    public function sales_person_targets_history_list(Request $request)
+    {
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_week', 'sale_person_target_logs.average_revenue','sale_person_target_logs.created_at')
+            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_week', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');
         return Datatables::of($targets)->make(true);
     }
 
-    public function overnight_overland_cargo_report_index(){
+    public function overnight_overland_cargo_report_index()
+    {
         $overnight_rad_tat = GlobalSettings::where('type', 'rad_tat_overnight')->first();
         $overland_rad_tat = GlobalSettings::where('type', 'rad_tat_overland')->first();
         return view('admin.settings.overnight_overland_cargo_report.index')->with(['overnight' => $overnight_rad_tat, 'overland' => $overland_rad_tat]);
     }
 
-    public function overnight_overland_cargo_report_list(Request $request){
+    public function overnight_overland_cargo_report_list(Request $request)
+    {
         $setting = City::leftjoin('admins as a', 'a.id', '=', 'cities.cut_off_time_updated_by')
             ->select('cities.id as origin_id', 'cities.name as origin', 'cities.cut_off_time as cut_off_time', 'cities.cut_off_time_updated_at as updated_at', 'a.name as updated_by')
             ->where('cities.hub', 1);
         return Datatables::of($setting)
+            ->addColumn('action', function ($requests) {
 
-            ->addColumn('action', function ($requests){
-
-                    $dropdown = '
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                 $dropdown .= '<button type="button" data-target-id=' . $requests->origin_id . ' class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                    return $dropdown;
+                return $dropdown;
             })->make(true);
     }
 
-    public function overnight_overland_cargo_report_rad_tat_submit(Request $request){
+    public function overnight_overland_cargo_report_rad_tat_submit(Request $request)
+    {
         GlobalSettings::where('type', 'rad_tat_overnight')->update([
             'setting_value' => $request->overnight
         ]);
@@ -1717,14 +1773,16 @@ class GlobalSettingsController extends Controller
     }
 
 
-    public function overnight_overland_cargo_report_edit_index($id){
+    public function overnight_overland_cargo_report_edit_index($id)
+    {
         $origin = City::find($id);
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $overnight_hubs = OvernightOverlandReportOriginHubs::where('origin_id', $id)->where('shipping_mode_id', 1)->pluck('hub_id')->toArray();
         return view('admin.settings.overnight_overland_cargo_report.update')->with(['origin' => $origin, 'hubs' => $hubs, 'overnight_hubs' => $overnight_hubs]);
     }
 
-    public function overnight_overland_cargo_report_origin_submit(Request $request){
+    public function overnight_overland_cargo_report_origin_submit(Request $request)
+    {
         $city = City::find($request->origin_id);
         $city->cut_off_time = $request->cut_off_time;
         $city->cut_off_time_updated_at = Carbon::now();
@@ -1736,15 +1794,14 @@ class GlobalSettingsController extends Controller
         $hubs = City::where('hub', 1)->where('id', '!=', $city->id)->where('status', 1)->pluck('id')->toArray();
 
         if ($request->has('hub_ids')) {
-            foreach($hubs as $hub){
-                if(in_array($hub, $request->hub_ids)){
+            foreach ($hubs as $hub) {
+                if (in_array($hub, $request->hub_ids)) {
                     $overnight_hubs = new OvernightOverlandReportOriginHubs();
                     $overnight_hubs->origin_id = $city->id;
                     $overnight_hubs->hub_id = $hub;
                     $overnight_hubs->shipping_mode_id = 1;
                     $overnight_hubs->save();
-                }
-                else{
+                } else {
                     $overland_hubs = new OvernightOverlandReportOriginHubs();
                     $overland_hubs->origin_id = $city->id;
                     $overland_hubs->hub_id = $hub;
@@ -1752,9 +1809,8 @@ class GlobalSettingsController extends Controller
                     $overland_hubs->save();
                 }
             }
-        }
-        else{
-            foreach($hubs as $hub){
+        } else {
+            foreach ($hubs as $hub) {
                 $overland_hubs = new OvernightOverlandReportOriginHubs();
                 $overland_hubs->origin_id = $city->id;
                 $overland_hubs->hub_id = $hub;
@@ -1767,23 +1823,25 @@ class GlobalSettingsController extends Controller
         return redirect()->route('admin.settings.overnight_overland_cargo_report.index')->with('success', 'Setting Updated Successfully');
     }
 
-    public function projection_percentage_index(){
+    public function projection_percentage_index()
+    {
         $settings = GlobalSettings::where('type', 'sales_projection_percentage')->first();
         $percentage = '';
-        if($settings){
+        if ($settings) {
             $percentage = $settings->setting_value;
         }
         return view('admin.settings.sales.percentage')->with(['projection_percentage' => $percentage]);
     }
 
-    public function projection_percentage_update(Request $request){
+    public function projection_percentage_update(Request $request)
+    {
         $percentage = $request->projection_percentage;
         $setting = GlobalSettings::where('type', 'sales_projection_percentage');
-        if($setting->exists()){
+        if ($setting->exists()) {
             $setting = $setting->first();
             $setting->setting_value = $percentage;
             $setting->save();
-        }else{
+        } else {
             $setting = new GlobalSettings();
             $setting->setting_value = $percentage;
             $setting->type = 'sales_projection_percentage';
@@ -1791,26 +1849,29 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Setting updated');
     }
-    public function projection_reason_index(){
+
+    public function projection_reason_index()
+    {
         return view('admin.settings.sales.reasons');
     }
 
 
-    public function projection_reason_list(Request $request) {
-        $reasons = BusinessProjectionReason::all(['id','name']);
+    public function projection_reason_list(Request $request)
+    {
+        $reasons = BusinessProjectionReason::all(['id', 'name']);
         return Datatables::of($reasons)->make(true);
     }
 
-    public function projection_reason_update(Request $request){
+    public function projection_reason_update(Request $request)
+    {
         $reason = $request->reason;
-        if($reason == null && $reason == ''){
-             return response()->json(['status' => 0, 'error' => 'Please enter reason!']);
+        if ($reason == null && $reason == '') {
+            return response()->json(['status' => 0, 'error' => 'Please enter reason!']);
         }
         $projection_reason = BusinessProjectionReason::where('name', $reason);
         if ($projection_reason->exists()) {
             return response()->json(['status' => 0, 'error' => 'Same reason already exists!']);
-        }
-        else {
+        } else {
             $business_projection_reason = new BusinessProjectionReason();
             $business_projection_reason->name = $reason;
             $business_projection_reason->save();
@@ -1818,14 +1879,16 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 1, 'success' => 'New Reason added successfully!']);
         }
     }
-    public function projection_shipments_index(){
-        $shippers = User::where('status', '>', 1)->select('id','name');
 
-        if(session('department_id') == 7){
+    public function projection_shipments_index()
+    {
+        $shippers = User::where('status', '>', 1)->select('id', 'name');
+
+        if (session('department_id') == 7) {
 //            if(session('role_id') != 4 ){
-                $shippers = $shippers->where(function ($query) {
-                    $query->whereIn('users.id', session('tagged_shippers'));
-                });
+            $shippers = $shippers->where(function ($query) {
+                $query->whereIn('users.id', session('tagged_shippers'));
+            });
 //            }
         }
         $shippers = $shippers->get();
@@ -1835,16 +1898,17 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.sales.shipments')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
     }
 
-    public function projection_shipments_update(Request $request){
+    public function projection_shipments_update(Request $request)
+    {
         $shippers = $request->shippers;
         $shipment = $request->projected_shipment;
-        if(count($shippers) > 0){
+        if (count($shippers) > 0) {
             foreach ($shippers as $shipper) {
                 $business_shipment = BusinessProjectionShipment::where('user_id', $shipper);
-                if($business_shipment->exists()){
+                if ($business_shipment->exists()) {
                     $business_shipment = $business_shipment->first();
                     $business_shipment->shipment = $shipment;
-                }else{
+                } else {
                     $business_shipment = new BusinessProjectionShipment();
                     $business_shipment->user_id = $shipper;
                     $business_shipment->shipment = $shipment;
@@ -1852,42 +1916,45 @@ class GlobalSettingsController extends Controller
                 $business_shipment->save();
             }
             return redirect()->back()->with('success', 'Settings successfully updated');
-        }else{
+        } else {
             return redirect()->back()->with('error', 'Shippers not selected!');
         }
     }
 
-    public function projection_shipments_list(Request $request){
-        $shipments = BusinessProjectionShipment::join('users as u','u.id','=','business_projection_shipments.user_id')->select('u.name as shipper','business_projection_shipments.shipment');
-        if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+    public function projection_shipments_list(Request $request)
+    {
+        $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
+        if (session('department_id') == 7) {
+            if (session('role_id') != 4) {
                 $shipments = $shipments->where(function ($query) {
-                $query->whereIn('u.id', session('tagged_shippers'));
-            });
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
             }
         }
         return Datatables::of($shipments)->make(true);
     }
 
-    public function delay_in_delivery_massage(){
+    public function delay_in_delivery_massage()
+    {
         $message = '';
         $settings = GlobalSettings::where('type', 'crm_delay_in_delivery_message')->first();
-        if($settings){
+        if ($settings) {
             $message = $settings->text;
         }
         return view('admin.settings.CRM.crm_delay_in_delivery_message')->with(['message' => $message]);
     }
 
-    public function delay_in_delivery_massage_store(Request $request){
+    public function delay_in_delivery_massage_store(Request $request)
+    {
         $message = $request->delay_in_delivery_message;
 
-        if($message){
+        if ($message) {
             $setting = GlobalSettings::where('type', 'crm_delay_in_delivery_message');
-            if($setting->exists()){
+            if ($setting->exists()) {
                 $setting = $setting->first();
                 $setting->text = $message;
                 $setting->save();
-            }else{
+            } else {
                 $setting = new GlobalSettings();
                 $setting->type = 'crm_delay_in_delivery_message';
                 $setting->setting_value = 0;
@@ -1899,12 +1966,15 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with(['error' => 'Please write a Message!']);
     }
 
-    public function auto_crm_comment_index() {
+    public function auto_crm_comment_index()
+    {
         $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
 
         return view('admin.settings.crm_comment')->with('settings', $settings);
     }
-    public function auto_crm_comment_store(Request $request) {
+
+    public function auto_crm_comment_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'auto_crm_comment')->first();
 
         $settings->text = $request->comment;
@@ -1914,54 +1984,60 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function blacklist_index(){
+    public function blacklist_index()
+    {
         return view('admin.settings.blacklist.index');
     }
-    public function blacklist_list(Request $request){
+
+    public function blacklist_list(Request $request)
+    {
         $blacklist = BlacklistSetting::join('admins as a', 'a.id', '=', 'blacklist_settings.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'blacklist_settings.updated_by')
             ->join('blacklist_labelings as bl', 'bl.id', '=', 'blacklist_settings.labeling_id')
             ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at as added_at', 'blacklist_settings.updated_at');
         $datatable = Datatables::of($blacklist)
-            ->addColumn('category_status', function ($data){
-                if($data->status == 0){
+            ->addColumn('category_status', function ($data) {
+                if ($data->status == 0) {
                     return 'Disable';
-                }else{
+                } else {
                     return 'Enable';
                 }
             })
-            ->addColumn('action', function ($data){
+            ->addColumn('action', function ($data) {
 
-            $dropdown = '
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-            if ($data->status == 1) {
-                $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
-            } else {
-                $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
-            }
+                if ($data->status == 1) {
+                    $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                } else {
+                    $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                }
 
-            return $dropdown;
+                return $dropdown;
 
-        });
+            });
 
-        return  $datatable->make(true);
+        return $datatable->make(true);
     }
 
-    public function blacklist_add(){
-        $labelings = BlacklistLabeling::all(['id','name']);
-        $conditions = BlacklistCondition::all(['id','name']);
-        $logics = BlacklistLogic::all(['id','name']);
-        $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
-        $operations = BlacklistOperation::all(['id','name']);
+    public function blacklist_add()
+    {
+        $labelings = BlacklistLabeling::all(['id', 'name']);
+        $conditions = BlacklistCondition::all(['id', 'name']);
+        $logics = BlacklistLogic::all(['id', 'name']);
+        $shipment_ranges = BlacklistShipmentRange::all(['id', 'name']);
+        $operations = BlacklistOperation::all(['id', 'name']);
         return view('admin.settings.blacklist.add')->with(['labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations]);
     }
-    public function blacklist_add_store(Request $request){
+
+    public function blacklist_add_store(Request $request)
+    {
 
         $conditions = $request->condition_select;
         $name = $request->name;
@@ -1969,14 +2045,14 @@ class GlobalSettingsController extends Controller
         $color = $request->color;
         $message = $request->message;
 
-        if(BlacklistSetting::where('color', $color)->exists()){
+        if (BlacklistSetting::where('color', $color)->exists()) {
             return redirect()->back()->with('error', 'Color already selected!');
         }
-        if(count($conditions) > count(array_flip($conditions))){
+        if (count($conditions) > count(array_flip($conditions))) {
             return redirect()->back()->with('error', 'Same condition selected multiple times!');
         }
 
-        if(!empty($conditions)){
+        if (!empty($conditions)) {
 
             $blacklist_setting = new BlacklistSetting();
             $blacklist_setting->name = $name;
@@ -1986,8 +2062,8 @@ class GlobalSettingsController extends Controller
             $blacklist_setting->added_by = Auth::id();
             $blacklist_setting->save();
             $setting_id = $blacklist_setting->id;
-            foreach ($conditions as $key => $condition){
-                foreach ($request->logic_select[$key] as $row => $logic){
+            foreach ($conditions as $key => $condition) {
+                foreach ($request->logic_select[$key] as $row => $logic) {
                     $blacklist_setting_condition = new BlacklistSettingCondition();
                     $blacklist_setting_condition->blacklist_setting_id = $setting_id;
                     $blacklist_setting_condition->blacklist_condition_id = $condition;
@@ -1995,9 +2071,9 @@ class GlobalSettingsController extends Controller
                     $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
                     $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
                     $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
-                    if($request->has('operation_select')){
-                        if(array_key_exists($key, $request->operation_select)){
-                            if(array_key_exists($row, $request->operation_select[$key])){
+                    if ($request->has('operation_select')) {
+                        if (array_key_exists($key, $request->operation_select)) {
+                            if (array_key_exists($row, $request->operation_select[$key])) {
                                 $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
                             }
                         }
@@ -2010,37 +2086,39 @@ class GlobalSettingsController extends Controller
         }
     }
 
-    public function blacklist_unique_criteria(Request $request){
+    public function blacklist_unique_criteria(Request $request)
+    {
         $condition_id = $request->condition;
         $logic_id = $request->logic_select;
         $logic_value = $request->logic_value;
-        if($request->has('category_id')){
+        if ($request->has('category_id')) {
             $category_id = $request->category_id;
-            if(BlacklistSettingCondition::where('blacklist_setting_id', '!=', $category_id)->where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()){
+            if (BlacklistSettingCondition::where('blacklist_setting_id', '!=', $category_id)->where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()) {
                 return "true";
-            }else{
+            } else {
                 return "false";
             }
         }
-        if(BlacklistSettingCondition::where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()){
+        if (BlacklistSettingCondition::where('blacklist_condition_id', $condition_id)->where('blacklist_logic_id', $logic_id)->where('blacklist_logic_value', $logic_value)->exists()) {
             return "true";
-        }else{
+        } else {
             return "false";
         }
 
     }
 
-    public function blacklist_status(Request $request){
+    public function blacklist_status(Request $request)
+    {
         $id = $request->id;
         $status = $request->status;
         $blacklist_setting = BlacklistSetting::find($id);
-        if(!$blacklist_setting){
+        if (!$blacklist_setting) {
             return response()->json(['status' => 1, 'error' => 'Setting not found!']);
         }
 
-        if($status == 1){
+        if ($status == 1) {
             $blacklist_setting->status = 1;
-        }else if($status == 0){
+        } else if ($status == 0) {
             $blacklist_setting->status = 0;
         }
         $blacklist_setting->save();
@@ -2048,25 +2126,27 @@ class GlobalSettingsController extends Controller
         return response()->json(['status' => 0, 'success' => 'Setting updated successfully!']);
     }
 
-    public function blacklist_edit(Request $request, $id){
+    public function blacklist_edit(Request $request, $id)
+    {
         $blacklist_setting = BlacklistSetting::find($id);
-        if($blacklist_setting){
+        if ($blacklist_setting) {
             $condition_ids = $blacklist_setting->conditions()->pluck('blacklist_condition_id')->toArray();
             $condition_ids = array_unique($condition_ids);
             $blacklist_conditions = $blacklist_setting->conditions->groupBy('blacklist_condition_id');
-            $labelings = BlacklistLabeling::all(['id','name']);
-            $conditions = BlacklistCondition::all(['id','name']);
-            $logics = BlacklistLogic::all(['id','name']);
-            $shipment_ranges = BlacklistShipmentRange::all(['id','name']);
-            $operations = BlacklistOperation::all(['id','name']);
+            $labelings = BlacklistLabeling::all(['id', 'name']);
+            $conditions = BlacklistCondition::all(['id', 'name']);
+            $logics = BlacklistLogic::all(['id', 'name']);
+            $shipment_ranges = BlacklistShipmentRange::all(['id', 'name']);
+            $operations = BlacklistOperation::all(['id', 'name']);
 
-            return view('admin.settings.blacklist.edit')->with(['setting_id' => $id,'labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations, 'blacklist_setting' => $blacklist_setting, 'condition_ids' => $condition_ids, 'blacklist_conditions' => $blacklist_conditions]);
-        }
-        else{
+            return view('admin.settings.blacklist.edit')->with(['setting_id' => $id, 'labelings' => $labelings, 'conditions' => $conditions, 'logics' => $logics, 'shipment_ranges' => $shipment_ranges, 'operations' => $operations, 'blacklist_setting' => $blacklist_setting, 'condition_ids' => $condition_ids, 'blacklist_conditions' => $blacklist_conditions]);
+        } else {
             return redirect()->back()->with('error', 'Settings not found!');
         }
     }
-    public function blacklist_edit_submit(Request $request){
+
+    public function blacklist_edit_submit(Request $request)
+    {
 
         $id = $request->setting_id;
         $conditions = $request->condition_select;
@@ -2074,17 +2154,17 @@ class GlobalSettingsController extends Controller
         $labeling_id = $request->labeling_select;
         $color = $request->color;
         $message = $request->message;
-        if(BlacklistSetting::where('color', $color)->where('id', '<>', $id)->exists()){
+        if (BlacklistSetting::where('color', $color)->where('id', '<>', $id)->exists()) {
             return redirect()->back()->with('error', 'Color already selected!');
         }
-        if(count($conditions) > count(array_flip($conditions))){
+        if (count($conditions) > count(array_flip($conditions))) {
             return redirect()->back()->with('error', 'Same condition selected multiple times!');
         }
 
-        if(!empty($conditions)){
+        if (!empty($conditions)) {
 
             $blacklist_setting = BlacklistSetting::find($id);
-            if($blacklist_setting){
+            if ($blacklist_setting) {
                 $blacklist_setting->name = $name;
                 $blacklist_setting->labeling_id = $labeling_id;
                 $blacklist_setting->color = $color;
@@ -2093,8 +2173,8 @@ class GlobalSettingsController extends Controller
                 $blacklist_setting->save();
                 $setting_id = $id;
                 BlacklistSettingCondition::where('blacklist_setting_id', $id)->delete();
-                foreach ($conditions as $key => $condition){
-                    foreach ($request->logic_select[$key] as $row => $logic){
+                foreach ($conditions as $key => $condition) {
+                    foreach ($request->logic_select[$key] as $row => $logic) {
                         $blacklist_setting_condition = new BlacklistSettingCondition();
                         $blacklist_setting_condition->blacklist_setting_id = $setting_id;
                         $blacklist_setting_condition->blacklist_condition_id = $condition;
@@ -2102,9 +2182,9 @@ class GlobalSettingsController extends Controller
                         $blacklist_setting_condition->blacklist_logic_value = $request->logic_percentage[$key][$row];
                         $blacklist_setting_condition->blacklist_shipment_range_id = $request->shipment_range_select[$key][$row];
                         $blacklist_setting_condition->blacklist_shipment_range_value = $request->shipment_range[$key][$row];
-                        if($request->has('operation_select')){
-                            if(array_key_exists($key, $request->operation_select)){
-                                if(array_key_exists($row, $request->operation_select[$key])){
+                        if ($request->has('operation_select')) {
+                            if (array_key_exists($key, $request->operation_select)) {
+                                if (array_key_exists($row, $request->operation_select[$key])) {
                                     $blacklist_setting_condition->blacklist_operation_id = $request->operation_select[$key][$row];
                                 }
                             }
@@ -2120,15 +2200,18 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('error', 'Conditions not selected!');
     }
 
-    public function blacklist_search_index(){
+    public function blacklist_search_index()
+    {
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         return view('admin.settings.blacklist.search')->with(['blacklists' => $blacklists]);
     }
-    public function blacklist_search_consignee(Request $request){
+
+    public function blacklist_search_consignee(Request $request)
+    {
         $phone = $request->phone;
         $data = array();
         $consignee_information = ConsigneeInformation::where('phone', $phone);
-        if($consignee_information->exists()){
+        if ($consignee_information->exists()) {
             $consignee_information = $consignee_information->first();
             $data['consignee'] = array();
 
@@ -2141,11 +2224,11 @@ class GlobalSettingsController extends Controller
             $consignee_information_id = $consignee_information->id;
             $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
             $color = NULL;
-            if($manual_blacklist->exists()){
+            if ($manual_blacklist->exists()) {
                 $manual_blacklist = $manual_blacklist->first();
                 $color = BlacklistSetting::find($manual_blacklist->blacklist_setting_id)->color;
             }
-            if(BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()){
+            if (BlacklistedConsignee::where('consignee_information_id', $consignee_information_id)->exists()) {
                 $data['blacklist'] = array();
                 $data['blacklist']['total_shipments'] = $consignee_information->blacklisted_consignee->shipments;
                 $data['blacklist']['delivered'] = $consignee_information->blacklisted_consignee->delivered;
@@ -2154,9 +2237,9 @@ class GlobalSettingsController extends Controller
                 $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
                 $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
                 $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
-                if($color == NULL){
+                if ($color == NULL) {
                     $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
-                }else{
+                } else {
                     $data['blacklist']['color'] = $color;
                 }
             }
@@ -2164,13 +2247,15 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Consignee not found']);
     }
-    public function blacklist_search_update(Request $request){
+
+    public function blacklist_search_update(Request $request)
+    {
         $action = $request->action;
         $blacklist_setting_id = $request->label_select;
         $consignee_information_id = $request->consignee_information_id;
-        if($action == 'exclude'){
+        if ($action == 'exclude') {
             $blacklist = BlacklistedConsigneeManuallyExcluded::where('consignee_information_id', $consignee_information_id);
-            if($blacklist->exists()){
+            if ($blacklist->exists()) {
                 return redirect()->back()->with('error', 'Already excluded!');
             }
 
@@ -2180,14 +2265,14 @@ class GlobalSettingsController extends Controller
             $blacklist->save();
 
 
-        }else if($action == 'label'){
+        } else if ($action == 'label') {
             $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
-            if($blacklist->exists()){
+            if ($blacklist->exists()) {
                 $blacklist = $blacklist->first();
                 $blacklist->added_by = Auth::id();
                 $blacklist->blacklist_setting_id = $blacklist_setting_id;
                 $blacklist->save();
-            }else{
+            } else {
                 $blacklist = new BlacklistedConsigneeManuallyBlacklisted();
                 $blacklist->consignee_information_id = $consignee_information_id;
                 $blacklist->added_by = Auth::id();
@@ -2199,40 +2284,45 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Successfully updated!');
     }
 
-     public function commission_percentage_index(){
-             $settings = GlobalSettings::where('type', 'commission_percentage')->first();
-            $percentage = '';
-            if($settings){
-                $percentage = $settings->text;
-            }
-            return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
+    public function commission_percentage_index()
+    {
+        $settings = GlobalSettings::where('type', 'commission_percentage')->first();
+        $percentage = '';
+        if ($settings) {
+            $percentage = $settings->text;
         }
+        return view('admin.settings.commission.commission_percentage')->with(['commission_percentage' => $percentage]);
+    }
 
-     public function commission_percentage_update(Request $request){
-            $percentage = $request->commission_percentage;
-            $setting = GlobalSettings::where('type', 'commission_percentage');
-            if($setting->exists()){
-                $setting = $setting->first();
-                $setting->setting_value = 0;
-                $setting->text=$percentage;
-                $setting->save();
-            }else{
-                $setting = new GlobalSettings();
-                 $setting->text=$percentage;
-                $setting->type = 'commission_percentage';
-                $setting->save();
-            }
-            return redirect()->back()->with('success', 'Setting updated');
+    public function commission_percentage_update(Request $request)
+    {
+        $percentage = $request->commission_percentage;
+        $setting = GlobalSettings::where('type', 'commission_percentage');
+        if ($setting->exists()) {
+            $setting = $setting->first();
+            $setting->setting_value = 0;
+            $setting->text = $percentage;
+            $setting->save();
+        } else {
+            $setting = new GlobalSettings();
+            $setting->text = $percentage;
+            $setting->type = 'commission_percentage';
+            $setting->save();
         }
+        return redirect()->back()->with('success', 'Setting updated');
+    }
 
-    public function return_reason_index(){
+    public function return_reason_index()
+    {
         return view('admin.settings.return.reason');
     }
-    public function return_reason_list(Request $request){
+
+    public function return_reason_list(Request $request)
+    {
         $reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
         $reasons = ShipmentStatusReason::whereIn('id', $reason_ids)->select('id', 'name');
         $datatable = Datatables::of($reasons)
-            ->addColumn('action', function ($data){
+            ->addColumn('action', function ($data) {
 
                 $dropdown = '
               <div class="btn-group">
@@ -2248,9 +2338,11 @@ class GlobalSettingsController extends Controller
 
         return $datatable->make(true);
     }
-    public function return_reason_add(Request $request){
+
+    public function return_reason_add(Request $request)
+    {
         $reason = trim($request->reason);
-        if($reason){
+        if ($reason) {
             $shipment_reason = new ShipmentStatusReason();
             $shipment_reason->name = $reason;
             $shipment_reason->save();
@@ -2261,21 +2353,25 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
-    public function return_reason_get(Request $request){
+
+    public function return_reason_get(Request $request)
+    {
         $id = $request->reason_id;
-        if($id){
+        if ($id) {
             $reason = ShipmentStatusReason::find($id);
-            if($reason){
+            if ($reason) {
                 return response()->json(['status' => 0, 'reason' => $reason->name]);
             }
             return response()->json(['status' => 1, 'error' => 'Reason not found!']);
         }
         return response()->json(['status' => 1, 'error' => 'Please select reason!']);
     }
-    public function return_reason_edit(Request $request){
+
+    public function return_reason_edit(Request $request)
+    {
         $reason_id = $request->reason_id;
         $reason = $request->reason;
-        if($reason){
+        if ($reason) {
             $reason_detail = ShipmentStatusReason::find($reason_id);
             $reason_detail->name = $reason;
             $reason_detail->save();
@@ -2283,13 +2379,14 @@ class GlobalSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
-    public function pickup_cut_off_settings_index() {
+
+    public function pickup_cut_off_settings_index()
+    {
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
 
         if ($settings) {
             $pickup_request_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $pickup_request_cut_off_time = 15;
         }
 
@@ -2297,8 +2394,7 @@ class GlobalSettingsController extends Controller
 
         if ($settings) {
             $pickup_arrival_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $pickup_arrival_cut_off_time = 8;
         }
 
@@ -2306,29 +2402,27 @@ class GlobalSettingsController extends Controller
 
         if ($settings) {
             $rider_assignment_cut_off_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $rider_assignment_cut_off_time = 0;
         }
         $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
         if ($settings) {
             $global_rider_id = $settings->setting_value;
-        }
-        else {
+        } else {
             $global_rider_id = 0;
         }
 
         return view('admin.settings.pickup_settings')->with(['pickup_request_cut_off_time' => $pickup_request_cut_off_time, 'pickup_arrival_cut_off_time' => $pickup_arrival_cut_off_time, 'rider_assignment_cut_off_time' => $rider_assignment_cut_off_time, 'global_rider_id' => $global_rider_id]);
     }
 
-    public function pickup_cut_off_settings_store(Request $request) {
+    public function pickup_cut_off_settings_store(Request $request)
+    {
         $request_settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
 
         if ($request_settings->exists()) {
             $request_settings = $request_settings->first();
-        }
-        else {
+        } else {
             $request_settings = new GlobalSettings();
 
             $request_settings->type = 'pickup_request_cut_off_time';
@@ -2342,8 +2436,7 @@ class GlobalSettingsController extends Controller
 
         if ($request_arrival->exists()) {
             $request_arrival = $request_arrival->first();
-        }
-        else {
+        } else {
             $request_arrival = new GlobalSettings();
 
             $request_arrival->type = 'pickup_arrival_cut_off_time';
@@ -2357,16 +2450,14 @@ class GlobalSettingsController extends Controller
 
         if ($rider_assignment->exists()) {
             $rider_assignment = $rider_assignment->first();
-        }
-        else {
+        } else {
             $rider_assignment = new GlobalSettings();
 
             $rider_assignment->type = 'rider_assignment_cut_off_time';
         }
-        if($request->rider_assignment_off_time != NULL ){
+        if ($request->rider_assignment_off_time != NULL) {
             $rider_assignment->setting_value = $request->rider_assignment_off_time;
-        }
-        else{
+        } else {
             $rider_assignment->setting_value = 0;
         }
 
@@ -2376,8 +2467,7 @@ class GlobalSettingsController extends Controller
 
         if ($global_rider->exists()) {
             $global_rider = $global_rider->first();
-        }
-        else {
+        } else {
             $global_rider = new GlobalSettings();
 
             $global_rider->type = 'global_rider_id';
@@ -2390,27 +2480,27 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function completed_aging_report_settings_index() {
-       
+    public function completed_aging_report_settings_index()
+    {
+
         $settings = GlobalSettings::where('type', 'completed_aging_report_time')->first();
 
         if ($settings) {
             $completed_aging_report_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $completed_aging_report_time = 10;
         }
 
         return view('admin.settings.aging_report')->with(['completed_aging_report_time' => $completed_aging_report_time]);
     }
 
-    public function completed_aging_report_settings_store(Request $request) {
+    public function completed_aging_report_settings_store(Request $request)
+    {
         $request_settings = GlobalSettings::where('type', 'completed_aging_report_time');
 
         if ($request_settings->exists()) {
             $request_settings = $request_settings->first();
-        }
-        else {
+        } else {
             $request_settings = new GlobalSettings();
 
             $request_settings->type = 'completed_aging_report_time';
@@ -2423,14 +2513,15 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public static function insertCompletedAgingData(){
+    public static function insertCompletedAgingData()
+    {
 
         $now = Carbon::now();
         $total = 0;
         $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
-        if(count($hubs) > 0){
+        if (count($hubs) > 0) {
             DB::table('completed_aging_reports')->truncate();
-            foreach ($hubs as $hub_id){
+            foreach ($hubs as $hub_id) {
                 $total_count = 0;
                 $zone_id = City::find($hub_id)->zone_id;
 //                $zone_id = ZoneClassCity::where('city_id',$hub_id)->first();
@@ -2440,14 +2531,12 @@ class GlobalSettingsController extends Controller
 
                 $completed_aging_report->date = $now;
 
-                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status',1)->where('dncc_status',0)->where('status', 1)->get();
-                foreach($delviery_notes as $delviery_note)
-                {
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('cash_collection_status', 1)->where('dncc_status', 0)->where('status', 1)->get();
+                foreach ($delviery_notes as $delviery_note) {
                     $start = $delviery_note->status_verified_at;
                     $start = Carbon::parse($start);
                     $difference = $start->diffInDays($now);
-                    if($difference > 2)
-                    {
+                    if ($difference > 2) {
                         $total_count++;
                     }
                 }
@@ -2459,15 +2548,17 @@ class GlobalSettingsController extends Controller
             NotificationsController::send(71, $now);
         }
     }
-    public static function insertPendingCashCollectionData(){
+
+    public static function insertPendingCashCollectionData()
+    {
 
         $now = Carbon::now();
         $total = 0;
 
         $hubs = City::where('hub', 1)->where('status', 1)->pluck('id')->toArray();
-        if(count($hubs) > 0){
+        if (count($hubs) > 0) {
             DB::table('pending_cash_collection_aging_reports')->truncate();
-            foreach ($hubs as $hub_id){
+            foreach ($hubs as $hub_id) {
                 $total_count = 0;
                 $zone_id = City::find($hub_id)->zone_id;
 
@@ -2478,14 +2569,12 @@ class GlobalSettingsController extends Controller
 
                 $pending_cash_collection_aging_report->date = $now;
 
-                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('pending_status', 1)->where('cash_collection_status', 0)->where('dncc_status',0)->get();
-                foreach($delviery_notes as $delviery_note)
-                {
+                $delviery_notes = DeliveryNote::where('hub_id', $hub_id)->where('pending_status', 1)->where('cash_collection_status', 0)->where('dncc_status', 0)->get();
+                foreach ($delviery_notes as $delviery_note) {
                     $start = $delviery_note->status_updated_at;
                     $start = Carbon::parse($start);
                     $difference = $start->diffInDays($now);
-                    if($difference > 2)
-                    {
+                    if ($difference > 2) {
                         $total_count++;
                     }
                 }
@@ -2497,23 +2586,25 @@ class GlobalSettingsController extends Controller
         NotificationsController::send(72, $now);
 
     }
-    public function crm_default_agent_index(){
+
+    public function crm_default_agent_index()
+    {
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-            ->where('admin_roles.department_id',3)
+            ->where('admin_roles.department_id', 3)
             ->get();
 
         $setting = GlobalSettings::where('type', 'crm_default_agent')->first();
         return view('admin.settings.CRM.default_agent')->with(['agents' => $agents, 'setting' => $setting]);
     }
 
-    public function crm_default_agent_store(Request $request){
+    public function crm_default_agent_store(Request $request)
+    {
         $setting = GlobalSettings::where('type', 'crm_default_agent');
-        if($setting->exists()){
+        if ($setting->exists()) {
             $setting = $setting->first();
             $setting->setting_value = $request->sale_person;
             $setting->save();
-        }
-        else{
+        } else {
             $setting = new GlobalSettings();
             $setting->setting_value = $request->sale_person;
             $setting->type = 'crm_default_agent';
@@ -2522,27 +2613,27 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function zero_charges_report_settings_index() {
-       
+    public function zero_charges_report_settings_index()
+    {
+
         $settings = GlobalSettings::where('type', 'zero_charges_report_time')->first();
 
         if ($settings) {
             $zero_charges_report_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $zero_charges_report_time = 10;
         }
 
         return view('admin.settings.zero_charges_report_settings')->with(['zero_charges_report_time' => $zero_charges_report_time]);
     }
 
-    public function zero_charges_report_settings_store(Request $request) {
+    public function zero_charges_report_settings_store(Request $request)
+    {
         $request_settings = GlobalSettings::where('type', 'zero_charges_report_time');
 
         if ($request_settings->exists()) {
             $request_settings = $request_settings->first();
-        }
-        else {
+        } else {
             $request_settings = new GlobalSettings();
 
             $request_settings->type = 'zero_charges_report_time';
@@ -2555,17 +2646,19 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function not_attempted_cron_index(){
+    public function not_attempted_cron_index()
+    {
         $settings = GlobalSettings::where('type', 'not_attempted_cron_time')->first();
 
         return view('admin.settings.not_attempted_report_cron_time')->with('settings', $settings);
     }
-    public function not_attempted_cron_store(Request $request) {
+
+    public function not_attempted_cron_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else{
+        } else {
             $settings = new GlobalSettings();
             $settings->type = 'not_attempted_cron_time';
         }
@@ -2576,24 +2669,28 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function holidays_index(){
+    public function holidays_index()
+    {
         return view('admin.settings.holidays');
     }
-    public function holidays_list(){
+
+    public function holidays_list()
+    {
         $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
             ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
 
         return Datatables::of($holidays)
             ->make(true);
     }
-    public function holidays_add(Request $request){
+
+    public function holidays_add(Request $request)
+    {
         $holiday_date = $request->holiday_date;
         $holiday_reason = $request->holiday_reason;
         $existing_holiday = CrmTatHolidays::where('holiday', $holiday_date);
-        if ($existing_holiday->exists()){
+        if ($existing_holiday->exists()) {
             return ['status' => 0, 'error' => 'Holiday is already marked on the selected date!'];
-        }
-        else{
+        } else {
             $new_holiday = new Holiday();
             $new_holiday->holiday = $holiday_date;
             $new_holiday->reason = $holiday_reason;
@@ -2602,21 +2699,25 @@ class GlobalSettingsController extends Controller
             return ['status' => 1, 'success' => 'Holiday added successfully!'];
         }
     }
-	public function station_recovery_cron_index(){
+
+    public function station_recovery_cron_index()
+    {
         $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
         $time = '';
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $time = $settings->setting_value;
         }
 
         return view('admin.settings.station_recovery.station_recovery_cron_time')->with('time', $time);
     }
-    public function station_recovery_cron_store(Request $request) {
+
+    public function station_recovery_cron_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
-        }else{
+        } else {
             $settings = new GlobalSettings();
             $settings->type = 'station_recovery_cron_time';
         }
@@ -2627,15 +2728,15 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function over_payment_limit_index() {
+    public function over_payment_limit_index()
+    {
         $settings = GlobalSettings::where('type', 'over_payment_limit');
 
         if ($settings->exists()) {
             $settings = $settings->first();
 
             $over_payment_limit = $settings->setting_value;
-        }
-        else {
+        } else {
             $over_payment_limit = 6000000;
         }
 
@@ -2643,13 +2744,13 @@ class GlobalSettingsController extends Controller
     }
 
 
-    public function over_payment_limit_store(Request $request) {
+    public function over_payment_limit_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'over_payment_limit');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'over_payment_limit';
@@ -2663,13 +2764,14 @@ class GlobalSettingsController extends Controller
     }
 
 
-    public function nsa_account_index(){
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
-        $riders = Rider::where('status', 1)->select('id','name')->get();
+    public function nsa_account_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'nsa_accounts');
         $rider_id = null;
         $nsa_accounts = array();
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
             $rider_id = $settings->setting_value;
@@ -2677,16 +2779,16 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.nsa_account')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'nsa_accounts' => $nsa_accounts]);
     }
 
-    public function nsa_account_store(Request $request){
-        if($request->has('shippers')){
-            if(count($request->shippers) > 0){
+    public function nsa_account_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
                 $shippers = implode(',', $request->shippers);
                 $settings = GlobalSettings::where('type', 'nsa_accounts');
 
                 if ($settings->exists()) {
                     $settings = $settings->first();
-                }
-                else {
+                } else {
                     $settings = new GlobalSettings();
 
                     $settings->type = 'nsa_accounts';
@@ -2698,24 +2800,26 @@ class GlobalSettingsController extends Controller
             }
             return redirect()->back()->with('success', 'Settings Updated!');
 
-        }else{
+        } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
 
     }
 
-    public function restrict_cities_intercept_index(){
-        $cities = City::where('status', 1)->select('id','name')->get();
+    public function restrict_cities_intercept_index()
+    {
+        $cities = City::where('status', 1)->select('id', 'name')->get();
         $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
         return view('admin.settings.restrict_cities_intercept')->with(['cities' => $cities, 'restricted_cities' => $restricted_cities]);
     }
 
-    public function restrict_cities_intercept_store(Request $request){
+    public function restrict_cities_intercept_store(Request $request)
+    {
         RestrictedCityIntercept::truncate();
-        if($request->has('cities')){
-            if(count($request->cities) > 0){
+        if ($request->has('cities')) {
+            if (count($request->cities) > 0) {
                 $cities = $request->cities;
-                foreach ($cities as $city_id){
+                foreach ($cities as $city_id) {
                     $restricted_city = new RestrictedCityIntercept();
                     $restricted_city->city_id = $city_id;
                     $restricted_city->save();
@@ -2726,29 +2830,29 @@ class GlobalSettingsController extends Controller
 
     }
 
-public function short_received_hub_wise_cron_index() {
+    public function short_received_hub_wise_cron_index()
+    {
 
         $settings = GlobalSettings::where('type', 'short_received_hub_wise_cron')->first();
 
         if ($settings) {
             $default_time = $settings->setting_value;
-        }
-        else {
+        } else {
             $default_time = 8;
         }
-        $cities = City::where('status', 1)->select('id','name')->get();
+        $cities = City::where('status', 1)->select('id', 'name')->get();
         $existing_cities = ShortReceiveReportTimeHubWise::get();
 
         return view('admin.settings.short_received_report_hub_wise_time')->with(['default_time' => $default_time, 'cities' => $cities, 'existing_cities' => $existing_cities]);
     }
 
-    public function short_received_hub_wise_cron_store(Request $request) {
+    public function short_received_hub_wise_cron_store(Request $request)
+    {
         $settings = GlobalSettings::where('type', 'short_received_hub_wise_cron');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-        }
-        else {
+        } else {
             $settings = new GlobalSettings();
 
             $settings->type = 'short_received_hub_wise_cron';
@@ -2758,9 +2862,9 @@ public function short_received_hub_wise_cron_index() {
 
         $settings->save();
         ShortReceiveReportTimeHubWise::truncate();
-        if($request->has('cities')){
+        if ($request->has('cities')) {
             $new_cities = $request->cities;
-            foreach ($new_cities as $index => $city){
+            foreach ($new_cities as $index => $city) {
                 $n_city = new ShortReceiveReportTimeHubWise();
                 $n_city->hub_id = $city;
                 $n_city->time = $request->time[$index];
@@ -2770,25 +2874,28 @@ public function short_received_hub_wise_cron_index() {
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function restrict_parcels_attempt_index(){
+
+    public function restrict_parcels_attempt_index()
+    {
         $already_restricted_shippers = RestrictParcelsAttempt::pluck('shipper_id')->toArray();
         $shippers = User::where('status', 3)->whereNotIn('id', $already_restricted_shippers)->get();
         return view('admin.settings.retrun_parcels_after_attempts')->with('shippers', $shippers);
     }
-    public function restrict_parcels_attempt_list(Request $request){
+
+    public function restrict_parcels_attempt_list(Request $request)
+    {
         $restricted_parcels_attempt = RestrictParcelsAttempt::join('users as u', 'u.id', '=', 'restrict_parcels_attempts.shipper_id')
             ->join('admins as a', 'a.id', '=', 'restrict_parcels_attempts.updated_by')
-        ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
+            ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
         $datatable = Datatables::of($restricted_parcels_attempt)
-            ->editColumn('status', function ($data){
-                if($data->status == 1){
+            ->editColumn('status', function ($data) {
+                if ($data->status == 1) {
                     return 'Enabled';
-                }
-                else{
+                } else {
                     return 'Disabled';
                 }
             })
-            ->addColumn('action', function ($data){
+            ->addColumn('action', function ($data) {
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -2797,10 +2904,9 @@ public function short_received_hub_wise_cron_index() {
 
                 $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-                if($data->status == 1){
+                if ($data->status == 1) {
                     $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                }
-                else{
+                } else {
                     $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 }
 
@@ -2811,103 +2917,129 @@ public function short_received_hub_wise_cron_index() {
         return $datatable->make(true);
     }
 
-    public function restrict_parcels_attempt_add(Request $request){
-        if($request->has('shipper_id') && $request->has('attempt_days')){
+    public function restrict_parcels_attempt_add(Request $request)
+    {
+        if ($request->has('shipper_id') && $request->has('attempt_days')) {
             $shipper_id = $request->shipper_id;
             $attempt_days = $request->attempt_days;
-            if($shipper_id != NULL && $attempt_days != NULL){
+            if ($shipper_id != NULL && $attempt_days != NULL) {
                 $restrict_shipper = new RestrictParcelsAttempt();
                 $restrict_shipper->shipper_id = $shipper_id;
                 $restrict_shipper->attempt_days = $attempt_days;
                 $restrict_shipper->updated_by = Auth::id();
                 $restrict_shipper->save();
 
-                return redirect()->back()->with('success','Setting updated successfully!');
+                return redirect()->back()->with('success', 'Setting updated successfully!');
+            } else {
+                return redirect()->back()->with('error', 'Data not found!');
             }
-            else{
-                return redirect()->back()->with('error','Data not found!');
-            }
-        }
-        else{
-            return redirect()->back()->with('error','Something went wrong!');
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong!');
         }
     }
-    public function restrict_parcels_attempt_edit(Request $request){
-        if($request->has('id') && $request->has('attempt_days')){
+
+    public function restrict_parcels_attempt_edit(Request $request)
+    {
+        if ($request->has('id') && $request->has('attempt_days')) {
             $id = $request->id;
             $attempt_days = $request->attempt_days;
-            if($id != NULL && $attempt_days != NULL){
+            if ($id != NULL && $attempt_days != NULL) {
                 $restrict_shipper = RestrictParcelsAttempt::find($id);
                 $restrict_shipper->attempt_days = $attempt_days;
                 $restrict_shipper->status = 1;
                 $restrict_shipper->updated_by = Auth::id();
                 $restrict_shipper->save();
 
-                return redirect()->back()->with('success','Setting updated successfully!');
+                return redirect()->back()->with('success', 'Setting updated successfully!');
+            } else {
+                return redirect()->back()->with('error', 'Data not found!');
             }
-            else{
-                return redirect()->back()->with('error','Data not found!');
-            }
-        }
-        else{
-            return redirect()->back()->with('error','Something went wrong!');
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong!');
         }
     }
-    public function restrict_parcels_attempt_enable_disable(Request $request){
-        if($request->has('id') && $request->has('status')){
+
+    public function restrict_parcels_attempt_enable_disable(Request $request)
+    {
+        if ($request->has('id') && $request->has('status')) {
             $id = $request->id;
             $status = $request->status;
-            if($id != NULL && $status != NULL){
+            if ($id != NULL && $status != NULL) {
                 $restrict_shipper = RestrictParcelsAttempt::find($id);
                 $restrict_shipper->status = $status;
                 $restrict_shipper->updated_by = Auth::id();
                 $restrict_shipper->save();
-                if($status == 1){
+                if ($status == 1) {
                     $text = 'Enabled';
-                }
-                else{
+                } else {
                     $text = 'Disabled';
                 }
-                return response()->json(['status' => 1, 'success' => 'Setting '. $text .' Successfully!']);
-            }
-            else{
+                return response()->json(['status' => 1, 'success' => 'Setting ' . $text . ' Successfully!']);
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Data not found']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Something went wrong!']);
         }
     }
 
-    public function runner_report_index(){
+    public function runner_report_index()
+    {
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.runner.index')->with('cities', $cities);
     }
-    public function runner_report_list(Request $request){
+
+    public function runner_report_list(Request $request)
+    {
         $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
-            ->select('runners.name as runner', 'runners.created_at', 'a.name as created_by');
-        $datatable = Datatables::of($runner_report);
+            ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
+        $datatable = Datatables::of($runner_report)
+            ->editColumn('status', function ($runner) {
+                if ($runner->status == 0) {
+                    return 'Disable';
+                } else {
+                    return 'Enable';
+                }
+            })
+            ->addColumn('action', function ($runner) {
+                $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                if ($runner->status == 0) {
+                    $dropdown .= $enable;
+                }
+                if ($runner->status == 1) {
+                    $dropdown .= $disable;
+                }
+                return $dropdown;
+
+            });
         return $datatable->make(true);
     }
 
-    public function runner_report_unique(Request $request){
+    public function runner_report_unique(Request $request)
+    {
         if ($request->filled('runner_name')) {
             $runner = Runner::where('name', $request->input('runner_name'));
 
             if (!$runner->exists()) {
                 return 'true';
-            }
-            else {
+            } else {
                 return 'false';
             }
-        }
-        else {
+        } else {
             return 'true';
         }
     }
 
-    public function runner_report_add(Request $request){
-        if($request->has('junction')){
+    public function runner_report_add(Request $request)
+    {
+        if ($request->has('junction')) {
             $runner = new Runner();
             $runner->name = $request->runner_name;
             $runner->created_by = Auth::id();
@@ -2921,8 +3053,8 @@ public function short_received_hub_wise_cron_index() {
 
             $serial = 2;
             $junctions = array($request->origin, $request->destination);
-            foreach ($request->junction as $junction_id){
-                if(!in_array($junction_id, $junctions)){
+            foreach ($request->junction as $junction_id) {
+                if (!in_array($junction_id, $junctions)) {
                     $junctions[] = $junction_id;
                     $junction = new RunnerJunction();
                     $junction->runner_id = $runner->id;
@@ -2940,27 +3072,29 @@ public function short_received_hub_wise_cron_index() {
             $destination->order = $serial;
             $destination->save();
 
-            return redirect()->back()->with('success','Runner updated successfully!');
-        }
-        else{
-            return redirect()->back()->with('error','Please add junctions!');
+            return redirect()->back()->with('success', 'Runner updated successfully!');
+        } else {
+            return redirect()->back()->with('error', 'Please add junctions!');
         }
     }
 
-public function arrived_at_origin_sms_for_shipper_index(){
-        $shippers = User::where('status', 3)->select('id','name')->get();
+    public function arrived_at_origin_sms_for_shipper_index()
+    {
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         $existing_shippers = BookingSmsForShippers::pluck('user_id')->toArray();
 
         return view('admin.settings.arrived_at_origin_sms_for_shipper')->with(['shippers' => $shippers, 'existing_shippers' => $existing_shippers]);
     }
 
-    public function arrived_at_origin_sms_for_shipper_update(Request $request){
+    public function arrived_at_origin_sms_for_shipper_update(Request $request)
+    {
         $shippers = $request->shippers;
         BookingSmsForShippers::truncate();
-        if($shippers != NULL){
-            if(count($shippers) > 0){
-                foreach ($shippers as $shipper) {;
+        if ($shippers != NULL) {
+            if (count($shippers) > 0) {
+                foreach ($shippers as $shipper) {
+                    ;
                     $business_shipment = new BookingSmsForShippers();
                     $business_shipment->user_id = $shipper;
                     $business_shipment->save();
@@ -2970,26 +3104,28 @@ public function arrived_at_origin_sms_for_shipper_index(){
         return redirect()->back()->with('success', 'Settings successfully updated');
     }
 
-    public function pickup_address_wise_payment_accounts_index(){
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+    public function pickup_address_wise_payment_accounts_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'pickup_wise_payment_accounts');
         $pickup_wise_accounts = array();
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.pickup_address_wise_payment_accounts')->with(['shippers' => $shippers,'pickup_wise_accounts' => $pickup_wise_accounts]);
+        return view('admin.settings.pickup_address_wise_payment_accounts')->with(['shippers' => $shippers, 'pickup_wise_accounts' => $pickup_wise_accounts]);
     }
-    public function pickup_address_wise_payment_accounts_submit(Request $request){
-        if($request->has('shippers')){
-            if(count($request->shippers) > 0){
+
+    public function pickup_address_wise_payment_accounts_submit(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
                 $shippers = implode(',', $request->shippers);
                 $settings = GlobalSettings::where('type', 'pickup_wise_payment_accounts');
 
                 if ($settings->exists()) {
                     $settings = $settings->first();
-                }
-                else {
+                } else {
                     $settings = new GlobalSettings();
 
                     $settings->type = 'pickup_wise_payment_accounts';
@@ -3001,8 +3137,56 @@ public function arrived_at_origin_sms_for_shipper_index(){
             }
             return redirect()->back()->with('success', 'Settings Updated!');
 
-        }else{
+        } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
-}
+
+    public function runner_report_enable_disable(Request $request)
+    {
+        $id = $request->id;
+        $runner = Runner::where('id', $id)->first();
+        if ($runner) {
+            if ($runner->status == 0) {
+                $runner->status = 1;
+                $runner->save();
+            } else {
+                $runner->status = 2;
+                $runner->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
+    }
+
+	public function international_walk_in_index(){
+        $walk_in_standard_charges = WalkInInternationalStandardWeightCharge::all();
+
+        $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
+        return view('admin.settings.international_walk_in')->with(['cities' => $cities, 'walk_in_standard_charges' => $walk_in_standard_charges]);
+    }
+    public function international_walk_in_store(Request $request){
+        WalkInInternationalStandardWeightCharge::truncate();
+        WalkInInternationalStandardWeightChargeHub::truncate();
+
+        foreach($request->standard_charges as $index => $charge_id){
+            $standard_weight_charge = new WalkInInternationalStandardWeightCharge();
+            $standard_weight_charge->id = $charge_id;
+            $standard_weight_charge->shipping_mode_id = 2;
+            $standard_weight_charge->hub_actual_weight = $request->hub_actual_weight[$charge_id];
+            $standard_weight_charge->hub_chargeable_weight = $request->hub_chargeable_weight[$charge_id];;
+            $standard_weight_charge->hub_return_charges = $request->hub_return_charges[$charge_id];;
+            $standard_weight_charge->door_actual_weight = $request->door_actual_weight[$charge_id];;
+            $standard_weight_charge->door_chargeable_weight = $request->door_chargeable_weight[$charge_id];;
+            $standard_weight_charge->door_return_charges = $request->door_return_charges[$charge_id];;
+            $standard_weight_charge->save();
+
+            foreach($request->hubs[$charge_id] as $hub_id){
+                $standard_weight_charge_hub = new WalkInInternationalStandardWeightChargeHub();
+                $standard_weight_charge_hub->international_charges_id = $charge_id;
+                $standard_weight_charge_hub->hub_id = $hub_id;
+                $standard_weight_charge_hub->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }}

@@ -1098,6 +1098,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('supply_chain')->name('supply_chain.')->group(function () {
             Route::get('','Admins\OrderManagementController@supply_chain_index')->name('supply_chain_index');
             Route::get('list','Admins\OrderManagementController@supply_chain_list')->name('supply_chain_list');
+
+            Route::prefix('shipment_on_hold')->name('shipment_on_hold.')->group(function () {
+                Route::get('','Admins\AdminSupplyChainController@shipment_on_hold_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminSupplyChainController@shipment_on_hold_details')->name('shipment_details');
+                Route::post('store', 'Admins\AdminSupplyChainController@shipment_on_hold_store')->name('store');
+
+                //history
+                Route::prefix('history')->name('history.')->group(function () {
+                    Route::get('', 'Admins\AdminSupplyChainController@shipment_on_hold_history')->name('index');
+                    Route::get('list', 'Admins\AdminSupplyChainController@shipment_on_hold_history_list')->name('list');
+                    Route::post('allow_dispatch_delivery', 'Admins\AdminSupplyChainController@allow_dispatch_delivery')->name('allow_dispatch_delivery');
+                });
+            });
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
@@ -1430,6 +1443,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
             Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
             Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
+            Route::post('station_operation_approved','Admins\AdminPettyCashController@petty_cash_station_operation_approved_all')->name('station_operation_approved');
 
         });
         Route::prefix('approved')->name('approved.')->group(function (){
@@ -1825,6 +1839,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
         });
+        Route::prefix('international_walk_in')->name('international_walk_in.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_walk_in_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@international_walk_in_store')->name('store');
+        });
+
         Route::prefix('auto_invoice_generation_and_due_date')->name('auto_invoice_generation_and_due_date.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_store')->name('store');
@@ -2164,6 +2183,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
             Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
             Route::post('check_quantity', 'Admins\AdminWalkInBookShipmentController@check_packing_quantity')->name('check_quantity');
+            Route::get('international', 'Admins\AdminWalkInBookShipmentController@international_book_index')->name('international_walk_in');
+            Route::post('international_store', 'Admins\AdminWalkInBookShipmentController@international_walk_in_store')->name('international_store');
+            Route::post('check_international_min_charges', 'Admins\AdminWalkInBookShipmentController@check_international_min_charges')->name('check_international_min_charges');
+            Route::post('check_international_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_international_standard_weight')->name('check_international_standard_weight');
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
@@ -2326,6 +2349,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add/submit', 'Admins\AdminRunnerController@runner_details_add_submit')->name('add.submit');
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
+        Route::post('/view_details', 'Admins\AdminRunnerController@runner_details_view')->name('view_details');
     });
 
     Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {

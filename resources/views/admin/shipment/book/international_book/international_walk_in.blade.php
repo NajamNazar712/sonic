@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Book a Shipment')
+@section('title', 'Book a International Shipment (Walk-In)')
 
 @section('content')
     <div class="app-content content">
@@ -8,13 +8,13 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                <h1 class="mb-1">Book a Shipment (Walk-In)</h1>
+                <h1 class="mb-1">Book a International Shipment (Walk-In)</h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.store') }}" novalidate="novalidate">
+                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.international_store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ $booking_types['id'] }}">
@@ -86,9 +86,12 @@
                                         <div class="form-group">
                                             <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
                                                 @foreach($consignee_cities as $city)
-                                                    <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
+                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="postal_code" class="form-control postal_code" placeholder="Postal Code*" data-rule-required="true" data-msg-required="Postal Code is required" data-rule-maxlength="10" data-msg-maxlength="Postal Code can be maximum 10 digits">
                                         </div>
 
                                         <div class="form-group">
@@ -345,7 +348,7 @@
                     var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
                 }
                 $.ajax({
-                    url:'{!! route('admin.shipment.book.check_min_charges') !!}',
+                    url:'{!! route('admin.shipment.book.check_international_min_charges') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -355,6 +358,7 @@
                         'shipping_mode': $('#shipping_mode').val()
                     }
                 }).done(function (data) {
+
                     if(data.status === 1){
                         $('#span_charges').remove();
                         if(data.min_charges < $('#charges_per_kg').val()) {
@@ -377,7 +381,7 @@
                 }
 
                 $.ajax({
-                    url:'{!! route('admin.shipment.book.check_standard_weight') !!}',
+                    url:'{!! route('admin.shipment.book.check_international_standard_weight') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -390,62 +394,62 @@
                         'pickup' : $('#pickup').prop('checked')
                     }
                 }).done(function (data) {
-                        if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
-                            if(shipment_pickup == 0){
-                                $('#sub_book').prop('disabled', true);
-                                $('#sub_book_print').prop('disabled', true);
-                            }
 
+                    if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
+                        if(shipment_pickup == 0){
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
                         }
-                        if(data.status === 1){
-                            $('#span').remove();
+                    }
+                    if(data.status === 1){
+                        $('#span').remove();
+                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                        $('#actual_weight').parent('div').append(span);
+                    }
+                    if(data.status === 0) {
+                        $('#span').remove();
+                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                        $('#charges_per_kg').parent('div').append(span);
+                    }
+                    if(data.status === 3) {
+                        $('#span').remove();
+                        if ($('#pickup_address').val() == "") {
+                            var span = '<span id="span" style="color: red">Pickup address is required</span>';
+                            $('#pickup_address').parent('div').append(span);
+                        }
+                        else{
                             var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#actual_weight').parent('div').append(span);
+                            $('#new_pickup_city').parent('div').append(span);
                         }
-                        if(data.status === 0) {
-                            $('#span').remove();
-                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#charges_per_kg').parent('div').append(span);
-                        }
-                        if(data.status === 3) {
-                            $('#span').remove();
-                            if ($('#pickup_address').val() == "") {
-                                var span = '<span id="span" style="color: red">Pickup address is required</span>';
-                                $('#pickup_address').parent('div').append(span);
-                            }
-                            else{
-                                var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                                $('#new_pickup_city').parent('div').append(span);
-                            }
-                            $('#actual_weight').val('');
-                            $('#charges_per_kg').val('');
-                        }
-                        if(data.status === 4) {
-                            $('#span').remove();
-                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#delivery_type').parent('div').append(span);
-                            $('#actual_weight').val('');
-                            $('#charges_per_kg').val('');
-                        }
-                        if(data.status === 5) {
-                            $('#span').remove();
-                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#consignee_city').parent('div').append(span);
-                            $('#actual_weight').val('');
-                            $('#charges_per_kg').val('');
-                        }
-                        if(data.status === 6) {
-                            $('#span').remove();
-                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#shipping_mode').parent('div').append(span);
-                            $('#actual_weight').val('');
-                            $('#charges_per_kg').val('');
-                        }
-                        if(data.status === 2) {
-                            $('#span').remove();
-                            $('#sub_book').prop('disabled', false);
-                            $('#sub_book_print').prop('disabled', false);
-                        }
+                        $('#actual_weight').val('');
+                        $('#charges_per_kg').val('');
+                    }
+                    if(data.status === 4) {
+                        $('#span').remove();
+                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                        $('#delivery_type').parent('div').append(span);
+                        $('#actual_weight').val('');
+                        $('#charges_per_kg').val('');
+                    }
+                    if(data.status === 5) {
+                        $('#span').remove();
+                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                        $('#consignee_city').parent('div').append(span);
+                        $('#actual_weight').val('');
+                        $('#charges_per_kg').val('');
+                    }
+                    if(data.status === 6) {
+                        $('#span').remove();
+                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                        $('#shipping_mode').parent('div').append(span);
+                        $('#actual_weight').val('');
+                        $('#charges_per_kg').val('');
+                    }
+                    if(data.status === 2) {
+                        $('#span').remove();
+                        $('#sub_book').prop('disabled', false);
+                        $('#sub_book_print').prop('disabled', false);
+                    }
                 });
             });
 
@@ -566,7 +570,7 @@
 
             });
 
-            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+            $('#shipping_mode').select2({
                 width: '100%',
                 placeholder: 'Mode of Shipping*'
             }).bind('change', function() {
@@ -618,10 +622,12 @@
                 }
             });
 
-            $('.phone_number').inputmask({
+            /*$('.phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
-            });
+            });*/
+
+            $('.phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
 
             $('.quantity').TouchSpin({
                 min: 1,
@@ -652,6 +658,12 @@
                 'allowMinus': false,
                 'allowPlus': false,
                 'max': 1000000
+            });
+
+            $('.postal_code').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
 
 

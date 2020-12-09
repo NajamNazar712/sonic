@@ -2,13 +2,18 @@
 
 namespace App\Http\controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\InternationalRatesHub;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\Zone;
@@ -63,7 +68,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -98,6 +103,7 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->walk_in_delivery_type_id = $delivery_type;
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->packaging_charges = $packaging_charges;
+        $shipment->business_category_id = $business_category_id;
 
         $self_collection = FALSE;
 
@@ -313,8 +319,8 @@ class AdminWalkInBookShipmentController extends Controller
                         }
 
                     }
-
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup);
+                    $business_category_id = 1;
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id);
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -995,7 +1001,7 @@ class AdminWalkInBookShipmentController extends Controller
                 $min_charges = $min_charges['chargeable_weight_local'];
             } else {
                 $city = City::where('id', $request->consignee_city)->first();
-                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                    $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
                 if ($zone_class['class'] == 1) {
                     $min_charges = $min_charges['chargeable_weight_charges_class_1'];
                 } elseif ($zone_class['class'] == 2) {
@@ -1087,5 +1093,296 @@ class AdminWalkInBookShipmentController extends Controller
             $datatable->whereBetween('shipments.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function international_book_index()
+    {
+        $check_id = GlobalSettings::select('setting_value')->where('type', "Walk-In")->first();
+        $user_id = $check_id['setting_value'];
+        $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
+        $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
+        $cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
+            ->select('c.name as city_name', 'c.id as city_id')->where('walk_in_cities.pickup', 1)->get();
+        $consignee_cities = City::join('walk_in_international_standard_weight_charge_hubs as wiiswch', 'wiiswch.hub_id', '=', 'cities.hub_id')->where('cities.status', 1)->where('cities.hub', 0)->where('cities.business_category_id', 2)->whereNotNull('cities.zone_id')->groupBy('cities.id')->orderBy('cities.name')->select('cities.name','cities.id')->groupBy('cities.id')->get();
+        $products = Product::orderBy('product_name')->get();
+        $shipping_mode = ShippingMode::where('id', 2)->get();
+        $delivery_type = DeliveryType::orderBy('delivery_type')->get();
+        $charges_modes = ChargesModes::whereIn('id', [1, 2])->get();
+        $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
+        $packaging_sizes = PackagingMaterialTypeSizes::all();
+        return view('admin.shipment.book.international_book.international_walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode, 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'consignee_cities' => $consignee_cities, 'packaging_types' => $packaging_type, 'packaging_sizes' => $packaging_sizes]);
+    }
+
+    public function international_walk_in_store(Request $request) {
+        $test = 0;
+        $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+
+        $user_id = $check_id['setting_value'];
+
+        if (!empty($request->input('shipping_mode'))) {
+
+            $service_type_id = 1;
+
+            if ($request->input('pickup_address') == 0) {
+                $pickup_city_id = $request->input('new_pickup_city');
+                $new_pickup_address = City::select('name')->where('id',$pickup_city_id)->first();
+                $pickup_address = 'TRAX Office ' . $new_pickup_address['name'];
+                $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address, $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+            }
+            else {
+                $pickup_address_id = $request->input('pickup_address');
+
+                $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+
+                $pickup_city_id = $user_shipping_info->city_id;
+            }
+
+            $information_display = TRUE;
+
+            if(isset($request->consignee_address)) {
+                $address = $request->input('consignee_address');
+            }
+            else{
+                $city_check = City::select('name')->where('id',$request->input('consignee_city'))->first();
+                $address = 'TRAX Office ' . $city_check['name'];
+            }
+            $consignee_city_id = $request->input('consignee_city');
+            $consignee_name = $request->input('consignee_name');
+            $consignee_address = $address;
+            $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
+
+            if ($request->filled('consignee_phone_number_2')) {
+                $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
+            }
+            else {
+                $consignee_phone_number_2 = NULL;
+            }
+
+            if ($request->filled('consignee_email_address')) {
+                $consignee_email_address = $request->input('consignee_email_address');
+            }
+            else {
+                $consignee_email_address = NULL;
+            }
+
+            if ($request->filled('order_id')) {
+                $order_id = $request->input('order_id');
+            }
+            else {
+                $order_id = NULL;
+            }
+
+            if ($request->filled('package_type')) {
+                $package_type = TRUE;
+            }
+            else {
+                $package_type = FALSE;
+            }
+
+            $packaging_charges = $request->packaging_charges;
+
+
+            $pickup_date = Carbon::now();
+
+            if ($request->filled('special_instructions')) {
+                $special_instructions = $request->input('special_instructions');
+            }
+            else {
+                $special_instructions = NULL;
+            }
+
+            $shipping_mode_id = $request->input('shipping_mode');
+
+            if ($request->input('shipping_mode') == 4) {
+                $same_day_timing_id = $request->input('same-day_timing');
+            }
+            else {
+                $same_day_timing_id = NULL;
+            }
+
+            $delivery_type = $request->delivery_type;
+            $charges_mode_id = $request->charges_mode;
+            $pickup = 0;
+            if($request->filled('pickup')){
+                $pickup = 1;
+                $actual_weight = 0;
+                $charges_per_kg = 0;
+                $weight_charges = 0;
+                $fuel_surcharge = 0;
+                $gst = 0;
+                $amount = 0;
+                $r_amount = 0;
+
+            }else{
+                $actual_weight = $request->actual_weight;
+                $charges_per_kg = $request->charges_per_kg;
+                $weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
+                $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipping_mode_id)->first();
+                $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
+                $city = City::where('id',$pickup_city_id)->first();
+                $zone = Zone::where('id',$city['zone_id'])->first();
+                $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
+
+                if($request->charges_mode == 1) {
+                    $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                    $amount = 0;
+
+                    $r_amount = $receivable;
+                }
+                else{
+                    $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                    $amount = $receivable;
+
+                    $r_amount = NULL;
+                }
+
+            }
+            $business_category_id = 2;
+
+            $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id);
+
+            $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+
+            $international_shipment = new InternationalShipment();
+            $international_shipment->shipment_id = $shipment_id;
+            $international_shipment->postal_code = $request->input('postal_code');
+            $international_shipment->save();
+
+            $product_type_id = $request->input('product_type');
+
+            if ($request->filled('item_description')) {
+                $item_description = $request->input('item_description');
+            }
+            else {
+                $item_description = NULL;
+            }
+
+            $item_quantity = $request->input('item_quantity');
+
+            $type = 0;
+
+            $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
+
+            if($request->filled('pickup')){
+                $walkin_weight = new WalkinShipmentWeightCharges();
+                $walkin_weight->shipment_id = $shipment_id;
+                $walkin_weight->charges_per_kg = $request->charges_per_kg;
+                $walkin_weight->save();
+            }
+
+            if($request->has('pack_type')){
+
+                $pickup_address_details = UserShippingInfo::find($pickup_address_id);
+                $hub_id = $pickup_address_details->city->hub_id;
+
+                $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
+
+                $fulfilment_hub = $fulfilment_hub->first();
+
+                $warehouse_id = $fulfilment_hub->warehouse_id;
+
+                $packaging_types = PackagingMaterialTypes::all();
+                $packaging_sizes = PackagingMaterialTypeSizes::all();
+                foreach ($packaging_types as $ptype) {
+                    foreach ($packaging_sizes as $psize) {
+                        $index = (int)($ptype->id . $psize->id);
+
+                        if (array_key_exists($index, $request->pack_type)) {
+                            $test += 1;
+                            $packaging_history = new WalkInShipmentPackagingMaterialHistory();
+                            $packaging_history->shipment_id = $shipment_id;
+                            $packaging_history->type_id = $request->pack_type[$index];
+                            $packaging_history->size_id = $request->pack_size[$index];
+                            $packaging_history->quantity = $request->pack_quantity[$index];
+                            $packaging_history->save();
+
+                            $type_id = $request->pack_type[$index];
+                            $type_size_id = $request->pack_size[$index];
+                            $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id])->first();
+
+                            $stock->stock = $stock['stock'] - $request->pack_quantity[$index];
+                            $stock->save();
+
+                        }
+                    }
+                }
+            }
+//                NotificationsController::send(2, $shipment_id);
+
+            $shipment_ids = array($shipment_id);
+            if($pickup == 0){
+                NotificationsController::send(85, $shipment_ids , Auth::id());
+            }
+
+            if ($request->filled('book_and_print')) {
+                $print = $shipment_id;
+            }
+            else {
+                $print = FALSE;
+            }
+            return redirect()->back()->with(['success' => $test .' Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+        }
+        else {
+            return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
+        }
+    }
+    public function check_international_standard_weight(Request $request){
+        if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->pickup != null) {
+            $city = City::find($request->consignee_city);
+            $hub_id = $city->hub->id;
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
+            $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+
+            if($request->delivery_type == 1){
+                $actual_weight = $check->door_actual_weight;
+                $chargeable_weight = $check->door_chargeable_weight;
+            }
+            else{
+                $actual_weight = $check->hub_actual_weight;
+                $chargeable_weight = $check->hub_chargeable_weight;
+            }
+            if($request->pickup == false){
+                if ($request->actual_weight < $actual_weight) {
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $actual_weight]);
+                }
+            }
+
+            if ($request->charges_per_kg < $chargeable_weight) {
+                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $chargeable_weight]);
+            }
+
+            return response()->json(['status' => 2, 'error' => '']);
+        }
+        else{
+            if($request->pickup_city == null){
+                return response()->json(['status' => 3, 'error' => 'Pickup city is required']);
+            }
+            elseif($request->delivery_type == null){
+                return response()->json(['status' => 4, 'error' => 'Delivery type is required']);
+            }
+            elseif($request->consignee_city == null){
+                return response()->json(['status' => 5, 'error' => 'Consignee city is required']);
+            }
+            elseif($request->shipping_mode == null){
+                return response()->json(['status' => 6, 'error' => 'Shipping mode is required']);
+            }
+        }
+    }
+
+    public function check_international_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $min_charges = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+            if($request->delivery_type == 1){
+                $min_charges = $min_charges->door_chargeable_weight;
+            }
+            else{
+                $min_charges = $min_charges->hub_chargeable_weight;
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
+        }
     }
 }

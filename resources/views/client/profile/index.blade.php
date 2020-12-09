@@ -118,6 +118,13 @@
                                                     <td>{{$reference->name}}</td>
                                                 </tr>
                                             @endif
+                                            @if($user->segment_id != null)
+                                                <tr>
+                                                    <td><b>Segment</b></td>
+                                                    <td>{{$user->segments->name}}
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             {{--@if($user->account_type_id == 2)
                                                 <tr>
                                                     <td style="vertical-align: middle;"><b>Invoice Grouping</b></td>
