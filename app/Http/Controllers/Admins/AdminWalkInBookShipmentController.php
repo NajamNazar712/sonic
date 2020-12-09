@@ -486,12 +486,12 @@ class AdminWalkInBookShipmentController extends Controller
                     }
                     if($request->pickup == false){
                         if ($request->actual_weight < $check['actual_weight']) {
-                            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                         }
                     }
 
                     if ($request->charges_per_kg < $check_zone) {
-                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
+                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' . $check_zone]);
                     }
 
                     return response()->json(['status' => 2, 'error' => '']);
@@ -503,11 +503,11 @@ class AdminWalkInBookShipmentController extends Controller
             else{
                 if($request->pickup == false){
                     if ($request->actual_weight < $check['actual_weight']) {
-                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                     }
                 }
                 if ($request->charges_per_kg < $check['chargeable_weight_local']) {
-                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' .  $check['chargeable_weight_local']]);
+                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' .  $check['chargeable_weight_local']]);
                 } else {
                     return response()->json(['status' => 2, 'error' => '']);
                 }
@@ -1122,7 +1122,7 @@ class AdminWalkInBookShipmentController extends Controller
 
         if (!empty($request->input('shipping_mode'))) {
 
-            $service_type_id = 1;
+            $service_type_id = 4;
 
             if ($request->input('pickup_address') == 0) {
                 $pickup_city_id = $request->input('new_pickup_city');
@@ -1347,12 +1347,12 @@ class AdminWalkInBookShipmentController extends Controller
             }
             if($request->pickup == false){
                 if ($request->actual_weight < $actual_weight) {
-                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $actual_weight]);
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $actual_weight]);
                 }
             }
 
             if ($request->charges_per_kg < $chargeable_weight) {
-                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $chargeable_weight]);
+                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' . $chargeable_weight]);
             }
 
             return response()->json(['status' => 2, 'error' => '']);
