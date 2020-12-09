@@ -290,7 +290,7 @@ class AdminInternationalRatesController extends Controller
             $intl_user_information->status = 1;
             $intl_user_information->save();
             $user = User::find($shipper_id);
-            if($user != 3){
+            if($user->status != 3){
                 $user->status = 3;
                 $user->save();
             }
