@@ -43,6 +43,9 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
+                if(InternationalUsersInformation::where('user_id', $user->id)->exists()){
+                    return redirect()->back()->with('error', 'Rates already added!');
+                }
                 $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
 
                 return view('admin.international.rates.add_rates')->with(['cities' => $cities, 'shipper' => $user]);
@@ -215,6 +218,8 @@ class AdminInternationalRatesController extends Controller
                 $intl_discount->save();
             }
         }
+        User::where('id',$shipper_id)->update(['status' => 1,'rates_added_by'=>Auth::id()]);
+
         if($request->has('rate_remarks') && $request->rate_remarks != null){
             $rate_remark = new InternationalRatesRemark();
             $rate_remark->user_id = $shipper_id;
@@ -222,7 +227,13 @@ class AdminInternationalRatesController extends Controller
             $rate_remark->admin_id = Auth::id();
             $rate_remark->save();
         }
-        return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
+        $user = User::find($shipper_id);
+        if($user->status == 3){
+            return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
+        }
+        else{
+            return redirect()->route('admin.accounts.pending')->with('success', 'Rates added successfully!');
+        }
 
     }
 	 public function edit_rates_index($id){
@@ -276,6 +287,7 @@ class AdminInternationalRatesController extends Controller
 
     public function edit_rates_submit(Request $request){
         $shipper_id = $request->shipper_id;
+        $user = User::find($shipper_id);
         $box_ids = $request->box_ids;
         if(count($box_ids) == 0){
             return redirect()->back()->with('error', 'Rates not submitted properly!');
@@ -284,7 +296,15 @@ class AdminInternationalRatesController extends Controller
             $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
             $intl_user_information->status = 1;
             $intl_user_information->save();
+
+            if($user->status != 3){
+                $user->status = 2;
+                $user->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
             return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+
+
         }
         elseif ($request->approve == 1) {
             $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
@@ -477,7 +497,12 @@ class AdminInternationalRatesController extends Controller
                 $rate_remark->admin_id = Auth::id();
                 $rate_remark->save();
             }
-            return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+            if($user->status == 3){
+                return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+            }
+            else {
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
         }
         else{
             $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
@@ -647,6 +672,7 @@ class AdminInternationalRatesController extends Controller
                 $rate_remark->admin_id = Auth::id();
                 $rate_remark->save();
             }
+
             return redirect()->back()->with('success', 'Rates updated successfully!');
         }
 

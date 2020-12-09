@@ -10,10 +10,10 @@
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book</span></a>
                         <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(1, session('permissions')))
-                            @if (session('account_type') == 1)
+                            @if (session('account_type') == 1 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
-                            @elseif (session('account_type') == 2)
+                            @elseif (session('account_type') == 2 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif

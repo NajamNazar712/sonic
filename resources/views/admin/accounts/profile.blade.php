@@ -440,33 +440,33 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
+
                         <div class="col-md-6">
                             <div class="form-group row">
                                 <div class="form-group col-md-9">
                                     <label for="segments">Segments:
                                         <span class="danger">*</span>
                                     </label>
-                                    <div>
-                                        <select name="segment_id" id="segment_id" data-rule-required="true" data-msg-required="Segment is required" class="select2 form-control required" style="width: 100%">
-                                            @foreach($segments as $segment)
-                                                <option value="{{$segment->id}}" {{ $user->segment_id == $segment->id ? 'selected' : '' }} >{{$segment->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+
+                                    <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
+                                        @foreach($segments as $segment)
+                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                                <div class="col-md-6">
-                                    <div class="form-group row">
-                                        <div class="col-md-9">
-                                            <label>STRN Number</label>
-                                            <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
-                                        </div>
-                                    </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <div class="col-md-9">
+                                    <label>STRN Number</label>
+                                    <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
                                 </div>
-                                <div class="col-md-6">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
                                     <div class="form-group row">
                                         <div class="col-md-9">
                                             <label>Brand Name</label>
@@ -474,7 +474,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+
+                        </div>
                         <div class="form-actions right">
                             <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                 Cancel
@@ -821,6 +822,14 @@
                 $("#tabs").hide();
                 generation(cycle);
             });
+            $('#segment_id').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Segment",
+                width:'100%',
+            });
+            @if($user->segment_id != null)
+            var segment_id = {!! $user->segment_id !!};
+            $('#segment_id').val(segment_id).trigger('change');
+            @endif
             $('#cancel-button-profile').click(function () {
                 $("#profile-form").hide();
                 $("#profile-form").validate().resetForm();
@@ -828,7 +837,7 @@
                 $("#profile-form").find(".danger").removeClass("danger");
                 $("#city_id").val("{{$user->city_id}}").trigger('change');
                 $("#product_id").val("{{$user->product_id}}").trigger('change');
-                $("$segments").val("{{$user->segment_id}}").trigger('change');
+                $("#segment_id").val(segment_id).trigger('change');
                 $("#tabs").show();
             });
             $('#cancel-button-bank').click(function () {
