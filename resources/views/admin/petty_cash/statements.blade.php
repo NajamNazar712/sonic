@@ -221,12 +221,13 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
+                @if (session('role_id') == 1 || in_array(190, session('permissions')))
                     {
                         className: 'btn btn-primary station',
                         text: 'Station Approved',
                         enabled: false,
-                        action: function (e, dt, node, config) {
 
+                        action: function (e, dt, node, config) {
                             $('input:hidden[name=statement_ids]').val(selected_rows);
 
                             if(selected_rows.length === 0){
@@ -286,7 +287,11 @@
                                 table.button('.station').disable();
                             }
                         }
-                    }, {
+                    },
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(191, session('permissions')))
+                    {
                         className: 'btn btn-primary operation',
                         text: 'Operation Approved',
                         enabled: false,
@@ -352,7 +357,9 @@
                                 table.button('.operation').disable();
                             }
                         }
-                    }, {
+                    },
+                        @endif
+                    {
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
                         action: function (e, dt, node, config) {
@@ -459,7 +466,7 @@
                     }
                 },
                 rowId: 'statement_id',
-                order: [1, 'desc'],
+                order: [8, 'desc'],
                 columns: [
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
