@@ -561,6 +561,7 @@
 
                                     @if ($user_information->status == 4 && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
                                     @if ($user_information->status == 2 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>

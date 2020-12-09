@@ -486,12 +486,12 @@ class AdminWalkInBookShipmentController extends Controller
                     }
                     if($request->pickup == false){
                         if ($request->actual_weight < $check['actual_weight']) {
-                            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                         }
                     }
 
                     if ($request->charges_per_kg < $check_zone) {
-                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
+                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' . $check_zone]);
                     }
 
                     return response()->json(['status' => 2, 'error' => '']);
@@ -503,11 +503,11 @@ class AdminWalkInBookShipmentController extends Controller
             else{
                 if($request->pickup == false){
                     if ($request->actual_weight < $check['actual_weight']) {
-                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                     }
                 }
                 if ($request->charges_per_kg < $check['chargeable_weight_local']) {
-                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' .  $check['chargeable_weight_local']]);
+                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' .  $check['chargeable_weight_local']]);
                 } else {
                     return response()->json(['status' => 2, 'error' => '']);
                 }
@@ -1103,7 +1103,8 @@ class AdminWalkInBookShipmentController extends Controller
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
         $cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
             ->select('c.name as city_name', 'c.id as city_id')->where('walk_in_cities.pickup', 1)->get();
-        $consignee_cities = City::join('walk_in_international_standard_weight_charge_hubs as wiiswch', 'wiiswch.hub_id', '=', 'cities.id')->where('cities.status', 1)->where('cities.hub', 0)->where('cities.business_category_id', 2)->whereNotNull('cities.zone_id')->groupBy('cities.id')->orderBy('cities.name')->select('cities.name','cities.id')->groupBy('wiiswch.hub_id')->get();
+        $allowed_hubs = WalkInInternationalStandardWeightChargeHub::pluck('hub_id')->toArray();
+        $consignee_cities = City::whereIn('hub_id', $allowed_hubs)->where('cities.status', 1)->where('cities.hub', 0)->where('cities.business_category_id', 2)->whereNotNull('cities.zone_id')->groupBy('cities.id')->orderBy('cities.name')->select('cities.name','cities.id')->groupBy('cities.id')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id', 2)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
@@ -1121,7 +1122,7 @@ class AdminWalkInBookShipmentController extends Controller
 
         if (!empty($request->input('shipping_mode'))) {
 
-            $service_type_id = 1;
+            $service_type_id = 4;
 
             if ($request->input('pickup_address') == 0) {
                 $pickup_city_id = $request->input('new_pickup_city');
@@ -1331,7 +1332,9 @@ class AdminWalkInBookShipmentController extends Controller
     }
     public function check_international_standard_weight(Request $request){
         if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->pickup != null) {
-            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $city = City::find($request->consignee_city);
+            $hub_id = $city->hub_id;
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
             $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
 
             if($request->delivery_type == 1){
@@ -1344,12 +1347,12 @@ class AdminWalkInBookShipmentController extends Controller
             }
             if($request->pickup == false){
                 if ($request->actual_weight < $actual_weight) {
-                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $actual_weight]);
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $actual_weight]);
                 }
             }
 
             if ($request->charges_per_kg < $chargeable_weight) {
-                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $chargeable_weight]);
+                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater than or equal to ' . $chargeable_weight]);
             }
 
             return response()->json(['status' => 2, 'error' => '']);
@@ -1372,7 +1375,9 @@ class AdminWalkInBookShipmentController extends Controller
 
     public function check_international_min_charges(Request $request){
         if($request->pickup_city != null && $request->consignee_city != null) {
-            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $city = City::find($request->consignee_city);
+            $hub_id = $city->hub_id;
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
             $min_charges = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
             if($request->delivery_type == 1){
                 $min_charges = $min_charges->door_chargeable_weight;
