@@ -1331,7 +1331,9 @@ class AdminWalkInBookShipmentController extends Controller
     }
     public function check_international_standard_weight(Request $request){
         if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->pickup != null) {
-            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $request->consignee_city)->first();
+            $city = City::find($request->consignee_city);
+            $hub_id = $city->hub->id;
+            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
             $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
 
             if($request->delivery_type == 1){
