@@ -86,7 +86,7 @@ class ShopifyController extends Controller
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                    <link rel="stylesheet" type="text/css" href="' . public_path('app-assets/css/bootstrap.min.css') . '">
 
                     <title>Shopify Invoice</title>
 
@@ -129,18 +129,7 @@ class ShopifyController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-
-                      td.replacement span {
-                        width: 22px;
-                      }
-
-                      td.replacement span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
+                      
                       p{
                       font-size: 18px;
                       }
@@ -150,95 +139,101 @@ class ShopifyController extends Controller
                     </style>
                   </head>
                   <body>
-                    <div>
+                    <div class="border pt-1">
       ';
-            $image = asset('storage/shopify_invoice_logos/' . $invoice->image);
-            $html .= '<div class="container-fluid">
-                        <div class="row mb-2 p-1">
-                            <div class="col-6 text-left">
-                             <img src="'. $image .'" width="100" class="d-block mb-1">
-                            </div>
-                            <div class="col-6 text-right">Invoice for #' . $order['order'] . '</div>
-                            <div class="col-12"><h2>'. $user .'</h2></div>
-                            <h5 class="col-12">'. $invoice->address .'</h5>
-                            <div class="col-12 border-bottom"></div>
-                        </div>
-                        
-                             
-                             <div class="col-12">
-                                <h1>Item Details</h1>
-                             </div>
-                             
-                             
-                            <div class="col-12">
-                                <table class="table border">
-                                    <thead>
-                                        <tr>
-                                            <td>Quantity</td>
-                                            <td>Item</td>
-                                            <td>Price</td>
-                                        </tr>
-                                        
-                                    </thead>
-                                    <tbody>';
-                            foreach ($order['items'] as $item){
-                                $html .='<tr>
-                                            <td>'. $item['quantity'] .'x</td>
-                                            <td>'. $item['name'] .'</td>
-                                            <td>'. $item['price'] .'</td>
-                                        </tr>';
-                            }
 
-        $html .='                </tbody>
-                                </table>
+            $html .= '<div class="container-fluid">
+                        <div class="row no-gutters">
+                            <div class="col-6 text-left">
+                             <img src="'. public_path('storage/shopify_invoice_logos/' . $invoice->image).'" width="100" class="d-block mb-1">
                             </div>
+                            <div class="col-6 text-right"><h3>Invoices for #' . $order['order'] . '</h3></div>
+                        </div>
+                        <div>
+                            <div><h2>'. $user.'</h2></div>
+                        </div>
+                        <div>
+                            <div><h5>'. $invoice->address .'</h5></div>
+                            <div class="border-bottom mt-2 mb-2"></div>
+                        </div>
                              
-                             <div class="col-12">
-                                <h1>Payment Details</h1>
-                             </div>
+                         <div>
+                            <h1>Item Details</h1>
+                         </div>
                              
-                             <div class="col-12">
-                             <table class="table border">
-                                 <tbody>
-                                 <tr>
-                                     <td>Subtotal price: </td><td>'. $order['subtotal_price'] .'</td>
-                                 </tr>
-                                 <tr>
-                                     <td>Total tax:</td><td>'. $order['total_tax'] .'</td>
-                                 </tr>
-                                 <tr>
-                                     <td>Shipping</td><td>'. $order['shipping'] .'</td>
-                                 </tr>
-                                 <tr>
-                                     <td>Total price:</td><td>'. $order['total_price'] .'</td>
-                                 </tr>
-                                 <tr>
-                                     <td>Total paid</td><td>'. $order['total_paid'] .'</td>
-                                 </tr>
-                                 <tr>
-                                     <td>Outstanding Amount:</td><td>'. $order['outstanding_amount'] .'</td>
-                                 </tr>
-                                 </tbody>
-                             </table>
-                             </div> 
-                             <div class="col-12">
-                                <h1>Shipping Details</h1>
-                             </div>   
-                             <div class="col-12">
-                             <div class="col-12 border p-2">
+                             
+                        <div>
+                            <table class="table border">
+                                <thead>
+                                    <tr>
+                                        <td>Quantity</td>
+                                        <td>Item</td>
+                                        <td>Price</td>
+                                    </tr>
+                                    
+                                </thead>
+                                <tbody>';
+                        foreach ($order['items'] as $item){
+                            $html .='<tr>
+                                        <td>'. $item['quantity'] .'x</td>
+                                        <td>'. $item['name'] .'</td>
+                                        <td>Rs.'. $item['price'] .'</td>
+                                    </tr>';
+                        }
+
+    $html .='                </tbody>
+                            </table>
+                        </div>
+                             
+                         <div class="mb-1">
+                            <h1>Payment Details</h1>
+                         </div>
+                             
+                         <div>
+                         <table class="table border">
+                             <tbody>
+                             <tr>
+                                 <td>Subtotal price: </td><td>Rs.'. $order['subtotal_price'] .'</td>
+                             </tr>
+                             <tr>
+                                 <td>Total tax: </td><td>Rs.'. $order['total_tax'] .'</td>
+                             </tr>
+                             <tr>
+                                 <td>Shipping: </td><td>Rs.'. $order['shipping'] .'</td>
+                             </tr>
+                             <tr>
+                                 <td><b>Total price:</b></td><td><b>Rs.'. $order['total_price'] .'</b></td>
+                             </tr>
+                             <tr>
+                                 <td><b>Total paid: </b></td><td><b>Rs.'. $order['total_paid'] .'</b></td>
+                             </tr>
+                             <tr>
+                                 <td><b>Outstanding Amount:</b></td><td><b>Rs.'. $order['outstanding_amount'] .'</b></td>
+                             </tr>
+                             </tbody>
+                         </table>
+                         </div> 
+                         <div class="mb-1">
+                            <h1>Shipping Details</h1>
+                         </div>   
+                         <div>
+                             <div class="border p-2">
                                 <h3 class="">'. $order['consignee_name'] .'</h3>
                                 <p>'. $order['consignee_address'] .'</p>
                                 <p class="mb-0">Phone: '. $order['consignee_phone'] .'</p>
                             </div>
+                        </div>
                             
-                            <div class="col-12">
-                                <p>'.  $invoice->message .'</p>
-                            </div>
-                            </div>
+                        <div class="mb-2 mt-2">
+                            <p>'.  $invoice->message .'</p>
+                        </div>
+                      </div>
                              
                       </div>';
 
             $html .= '
+<div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     </div>
                   </body>
                 </html>

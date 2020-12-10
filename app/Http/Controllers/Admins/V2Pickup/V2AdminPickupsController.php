@@ -365,8 +365,10 @@ class V2AdminPickupsController extends Controller
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
                     }
-                    NotificationsController::send(106, $riders, $pickup_request_id);
-                    NotificationsController::send(107, $riders, $pickup_request_id);
+                    if($riders['old_rider_id'] != null && $riders['new_rider_id'] != null){
+                        NotificationsController::send(106, $riders, $pickup_request_id);
+                        NotificationsController::send(107, $riders, $pickup_request_id);
+                    }
 
                 }
 
