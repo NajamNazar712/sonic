@@ -278,7 +278,6 @@ class AdminInternationalRatesController extends Controller
                         $discount_charges[$dis_charges->box_id]['return'] = $dis_charges->return;
                     }
                 }
-                dd($rate_statuses);
                 return view('admin.international.rates.edit_rates')->with(['cities' => $cities, 'shipper' => $user, 'user_information' => $user_information, 'rate_statuses' => $rate_statuses, 'weight_charges' => $weight_charges, 'rates_hubs' => $rates_hubs, 'cash_handling_charges' => $cash_handling_charges, 'insurance_charges' => $insurance_charges, 'return_charges' => $return_charges, 'discount_charges' => $discount_charges]);
             }
             return redirect()->back()->with('error', 'No User Found!');
