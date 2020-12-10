@@ -80,10 +80,16 @@
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Shipper Name');
+                            head.push('Status');
+                            head.push('Last Status');
+                            head.push('Arrival Status Date');
                             head.push('Delivery Date');
                             head.push('Dispatch Date');
-                            head.push('Status');
                             head.push('Added By');
+                            head.push('On-Hold');
                             head.push('Created At');
 
                             $.each(result.data, function(index, values) {
@@ -91,11 +97,18 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.shipper_name);
+                                row.push(values.status);
+                                row.push(values.last_status_date);
+                                row.push(values.arrival_status_date);
                                 row.push(values.delivery_date);
                                 row.push(values.dispatch_date);
                                 row.push(values.status);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.shipment_on_hold_status);
 
                                 body.push(row);
                             });
@@ -112,7 +125,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Walk-In Booking History',
+                        title: 'Supply Chain Shipment On Hold History',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
