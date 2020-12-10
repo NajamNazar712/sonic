@@ -7303,6 +7303,8 @@ class AdminDashboardController extends Controller
                         return "Rejected";
                     }elseif($users->international_rate_status == 4){
                         return "Requested";
+                    }elseif($users->international_rate_status == 5){
+                        return "Rejected";
                     }
                 }
                 else{

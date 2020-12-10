@@ -218,7 +218,6 @@ class AdminInternationalRatesController extends Controller
                 $intl_discount->save();
             }
         }
-        User::where('id',$shipper_id)->update(['status' => 1,'rates_added_by'=>Auth::id()]);
 
         if($request->has('rate_remarks') && $request->rate_remarks != null){
             $rate_remark = new InternationalRatesRemark();
@@ -232,6 +231,7 @@ class AdminInternationalRatesController extends Controller
             return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
         }
         else{
+            User::where('id',$shipper_id)->update(['status' => 1,'rates_added_by'=>Auth::id()]);
             return redirect()->route('admin.accounts.pending')->with('success', 'Rates added successfully!');
         }
 
@@ -242,7 +242,7 @@ class AdminInternationalRatesController extends Controller
             if($user){
                 $cities = City::where('business_category_id', 2)->where('hub', 1)->select('id', 'name')->get();
                 $user_information = InternationalUsersInformation::where('user_id', $user->id)->first();
-                if($user_information->status == 1 || $user_information->status == 4){
+                if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                     $rate_statuses = InternationalRatesStatus::where('user_id', $user->id)->get();
                     $weight_charges = InternationalRatesWeightCharges::where('user_id', $user->id)->get();
                     $rates_hubs = InternationalRatesHub::where('user_id', $user->id)->get();
@@ -278,6 +278,7 @@ class AdminInternationalRatesController extends Controller
                         $discount_charges[$dis_charges->box_id]['return'] = $dis_charges->return;
                     }
                 }
+                dd($rate_statuses);
                 return view('admin.international.rates.edit_rates')->with(['cities' => $cities, 'shipper' => $user, 'user_information' => $user_information, 'rate_statuses' => $rate_statuses, 'weight_charges' => $weight_charges, 'rates_hubs' => $rates_hubs, 'cash_handling_charges' => $cash_handling_charges, 'insurance_charges' => $insurance_charges, 'return_charges' => $return_charges, 'discount_charges' => $discount_charges]);
             }
             return redirect()->back()->with('error', 'No User Found!');
@@ -704,7 +705,12 @@ class AdminInternationalRatesController extends Controller
         $shipper_id = $request->shipper_id;
         $reject_reason = $request->rejected_reason;
         $user_information = InternationalUsersInformation::where('user_id',$shipper_id)->first();
-        $user_information->status = 3;
+        if($request->authorization == 1){
+            $user_information->status = 5;
+        }
+        else{
+            $user_information->status = 3;
+        }
         $user_information->rejected_reason = $reject_reason;
         $user_information->save();
         return ['success' => 'Rates has been rejected!'];
