@@ -35,6 +35,9 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -1589,12 +1592,12 @@ class AdminReportsEmailController extends Controller
                     ->where('ds.delivery_note_id','=',
                         DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)')                        );
             })
-            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
+            ->leftJoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftJoin('pending_payment_shipments as pps', function ($join) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where('pps.id','=',
@@ -2122,11 +2125,9 @@ class AdminReportsEmailController extends Controller
 
     static public function overland_aging_report()
     {
-        $to = Carbon::today()->toDateString();
-        $from = Carbon::today()->subDays(7)->toDateString();
-        /*Carbon::setWeekendDays([
-            Carbon::SUNDAY,
-        ]);*/
+        $to = Carbon::yesterday()->toDateString();
+        $from = Carbon::parse($to)->subDays(7)->toDateString();
+        $today = Carbon::now();
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -2144,13 +2145,447 @@ class AdminReportsEmailController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-            })->select('shipments.id as shId', 'shipments.tracking_number as tracking', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub',  'shipments.consignee_address','ss.name as current_status', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival_date','shipments.actual_weight as actual_weight','shipments.chargeable_weight as chargeable_weight',DB::raw("CONCAT(DATEDIFF(shipments_journey.created_at, sj.created_at),'','days') as aging"))
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
+            })->select('shipments.id as shId', 'shipments.tracking_number as tracking', 'u.name as shipper','oc.id as origin_id','oc.name as origin', 'dc.name as destination','h.id as hub_id','h.name as hub',  'shipments.consignee_address','ss.name as current_status', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival_date','shipments.actual_weight as actual_weight','shipments.chargeable_weight as chargeable_weight')
             ->whereBetween('shipments_journey.created_at',[$from,$to])
             ->where('sm.id',2)
+            ->whereIn('shipments_journey.shipper_status_id',[2,3])
             ->groupBy('shipments.id')->get();
 
-            return $shipments;
+
+        Carbon::setWeekendDays([
+            Carbon::SUNDAY,]);
+
+        $day_wise = '<div class="mb-2">';
+        $day_wise = '<table style="width:100%;">';
+        $day_wise .= '<thead><tr>
+                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Days</th>
+                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Count</th>
+                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Ratio</th>';
+        $day_wise .= '</tr></thead><tbody>';
+        $days = array();
+        $days['zero'] = 0;
+        $days['one'] = 0;
+        $days['two'] = 0;
+        $days['three'] = 0;
+        $days['four'] = 0;
+        $days['five'] = 0;
+        $days['six'] = 0;
+        $days['total'] = 0;
+
+        foreach($shipments as $shipment){
+            $arrival_date = $shipment->arrival_date;
+            $today = Carbon::parse($today);
+            $arrival_date = Carbon::parse($arrival_date);
+            $aging = $arrival_date->diffInDays($today);
+
+            if($aging == 0){
+                $days['zero']++;
+                $days['total']++;
+            }
+            if($aging == 1){
+                $days['one']++;
+                $days['total']++;
+            }
+            elseif ($aging == 2){
+                $days['two']++;
+                $days['total']++;
+            }
+            elseif ($aging == 3){
+                $days['three']++;
+                $days['total']++;
+            }
+            elseif ($aging == 4){
+                $days['four']++;
+                $days['total']++;
+            }
+            elseif ($aging == 5){
+                $days['five']++;
+                $days['total']++;
+            }
+            elseif ($aging >= 6){
+                $days['six']++;
+                $days['total']++;
+            }
+
+        }
+        $days_ratio['zero'] = $days['zero']/$days['total'];
+        $days_ratio['one'] = $days['one']/$days['total'];
+        $days_ratio['two'] = $days['two']/$days['total'];
+        $days_ratio['three'] = $days['three']/$days['total'];
+        $days_ratio['four'] = $days['four']/$days['total'];
+        $days_ratio['five'] = $days['five']/$days['total'];
+        $days_ratio['six'] = $days['six']/$days['total'];
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">0</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['zero'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['zero'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">1</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['one'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['one'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">2</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['two'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['two'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">3</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['three'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['three'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">4</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['four'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['four'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">5</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['five'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['five'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">5+</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['six'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['six'] . '</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '<tr>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Grand Total</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .$days['total'] . '</td>';
+        $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+        $day_wise .= '</tr>';
+
+        $day_wise .= '</tbody></table>';
+        $day_wise .= '</div>';
+
+        //shipments in transit
+        $origin_wise = '<div class="mb-2">';
+        $origin_wise .= '<table style="width:100%;">';
+        $origin_wise .= '<thead><tr><th COLSPAN="10" style="border: 1px solid black; border-collapse: collapse;">Shipment-In Transit</th></tr><tr>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">0</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">1</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">2</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">3</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">4</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">5</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">5+</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Ratio</th>';
+        $origin_wise .= '</tr></thead><tbody>';
+
+        $days = array();
+        $days['zero'] = 0;
+        $days['one'] = 0;
+        $days['two'] = 0;
+        $days['three'] = 0;
+        $days['four'] = 0;
+        $days['five'] = 0;
+        $days['six'] = 0;
+        $days['total'] = 0;
+
+
+        foreach($shipments as $shipment){
+
+            $origin_id = $shipment->origin_id;
+            $arrival_date = $shipment->arrival_date;
+            $today = Carbon::parse($today);
+            $arrival_date = Carbon::parse($arrival_date);
+            $aging = $arrival_date->diffInDays($today);
+
+            if(!array_key_exists($origin_id, $days)){
+                $days[$origin_id]['zero'] = 0;
+                $days[$origin_id]['one'] = 0;
+                $days[$origin_id]['two'] = 0;
+                $days[$origin_id]['three'] = 0;
+                $days[$origin_id]['four'] = 0;
+                $days[$origin_id]['five'] = 0;
+                $days[$origin_id]['six'] = 0;
+                $days[$origin_id]['total'] = 0;
+            }
+            if($aging == 0){
+                $days[$origin_id]['zero']++;
+                $days[$origin_id]['total']++;
+            }
+            if($aging == 1){
+                $days[$origin_id]['one']++;
+                $days[$origin_id]['total']++;
+            }
+            elseif ($aging == 2){
+                $days[$origin_id]['two']++;
+                $days[$origin_id]['total']++;
+            }
+            elseif ($aging == 3){
+                $days[$origin_id]['three']++;
+                $days[$origin_id]['total']++;
+            }
+            elseif ($aging == 4){
+                $days[$origin_id]['four']++;
+                $days[$origin_id]['total']++;
+            }
+            elseif ($aging == 5){
+                $days[$origin_id]['five']++;
+                $days[$origin_id]['total']++;
+            }
+            elseif ($aging >= 6){
+                $days[$origin_id]['six']++;
+                $days[$origin_id]['total']++;
+            }
+        }
+
+        $origins = City::where('pickup', 1)->where('status', 1)->get();
+        $total_days['zero']['total'] = 0;
+        $total_days['one']['total'] = 0;
+        $total_days['two']['total'] = 0;
+        $total_days['three']['total'] = 0;
+        $total_days['four']['total'] = 0;
+        $total_days['five']['total'] = 0;
+        $total_days['six']['total'] = 0;
+        $total_days['row']['total'] = 0;
+        foreach($origins as $origin){
+            if(array_key_exists($origin->id, $days)){
+
+                $origin_wise .= '<tr>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $origin->name .'</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['zero'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['one'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['two'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['three'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['four'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['five'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['six'] . '</td>';
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['total'] . '</td>';
+
+                $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$origin->id]['zero'];
+                $total_days['one']['total'] = $total_days['one']['total'] + $days[$origin->id]['one'];
+                $total_days['two']['total'] = $total_days['two']['total'] + $days[$origin->id]['two'];
+                $total_days['three']['total'] = $total_days['three']['total'] + $days[$origin->id]['three'];
+                $total_days['four']['total'] = $total_days['four']['total'] + $days[$origin->id]['four'];
+                $total_days['five']['total'] = $total_days['five']['total'] + $days[$origin->id]['five'];
+                $total_days['six']['total'] = $total_days['six']['total'] + $days[$origin->id]['six'];
+                $total_days['row']['total'] = $total_days['row']['total'] + $days[$origin->id]['total'];
+
+                $ratio = $days[$origin_id]['total'] / $total_days['row']['total'];
+                $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $ratio .'</td>';
+                $origin_wise .= '</tr>';
+            }
+        }
+
+        $origin_wise .= '<tr>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['zero']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['one']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['two']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['three']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['four']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['five']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['six']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['row']['total']  . '</td>';
+        $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+        $origin_wise .='</tr>';
+        $origin_wise .= '</tbody></table>';
+        $origin_wise .= '</div>';
+
+
+        //In Transit Shipments Breakup
+        $hub_wise = '<div class="mb-2">';
+        $hub_wise .= '<table style="width:100%;">';
+        $hub_wise .= '<thead><tr><th COLSPAN="10" style="border: 1px solid black; border-collapse: collapse;">In Transit Shipments Breakup</th></tr><tr>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">0</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">1</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">2</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">3</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">4</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">5</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">5+</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</th>
+                      <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Ratio</th>';
+        $hub_wise .= '</tr></thead><tbody>';
+
+        $days = array();
+        $days['zero'] = 0;
+        $days['one'] = 0;
+        $days['two'] = 0;
+        $days['three'] = 0;
+        $days['four'] = 0;
+        $days['five'] = 0;
+        $days['six'] = 0;
+        $days['total'] = 0;
+
+
+        foreach($shipments as $shipment){
+            $hub_id = $shipment->hub_id;
+            $arrival_date = $shipment->arrival_date;
+            $today = Carbon::parse($today);
+            $arrival_date = Carbon::parse($arrival_date);
+            $aging = $arrival_date->diffInDays($today);
+
+            if(!array_key_exists($hub_id, $days)){
+                $days[$hub_id]['zero'] = 0;
+                $days[$hub_id]['one'] = 0;
+                $days[$hub_id]['two'] = 0;
+                $days[$hub_id]['three'] = 0;
+                $days[$hub_id]['four'] = 0;
+                $days[$hub_id]['five'] = 0;
+                $days[$hub_id]['six'] = 0;
+                $days[$hub_id]['total'] = 0;
+            }
+            if($aging == 0){
+                $days[$hub_id]['zero']++;
+                $days[$hub_id]['total']++;
+            }
+            if($aging == 1){
+                $days[$hub_id]['one']++;
+                $days[$hub_id]['total']++;
+            }
+            elseif ($aging == 2){
+                $days[$hub_id]['two']++;
+                $days[$hub_id]['total']++;
+            }
+            elseif ($aging == 3){
+                $days[$hub_id]['three']++;
+                $days[$hub_id]['total']++;
+            }
+            elseif ($aging == 4){
+                $days[$hub_id]['four']++;
+                $days[$hub_id]['total']++;
+            }
+            elseif ($aging == 5){
+                $days[$hub_id]['five']++;
+                $days[$hub_id]['total']++;
+            }
+            elseif ($aging >= 6){
+                $days[$hub_id]['six']++;
+                $days[$hub_id]['total']++;
+            }
+
+        }
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $total_days['zero']['total'] = 0;
+        $total_days['one']['total'] = 0;
+        $total_days['two']['total'] = 0;
+        $total_days['three']['total'] = 0;
+        $total_days['four']['total'] = 0;
+        $total_days['five']['total'] = 0;
+        $total_days['six']['total'] = 0;
+        $total_days['row']['total'] = 0;
+
+        foreach($hubs as $hub){
+            if(array_key_exists($hub->id, $days)){
+                $hub_wise .= '<tr>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $origin->name .'</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['zero'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['one'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['two'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['three'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['four'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['five'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['six'] . '</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['total'] . '</td>';
+
+                $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$hub->id]['zero'];
+                $total_days['one']['total'] = $total_days['one']['total'] + $days[$hub->id]['one'];
+                $total_days['two']['total'] = $total_days['two']['total'] + $days[$hub->id]['two'];
+                $total_days['three']['total'] = $total_days['three']['total'] + $days[$hub->id]['three'];
+                $total_days['four']['total'] = $total_days['four']['total'] + $days[$hub->id]['four'];
+                $total_days['five']['total'] = $total_days['five']['total'] + $days[$hub->id]['five'];
+                $total_days['six']['total'] = $total_days['six']['total'] + $days[$hub->id]['six'];
+                $total_days['row']['total'] = $total_days['row']['total'] + $days[$hub->id]['total'];
+
+                $ratio =  $days[$hub_id]['total'] / $total_days['row']['total'];
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $ratio .'</td>';
+                $hub_wise .= '</tr>';
+
+            }
+
+
+        }
+        $hub_wise .= '<tr>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['zero']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['one']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['two']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['three']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['four']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['five']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['six']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['row']['total']  . '</td>';
+        $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+        $hub_wise .='</tr>';
+        $hub_wise .= '</tbody></table>';
+        $hub_wise .= '</div>';
+
+
+        $html = '<div class="mb-4">';
+        $html .= '<table style="width:100%;">';
+        $html .= '<thead><tr>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Arrival Date</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status Date</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Aging</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Actual Weight</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Chargeable Weight</th>';
+        $html .= '</tr></thead><tbody>';
+        $serial = 1;
+
+        foreach($shipments as $shipment){
+            $tracking_number = $shipment->tracking;
+            $shipper = $shipment->shipper;
+            $origin = $shipment->origin;
+            $destination = $shipment->destination;
+            $hub = $shipment->hub;
+            $current_status = $shipment->current_status;
+            $arrival_date = $shipment->arrival_date;
+            $current_status_date = $shipment->current_status_date;
+            $today = Carbon::parse($today);
+            $arrival_date = Carbon::parse($arrival_date);
+            $aging = $arrival_date->diffInDays($today) . ' days';
+            $actual_weight = $shipment->actual_weight;
+            $chargeable_weight = $shipment->chargeable_weight;
+
+            $html .= '<tr>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tracking_number . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $destination . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $current_status . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $arrival_date . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $current_status_date . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $aging . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $actual_weight . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $chargeable_weight . '</td>';
+            $html .= '</tr>';
+            $serial++;
+        }
+        $html .= '</tbody></table>';
+        $html .= '</div>';
+
+
+        $table = $day_wise;
+        $table .= $origin_wise;
+        $table .= $hub_wise;
+        $table .= $html;
+
+        return $table;
 
 
     }

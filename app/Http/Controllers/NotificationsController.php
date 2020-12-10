@@ -6408,52 +6408,19 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);
                 }
                 else if ($id == 112) {
-//                    $date = $reference_1_id;
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+//
 //                    $file = $reference_2_id;
 //                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
 //                    if (strpos($body, '[link]') !== FALSE) {
 //                        $body = str_replace('[link]', $link, $body);
 //                    }
-                    $shipments = $reference_1_id;
+                    $data = $reference_1_id;
 
-                    $html = '<table style="width:100%;">';
-                    $html .= '<thead><tr>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Arrival Date</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status Date</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Aging</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Actual Weight</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Chargeable Weight</th>';
-                    $html .= '</tr></thead><tbody>';
-                    $serial = 1;
-                    foreach ($shipments as $index => $shipment) {
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['tracking'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['shipper'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['origin'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['destination'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['hub'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['current_status'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['arrival_date'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['current_status_date'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['aging'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['actual_weight'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment['chargeable_weight'] . '</td>';
-                        $html .= '</tr>';
-                        $serial++;
-                    }
-                    $html .= '</tbody></table>';
-
-                    if (strpos($body, '[preview]') !== FALSE) {
-                        $body = str_replace('[preview]', $html, $body);
-                    }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]',$data, $body);
+                        }
 
                     $admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
 
