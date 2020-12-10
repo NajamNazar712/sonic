@@ -26,7 +26,12 @@ class AppServiceProvider extends ServiceProvider
         view()->composer('*', function ($view) {
             if (Auth::guard('admin')->check()) {
                 $settings = GlobalSettings::where('type', 'admin_ticker');
-                $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id','name', 'url');
+                if(session('role_id') !== 1){
+                    $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id','name', 'url');
+                }
+                else{
+                    $search_sonic = AdminsScreenList::select('id','name', 'url');
+                }
             }
             else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
                 $settings = GlobalSettings::where('type', 'shipper_ticker');
@@ -50,7 +55,12 @@ class AppServiceProvider extends ServiceProvider
             if($search_sonic->exists()){
                 $search_sonic = $search_sonic->get();
                 if (!empty($search_sonic)) {
-                    $view->with('search_sonic', $search_sonic);
+                    $pages_list = array();
+                    foreach ($search_sonic as $search){
+                        $url = route("$search->url");
+                        $pages_list[] = ['name' => $search->name, 'url' => $url];
+                    }
+                    $view->with('search_sonic', $pages_list);
                 }
             }
         });

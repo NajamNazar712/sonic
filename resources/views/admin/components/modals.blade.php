@@ -379,42 +379,7 @@
 </div>
 <!--Shipment Charges Modal -->
 
-<!-- Global Search Sonic (Admin Side) -->
-<div class="modal fade text-left" id="GlobalSearchSonicModal" tabindex="-1" role="dialog" aria-labelledby="GlobalSearchSonicModal"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <select name="search_admin_sonic" id="search_admin_sonic" class="form-control select2">
-                                     @foreach($search_sonic as $search)
-                                        <option value="{{ $search->url }}">{{ $search->name }} ({{ $search->url  }})</option>
-                                    @endforeach
-                            </select>
-                                <span class="fa fa-search form-control-feedback"></span>
-                            <input type="text" class="form-control" placeholder="Search">
-                        </div>
-                    </form>
-            </div>
-        </div>
-    </div>
-</div>
-@section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
-
-    <script type="text/javascript">
-        $('#search_admin_sonic').prepend('<option value="" selected="selected"></option>').select2({
-            width: '100%',
-            allowClear:true
-        });
-
-
-
-
-    </script>
-    @endsection
 
 
 
