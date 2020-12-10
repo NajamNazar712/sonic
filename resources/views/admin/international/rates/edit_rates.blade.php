@@ -343,11 +343,11 @@
                                                                 @endphp
                                                             @endif
                                                         @endforeach
-                                                        @if($return_check = false)
+                                                        @if($return_check == false)
                                                             <div class="col-3 text-center">
                                                                 <label class="card-title">Local Charges</label>
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}">
+                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}" disabled>
                                                                 </fieldset>
                                                             </div>
                                                         @endif
