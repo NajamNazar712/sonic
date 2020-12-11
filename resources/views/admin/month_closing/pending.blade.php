@@ -27,8 +27,8 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Number</th>
-                        <th class="border-primary border-darken-1">Claim ID </th>
-                        <th class="border-primary border-darken-1">Claim Type</th>
+{{--                        <th class="border-primary border-darken-1">Claim ID </th>--}}
+{{--                        <th class="border-primary border-darken-1">Claim Type</th>--}}
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Comments</th>
                         <th class="border-primary border-darken-1">Actions</th>

@@ -371,7 +371,7 @@ class AdminMonthClosingController extends Controller
                     ->where('sj.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->join('crm_requests as cr','cr.shipment_id','=','shipments.id')
+//            ->join('crm_requests as cr','cr.shipment_id','=','shipments.id')
             ->join('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
             ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address as consignee_address','shipments.amount as cod_amount','u.name as shipper','shipments_journey.remarks as shipment_remarks','cr.id as claim_id','crn.type as claim_type')
             ->groupBy('shipments.id');
