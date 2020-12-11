@@ -115,7 +115,7 @@ class AdminSupplyChainController extends Controller
             })
             ->addColumn('action', function ($allow_dispatch) {
                 if ($allow_dispatch->shipment_on_hold_status) {
-                    if (session('role_id') == 1 || in_array(53, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(404, session('permissions'))) {
                         $allow_dispatch_button = '<button type="button" class="dropdown-item allow_dispatch_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Allow Dispatch/Delivery</div></button>';
                         $dropdown = '
                               <div class="btn-group">
