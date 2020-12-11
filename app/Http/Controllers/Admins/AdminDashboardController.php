@@ -135,7 +135,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Models\Segment;
+
 
 
 class AdminDashboardController extends Controller
