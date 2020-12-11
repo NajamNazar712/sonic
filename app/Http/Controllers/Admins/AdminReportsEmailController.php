@@ -2024,49 +2024,20 @@ class AdminReportsEmailController extends Controller
         $date_to = $date_to . ' 08:59:59';
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-            })
-            ->join('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-            })
-            ->leftJoin('shipments_journey as sjd', function ($join) {
-                $join->on('sjd.shipment_id', '=', 'shipments.id')
-                    ->where('sjd.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
-            })
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
-            ->leftjoin('crm_requests as crm', function ($join) {
-                $join->on('crm.shipment_id', '=', 'shipments.id')
-                    ->whereIn('crm.status_id', [2, 3, 5])
-                    ->where('crm.case_nature_id', 1);
-            })
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
-                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
-            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
-            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereBetween('sj.created_at', [$date_from,$date_to])
-            ->whereIn('shipments.shipper_status_id', $status)->get();
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->where('delivery_notes.status', 0)->get();
 
         $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
         $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'Consignee Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
         $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
 
-        if(count($shipments) > 0) {
-            foreach ($shipments as $shipment) {
+        if(count($deliveries) > 0) {
+            foreach ($deliveries as $shipment) {
                 $serial++;
                 $tracking_number = $shipment->tracking_number;
                 $shipper = $shipment->shipper;
