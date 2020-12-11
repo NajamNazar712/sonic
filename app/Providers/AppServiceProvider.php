@@ -32,19 +32,20 @@ class AppServiceProvider extends ServiceProvider
                 else{
                     $search_sonic = AdminsScreenList::select('id','name', 'url');
                 }
+
             }
             else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
                 $settings = GlobalSettings::where('type', 'shipper_ticker');
             }
             else {
                 $settings = NULL;
+                $search_sonic = NULL;
             }
 
             if ($settings && $settings->exists()) {
                 $settings = $settings->first();
 
                 $ticker = $settings->text;
-//                $search = $search_sonic->name;
 
                 if (!empty($ticker)) {
                     $view->with('ticker', $ticker);
@@ -52,7 +53,7 @@ class AppServiceProvider extends ServiceProvider
 
             }
 
-            if($search_sonic->exists()){
+            if($search_sonic && $search_sonic->exists()){
                 $search_sonic = $search_sonic->get();
                 if (!empty($search_sonic)) {
                     $pages_list = array();

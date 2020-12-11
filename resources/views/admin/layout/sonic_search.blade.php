@@ -7,9 +7,11 @@
                 <form>
                     <div class="form-group">
                         <select name="search_admin_sonic" id="search_admin_sonic" class="form-control select2">
+                            @if(isset($search_sonic))
                             @foreach($search_sonic as $search)
                                 <option value="{{ $search['url'] }}">{{ $search['name'] }}</option>
                             @endforeach
+                            @endif
                         </select>
                     </div>
                 </form>
