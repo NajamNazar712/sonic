@@ -1384,10 +1384,10 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
     }
     public function UserStatus(Request $request){
-//        return $request;
+
         $id = $request->shid; //shipper id
         $status = $request->status;
-//        return $request;
+
         if($status == 'activate'){
             $user = User::find($id);
             if($user->status == 2){
@@ -7303,6 +7303,8 @@ class AdminDashboardController extends Controller
                         return "Rejected";
                     }elseif($users->international_rate_status == 4){
                         return "Requested";
+                    }elseif($users->international_rate_status == 5){
+                        return "Rejected";
                     }
                 }
                 else{
@@ -7328,7 +7330,7 @@ class AdminDashboardController extends Controller
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
+                    <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
@@ -7432,7 +7434,8 @@ class AdminDashboardController extends Controller
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7571,6 +7574,31 @@ class AdminDashboardController extends Controller
                     return $count;
                 }
             })
+            ->editColumn('international_rate_status',function ($users){
+                if($users->international_rate_status != null){
+                    if($users->international_rate_status == 1){
+                        return "Approved";
+                    }elseif($users->international_rate_status == 2){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 3){
+                        return "Rejected";
+                    }elseif($users->international_rate_status == 4){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 5){
+                        return "Rejected";
+                    }
+                }
+                else{
+                    return "International Rates are not set";
+                }
+            })
+            ->editColumn('international_rejected_reason',function ($users){
+                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+                    return $users->international_rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
                     $multiple_sale_check = true;
@@ -7582,7 +7610,7 @@ class AdminDashboardController extends Controller
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
+                    <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
@@ -7592,7 +7620,7 @@ class AdminDashboardController extends Controller
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
-                if($result->status == 2 && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
+                if(($result->status == 2 || $result->international_status == 1) && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
@@ -7623,7 +7651,7 @@ class AdminDashboardController extends Controller
                 }
 
 //                if($result->account_type_id == 1){
-                    if(($result->rate_status == 0 && $result->status == 2) && (session('role_id') == 1 || in_array(8, session('permissions')))){
+                    if(($result->rate_status == 0 && $result->status == 2) && (InternationalUsersInformation::where('user_id', $result->id)->exists() == false) && (session('role_id') == 1 || in_array(8, session('permissions')))){
                         $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
                     }
 //                }
@@ -7668,6 +7696,15 @@ class AdminDashboardController extends Controller
                 if($sale_check){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
+                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
+                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }else{
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                    }
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -7755,7 +7792,7 @@ class AdminDashboardController extends Controller
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
-        $segment = Segment::find($user->segment_id);
+
         $segments = Segment::all();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
@@ -7777,14 +7814,14 @@ class AdminDashboardController extends Controller
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
             'cnic'=>'required|string|max:255',
+            'segment_id' => 'required'
         ]);
 
 
         if($request->password=="" || $request->password==null)
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
@@ -7794,8 +7831,7 @@ class AdminDashboardController extends Controller
         else
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id'=>$request->segment_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
         }
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
@@ -9548,5 +9584,9 @@ class AdminDashboardController extends Controller
         }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
+
+//    public function search_sonic(Request $request){
+//        if($request->has())
+//    }
 }
 

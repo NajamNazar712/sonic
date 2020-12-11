@@ -379,6 +379,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+        //Search Sonic
+//        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
          //commision dashboard routes
     // Route::prefix('commission')->name('commission.')->group(function () {
@@ -1839,6 +1841,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
         });
+        Route::prefix('international_walk_in')->name('international_walk_in.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_walk_in_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@international_walk_in_store')->name('store');
+        });
+
         Route::prefix('auto_invoice_generation_and_due_date')->name('auto_invoice_generation_and_due_date.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_store')->name('store');
@@ -2178,6 +2185,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
             Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
             Route::post('check_quantity', 'Admins\AdminWalkInBookShipmentController@check_packing_quantity')->name('check_quantity');
+            Route::get('international', 'Admins\AdminWalkInBookShipmentController@international_book_index')->name('international_walk_in');
+            Route::post('international_store', 'Admins\AdminWalkInBookShipmentController@international_walk_in_store')->name('international_store');
+            Route::post('check_international_min_charges', 'Admins\AdminWalkInBookShipmentController@check_international_min_charges')->name('check_international_min_charges');
+            Route::post('check_international_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_international_standard_weight')->name('check_international_standard_weight');
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');

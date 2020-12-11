@@ -71,6 +71,26 @@
 													   id="search_date_to" placeholder="Date (To)">
 											</div>
 										</div>
+										<div class="col-3">
+											<div class="form-group input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o small-calender-icon"></span>
+													</span>
+												</div>
+												<input type="text" name="search_date_status_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_status_from" placeholder="Status Date From">
+											</div>
+										</div>
+										<div class="col-3">
+											<div class="form-group input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o small-calender-icon"></span>
+													</span>
+												</div>
+												<input type="text" name="search_date_status_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_status_to" placeholder="Status Date To">
+											</div>
+										</div>
 										<div class="col-2 text-right">
 											<button type="button" id="search_filter_btn"
 													class="btn btn-outline-primary w-100"><i
@@ -394,6 +414,35 @@
                 }
             });
 
+			$('#search_date_status_from').pickadate({
+				firstDay: 1,
+				clear: '',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					if (context.select) {
+						$('#search_date_status_to').pickadate('picker').set('min', $('#search_date_status_from').pickadate('picker').get('select'));
+					}
+				}
+			});
+
+			$('#search_date_status_to').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				format:'dd mmmm, yyyy',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 23:59:59',
+				hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					if (context.select) {
+						$('#search_date_status_from').pickadate('picker').set('max', $('#search_date_status_to').pickadate('picker').get('select'));
+					}
+				}
+			});
             $('#complaint_channels').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Channel",
@@ -640,6 +689,8 @@
                         d.search_shipper_status = $('#search_shipper_status').val();
                         d.search_from = $('input[name="search_from_formatted"]').val();
                         d.search_to = $('input[name="search_to_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_status_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_status_to_formatted"]').val();
 					}
 				},
 				rowId: 'id',

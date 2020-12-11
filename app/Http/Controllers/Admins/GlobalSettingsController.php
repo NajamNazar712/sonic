@@ -16,6 +16,8 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
@@ -3149,10 +3151,42 @@ class GlobalSettingsController extends Controller
                 $runner->status = 1;
                 $runner->save();
             } else {
-                $runner->status = 0;
+                $runner->status = 2;
                 $runner->save();
             }
-            return response()->json(['status' => 1, 'success' => 'Statement Successfully Updated!']);
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
         }
     }
-}
+
+	public function international_walk_in_index(){
+        $walk_in_standard_charges = WalkInInternationalStandardWeightCharge::all();
+
+        $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
+        return view('admin.settings.international_walk_in')->with(['cities' => $cities, 'walk_in_standard_charges' => $walk_in_standard_charges]);
+    }
+    public function international_walk_in_store(Request $request){
+        WalkInInternationalStandardWeightCharge::truncate();
+        WalkInInternationalStandardWeightChargeHub::truncate();
+
+        foreach($request->standard_charges as $index => $charge_id){
+            $standard_weight_charge = new WalkInInternationalStandardWeightCharge();
+            $standard_weight_charge->id = $charge_id;
+            $standard_weight_charge->shipping_mode_id = 2;
+            $standard_weight_charge->hub_actual_weight = $request->hub_actual_weight[$charge_id];
+            $standard_weight_charge->hub_chargeable_weight = $request->hub_chargeable_weight[$charge_id];;
+            $standard_weight_charge->hub_return_charges = $request->hub_return_charges[$charge_id];;
+            $standard_weight_charge->door_actual_weight = $request->door_actual_weight[$charge_id];;
+            $standard_weight_charge->door_chargeable_weight = $request->door_chargeable_weight[$charge_id];;
+            $standard_weight_charge->door_return_charges = $request->door_return_charges[$charge_id];;
+            $standard_weight_charge->save();
+
+            foreach($request->hubs[$charge_id] as $hub_id){
+                $standard_weight_charge_hub = new WalkInInternationalStandardWeightChargeHub();
+                $standard_weight_charge_hub->international_charges_id = $charge_id;
+                $standard_weight_charge_hub->hub_id = $hub_id;
+                $standard_weight_charge_hub->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }}
