@@ -2068,11 +2068,11 @@ class AdminReportsEmailController extends Controller
                 $sheet = $spreadsheet->getActiveSheet();
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
-                $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
-                $sheet->getStyle("A" . $serial . ":R" . $serial)->applyFromArray($cell_st);
+                $sheet->getStyle("A2:N2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:N3")->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":N" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Receive Deliveries Report');
-                $sheet->mergeCells('A2:R2');
+                $sheet->mergeCells('A2:N2');
 //                $sheet->mergeCells('A3:C3');
 //                $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
