@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Walk-In')
+@section('title', 'Domestic Walk-In')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Walk-In
+                    Domestic Walk-In
                 </h1>
 
                 <div class="card">

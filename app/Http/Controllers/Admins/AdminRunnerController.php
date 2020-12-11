@@ -24,28 +24,36 @@ class AdminRunnerController extends Controller
     }
 
     public function index(){
-        $existing_runners = RunnerDetail::where('status', 0)->pluck('runner_id')->toArray();
+        $existing_runners = RunnerDetail::where('status',0)->pluck('runner_id')->toArray();
         $runners = Runner::where('status', 1)->whereNotIn('id', $existing_runners)->get();
         return view('admin.runner.index')->with(['runners' => $runners]);
     }
     public function list(Request $request){
         $runner_details = RunnerDetail::join('runners as r', 'r.id', '=', 'runner_details.runner_id')
             ->join('admins as a', 'a.id', '=', 'runner_details.created_by')
-            ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at', 'a.name as created_by')
-            ->where('runner_details.status', 0);
+            ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at', 'a.name as created_by','runner_details.status as status')
+         /*   ->where('runner_details.status', 0)*/;
         $datatable = Datatables::of($runner_details)
-            ->addColumn('action', function ($data){
+            ->editColumn('status',function($runner_details){
+                if($runner_details->status == 0){
+                    return 'Update';
+                }
+                else{
+                    return 'Complete';
+                }
+            })
+            ->addColumn('action', function ($runner_details){
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-                $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">update</div></button>';
-
+                if($runner_details->status == 0){
+                    $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update</div></button>';
+                }
+                $dropdown .= '<button type="button" class="dropdown-item details" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-clipboard"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
                 return $dropdown;
-
             });
         return $datatable->make(true);
     }
@@ -70,8 +78,8 @@ class AdminRunnerController extends Controller
         $runner_detail_array[] = ['list' => 'Day:', 'data' => $today, 'info' => $text];
         $runner_detail_array[] = ['list' => '', 'data' => '', 'info' => ''];
         $runner_detail_array[] = ['list' => '', 'data' => '', 'info' => ''];
-        $runner_detail_array['header'] = ['Origin', 'TO', 'Destination', 'Departure Date Time', 'Arrival Date Time', 'Duration', 'Stay Time'];
-        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Date Time' => '', 'Arrival Date Time' => '', 'Duration' => '', 'Stay Time' => ''];
+        $runner_detail_array['header'] = ['Origin', 'TO', 'Destination', 'Departure Date Time', 'Arrival Date Time', 'Duration', 'Stay Time','Comment'];
+        $runner_detail_array[] = ['Origin' => '', 'TO' => '', 'Destination' => '', 'Departure Date Time' => '', 'Arrival Date Time' => '', 'Duration' => '', 'Stay Time' => '','Comment' => ''];
         $hours = 0;
         $minutes = 0;
         $seconds = 0;
@@ -116,8 +124,9 @@ class AdminRunnerController extends Controller
             $total_dur_hours = $total_dur_hours + (int)$dur_hours;
             $total_minutes = $total_minutes + (int)$dur_minutes;
             $total_second = $total_second + (int)$dur_sec;
+            $comment = $detail_time->comment;
 
-            $runner_detail_array[] = ['Origin' => $detail_time->origin_hub->name, 'TO' => '-> -> ->', 'Destination' => $detail_time->destination_hub->name, 'Departure Date Time' => $detail_time->departure_date . ' ' .  $detail_time->departure_time, 'Arrival Date Time' => $detail_time->arrival_date . ' ' .  $detail_time->arrival_time, 'Duration' => $duration_time, 'Stay Time' => $detail_time->stay_time];
+            $runner_detail_array[] = ['Origin' => $detail_time->origin_hub->name, 'TO' => '-> -> ->', 'Destination' => $detail_time->destination_hub->name, 'Departure Date Time' => $detail_time->departure_date . ' ' .  $detail_time->departure_time, 'Arrival Date Time' => $detail_time->arrival_date . ' ' .  $detail_time->arrival_time, 'Duration' => $duration_time, 'Stay Time' => $detail_time->stay_time,'Comment' => $comment];
             $count++;
         }
         $stay_second = ($seconds % 60);
@@ -167,17 +176,17 @@ class AdminRunnerController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->fromArray($runner_detail_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:G5")->applyFromArray($cell_s);
-        $sheet->getStyle("A2:G5")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
-        $sheet->mergeCells('C2:G2');
-        $sheet->mergeCells('C3:G3');
-        $sheet->mergeCells('C4:G4');
-        $sheet->mergeCells('C5:G5');
+        $sheet->getStyle("A2:H5")->applyFromArray($cell_s);
+        $sheet->getStyle("A2:H5")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->mergeCells('C2:H2');
+        $sheet->mergeCells('C3:H3');
+        $sheet->mergeCells('C4:H4');
+        $sheet->mergeCells('C5:H5');
         $new_count = $count + 2;
         $sheet->getStyle("F".$count.":G".$count)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
         $sheet->getStyle("F".$new_count.":G".$new_count)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
-        $sheet->getStyle("A8:G8")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
-        $sheet->getStyle("A8:G8")->applyFromArray($cell_st);
+        $sheet->getStyle("A8:H8")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3');
+        $sheet->getStyle("A8:H8")->applyFromArray($cell_st);
         $date_file_name = Carbon::today()->format('Y_m_d');
         $sheet->setTitle('Runner Report ' . $date_file_name);
         $writer = new Xlsx($spreadsheet);
@@ -239,6 +248,7 @@ class AdminRunnerController extends Controller
             $runner_detail_time->departure_date = $request->departure_date[$index];
             $runner_detail_time->arrival_date = $request->arrival_date[$index];
             $runner_detail_time->arrival_time = $request->arrival_time[$index];
+            $runner_detail_time->comment = $request->comment[$index];
             $runner_detail_time->stay_time = $stay_time;
             $runner_detail_time->save();
 
@@ -269,7 +279,7 @@ class AdminRunnerController extends Controller
         $runner_detail = RunnerDetail::find($request->id);
         $runner_detail_time = RunnerDetailTime::join('cities as oc', 'oc.id', '=', 'runner_detail_times.origin')
         ->join('cities as dc', 'dc.id', '=', 'runner_detail_times.destination')
-        ->select('runner_detail_times.id', 'runner_detail_times.origin', 'runner_detail_times.destination', 'runner_detail_times.departure_date', 'runner_detail_times.arrival_date', 'runner_detail_times.departure_time', 'runner_detail_times.arrival_time', 'oc.name as origin_name', 'dc.name as destination_name')->where('runner_detail_id', $request->id)->get();
+        ->select('runner_detail_times.id', 'runner_detail_times.origin', 'runner_detail_times.destination', 'runner_detail_times.departure_date', 'runner_detail_times.arrival_date', 'runner_detail_times.departure_time', 'runner_detail_times.arrival_time', 'oc.name as origin_name', 'dc.name as destination_name','runner_detail_times.comment as comment')->where('runner_detail_id', $request->id)->get();
         $runner = Runner::find($runner_detail->runner_id);
         $junctions = RunnerJunction::join('cities as c', 'c.id', '=', 'runner_junctions.junction_id')
             ->select('c.id as city_id', 'c.name as city_name', 'runner_junctions.order as order')
@@ -313,6 +323,7 @@ class AdminRunnerController extends Controller
             $runner_detail_time->departure_date = $request->departure_date[$index];
             $runner_detail_time->arrival_date = $request->arrival_date[$index];
             $runner_detail_time->arrival_time = $request->arrival_time[$index];
+            $runner_detail_time->comment = $request->comment[$index];
             $runner_detail_time->stay_time = $stay_time;
             $runner_detail_time->save();
 
@@ -337,6 +348,17 @@ class AdminRunnerController extends Controller
             $path = $this->runner_report($runner_detail->id, $text);
             NotificationsController::send(88, $runner_detail->id, url('/') . '/' . $path);
             return redirect()->route('admin.runner.index')->with('success', 'Runner On Route completed successfully!');
+        }
+    }
+    public function runner_details_view(Request $request){
+        $runner_detail_id = $request->id;
+        $runner_detail_time = RunnerDetailTime::join('cities as c','c.id','=','runner_detail_times.origin')->join('cities as ci','ci.id','=','runner_detail_times.destination')->where('runner_detail_times.runner_detail_id',$runner_detail_id)->select('c.name as origin','ci.name as destination','runner_detail_times.departure_date as departure_date','runner_detail_times.departure_time as departure_time','runner_detail_times.arrival_date as arrival_date','runner_detail_times.arrival_time as arrival_time','runner_detail_times.stay_time as stay_time','runner_detail_times.comment as comment')->get();
+        $details = array();
+        if($runner_detail_time){
+            foreach($runner_detail_time as $runner_details){
+                $details[] = $runner_details;
+            }
+            return response()->json(['runner_detail_times' => $details]);
         }
     }
 }

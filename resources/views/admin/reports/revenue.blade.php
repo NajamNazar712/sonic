@@ -419,7 +419,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
-                                row.push(values.business_category_id);
+                                row.push(values.name);
                                 row.push(values.shipper);
                                 row.push(values.order_id);
                                 row.push(values.current_status);
@@ -508,7 +508,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
-                    { data:'business_category_id' ,name: 'shipments.business_category_id', class: 'align-middle business_category_id'},
+                    { data:'name' ,name: 'bc.name', class: 'align-middle name'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},

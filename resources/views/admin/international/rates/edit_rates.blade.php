@@ -343,11 +343,11 @@
                                                                 @endphp
                                                             @endif
                                                         @endforeach
-                                                        @if($return_check = false)
+                                                        @if($return_check == false)
                                                             <div class="col-3 text-center">
                                                                 <label class="card-title">Local Charges</label>
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}">
+                                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="return_local_charges_{{$rate_status->box_id}}" disabled>
                                                                 </fieldset>
                                                             </div>
                                                         @endif
@@ -561,6 +561,7 @@
 
                                     @if ($user_information->status == 4 && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        <button id="AuthorizeaccountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
                                     @if ($user_information->status == 2 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
@@ -1562,8 +1563,14 @@
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
             });
+            var auth_reject = 0;
             $('#accountRejectActiveSubmit').click(function() {
                 $('#RejectRatesModal').modal('show');
+                auth_reject = 0;
+            });
+            $('#AuthorizeaccountRejectActiveSubmit').click(function() {
+                $('#RejectRatesModal').modal('show');
+                auth_reject = 1;
             });
             $('#RejectRatesSubmit').on('click',function () {
                 var shipper = $('#shipper_id').val();
@@ -1575,6 +1582,7 @@
                         data: {
                             'rejected_reason': reject_reason,
                             'shipper_id':shipper,
+                            'authorization':auth_reject,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
