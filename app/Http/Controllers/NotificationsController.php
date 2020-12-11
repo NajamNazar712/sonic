@@ -6410,31 +6410,24 @@ class NotificationsController extends Controller
                 else if ($id == 112) {
                     $subject = $notification->subject;
                     $body = $notification->body;
-//
-//                    $file = $reference_2_id;
-//
-                    $file = $reference_1_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
+                    $data = $reference_1_id;
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]',$data, $body);
                     }
-
-                       /* if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]',$data, $body);
-                        }*/
-
-                    $admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
+                    //$admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
+                    $admins = Admin::whereIn('id', [36,55,288])->where('status',1);
 
                     if ($admins->exists()) {
                         $to = $admins->pluck('email')->toArray();
                     }
 
-                    $admins = Admin::whereIn('id', [70,228,161,137,15,36,21,386,397,414,428,495,50])->where('status',1);
+                   /* $admins = Admin::whereIn('id', [70,228,161,137,15,36,21,386,397,414,428,495,50])->where('status',1);
 
                     if ($admins->exists()) {
                         $cc = $admins->pluck('email')->toArray();
-                    }
-                    self::email($subject, $body, $to,$cc);
+                    }*/
+                    self::email($subject, $body, $to/*,$cc*/);
                 }
 
             }

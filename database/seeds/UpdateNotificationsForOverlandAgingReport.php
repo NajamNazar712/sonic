@@ -16,7 +16,7 @@ class UpdateNotificationsForOverlandAgingReport extends Seeder
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 112, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Overland Aging Report', 'type_id' => 1, 'subject' => 'Overland Aging Report', 'body' => '[preview] [link]','updated_by' => 3, 'status' => 0)
+            array('id' => 112, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Overland Aging Report', 'type_id' => 1, 'subject' => 'Overland Aging Report', 'body' => '[preview]','updated_by' => 3, 'status' => 0)
         ));
     }
 }

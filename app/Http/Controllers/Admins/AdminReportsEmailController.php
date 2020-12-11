@@ -2156,12 +2156,10 @@ class AdminReportsEmailController extends Controller
         Carbon::setWeekendDays([
             Carbon::SUNDAY,]);
 
-        $overland_aging_day_wise[] = ['Overland Aging Report'];
+
         $overland_aging_day_wise_header['header'] = ['Days','Count','Ratio'];
 
         $overland_aging_day_wise_data[] = ['Days' => '','Count' => '','Ratio' => ''];
-
-
 
         $day_wise = '<div class="mb-2">';
         $day_wise = '<table style="width:100%;">';
@@ -2563,7 +2561,6 @@ class AdminReportsEmailController extends Controller
 
         $hub_wise_shipment = array_merge($hub_wise_shipment_header,$hub_wise_shipment_data,$hub_wise_shipment_footer);
 
-
         //table tracking_number wise
         $html = '<div class="mb-4">';
         $html .= '<table style="width:100%;">';
@@ -2585,7 +2582,6 @@ class AdminReportsEmailController extends Controller
 
         $tracking_number_wise_header['header'] = ['S.No','Tracking Number','Shipper','Origin','Destination','Hub','Current Status','Arrival Date','Current Status Date','Aging','Actual Weight','Chargeable Weight'];
         $tracking_number_wise_data[] = ['S.No' =>'','Tracking Number' =>'','Shipper' =>'','Origin' =>'','Destination' =>'','Hub' =>'','Current Status' =>'','Arrival Date' =>'' ,'Current Status Date' =>'','Aging' =>'','Actual Weight' =>'', 'Chargeable Weight' => ''];
-
 
 
         foreach($shipments as $shipment){
@@ -2634,8 +2630,10 @@ class AdminReportsEmailController extends Controller
         $table .= $origin_wise;
         $table .= $hub_wise;
         $table .= $html;
+        $table .= '<br>' ;
+        $table .= '<br>' ;
+        $table .= '-' ;
 
-        //return $table;
 
         $cell_st = [
             'font' => ['bold' => true],
@@ -2673,6 +2671,7 @@ class AdminReportsEmailController extends Controller
             ->getStartColor()
             ->setRGB('CECECE');
 
+
         $sheet->fromArray($overland_aging_day_wise,NULL,'D4',true);
 
         $total_style_cell = 'D13:F13';
@@ -2707,16 +2706,13 @@ class AdminReportsEmailController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
 
-
-
-        $count_details = $grand_total_count + 4;
+        $count_details = $grand_total_count + 6;
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
-
 
         $origin_wise_cell = 'D'.$count_details;
         $origin_wise_last_cell = 'M'.$count_details;
@@ -2747,8 +2743,6 @@ class AdminReportsEmailController extends Controller
 
         $count = $total_hub_wise_count + $count_details + 6;
 
-
-
         $tracking_wise_cell = 'D'.$count;
         $origin_wise_last_cell = 'O'.$count;
         $sheet->fromArray($tracking_number_wise,NULL,$tracking_wise_cell,true);
@@ -2771,10 +2765,14 @@ class AdminReportsEmailController extends Controller
         header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
         header('Cache-Control: max-age=0');
         $date_file_name = Carbon::today()->format('Y_m_d');
-        $file_name_without_path = "reports/overland_aging_report_" . $date_file_name . ".xlsx";
-        $file_name = public_path() . "/reports/overland_aging_report_" . $date_file_name . ".xlsx";
+        $file_name_without_path = "reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
         $writer->save($file_name);
-        return url('/') . '/' . $file_name_without_path;
+        $link =  url('/') . '/' . $file_name_without_path;
+
+        $data = $table;
+        $data .= '<a href="'.$link.'"> Download </a>';
+        return $data ;
 
     }
 
