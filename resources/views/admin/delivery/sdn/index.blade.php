@@ -37,7 +37,7 @@
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
                             </div>
-                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Status Date From">
+                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Resolved Date From">
                         </div>
                     </div>
                     <div class="col-3">
@@ -47,7 +47,7 @@
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Status Date To">
+                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Resolved Date To">
                         </div>
                     </div>
                     <div class="col-3">
