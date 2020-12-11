@@ -1602,7 +1602,7 @@ class AdminPettyCashController extends Controller
             if ($flag) {
                 return response()->json(['status' => 0, 'success' => 'Station Approved!']);
             } else {
-                return response()->json(['status' => 1, 'error' => 'Station Approved first!']);
+                return response()->json(['status' => 1, 'error' => 'Already Approved!']);
             }
         }
         return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);

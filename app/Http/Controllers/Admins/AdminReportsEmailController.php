@@ -1955,63 +1955,62 @@ class AdminReportsEmailController extends Controller
             ->whereBetween('sj.created_at', [$date_from,$date_to])
             ->whereIn('shipments.shipper_status_id', $status)->get();
 
-        if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-        }
 
         $pending_deliveries_report_array[] = ['Pending Deliveries Report'];
         $pending_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'Consignee Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
         $pending_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
 
-        foreach($shipments as $shipment){
-            $serial++;
-            $tracking_number = $shipment->tracking_number;
-            $shipper = $shipment->shipper;
-            $origin = $shipment->origin;
-            $destination = $shipment->destination;
-            $hub = $shipment->hub;
-            $consignee_name = $shipment->consignee_name;
-            $phone = $shipment->phone;
-            $consignee_address = $shipment->consignee_address;
-            $amount = $shipment->amount;
-            $shipping_mode = $shipment->shipping_mode;
-            $service_type = $shipment->service_type;
-            $status = $shipment->status;
-            $reason = $shipment->reason;
-            $remarks = $shipment->remarks;
-            $arrival = $shipment->arrival;
-            $destination_arrival = $shipment->destination_arrival;
-            $status_date = $shipment->status_date;
+        if(count($shipments) > 0) {
+            foreach ($shipments as $shipment) {
+                $serial++;
+                $tracking_number = $shipment->tracking_number;
+                $shipper = $shipment->shipper;
+                $origin = $shipment->origin;
+                $destination = $shipment->destination;
+                $hub = $shipment->hub;
+                $consignee_name = $shipment->consignee_name;
+                $phone = $shipment->phone;
+                $consignee_address = $shipment->consignee_address;
+                $amount = $shipment->amount;
+                $shipping_mode = $shipment->shipping_mode;
+                $service_type = $shipment->service_type;
+                $status = $shipment->status;
+                $reason = $shipment->reason;
+                $remarks = $shipment->remarks;
+                $arrival = $shipment->arrival;
+                $destination_arrival = $shipment->destination_arrival;
+                $status_date = $shipment->status_date;
 
-            $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Consignee Name' => $consignee_name,'Phone' => $phone,'Address' => $consignee_address,'Consignee Amount' => $amount,'Shipping Mode' => $shipping_mode,'Service Type' => $service_type,'Status' => $status, 'Reason' => $reason,'Remarks' => $remarks,'Origi Arrival Date' => $arrival,'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
+                $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
 
-            $cell_st = [
-                'font' => ['bold' => true],
-                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-            ];
-            $serial = $serial + 6;
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
-            $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
-            $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
-            $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
-            $sheet->setTitle('Pending Deliveries Report');
-            $sheet->mergeCells('A2:C2');
-            $sheet->mergeCells('A3:C3');
-            $sheet->mergeCells('A' . $serial . ':B' . $serial);
-            $writer = new Xlsx($spreadsheet);
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename=daily_pending_deliveries_report_.xlsx"');
-            header('Cache-Control: max-age=0');
-            $date_file_name = Carbon::today()->format('Y_m_d');
-            $file_name_without_path = "reports/daily_pending_deliveries_report_"  . $date_file_name .  ".xlsx";
-            $file_name = public_path() . "/reports/daily_pending_deliveries_report_" . $date_file_name .  ".xlsx";
-            $writer->save($file_name);
-            return url('/') . '/' . $file_name_without_path;
+                $cell_st = [
+                    'font' => ['bold' => true],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                ];
+                $serial = $serial + 6;
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->getDefaultColumnDimension()->setWidth(20);
+                $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
+                $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
+                $sheet->setTitle('Pending Deliveries Report');
+                $sheet->mergeCells('A2:C2');
+                $sheet->mergeCells('A3:C3');
+                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                $writer = new Xlsx($spreadsheet);
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename=daily_pending_deliveries_report_.xlsx"');
+                header('Cache-Control: max-age=0');
+                $date_file_name = Carbon::today()->format('Y_m_d');
+                $file_name_without_path = "reports/daily_pending_deliveries_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/daily_pending_deliveries_report_" . $date_file_name . ".xlsx";
+                $writer->save($file_name);
+                return url('/') . '/' . $file_name_without_path;
 
+            }
         }
     }
 
@@ -2060,63 +2059,62 @@ class AdminReportsEmailController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereBetween('sj.created_at', [$date_from,$date_to])
             ->whereIn('shipments.shipper_status_id', $status)->get();
-        if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-        }
 
         $receive_deliveries_report_array[] = ['Pending Deliveries Report'];
         $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'Consignee Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
         $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
 
-        foreach($shipments as $shipment){
-            $serial++;
-            $tracking_number = $shipment->tracking_number;
-            $shipper = $shipment->shipper;
-            $origin = $shipment->origin;
-            $destination = $shipment->destination;
-            $hub = $shipment->hub;
-            $consignee_name = $shipment->consignee_name;
-            $phone = $shipment->phone;
-            $consignee_address = $shipment->consignee_address;
-            $amount = $shipment->amount;
-            $shipping_mode = $shipment->shipping_mode;
-            $service_type = $shipment->service_type;
-            $status = $shipment->status;
-            $reason = $shipment->reason;
-            $remarks = $shipment->remarks;
-            $arrival = $shipment->arrival;
-            $destination_arrival = $shipment->destination_arrival;
-            $status_date = $shipment->status_date;
+        if(count($shipments) > 0) {
+            foreach ($shipments as $shipment) {
+                $serial++;
+                $tracking_number = $shipment->tracking_number;
+                $shipper = $shipment->shipper;
+                $origin = $shipment->origin;
+                $destination = $shipment->destination;
+                $hub = $shipment->hub;
+                $consignee_name = $shipment->consignee_name;
+                $phone = $shipment->phone;
+                $consignee_address = $shipment->consignee_address;
+                $amount = $shipment->amount;
+                $shipping_mode = $shipment->shipping_mode;
+                $service_type = $shipment->service_type;
+                $status = $shipment->status;
+                $reason = $shipment->reason;
+                $remarks = $shipment->remarks;
+                $arrival = $shipment->arrival;
+                $destination_arrival = $shipment->destination_arrival;
+                $status_date = $shipment->status_date;
 
-            $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper,'Origin' => $origin,'Destination' => $destination,'Hub' => $hub,'Consignee Name' => $consignee_name,'Phone' => $phone,'Address' => $consignee_address,'Consignee Amount' => $amount,'Shipping Mode' => $shipping_mode,'Service Type' => $service_type,'Status' => $status, 'Reason' => $reason,'Remarks' => $remarks,'Origi Arrival Date' => $arrival,'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
+                $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
 
-            $cell_st = [
-                'font' => ['bold' => true],
-                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-            ];
-            $serial = $serial + 6;
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
-            $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
-            $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
-            $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
-            $sheet->setTitle('Pending Deliveries Report');
-            $sheet->mergeCells('A2:C2');
-            $sheet->mergeCells('A3:C3');
-            $sheet->mergeCells('A' . $serial . ':B' . $serial);
-            $writer = new Xlsx($spreadsheet);
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename=daily_receive_deliveries_report_.xlsx"');
-            header('Cache-Control: max-age=0');
-            $date_file_name = Carbon::today()->format('Y_m_d');
-            $file_name_without_path = "reports/daily_receive_deliveries_report_"  . $date_file_name .  ".xlsx";
-            $file_name = public_path() . "/reports/daily_pending_deliveries_report_" . $date_file_name .  ".xlsx";
-            $writer->save($file_name);
-            return url('/') . '/' . $file_name_without_path;
+                $cell_st = [
+                    'font' => ['bold' => true],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                ];
+                $serial = $serial + 6;
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->getDefaultColumnDimension()->setWidth(20);
+                $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
+                $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
+                $sheet->setTitle('Pending Deliveries Report');
+                $sheet->mergeCells('A2:C2');
+                $sheet->mergeCells('A3:C3');
+                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                $writer = new Xlsx($spreadsheet);
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename=daily_receive_deliveries_report_.xlsx"');
+                header('Cache-Control: max-age=0');
+                $date_file_name = Carbon::today()->format('Y_m_d');
+                $file_name_without_path = "reports/daily_receive_deliveries_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/daily_pending_deliveries_report_" . $date_file_name . ".xlsx";
+                $writer->save($file_name);
+                return url('/') . '/' . $file_name_without_path;
 
+            }
         }
     }
 }
