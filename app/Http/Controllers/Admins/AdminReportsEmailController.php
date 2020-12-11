@@ -2052,7 +2052,11 @@ class AdminReportsEmailController extends Controller
                 $amount = $shipment->amount;
                 $shipments_count = $shipment->shipments_count;
                 $shipments_unverified_count = $shipment->shipments_unverified_count;
-                $pending_status = $shipment->pending_status;
+                if ($shipment->pending_status == 0) {
+                    $pending_status = 'Pending for Update';
+                } else {
+                    $pending_status = 'Pending for Verification';
+                }
                 $delivered_shipments = $shipment->delivered_shipments;
                 $created_at = $shipment->created_at;
                 $updated_by = $shipment->updated_by;
