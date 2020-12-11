@@ -42,6 +42,7 @@ class PendingDeliveriesReport extends Command
     {
         $date = Carbon::today()->format('Y-m-d');
         $response = AdminReportsEmailController::pending_deliveries($date);
+        dd($response);
         NotificationsController::send(110, $date, $response);
     }
 }
