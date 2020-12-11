@@ -71,7 +71,7 @@ class OnHoldShipmentEmail extends Command
         }
 
 
-        $deliver_on_hold_shipments = ShipmentOnHold::whereDate('deliver_date', $today)->where('status', 1)->where('email_status', 1);
+        $deliver_on_hold_shipments = ShipmentOnHold::whereDate('delivery_date', $today)->where('status', 1)->where('email_status', 1);
         if($deliver_on_hold_shipments->exists()){
             $deliver_on_hold_shipments = $deliver_on_hold_shipments->get();
             if(count($deliver_on_hold_shipments) > 0){
@@ -90,8 +90,8 @@ class OnHoldShipmentEmail extends Command
                     $details[$index]['last_status_date'] = $last_status_date;
                     $details[$index]['arrival_status_date'] = $arrival_status_date;
 
-                    $dispatch_shipment->email_status = 2;
-                    $dispatch_shipment->save();
+                    $deliver_shipment->email_status = 2;
+                    $deliver_shipment->save();
                 }
                 NotificationsController::send(109, $today, $details);
             }
