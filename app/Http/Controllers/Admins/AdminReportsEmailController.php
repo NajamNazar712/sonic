@@ -2033,7 +2033,7 @@ class AdminReportsEmailController extends Controller
             ->where('delivery_notes.status', 0)->get();
 
         $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
-        $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'Consignee Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
+        $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'COD Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
         $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
 
         if(count($deliveries) > 0) {
