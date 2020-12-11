@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\http\Models\Admins\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\http\Models\CargoConsignmentExcel;
 use App\http\Models\CargoConsignmentJunctionSend;
@@ -290,7 +291,18 @@ class AdminCargoController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
+            $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+            if($on_hold_shipment->exists()){
+                if(!in_array(Auth::id(), [10, 288, 423])){
+                    $on_hold_shipment = $on_hold_shipment->first();
+                    $dispatch_date = Carbon::parse($on_hold_shipment->dispatch_date);
+                    $today = Carbon::today();
+                    if($dispatch_date > $today){
+                        $dispatch_date = $dispatch_date->toFormattedDateString();
+                        return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $dispatch_date];
+                    }
+                }
+            }
             if($shipment->packaging_material_request == 1){
 
 

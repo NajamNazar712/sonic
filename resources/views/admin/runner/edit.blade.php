@@ -54,6 +54,7 @@
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Departure Date Time</th>
                             <th class="border-primary border-darken-1">Arrival Date Time</th>
+                            <th class="border-primary border-darken-1">Add Reason</th>
                         </tr>
                         </thead>
                     </table>
@@ -169,7 +170,8 @@
                     { name: 'origin', class: 'align-middle user_name', width: '40px'},
                     { name: 'hub', class: 'align-middle hub', width: '40px'},
                     { name: 'departure_time', class: 'align-middle departure_time'},
-                    { name: 'arrival_time', class: 'align-middle arrival_time'}
+                    { name: 'arrival_time', class: 'align-middle arrival_time'},
+                    { name: 'comment', class: 'align-middle comment'}
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -184,7 +186,6 @@
             var total_rows = junctions.length - 1;
             var cities = [];
             var last_junction_id = @json($last_junction);
-
             var runner_details_time = @json($runner_detail_time)
 
             $.each(runner_details_time,function (key,value) {
@@ -196,11 +197,19 @@
                     '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="'+ value.departure_time +'" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required" readonly></div></div>';
                 var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" data-value="'+ value.arrival_date +'" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required" disabled></div>' +
                     '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="'+ value.arrival_time +'" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required" readonly></div></div>';
+                if(value.comment == null){
+                    var comment = '<div class="col form-group input-group"><input type="text" name="comment[' + row + ']" id="comment' + row + '" class="form-control rounded-right"  placeholder="Comment"></div></div>';
+                }
+                else{
+                     comment = '<div class="col form-group input-group"><input type="text" name="comment[' + row + ']" id="comment' + row + '" class="form-control rounded-right" value="'+ value.comment +'" placeholder="Comment"></div></div>';
+
+                }
+
                 if(key == 0){
                     cities.push(value.origin);
                 }
                 cities.push(value.destination);
-                table.row.add([1, new_origin, new_destination, departure_time, arrival_time]);
+                table.row.add([1, new_origin, new_destination, departure_time, arrival_time,comment]);
                 table.draw();
 
                 $('#origin_' + row).select2({
@@ -247,8 +256,10 @@
                         '<div class="col form-group input-group"><input type="text" name="departure_time[' + row + ']" id="departure_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Departure Time*" data-rule-required="true" data-msg-required="Departure Time is required"></div></div>';
                     var arrival_time = '<div class="row"><div class="col form-group input-group"><input type="text" name="arrival_date[' + row + ']" id="arrival_date_' + row + '" class="form-control rounded-right pickadate date" value="" placeholder="Arrival Date*" data-rule-required="true" data-msg-required="Arrival Date is required"></div>' +
                         '<div class="col form-group input-group"><input type="text" name="arrival_time[' + row + ']" id="arrival_time_' + row + '" class="form-control rounded-right time" value="" placeholder="Arrival Time*" data-rule-required="true" data-msg-required="Arrival Time is required"></div></div>';
+                        var comment = '<div class="col form-group input-group"><input type="text" name="comment[' + row + ']" id="comment' + row + '" class="form-control rounded-right" value="" placeholder="Comment"></div></div>';
+
                     cities.push(parseInt(old_destination));
-                    table.row.add([1, new_origin, new_destination, departure_time, arrival_time]);
+                    table.row.add([1, new_origin, new_destination, departure_time, arrival_time,comment]);
                     table.draw();
                     $.each(junctions,function (key,value) {
                         var city_id = parseInt(value.city_id);
@@ -347,6 +358,7 @@
                         $('arrival_time_' + i).attr('readonly', false);
                         $('departure_date_' + i).attr('disabled', false);
                         $('arrival_date_' + i).attr('disabled', false);
+                        $('comment' + i).attr('disabled', false);
                     }
 
                     form.submit();

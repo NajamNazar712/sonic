@@ -70,6 +70,17 @@
                                         </div>
                                     </form>
                                 </div>
+                                <div class="col-3">
+                                    <form id="payment_filter_form" class="mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="form-group">
+                                            <select name="payment_filter" id="payment_filter" class="select2 payment_filter">
+                                                    <option value="1000000">greater than 1M</option>
+                                                    <option value="5000000">greater than 5M</option>
+                                                    <option value="10000000">greater than 10M</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
 
                             <div class="row text-center">
@@ -376,6 +387,13 @@
             }).bind('change', function() {
                 table.draw();
             });
+
+            $('#payment_filter_form #payment_filter').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Payment Filter',
+                width:'100%',
+            }).bind('change', function() {
+                table.draw();
+            });
             $('#make_payments_form #company_bank').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Company Bank',
                 width:'100%',
@@ -479,6 +497,7 @@
                         d.search_shipper = $('#search_shipper').val();
                         d.shipper_status = $('#shipper_status_form select.shipper_status').val();
                         d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
+                        d.payment_filter = $('#payment_filter_form #payment_filter').val();
                     }
                 },
                 rowId: 'id',

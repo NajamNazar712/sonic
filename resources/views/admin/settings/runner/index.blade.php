@@ -18,6 +18,8 @@
                         <th class="border-primary border-darken-1">Runner</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
                 </table>
@@ -213,6 +215,7 @@
                             head.push('Runner');
                             head.push('Created At');
                             head.push('Created By');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -222,6 +225,7 @@
                                 row.push(values.runner);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -267,7 +271,9 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'runner', name: 'runners.name', class: 'align-middle text-center runner'},
                     {data: 'created_at', name: 'runners.created_at', class: 'align-middle text-center created_at'},
-                    {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'}
+                    {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'},
+                    {data: 'status', name: 'runners.status', class: 'align-middle text-center status'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -280,10 +286,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    // var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                    //     '<option value="1">Enabled</option>' +
-                    //     '<option value="0">Disabled</option>' +
-                    //     '</select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="1">Enabled</option>' +
+                        '<option value="0">Disabled</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -293,12 +299,12 @@
                         if ($(header).is('.serial_number')|| $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
-                        // else if($(header).is('.status')){
-                        //     $(status_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }
+                        else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -309,54 +315,79 @@
                             }
                         }
                     });
-                    // $("#status_select").prepend('<option value="" selected></option>').select2({
-                    //     placeholder: "Select Status",
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
-            {{--$('body').on('click','button.disable',function () {--}}
-            {{--    var id = $(this).parents('tr').attr('id');--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.settings.runner.enable_disable') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'id': id,--}}
-            {{--            'status': 0,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        }--}}
-            {{--    }).done(function (data) {--}}
-            {{--        if(data.status === 1){--}}
-            {{--            table.draw();--}}
-            {{--            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-            {{--        }else{--}}
-            {{--            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--});--}}
-            {{--$('body').on('click','button.enable',function () {--}}
-            {{--    var id = $(this).parents('tr').attr('id');--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.settings.runner.enable_disable') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'id': id,--}}
-            {{--            'status': 1,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        }--}}
-            {{--    }).done(function (data) {--}}
-            {{--        if(data.status === 1){--}}
-            {{--            table.draw();--}}
-            {{--            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-            {{--        }else{--}}
-            {{--            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--});--}}
+                var id = table.row( $(this).parents('tr') ).data().id;
+
+                if ($(this).hasClass('status')) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.runner.enable_disable') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function(data) {
+                        if (data.status) {
+                            table.draw(true);
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+
+                        }
+                    });
+                }
+            });
+
+            /*$('body').on('click','button.disable',function () {*/
+            /*$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.settings.runner.enable_disable') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'status': 0,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        table.draw();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+            $('body').on('click','button.enable',function () {
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.settings.runner.enable_disable') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'status': 1,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        table.draw();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });*/
         });
 
     </script>
