@@ -6391,6 +6391,28 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, $cc);
                 }
+                else if ($id == 112) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $data = $reference_1_id;
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]',$data, $body);
+                    }
+                    //$admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
+                    $admins = Admin::whereIn('id', [36,55,288])->where('status',1);
+
+                    if ($admins->exists()) {
+                        $to = $admins->pluck('email')->toArray();
+                    }
+
+                   /* $admins = Admin::whereIn('id', [70,228,161,137,15,36,21,386,397,414,428,495,50])->where('status',1);
+
+                    if ($admins->exists()) {
+                        $cc = $admins->pluck('email')->toArray();
+                    }*/
+                    self::email($subject, $body, $to/*,$cc*/);
+                }
 
             }
         }
