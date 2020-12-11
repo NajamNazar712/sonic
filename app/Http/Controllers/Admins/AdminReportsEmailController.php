@@ -2031,35 +2031,37 @@ class AdminReportsEmailController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
-            ->where('delivery_notes.status', 0)->get();
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->whereBetween('delivery_notes.created_at', [$date_from, $date_to])
+            ->where('delivery_notes.status', 0)
+            ->orderBy('delivery_notes.created_at', 'desc')->get();
 
         $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
-        $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'COD Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
-        $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
+        $receive_deliveries_report_array['header'] = ['S. No.', 'Delivery Note No.', 'Hub', 'Rider', 'Route', 'No. Of Shipments', 'No. of Pending Shipments', 'No. of Delivered Shipments', 'Assigned By', 'Assigned Date', 'Total Collection', 'Status', 'Last Updated (Date)', 'Last Updated By'];
+        $receive_deliveries_report_array[] = ['S. No.' => '', 'Delivery Note No.' => '', 'Hub' => '', 'Rider' => '', 'Route' => '', 'No. Of Shipments' => '', 'No. of Pending Shipments' => '', 'No. of Delivered Shipments' => '', 'Assigned By' => '', 'Assigned Date' => '', 'Total Collection' => '', 'Status' => '', 'Last Updated (Date)' => '', 'Last Updated By' => ''];
 
         if(count($deliveries) > 0) {
             foreach ($deliveries as $shipment) {
                 $serial++;
-                $tracking_number = $shipment->tracking_number;
-                $shipper = $shipment->shipper;
-                $origin = $shipment->origin;
-                $destination = $shipment->destination;
+                $delivery_note_id = $shipment->delivery_note_id;
                 $hub = $shipment->hub;
-                $consignee_name = $shipment->consignee_name;
-                $phone = $shipment->phone;
-                $consignee_address = $shipment->consignee_address;
+                $rider = $shipment->rider;
+                $route = $shipment->route;
+                $assignee = $shipment->assignee;
                 $amount = $shipment->amount;
-                $shipping_mode = $shipment->shipping_mode;
-                $service_type = $shipment->service_type;
-                $status = $shipment->status;
-                $reason = $shipment->reason;
-                $remarks = $shipment->remarks;
-                $arrival = $shipment->arrival;
-                $destination_arrival = $shipment->destination_arrival;
-                $status_date = $shipment->status_date;
+                $shipments_count = $shipment->shipments_count;
+                $shipments_unverified_count = $shipment->shipments_unverified_count;
+                $pending_status = $shipment->pending_status;
+                $special_rider = $shipment->special_rider;
+                $special_rider_name = $shipment->special_rider_name;
+                $special_rider_phone = $shipment->special_rider_phone;
+                $delivered_shipments = $shipment->delivered_shipments;
+                $created_at = $shipment->created_at;
+                $updated_by = $shipment->updated_by;
+                $last_updated_at = $shipment->last_updated_at;
 
-                $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
+
+                $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Delivery Note No.' => $delivery_note_id, 'Hub' => $hub, 'Rider' => $rider, 'Route' => $route, 'No. Of Shipments' => $shipments_count, 'No. of Pending Shipments' => $shipments_unverified_count, 'No. of Delivered Shipments' => $delivered_shipments, 'Assigned By' => $assignee, 'Assigned Date' => $created_at, 'Total Collection' => $amount, 'Status' => $pending_status, 'Last Updated (Dated)' => $last_updated_at, 'Last Updated By' => $updated_by];
             }
                 $cell_st = [
                     'font' => ['bold' => true],
