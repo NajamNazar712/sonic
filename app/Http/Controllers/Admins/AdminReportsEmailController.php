@@ -2151,7 +2151,7 @@ class AdminReportsEmailController extends Controller
             ->where('sm.id',2)
             ->where('shipments_journey.shipper_status_id',3)
             ->groupBy('shipments.id')->get();
-        
+
         Carbon::setWeekendDays([
             Carbon::SUNDAY,]);
 
@@ -2311,6 +2311,7 @@ class AdminReportsEmailController extends Controller
         $days['six'] = 0;
         $days['total'] = 0;
 
+        $origin_wise_shipment_header['name']  = ['Shipments In Transit'];
         $origin_wise_shipment_header['header'] = ['Origin','0','1','2','3','4','5','5+','Total','Ratio'];
         $origin_wise_shipment_data[] = ['Origin' =>'','0' =>'','1' =>'','2' =>'','3' =>'','4' =>'','5' =>'','5+' =>'' ,'Total' =>'','Ratio' =>''];
 
@@ -2449,6 +2450,7 @@ class AdminReportsEmailController extends Controller
         $days['six'] = 0;
         $days['total'] = 0;
 
+        $hub_wise_shipment_header['name'] = ['In Transit Shipments Breakup'];
         $hub_wise_shipment_header['header'] = ['Hub','0','1','2','3','4','5','5+','Total','Ratio'];
         $hub_wise_shipment_data[] = ['Hub' =>'','0' =>'','1' =>'','2' =>'','3' =>'','4' =>'','5' =>'','5+' =>'' ,'Total' =>'','Ratio' =>''];
 
@@ -2692,6 +2694,17 @@ class AdminReportsEmailController extends Controller
 
         $total_style_cell = 'D18:M18';
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->mergeCells('D18:M18');
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+
+        $total_style_cell = 'D19:M19';
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+
         $sheet->getStyle($total_style_cell)
             ->getFill()
             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
@@ -2699,6 +2712,7 @@ class AdminReportsEmailController extends Controller
             ->setRGB('CECECE');
 
         $grand_total_count =  18 + $total_origin_wise_count -1;
+
 
         $total_style_cell = "D$grand_total_count".":M".$grand_total_count;
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
@@ -2718,6 +2732,24 @@ class AdminReportsEmailController extends Controller
         $sheet->fromArray($hub_wise_shipment,NULL,$origin_wise_cell,true);
         $total_hub_wise_count = count($hub_wise_shipment);
 
+
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+
+        $total_style_cell = "D$count_column".":M".$count_column;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->mergeCells('D' . $count_column . ':M' . $count_column);
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+
+
+
+        $count_column = $count_column + 1;
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+
         $total_style_cell = "D$count_column".":M".$count_column;
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
 
@@ -2726,8 +2758,12 @@ class AdminReportsEmailController extends Controller
             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+        //dd($count_column);
+        //dd($count_column);
 
-        $grand_total_count =  $count_column + $total_hub_wise_count -1;
+
+        $grand_total_count =  $count_column + $total_hub_wise_count -2;
 
         $total_style_cell = "D$grand_total_count".":M".$grand_total_count;
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
