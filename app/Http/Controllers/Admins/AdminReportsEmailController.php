@@ -2149,12 +2149,19 @@ class AdminReportsEmailController extends Controller
             })->select('shipments.id as shId', 'shipments.tracking_number as tracking', 'u.name as shipper','oc.id as origin_id','oc.name as origin', 'dc.name as destination','h.id as hub_id','h.name as hub',  'shipments.consignee_address','ss.name as current_status', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival_date','shipments.actual_weight as actual_weight','shipments.chargeable_weight as chargeable_weight')
             ->whereBetween('shipments_journey.created_at',[$from,$to])
             ->where('sm.id',2)
-            ->whereIn('shipments_journey.shipper_status_id',[2,3])
+            ->where('shipments_journey.shipper_status_id',3)
             ->groupBy('shipments.id')->get();
 
-
+    //dd($shipments);
         Carbon::setWeekendDays([
             Carbon::SUNDAY,]);
+
+        $overland_aging_day_wise[] = ['Overland Aging Report'];
+        $overland_aging_day_wise_header['header'] = ['Days','Count','Ratio'];
+
+        $overland_aging_day_wise_data[] = ['Days' => '','Count' => '','Ratio' => ''];
+
+
 
         $day_wise = '<div class="mb-2">';
         $day_wise = '<table style="width:100%;">';
@@ -2216,6 +2223,19 @@ class AdminReportsEmailController extends Controller
         $days_ratio['four'] = $days['four']/$days['total'];
         $days_ratio['five'] = $days['five']/$days['total'];
         $days_ratio['six'] = $days['six']/$days['total'];
+
+        $overland_aging_day_wise_data['zero'] = ['Days' => '0', 'Count' =>  $days['zero'], 'Ratio' => $days_ratio['zero']];
+        $overland_aging_day_wise_data['one'] = ['Days' => '1', 'Count' =>  $days['one'], 'Ratio' => $days_ratio['one']];
+        $overland_aging_day_wise_data['two'] = ['Days' => '2', 'Count' =>  $days['two'], 'Ratio' => $days_ratio['two']];
+        $overland_aging_day_wise_data['three'] = ['Days' => '3', 'Count' =>  $days['three'], 'Ratio' => $days_ratio['three']];
+        $overland_aging_day_wise_data['four'] = ['Days' => '4', 'Count' =>  $days['four'], 'Ratio' => $days_ratio['four']];
+        $overland_aging_day_wise_data['five'] = ['Days' => '5', 'Count' =>  $days['five'], 'Ratio' => $days_ratio['five']];
+        $overland_aging_day_wise_data['six'] = ['Days' => '5+', 'Count' =>  $days['six'], 'Ratio' => $days_ratio['six']];
+
+        $overland_aging_day_wise_footer[] =['Grand Total','Count' =>  $days['total'],''];
+
+        $overland_aging_day_wise = array_merge($overland_aging_day_wise_header,$overland_aging_day_wise_data,$overland_aging_day_wise_footer);
+
 
         $day_wise .= '<tr>';
         $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">0</td>';
@@ -2293,6 +2313,9 @@ class AdminReportsEmailController extends Controller
         $days['five'] = 0;
         $days['six'] = 0;
         $days['total'] = 0;
+
+        $origin_wise_shipment_header['header'] = ['Origin','0','1','2','3','4','5','5+','Total','Ratio'];
+        $origin_wise_shipment_data[] = ['Origin' =>'','0' =>'','1' =>'','2' =>'','3' =>'','4' =>'','5' =>'','5+' =>'' ,'Total' =>'','Ratio' =>''];
 
 
         foreach($shipments as $shipment){
@@ -2378,8 +2401,12 @@ class AdminReportsEmailController extends Controller
                 $ratio = $days[$origin_id]['total'] / $total_days['row']['total'];
                 $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $ratio .'</td>';
                 $origin_wise .= '</tr>';
+
+                $origin_wise_shipment_data[] = ['Origin' =>$origin->name ,'0' => $days[$origin->id]['zero'],'1' => $days[$origin->id]['one'],'2' => $days[$origin->id]['two'],'3'=> $days[$origin->id]['three'],'4' => $days[$origin->id]['four'],'5' => $days[$origin->id]['five'],'5+' => $days[$origin->id]['five'], 'Total' =>$days[$origin->id]['total'],'Ratio' =>$ratio];
+
             }
         }
+        $origin_wise_shipment_footer[] = ['Grand Total' => 'Grand Total' ,'0' =>  $total_days['zero']['total'] ,'1' =>  $total_days['one']['total'] ,'2' =>  $total_days['two']['total'] ,'3'=>  $total_days['three']['total'] ,'4' =>  $total_days['four']['total'] ,'5' =>  $total_days['five']['total'] ,'5+' =>  $total_days['six']['total'] , 'Total' =>$total_days['row']['total'],'Ratio' =>$ratio];
 
         $origin_wise .= '<tr>';
         $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
@@ -2396,6 +2423,8 @@ class AdminReportsEmailController extends Controller
         $origin_wise .= '</tbody></table>';
         $origin_wise .= '</div>';
 
+
+        $origin_wise_shipment = array_merge($origin_wise_shipment_header,$origin_wise_shipment_data,$origin_wise_shipment_footer);
 
         //In Transit Shipments Breakup
         $hub_wise = '<div class="mb-2">';
@@ -2422,6 +2451,9 @@ class AdminReportsEmailController extends Controller
         $days['five'] = 0;
         $days['six'] = 0;
         $days['total'] = 0;
+
+        $hub_wise_shipment_header['header'] = ['Hub','0','1','2','3','4','5','5+','Total','Ratio'];
+        $hub_wise_shipment_data[] = ['Hub' =>'','0' =>'','1' =>'','2' =>'','3' =>'','4' =>'','5' =>'','5+' =>'' ,'Total' =>'','Ratio' =>''];
 
 
         foreach($shipments as $shipment){
@@ -2484,7 +2516,7 @@ class AdminReportsEmailController extends Controller
         foreach($hubs as $hub){
             if(array_key_exists($hub->id, $days)){
                 $hub_wise .= '<tr>';
-                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $origin->name .'</td>';
+                $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $hub->name .'</td>';
                 $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['zero'] . '</td>';
                 $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['one'] . '</td>';
                 $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['two'] . '</td>';
@@ -2507,10 +2539,13 @@ class AdminReportsEmailController extends Controller
                 $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $ratio .'</td>';
                 $hub_wise .= '</tr>';
 
+                $hub_wise_shipment_data[] = ['Hub' => $hub->name ,'0' => $days[$hub->id]['zero'],'1' => $days[$hub->id]['one'],'2' => $days[$hub->id]['two'],'3'=> $days[$hub->id]['three'],'4' => $days[$hub->id]['four'],'5' => $days[$hub->id]['five'],'5+' => $days[$hub->id]['six'], 'Total' =>$days[$hub->id]['total'],'Ratio' =>$ratio];
+
             }
-
-
         }
+
+        $hub_wise_shipment_footer[] = ['Grand Total' => 'Grand Total' ,'0' =>  $total_days['zero']['total'] ,'1' =>  $total_days['one']['total'] ,'2' =>  $total_days['two']['total'] ,'3'=>  $total_days['three']['total'] ,'4' =>  $total_days['four']['total'] ,'5' =>  $total_days['five']['total'] ,'5+' =>  $total_days['six']['total'] , 'Total' =>$total_days['row']['total'],'Ratio' =>$ratio];
+
         $hub_wise .= '<tr>';
         $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
         $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['zero']['total']  . '</td>';
@@ -2526,7 +2561,10 @@ class AdminReportsEmailController extends Controller
         $hub_wise .= '</tbody></table>';
         $hub_wise .= '</div>';
 
+        $hub_wise_shipment = array_merge($hub_wise_shipment_header,$hub_wise_shipment_data,$hub_wise_shipment_footer);
 
+
+        //table tracking_number wise
         $html = '<div class="mb-4">';
         $html .= '<table style="width:100%;">';
         $html .= '<thead><tr>
@@ -2544,6 +2582,11 @@ class AdminReportsEmailController extends Controller
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Chargeable Weight</th>';
         $html .= '</tr></thead><tbody>';
         $serial = 1;
+
+        $tracking_number_wise_header['header'] = ['S.No','Tracking Number','Shipper','Origin','Destination','Hub','Current Status','Arrival Date','Current Status Date','Aging','Actual Weight','Chargeable Weight'];
+        $tracking_number_wise_data[] = ['S.No' =>'','Tracking Number' =>'','Shipper' =>'','Origin' =>'','Destination' =>'','Hub' =>'','Current Status' =>'','Arrival Date' =>'' ,'Current Status Date' =>'','Aging' =>'','Actual Weight' =>'', 'Chargeable Weight' => ''];
+
+
 
         foreach($shipments as $shipment){
             $tracking_number = $shipment->tracking;
@@ -2574,10 +2617,17 @@ class AdminReportsEmailController extends Controller
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $actual_weight . '</td>';
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $chargeable_weight . '</td>';
             $html .= '</tr>';
+
+            $tracking_number_wise_data[] = ['S.No' =>$serial,'Tracking Number' =>$tracking_number,'Shipper' =>$shipper,'Origin' =>$origin,'Destination' =>$destination,'Hub' =>$hub,'Current Status' =>$current_status,'Arrival Date' =>$arrival_date,'Current Status Date' =>$current_status_date,'Aging' =>$aging,'Actual Weight' =>$actual_weight, 'Chargeable Weight' => $chargeable_weight];
+
             $serial++;
+
         }
+
         $html .= '</tbody></table>';
         $html .= '</div>';
+
+        $tracking_number_wise = array_merge($tracking_number_wise_header,$tracking_number_wise_data);
 
 
         $table = $day_wise;
@@ -2585,8 +2635,146 @@ class AdminReportsEmailController extends Controller
         $table .= $hub_wise;
         $table .= $html;
 
-        return $table;
+        //return $table;
 
+        $cell_st = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+        $total_cell_st =[
+            'font' =>['bold' => true],
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]],
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => array('argb' => '000000'),
+                ),
+            )
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($overland_aging_day_wise, NULL, 'D4', true);
+        $sheet->getStyle("D2:P2") ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $total_style_cell = 'D4:F4';
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+        $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $sheet->fromArray($overland_aging_day_wise,NULL,'D4',true);
+
+        $total_style_cell = 'D13:F13';
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+        $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
+
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $origin_wise_cell = 'D18';
+        $origin_wise_last_cell = 'M18';
+        $sheet->fromArray($origin_wise_shipment,NULL,$origin_wise_cell,true);
+        $total_origin_wise_count = count($origin_wise_shipment);
+
+        $total_style_cell = 'D18:M18';
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $grand_total_count =  18 + $total_origin_wise_count -1;
+
+        $total_style_cell = "D$grand_total_count".":M".$grand_total_count;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+        $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
+
+
+
+        $count_details = $grand_total_count + 4;
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+
+        $origin_wise_cell = 'D'.$count_details;
+        $origin_wise_last_cell = 'M'.$count_details;
+        $sheet->fromArray($hub_wise_shipment,NULL,$origin_wise_cell,true);
+        $total_hub_wise_count = count($hub_wise_shipment);
+
+        $total_style_cell = "D$count_details".":M".$count_details;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $grand_total_count =  $count_details + $total_hub_wise_count -1;
+
+        $total_style_cell = "D$grand_total_count".":M".$grand_total_count;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
+        $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+        $count = $total_hub_wise_count + $count_details + 6;
+
+
+
+        $tracking_wise_cell = 'D'.$count;
+        $origin_wise_last_cell = 'O'.$count;
+        $sheet->fromArray($tracking_number_wise,NULL,$tracking_wise_cell,true);
+        $total_tracking_wise_count = count($hub_wise_shipment);
+
+        $total_style_cell = "D$count".":O".$count;
+        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+
+        $sheet->getStyle($total_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+
+
+        $sheet->setTitle('Overland Aging Report');
+        $sheet->mergeCells('A2:P2');
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
+        header('Cache-Control: max-age=0');
+        $date_file_name = Carbon::today()->format('Y_m_d');
+        $file_name_without_path = "reports/overland_aging_report_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/overland_aging_report_" . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+        return url('/') . '/' . $file_name_without_path;
 
     }
 

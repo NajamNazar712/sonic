@@ -6412,15 +6412,16 @@ class NotificationsController extends Controller
                     $body = $notification->body;
 //
 //                    $file = $reference_2_id;
-//                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-//                    if (strpos($body, '[link]') !== FALSE) {
-//                        $body = str_replace('[link]', $link, $body);
-//                    }
-                    $data = $reference_1_id;
+//
+                    $file = $reference_1_id;
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
 
-                        if (strpos($body, '[preview]') !== FALSE) {
+                       /* if (strpos($body, '[preview]') !== FALSE) {
                             $body = str_replace('[preview]',$data, $body);
-                        }
+                        }*/
 
                     $admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
 
