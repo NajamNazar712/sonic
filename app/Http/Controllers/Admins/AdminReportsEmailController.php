@@ -2050,9 +2050,6 @@ class AdminReportsEmailController extends Controller
                 $shipments_count = $shipment->shipments_count;
                 $shipments_unverified_count = $shipment->shipments_unverified_count;
                 $pending_status = $shipment->pending_status;
-                $special_rider = $shipment->special_rider;
-                $special_rider_name = $shipment->special_rider_name;
-                $special_rider_phone = $shipment->special_rider_phone;
                 $delivered_shipments = $shipment->delivered_shipments;
                 $created_at = $shipment->created_at;
                 $updated_by = $shipment->updated_by;
