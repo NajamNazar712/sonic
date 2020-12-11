@@ -117,6 +117,6 @@ class AdminSearchSonicSeed extends Seeder
             array('id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Replacement To Regular Log', 'url'=>'admin.delivery.replacement.replacement_to_regular_logs', 'permission_id' => 208))
             array('id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Change Shipment Amount', 'url'=>'admin.finance.change_shipment_amount', 'permission_id' => 57))
             array('id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Change Shipment Weight', 'url'=>'admin.finance.change_shipment_weight', 'permission_id' => 134))
-            array('id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Add Coordinates', 'url'=>'admin.coordinates.add', 'permission_id' => 324))
+            array('id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Add Coordinates', 'url'=>'admin.coordinates.add', 'permission_id' => 134))
     }
 }
