@@ -1983,7 +1983,7 @@ class AdminReportsEmailController extends Controller
                 $destination_arrival = $shipment->destination_arrival;
                 $status_date = $shipment->status_date;
 
-                $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
+                $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'COD Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Original Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
             }
                 $cell_st = [
                     'font' => ['bold' => true],
@@ -1997,7 +1997,7 @@ class AdminReportsEmailController extends Controller
                 $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
                 $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
                 $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
-                $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":R" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Pending Deliveries Report');
                 $sheet->mergeCells('A2:R2');
 //                $sheet->mergeCells('A3:C3');
@@ -2098,11 +2098,11 @@ class AdminReportsEmailController extends Controller
                 $sheet = $spreadsheet->getActiveSheet();
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
-                $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
-                $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
+                $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":R" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Receive Deliveries Report');
-//                $sheet->mergeCells('A2:C2');
+                $sheet->mergeCells('A2:R2');
 //                $sheet->mergeCells('A3:C3');
 //                $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
