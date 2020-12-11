@@ -40,7 +40,7 @@ class ReceiveDeliveriesReport extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
+        $date = Carbon::yesterday()->format('Y-m-d');
         $response = AdminReportsEmailController::receive_deliveries($date);
         NotificationsController::send(111, $date, $response);
     }

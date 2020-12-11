@@ -1913,9 +1913,11 @@ class AdminReportsEmailController extends Controller
     {
         $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
         $date_from = $date_from . ' 09:00:00';
-        $yesterday = Carbon::parse($date)->subDays(1);
+
+        $yesterday = Carbon::parse($date)->addDays(1);
         $date_to = $yesterday->toDateString();
         $date_to = $date_to . ' 08:59:59';
+
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -1982,7 +1984,7 @@ class AdminReportsEmailController extends Controller
                 $status_date = $shipment->status_date;
 
                 $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
-
+            }
                 $cell_st = [
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -1993,13 +1995,13 @@ class AdminReportsEmailController extends Controller
                 $sheet = $spreadsheet->getActiveSheet();
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
-                $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
+                $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
                 $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Pending Deliveries Report');
-                $sheet->mergeCells('A2:C2');
-                $sheet->mergeCells('A3:C3');
-                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                $sheet->mergeCells('A2:R2');
+//                $sheet->mergeCells('A3:C3');
+//                $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename=daily_pending_deliveries_report_.xlsx"');
@@ -2010,7 +2012,6 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
                 return url('/') . '/' . $file_name_without_path;
 
-            }
         }
     }
 
@@ -2018,7 +2019,7 @@ class AdminReportsEmailController extends Controller
     {
         $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
         $date_from = $date_from . ' 09:00:00';
-        $next_day = Carbon::parse($date)->subDay(1);
+        $next_day = Carbon::parse($date)->addDay(1);
         $date_to = $next_day->toDateString();
         $date_to = $date_to . ' 08:59:59';
         $serial = 0;
@@ -2060,7 +2061,7 @@ class AdminReportsEmailController extends Controller
             ->whereBetween('sj.created_at', [$date_from,$date_to])
             ->whereIn('shipments.shipper_status_id', $status)->get();
 
-        $receive_deliveries_report_array[] = ['Pending Deliveries Report'];
+        $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
         $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Consignee Name', 'Phone', 'Address', 'Consignee Amount', 'Shipping Mode', 'Service Type', 'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Arrival Date', 'Status Date'];
         $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Consignee Name' => '', 'Phone' => '', 'Address' => '', 'Consignee Amount' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Arrival Date' => '', 'Status Date' => ''];
 
@@ -2086,7 +2087,7 @@ class AdminReportsEmailController extends Controller
                 $status_date = $shipment->status_date;
 
                 $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Consignee Name' => $consignee_name, 'Phone' => $phone, 'Address' => $consignee_address, 'Consignee Amount' => $amount, 'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Origi Arrival Date' => $arrival, 'Destination Arrival Date' => $destination_arrival, 'Status Date' => $status_date];
-
+            }
                 $cell_st = [
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -2100,21 +2101,21 @@ class AdminReportsEmailController extends Controller
                 $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
                 $sheet->getStyle("A3:C3")->applyFromArray($cell_st);
                 $sheet->getStyle("A" . $serial . ":C" . $serial)->applyFromArray($cell_st);
-                $sheet->setTitle('Pending Deliveries Report');
-                $sheet->mergeCells('A2:C2');
-                $sheet->mergeCells('A3:C3');
-                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                $sheet->setTitle('Receive Deliveries Report');
+//                $sheet->mergeCells('A2:C2');
+//                $sheet->mergeCells('A3:C3');
+//                $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename=daily_receive_deliveries_report_.xlsx"');
                 header('Cache-Control: max-age=0');
                 $date_file_name = Carbon::today()->format('Y_m_d');
                 $file_name_without_path = "reports/daily_receive_deliveries_report_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/daily_pending_deliveries_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/daily_receive_deliveries_report_" . $date_file_name . ".xlsx";
                 $writer->save($file_name);
                 return url('/') . '/' . $file_name_without_path;
 
-            }
+
         }
     }
 }
