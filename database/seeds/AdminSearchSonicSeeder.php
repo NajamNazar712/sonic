@@ -126,63 +126,63 @@ class AdminSearchSonicSeeder extends Seeder
             array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Sales Dashboard', 'url'=>'admin.dashboard.index', 'permission_id' => 331),
             array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Open Parcel History', 'url'=>'admin.parcel_history.index', 'permission_id' => 392),
             array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Trax Directory', 'url'=>'admin.trax_directory.index', 'permission_id' => 392),
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'International Tracking Upload', 'url'=>'admin.international.tracking_upload', 'permission_id' => 398)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booked VS Received VS Delivered VS Returned', 'url'=>'admin.pickups.bookedvsreceived.index', 'permission_id' => 113)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pickup Notes Report', 'url'=>'admin.reports.pickup_notes_report', 'permission_id' => 64)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple IBAN Number Change Report', 'url'=>'admin.reports.multiple_IBAN_no_change', 'permission_id' => 328)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Received Report', 'url'=>'admin.reports.cargo_received_report', 'permission_id' => 65)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Completed Delivery Notes Report', 'url'=>'admin.reports.completed_delivery_notes_report', 'permission_id' => 66)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Return Notes Report', 'url'=>'admin.reports.return_notes_report', 'permission_id' => 67)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Outstanding Shipments Report', 'url'=>'admin.reports.outstanding_shipments_report', 'permission_id' => 68)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Lead Time Report', 'url'=>'admin.reports.lead_time_report', 'permission_id' => 69)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality of Service Report', 'url'=>'admin.reports.qsr_report', 'permission_id' => 70)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance Report', 'url'=>'admin.reports.qa_report', 'permission_id' => 71)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Customer Retention Report', 'url'=>'admin.reports.customer_retention_report', 'permission_id' => 70)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily Pickup & Sales Report', 'url'=>'admin.reports.daily_pickup_sales_report', 'permission_id' => 73)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Monthwise Customer Sales Report', 'url'=>'admin.reports.customer_sales_report', 'permission_id' => 74)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Overall Sales Report', 'url'=>'admin.reports.overall_sales', 'permission_id' => 75)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Sales Person Performance Report', 'url'=>'admin.reports.sales_person_performance_report', 'permission_id' => 138)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Negative Balance Customers Report', 'url'=>'admin.reports.invoice_for_negative_balance_customers', 'permission_id' => 148)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash Statements Report', 'url'=>'admin.reports.petty_cash_statement', 'permission_id' => 156)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Call Verification Report', 'url'=>'admin.reports.call_verification_report', 'permission_id' => 153)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Fake Statuses Report', 'url'=>'admin.reports.fake_statuses_report', 'permission_id' => 169)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Debriefing Report', 'url'=>'admin.reports.debriefing_report', 'permission_id' => 170)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Returns Shipment Report', 'url'=>'admin.reports.cargo_returns_shipment_report', 'permission_id' => 172)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Return To Re-Attempt Ratio Report', 'url'=>'admin.reports.return_reattempt_ratio', 'permission_id' => 174)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple Payments Report', 'url'=>'admin.reports.multiple_payment_report', 'permission_id' => 176)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Revenue Report', 'url'=>'admin.reports.revenue', 'permission_id' => 176)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'GST Report', 'url'=>'admin.reports.gst_report', 'permission_id' => 199)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'CRM Report', 'url'=>'admin.reports.crm_report', 'permission_id' => 200)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Summary Report', 'url'=>'admin.reports.summary', 'permission_id' => 210)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Account Activation Report', 'url'=>'admin.reports.account_activation', 'permission_id' => 246)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Adjustments Report', 'url'=>'admin.reports.adjustments', 'permission_id' => 248)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Station Deposit Notes Report', 'url'=>'admin.reports.station_deposit_notes', 'permission_id' => 252)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Rates Edit Report', 'url'=>'admin.reports.account_edits', 'permission_id' => 255)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper Bank History Report', 'url'=>'admin.reports.shipper_bank_history', 'permission_id' => 257)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Consignee Details History Report', 'url'=>'admin.reports.consignee_details_history', 'permission_id' => 258)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booked And Cancelled Shipments Report', 'url'=>'admin.reports.booked_and_cancelled_shipments_report', 'permission_id' => 259)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Fake Statuses Shipments Report', 'url'=>'admin.reports.fake_statuses_shipments_report', 'permission_id' => 263)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily Visit Report', 'url'=>'admin.reports.daily_visit_report', 'permission_id' => 264)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Delivered Shipment Report (Rider Wise)', 'url'=>'admin.reports.delivered_shipment_report', 'permission_id' => 275)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Route Distribution Summary Report', 'url'=>'admin.reports.route_distribution_summary_report', 'permission_id' => 300)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Arrived At Destination VS Out For Delivery VS Receive Report', 'url'=>'admin.reports.arrived_at_destination_out_for_delivery_and_received_report', 'permission_id' => 300)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Account Reconciliation Report', 'url'=>'admin.reports.account_reconciliation', 'permission_id' => 312)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Short Received Shipments', 'url'=>'admin.reports.cargo_short_received_shipments', 'permission_id' => 319)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile Status Report', 'url'=>'admin.reports.last_mile_status', 'permission_id' => 319)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pickup Report', 'url'=>'admin.reports.pickup_report', 'permission_id' => 337)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Completed Aging Report', 'url'=>'admin.reports.completed_aging_report', 'permission_id' => 337)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pending Cash Collection Report', 'url'=>'admin.reports.pending_cash_collection_report', 'permission_id' => 337)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Station Recovery Report', 'url'=>'admin.reports.station_recovery', 'permission_id' => 337)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Not Attempted Aging Report', 'url'=>'admin.reports.not_attempted_aging_report', 'permission_id' => 360)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily and Monthly Adjustments Report', 'url'=>'admin.reports.daily_monthly_adjustment', 'permission_id' => 373)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash Expense Summary Report', 'url'=>'admin.petty_cash_expense.index', 'permission_id' => 395)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'App Efficiency Report', 'url'=>'aadmin.reports.app_efficiency', 'permission_id' => 401)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Create Handover Note', 'url'=>'admin.handover.index', 'permission_id' => 339)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Receive Handover Note', 'url'=>'admin.handover.receive', 'permission_id' => 341)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Handover List', 'url'=>'admin.handover.list', 'permission_id' => 342)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Responsibles', 'url'=>'admin.handover.responsibles', 'permission_id' => 340)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Tracking', 'url'=>'admin.tracking.quick_tracking', 'permission_id' => 342)
-            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Report - Sales Dashboard', 'url'=>'admin.reports.power_bi_sales_dashboard', 'permission_id' => 342)
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'International Tracking Upload', 'url'=>'admin.international.tracking_upload', 'permission_id' => 398),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booked VS Received VS Delivered VS Returned', 'url'=>'admin.pickups.bookedvsreceived.index', 'permission_id' => 113),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pickup Notes Report', 'url'=>'admin.reports.pickup_notes_report', 'permission_id' => 64),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple IBAN Number Change Report', 'url'=>'admin.reports.multiple_IBAN_no_change', 'permission_id' => 328),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Received Report', 'url'=>'admin.reports.cargo_received_report', 'permission_id' => 65),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Completed Delivery Notes Report', 'url'=>'admin.reports.completed_delivery_notes_report', 'permission_id' => 66),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Return Notes Report', 'url'=>'admin.reports.return_notes_report', 'permission_id' => 67),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Outstanding Shipments Report', 'url'=>'admin.reports.outstanding_shipments_report', 'permission_id' => 68),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Lead Time Report', 'url'=>'admin.reports.lead_time_report', 'permission_id' => 69),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality of Service Report', 'url'=>'admin.reports.qsr_report', 'permission_id' => 70),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance Report', 'url'=>'admin.reports.qa_report', 'permission_id' => 71),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Customer Retention Report', 'url'=>'admin.reports.customer_retention_report', 'permission_id' => 70),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily Pickup & Sales Report', 'url'=>'admin.reports.daily_pickup_sales_report', 'permission_id' => 73),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Monthwise Customer Sales Report', 'url'=>'admin.reports.customer_sales_report', 'permission_id' => 74),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Overall Sales Report', 'url'=>'admin.reports.overall_sales', 'permission_id' => 75),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Sales Person Performance Report', 'url'=>'admin.reports.sales_person_performance_report', 'permission_id' => 138),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Negative Balance Customers Report', 'url'=>'admin.reports.invoice_for_negative_balance_customers', 'permission_id' => 148),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash Statements Report', 'url'=>'admin.reports.petty_cash_statement', 'permission_id' => 156),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Call Verification Report', 'url'=>'admin.reports.call_verification_report', 'permission_id' => 153),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Fake Statuses Report', 'url'=>'admin.reports.fake_statuses_report', 'permission_id' => 169),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Debriefing Report', 'url'=>'admin.reports.debriefing_report', 'permission_id' => 170),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Returns Shipment Report', 'url'=>'admin.reports.cargo_returns_shipment_report', 'permission_id' => 172),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Return To Re-Attempt Ratio Report', 'url'=>'admin.reports.return_reattempt_ratio', 'permission_id' => 174),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple Payments Report', 'url'=>'admin.reports.multiple_payment_report', 'permission_id' => 176),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Revenue Report', 'url'=>'admin.reports.revenue', 'permission_id' => 176),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'GST Report', 'url'=>'admin.reports.gst_report', 'permission_id' => 199),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'CRM Report', 'url'=>'admin.reports.crm_report', 'permission_id' => 200),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Summary Report', 'url'=>'admin.reports.summary', 'permission_id' => 210),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Account Activation Report', 'url'=>'admin.reports.account_activation', 'permission_id' => 246),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Adjustments Report', 'url'=>'admin.reports.adjustments', 'permission_id' => 248),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Station Deposit Notes Report', 'url'=>'admin.reports.station_deposit_notes', 'permission_id' => 252),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Rates Edit Report', 'url'=>'admin.reports.account_edits', 'permission_id' => 255),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper Bank History Report', 'url'=>'admin.reports.shipper_bank_history', 'permission_id' => 257),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Consignee Details History Report', 'url'=>'admin.reports.consignee_details_history', 'permission_id' => 258),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booked And Cancelled Shipments Report', 'url'=>'admin.reports.booked_and_cancelled_shipments_report', 'permission_id' => 259),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Fake Statuses Shipments Report', 'url'=>'admin.reports.fake_statuses_shipments_report', 'permission_id' => 263),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily Visit Report', 'url'=>'admin.reports.daily_visit_report', 'permission_id' => 264),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Delivered Shipment Report (Rider Wise)', 'url'=>'admin.reports.delivered_shipment_report', 'permission_id' => 275),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Route Distribution Summary Report', 'url'=>'admin.reports.route_distribution_summary_report', 'permission_id' => 300),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Arrived At Destination VS Out For Delivery VS Receive Report', 'url'=>'admin.reports.arrived_at_destination_out_for_delivery_and_received_report', 'permission_id' => 300),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Account Reconciliation Report', 'url'=>'admin.reports.account_reconciliation', 'permission_id' => 312),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Cargo Short Received Shipments', 'url'=>'admin.reports.cargo_short_received_shipments', 'permission_id' => 319),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile Status Report', 'url'=>'admin.reports.last_mile_status', 'permission_id' => 319),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pickup Report', 'url'=>'admin.reports.pickup_report', 'permission_id' => 337),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Completed Aging Report', 'url'=>'admin.reports.completed_aging_report', 'permission_id' => 337),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Pending Cash Collection Report', 'url'=>'admin.reports.pending_cash_collection_report', 'permission_id' => 337),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Station Recovery Report', 'url'=>'admin.reports.station_recovery', 'permission_id' => 337),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Not Attempted Aging Report', 'url'=>'admin.reports.not_attempted_aging_report', 'permission_id' => 360),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily and Monthly Adjustments Report', 'url'=>'admin.reports.daily_monthly_adjustment', 'permission_id' => 373),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Petty Cash Expense Summary Report', 'url'=>'admin.petty_cash_expense.index', 'permission_id' => 395),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'App Efficiency Report', 'url'=>'aadmin.reports.app_efficiency', 'permission_id' => 401),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Create Handover Note', 'url'=>'admin.handover.index', 'permission_id' => 339),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Receive Handover Note', 'url'=>'admin.handover.receive', 'permission_id' => 341),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Handover List', 'url'=>'admin.handover.list', 'permission_id' => 342),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Responsibles', 'url'=>'admin.handover.responsibles', 'permission_id' => 340),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Tracking', 'url'=>'admin.tracking.quick_tracking', 'permission_id' => 342),
+            array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Report - Sales Dashboard', 'url'=>'admin.reports.power_bi_sales_dashboard', 'permission_id' => 342),
             array('id'=>'','created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Report - Operation Dashboard', 'url'=>'admin.reports.power_bi_operation_dashboard', 'permission_id' => 342)
         ));
     }
