@@ -95,9 +95,9 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
-            $('#pickup_address').select2({
+            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Search Pickup Addresses",
+                placeholder:"Add Pickup Addresses",
                 allowClear:true,
             });
            /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
@@ -262,8 +262,7 @@
                         }
                     }).done(function(data){
 
-                        console.log(route_id);
-                        console.log(data.pickup_address_ids);
+                        $('#pickup_address').val('All').trigger('change');
                         if(data.pickup_address_ids.length != 0 ){
                             $('#pickup_address').val(data.pickup_address_ids).trigger('change');
                         }
