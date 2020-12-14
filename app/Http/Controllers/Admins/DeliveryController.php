@@ -4172,8 +4172,6 @@ class DeliveryController extends Controller
         $sdn->sdn_deposit_amount = $total_amount;
         $sdn->deposit_slip_status = 1;
         $sdn->status = 1;
-        $sdn->status_updated_at = Carbon::now();
-        $sdn->status_updated_by = Auth::id();
         $sdn->save();
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 

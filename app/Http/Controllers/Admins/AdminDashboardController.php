@@ -9584,5 +9584,9 @@ class AdminDashboardController extends Controller
         }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
+
+//    public function search_sonic(Request $request){
+//        if($request->has())
+//    }
 }
 
