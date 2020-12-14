@@ -3736,12 +3736,13 @@ class NotificationsController extends Controller
                     $date = Carbon::today()->startOfDay()->toDateTimeString();
                     $date_end = Carbon::today()->endOfDay()->toDateTimeString();
                     $month_average_data = MonthAverage::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
-                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments/Day</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Month Speed</strong></th></tr></thead><tbody>';
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments/Day</strong></th>th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Day</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Month Speed</strong></th></tr></thead><tbody>';
                     $serial = 1;
                     $shipments_count = 0;
                     $revenue_count = 0;
                     $avg_revenue_count = 0;
                     $avg_shipments_count = 0;
+                    $avg_revenue_per_day_count = 0;
                     $month_speed_count = 0;
                     foreach ($month_average_data as $month_average) {
                         $html .= '<tr>';
@@ -3751,11 +3752,13 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_shipments)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_revenue_per_day)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->month_speed)) . '</td>';
                         $html .= '</tr>';
                         $shipments_count = $shipments_count + $month_average->shipments;
                         $revenue_count = $revenue_count + $month_average->revenue;
                         $avg_shipments_count = $avg_shipments_count + $month_average->avg_shipments;
+                        $avg_revenue_per_day_count = $avg_revenue_per_day_count + $month_average->avg_revenue_per_day;
                         $month_speed_count = $month_speed_count + $month_average->month_speed;
                         $serial++;
                     }
