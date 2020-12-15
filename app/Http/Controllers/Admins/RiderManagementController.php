@@ -7,6 +7,7 @@ use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
+use App\Http\Models\RouteType;
 use App\Http\Models\SmsHistory;
 use App\Http\Models\SmsHistoryRider;
 use Illuminate\Http\Request;
@@ -116,7 +117,8 @@ class RiderManagementController extends Controller
     public function addRiderView(){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
+        $route_types = RouteType::all();
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -148,6 +150,7 @@ class RiderManagementController extends Controller
             $route->start = $request->start;
             $route->end = $request->end;
             $route->junction = $request->junction;
+            $route->route_type_id = $request->route_type_id;
             $route->status = 1;
             $route->save();
             $route_id = $route->id;
@@ -193,9 +196,10 @@ class RiderManagementController extends Controller
     public function editRiderView($id){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -244,6 +248,7 @@ class RiderManagementController extends Controller
             $route->start = $request->start;
             $route->end = $request->end;
             $route->junction = $request->junction;
+            $route->route_type_id = $request->route_type_id;
             $route->status = 1;
             $route->save();
 
