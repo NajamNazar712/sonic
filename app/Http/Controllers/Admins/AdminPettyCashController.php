@@ -756,9 +756,14 @@ class AdminPettyCashController extends Controller
 
                 }
                 return $dropdown;
-            })
-            ->make(true);
-        return $petty;
+            });
+
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $petty->whereBetween('petty_cash_statements.finance_approved_at', [$from,$to]);
+            }
+        return $petty->make(true);
     }
 
     public function rejected_petty_cash_statements_index()
@@ -1597,7 +1602,7 @@ class AdminPettyCashController extends Controller
             if ($flag) {
                 return response()->json(['status' => 0, 'success' => 'Station Approved!']);
             } else {
-                return response()->json(['status' => 1, 'error' => 'Station Approved first!']);
+                return response()->json(['status' => 1, 'error' => 'Already Approved!']);
             }
         }
         return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);

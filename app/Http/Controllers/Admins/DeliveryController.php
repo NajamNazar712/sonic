@@ -4044,7 +4044,7 @@ class DeliveryController extends Controller
                 if ($sdn->status == 0) {
                     return 'Created';
                 }
-                else if ($sdn->status == 0) {
+                else if ($sdn->status == 1) {
                     return 'Deposited';
                 }
                 else {
@@ -4074,6 +4074,11 @@ class DeliveryController extends Controller
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
                 ->where('dnsdns.delivery_note_id', '=', $dncc)
                 ->groupBy('station_deposit_notes.id');
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('station_deposit_notes.status_updated_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

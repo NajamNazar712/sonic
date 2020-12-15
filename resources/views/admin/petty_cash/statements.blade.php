@@ -160,6 +160,9 @@
                     }
                 }
             });
+            $('#search_filter_btn').on('click',function (){
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
