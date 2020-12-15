@@ -68,7 +68,7 @@ use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use App\RouteLocations;
-use App\RouteType;
+use App\Http\Models\RouteType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
