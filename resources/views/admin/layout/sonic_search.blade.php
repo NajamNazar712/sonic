@@ -24,7 +24,12 @@
 
 
 <script type="text/javascript">
-
+    $(document).ready(function(){
+        $(document).on('keydown', function ( e ) {
+            if (e.ctrlKey && e.shiftKey && ( String.fromCharCode(e.which).toLowerCase() === 'f') ) {
+                $("#GlobalSearchSonicModal").modal('show');
+            }
+        });
         $('#search_admin_sonic').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder:'Search Sonic',
@@ -40,6 +45,7 @@
         $('#GlobalSearchSonicModal').on('hidden.bs.modal', function (e) {
             $('#search_admin_sonic').select2('close');
         });
+    });
 
 
 </script>
