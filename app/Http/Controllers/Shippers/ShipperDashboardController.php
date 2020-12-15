@@ -75,6 +75,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\City;
 use App\Http\Models\UserDefaultBankDuration;
 use Auth;
+use App\Http\Models\Segment;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

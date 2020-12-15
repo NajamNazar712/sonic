@@ -575,6 +575,8 @@ class AdminFinanceController extends Controller
         $station_deposit_note = StationDepositNote::find($request->station_deposit_note_id);
 
         $station_deposit_note->status = 2;
+        $station_deposit_note->status_updated_at = Carbon::now();
+        $station_deposit_note->status_updated_by = Auth::id();
 
         $station_deposit_note->save();
 
@@ -3674,6 +3676,7 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_list(Request $request) {
+
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
@@ -3694,7 +3697,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges');
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at');
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -3878,6 +3881,12 @@ class AdminFinanceController extends Controller
             $to = $request->get('search_to');
             $datatables->whereBetween('done_payments.created_at', [$from,$to]);
         }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('done_payments.status_updated_at', [$from,$to]);
+        }
         return $datatables->make(true);
     }
 
@@ -3887,6 +3896,8 @@ class AdminFinanceController extends Controller
 
             if ($done_payment->status != 1) {
                 $done_payment->status = 1;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
 
                 $done_payment->save();
 
@@ -3925,6 +3936,8 @@ class AdminFinanceController extends Controller
 
             if ($done_payment->status != 2) {
                 $done_payment->status = 2;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
 
                 $done_payment->save();
 
@@ -6445,6 +6458,12 @@ class AdminFinanceController extends Controller
             else{
                 $datatables->whereRaw('false');
             }
+        }
+        if($request->get('payment_filter') !== null){
+           $payment_amount = $request->get('payment_filter');
+
+           $datatables->having('total_payable', '>', $payment_amount);
+
         }
 
         return $datatables->make(true);

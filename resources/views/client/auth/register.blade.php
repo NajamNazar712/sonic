@@ -287,6 +287,20 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="segments">Segments:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($segments as $segment)
+                                                                    <option value="{{$segment->id}}"> {{$segment->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -895,6 +909,9 @@
         $('select[name="sale_person"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Sale Person',
             // dropdownParent:$('#registership')
+        });
+        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Segment',
         });
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',

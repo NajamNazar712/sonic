@@ -134,6 +134,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Segment;
 
 
 class AdminDashboardController extends Controller
@@ -1383,10 +1384,10 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
     }
     public function UserStatus(Request $request){
-//        return $request;
+
         $id = $request->shid; //shipper id
         $status = $request->status;
-//        return $request;
+
         if($status == 'activate'){
             $user = User::find($id);
             if($user->status == 2){
@@ -1483,11 +1484,11 @@ class AdminDashboardController extends Controller
                     //     $shipper_data->admin_id=$tag_id;
                     //     $sale_person_tag->user_id=$shipper_id;
                     //     $sale_person_tag->save();
-                        
+
                     // }
 
-            // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
-                 }
+                    // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
+                }
             }
             NotificationsController::send(81,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
@@ -1753,7 +1754,7 @@ class AdminDashboardController extends Controller
         }
 
         $sales_commission = SalesCommission::where('shipper_id', $id)->first();
-if(session('department_id') == 7){
+        if(session('department_id') == 7){
             if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
                 return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
             }
@@ -1872,7 +1873,7 @@ if(session('department_id') == 7){
                     $packaging_sizes[$type->id] = $type->sizes;
                 }
             }
-            
+
             $packaging_charges = array();
             if(count($packaging) > 0){
 
@@ -2010,13 +2011,13 @@ if(session('department_id') == 7){
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
                 'on_cash_range_down.*.numeric' => 'The overnight cash range down field must be numeric.',
                 'on_cash_charges.*.required_if' => 'The overnight cash charges field is required.',
-                
+
                 'on_ins_range_up.*.required_if' => 'The overnight insurance range up field is required.',
                 'on_ins_range_up.*.numeric' => 'The overnight insurance range up field must be numeric or percentage.',
                 'on_ins_range_down.*.required_if' => 'The overnight insurance range down field is required.',
                 'on_ins_range_down.*.numeric' => 'The overnight insurance range down field must be numeric or percentage.',
                 'on_ins_charges.*.required_if' => 'The overnight insurance charges field is required.',
-                
+
                 'on_return_local_charges.required_if' => 'The overnight return local charges field is required.',
                 'on_return_local_charges.numeric' => 'The overnight return local charges field must be numeric or percentage.',
                 'on_return_class_0_charges.*.numeric' => 'The overnight class A return charges field must be numeric.',
@@ -3517,7 +3518,7 @@ if(session('department_id') == 7){
                         $psf->charges = $request->psf_charges;
                     }
                     $psf->save();
-                    
+
                 }
                 if($request->has('storage_charges_switch')){
                     WmsStorageTypeCharge::where('user_id', $id)->delete();
@@ -3557,7 +3558,7 @@ if(session('department_id') == 7){
                         $labelling->charges = $request->labelling_charges;
                     }
                     $labelling->save();
-                    
+
                 }else{
                     WmsLabellingCharge::where('user_id', $id)->delete();
                 }
@@ -4717,58 +4718,58 @@ if(session('department_id') == 7){
             WmsPendingLabellingCharge::where('user_id', $id)->delete();
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
 
-            $wms_user_info = new WmsPendingUserInformation();
-            $wms_user_info->user_id = $id;
-            $wms_user_info->warehousing = 1;
-            $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = 1;
-            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
-            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
-            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
-            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
-            $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
-            $wms_user_info->save();
+                $wms_user_info = new WmsPendingUserInformation();
+                $wms_user_info->user_id = $id;
+                $wms_user_info->warehousing = 1;
+                $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+                $wms_user_info->invoicing_date = 1;
+                $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+                $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+                $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+                $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+                $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
+                $wms_user_info->save();
 
-            if($request->has('ppc_switch')){
-                $ppc = new WmsPendingPerProductCharge();
-                $ppc->user_id = $id;
-                $ppc->charges = $request->ppc_charges;
-                $ppc->save();
-            }
-            if($request->has('psf_switch')){
-                $psf = new WmsPendingPerSquareFootCharge();
-                $psf->user_id = $id;
-                $psf->charges = $request->psf_charges;
-                $psf->save();
-            }
-            if($request->has('storage_charges_switch')){
-                foreach ($request->storage_type as $key => $storage_type) {
-                    $storage_charges = new WmsPendingStorageTypeCharge();
-                    $storage_charges->user_id = $id;
-                    $storage_charges->storage_type_id = $storage_type;
-                    $storage_charges->charges = $request->storage_type_charges[$key];
-                    $storage_charges->save();
+                if($request->has('ppc_switch')){
+                    $ppc = new WmsPendingPerProductCharge();
+                    $ppc->user_id = $id;
+                    $ppc->charges = $request->ppc_charges;
+                    $ppc->save();
+                }
+                if($request->has('psf_switch')){
+                    $psf = new WmsPendingPerSquareFootCharge();
+                    $psf->user_id = $id;
+                    $psf->charges = $request->psf_charges;
+                    $psf->save();
+                }
+                if($request->has('storage_charges_switch')){
+                    foreach ($request->storage_type as $key => $storage_type) {
+                        $storage_charges = new WmsPendingStorageTypeCharge();
+                        $storage_charges->user_id = $id;
+                        $storage_charges->storage_type_id = $storage_type;
+                        $storage_charges->charges = $request->storage_type_charges[$key];
+                        $storage_charges->save();
+                    }
+                }
+
+                if($request->has('packing_charges_switch')){
+                    foreach ($request->packing_type as $key => $packing) {
+                        $ptype = new WmsPendingPackingCharge();
+                        $ptype->user_id = $id;
+                        $ptype->packing_type_id = $packing;
+                        $ptype->packing_size_id = $request->packing_size[$key];
+                        $ptype->charges = $request->packing_charges[$key];
+                        $ptype->save();
+                    }
+                }
+
+                if($request->has('labelling_charges_switch')){
+                    $labelling = new WmsPendingLabellingCharge();
+                    $labelling->user_id = $id;
+                    $labelling->charges = $request->labelling_charges;
+                    $labelling->save();
                 }
             }
-
-            if($request->has('packing_charges_switch')){
-                foreach ($request->packing_type as $key => $packing) {
-                    $ptype = new WmsPendingPackingCharge();
-                    $ptype->user_id = $id;
-                    $ptype->packing_type_id = $packing;
-                    $ptype->packing_size_id = $request->packing_size[$key];
-                    $ptype->charges = $request->packing_charges[$key];
-                    $ptype->save();
-                }
-            }
-
-            if($request->has('labelling_charges_switch')){
-                $labelling = new WmsPendingLabellingCharge();
-                $labelling->user_id = $id;
-                $labelling->charges = $request->labelling_charges;
-                $labelling->save();
-            }
-        }
 
             //dd($weightAlready);
 
@@ -7127,21 +7128,21 @@ if(session('department_id') == 7){
     }
     public function activeAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-           ->leftjoin('products as p','p.id','=','users.product_id')
-           ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
-           ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
-           ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
-           ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
-           ->leftjoin('account_types as at','at.id','=','users.account_type_id')
-           ->leftjoin('sale_person_tags as spt', function ($join) {
-               $join->on('spt.user_id', '=', 'users.id')
-                   ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                   ->where('spt.status','=',0);
-           })
+            ->leftjoin('products as p','p.id','=','users.product_id')
+            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
+            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
+            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7151,6 +7152,10 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+
+        if(in_array(403, session('permissions'))){
+            $users = $users->whereIn('iui.status', [1, 2, 3, 4]);
         }
 
         if($sale_persons = $request->get('sale_persons')){
@@ -7294,8 +7299,11 @@ if(session('department_id') == 7){
                         return "Approved";
                     }elseif($users->international_rate_status == 2){
                         return "Requested";
-                    }
-                    else{
+                    }elseif($users->international_rate_status == 3){
+                        return "Rejected";
+                    }elseif($users->international_rate_status == 4){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 5){
                         return "Rejected";
                     }
                 }
@@ -7322,7 +7330,7 @@ if(session('department_id') == 7){
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
+                    <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
@@ -7426,7 +7434,8 @@ if(session('department_id') == 7){
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7565,6 +7574,31 @@ if(session('department_id') == 7){
                     return $count;
                 }
             })
+            ->editColumn('international_rate_status',function ($users){
+                if($users->international_rate_status != null){
+                    if($users->international_rate_status == 1){
+                        return "Approved";
+                    }elseif($users->international_rate_status == 2){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 3){
+                        return "Rejected";
+                    }elseif($users->international_rate_status == 4){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 5){
+                        return "Rejected";
+                    }
+                }
+                else{
+                    return "International Rates are not set";
+                }
+            })
+            ->editColumn('international_rejected_reason',function ($users){
+                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+                    return $users->international_rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
             ->addColumn("action", function ($result) {
                 if(in_array($result->id, session('tagged_shippers'))){
                     $multiple_sale_check = true;
@@ -7576,7 +7610,7 @@ if(session('department_id') == 7){
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
+                    <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
@@ -7586,7 +7620,7 @@ if(session('department_id') == 7){
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
-                if($result->status == 2 && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
+                if(($result->status == 2 || $result->international_status == 1) && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
@@ -7616,11 +7650,11 @@ if(session('department_id') == 7){
 
                 }
 
-                if($result->account_type_id == 1){
-                    if(($result->rate_status == 0 && $result->status == 2) && (session('role_id') == 1 || in_array(8, session('permissions')))){
+//                if($result->account_type_id == 1){
+                    if(($result->rate_status == 0 && $result->status == 2) && (InternationalUsersInformation::where('user_id', $result->id)->exists() == false) && (session('role_id') == 1 || in_array(8, session('permissions')))){
                         $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
                     }
-                }
+//                }
 
                 if($result->account_type_id == 1){
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
@@ -7662,6 +7696,15 @@ if(session('department_id') == 7){
                 if($sale_check){
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
+                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
+                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }else{
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                    }
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -7749,10 +7792,13 @@ if(session('department_id') == 7){
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
+
+        $segments = Segment::all();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments]);
     }
+
 
 
     public function updateProfile(Request $request)
@@ -7768,14 +7814,14 @@ if(session('department_id') == 7){
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
             'cnic'=>'required|string|max:255',
+            'segment_id' => 'required'
         ]);
 
 
         if($request->password=="" || $request->password==null)
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
@@ -7785,8 +7831,7 @@ if(session('department_id') == 7){
         else
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
-                'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
         }
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
@@ -7820,18 +7865,18 @@ if(session('department_id') == 7){
                 $generation_date = $request->generation_date;
             }
             UserBankInfo::where('user_id',$user_id)->update([
-                    'bank_branch'=>$request->bank_branch,
-                    'bank_name'=>$request->bank_name,
-                    'account_no'=>$request->account_no,
-                    'account_title'=>$request->account_title,
-                    'iban'=>$request->iban,
-                    'city_id'=>$request->bank_city,
-                    'invoicing_cycle_id' => $request->invoicing_cycle_id,
-                    'generation_date' => $generation_date,
-                    'billing_person_name' => $request->billing_person_name,
-                    'billing_person_phone' => $request->billing_person_phone,
-                    'billing_person_email' => $request->billing_person_email,
-                    'billing_address' => $request->billing_address
+                'bank_branch'=>$request->bank_branch,
+                'bank_name'=>$request->bank_name,
+                'account_no'=>$request->account_no,
+                'account_title'=>$request->account_title,
+                'iban'=>$request->iban,
+                'city_id'=>$request->bank_city,
+                'invoicing_cycle_id' => $request->invoicing_cycle_id,
+                'generation_date' => $generation_date,
+                'billing_person_name' => $request->billing_person_name,
+                'billing_person_phone' => $request->billing_person_phone,
+                'billing_person_email' => $request->billing_person_email,
+                'billing_address' => $request->billing_address
             ]);
         }
         if($old_bank_detail->bank_name != $request->bank_name){
@@ -8847,7 +8892,7 @@ if(session('department_id') == 7){
                     }
                 }
             }
-                return redirect()->route('admin.accounts.merged_account.index')->with(['success'=>"Accounts merged successfully."]);
+            return redirect()->route('admin.accounts.merged_account.index')->with(['success'=>"Accounts merged successfully."]);
         }
         else{
             return redirect()->back()->with('error', "Sister accounts are not selected!");
@@ -8864,7 +8909,7 @@ if(session('department_id') == 7){
         return Datatables::of($merged_accounts)
 
             ->editColumn('accounts_button', function ($users){
-                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
+                return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
             })
             ->editColumn('updated_by', function($users){
                 if($users->updated_by != null){
@@ -8885,7 +8930,7 @@ if(session('department_id') == 7){
             ->addColumn("action", function ($users) {
                 $dropdown = '';
                 if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions'))) {
-                $dropdown .= '
+                    $dropdown .= '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
@@ -8895,7 +8940,7 @@ if(session('department_id') == 7){
                     $dropdown .= '<button type="button" class="dropdown-item mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
 
 
-                $dropdown .= '
+                    $dropdown .= '
                         </div>
                       </div>
                     ';
@@ -9072,7 +9117,7 @@ if(session('department_id') == 7){
             $user_document->approved_by = Auth::id();
             $user_document->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
-            
+
         }
         else if($approve == 0){
             $user->documents_status = 3;
@@ -9089,9 +9134,9 @@ if(session('department_id') == 7){
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
         if($user_attachment){
             return response()->json(['status' => 1, 'user_attachment' => $user_attachment]);
-         }
-        else{  
-             return response()->json(['status' => 0]);
+        }
+        else{
+            return response()->json(['status' => 0]);
         }
     }
     public function uploadDocuments(Request $request){
@@ -9160,7 +9205,7 @@ if(session('department_id') == 7){
             $user_attachment->save();
         }
         else{
-            
+
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
                 $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
@@ -9168,35 +9213,35 @@ if(session('department_id') == 7){
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
-            
+
             if ($request->hasFile('signed_acknowledgement_pdf')) {
                 $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
-            
+
             if ($request->hasFile('cnic_front_image')) {
                 $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_front_image = $filename;
             }
-            
+
             if ($request->hasFile('cnic_back_image')) {
                 $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->cnic_back_image = $filename;
             }
-            
+
             if ($request->hasFile('blank_cheque_image')) {
                 $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
                 $new_user_attachment->blank_cheque_image = $filename;
             }
-            
+
             $new_user_attachment->user_id = $request->user_id;
             $new_user_attachment->uploaded_at = Carbon::now();
             $new_user_attachment->uploaded_by = Auth::id();
@@ -9220,7 +9265,7 @@ if(session('department_id') == 7){
                 $user->documents_status = 1;
                 $user->save();
             }
-            
+
             return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
         }
         return response()->json(['error' => 'User not found!']);
@@ -9524,10 +9569,10 @@ if(session('department_id') == 7){
             'route_id' => 'required',
             'pickup_address' =>'required']);
 
-       $route_id = $request->route_id;
-       $pickup_addresses = $request->pickup_address;
+        $route_id = $request->route_id;
+        $pickup_addresses = $request->pickup_address;
 
-       RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
+        RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
 
         if($route_id){
             foreach($pickup_addresses as $pickup_address){
@@ -9536,8 +9581,12 @@ if(session('department_id') == 7){
                 $location->pickup_address_id = $pickup_address;
                 $location->save();
             }
-      }
+        }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
+
+//    public function search_sonic(Request $request){
+//        if($request->has())
+//    }
 }
 

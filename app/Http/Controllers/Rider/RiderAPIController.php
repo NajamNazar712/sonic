@@ -1362,7 +1362,8 @@ class RiderAPIController extends Controller {
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
-            'shipments' => ['required', 'integer', 'digits_between:1,10']
+            'shipments' => ['required', 'integer', 'digits_between:1,10'],
+            'picture' => ['required', 'image']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1431,6 +1432,12 @@ class RiderAPIController extends Controller {
                 }
 
                 $rider_pickup->shipments = $request->shipments;
+
+                $rider_pickup->save();
+
+                $picture_path = 'rider_pickup/' . $rider_pickup->id . '.png';
+                Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                $rider_pickup->picture_path = $picture_path;
 
                 $rider_pickup->save();
 
