@@ -5,7 +5,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <form>
-                    <div class="form-group">
+                    <div class="form-group mb-0">
                         <select name="search_admin_sonic" id="search_admin_sonic" class="form-control select2">
                             @if(isset($search_sonic))
                             @foreach($search_sonic as $search)
