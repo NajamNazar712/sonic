@@ -3148,7 +3148,7 @@ class GlobalSettingsController extends Controller
         $runner = Runner::where('id', $id)->first();
         if ($runner) {
             if ($runner->status == 2) {
-                $runner->status = 0;
+                $runner->status = 1;
                 $runner->save();
             } else {
                 $runner->status = 2;
