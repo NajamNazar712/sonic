@@ -366,14 +366,16 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
+            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_status')
+            ->leftJoin('crm_requests as cr', function ($join) {
+                $join->on('cr.shipment_id', '=', 'shipments.id')
+                    ->where('cr.created_at','=',
+                        DB::raw('(select max(created_at) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
-//            ->join('crm_requests as cr','cr.shipment_id','=','shipments.id')
             ->join('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address as consignee_address','shipments.amount as cod_amount','u.name as shipper','shipments_journey.remarks as shipment_remarks','cr.id as claim_id','crn.type as claim_type')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address as consignee_address','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mc.status_id')
             ->groupBy('shipments.id');
 
         $datatable = Datatables::of($shipments)

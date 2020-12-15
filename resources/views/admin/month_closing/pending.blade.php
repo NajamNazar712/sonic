@@ -201,7 +201,7 @@
             } );
             var selected_rows = [];
             var shipment_remarks = {};
-            /*var table = $('#datatable').DataTable({
+            var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([142, 143, 144], session('permissions'))) !== 0)
 
@@ -330,18 +330,6 @@
                         }
                     },
                     {
-
-                        title: 'Month Closing',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Closing Month ',
-                    },
-                    {
-
-                        title: 'Month Closing',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Closing Status',
-                    },
-                    {
                         extend: 'excel',
                         title: 'Month Closing',
                         className: 'btn btn-primary',
@@ -351,7 +339,7 @@
                 @else
                 buttons:[{
                     extend: 'excel',
-                    title: 'Month Closing',
+                    title: 'Month Closing Pending',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -372,13 +360,13 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.month_closing.pending.list') }}',
-                rowId: 'shId',
-                /!* order: [[1, 'asc']],*!/
+                rowId: 'shipment_id',
+                order: [[1, 'asc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shipment_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                    //  {data: 'current_status', name: 'u.name', class: 'align-middle current_status'},
+                    {data: 'current_status', name: 'u.name', class: 'align-middle current_status'},
                     {data: 'cod_amount', name: 'shipments.amount', class: 'align-middle cod_amount'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -386,12 +374,9 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
-                    {data: 'claim_id', name: 'cr.id', class: 'align-middle claim_id'},
-                    {data: 'claim_type', name: 'crn.type', class: 'align-middle claim_type'},
-                    /!*{data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},*!/
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    /!*{data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},*!/
+                    {data: 'closing_status', name: 'status', class: 'align-middle closing_status'},
+                    {data: 'remarks', name: 'ssr.name', class: 'align-middle remarks'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -410,16 +395,16 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    /!*  var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                      var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                      var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';*!/
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ( $(header).is('.select') || $(header).is('.serial_number') /!*||  $(header).is('.shipment_remarks')*!/ ) {
+                        if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.shipment_remarks') ) {
                             $(td).appendTo($(search));
-                        }/!*else if($(header).is('.status')){
+                        }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
@@ -434,7 +419,7 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }*!/
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -447,7 +432,7 @@
                     });
 
 
-                    /!*  $("#status_select").prepend('<option value="" selected></option>').select2({
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
                           data:data,
                           placeholder: "Select Status",
                           width:'100%',
@@ -470,10 +455,10 @@
                           width:'100%',
                           containerCssClass: 'select-xs',
                           dropdownCssClass: 'form-control-sm p-0'
-                      });*!/
+                      });
                     this.api().table().columns.adjust();
                 }
-            });*/
+            });
 
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
