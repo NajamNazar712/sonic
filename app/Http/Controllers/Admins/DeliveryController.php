@@ -19,6 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\http\Models\Admins\ShipmentOnHold;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
@@ -321,6 +322,18 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
+                $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+                if($on_hold_shipment->exists()){
+                    if(!in_array(Auth::id(), [10, 288, 423])){
+                        $on_hold_shipment = $on_hold_shipment->first();
+                        $delivery_date = Carbon::parse($on_hold_shipment->delivery_date);
+                        $today = Carbon::today();
+                        if($delivery_date > $today){
+                            $delivery_date = $delivery_date->toFormattedDateString();
+                            return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $delivery_date];
+                        }
+                    }
+                }
                 if($shipment->packaging_material_request == 1) {
                     $packaging_material_request = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
                     if ($packaging_material_request != null) {

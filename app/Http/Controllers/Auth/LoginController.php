@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -188,6 +190,16 @@ class LoginController extends Controller
         }
         session(['packaging_charges_check' => $packaging_charges_check]);
 
+        $rate_status = RateStatus::where('user_id', $user->id)->where('status', 1);
+        if($rate_status->exists()){
+            session(['rate_status' => TRUE]);
+        }
+        else{
+            $corporate_rate_status = CorporateRateStatus::where('user_id', $user->id)->where('status', 1);
+            if($corporate_rate_status->exists()){
+                session(['rate_status' => TRUE]);
+            }
+        }
         $international_rate_status = InternationalUsersInformation::where('user_id', $user->id)->where('status', 1);
         if($international_rate_status->exists()){
             session(['international_rates' => TRUE]);

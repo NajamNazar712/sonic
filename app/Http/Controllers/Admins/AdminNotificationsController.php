@@ -345,6 +345,12 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['new_rider_name','pickup_request_id','pickup_coordinator_name'];
         }
+        else if ($id == 110) {
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 111) {
+            $details['fields'] = ['date', 'link'];
+        }
 
 		return $details;
     }
