@@ -2002,7 +2002,10 @@ class AdminReportsEmailController extends Controller
                 $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
                 $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
                 $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
-                $sheet->getStyle("B5:B1000")->getNumberFormat();
+                $sheet->getStyle("B5:B1000")->getNumberFormat()
+                    ->setFormatCode(
+                        \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
+                    );
                 $sheet->getStyle("A" . $serial . ":R" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Pending Deliveries Report');
                 $sheet->mergeCells('A2:R2');
