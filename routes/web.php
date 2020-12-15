@@ -570,7 +570,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/assign_locations_view', 'Admins\AdminDashboardController@assign_locations_view')->name('assign_locations_view');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
-            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+           // Route::get('','Admins\AdminDashboardController@riderView')->name('index');
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
             Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');

@@ -8382,7 +8382,6 @@ if(session('department_id') == 7){
         $route_types = RouteType::all();
         $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
         $riders = Rider::where('status', 1)->select(['id','name'])->get();
-
         return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders ,'route_types' => $route_types]);
     }
     public function addRouteDetails(Request $request){

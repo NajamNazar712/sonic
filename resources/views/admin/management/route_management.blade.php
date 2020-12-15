@@ -144,6 +144,7 @@
                             head.push('Junction');
                             head.push('Added Date/Time');
                             head.push('Status');
+                            head.push('Route Type');
 
 
                             $.each(result.data, function(index, values) {
@@ -157,6 +158,7 @@
                                 row.push(values.junction);
                                 row.push(values.created_at);
                                 row.push(values.status);
+                                row.push(values.route_type);
 
                                 body.push(row);
                             });

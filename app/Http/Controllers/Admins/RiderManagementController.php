@@ -120,66 +120,6 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
     }
-   /* public function addRiderDetails(Request $request){
-        //dd($request);
-        $type = $request->rider_type;
-        $validations = [
-            'city_id'=>'required|numeric',
-            'rider_name'=>'required|max:255',
-            'phone'=>'required|max:255',
-            'cnic'=>'required|max:255',
-            'address'=>'required|max:255',
-            'route_id'=>'required',
-            'rider_category'=>'required|numeric',
-            'pin' => 'required|numeric',
-            'trax_id'=>'required|max:255|string',
-        ];
-        $validate = Validator::make($request->all(), $validations);
-
-        if ($validate->fails()) {
-            return redirect()->back()
-                ->withErrors($validate);
-        }
-        if(Rider::where('cnic',$request->cnic)->exists()){
-            return redirect()->back()->with('error', 'Rider with this CNIC already exist!');
-        }
-        $route_id = null;
-        if($request->route_id == 'other'){
-            $route = new Route();
-            $route->city_id = $request->city_id;
-            $route->code = $request->route_code;
-            $route->start = $request->start;
-            $route->end = $request->end;
-            $route->junction = $request->junction;
-            $route->route_type_id = $request->route_type_id;
-            $route->status = 1;
-            $route->save();
-            $route_id = $route->id;
-        }else{
-            $route_id = $request->route_id;
-        }
-        Rider::where('route_id', $request->route_id)->update(['route_id' => NULL]);
-        $rider = Rider::create([
-            'city_id'=>$request->city_id,
-            'name'=>$request->rider_name,
-            'phone'=>$request->phone,
-            'cnic'=>$request->cnic,
-            'address'=>$request->address,
-            'route_id'=>$route_id,
-            'rider_category_id'=>$request->rider_category,
-            'status'=>1,
-            'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
-            'pin'=> bcrypt($request->pin),
-            'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
-            'rider_type_id' => $type
-        ]);
-        if($rider){
-            NotificationsController::send(61, $rider->id, $request->pin);
-            return redirect()->back()->with('success','Rider added successfully');
-        }
-
-    }*/
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
         $validations = [
