@@ -8496,8 +8496,9 @@ if(session('department_id') == 7){
 
     }
     public function riderView(){
+        //$route_types = RouteType::all();
         $category = RiderCategory::all();
-        return view('admin.management.rider_management')->with(['categories'=>$category]);
+        return view('admin.management.rider_management')->with(['categories'=>$category/*,'route_types' =>$route_types*/]);
     }
     public function riderListAjax(){
 
@@ -8575,8 +8576,9 @@ if(session('department_id') == 7){
     }
     public function addRiderView(){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $route_types = RouteType::all();
         $category = RiderCategory::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
     }
     public function categoryListAjax(Request $request){
         $city_id = $request->id;
@@ -8636,8 +8638,9 @@ if(session('department_id') == 7){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
+        $route_types = RouteType::all();
         $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
