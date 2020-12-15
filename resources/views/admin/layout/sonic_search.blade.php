@@ -34,5 +34,12 @@
             window.location.href = url;
         });
 
+        $('#GlobalSearchSonicModal').on('shown.bs.modal', function (e) {
+            $('#search_admin_sonic').select2('open');
+        });
+        $('#GlobalSearchSonicModal').on('hidden.bs.modal', function (e) {
+            $('#search_admin_sonic').select2('close');
+        });
+
 
 </script>
