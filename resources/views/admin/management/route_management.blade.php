@@ -27,6 +27,7 @@
                                     <th class="border-primary border-darken-1">Junction</th>
                                     <th class="border-primary border-darken-1">Added Date/Time</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Route Types</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -46,12 +47,32 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="AssignLocationsView" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignLocationsView"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <h4 class="modal-title w-100 font-weight-bold">View Addresses</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body mx-3">
+
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end">
+                        <button class="btn btn-grey" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade text-left" id="assign_location" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignLocations"
              aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-primary white">
-                        <h4 class="modal-title white">Assign Locations</h4>
+                        <h4 class="modal-title white">Assign Shippers</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -73,7 +94,7 @@
 
                             <div class="row justify-content-center mt-4">
                                 <div class="col-4">
-                                    <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Locations</button>
+                                    <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
                                 </div>
                             </div>
                         </form>
@@ -195,6 +216,7 @@
                     {data: 'junction', name: 'routes.junction', class: 'align-middle junction'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'routes.status', class: 'align-middle status'},
+                    {data: 'route_type', name: 'rt.id', class: 'align-middle route_type'},
                     {data: 'action', name: 'action', class: 'align-middle action text-center', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -213,6 +235,10 @@
                         '<option value="0">Inactive</option>' +
                         '<option value="1">Active</option>' +
                         '</select>';
+                    var route_type = '<select name="route_type" id="route_type" class="select2 form-control">' +
+                        '<option value="1">Pickup</option>' +
+                        '<option value="2">Delivery</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -221,6 +247,11 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.route_type')){
+                            $(route_type).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -237,6 +268,12 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#route_type").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Route Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -262,8 +299,6 @@
                         }
                     }).done(function(data){
 
-                        console.log(route_id);
-                        console.log(data.pickup_address_ids);
                         if(data.pickup_address_ids.length != 0 ){
                             $('#pickup_address').val(data.pickup_address_ids).trigger('change');
                         }
@@ -273,8 +308,43 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu  .dropdown-item', function() {
 
+                if ($(this).hasClass('view_location')) {
+                    var route_id = table.row( $(this).parents('tr') ).data().id;
+                    console.log(route_id);
+
+                    $.ajax({
+                        url: '{!! route('admin.management.route.assign_locations_view') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'route_id': route_id
+                        }
+                    }).done(function(data){
+                        if(data.locations.length != 0){
+                            console.log(data.locations);
+                            var html = '';
+                            html += '<table class="table table-sm datatable text-center">';
+                            html += '<thead><tr><th>S No.</th><th><strong>Address</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.locations, function(index, value) {
+                                var ind = index+1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value + '</td>';
+                            });
+                            html += '</tbody></table>';
+
+                            $('#AssignLocationsView .modal-body').html(html);
+                            $('#AssignLocationsView').modal('show');
+                        }
+
+                    });
+                }
             });
+
+
+        });
 
 
 

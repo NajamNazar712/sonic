@@ -68,6 +68,7 @@ use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use App\RouteLocations;
+use App\RouteType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -8307,12 +8308,14 @@ if(session('department_id') == 7){
     }
     //route management
     public function routeView(){
+        $route_type = RouteType::all();
         $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
-        return view('admin.management.route_management')->with(['users' => $users]);
+        return view('admin.management.route_management')->with(['users' => $users ,'route_type' =>$route_type]);
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->select(['cities.name as city','routes.id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at']);
+            ->leftjoin('route_types as rt','rt.id','=','routes.route_type_id')
+            ->select(['cities.name as city','routes.id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.name as route_type']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -8356,7 +8359,10 @@ if(session('department_id') == 7){
                         }
                     }
 
-                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Shipper</div></button>';
+
+
+                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipper</div></button>';
 
 
                     $dropdown .= '
@@ -8373,16 +8379,20 @@ if(session('department_id') == 7){
             ->make(true);
     }
     public function addRouteView(){
+        $route_types = RouteType::all();
         $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
         $riders = Rider::where('status', 1)->select(['id','name'])->get();
-        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders]);
+
+        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders ,'route_types' => $route_types]);
     }
     public function addRouteDetails(Request $request){
-//        return $request;
+
+        //dd($request);
         $validations = [
             'city_id'=>'required|numeric',
             'route_code'=>'required',
             'start'=>'required',
+            'route_type_id'=>'required',
             'end'=>'required',
             'junction'=>'required'
         ];
@@ -8396,6 +8406,7 @@ if(session('department_id') == 7){
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
+            'route_type_id'=>$request->route_type_id,
             'end'=>$request->end,
             'junction'=>$request->junction,
             'status'=>1
@@ -8416,6 +8427,7 @@ if(session('department_id') == 7){
     public function editRouteView($id){
         $citylist = City::select(['id','name'])->get();
         $riders = Rider::where('status',1)->select(['id','name'])->get();
+        $route_types = RouteType::all();
         $current_rider = Rider::where('route_id',$id);
         if($current_rider->exists()){
             $current_rider = $current_rider->select('id')->first();
@@ -8425,7 +8437,9 @@ if(session('department_id') == 7){
             $current_rider_id = NULL;
         }
         $route = Route::find($id);
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id]);
+        $route_type_id = $route->route_type_id;
+        $current_route_type_id = RouteType::find($route_type_id)->id;
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id,'route_types' => $route_types,'current_route_type_id' => $current_route_type_id]);
     }
     public function editRouteDetails(Request $request, $id){
         $validations = [
@@ -8433,6 +8447,7 @@ if(session('department_id') == 7){
             'route_code'=>'required',
             'start'=>'required',
             'end'=>'required',
+            'route_type_id'=>'required',
             'junction'=>'required'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8446,6 +8461,7 @@ if(session('department_id') == 7){
             'code'=>$request->route_code,
             'start'=>$request->start,
             'end'=>$request->end,
+            'route_type_id'=>$request->route_type_id,
             'junction'=>$request->junction,
             'status'=>1
         ]);
@@ -9556,6 +9572,20 @@ if(session('department_id') == 7){
             return response()->json(['pickup_address_ids' => $data]);
         }
     }
+
+
+     public function assign_locations_view(Request $request){
+        $route_id = $request->route_id;
+        $data = array();
+        if($route_id){
+            $locations = RouteLocations::join('user_shipping_infos as usi','usi.id','=','route_locations.pickup_address_id')
+                ->join('users as u','u.id','=','usi.user_id')->where('route_locations.route_id',$route_id)->select('u.name as shipper','usi.pickup_address as address')->get();
+            foreach($locations as $location){
+                $data[] = $location->shipper . ' - ' . $location->address;
+            }
+            return response()->json(['locations' => $data]);
+        }
+     }
 
 }
 
