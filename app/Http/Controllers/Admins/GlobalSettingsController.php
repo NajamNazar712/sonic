@@ -2995,10 +2995,10 @@ class GlobalSettingsController extends Controller
             ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
         $datatable = Datatables::of($runner_report)
             ->editColumn('status', function ($runner) {
-                if ($runner->status == 0) {
-                    return 'Disable';
-                } else {
+                if ($runner->status == 0 || $runner->status == 1) {
                     return 'Enable';
+                } else {
+                    return 'Disable';
                 }
             })
             ->addColumn('action', function ($runner) {
@@ -3010,10 +3010,10 @@ class GlobalSettingsController extends Controller
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
 
-                if ($runner->status == 0) {
+                if ($runner->status == 2) {
                     $dropdown .= $enable;
                 }
-                if ($runner->status == 1) {
+                if ($runner->status == 1 || $runner->status == 0) {
                     $dropdown .= $disable;
                 }
                 return $dropdown;
@@ -3147,8 +3147,8 @@ class GlobalSettingsController extends Controller
         $id = $request->id;
         $runner = Runner::where('id', $id)->first();
         if ($runner) {
-            if ($runner->status == 0) {
-                $runner->status = 1;
+            if ($runner->status == 2) {
+                $runner->status = 0;
                 $runner->save();
             } else {
                 $runner->status = 2;
