@@ -269,9 +269,9 @@
                                                         </label>
                                                         <div>
                                                             <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%">
-                                                                @foreach($sales_persons as $sales_person)
-                                                                    <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>
-                                                                @endforeach
+{{--                                                                @foreach($sales_persons as $sales_person)--}}
+{{--                                                                    <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>--}}
+{{--                                                                @endforeach--}}
                                                             </select>
                                                         </div>
                                                     </div>
@@ -1058,6 +1058,14 @@
                     }
                 });
             }
+
+
+        });
+
+        $('body').on('change','input[name="shipper_city"]',function () {
+            var city_id = $(this).val();
+            var error = 0;
+
 
 
         });
