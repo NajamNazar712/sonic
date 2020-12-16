@@ -68,37 +68,7 @@ class ShipperTelenorController extends Controller
         }
     }
 
-    private function information_extraction($row) {
-        $entry = array();
-
-        $entry['name'] = $row[8];
-
-        $address = $row[14];
-        $city = '';
-
-        for ($c = 15; $c <= 20; $c++) {
-            if (!empty(trim($row[$c]))) {
-                $address .= ' ' . $row[$c];
-            }
-        }
-
-        $address_array = explode('_', $address);
-
-        if (count($address_array) > 1) {
-            $city = end($address_array);
-
-            array_pop($address_array);
-
-            $address = implode(' ', $address_array);
-        }
-
-        $entry['address'] = $address;
-        $entry['city'] = $city;
-
-        return $entry;
-    }
-
-    private function stationary_verification(&$misidn, $file, &$card_numbers, &$information, &$courier_data, $zip, $date, $type) {
+    private function stationary_verification(&$misidn, $file, &$card_numbers, $zip, $date, $type) {
         $stationary = explode("\n", file_get_contents($file));
 
         if (!empty($misidn) && !empty($stationary)) {
@@ -108,9 +78,7 @@ class ShipperTelenorController extends Controller
                 $key = array_search(substr($row, 23, 10), $misidn);
 
                 if ($key !== FALSE) {
-                    $row = str_replace("||||", "|", $row);
-                    $row = str_replace("|||", "|", $row);
-                    $row = str_replace("||", "|", $row);
+                    $row = preg_replace("/\|+/", "|", $row);
 
                     $length = $stationary_length - strlen($row);
 
@@ -126,10 +94,7 @@ class ShipperTelenorController extends Controller
 
                     $phone_number = $misidn[$key];
 
-                    $courier_data[] = [$card_number, $phone_number, $information[$phone_number]['name'], $information[$phone_number]['address'], $information[$phone_number]['city']];
-
                     unset($misidn[$key]);
-                    unset($information[$phone_number]);
                 }
                 else {
                     unset($stationary[$index]);
@@ -140,26 +105,6 @@ class ShipperTelenorController extends Controller
         }
 
         unset($stationary);
-    }
-
-    private function courier_file_creation($courier_data, $zip, $date) {
-        if (!empty($courier_data)) {
-            $spreadsheet = new Spreadsheet();
-            $spreadsheet->getActiveSheet()->fromArray($courier_data);
-
-            $writer = new Xlsx($spreadsheet);
-
-            $filename = $date . '_courier_data_' . (count($courier_data) - 1) . '.xlsx';
-
-            $writer->save($filename);
-
-            $zip->addFile($filename);
-
-            return $filename;
-        }
-        else {
-            return FALSE;
-        }
     }
 
     private function missing_misidn_file_creation($misidn, $zip, $date) {
@@ -230,18 +175,10 @@ class ShipperTelenorController extends Controller
                     $misidn['up'] = array();
                     $misidn['paypak'] = array();
 
-                    $information = array();
-                    $information['up'] = array();
-                    $information['paypak'] = array();
-
                     foreach ($spreadsheet as $row) {
-                        if (!empty($row[14])) {
-                            $type = $this->type_definer($row[4]);
+                        $type = $this->type_definer($row[4]);
 
-                            $misidn[$type][] = $row[5];
-
-                            $information[$type][$row[5]] = $this->information_extraction($row);
-                        }
+                        $misidn[$type][] = $row[5];
                     }
 
                     unset($spreadsheet);
@@ -250,16 +187,8 @@ class ShipperTelenorController extends Controller
                     $card_numbers['up'] = array();
                     $card_numbers['paypak'] = array();
 
-                    $courier_data = array();
-                    $courier_data[] = ['Card Number', 'Phone Number', 'Name', 'Address', 'City'];
-
-                    $this->stationary_verification($misidn['up'], $request->file('stationary_file_up'), $card_numbers['up'], $information['up'], $courier_data, $zip, $date, 'up');
-                    $this->stationary_verification($misidn['paypak'], $request->file('stationary_file_paypak'), $card_numbers['paypak'], $information['paypak'], $courier_data, $zip, $date, 'paypak');
-
-                    $filename = $this->courier_file_creation($courier_data, $zip, $date);
-
-                    unset($information);
-                    unset($courier_data);
+                    $this->stationary_verification($misidn['up'], $request->file('stationary_file_up'), $card_numbers['up'], $zip, $date, 'up');
+                    $this->stationary_verification($misidn['paypak'], $request->file('stationary_file_paypak'), $card_numbers['paypak'], $zip, $date, 'paypak');
 
                     $this->missing_misidn_file_creation($misidn, $zip, $date);
 
@@ -271,8 +200,6 @@ class ShipperTelenorController extends Controller
                     unset($card_numbers);
 
                     $zip->close();
-
-                    unlink($filename);
 
                     return response()->download($zip_filename);
                 }

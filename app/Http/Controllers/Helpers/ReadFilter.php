@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 class ReadFilter implements IReadFilter
 {
     public function readCell($column, $row, $worksheetName = '') {
-        if (in_array($column, ['E','F', 'I', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'])) {
+        if (in_array($column, ['E','F'])) {
             return TRUE;
         }
         else {
