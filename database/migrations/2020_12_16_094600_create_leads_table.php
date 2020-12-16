@@ -15,6 +15,16 @@ class CreateLeadsTable extends Migration
     {
         Schema::create('leads', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('lead_id');
+            $table->string('contact_person');
+            $table->integer('city_id');
+            $table->string('phone_number');
+            $table->string('email_address');
+            $table->timestamp('requested_date');
+            $table->integer('sale_person_id')->nullable();
+            $table->integer('reference_person_id')->nullable();
+            $table->integer('status_id');
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
     }
