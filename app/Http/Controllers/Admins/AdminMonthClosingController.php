@@ -361,7 +361,7 @@ class AdminMonthClosingController extends Controller
         $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
         $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
         $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
-        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27,  44, 47, 48 ];
+        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27, 28, 29, 44, 47, 48 ];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
