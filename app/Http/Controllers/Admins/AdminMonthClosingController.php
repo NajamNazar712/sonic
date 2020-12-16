@@ -366,16 +366,17 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
-            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.')
-            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_status')
+            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.status_id')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_status_id')
             ->leftJoin('crm_requests as cr', function ($join) {
                 $join->on('cr.shipment_id', '=', 'shipments.id')
                     ->where('cr.created_at','=',
                         DB::raw('(select max(created_at) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
-            ->join('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address as consignee_address','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mc.status_id')
+            ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mc.status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status')
             ->groupBy('shipments.id');
 
         $datatable = Datatables::of($shipments)
@@ -383,19 +384,22 @@ class AdminMonthClosingController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('claim_id_link', function ($shipments) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->id]) . '  target="_blank">' . str_pad($shipments->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
             })
-            ->addColumn('action', function($user) {
-                $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
+            ->addColumn('action', function($shipments) {
+                $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
 
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
 
-                $dropdown .= $verify;
+                $dropdown .= $assign_responsible;
                 return $dropdown;
 
             });
