@@ -2448,5 +2448,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
         });
     });
+
+	Route::prefix('leads')->name('leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+    });
 });
 

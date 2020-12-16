@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Packaging Material Requests')
+@section('title', 'Leads Management')
 
 @section('content')
     <h1 class="mb-1">
-        Packaging Material Requests
+        Leads Management
     </h1>
 
     <div class="card">
@@ -25,8 +25,8 @@
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
-                        <th class="border-primary border-darken-1">Aging</th>
-                        <th class="border-primary border-darken-1">Action</th>
+{{--                        <th class="border-primary border-darken-1">Aging</th>--}}
+{{--                        <th class="border-primary border-darken-1">Action</th>--}}
                     </tr>
                     </thead>
                 </table>
@@ -353,26 +353,25 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.packaging.requests.list') }}',
+                ajax: '{{ route('admin.leads.list') }}',
                 rowId: 'request_id',
                 order: [[3, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'city', name: 'ct.name', class: 'align-middle city'},
-                    {data: 'total_quantity_button', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
-                    {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
-                    {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
-                    {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks_view'},
-                    {data: 'requested_by', name:'rb.name', class: 'align-middle requested_by'},
-                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
-                    {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
-                    {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                    {data: 'id', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'contact_person', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'phone_number', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
+                    {data: 'email_address', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
+                    {data: 'requested_date', name: 'packaging_material_requests.address', class: 'align-middle address'},
+                    {data: 'message', name: 'ppm.id', class: 'align-middle mode'},
+                    {data: 'status_id', name: 'status', class: 'align-middle status'},
+                    {data: 'updated_by', name: 'sj.remarks', class: 'align-middle remarks_view'},
+                    {data: 'sale_person', name:'rb.name', class: 'align-middle requested_by'},
+                    {data: 'sale_person', class: 'align-middle aging', orderable: false, searchable: false},
+                    // {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
+                    // {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -416,41 +415,24 @@
                             }
                         }
                     });
-                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
-                        obj.id = obj.id;
+                    {{--var data1 = $.map({!! $payment_mode !!}, function (obj) {--}}
+                    {{--    obj.id = obj.id;--}}
 
-                        return obj;
-                    });
-                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
-                        obj.text = obj.name;
+                    {{--    return obj;--}}
+                    {{--});--}}
+                    {{--var data1 = $.map({!! $payment_mode !!}, function (obj) {--}}
+                    {{--    obj.text = obj.mode;--}}
 
-                        return obj;
-                    });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data: data2,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data1 = $.map({!! $payment_mode !!}, function (obj) {
-                        obj.id = obj.id;
+                    {{--    return obj;--}}
+                    {{--});--}}
 
-                        return obj;
-                    });
-                    var data1 = $.map({!! $payment_mode !!}, function (obj) {
-                        obj.text = obj.mode;
-
-                        return obj;
-                    });
-
-                    $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
-                        placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    {{--$("#payment_mode_select").prepend('<option value="" selected></option>').select2({--}}
+                    {{--    data:data1,--}}
+                    {{--    placeholder: "Select Mode",--}}
+                    {{--    width:'100%',--}}
+                    {{--    containerCssClass: 'select-xs',--}}
+                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
+                    {{--});--}}
                     this.api().table().columns.adjust();
                 }
             });
@@ -485,38 +467,77 @@
                     // console.log(data.success);
                 });
             });
-            //grn
-            $('body').on('click','.grn',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
 
-                $.ajax({
-                    url: '{!! route('admin.packaging.requests.good_receiving_note') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': request_id,
-                        'shipment_id': shipment_id_data,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    var tab = window.open('', '_blank');
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                console.log(id);
+                var index = $.inArray(id, selected_rows);
 
-                    if(!tab) {
-                        swal({
-                            title: 'Popup Blocker Enabled!',
-                            text: 'Please add this site to your exception list.',
-                            icon: 'error',
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.bulk_tagging').enable();
+
+                }
+                else {
+                    table.button('.bulk_tagging').disable();
+                }
+            });
+
+            $("#saletag").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sales Person",
+                width:'100%',
+                dropdownParent:$('#SalesTagModal')
+            });
+            $("#saletag1").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sales Person",
+                width:'100%',
+                dropdownParent:$('#SalesTagModal1')
+            });
+            $("#set_segment").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Segment",
+                width:'100%',
+                dropdownParent:$('#SetSegment')
+            });
+            $('#SalesTagModal').on('shown.bs.modal',function (e) {
+                var $invoker = $(e.relatedTarget);
+                var shipper_id = $invoker.data('target-id');
+                $('#shipper_id').val(shipper_id);
+            });
+            $('#salesTagSubmit').on('click',function () {
+                var shipper = $('#shipper_id').val();
+                var tag = parseInt($('#saletag').val());
+                if(tag){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.tag.submit') !!}',
+                        method: 'POST',
+                        data: {
+                            'admin_id': tag,
+                            'shipper_id':shipper,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#saletag').val('').trigger('change');
+                            $('#SalesTagModal').modal('hide');
+                            table.draw(true);
                         });
-                    }
-                    else {
-                        tab.document.write(data);
-                        tab.document.close();
-                        tab.focus();
-                    }
-                    // console.log(data.success);
-                });
+                }else{
+                    var error = "Sales Person Not Selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             });
             //confirm
             $('body').on('click','.confirm',function(){
@@ -570,243 +591,6 @@
                     }
                 });
 
-            });
-            //cancel
-            $('body').on('click','.cancel',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Cancel Packaging Material!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.packaging.requests.cancel') !!}',
-                            method: 'POST',
-                            data: {
-                                'id': request_id,
-                                'shipment_id': shipment_id_data,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                table.draw();
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                            }
-                        });
-                    }
-                });
-
-            });
-            //dispatch
-            $('body').on('click','.dispatch',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Dispatch Packaging Material!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.packaging.requests.dispatch') !!}',
-                            method: 'POST',
-                            data: {
-                                'id': request_id,
-                                'shipment_id': shipment_id_data,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                table.draw();
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                            }
-                        });
-                    }
-                });
-
-            });
-            //complete
-            $('body').on('click','.completed',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Complete Packaging Material!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.packaging.requests.completed') !!}',
-                            method: 'POST',
-                            data: {
-                                'id': request_id,
-                                'shipment_id': shipment_id_data,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                table.draw();
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                    }
-                });
-
-            });
-            //replenish
-            $('body').on('click','.replenished',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Replenish Packaging Material!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.packaging.requests.replenish') !!}',
-                            method: 'POST',
-                            data: {
-                                'id': request_id,
-                                'shipment_id': shipment_id_data,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                table.draw();
-                            }
-                            else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                    }
-                });
-
-            });
-            //remarks
-            $('body').on('click','.remarks',function(){
-                var request_id = table.row($(this).parents('tr')).data().shipment_id;
-                var remarks = table.row($(this).parents('tr')).data().remarks;
-                $('#remarks_shipment_id').val(request_id);
-                $('#packaging_remarks').val(remarks);
-
-                $('#AddRemarks').modal('show');
-
-            });
-            $('#update_remarks_form').on('submit', function(e){
-                e.preventDefault();
-            });
-
-            $('#update_remarks_button').on('click', function(){
-                var remarks_shipment_id = $('#remarks_shipment_id').val();
-                var packaging_remarks = $('#packaging_remarks').val();
-                if(packaging_remarks == null || packaging_remarks == ''){
-                    var error = 'Please enter remarks';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                else{
-                    $('#update_remarks_button').attr('disabled', true);
-                    $.ajax({
-                        url: '{!! route('admin.packaging.requests.remarks') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': remarks_shipment_id,
-                            'remarks': packaging_remarks,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if(data.status === 1){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.draw();
-                            $('#AddRemarks').modal('hide');
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        $('#update_remarks_button').attr('disabled', false);
-                    });
-                }
             });
         });
 
