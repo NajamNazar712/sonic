@@ -72,6 +72,7 @@ class Kernel extends ConsoleKernel
 		//'App\Console\Commands\TelenorCall',
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
+        'App\Console\Commands\OverlandAgingReport',
 
 
     ];
@@ -160,7 +161,7 @@ class Kernel extends ConsoleKernel
 //		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
 //      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
 
-        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
         $schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
         $schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
 
@@ -226,6 +227,7 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

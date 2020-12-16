@@ -3394,7 +3394,7 @@ class AdminFinanceController extends Controller
                             $packaging_material_charges = 0;
                             $adjustment_amount = 0;
                             if($pending_payment_shipment->type == 2){
-                                $adjustment_amount = $pending_payment_shipment->amount;
+                                $adjustment_amount = $pending_payment_shipment->payable;
                             }
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -4913,7 +4913,7 @@ class AdminFinanceController extends Controller
         ';
 
         $html .= '
-            <style>@page{size:A4 portrait; margin-top: 10rem; margin-bottom: 8rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            <style>@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
         if (!$email) {
@@ -5235,7 +5235,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="14">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>

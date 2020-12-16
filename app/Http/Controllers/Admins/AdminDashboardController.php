@@ -11,6 +11,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
@@ -134,7 +135,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Models\Segment;
+
 
 
 class AdminDashboardController extends Controller
@@ -1375,8 +1376,9 @@ class AdminDashboardController extends Controller
         $shippers = User::whereIn('status', [3, 4])->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
+        $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments]);
 
     }
     public function blockAccountsList(){
@@ -7435,7 +7437,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7572,6 +7574,31 @@ class AdminDashboardController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
                 }else{
                     return $count;
+                }
+            })
+            ->editColumn('international_rate_status',function ($users){
+                if($users->international_rate_status != null){
+                    if($users->international_rate_status == 1){
+                        return "Approved";
+                    }elseif($users->international_rate_status == 2){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 3){
+                        return "Rejected";
+                    }elseif($users->international_rate_status == 4){
+                        return "Requested";
+                    }elseif($users->international_rate_status == 5){
+                        return "Rejected";
+                    }
+                }
+                else{
+                    return "International Rates are not set";
+                }
+            })
+            ->editColumn('international_rejected_reason',function ($users){
+                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+                    return $users->international_rejected_reason;
+                }else{
+                    return "-";
                 }
             })
             ->addColumn("action", function ($result) {
@@ -8375,7 +8402,7 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" data-toggle="modal" data-target="#assignlocation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
 
 
                     $dropdown .= '
@@ -8614,6 +8641,7 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -9547,7 +9575,10 @@ class AdminDashboardController extends Controller
         $route_id = $request->route_id;
         $pickup_addresses = $request->pickup_address;
 
-        RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
+       foreach($pickup_addresses as $address){
+           RouteLocations::where('pickup_address_id',$address)->delete();
+       }
+        RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
             foreach($pickup_addresses as $pickup_address){
@@ -9559,5 +9590,18 @@ class AdminDashboardController extends Controller
         }
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
+
+    public function view_assign_locations(Request $request){
+        $route_id = $request->route_id;
+        $data = array();
+        if($route_id != null){
+            $pickup_addresses = RouteLocations::where('route_id',$route_id)->select('pickup_address_id')->get();
+           foreach($pickup_addresses as $pickup_address){
+                $data[] = $pickup_address->pickup_address_id;
+           }
+            return response()->json(['pickup_address_ids' => $data]);
+        }
+    }
+
 }
 

@@ -2940,6 +2940,16 @@ class DeliveryController extends Controller
                             NotificationsController::send(35, $shipment_id);
                         }
                     }
+
+                    $delivery_note_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->pluck('shipment_id')->toArray();
+                    if(count($delivery_note_shipment_ids) > 0){
+                        foreach($delivery_note_shipment_ids as $delivery_note_shipment_id){
+                            $shipment = Shipment::find($delivery_note_shipment_id);
+                            if($shipment->user_id == 3324){
+                                NotificationsController::send(104, $delivery_note_shipment_id);
+                            }
+                        }
+                    }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
                         return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
@@ -4172,8 +4182,6 @@ class DeliveryController extends Controller
         $sdn->sdn_deposit_amount = $total_amount;
         $sdn->deposit_slip_status = 1;
         $sdn->status = 1;
-        $sdn->status_updated_at = Carbon::now();
-        $sdn->status_updated_by = Auth::id();
         $sdn->save();
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 

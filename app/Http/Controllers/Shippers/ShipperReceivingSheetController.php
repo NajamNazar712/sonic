@@ -1115,4 +1115,47 @@ class ShipperReceivingSheetController extends Controller
             return redirect()->back()->with('error', 'Shipment not selected!');
         }
     }
+
+    public function shipments_index() {
+        return view('client.shipment.receiving_sheet.shipments');
+    }
+
+    public function shipments_list(Request $request) {
+        $shipments = Shipment::join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
+            ->join('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('gul_ahmed_pickup_addresses as gapa', 'usi.id', '=', 'gapa.pickup_address_id')
+            ->select('shipments.tracking_number', 'rs.id AS receiving_sheet', 'shipments.order_id', 'gapa.warehouse_id', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'shipments.estimated_weight', 'shipments.amount')
+            ->where('shipments.packaging_material_request', 0)
+            ->where(function ($query) {
+                $query->whereNull('rs.status')->orWhere('rs.status', 0);
+            })
+            ->where(function ($query) {
+                $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
+
+        if (session('user_type') == 2) {
+            if(session('restriction') == 1) {
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $datatable = Datatables::of($shipments);
+
+        if ($date = $request->get('search_date')) {
+            $datatable->whereDate('rs.created_at', $date);
+        }
+        else {
+            $datatable->whereRaw('false');
+        }
+
+        return $datatable->make(true);
+    }
 }

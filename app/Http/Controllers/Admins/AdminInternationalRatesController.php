@@ -497,6 +497,11 @@ class AdminInternationalRatesController extends Controller
                 $rate_remark->admin_id = Auth::id();
                 $rate_remark->save();
             }
+            if($user->status != 3){
+                $user->status = 2;
+                $user->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
             if($user->status == 3){
                 return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
             }

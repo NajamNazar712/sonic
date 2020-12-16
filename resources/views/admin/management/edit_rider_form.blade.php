@@ -88,7 +88,7 @@
                 <fieldset class="form-group">
                     <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($routes as $route)
-                            <option value="{{$route->id}}">{{$rider->route->code}} ({{$route->start}} to {{$route->end}})</option>
+                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
                         @endforeach
                         <option value="other">Other</option>
                     </select>
@@ -135,8 +135,8 @@
     $(document).ready(function () {
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
-        $('.select2').select2({
-            dropdownParent: $("#editRider")
+        $('#editRiderForm .select2').select2({
+            dropdownParent: $("#editRiderForm")
         });
         var category_id = {{$rider->rider_category_id}};
         $('#category_list').val(category_id).trigger('change');
@@ -151,7 +151,9 @@
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         //$('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
         $('#city_list').val({!! $rider->city_id !!}).trigger('change');
-        $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @if($rider->route_id != Null)
+            $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @endif
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();

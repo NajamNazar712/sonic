@@ -503,5 +503,107 @@ class ShipperReportsController extends Controller
 
         return view('client.reports.delivery_and_return_report')->with(['link' => $link]);
     }
+
+
+
+    public function sales_telenor_index(){
+        $shipping_modes = DB::connection('mysql')->table('shipping_modes')->select('id','mode')->get();
+        $cities = DB::connection('mysql')->table('cities')->select('id','name')->get();
+        $statuses = DB::connection('mysql')->table('shipment_status')->whereNotIn('id',[1,17])->get();
+        return view('client.reports.sales_report_telenor')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes]);
+    }
+    public function sales_telenor_list(Request $request){
+        $connection = 'mysql';
+
+        $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('shipments_journey as sj', function ($join) use($connection) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipments_journey as dr', function ($join) use($connection) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id', '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37))'));
+            })
+            ->leftJoin('shipments_journey as sjrr', function ($join) use($connection) {
+                $join->on('sjrr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+                    ->where('sjrr.id', '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.status_reason_id is not null)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
+            ->select('shipments.tracking_number','shipments.order_id as order_id','ss.name as current_status','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.actual_weight', 'dr.created_at as delivered_or_returned', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'ssr.name as return_reason', 'dr.shipper_status_id')
+            ->whereNotIn('shipments.shipper_status_id',[1,17]);
+
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $sales = $sales->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $sales = $sales->where(function ($query) {
+            $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+        });
+
+        $datatable = Datatables::of($sales)
+        ->addColumn('delivery_within_15_days', function($sales) {
+            if ($sales->shipper_status_id != 25) {
+                $delivered_date = Carbon::parse($sales->delivered_or_returned)->startOfDay();
+
+                $arrival_date = Carbon::parse($sales->arrival_date)->startOfDay();
+
+                $days = $delivered_date->diffInDays($arrival_date);
+
+                if ($days <= 15) {
+                    return 'YES';
+                }
+                else {
+                    return 'NO';
+                }
+            }
+            else {
+                return '';
+            }
+        });
+
+        if($tracking = $request->get('search_tracking')){
+            $datatable->where('shipments.tracking_number', '=', $tracking);
+        }
+
+        if($origin = $request->get('search_origin')){
+            $datatable->where('oc.id', '=', $origin);
+        }
+
+        if($destination = $request->get('search_destination')){
+            $datatable->where('dc.id', '=', $destination);
+        }
+
+        if($status = $request->get('search_status')){
+            $datatable->where('ss.id', '=', $status);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
+
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+            $datatable->whereBetween('dr.created_at', [$from, $to]);
+        }
+
+        return $datatable->make(true);
+    }
 }
 

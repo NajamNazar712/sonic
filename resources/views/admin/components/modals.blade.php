@@ -378,3 +378,8 @@
     </div>
 </div>
 <!--Shipment Charges Modal -->
+
+
+
+
+
