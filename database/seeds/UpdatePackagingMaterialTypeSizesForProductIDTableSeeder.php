@@ -74,7 +74,7 @@ class UpdatePackagingMaterialTypeSizesForProductIDTableSeeder extends Seeder
                     }
                 }
             }
-            $warehouses = Warehouse::where('master_type', 0)->where('pickup_address_id', NULL);
+            $warehouses = Warehouse::where('master_type', 0)->where('status', 1)->where('pickup_address_id', NULL);
             if($warehouses->exists()){
                 $warehouses = $warehouses->get();
                 $user = User::find($setting->setting_value);
