@@ -1760,8 +1760,7 @@ class V2AdminPickupsController extends Controller
             ->editColumn('picture_path', function ($rider_pickup) {
                 if ($rider_pickup->pickup_type == 0) {
                     return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                }
-                else {
+                } else {
                     return '';
                 }
             });
@@ -2361,9 +2360,7 @@ class V2AdminPickupsController extends Controller
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
-            ->leftjoin('v2_rider_pickup_action_logs as rpal','rpal.pickup_note_id','=','v2_pickup_notes.id')
-            ->leftjoin('pickup_actions as pa','pa.id','=','rpal.type_id')
-            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked','rpal.type_id as type', DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_request_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'))
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'), DB::raw('(SELECT SUM(shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
             ->groupBy('v2_pickup_notes.id');
 
 
@@ -2390,22 +2387,7 @@ class V2AdminPickupsController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
                         ;
                 }
-            })
-            ->editColumn('type', function ($rider) {
-                if($rider->type == 1){
-                    return 'Navigate';
-                }
-                else if($rider->type == 2){
-                    return  'Call';
-                }
-                else if($rider->type == 3){
-                    return  'Not Pick';
-                }
-                else if($rider->type == 4){
-                    return 'Pick';
-                }
-            })
-        ;
+            });
 
         return $datatable->make(true);
 
