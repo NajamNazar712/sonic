@@ -27,8 +27,9 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Number</th>
-{{--                        <th class="border-primary border-darken-1">Claim ID </th>--}}
-{{--                        <th class="border-primary border-darken-1">Claim Type</th>--}}
+                        <th class="border-primary border-darken-1">Claim ID </th>
+                        <th class="border-primary border-darken-1">Claim Type</th>
+                        <th class="border-primary border-darken-1">Closing Type</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Comments</th>
                         <th class="border-primary border-darken-1">Actions</th>
@@ -200,7 +201,6 @@
                 }
             } );
             var selected_rows = [];
-            var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([142, 143, 144], session('permissions'))) !== 0)
@@ -376,9 +376,9 @@
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'claim_id_link', name: 'cr.id', class: 'align-middle claim_id_link'},
                     {data: 'claim_type', name: 'crn.type', class: 'align-middle claim_type'},
-                    {data: 'closing_status', name: 'status', class: 'align-middle closing_status'},
-                    {data: 'remarks', name: 'ssr.name', class: 'align-middle remarks'},
-                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                    {data: 'closing_type', name: 'mct.name', class: 'align-middle closing_type'},
+                    {data: 'remarks', name: 'mc.remarks', class: 'align-middle remarks'},
+                    {data: 'closing_status', name: 'mcs.name', class: 'align-middle closing_status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -396,31 +396,32 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    // var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    // var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    // var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.shipment_remarks') ) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.mode')){
-                            $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
-                            $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
+                        // else if($(header).is('.status')){
+                        //     $(drop_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }else if($(header).is('.mode')){
+                        //     $(mode_drop_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }else if($(header).is('.service_type')){
+                        //     $(service_drop_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -433,30 +434,30 @@
                     });
 
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                          data:data,
-                          placeholder: "Select Status",
-                          width:'100%',
-                          containerCssClass: 'select-xs',
-                          dropdownCssClass: 'form-control-sm p-0'
-                      });
-
-
-                      $("#mode_select").prepend('<option value="" selected></option>').select2({
-                          data:data1,
-                          placeholder: "Select Mode",
-                          width:'100%',
-                          containerCssClass: 'select-xs',
-                          dropdownCssClass: 'form-control-sm p-0'
-                      });
-
-                      $("#service_select").prepend('<option value="" selected></option>').select2({
-                          data:data2,
-                          placeholder: "Select Service",
-                          width:'100%',
-                          containerCssClass: 'select-xs',
-                          dropdownCssClass: 'form-control-sm p-0'
-                      });
+                    // $("#status_select").prepend('<option value="" selected></option>').select2({
+                    //       data:data,
+                    //       placeholder: "Select Status",
+                    //       width:'100%',
+                    //       containerCssClass: 'select-xs',
+                    //       dropdownCssClass: 'form-control-sm p-0'
+                    //   });
+                    //
+                    //
+                    //   $("#mode_select").prepend('<option value="" selected></option>').select2({
+                    //       data:data1,
+                    //       placeholder: "Select Mode",
+                    //       width:'100%',
+                    //       containerCssClass: 'select-xs',
+                    //       dropdownCssClass: 'form-control-sm p-0'
+                    //   });
+                    //
+                    //   $("#service_select").prepend('<option value="" selected></option>').select2({
+                    //       data:data2,
+                    //       placeholder: "Select Service",
+                    //       width:'100%',
+                    //       containerCssClass: 'select-xs',
+                    //       dropdownCssClass: 'form-control-sm p-0'
+                    //   });
                     this.api().table().columns.adjust();
                 }
             });
@@ -476,189 +477,20 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.confirm').enable();
-                    table.button('.re-attempt').enable();
+                    table.button('.resolve').enable();
+
                 }
                 else {
-                    table.button('.confirm').disable();
-                    table.button('.re-attempt').disable();
-                }
-
-            });
-
-
-            // $('#add_shipment_form input.tracking_number').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false
-            // });so
-
-            var select = $('#add_shipment_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)*',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
-
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            });
-            $('#add_shipments_modal').on('hide.bs.modal', function () {
-                $('#add_shipment_form input.add_remarks').val('');
-            });
-
-            $('#add_shipment_form').validate({
-                ignore: [],
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                submitHandler: function(form) {
-                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to add as Month Closing Shipment!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            blockPagePermanently();
-                            var tracking_numbers = $('#add_shipment_form input.tracking_numbers').val();
-                            var remarks = $('#add_shipment_form input.add_remarks').val();
-                            $('#add_shipment_form button[type="submit"]').attr('disabled', 'disabled');
-                            $.ajax({
-                                url: '{!! route('admin.month_closing.add') !!}',
-                                method: 'POST',
-                                data: {
-                                    'tracking_numbers': tracking_numbers,
-                                    'remarks': remarks,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function(data){
-                                UnblockPagePermanently();
-                                if(data.status == 1) {
-
-                                    var html = '';
-
-                                    html += 'The following Shipment(s) could not be added:<br/>';
-
-                                    $.each(data.errors, function (index, message) {
-                                        html += index + ', ';
-                                    });
-
-                                    html = html.slice(0, -2);
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-                                    swal({
-                                        // title: 'Month Closing!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                    scan_sound(2);
-                                    table.draw(true);
-
-                                }else if(data.status == 2){
-                                    var success = "Shipment(s) has been successfully added";
-                                    toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    scan_sound(1);
-                                    table.draw(true);
-                                }else if(data.status == 3){
-                                    var html = '';
-
-                                    html += 'Some Shipment(s) has been successfully added!<br/><br/>';
-
-                                    html += 'The following Shipment(s) could not be added:<br/>';
-
-                                    $.each(data.errors, function (index, message) {
-                                        html += index + ', ';
-                                    });
-
-                                    html = html.slice(0, -2);
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-                                    swal({
-                                        // title: 'Month Closing!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                    scan_sound(2);
-                                    table.draw(true);
-                                }
-                                select[0].selectize.clear();
-                                $('#add_shipments_modal').modal('hide');
-                                $('#add_shipment_form button[type="submit"]').attr('disabled', false);
-                            });
-                            return false;
-                        }
-                    });
-
+                    table.button('.resolve').disable();
 
                 }
+
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var shipment_id = $(this).parents('tr').attr('id');
+                console.log(shipment_id);
+            });
         });
     </script>
 @endsection

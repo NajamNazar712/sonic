@@ -356,6 +356,12 @@ class AdminMonthClosingController extends Controller
     }
 
     public function pending_list(){
+        $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
+        $intransit_status_array = array(3, 21, 26, 32);
+        $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
+        $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
+        $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
+        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27,  44, 47, 48 ];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -369,14 +375,15 @@ class AdminMonthClosingController extends Controller
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
             ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.status_id')
-            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_status_id')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_type_id')
             ->leftJoin('crm_requests as cr', function ($join) {
                 $join->on('cr.shipment_id', '=', 'shipments.id')
                     ->where('cr.created_at','=',
                         DB::raw('(select max(created_at) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mc.status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mcs.name as closing_status', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type')
+            ->whereIn('shipments.shipper_status_id', )
             ->groupBy('shipments.id');
 
         $datatable = Datatables::of($shipments)
@@ -385,14 +392,20 @@ class AdminMonthClosingController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('claim_id_link', function ($shipments) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->id]) . '  target="_blank">' . str_pad($shipments->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                if($shipments->claim_id != null){
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->claim_id]) . '  target="_blank">' . str_pad($shipments->claim_id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                }
+                else{
+                    return '-';
+                }
+
             })
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
             })
             ->addColumn('action', function($shipments) {
-                $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
+                $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
 
                 $dropdown = '
                     <div class="btn-group">
