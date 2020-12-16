@@ -40,22 +40,25 @@
             </div>
         </div>
     </div>
-    {{-- <div class="modal fade" id="add_shipments_modal" role="dialog" aria-labelledby="add_shipments_title" aria-hidden="true">
+    <div class="modal fade" id="add_responsible_modal" role="dialog" aria-labelledby="add_responsible_modal_title" aria-hidden="true">
          <div class="modal-dialog modal-md" role="document">
              <div class="modal-content">
                  <div class="modal-header">
-                     <h4 class="modal-title" id="add_shipments_title">Shipment(s)</h4>
+                     <h4 class="modal-title" id="add_responsible_modal_title">Assign Responsible(s)</h4>
 
                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                          <span aria-hidden="true">×</span>
                      </button>
                  </div>
                  <div class="modal-body text-center">
-                     <form id="add_shipment_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                     <form id="add_responsible_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
 
                          <div class="form-group">
-                             <input type="text" name="tracking_numbers" class="form-control tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-
+                             <select name="responsible_persons[]" id="responsible_persons" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                 @foreach($admins as $admin)
+                                     <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                 @endforeach
+                             </select>
                          </div>
                          <div class="form-group">
                              <input type="text" name="add_remarks" class="form-control add_remarks" placeholder="Remarks">
@@ -73,7 +76,6 @@
              </div>
          </div>
      </div>
- --}}
 @endsection
 
 @section('css')
@@ -136,12 +138,15 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#responsible_persons').select2({
+                width:'100%',
+                placeholder:"Search Name",
+                allowClear:true,
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -488,8 +493,12 @@
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var shipment_id = $(this).parents('tr').attr('id');
-                console.log(shipment_id);
+                var shipment_id = parseInt($(this).parents('tr').attr('id'));
+                if(shipment_id){
+                    if ($(this).hasClass('assign_responsible')) {
+
+                    }
+                }
             });
         });
     </script>

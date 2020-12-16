@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
@@ -352,16 +353,13 @@ class AdminMonthClosingController extends Controller
      }
 
     public function pending_index(){
-        return view('admin.month_closing.pending');
+        $admins = Admin::where('status', 1)->select('id', 'name')->get();
+        return view('admin.month_closing.pending')->with(['admins' => $admins]);
     }
 
     public function pending_list(){
-        $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
-        $intransit_status_array = array(3, 21, 26, 32);
-        $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
-        $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
-        $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
-        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27, 28, 29, 44, 47, 48 ];
+//        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
+        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 44, 45, 46, 47, 48, 60];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -383,7 +381,7 @@ class AdminMonthClosingController extends Controller
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
             ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mcs.name as closing_status', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type')
-            ->whereIn('shipments.shipper_status_id', )
+            ->whereIn('shipments.shipper_status_id', $month_closing_status)
             ->groupBy('shipments.id');
 
         $datatable = Datatables::of($shipments)
