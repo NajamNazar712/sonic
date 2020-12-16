@@ -48,6 +48,12 @@ Route::name('api.')->group(function () {
             Route::post('pending', 'APIController@return_confirmation_pending_update')->name('pending');
 
         });
+
+
+        Route::prefix('shopify')->name('shopify.')->group(function() {
+            Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
+            Route::post('air_waybill', 'APIController@shipment_air_waybill_shopify_invoice')->name('air_waybill');
+        });
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
@@ -77,6 +83,7 @@ Route::name('api.')->group(function () {
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
+                Route::get('summary/multiple', 'Rider\RiderAPIController@delivery_summary_multiple')->name('delivery_summary_multiple');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -98,4 +105,7 @@ Route::name('api.')->group(function () {
         });
 
     });
+
+
+
 });

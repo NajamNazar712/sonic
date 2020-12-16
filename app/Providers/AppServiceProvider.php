@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         view()->composer('*', function ($view) {
+            $search_sonic = NULL;
             if (Auth::guard('admin')->check()) {
                 $settings = GlobalSettings::where('type', 'admin_ticker');
                 if(session('role_id') !== 1){

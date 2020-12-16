@@ -32,21 +32,11 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([76, 79, 217], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([79], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Packaging</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([76, 79], session('permissions'))) !== 0)
-                                        <li class=" nav-item"><a href="#"><span class="menu-title">Requests</span></a>
-                                            <ul class="menu-content">
-                                                @if (session('role_id') == 1 || in_array(76, session('permissions')))
-                                                    <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Warehouse Stock</a></li>
-                                                @endif
-
-                                                @if (session('role_id') == 1 || in_array(79, session('permissions')))
-                                                    <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Shipper</a>
-                                                    </li>
-                                                @endif
-                                            </ul>
+                                    @if (session('role_id') == 1 || in_array(79, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Request</a>
                                         </li>
                                     @endif
 
@@ -906,9 +896,9 @@
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.auto_account_disabled_days.auto_index')}}">Auto Account Disabled Days</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(228, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li>
-                                    @endif
+{{--                                    @if (session('role_id') == 1 || in_array(228, session('permissions')))--}}
+{{--                                        <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li>--}}
+{{--                                    @endif--}}
                                     @if (session('role_id') == 1 || in_array(214, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.packaging.types.index') }}">Packaging Types</a>
                                         </li>

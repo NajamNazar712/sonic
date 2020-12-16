@@ -63,7 +63,7 @@
                             <input type="text" hidden id="route_id" name="route_id">
                             <div class="row justify-content-center">
                                 <div class="col-12">
-                                    <select name="pickup_address[]" id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($users as $user)
                                             <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
                                         @endforeach
@@ -95,9 +95,9 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
-            $('#pickup_address').select2({
+            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Search Pickup Addresses",
+                placeholder:"Add Pickup Addresses",
                 allowClear:true,
             });
            /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
@@ -246,15 +246,35 @@
             });
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
-               // $('input:hidden[name=id]').val();
+
                 var route_id = table.row( $(this).parents('tr') ).data().id;
 
                 $('#route_id').val(route_id);
 
                 if ($(this).hasClass('assign_location')) {
+
+                    $.ajax({
+                        url: '{!! route('admin.management.route.view_assign_location') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'route_id': route_id
+                        }
+                    }).done(function(data){
+
+                        $('#pickup_address').val('All').trigger('change');
+                        if(data.pickup_address_ids.length != 0 ){
+                            $('#pickup_address').val(data.pickup_address_ids).trigger('change');
+                        }
+
+                    });
                     $('#assign_location').modal('show');
                 }
             });
+
+
+            });
+
 
 
 
@@ -311,7 +331,7 @@
                 }
             });
 
-        });
+
     });
     </script>
 

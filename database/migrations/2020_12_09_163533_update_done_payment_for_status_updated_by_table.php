@@ -14,8 +14,8 @@ class UpdateDonePaymentForStatusUpdatedByTable extends Migration
     public function up()
     {
         Schema::table('done_payments', function (Blueprint $table) {
-            $table->timestamp('status_updated_at')->nullable();
-            $table->integer('status_updated_by')->nullable();
+            $table->timestamp('status_updated_at')->nullable()->index();
+            $table->integer('status_updated_by')->nullable()->index();
         });
     }
 

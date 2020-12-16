@@ -11,6 +11,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
@@ -134,7 +135,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Models\Segment;
+
 
 
 class AdminDashboardController extends Controller
@@ -1375,8 +1376,9 @@ class AdminDashboardController extends Controller
         $shippers = User::whereIn('status', [3, 4])->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
+        $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments]);
 
     }
     public function blockAccountsList(){
@@ -8400,7 +8402,7 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" data-toggle="modal" data-target="#assignlocation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Location</div></button>';
 
 
                     $dropdown .= '
@@ -8639,6 +8641,7 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -9572,7 +9575,10 @@ class AdminDashboardController extends Controller
         $route_id = $request->route_id;
         $pickup_addresses = $request->pickup_address;
 
-        RouteLocations::where('pickup_address_id',$pickup_addresses)->delete();
+       foreach($pickup_addresses as $address){
+           RouteLocations::where('pickup_address_id',$address)->delete();
+       }
+        RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
             foreach($pickup_addresses as $pickup_address){
@@ -9585,8 +9591,17 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
 
-//    public function search_sonic(Request $request){
-//        if($request->has())
-//    }
+    public function view_assign_locations(Request $request){
+        $route_id = $request->route_id;
+        $data = array();
+        if($route_id != null){
+            $pickup_addresses = RouteLocations::where('route_id',$route_id)->select('pickup_address_id')->get();
+           foreach($pickup_addresses as $pickup_address){
+                $data[] = $pickup_address->pickup_address_id;
+           }
+            return response()->json(['pickup_address_ids' => $data]);
+        }
+    }
+
 }
 

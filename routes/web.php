@@ -107,6 +107,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('print_receiving_sheet_and_air_waybill', 'Shippers\ShipperReceivingSheetController@print_receiving_sheet_and_air_waybill')->name('print_receiving_sheet_and_air_waybill');
             Route::post('cn/info','Shippers\ShipperReceivingSheetController@update_cn_info')->name('cn.info');
             Route::post('cn/update','Shippers\ShipperReceivingSheetController@update_consignee_info_and_special_instructions')->name('cn.update');
+
+            Route::prefix('shipments')->name('shipments.')->group(function () {
+                Route::get('', 'Shippers\ShipperReceivingSheetController@shipments_index')->name('index');
+                Route::get('list', 'Shippers\ShipperReceivingSheetController@shipments_list')->name('list');
+            });
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
@@ -160,6 +165,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('sizes','Shippers\ShipperPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
             Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
+
+            Route::prefix('cart')->name('cart.')->group(function (){
+                Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
+                Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
+            });
         });
     });
     Route::prefix('return')->name('return.')->group(function (){
@@ -227,6 +237,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('sales')->name('sales.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
+
+            Route::prefix('telenor')->name('telenor.')->group(function (){
+                Route::get('','Shippers\ShipperReportsController@sales_telenor_index')->name('index');
+                Route::get('list','Shippers\ShipperReportsController@sales_telenor_list')->name('list');
+            });
         });
         Route::prefix('summary')->name('summary.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
@@ -437,7 +452,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('accounts')->name('accounts.')->group(function(){
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
         Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
-        Route::get('active', 'Admins\AdminDashboardController@targets')->name('active');
+        Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::get('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
         Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
@@ -446,6 +461,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
         Route::post('tag/submit/bulk','Admins\AdminDashboardController@tagSubmitBulk')->name('tag.submit.bulk');
+        Route::post('set_segment/bulk','Admins\AdminDashboardController@setSegmentBulk')->name('set.segment_bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
 
@@ -559,6 +575,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
             Route::post('/assign_location', 'Admins\AdminDashboardController@assign_locations_submit')->name('assign_location');
+            Route::post('/view_assign_location', 'Admins\AdminDashboardController@view_assign_locations')->name('view_assign_location');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
             Route::get('','Admins\AdminDashboardController@riderView')->name('index');
