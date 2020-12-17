@@ -353,7 +353,7 @@ class AdminMonthClosingController extends Controller
      }
 
     public function pending_index(){
-        $admins = Admin::where('status', 1)->select('id', 'name')->get();
+        $admins = Admin::where('status', 1)->get();
         return view('admin.month_closing.pending')->with(['admins' => $admins]);
     }
 

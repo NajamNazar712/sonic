@@ -41,7 +41,7 @@
         </div>
     </div>
     <div class="modal fade" id="add_responsible_modal" role="dialog" aria-labelledby="add_responsible_modal_title" aria-hidden="true">
-         <div class="modal-dialog modal-md" role="document">
+         <div class="modal-dialog modal-lg" role="document">
              <div class="modal-content">
                  <div class="modal-header">
                      <h4 class="modal-title" id="add_responsible_modal_title">Assign Responsible(s)</h4>
@@ -56,10 +56,25 @@
                          <div class="form-group">
                              <select name="responsible_persons[]" id="responsible_persons" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                  @foreach($admins as $admin)
-                                     <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                     <option rel="{{$admin->name}}" value="{{$admin->id}}">{{$admin->name}}  {{ ($admin->designation != null)? '( '.$admin->designation.' )':'' }}  ( {{ $admin->role->department->name }} )</option>
                                  @endforeach
                              </select>
                          </div>
+                         <div class="form-group">
+                             <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct All</label>
+                             <input type="checkbox" name="deduct_switch" id="deduct_switch" class="switchery deduct_switch" data-color="success" data-size="sm"/>
+                             <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct Individually</label>
+
+                         </div>
+                         <div id="deduct_all_div">
+                             <div class="form-group">
+                                 <input type="text" name="deduct_amount" class="form-control deduct_amount" placeholder="Deduct Amount for selected person(s)">
+                             </div>
+                         </div>
+                         <div id="deduct_individual_div" style="display: none;">
+
+                         </div>
+
                          <div class="form-group">
                              <input type="text" name="add_remarks" class="form-control add_remarks" placeholder="Remarks">
 
@@ -147,6 +162,15 @@
                 placeholder:"Search Name",
                 allowClear:true,
             });
+            $('.deduct_amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 10000000
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -492,11 +516,38 @@
 
             });
 
+            // var deduct_amount_switch = document.querySelector('.switchery.deduct_switch');
+            $('#deduct_switch').on('change',function(){
+                deduct_amount_switch_change = document.querySelector('#deduct_switch');
+                var users_count = $('#responsible_persons').val().length;
+                if(users_count > 0){
+                    if(deduct_amount_switch_change.checked === true){
+                        var html = '';
+
+                        $('#deduct_individual_div').slideDown();
+                        $('#deduct_all_div').slideUp();
+
+                    }
+                    else{
+                        $('#deduct_all_div').slideDown();
+                        $('#deduct_individual_div').slideUp();
+                    }
+                }
+                else{
+                    if(deduct_amount_switch_change.checked === true){
+                        var error = 'Select atleast one responsible person!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $('#deduct_switch').trigger('click');
+                    }
+
+                }
+
+            });
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var shipment_id = parseInt($(this).parents('tr').attr('id'));
                 if(shipment_id){
                     if ($(this).hasClass('assign_responsible')) {
-
+                        $('#add_responsible_modal').modal('show');
                     }
                 }
             });
