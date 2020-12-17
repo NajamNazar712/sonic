@@ -5195,6 +5195,7 @@
                         $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
                         $('input[name="storage_type[0]"]').val($(this).val());
                     });
+                    $('select[name="storage_type[0]"]').attr('disabled', true);
                 @endif
                 @if(count($wms_packing_charges) > 0)
                     @foreach($wms_packing_charges as $indx => $packing)
