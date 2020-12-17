@@ -1062,10 +1062,26 @@
 
         });
 
-        $('body').on('change','input[name="shipper_city"]',function () {
+        $('#shipper_city').on('change',function () {
             var city_id = $(this).val();
-            var error = 0;
-
+            console.log(city_id);
+            {{--$.ajax({--}}
+            {{--    url: '{!! route('cod.salesPerson') !!}',--}}
+            {{--    method: 'POST',--}}
+            {{--    data: {city_id:shipper_city},--}}
+                // success: function(data) {
+                //     if(data.status == 0){
+                //         err.css('display','block');
+                //
+                //     }else if(data.status == 1){
+                //         err.css('display','none');
+                //
+                //
+                //
+                //     }
+                //
+                // }
+            // });
 
 
         });
