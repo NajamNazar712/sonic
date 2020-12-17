@@ -228,25 +228,32 @@
 
         $(document).ready(function() {
 
-            /*$('#editRouteForm .select2').select2({
-                dropdownParent: $("#editRoute")
-            });*/
+
             $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select City',
                 width:'100%',
-                allowClear:true
+                allowClear:true,
+                dropdownParent: $("#add_route")
+            });
+            $('#editRouteForm #city_id').select2({
+                placeholder:'Select City',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#edit_route_modal")
             });
 
-            $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#editRouteForm #rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider',
                 width:'100%',
-                allowClear:true
+                allowClear:true,
+                dropdownParent: $("#edit_route_modal")
             });
-           /* $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider',
                 width:'100%',
-                allowClear:true
-            });*/
+                allowClear:true,
+                dropdownParent: $("#add_route")
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -308,14 +315,14 @@
                 },
                     {
                         extend: 'excel',
-                        title: 'Route Management',
+                        title: 'Pickup Route',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
                 @else
                 buttons: [{
                     extend: 'excel',
-                    title: 'Route Management',
+                    title: 'Pickup Routes',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
