@@ -373,6 +373,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     });
 
+    Route::prefix('telenor')->name('telenor.')->group(function () {
+        Route::prefix('data_conversion')->name('data_conversion.')->group(function () {
+            Route::get('', 'Shippers\ShipperTelenorController@data_conversion_index')->name('index');
+            Route::post('', 'Shippers\ShipperTelenorController@data_conversion_store')->name('store');
+        });
+    });
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
