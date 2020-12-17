@@ -1710,7 +1710,7 @@ class V2AdminPickupsController extends Controller
         $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
             ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
             ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
-            ->join('riders as r', 'pr.current_rider_id', 'r.id')
+            ->join('riders as r', 'pn.rider_id', 'r.id')
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
