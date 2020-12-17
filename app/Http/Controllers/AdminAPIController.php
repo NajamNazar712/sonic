@@ -163,6 +163,8 @@ class AdminAPIController extends Controller
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
         if ($return_note) {
+            $present = false;
+
             $pictures = array();
             if($request->has('pictures')){
                 $pictures = $request->pictures;
@@ -192,6 +194,8 @@ class AdminAPIController extends Controller
                         }
                     }
                 }
+
+                $present = true;
             }
             if (count($pictures) > 0) {
                 foreach ($pictures as $picture) {
@@ -207,7 +211,16 @@ class AdminAPIController extends Controller
                     $return_note_image->image = $generated_image_name;
                     $return_note_image->save();
                 }
+
+                $present = true;
             }
+
+            if ($present && in_array($return_note->status, [1, 3])) {
+                $return_note->updated_by = $admin_id;
+                $return_note->status = 1;
+                $return_note->save();
+            }
+
             return response()->json(['status' => 0, 'success' => 'Image insert successfully!']);
         }
         return response()->json(['status' => 1, 'error' => 'Return Note not found!']);

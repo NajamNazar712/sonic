@@ -70,6 +70,7 @@ class ShipperTelenorController extends Controller
 
     private function stationary_verification(&$misidn, $file, &$card_numbers, $zip, $date, $type) {
         $stationary = explode("\n", file_get_contents($file));
+        $carry_forward_stationary = array();
 
         if (!empty($misidn) && !empty($stationary)) {
             $stationary_length = 341;
@@ -97,14 +98,19 @@ class ShipperTelenorController extends Controller
                     unset($misidn[$key]);
                 }
                 else {
+                    $carry_forward_stationary[] = $row;
+
                     unset($stationary[$index]);
                 }
             }
 
             $zip->addFromString($date . '_stationary_' . $type . '_' . count($stationary) . '.txt', implode("\n", $stationary));
+
+            $zip->addFromString($date . '_carry_forward_stationary_' . $type . '_' . count($carry_forward_stationary) . '.txt', implode("\n", $carry_forward_stationary));
         }
 
         unset($stationary);
+        unset($carry_forward_stationary);
     }
 
     private function missing_misidn_file_creation($misidn, $zip, $date) {
@@ -127,6 +133,7 @@ class ShipperTelenorController extends Controller
 
     private function card_file_creation($file, &$card_numbers, $zip, $date, $type) {
         $card = explode("\n", file_get_contents($file));
+        $carry_forward_card = array();
 
         if (!empty($card_numbers) && !empty($card)) {
             if ($type == 'up') {
@@ -148,14 +155,19 @@ class ShipperTelenorController extends Controller
                     $card[$index] = $row;
                 }
                 else {
+                    $carry_forward_card[] = $row;
+
                     unset($card[$index]);
                 }
             }
 
             $zip->addFromString($date . '_card_' . $type . '_' . count($card) . '.txt', implode("\n", $card));
+
+            $zip->addFromString($date . '_carry_forward_card_' . $type . '_' . count($carry_forward_card) . '.txt', implode("\n", $carry_forward_card));
         }
 
         unset($card);
+        unset($carry_forward_card);
     }
 
     public function data_conversion_index() {
