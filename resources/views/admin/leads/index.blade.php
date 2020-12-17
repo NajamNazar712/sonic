@@ -22,11 +22,13 @@
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
+                        <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
-{{--                        <th class="border-primary border-darken-1">Aging</th>--}}
-{{--                        <th class="border-primary border-darken-1">Action</th>--}}
+                        <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -274,31 +276,15 @@
 
                                 if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                     id = parseInt(row.id());
+                                    row.select();
 
-                                    hub_id = $(row.node()).data('id');
+                                    var index = $.inArray(id, selected_rows);
 
-                                    var allow = false;
-
-                                    if(hub_ids.length == 0) {
-                                        hub_ids.push(hub_id);
-
-                                        allow = true;
-                                    }
-                                    else if(hub_ids[0] == hub_id) {
-                                        allow = true;
+                                    if (index === -1) {
+                                        selected_rows.push(id);
                                     }
 
-                                    if (allow) {
-                                        row.select();
-
-                                        var index = $.inArray(id, selected_rows);
-
-                                        if (index === -1) {
-                                            selected_rows.push(id);
-                                        }
-
-                                        table.button('.bulk_tagging').enable();
-                                    }
+                                    table.button('.bulk_tagging').enable();
                                 }
                             });
                         }
@@ -325,7 +311,6 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.bulk_tagging').disable();
-                                        hub_ids.splice(index, 1);
                                     }
                                 }
                             });
@@ -355,27 +340,30 @@
                 serverSide: true,
                 ajax: '{{ route('admin.leads.list') }}',
                 rowId: 'request_id',
-                order: [[3, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'contact_person', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'lead_id', name: 'leads.id', class: 'align-middle lead_id'},
+                    {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
-                    {data: 'phone_number', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
-                    {data: 'email_address', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
-                    {data: 'requested_date', name: 'packaging_material_requests.address', class: 'align-middle address'},
-                    {data: 'message', name: 'ppm.id', class: 'align-middle mode'},
-                    {data: 'status_id', name: 'status', class: 'align-middle status'},
-                    {data: 'updated_by', name: 'sj.remarks', class: 'align-middle remarks_view'},
-                    {data: 'sale_person', name:'rb.name', class: 'align-middle requested_by'},
-                    {data: 'sale_person', class: 'align-middle aging', orderable: false, searchable: false},
-                    // {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
-                    // {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                    {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
+                    {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
+                    {data: 'message', name: 'leads.message', class: 'align-middle message'},
+                    {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
+                    {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
+                    {data: 'status', name: 'ls.id', class: 'align-middle status'},
+                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
+                    {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -399,12 +387,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.mode')){
-                            $(payment_mode_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -415,24 +397,24 @@
                             }
                         }
                     });
-                    {{--var data1 = $.map({!! $payment_mode !!}, function (obj) {--}}
-                    {{--    obj.id = obj.id;--}}
+                    var data1 = $.map({!! $statuses !!}, function (obj) {
+                        obj.id = obj.id;
 
-                    {{--    return obj;--}}
-                    {{--});--}}
-                    {{--var data1 = $.map({!! $payment_mode !!}, function (obj) {--}}
-                    {{--    obj.text = obj.mode;--}}
+                        return obj;
+                    });
+                    var data1 = $.map({!! $statuses !!}, function (obj) {
+                        obj.text = obj.mode;
 
-                    {{--    return obj;--}}
-                    {{--});--}}
+                        return obj;
+                    });
 
-                    {{--$("#payment_mode_select").prepend('<option value="" selected></option>').select2({--}}
-                    {{--    data:data1,--}}
-                    {{--    placeholder: "Select Mode",--}}
-                    {{--    width:'100%',--}}
-                    {{--    containerCssClass: 'select-xs',--}}
-                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
-                    {{--});--}}
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
