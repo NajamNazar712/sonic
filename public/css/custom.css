@@ -52,6 +52,10 @@ html body .content .content-wrapper {
 	white-space: normal;
 }
 
+.btn-group .dropdown-menu.accounts .dropdown-item {
+	font-size:10px;
+}
+
 .dropdown-item:active {
 	background: #64a0d2;
 }

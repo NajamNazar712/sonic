@@ -132,6 +132,14 @@ class Permission
             'cargo.receive.quick.list.ajax' => 31,
             'cargo.supply_chain.supply_chain_index' => 376,
 
+            'cargo.supply_chain.shipment_on_hold.index' => 404,
+            'cargo.supply_chain.shipment_on_hold.shipment_details' => 404,
+            'cargo.supply_chain.shipment_on_hold.store' => 404,
+
+            'cargo.supply_chain.shipment_on_hold.history.index' => 405,
+            'cargo.supply_chain.shipment_on_hold.history.list' => 405,
+            'cargo.supply_chain.shipment_on_hold.history.allow_dispatch_delivery' => 405,
+
             'master_cargo.bag.pending.index' => 25,
             'master_cargo.bag.pending.list' => 25,
             'master_cargo.bag.create.index' => 26,
@@ -583,7 +591,10 @@ class Permission
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
+            'settings.walk_in.index' => 154,
             'settings.walk_in.store' => 154,
+            'settings.international_walk_in.index' => 154,
+            'settings.international_walk_in.store' => 154,
 		    'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
@@ -725,6 +736,9 @@ class Permission
 
             'shipment.book.walk_in' => 155,
             'shipment.book.store' => 155,
+
+            'shipment.book.international_walk_in' => 155,
+            'shipment.book.international_store' => 155,
 
             'shipment.history.walk_in_history' => 209,
             'shipment.history.walk_in_history_list' => 209,
