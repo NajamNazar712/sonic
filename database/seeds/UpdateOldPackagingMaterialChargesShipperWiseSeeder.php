@@ -12,7 +12,7 @@ class UpdateOldPackagingMaterialChargesShipperWiseSeeder extends Seeder
      */
     public function run()
     {
-        $type_ids = [11];
+        $type_ids = [1, 2, 4, 5];
         $packaging_charges = PackagingCharge::whereIn('type_id', $type_ids);
         if($packaging_charges->exists()){
             $packaging_charges = $packaging_charges->get();
