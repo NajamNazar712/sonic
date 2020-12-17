@@ -14,7 +14,7 @@ class UpdateRoutesTableForRouteTypeId extends Migration
     public function up()
     {
         Schema::table('routes', function (Blueprint $table) {
-            $table->integer('route_type_id')->index()->default(1);
+            $table->integer('route_type_id')->index()->default(2);
         });
     }
 

@@ -8315,7 +8315,7 @@ if(session('department_id') == 7){
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
             ->leftjoin('route_types as rt','rt.id','=','routes.route_type_id')
-            ->select(['cities.name as city','routes.id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.name as route_type']);
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -9587,6 +9587,21 @@ if(session('department_id') == 7){
             }
             return response()->json(['locations' => $data]);
         }
+     }
+
+     public function set_as_pickup_route(Request $request){
+         foreach ($request->route_id as $id) {
+             if ($id) {
+                 $route = Route::find($id);
+                 if ($route) {
+                     if ($route->route_type_id == 2) {
+                         $route->route_type_id = 1;
+                         $route->save();
+                     }
+                 }
+             }
+         }
+         return response()->json(['status' => 1, 'success' => 'Route type has been updated !']);
      }
 
 }

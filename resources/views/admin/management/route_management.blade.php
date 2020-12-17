@@ -19,6 +19,7 @@
                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
@@ -107,10 +108,14 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
@@ -125,6 +130,7 @@
                 width: '100%',
                 placeholder: 'Search Pickup Address'
             });*/
+            var selected_rows = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -182,7 +188,121 @@
 
                         }
 
-                    },
+                    },{
+                    text: '<i class="la la-cogs"></i> Set as Pickup Route',
+                    className: 'btn btn-primary pickup',
+                    enabled:false,
+                    action: function (e, dt, node, config) {
+
+                        $('input:hidden[name=id]').val(selected_rows);
+
+                        if(selected_rows.length === 0){
+                            table.button('.pickup').disable();
+                            return false;
+                        }
+                        else if(selected_rows !== ''){
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to set as pickup route !',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.management.route.set_pickup_route') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'route_id': selected_rows
+                                        }
+                                    }).done(function(data){
+                                        if(data.status){
+                                            table.rows().deselect();
+                                            selected_rows = [];
+                                            table.button('.pickup').disable();
+                                            table.draw(true);
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        }
+
+                                    });
+                                }
+                            });
+
+                        }else{
+                            var error = 'Route Not Found, Please Try again!';
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            table.button('.pickup').disable();
+                        }
+                    }
+                },{
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+
+                                table.button('.pickup').enable();
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.pickup').disable();
+                                }
+                            }
+                        });
+                    }
+                },
                     {
                         extend: 'excel',
                         title: 'Route Management',
@@ -198,6 +318,12 @@
                 },'reset'],
                 @endif
                 scrollX: true, scrollY: '500px',
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -210,6 +336,7 @@
                 rowId: 'id',
                 order: [[6, 'desc']],
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'code', name: 'routes.code', class: 'align-middle code'},
@@ -222,9 +349,18 @@
                     {data: 'action', name: 'action', class: 'align-middle action text-center', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
+
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                    if (data.route_type == 'Delivery') {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }
 
                 },
                 initComplete: function() {
@@ -245,7 +381,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') ) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -283,6 +419,27 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.pickup').enable();
+                }
+                else {
+                    table.button('.pickup').disable();
+                }
+            });
+
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
 
@@ -345,11 +502,7 @@
                 }
             });
 
-
         });
-
-
-
 
         $("#addRoute").on("show.bs.modal", function(e) {
                 $.get( "/admin/management/route/add", function( data ) {

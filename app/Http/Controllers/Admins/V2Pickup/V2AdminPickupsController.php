@@ -2411,4 +2411,88 @@ class V2AdminPickupsController extends Controller
 
     }
 
+    public function pickup_route_index(){
+        $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $riders = Rider::where('status', 1)->select(['id','name'])->get();
+        return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders]);
+    }
+
+    public function pickup_route_list(){
+        $routes = Route::join('cities','routes.city_id','=','cities.id')
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at'])->where('routes.route_type_id',1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereIn('cities.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($routes)
+            ->editColumn('status', function ($routes) {
+                return ($routes->status == 0)? 'Inactive': 'Active';
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('active', $keyword) !== FALSE) {
+                    $query->where('routes.status', '=', 1);
+                }
+                else if (strpos('inactive', $keyword) !== FALSE) {
+                    $query->where('routes.status', '=', 0);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item update_route" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Route</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(95, session('permissions'))) {
+                        if ($result->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function edit_route_ajax(Request $request){
+        $id = $request->route_id;
+        $data = array();
+        if($id){
+            $route = Route::find($id);
+            $city_id = $route->city_id;
+            $code = $route->code;
+            $start = $route->start;
+            $end = $route->end;
+            $junctions = $route->junction;
+            $rider = Rider::where('route_id',$id)->first();
+            $rider_id = $rider->id;
+            $data []= (['city_id' => $city_id,'code' => $code,'start' => $start,'end' => $end,'rider_id' => $rider_id,'junctions' => $junctions]);
+            return response()->json(['details' => $data]);
+        }
+    }
+
+
 }

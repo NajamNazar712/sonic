@@ -183,9 +183,12 @@
                                         @if (session('role_id') == 1 || in_array(272, session('permissions')))
                                             <li><a class="menu-item" href="{{ route('admin.v2_pickups.action_log.index') }}">Rider Action Log</a></li>
                                         @endif
-                                            @if (session('role_id') == 1 || in_array(366, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider_receiving.index') }}">Rider Receiving</a></li>
-                                            @endif
+                                        @if (session('role_id') == 1 || in_array(366, session('permissions')))
+                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.rider_receiving.index') }}">Rider Receiving</a></li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(406, session('permissions')))
+                                            <li><a class="menu-item" href="{{ route('admin.v2_pickups.pickup_route.index') }}">Pickup Route</a></li>
+                                        @endif
                                     </ul>
                                 </li>
                             @endif
