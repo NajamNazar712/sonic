@@ -57,7 +57,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body text-center">
+                    <div class="modal-body ">
 
                  <form action="{{route('admin.management.route.add')}}" method="post" class="mt-2" id="addRouteForm" novalidate="novalidate">
                     {{csrf_field()}}
@@ -65,7 +65,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;text-align: left; " required data-rule-required="true" data-msg-required="This field is required">
                                     <option value="" selected>Select a City</option>
                                     @foreach($cities as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
@@ -96,7 +96,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="rider_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                <select name="rider_id" id="rider" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                                     <option value="" selected>Select a Rider</option>
                                     @foreach($riders as $rider)
                                         <option value="{{$rider->id}}">{{$rider->name}}</option>
@@ -137,7 +137,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body text-center">
+                    <div class="modal-body">
 
                         <form action="#" method="post" class="mt-2" id="editRouteForm" novalidate="novalidate">
                             {{csrf_field()}}
@@ -213,6 +213,11 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <style>
+        textarea#junction {
+            resize: none;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -222,6 +227,27 @@
     <script type="text/javascript">
 
         $(document).ready(function() {
+
+            /*$('#editRouteForm .select2').select2({
+                dropdownParent: $("#editRoute")
+            });*/
+            $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select City',
+                width:'100%',
+                allowClear:true
+            });
+
+            $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
+                width:'100%',
+                allowClear:true
+            });
+           /* $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
+                width:'100%',
+                allowClear:true
+            });*/
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -389,51 +415,79 @@
                         }).done(function(data){
                             console.log(data);
                             if(data.details.length != 0 ){
-                                $.each(data.details, function(index, value) {
-                                    var city_id = value.city_id;
-                                    var route_code = value.code;
-                                    var start = value.start;
-                                    var end = value.end;
-                                    var rider_id = value.rider_id;
-                                    var junctions = value.junctions;
+                                /*$.each(data.details, function(index, value) {*/
+                                    var city_id = data.details.city_id;
+                                    var route_code = data.details.code;
+                                    var start = data.details.start;
+                                    var end = data.details.end;
+                                    var rider_id = data.details.rider_id;
+                                    var junctions = data.details.junctions;
 
-                                    $('#city_id').val(city_id);
+                                    $('#city_id').val(city_id).trigger('change');
                                     $('#route_code').val(route_code);
                                     $('#start').val(start);
                                     $('#end').val(end);
-                                    $('#rider_id').val(rider_id);
+                                    $('#rider_id').val(rider_id).trigger('change');
                                     $('#junstion_edit').val(junctions);
-                                });
+                                //});
                                 $('#edit_route_modal').modal('show');
                                 var route = '{!! route('admin.management.route.edit', ':id') !!}';
                                     route = route.replace(':id', route_id);
                                 $("#editRouteForm").attr('action', route);
 
-                                //$('#edit_route_modal').modal('show');
                             }
 
                         });
-                   /* else{
-                        error toastr
-                        };*!/*/
 
                     }
-
-
-
             });
 
         });
 
-       /* $("#editRouteForm").on("show.bs.modal", function(e) {
+        $( "#editRouteForm" ).validate({
 
-            var id = $(e.relatedTarget).data('target-id');
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
 
-            $.get( "/admin/management/route/"+id+"/edit", function( data ) {
-                $("#edit_route").html(data);
-            });
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Route is being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
 
-        });*/
+                form.submit();
+            }
+        });
+
+
+        $( "#addRouteForm" ).validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Route is being Saved!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+
+                form.submit();
+            }
+        });
 
         $('body').on('click','.deactivate',function (e) {
             var id = $(this).data('target-id');

@@ -2487,9 +2487,15 @@ class V2AdminPickupsController extends Controller
             $start = $route->start;
             $end = $route->end;
             $junctions = $route->junction;
-            $rider = Rider::where('route_id',$id)->first();
-            $rider_id = $rider->id;
-            $data []= (['city_id' => $city_id,'code' => $code,'start' => $start,'end' => $end,'rider_id' => $rider_id,'junctions' => $junctions]);
+            $rider = Rider::where('route_id',$id);
+           if($rider->exists()){
+               $rider_id = $rider->select('id')->first();
+               $rider_id = $rider_id->id;
+           }
+           else{
+               $rider_id = NULL;
+           }
+            $data = (['city_id' => $city_id,'code' => $code,'start' => $start,'end' => $end,'rider_id' => $rider_id,'junctions' => $junctions]);
             return response()->json(['details' => $data]);
         }
     }
