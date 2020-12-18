@@ -372,14 +372,13 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button') || $(header).is('.aging') || $(header).is('.confirmed_aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -403,7 +402,7 @@
                         return obj;
                     });
                     var data1 = $.map({!! $statuses !!}, function (obj) {
-                        obj.text = obj.mode;
+                        obj.text = obj.name;
 
                         return obj;
                     });

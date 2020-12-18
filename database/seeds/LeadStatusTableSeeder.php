@@ -18,10 +18,14 @@ class LeadStatusTableSeeder extends Seeder
             array('id' => 2, 'name' => 'Unresponsive'),
             array('id' => 3, 'name' => 'Irrelevant'),
             array('id' => 4, 'name' => 'Not Interested'),
-            array('id' => 2, 'name' => 'Data Gathered'),
-            array('id' => 2, 'name' => 'Proposal Sent'),
-            array('id' => 5, 'name' => 'Proceed for Account Activation'),
-            array('id' => 6, 'name' => 'Account Activated')
+            array('id' => 5, 'name' => 'Data Gathered'),
+            array('id' => 6, 'name' => 'Proposal Sent'),
+            array('id' => 7, 'name' => 'Under Negotiation'),
+            array('id' => 8, 'name' => 'Follow-up'),
+            array('id' => 9, 'name' => 'In-process for Activation'),
+            array('id' => 10, 'name' => 'Rejected'),
+            array('id' => 11, 'name' => 'Blocked'),
+            array('id' => 12, 'name' => 'Account Activated')
         ));
     }
 }
