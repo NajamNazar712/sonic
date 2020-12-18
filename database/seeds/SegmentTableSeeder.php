@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Models\Shipper\User;
 use Illuminate\Database\Seeder;
 
 class SegmentTableSeeder extends Seeder
