@@ -53,6 +53,32 @@
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
+                <select name="rider_id" id="rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                   {{-- <option value="{{$riders->id}}" selected>{{$riders->name}}</option>--}}
+                    @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="route_type_id" id="route_type_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                   {{-- <option value="{{$route->route_type->id}}" selected>{{$route->route_type->name}}</option>--}}
+                    @foreach($route_types as $type)
+                        <option value="{{$type->id}}">{{$type->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
                 <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required">{{$route->junction}}</textarea>
             </fieldset>
         </div>
@@ -66,9 +92,33 @@
 
 <script type="text/javascript">
 
-    $('.select2').select2({
+    $('#editRouteForm .select2').select2({
         dropdownParent: $("#editRoute")
     });
+    var rider_id = @json($current_rider_id);
+
+    if(rider_id === null){
+        $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Rider*'
+        });
+    }
+    else{
+        $('#rider_id').val(rider_id).trigger('change');
+    }
+
+    var route_type = @json($current_route_type_id);
+
+    if(route_type === null){
+        $('#route_type_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Route Type*'
+        });
+    }
+    else{
+        $('#route_type_id').val(route_type).trigger('change');
+    }
+
 
     $( "#editRouteForm" ).validate({
 

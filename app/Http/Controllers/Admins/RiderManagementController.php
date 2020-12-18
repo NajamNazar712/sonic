@@ -7,6 +7,7 @@ use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
+use App\Http\Models\RouteType;
 use App\Http\Models\SmsHistory;
 use App\Http\Models\SmsHistoryRider;
 use Illuminate\Http\Request;
@@ -116,7 +117,8 @@ class RiderManagementController extends Controller
     public function addRiderView(){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
+        $route_types = RouteType::all();
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -132,7 +134,6 @@ class RiderManagementController extends Controller
             'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
-
         if ($validate->fails()) {
             return redirect()->back()
                 ->withErrors($validate);
@@ -148,13 +149,14 @@ class RiderManagementController extends Controller
             $route->start = $request->start;
             $route->end = $request->end;
             $route->junction = $request->junction;
+            $route->route_type_id = $request->route_type_id;
             $route->status = 1;
             $route->save();
             $route_id = $route->id;
         }else{
             $route_id = $request->route_id;
         }
-
+        Rider::where('route_id', $request->route_id)->update(['route_id' => NULL]);
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -174,7 +176,6 @@ class RiderManagementController extends Controller
             NotificationsController::send(61, $rider->id, $request->pin);
             return redirect()->back()->with('success','Rider added successfully');
         }
-
     }
     public function categoryListAjax(Request $request){
         $city_id = $request->id;
@@ -193,9 +194,10 @@ class RiderManagementController extends Controller
     public function editRiderView($id){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -244,11 +246,13 @@ class RiderManagementController extends Controller
             $route->start = $request->start;
             $route->end = $request->end;
             $route->junction = $request->junction;
+            $route->route_type_id = $request->route_type_id;
             $route->status = 1;
             $route->save();
 
             $rider->route_id = $route->id;
         }else{
+            Rider::where('route_id', $request->route_id)->where('id', '<>', $id)->update(['route_id' => NULL]);
             $rider->route_id = $request->route_id;
         }
         if($request->pin != '') {

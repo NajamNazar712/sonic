@@ -88,7 +88,7 @@
                 <fieldset class="form-group">
                     <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($routes as $route)
-                            <option value="{{$route->id}}">{{$rider->route->code}} ({{$route->start}} to {{$route->end}})</option>
+                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
                         @endforeach
                         <option value="other">Other</option>
                     </select>
@@ -117,6 +117,18 @@
             <div class="row mb-2">
                 <div class="col">
                     <fieldset class="form-group">
+                        <select name="route_type_id" id="route_type_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                            <option value="" selected>Select Route Type</option>
+                            @foreach($route_types as $route_type)
+                                <option value="{{$route_type->id}}">{{$route_type->name}}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <fieldset class="form-group">
                         <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
                     </fieldset>
                 </div>
@@ -135,8 +147,8 @@
     $(document).ready(function () {
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
-        $('.select2').select2({
-            dropdownParent: $("#editRider")
+        $('#editRiderForm .select2').select2({
+            dropdownParent: $("#editRiderForm")
         });
         var category_id = {{$rider->rider_category_id}};
         $('#category_list').val(category_id).trigger('change');
@@ -151,7 +163,9 @@
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         //$('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
         $('#city_list').val({!! $rider->city_id !!}).trigger('change');
-        $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @if($rider->route_id != Null)
+            $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @endif
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();

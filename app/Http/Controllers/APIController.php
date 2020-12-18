@@ -7,6 +7,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
+use Illuminate\Support\Facades\Log;
 use Validator;
 use Illuminate\Validation\Rule;
 
@@ -304,7 +306,7 @@ class APIController extends Controller
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
@@ -357,7 +359,7 @@ class APIController extends Controller
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
@@ -877,7 +879,7 @@ class APIController extends Controller
 
     public function shipment_air_waybill(Request $request) {
       $user_id = $request->user_id;
-
+      Log::info($request);
       $rules = [
         'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -1535,7 +1537,7 @@ class APIController extends Controller
           'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
           'origin_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
           'destination_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-          'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+          'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
           'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
               $query->where('user_id', $user_id)->where('status', 1);
           })],
@@ -1933,27 +1935,29 @@ class APIController extends Controller
         }
 
     }
+
     public function shipment_book_gul_ahmed(Request $request) {
         $user_id = $request->user_id;
         $user_type = User::where('id',$user_id)->first();
         $rules = [
-            'warehouse_id' => ['required', Rule::exists('gul_ahmed_pickup_addresses', 'warehouse_id')],
-            'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
-            'consignee_name' => ['required', 'between:1,100'],
-            'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_date' => ['nullable', 'date_format:Y-m-d'],
-            'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-            'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
-            'item_description' => ['required', 'between:0,500'],
-            'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          'warehouse_id' => ['required', Rule::exists('gul_ahmed_pickup_addresses', 'warehouse_id')],
+          'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
+          'consignee_name' => ['required', 'between:1,100'],
+          'consignee_address' => ['required', 'between:1,255'],
+          'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+          'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+          'consignee_email_address' => ['nullable', 'filled', 'email'],
+          'order_date' => ['nullable', 'date_format:Y-m-d'],
+          'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+          'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
+          'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
+          'item_description' => ['required', 'between:0,500'],
+          'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
+          'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+          'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function($query) use($user_id) {
             $query->where('user_id', $user_id);
-        })]
+          })],
+          'reference_number' => ['nullable', 'filled', 'between:0,100']
         ];
 
 
@@ -2093,6 +2097,13 @@ class APIController extends Controller
                 $order_id = NULL;
             }
 
+            if ($request->filled('reference_number')) {
+                $reference_number = $request->input('reference_number');
+            }
+            else {
+                $reference_number = NULL;
+            }
+
             $package_type = TRUE;
 
 
@@ -2118,7 +2129,7 @@ class APIController extends Controller
                 }
             }
             $business_category_id = 1;
-            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $reference_number, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
 
             if($shipment_pre_book){
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
@@ -2215,7 +2226,76 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number ,'video'=> $video]);
                 }
             }
-            return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+            return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
+        }
+    }
+
+    public function shipment_air_waybill_shopify_invoice(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_numbers' => ['required', 'array', 'min:1'],
+            'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'orders' => ['required','array', 'min:1']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_numbers = $request->tracking_numbers;
+
+            if ($tracking_numbers) {
+                $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
+            }
+
+            $air_waybill = '';
+            $valid = FALSE;
+            $invoice = FALSE;
+            $shop_invoice_setting = ShopifyInvoiceSetting::where('user_id', $user_id);
+            if($shop_invoice_setting->exists()){
+                $shop_invoice_setting = $shop_invoice_setting->first();
+                $invoice = TRUE;
+            }
+
+            foreach ($shipments as $shipment) {
+                if ($shipment->shipper_status_id == 1) {
+                    $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+
+                    if(!empty($request->orders[$shipment->tracking_number]) && $invoice){
+                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting);
+                    }
+                    $valid = TRUE;
+                }
+            }
+
+            if ($valid) {
+                $filename = 'air_waybill.jpg';
+
+                if (!isset($request->type) || $request->type == 0) {
+                    $image = SnappyImage::loadHTML($air_waybill);
+
+                    $filename = 'air_waybill' . '.jpg';
+
+                    return $image->setOption('disable-smart-width', TRUE)->setOption('width', 1280)->download($filename);
+                }
+                else {
+                    $pdf = SnappyPDF::loadHTML($air_waybill);
+
+                    $filename = 'air_waybill' . '.pdf';
+
+                    return $pdf->download($filename);
+                }
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'Already Received']);
+            }
         }
     }
 }

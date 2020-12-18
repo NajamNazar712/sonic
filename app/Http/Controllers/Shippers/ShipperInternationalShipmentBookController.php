@@ -44,8 +44,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $date = Carbon::today();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->select('c.name','c.id')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
@@ -65,12 +64,11 @@ class ShipperInternationalShipmentBookController extends Controller
 //        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
 
         $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
     }
 
     public function store(Request $request) {
         $user_id = session('user_id');
-
         $service_type_id = 1;
 
         if ($request->input('pickup_address') == 0) {

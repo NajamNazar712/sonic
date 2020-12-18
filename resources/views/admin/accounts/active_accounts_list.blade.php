@@ -78,6 +78,8 @@
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Document Uploaded At</th>
+                                        <th class="border-primary border-darken-1">Document Approved At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
@@ -110,6 +112,29 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="salesTagSubmit1">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="SetSegment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SetSegment"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Set Segment</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id1">
+                    <select name="Set_segment" id="set_segment" class="form-control select2">
+                        @foreach($segments as $segment)
+                            <option value="{{ $segment->id }}" > {{ $segment->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="setsegmentSubmit">Submit</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -288,6 +313,8 @@
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
                         head.push('Account Disable Remarks');
+                        head.push('Documents Uploaded At');
+                        head.push('Documents Approved At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
                         head.push('Intl Rates Status');
@@ -318,6 +345,8 @@
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_remarks);
+                            row.push(values.documents_uploaded_at);
+                            row.push(values.documents_approved_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
                             row.push(values.international_rate_status);
@@ -380,6 +409,92 @@
                             }
                         }
                     },
+                   /* {
+                        text: 'Set Segment',
+                        className: 'btn btn-primary set_segment',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+
+                                $('#SetSegment').modal('show');
+                                $('#setsegmentSubmit').on('click',function () {
+                                    var segment = parseInt($('#set_segment').val());
+                                    console.log(segment);
+                                    swal({
+                                        text: 'Are you sure, you want to set Segment?',
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function(confirm) {
+                                        if (confirm) {
+                                            if (segment) {
+                                                $.ajax({
+                                                    url: '{!! route('admin.accounts.set.segment_bulk') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'segment_id': segment,
+                                                        'shipper_ids[]': selected_rows,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                })
+                                                    .done(function (data) {
+                                                        if (data) {
+                                                            $('#SetSegment').modal('hide');
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rows = [];
+
+                                                        table.rows().deselect();
+                                                        $('#set_segment').val('').trigger('change');
+                                                        $('#SetSegment').modal('hide');
+                                                        table.draw(true);
+                                                        table.button('.bulk_tagging').disable();
+                                                        table.button('.set_segment').disable();
+                                                        table.button('.set_commission').disable();
+                                                        table.button('.approve_commission').disable();
+
+                                                    });
+                                            } else {
+                                                var error = "Account Not Selected!";
+                                                toastr.error(error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+
+                            }else{
+                                var error = "Account Not selected!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                        }
+                    },*/
                     {
                         text: 'Approve Commission',
                         className: 'btn btn-primary approve_commission',
@@ -547,6 +662,7 @@
                                         table.button('.bulk_tagging').enable();
                                         table.button('.set_commission').enable();
                                         table.button('.approve_commission').enable();
+                                        table.button('.set_segment').enable();
                                     }
                                 }
                             });
@@ -576,6 +692,7 @@
                                         table.button('.bulk_tagging').disable();
                                         table.button('.set_commission').disable();
                                         table.button('.approve_commission').disable();
+                                        table.button('.set_segment').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -640,6 +757,8 @@
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
+                {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at', searchable: false},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
@@ -832,6 +951,11 @@
             placeholder: "Select Sales Person",
             width:'100%',
             dropdownParent:$('#SalesTagModal1')
+        });
+        $("#set_segment").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Segment",
+            width:'100%',
+            dropdownParent:$('#SetSegment')
         });
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);

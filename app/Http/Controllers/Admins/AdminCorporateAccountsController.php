@@ -378,17 +378,17 @@ class AdminCorporateAccountsController extends Controller
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             $on_validations = [
 
-                'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'on_door_range_up.*' => 'required|numeric|between:0,10000',
-                'on_door_range_down.*' => 'required|numeric|between:0,10000',
+                'on_door_mcw_charges' => 'required|numeric|between:0,100000',
+                'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'on_door_range_up.*' => 'required|numeric|between:0,100000',
+                'on_door_range_down.*' => 'required|numeric|between:0,100000',
                 'on_door_local_charges.*' => 'required|numeric',
                 'on_door_class_0_charges.*' => 'required|numeric',
                 'on_door_class_1_charges.*' => 'required',
                 'on_door_class_2_charges.*' => 'required',
                 'on_door_class_3_charges.*' => 'required',
-                'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
                 'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
                 'on_hub_class_0_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
                 'on_hub_class_1_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
@@ -419,17 +419,17 @@ class AdminCorporateAccountsController extends Controller
         //overland
         if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
             $ol_validations = [
-                'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'ol_door_range_up.*' => 'required|numeric|between:0,10000',
-                'ol_door_range_down.*' => 'required|numeric|between:0,10000',
+                'ol_door_mcw_charges' => 'required|numeric|between:0,100000',
+                'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'ol_door_range_up.*' => 'required|numeric|between:0,100000',
+                'ol_door_range_down.*' => 'required|numeric|between:0,100000',
                 'ol_door_local_charges.*' => 'required|numeric',
                 'ol_door_class_0_charges.*' => 'required|numeric',
                 'ol_door_class_1_charges.*' => 'required',
                 'ol_door_class_2_charges.*' => 'required',
                 'ol_door_class_3_charges.*' => 'required',
-                'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
                 'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
                 'ol_hub_class_0_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
                 'ol_hub_class_1_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
@@ -460,17 +460,17 @@ class AdminCorporateAccountsController extends Controller
         //overland
         if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
             $detain_validations = [
-                'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'detain_door_range_up.*' => 'required|numeric|between:0,10000',
-                'detain_door_range_down.*' => 'required|numeric|between:0,10000',
+                'detain_door_mcw_charges' => 'required|numeric|between:0,100000',
+                'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'detain_door_range_up.*' => 'required|numeric|between:0,100000',
+                'detain_door_range_down.*' => 'required|numeric|between:0,100000',
                 'detain_door_local_charges.*' => 'required|numeric',
                 'detain_door_class_0_charges.*' => 'required|numeric',
                 'detain_door_class_1_charges.*' => 'required',
                 'detain_door_class_2_charges.*' => 'required',
                 'detain_door_class_3_charges.*' => 'required',
-                'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
                 'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
                 'detain_hub_class_0_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
                 'detain_hub_class_1_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
@@ -501,17 +501,17 @@ class AdminCorporateAccountsController extends Controller
         //sameday
         if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
             $sameday_validations = [
-                'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
-                'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
+                'sameday_door_mcw_charges' => 'required|numeric|between:0,100000',
+                'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'sameday_door_range_up.*' => 'required|numeric|between:0,100000',
+                'sameday_door_range_down.*' => 'required|numeric|between:0,100000',
                 'sameday_door_local_charges.*' => 'required|numeric',
                 'sameday_door_class_0_charges.*' => 'required|numeric',
                 'sameday_door_class_1_charges.*' => 'required',
                 'sameday_door_class_2_charges.*' => 'required',
                 'sameday_door_class_3_charges.*' => 'required',
-                'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
+                'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
                 'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
                 'sameday_hub_class_0_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
                 'sameday_hub_class_1_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
@@ -1491,8 +1491,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
         }
-
-        if ((($user['rate_status'] >= 0) && $user['status'] == 1) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
+        if ((($user['rate_status'] >= 0) &&  ($user['status']==1 || $user['status']==5)) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1874,10 +1873,10 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
 
-                    'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                    'on_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                    'on_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_door_range_down.*' => 'required|numeric|between:0,100000',
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_class_0_charges.*' => 'required|numeric',
                     'on_door_class_1_charges.*' => 'required',
@@ -1915,10 +1914,10 @@ class AdminCorporateAccountsController extends Controller
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                    'ol_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                    'ol_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_door_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_class_0_charges.*' => 'required|numeric',
                     'ol_door_class_1_charges.*' => 'required',
@@ -1956,10 +1955,10 @@ class AdminCorporateAccountsController extends Controller
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                    'detain_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                    'detain_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_door_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_class_0_charges.*' => 'required|numeric',
                     'detain_door_class_1_charges.*' => 'required',
@@ -1997,10 +1996,10 @@ class AdminCorporateAccountsController extends Controller
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                    'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                    'sameday_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_door_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_class_0_charges.*' => 'required|numeric',
                     'sameday_door_class_1_charges.*' => 'required',
@@ -3896,10 +3895,10 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
 
-                    'on_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,10000',
-                    'on_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'on_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'on_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'on_hub_mcw_charges' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
+                    'on_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'on_door_range_down.*' => 'required|numeric|between:0,100000',
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_class_0_charges.*' => 'required|numeric',
                     'on_door_class_1_charges.*' => 'required',
@@ -3935,10 +3934,10 @@ class AdminCorporateAccountsController extends Controller
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|between:0,10000',
-                    'ol_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'ol_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'ol_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'ol_hub_mcw_charges' => 'required_if:ol_hub_to_hub_switch,==,on|between:0,100000',
+                    'ol_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'ol_door_range_down.*' => 'required|numeric|between:0,100000',
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_class_0_charges.*' => 'required|numeric',
                     'ol_door_class_1_charges.*' => 'required',
@@ -3974,10 +3973,10 @@ class AdminCorporateAccountsController extends Controller
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|between:0,10000',
-                    'detain_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'detain_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'detain_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'detain_hub_mcw_charges' => 'required_if:detain_hub_to_hub_switch,==,on|between:0,100000',
+                    'detain_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'detain_door_range_down.*' => 'required|numeric|between:0,100000',
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_class_0_charges.*' => 'required|numeric',
                     'detain_door_class_1_charges.*' => 'required',
@@ -4013,10 +4012,10 @@ class AdminCorporateAccountsController extends Controller
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_door_mcw_charges' => 'required|numeric|between:0,10000',
-                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|between:0,10000',
-                    'sameday_door_range_up.*' => 'required|numeric|between:0,10000',
-                    'sameday_door_range_down.*' => 'required|numeric|between:0,10000',
+                    'sameday_door_mcw_charges' => 'required|numeric|between:0,100000',
+                    'sameday_hub_mcw_charges' => 'required_if:sameday_hub_to_hub_switch,==,on|between:0,100000',
+                    'sameday_door_range_up.*' => 'required|numeric|between:0,100000',
+                    'sameday_door_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_class_0_charges.*' => 'required|numeric',
                     'sameday_door_class_1_charges.*' => 'required',
@@ -6369,5 +6368,19 @@ class AdminCorporateAccountsController extends Controller
         }else{
             return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
         }
+    }
+    public function rejectReasonSubmit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $reject_reason = $request->rejected_reason;
+        $user = User::find($shipper_id);
+        if($user->status != 3){
+            $user->status = 5;
+        }
+        $user->rejected_reason = $reject_reason;
+        $user->rate_status = 2;
+        $user->save();
+        NotificationsController::send(64, $shipper_id );
+        return ['success' => 'Rates has been rejected!'];
     }
 }

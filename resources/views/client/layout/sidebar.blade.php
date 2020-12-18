@@ -4,16 +4,20 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
 
+            @if (session('user_id') == 3324)
+                <li class=" nav-item"><a href="{{route('cod.telenor.data_conversion.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Telenor - Data Conversion</span></a></li>
+            @endif
+
             @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book</span></a>
                         <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(1, session('permissions')))
-                            @if (session('account_type') == 1)
+                            @if (session('account_type') == 1 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
-                            @elseif (session('account_type') == 2)
+                            @elseif (session('account_type') == 2 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif
@@ -30,6 +34,7 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
                                 </ul>
                             </li>
                         @endif
@@ -98,6 +103,10 @@
             @if (session('user_type') == 1 || in_array(8, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
+                        @if (session('user_id') == 3324)
+                            <li><a class="menu-item" href="{{ route('cod.reports.sales.telenor.index') }}">Overall Sales - Telenor</a></li>
+                        @endif
+
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>

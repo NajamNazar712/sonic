@@ -75,9 +75,13 @@
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
+                                        <th class="border-primary border-darken-1">Documents Uploaded At</th>
+                                        <th class="border-primary border-darken-1">Documents Approved At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
+                                        <th class="border-primary border-darken-1">Intl Rate Status</th>
+                                        <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -220,6 +224,8 @@
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
+                        head.push('Documents Uploaded At');
+                        head.push('Documents Approved At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
                         $.each(result.data, function(index, values) {
@@ -244,6 +250,8 @@
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
                             row.push(values.rates_authorized_by);
+                            row.push(values.documents_uploaded_at);
+                            row.push(values.documents_approved_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
 
@@ -516,9 +524,13 @@
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
                 {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},
+                {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at'},
+                {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at'},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
+                {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
+                {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -556,7 +568,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate')) {
+                    if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

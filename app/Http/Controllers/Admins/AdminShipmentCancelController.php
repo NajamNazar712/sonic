@@ -39,7 +39,7 @@ class AdminShipmentCancelController extends Controller
     }
 
     static public function cancel() {
-        $active_users = User::where('status', 3)->get();
+        $active_users = User::where('status', 3)->where('id', '!=', 4758)->get();
         if(count($active_users)){
             foreach ($active_users as $user){
                 if($user->auto_shipment_cancellation_days == null){
@@ -228,6 +228,9 @@ class AdminShipmentCancelController extends Controller
         })
         ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         return $datatables->make(true);
     }
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -310,7 +312,97 @@ class AdminTrackingController extends Controller
                         $details['complain'] = array();
                         $details['complain']['id'] = $complain->id;
                         $details['complain']['padded_id'] = str_pad($complain->id, 6, '0', STR_PAD_LEFT);
-                        $details['complain']['tat'] = Carbon::parse($complain->created_at)->diffInWeekdays(Carbon::now());
+
+                        //mera code start
+                        Carbon::setWeekendDays([
+                            Carbon::SUNDAY,
+                        ]);
+                        $launched = Carbon::parse($complain->created_at);
+                        $first_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->first();
+                        if ($first_closed) {
+                            $current = $first_closed->created_at;
+                        } else {
+                            $current = Carbon::now();
+                        }
+                        $time_format = 'H:i';
+                        $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                        $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                        $from_formatted = date($time_format, strtotime($time_from->setting_value));
+                        $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                        $cut_off_check = $complain->created_at->format($time_format);
+                        $current_tat = $current->diffInWeekdays($launched);
+                        $launched_check = $launched->toDateString();
+                        $current_check = $current->toDateString();
+                        if ($launched_check <= $current_check) {
+                            if ($to_formatted < $cut_off_check) {
+                                $after_cut_off = $current_tat - 1;
+                                $current_tat = $after_cut_off;
+                            }
+                        }
+                        $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                        foreach ($holidays as $holiday) {
+                            $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                            $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                            $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                            if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                                if ($holiday_formatted_check == $launched_formatted_check) {
+                                    if ($to_formatted < $cut_off_check) {
+                                        $after_cut_off = $current_tat + 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $after_holidays = $current_tat - 1;
+                                $current_tat = $after_holidays;
+                            }
+                        }
+
+                        $re_open_counts = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 5)->get();
+                        if ($re_open_counts) {
+                            foreach ($re_open_counts as $re_open_count) {
+                                $launched = Carbon::parse($re_open_count->created_at);
+                                $last_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->where('created_at', '>=', $re_open_count->created_at)->first();
+                                if ($last_closed) {
+                                    $current = $last_closed->created_at;
+                                } else {
+                                    $current = Carbon::now();
+                                }
+                                $time_format = 'H:i';
+                                $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                                $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                                $from_formatted = date($time_format, strtotime($time_from->setting_value));
+                                $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                                $cut_off_check = $complain->created_at->format($time_format);
+                                $additional_tat = $current->diffInWeekdays($launched);
+                                $current_tat = $current_tat + $additional_tat;
+                                $launched_check = $launched->toDateString();
+                                $current_check = $current->toDateString();
+                                if ($launched_check <= $current_check) {
+                                    if ($to_formatted < $cut_off_check) {
+                                        $after_cut_off = $current_tat - 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                                foreach ($holidays as $holiday) {
+                                    $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                                    $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                                    $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                                    if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                                        if ($holiday_formatted_check == $launched_formatted_check) {
+                                            if ($to_formatted < $cut_off_check) {
+                                                $after_cut_off = $current_tat + 1;
+                                                $current_tat = $after_cut_off;
+                                            }
+                                        }
+                                        $after_holidays = $current_tat - 1;
+                                        $current_tat = $after_holidays;
+                                    }
+                                }
+                            }
+                        }
+                        //return $current_tat;
+                        //mera code end
+                        $details['complain']['tat'] = $current_tat;
                     }
 
                     $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
@@ -389,7 +481,12 @@ class AdminTrackingController extends Controller
         $information['phone_number'] = $rider->phone;
         $information['city'] = $rider->city->name;
         $information['category'] = $rider->rider_category->name;
-        $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        if($rider->route){
+            $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        }else{
+            $information['route'] = '';
+        }
+
 
         return $information;
     }
@@ -714,7 +811,23 @@ class AdminTrackingController extends Controller
                         }
 
                         if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+                            if ($journey->shipper_status_id == 3) {
+                                $bag = Bag::where('id', $journey->reference_1_id);
+                                if($bag->exists()){
+                                    $bag = $bag->first();
+                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+                                    if($master_cargo_bags->exists()){
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                    }
+                                    else{
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                    }
+                                }
+                                else{
+                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                }
+                            }
+                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
                                 $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             }
                             else {

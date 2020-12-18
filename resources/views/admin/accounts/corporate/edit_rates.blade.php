@@ -19,6 +19,7 @@
                         </h2>
                         @include('admin.inc.messages')
                     </div>
+                    <input type="hidden" id="shipper_id" value="{{$shipper->id}}">
 
 
                     <div class="card-content">
@@ -4199,12 +4200,15 @@
                                     <input type="hidden" name="approve" id="approve">
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
 
-                                    @if ($shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))
+                                    @if (($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
 
                                     @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                    @endif
+                                    @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
+                                        <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
                                 </div>
                             </div>
@@ -4219,6 +4223,24 @@
         </div>
 
     </section>
+
+    <div class="modal fade text-left" id="RejectRatesModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RejectRatesModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Write a reason to reject rates!</h4>
+                </div>
+                <div class="modal-body">
+                    <textarea id="reject_reason" onkeyup="textAreaAdjust(this)" style="width:100%;overflow:hidden"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="RejectRatesSubmit">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {{--    <div class="modal fade text-left" id="UserDocumentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UserDocumentModal"--}}
 {{--         aria-hidden="true">--}}
 {{--        <div class="modal-dialog modal-md" role="document">--}}
@@ -4723,6 +4745,38 @@
         });
         //sales tier end
 
+        function textAreaAdjust(o) {
+            o.style.height = "1px";
+            o.style.height = (25+o.scrollHeight)+"px";
+        }
+
+        $('#accountRejectActiveSubmit').click(function() {
+            $('#RejectRatesModal').modal('show');
+        });
+        $('#RejectRatesSubmit').on('click',function () {
+            var shipper = $('#shipper_id').val();
+            var reject_reason = document.getElementById('reject_reason').value;
+            if(reject_reason){
+                $.ajax({
+                    url: '{!! route('admin.corporate.rejectreason.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'rejected_reason': reject_reason,
+                        'shipper_id':shipper,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        $('#RejectRatesModal').modal('hide');
+                        window.setTimeout(function () {window.location.reload()}, 3000);
+                    });
+            }else{
+                var error = "You have not selected any reason!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+        });
+
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
         });
@@ -4738,7 +4792,7 @@
             'rightAlign': false,
             'digits': 3,
             'min': 0.00,
-            'max': 10000
+            'max': 100000
         });
         $('.amount').inputmask({
             'alias': 'decimal',
@@ -4795,7 +4849,7 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.00,
-                'max': 10000
+                'max': 100000
             });
             $('.amount').inputmask({
                 'alias': 'decimal',

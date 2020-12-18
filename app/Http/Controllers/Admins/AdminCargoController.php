@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\http\Models\Admins\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\http\Models\CargoConsignmentExcel;
 use App\http\Models\CargoConsignmentJunctionSend;
@@ -290,7 +291,18 @@ class AdminCargoController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
+            $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+            if($on_hold_shipment->exists()){
+                if(!in_array(Auth::id(), [10, 288, 423])){
+                    $on_hold_shipment = $on_hold_shipment->first();
+                    $dispatch_date = Carbon::parse($on_hold_shipment->dispatch_date);
+                    $today = Carbon::today();
+                    if($dispatch_date > $today){
+                        $dispatch_date = $dispatch_date->toFormattedDateString();
+                        return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $dispatch_date];
+                    }
+                }
+            }
             if($shipment->packaging_material_request == 1){
 
 
@@ -2210,7 +2222,7 @@ class AdminCargoController extends Controller
         $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);
         $cargo_consignment_excel->excel = 'cargo_consignment_excel_' . $cargo_consignment_excel->id  . '.xlsx';
         $cargo_consignment_excel->save();
-        return redirect()->route('admin.cargo.receive.quick.list.index')->with('success', 'Selected Shipments of Cargo No(s)#' . $all_cargo_consignment_ids . ' has been Received');
+        return redirect()->back()->with('success', 'Selected Shipments of Cargo No(s)#' . $all_cargo_consignment_ids . ' has been Received');
     }
 
 

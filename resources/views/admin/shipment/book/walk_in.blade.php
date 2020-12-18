@@ -384,7 +384,6 @@
                         'actual_weight': $('#actual_weight').val(),
                         'charges_per_kg': $('#charges_per_kg').val(),
                         'pickup_city': pickup_city_id,
-                        'pickup': pickup,
                         'consignee_city': $('#consignee_city').val(),
                         'delivery_type': $('#delivery_type').val(),
                         'shipping_mode': $('#shipping_mode').val(),
@@ -645,7 +644,7 @@
                 'allowPlus': false,
                 'digits': 2,
                 'min': 0.1,
-                'max': 10000
+                'max': 100000
             });
 
             $('.charges_per_kg').inputmask({

@@ -9,10 +9,10 @@
     <meta name="author" content="Trax IT">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Register - Sonic | Trax</title>
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon-32x32.png') }} ">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16x16.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon_new.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon_new-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon_new-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon_new.ico') }}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
           rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
@@ -65,7 +65,7 @@
                                 <div class="card-title text-center">
                                     <div class="row align-items-center">
                                         <div class="col sonic_logo align-middle text-left">
-                                            <img src="{{asset('img/sonic_logo.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
                                         </div>
 
                                         <div class="col trax_logo align-middle text-right">
@@ -284,6 +284,20 @@
                                                         </label>
                                                         <div>
                                                             <input type="text" class="form-control" value="{{ old('brand_name') }}" name="brand_name" placeholder="Brand Name">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="segments">Segments:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="segments" id="segments" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($segments as $segment)
+                                                                    <option value="{{$segment->id}}"> {{$segment->name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -895,6 +909,9 @@
         $('select[name="sale_person"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Sale Person',
             // dropdownParent:$('#registership')
+        });
+        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Segment',
         });
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',

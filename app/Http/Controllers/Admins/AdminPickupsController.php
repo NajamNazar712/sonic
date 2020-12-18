@@ -7,11 +7,16 @@ use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
 use App\Http\Models\RiderCategory;
+use App\Http\Models\Route;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\RouteLocations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -40,6 +45,7 @@ use App\Http\Models\PickupNoteStatus;
 use App\Http\Models\Zone;
 
 use Auth;
+
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -73,6 +79,7 @@ class AdminPickupsController extends Controller
                   $reverse_pickup = FALSE;
                   if ($pickup_request->exists()) {
                       $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
+
                       if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
                           $bookings = $pickup_request->booked + 1;
 
@@ -136,6 +143,7 @@ class AdminPickupsController extends Controller
                       $pickup_request->save();
 
                       $allow = TRUE;
+                      self::auto_pickup_assign($pickup_request->id);
                   }
 
                   if ($allow) {
@@ -918,7 +926,10 @@ class AdminPickupsController extends Controller
 
         $rider = Rider::find($pickup_note->rider_id);
         $route = $rider->route;
-
+          $route_name = '';
+          if($route){
+              $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
+          }
         $html .= '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -941,7 +952,7 @@ class AdminPickupsController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Route</strong></td>
-                            <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
+                            <td> ' . $route_name . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>City</strong></td>
@@ -2914,4 +2925,167 @@ class AdminPickupsController extends Controller
         return redirect()->back()->with(['success' => 'Arrival Done', 'print_shipment_ids' => $print_shipment_ids]);
       }
     }
+
+    static public function auto_pickup_assign($pickup_request_id){
+
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
+        $pickup_address_id = $pickup_request->pickup_address_id;
+        if(RouteLocations::where('pickup_address_id',$pickup_address_id)->exists()){
+            $route = RouteLocations::where('pickup_address_id',$pickup_address_id)->first();
+            $route_status = Route::find($route->route_id);
+            if($route_status->status != 1 ){
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+        $rider = Rider::where('route_id',$route->route_id)->select('id')->first();
+        $rider_id = $rider->id;
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
+        $pickup_address_id = $pickup_request->pickup_address_id;
+
+            $rider_cut_off_time = NULL;
+            $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
+            if($rider_settings->exists()){
+                $rider_settings = $rider_settings->first();
+                if($rider_settings->setting_value != 0 && $rider_settings->setting_value != null){
+                    $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+                }
+            }
+            $admin_settings = GlobalSettings::where('type','auto_assign_admin');
+            if($admin_settings->exists()){
+                $admin_settings = $admin_settings->first();
+                if($admin_settings->setting_value != 0 && $admin_settings->setting_value != null){
+                    $admin_id = $admin_settings->setting_value;
+                }
+                else{
+                    $admin_id = NULL;
+                }
+            }
+            if($rider_cut_off_time != null){
+                if(Carbon::now() > $rider_cut_off_time){
+                    return false;
+                }
+            }
+
+            $pickups = 0;
+
+            $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+            $arrival_cut_off_time = '8';
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $arrival_cut_off_time = $settings->setting_value;
+            }
+
+            $start_date = Carbon::now()->startOfDay();
+            $end_date = Carbon::now()->endOfDay();
+            $today = Carbon::today();
+            $today->hour($arrival_cut_off_time)->minute(0)->second(0);
+
+            $global_admin_id = $admin_id;
+
+
+
+            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>',$today);
+            if(!$existing_pickup_request_attempt->exists()){
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+
+                $pickup_request->rider_status = 2;
+                $pickup_request->attempts = $pickup_request->attempts + 1;
+                $pickup_request->current_rider_id = $rider_id;
+                $pickup_request->last_updated_by = $global_admin_id;
+                $pickup_request->save();
+
+                $pickup_request_attempt = new V2PickupRequestAttempt();
+                $pickup_request_attempt->pickup_request_id = $pickup_request_id;
+                $pickup_request_attempt->rider_id = $rider_id;
+                $pickup_request_attempt->attempt_date = Carbon::now();
+                $pickup_request_attempt->assigned_by = $global_admin_id;
+                $pickup_request_attempt->save();
+
+                $pickups++;
+
+            }else{
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                if($pickup_request->current_rider_id != $rider_id){
+
+                    $pickup_request->current_rider_id = $rider_id;
+                    $pickup_request->last_updated_by = $global_admin_id;
+                    $pickup_request->save();
+                    $existing_pickup_request_attempt = $existing_pickup_request_attempt->latest('id')->first();
+
+                    $existing_pickup_rider = $existing_pickup_request_attempt->rider_id;
+
+                    $existing_pickup_request_attempt->rider_id = $rider_id;
+                    $existing_pickup_request_attempt->assigned_by = $global_admin_id;
+                    $existing_pickup_request_attempt->save();
+
+                    $pickup_note_request = $pickup_request->pickup_note_request;
+                    if($pickup_note_request){
+                        $pickup_note = $pickup_note_request->pickup_note;
+                        $pickup_note_rider = $pickup_note->rider_id;
+                        if($existing_pickup_rider == $pickup_note_rider){
+                            $pickup_request->pickup_note_request->delete();
+                            $pickup_note->pickups = $pickup_note->pickups - 1;
+                            $pickup_note->save();
+                        }
+                    }
+                    $pickups++;
+                }
+
+            }
+
+                $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
+
+                if ($pickup_note->exists()) {
+                    $pickup_note = $pickup_note->first();
+                    if(!V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request_id)->exists()){
+                        $pickup_note->pickups += $pickups;
+
+                        $pickup_note->save();
+
+                        $pickup_note_id = $pickup_note->id;
+                    }
+
+                }
+                else {
+                    $pickup_note = new V2PickupNote();
+
+                    $pickup_note->rider_id = $rider_id;
+                    $pickup_note->pickups = $pickups;
+                    $pickup_note->save();
+
+                    $pickup_note_id = $pickup_note->id;
+                }
+
+
+                if(!V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('pickup_request_id', $pickup_request_id)->exists()){
+                    $pickup_note_request = new V2PickupNoteRequest();
+
+                    $pickup_note_request->pickup_note_id = $pickup_note_id;
+                    $pickup_note_request->pickup_request_id = $pickup_request_id;
+
+                    $pickup_note_request->save();
+//                        $pickup_request = V2PickupRequest::find($pickup_request_id);
+//                        $assigned_shipments = $pickup_request->pickup_request_shipments;
+//                        NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);
+//                        if($pickup_request->vendor == 1){
+//                            NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
+//                        }
+
+//                        if ($assigned_shipments) {
+//                            foreach ($assigned_shipments as $assigned_shipment) {
+//                                $shipment = $assigned_shipment->shipment;
+//
+//                                if ($shipment->booking_type_id == 5) {
+//                                    NotificationsController::send(77, $rider_id, $shipment->id);
+//                                }
+//                            }
+//                        }
+                }
+
+
+    }
+
 }

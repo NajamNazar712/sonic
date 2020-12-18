@@ -4153,7 +4153,7 @@
             'rightAlign': false,
             'digits': 2,
             'min': 0.00,
-            'max': 10000
+            'max': 100000
         });
         $('.amount').inputmask({
             'alias': 'decimal',
@@ -4231,7 +4231,7 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.00,
-                'max': 10000
+                'max': 100000
             });
             $('.amount').inputmask({
                 'alias': 'decimal',
@@ -5171,14 +5171,33 @@
             });
         @if(!empty($wms_user_info))
             $('#invoicing_cycle_select').val({{$wms_user_info->invoicing_cycle}}).trigger('change');
-                @foreach($wms_storage_charges as $skey => $storage)
-                    $('select[name="storage_type[{{$skey}}]"]').select2({
+                @if(count($wms_storage_charges) > 0)
+                    @foreach($wms_storage_charges as $skey => $storage)
+                        $('select[name="storage_type[{{$skey}}]"]').select2({
+                            width:'100%',
+                            placeholder:'Select Storage Type'
+                        });
+                        $('select[name="storage_type[{{$skey}}]"]').val({{$storage->storage_type_id}}).trigger('change');
+                        storage_type_selected.push('{{$storage->storage_type_id}}');
+                    @endforeach
+                @else
+                    var storage_type_data = @json($storage_types);
+                    var storage_data = $.map(storage_type_data, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+                    $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data:storage_data,
                         width:'100%',
                         placeholder:'Select Storage Type'
+                    }).bind('select2:select', function(){
+                        $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                        $('input[name="storage_type[0]"]').val($(this).val());
                     });
-                    $('select[name="storage_type[{{$skey}}]"]').val({{$storage->storage_type_id}}).trigger('change');
-                    storage_type_selected.push('{{$storage->storage_type_id}}');
-                @endforeach
+                    $('select[name="storage_type[0]"]').attr('disabled', true);
+                    $('input[name="storage_type_charges[0]"]').attr('disabled', true);
+                @endif
                 @if(count($wms_packing_charges) > 0)
                     @foreach($wms_packing_charges as $indx => $packing)
                     $('select[name="packing_type[{{$indx}}]"]').select2({
@@ -5207,11 +5226,8 @@
                 width:'100%',
                 placeholder:'Select Storage Type'
             }).bind('select2:select', function(){
-                
                 $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
                 $('input[name="storage_type[0]"]').val($(this).val());
-
-                
             });
 
             $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({

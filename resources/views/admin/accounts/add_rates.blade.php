@@ -2399,7 +2399,7 @@
             'rightAlign': false,
             'digits': 2,
             'min': 0.00,
-            'max': 10000
+            'max': 100000
         });
         $('.amount').inputmask({
             'alias': 'decimal',
@@ -2472,7 +2472,7 @@
                 'rightAlign': false,
                 'digits': 2,
                 'min': 0.00,
-                'max': 10000
+                'max': 100000
             });
             $('.amount').inputmask({
                 'alias': 'decimal',

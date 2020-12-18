@@ -45,6 +45,31 @@
             </fieldset>
         </div>
     </div>
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="rider_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select a Rider</option>
+                    @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="route_type_id" id="route_type_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select Route Type</option>
+                    @foreach($route_types as $route_type)
+                        <option value="{{$route_type->id}}">{{$route_type->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
 
     <div class="row mb-2">
         <div class="col">
@@ -68,7 +93,17 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        $('.select2').select2({
+       /* $('#route_type_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Route Type'
+        });*/
+        // $('#route_type_id').select2({
+        //     width:'100%',
+        //     placeholder:"Select Route Type",
+        //     allowClear:true,
+        // });
+
+        $('#addRouteForm .select2').select2({
             dropdownParent: $("#addRoute")
         });
 

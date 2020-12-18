@@ -575,6 +575,8 @@ class AdminFinanceController extends Controller
         $station_deposit_note = StationDepositNote::find($request->station_deposit_note_id);
 
         $station_deposit_note->status = 2;
+        $station_deposit_note->status_updated_at = Carbon::now();
+        $station_deposit_note->status_updated_by = Auth::id();
 
         $station_deposit_note->save();
 
@@ -2208,7 +2210,7 @@ class AdminFinanceController extends Controller
 
                             $pending_payment_shipment->save();
 
-                            self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
+                            self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $payable);
 
                         }
 
@@ -3392,7 +3394,7 @@ class AdminFinanceController extends Controller
                             $packaging_material_charges = 0;
                             $adjustment_amount = 0;
                             if($pending_payment_shipment->type == 2){
-                                $adjustment_amount = $pending_payment_shipment->amount;
+                                $adjustment_amount = $pending_payment_shipment->payable;
                             }
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -3674,6 +3676,7 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_list(Request $request) {
+
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
@@ -3694,7 +3697,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges');
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at');
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -3878,6 +3881,12 @@ class AdminFinanceController extends Controller
             $to = $request->get('search_to');
             $datatables->whereBetween('done_payments.created_at', [$from,$to]);
         }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('done_payments.status_updated_at', [$from,$to]);
+        }
         return $datatables->make(true);
     }
 
@@ -3887,6 +3896,8 @@ class AdminFinanceController extends Controller
 
             if ($done_payment->status != 1) {
                 $done_payment->status = 1;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
 
                 $done_payment->save();
 
@@ -3925,6 +3936,8 @@ class AdminFinanceController extends Controller
 
             if ($done_payment->status != 2) {
                 $done_payment->status = 2;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
 
                 $done_payment->save();
 
@@ -4750,6 +4763,7 @@ class AdminFinanceController extends Controller
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
 
+//        $cities = City::all();
         $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
@@ -4844,6 +4858,29 @@ class AdminFinanceController extends Controller
                         NotificationsController::send(27, $invoice_id);
                     }
                 }
+                /*if ($generate) {
+                    if ($user->invoice_group_by == 0) {
+                        $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+
+                        if ($pending_invoice_shipments->exists()) {
+                            self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
+                        }
+                    }
+                    else {
+                        foreach ($cities as $city) {
+                            $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment.pickup_address', function ($query) use ($user_id, $city) {
+                                $query->where('shipments.user_id', $user_id)
+                                    ->where('user_shipping_infos.city_id', $city->id);
+                            });
+
+                            if ($pending_invoice_shipments->exists()) {
+                                self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
+                            }
+                        }
+                    }
+                }*/
             }
         }
     }
@@ -4876,7 +4913,7 @@ class AdminFinanceController extends Controller
         ';
 
         $html .= '
-            <style>@page{size:A4 portrait; margin-top: 10rem; margin-bottom: 8rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            <style>@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
         if (!$email) {
@@ -4997,6 +5034,7 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td>' . $serial_number[$origin] . '</td>
                           <td>' . $shipment->tracking_number . '</td>
+                          <td>' . $shipment->order_id . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $shipment->shipping_mode->mode . '</td>
                           <td>' . $date . '</td>
@@ -5197,11 +5235,12 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="14">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
+                          <th class="color secondary">Order ID</th>
                           <th class="color secondary">Destination</th>
                           <th class="color secondary">Shipping Mode</th>
                           <th class="color secondary">Arrival Date</th>
@@ -6420,8 +6459,86 @@ class AdminFinanceController extends Controller
                 $datatables->whereRaw('false');
             }
         }
+        if($request->get('payment_filter') !== null){
+           $payment_amount = $request->get('payment_filter');
+
+           $datatables->having('total_payable', '>', $payment_amount);
+
+        }
 
         return $datatables->make(true);
     }
 
+    static public function invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments){
+
+        $invoice = new Invoice();
+
+        $invoice->user_id = $user_id;
+        $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+        $invoice->billing_period_from_date = $billing_period_from_date;
+        $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+        $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+        $invoice->status_id = 1;
+
+        $invoice->save();
+
+        $invoice_id = $invoice->id;
+
+        $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+        $total_shipments = 0;
+        $total_delivered_shipments = 0;
+        $total_returned_shipments = 0;
+        $total_adjusted_shipments = 0;
+        $total_charges = 0;
+        $total_gst = 0;
+        $total_invoice_amount = 0;
+
+        foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
+            $invoice_shipment = new InvoiceShipment();
+
+            $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+            $invoice_shipment->invoice_id = $invoice_id;
+            $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+            $invoice_shipment->type = $pending_invoice_shipment->type;
+            $invoice_shipment->charges = $pending_invoice_shipment->charges;
+            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+
+            $invoice_shipment->save();
+
+            $total_shipments++;
+
+            if ($pending_invoice_shipment->type == 0) {
+                $total_delivered_shipments++;
+            }
+            else if ($pending_invoice_shipment->type == 1) {
+                $total_returned_shipments++;
+            }
+            else {
+                $total_adjusted_shipments++;
+            }
+
+            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+
+            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+
+            $pending_invoice_shipment->delete();
+        }
+
+        $invoice->invoice_number = $invoice_number;
+        $invoice->total_shipments = $total_shipments;
+        $invoice->total_delivered_shipments = $total_delivered_shipments;
+        $invoice->total_returned_shipments = $total_returned_shipments;
+        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+        $invoice->total_charges = $total_charges;
+        $invoice->total_gst = $total_gst;
+        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+        $invoice->save();
+
+        NotificationsController::send(27, $invoice_id);
+    }
 }

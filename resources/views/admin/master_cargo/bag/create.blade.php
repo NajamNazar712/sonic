@@ -137,7 +137,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-maxlength="13" data-msg-maxlength="Seal Number can not be greater then 13 numbers" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number') }}" data-msg-remote="Seal Number must be unique">
+                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
                                                         </div>
                                                     </div>
 
@@ -522,6 +522,13 @@
                             'allowPlus': false
                         });
 
+                        $('#cargo_consignment form input.seal_number').on('change', function(){
+                            var seal = this.value;
+                            if(seal.length != 12 && seal.length != 13 && seal.length != 6){
+                                this.value = '';
+                            }
+                        });
+
                         $('#cargo_consignment form input.actual_weight').inputmask({
                             'alias': 'decimal',
                             'allowMinus': false,
@@ -545,7 +552,7 @@
                             $('#cargo_consignment form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
                         });
 
-                        $('#cargo_consignment form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
+                        $('#cargo_consignment form .transport_mode').select2({
                             width: '100%',
                             placeholder: 'Transport Mode*'
                         }).bind('change', function() {
@@ -566,7 +573,7 @@
 
                         transport_mode_vendors = data.transport_mode_vendors;
 
-                        $('#cargo_consignment form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
+                        $('#cargo_consignment form .transport_mode_vendor').select2({
                             width: '100%',
                             placeholder: 'Vendor*'
                         }).bind('change', function() {
@@ -583,67 +590,68 @@
                                 $('#cargo_consignment #vendor_name-error').remove();
                             }
                         });
+                        $('#cargo_consignment form .transport_mode').val(2).trigger('change');
                         UnblockPagePermanently();
-                        $('#cargo_consignment form').validate({
-                            errorClass: 'danger',
-                            successClass: 'success',
-                            errorPlacement: function(error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            normalizer: function(value) {
-                                return $.trim(value);
-                            },
-                            submitHandler: function(form) {
-                                var pressed_button = $(this.submitButton);
-
-                                $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
-
-                                $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                                blockPagePermanently();
-
-                                swal({
-                                    text: 'Are you sure you want to submit?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                }).then(function(confirm) {
-                                    if(confirm) {
-                                        swal({
-                                            title: 'Please Wait!',
-                                            text: 'Your cargo is being created!',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-
-                                        form.submit();
-                                    }
-                                    else {
-                                        $(form).find('button[type=submit]').prop('disabled', false);
-
-                                        UnblockPagePermanently();
-                                    }
-                                });
-                            }
-                        });
                     }
                 });
+            });
+            $('#cargo_consignment form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
+
+                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    blockPagePermanently();
+
+                    swal({
+                        text: 'Are you sure you want to submit?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Your Bag is being created!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            form.submit();
+                        }
+                        else {
+                            $(form).find('button[type=submit]').prop('disabled', false);
+
+                            UnblockPagePermanently();
+                        }
+                    });
+                }
             });
 
             $('#camera_scan_initiate').bind('click', function() {
