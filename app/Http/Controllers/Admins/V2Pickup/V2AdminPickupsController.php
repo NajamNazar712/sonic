@@ -2394,9 +2394,10 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pickup_route_index(){
+        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
         $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
         $riders = Rider::where('status', 1)->select(['id','name'])->get();
-        return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders]);
+        return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
     }
 
     public function pickup_route_list(){
@@ -2444,6 +2445,10 @@ class V2AdminPickupsController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
                         }
                     }
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Shipper</div></button>';
+
+
+                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipper</div></button>';
 
                     $dropdown .= '
                         </div>

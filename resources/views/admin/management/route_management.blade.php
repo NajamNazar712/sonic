@@ -486,7 +486,7 @@
                             console.log(data.locations);
                             var html = '';
                             html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th><strong>Address</strong></th></tr></thead>';
+                            html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.locations, function(index, value) {
                                 var ind = index+1;
