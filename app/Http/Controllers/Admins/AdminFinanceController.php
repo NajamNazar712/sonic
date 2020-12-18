@@ -3394,7 +3394,7 @@ class AdminFinanceController extends Controller
                             $packaging_material_charges = 0;
                             $adjustment_amount = 0;
                             if($pending_payment_shipment->type == 2){
-                                $adjustment_amount = $pending_payment_shipment->amount;
+                                $adjustment_amount = $pending_payment_shipment->payable;
                             }
                             $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 

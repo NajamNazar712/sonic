@@ -105,6 +105,10 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
+            else if ($user->id == 8761) {
+                auth('web')->logout();
+                return back()->with('info', 'Access Denied!');
+            }
             else {
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
@@ -141,6 +145,8 @@ class LoginController extends Controller
                     }
                 }
             }
+
+            $shipper_user_id = $user->id;
         }
         else {
             $shipper = User::find($user->user_id);
@@ -182,25 +188,27 @@ class LoginController extends Controller
                     session(['air_waybill_type' => 1]);
                 }
             }
+
+            $shipper_user_id = $user->user_id;
         }
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user->id);
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
         if($shipment_pre_book->exists()){
             $shipment_pre_book = $shipment_pre_book->first();
             session(['prefix' => $shipment_pre_book->prefix]);
         }
         session(['packaging_charges_check' => $packaging_charges_check]);
 
-        $rate_status = RateStatus::where('user_id', $user->id)->where('status', 1);
+        $rate_status = RateStatus::where('user_id', $shipper_user_id)->where('status', 1);
         if($rate_status->exists()){
             session(['rate_status' => TRUE]);
         }
         else{
-            $corporate_rate_status = CorporateRateStatus::where('user_id', $user->id)->where('status', 1);
+            $corporate_rate_status = CorporateRateStatus::where('user_id', $shipper_user_id)->where('status', 1);
             if($corporate_rate_status->exists()){
                 session(['rate_status' => TRUE]);
             }
         }
-        $international_rate_status = InternationalUsersInformation::where('user_id', $user->id)->where('status', 1);
+        $international_rate_status = InternationalUsersInformation::where('user_id', $shipper_user_id)->where('status', 1);
         if($international_rate_status->exists()){
             session(['international_rates' => TRUE]);
         }

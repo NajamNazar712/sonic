@@ -14,10 +14,10 @@ class UpdateDonePaymentCalculationForAdjustmentTableSeeder extends Seeder
      */
     public function run()
     {
-        $done_payments = DonePayment::pluck('id')->toArray();
+        $done_payments = DonePayment::where('adjusted_shipments', '>', 0)->pluck('id')->toArray();
         if(count($done_payments) > 0){
             foreach ($done_payments as $payment_id){
-                $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $payment_id)->selectRaw('SUM(amount) as total_amount')->where('type', 2)->first();
+                $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $payment_id)->selectRaw('SUM(payable) as total_amount')->where('type', 2)->first();
                 if($done_payment_shipments){
                     $done_payment_calculation = DonePaymentCalculation::where('done_payment_id', $payment_id);
                     if($done_payment_calculation->exists()){
