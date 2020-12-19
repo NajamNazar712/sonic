@@ -582,9 +582,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
             Route::post('/assign_location', 'Admins\AdminDashboardController@assign_locations_submit')->name('assign_location');
             Route::post('/view_assign_location', 'Admins\AdminDashboardController@view_assign_locations')->name('view_assign_location');
+            Route::post('/assign_locations_view', 'Admins\AdminDashboardController@assign_locations_view')->name('assign_locations_view');
+            Route::post('/set_pickup_route', 'Admins\AdminDashboardController@set_as_pickup_route')->name('set_pickup_route');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
-            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+           // Route::get('','Admins\AdminDashboardController@riderView')->name('index');
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
             Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
@@ -829,6 +831,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
             });
 
+        });
+
+        Route::prefix('pickup_route')->name('pickup_route.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_list')->name('list');
+            Route::post('/ajax', 'Admins\V2Pickup\V2AdminPickupsController@edit_route_ajax')->name('edit_ajax');
+            //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
         });
 
     });

@@ -2131,6 +2131,7 @@ class AdminReportsEmailController extends Controller
             ->where('shipments_journey.shipper_status_id',3)
             ->groupBy('shipments.id')->get();
 
+
         Carbon::setWeekendDays([
             Carbon::SUNDAY,]);
 
@@ -2767,8 +2768,8 @@ class AdminReportsEmailController extends Controller
             header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
             header('Cache-Control: max-age=0');
             $date_file_name = Carbon::today()->format('Y_m_d');
-            $file_name_without_path = "reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
-            $file_name = public_path() . "/reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
+            $file_name_without_path = "reports/overland_aging_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/overland_aging_report_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
             $link = url('/') . '/' . $file_name_without_path;
 
