@@ -600,8 +600,9 @@ class RegisterController extends Controller
     }
 
     public function sales_person(Request $request){
-        $city_id = $request->shipper_city;
+        $id = $request->id;
         $sales_persons = Admin::leftjoin('admin_hubs as ah', 'admins.id','=', 'ah.admin_id')->join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
+        return response()->json($sales_persons);
     }
 
 }

@@ -268,11 +268,7 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%">
-{{--                                                                @foreach($sales_persons as $sales_person)--}}
-{{--                                                                    <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>--}}
-{{--                                                                @endforeach--}}
-                                                            </select>
+                                                            <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%"></select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1064,24 +1060,24 @@
 
         $('#shipper_city').on('change',function () {
             var city_id = $(this).val();
-            console.log(city_id);
-            {{--$.ajax({--}}
-            {{--    url: '{!! route('cod.salesPerson') !!}',--}}
-            {{--    method: 'POST',--}}
-            {{--    data: {city_id:shipper_city},--}}
-                // success: function(data) {
-                //     if(data.status == 0){
-                //         err.css('display','block');
-                //
-                //     }else if(data.status == 1){
-                //         err.css('display','none');
-                //
-                //
-                //
-                //     }
-                //
-                // }
-            // });
+            $.ajax({
+                url: '{!! route('cod.salesPerson') !!}',
+                method: 'POST',
+                data: {
+                    'id': type_id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if(data.status == 0){
+                    $('#sale_person').empty();
+
+                    $.each(data.sizes,function (key,value) {
+                        var type_size = parseInt(type_id+value.id);
+
+                        var index = $.inArray(type_size, already_selected_size);
+
+                        if(index === -1){
+                }
 
 
         });
