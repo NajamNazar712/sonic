@@ -5303,12 +5303,13 @@ class NotificationsController extends Controller
                     $cc = array();
                     foreach ($sales_person as $index => $person) {
                         $shipper = User::find($index);
+                        $old_sales_person_date = $SalePersonTag::find($index);
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
                         if ($person['old_sale_person'] != null) {
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->created_at . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person_date']->created_at . '</td>';
                         } else {
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
                         }
