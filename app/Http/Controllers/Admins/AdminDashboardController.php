@@ -9668,6 +9668,19 @@ class AdminDashboardController extends Controller
         else{
             if($shipper_ids) {
                 foreach ($shipper_ids as $shipper_id) {
+                    $sale_tier =  SalesTierTypeTag::where('user_id',$shipper_id);
+                    if($sale_tier->exists()){
+                        $sale_tier = $sale_tier->first();
+
+
+
+
+                        $sale_tier->user_id = $shipper_id;
+                        $sale_tier->poc = $poc;
+                        $sale_tier->kam = $kam;
+                        $sale_tier->ref = $ref;
+                        $sale_tier->save();
+                    }
                     $sale_tier = new SalesTierTypeTag();
                     $sale_tier->user_id = $shipper_id;
                     $sale_tier->poc = $poc;
