@@ -38,6 +38,9 @@ class LeadManagementController extends Controller
             ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
 
         return Datatables::of($leads)
+            ->editColumn('lead_id', function ($lead) {
+                return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
+            })
             ->addColumn('aging',function ($lead){
                 $days = Carbon::now()->diffInDays($lead->requested_date);
                 if($days == 0){
@@ -71,8 +74,15 @@ class LeadManagementController extends Controller
             $lead_log->lead_id = $lead->id;
             $lead_log->prev_status_id = $lead->status_id;
             $lead_log->status_id = $status;
+            $lead_log->sale_person_id = $lead->sale_person_id;
+            $lead_log->reference_person_id = $lead->reference_person_id;
             $lead_log->updated_by = Auth::id();
             $lead_log->save();
+
+            $lead->status_id = $status;
+            $lead->updated_by = Auth::id();
+            $lead->save();
+
             return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
         }
         else{
@@ -88,14 +98,24 @@ class LeadManagementController extends Controller
             $lead_logs = $lead_logs->get();
             $details = array();
             foreach ($lead_logs as $log){
-                $detail['lead_id'] = $lead->id;
+                $detail['lead_id'] = str_pad($lead->id, 3, '0', STR_PAD_LEFT);
                 $detail['contact_person'] = $lead->contact_person;
                 $detail['phone_number'] = $lead->phone_number;
-                $detail['sales_person'] = $log->sales_person->name;
-                $detail['reference_person'] = $log->reference_person->name;
+                if($log->sale_person_id != null){
+                    $detail['sales_person'] = $log->sales_person->name;
+                }
+                else{
+                    $detail['sales_person'] = '-';
+                }
+                if($log->reference_person_id != null){
+                    $detail['reference_person'] = $log->reference_person->name;
+                }
+                else{
+                    $detail['reference_person'] = '-';
+                }
                 $detail['status'] = $log->status->name;
                 $detail['updated_by'] = $log->admin->name;
-                $detail['updated_at'] = $log->created_at;
+                $detail['updated_at'] = Carbon::parse($log->updated_at)->toDateTimeString();
 
                 $details[] = $detail;
             }
@@ -123,23 +143,44 @@ class LeadManagementController extends Controller
         }
     }
 
-    public function view_remarks_details(Request $request){
-        $lead_id = $request->lead_id;
+    public function view_remarks_index($id){
+        $lead_id = $id;
         $lead_remarks = LeadRemark::where('lead_id', $lead_id);
+        $lead = Lead::find($lead_id);
+        $details = array();
         if($lead_remarks->exists()){
             $lead_remarks = $lead_remarks->get();
-            $details = array();
             foreach ($lead_remarks as $remark){
-                $detail['remarks'] = $remark->remarks;
-                $detail['updated_by'] = $remark->admin->name;
-                $detail['updated_at'] = Carbon::parse($remark->updated_at)->toDateTimeString();
-
-                $details[] = $detail;
+                $details[] = $remark;
             }
-            return response()->json(['status' => 1, 'leads' => $details]);
+        }
+        return view('admin.leads.remarks')->with(['lead' => $lead, 'details' => $details]);
+    }
+
+    public function tag_sale_person_forward_lead(Request $request){
+        $lead_ids = $request->lead_ids;
+        $sale_person = $request->sale_person;
+        if($request->has('reference_person')){
+            $reference_person = $request->reference_person;
         }
         else{
-            return response()->json(['status' => 0, 'error' => 'Remarks Does\'nt exist!']);
+            $reference_person = null;
+        }
+        $leads = Lead::whereIn('id', $lead_ids);
+        if($leads->exists()){
+            $leads = $leads->get();
+            foreach ($leads as $lead){
+                $lead->sale_person_id = $sale_person;
+                if($request->has('reference_person')){
+                    $lead->reference_person_id = $reference_person;
+                }
+                $lead->updated_by = Auth::id();
+                $lead->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Lead(s) Does\'nt exist!']);
         }
     }
 }
