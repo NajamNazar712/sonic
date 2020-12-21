@@ -2104,9 +2104,9 @@ class AdminReportsEmailController extends Controller
 
     static public function overland_aging_report()
     {
-        $yesterday = Carbon::yesterday();
-        $to = Carbon::parse($yesterday)->subDays(1)->toDateTimeString();
-        $from = Carbon::parse($to)->subDays(7)->toDateString();
+        $to = Carbon::yesterday()->toDateString();
+        //$to = Carbon::parse($yesterday)->subDays(1)->toDateTimeString();
+        $from = Carbon::parse($to)->subDays(6)->toDateString();
         $today = Carbon::now();
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
