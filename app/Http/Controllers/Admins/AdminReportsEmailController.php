@@ -421,7 +421,7 @@ class AdminReportsEmailController extends Controller
             $month_average_entry->revenue = round($revenue[$month_average->origin_id], 2);
             $month_average_entry->avg_revenue = round($avg_revenue[$month_average->origin_id], 2);
             $month_average_entry->avg_shipments = round($avg_shipment[$month_average->origin_id], 2);
-            $month_average_entry->avg_revenue_per_day = round($avg_revenue[$month_average->origin_id], 2);
+            $month_average_entry->avg_revenue_per_day = round($avg_revenue_per_day[$month_average->origin_id], 2);
             $month_average_entry->month_speed = round($month_speed[$month_average->origin_id], 2);
             $month_average_entry->save();
             $serial++;
@@ -440,7 +440,7 @@ class AdminReportsEmailController extends Controller
             $total_avg_revenue_count = 0;
         }
 
-        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Month Speed' => ''];
+        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Avg Revenue/Day' => '', 'Month Speed' => ''];
         $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Avg Revenue/Day' => round($total_avg_revenue_per_day_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
         $cell_st = [
             'font' => ['bold' => true],
@@ -452,7 +452,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($month_average_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:H2")->applyFromArray($cell_st);
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 

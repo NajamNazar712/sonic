@@ -74,12 +74,11 @@ class UpdatePackagingMaterialTypeSizesForProductIDTableSeeder extends Seeder
                     }
                 }
             }
-        }
-        $warehouses = Warehouse::where('master_type', 0)->where('pickup_address_id', NULL);
-        if($warehouses->exists()){
-            $warehouses = $warehouses->get();
-            $user = User::select('id')->where('name','Packaging Material - Trax')->first();
-            foreach ($warehouses as $warehouse){
+            $warehouses = Warehouse::where('master_type', 0)->where('status', 1)->where('pickup_address_id', NULL);
+            if($warehouses->exists()){
+                $warehouses = $warehouses->get();
+                $user = User::find($setting->setting_value);
+                foreach ($warehouses as $warehouse){
 //                if($warehouse->hub_id != 202){
                     $hub = City::find($warehouse->hub_id);
                     $pickup_address = 'Trax Warehouse ' . $hub->name;
@@ -99,6 +98,7 @@ class UpdatePackagingMaterialTypeSizesForProductIDTableSeeder extends Seeder
                     $warehouse->pickup_address_id = $user_shipping_info->id;
                     $warehouse->save();
 //                }
+                }
             }
         }
     }
