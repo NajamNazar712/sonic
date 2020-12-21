@@ -163,7 +163,7 @@ class AdminMonthClosingController extends Controller
                                 $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
                                 $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                                 if($delivery){
-                                    $errors[$tracking_number] = 'Shipment is in an Unverified Delivery Note';
+                                    $errors[$shipment->tracking_number] = 'Shipment is in an Unverified Delivery Note';
 //                                    return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
                                 }
                             }
