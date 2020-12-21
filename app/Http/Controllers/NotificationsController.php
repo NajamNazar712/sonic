@@ -2361,7 +2361,7 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 45])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -3587,7 +3587,7 @@ class NotificationsController extends Controller
                     $to = array();
                     $cc = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 45])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -3683,7 +3683,7 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $cc = array();
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 45])->where('status', 1);
 
                     if ($admins->exists()) {
                         $cc = $admins->pluck('email')->toArray();
@@ -3736,7 +3736,7 @@ class NotificationsController extends Controller
                     $date = Carbon::today()->startOfDay()->toDateTimeString();
                     $date_end = Carbon::today()->endOfDay()->toDateTimeString();
                     $month_average_data = MonthAverage::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
-                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments/Day</strong></th>th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Day</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Month Speed</strong></th></tr></thead><tbody>';
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments/Day</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Day</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Month Speed</strong></th></tr></thead><tbody>';
                     $serial = 1;
                     $shipments_count = 0;
                     $revenue_count = 0;
@@ -3774,6 +3774,7 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_shipments_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_per_day_count)) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_speed_count)) . '</td>';
                     $html .= '</tr>';
 
@@ -3786,7 +3787,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 45])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -4226,7 +4227,7 @@ class NotificationsController extends Controller
                                 $sale_person_email = $admin_sale_person->email;
                                 $to = array_merge($to, [$sale_person_email]);
 
-                                $cc_admins = Admin::whereIn('id', [12, 32, 13, 60, 49, 174]);
+                                $cc_admins = Admin::whereIn('id', [12, 32, 13, 60, 49, 174, 428]);
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
@@ -4749,7 +4750,7 @@ class NotificationsController extends Controller
                     }
                     $cc = array();
 
-                    $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 25, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub_shipment['id']);
+                    $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 25, 34, 45])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub_shipment['id']);
 
                     if ($general_managers->exists()) {
                         $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
@@ -4803,7 +4804,7 @@ class NotificationsController extends Controller
                     $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->join('cities', 'cities.id', '=', 'admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id', '=', $zone_id);
                     $cc = array();
 
-                    $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 25, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $zone_id);
+                    $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 18, 19, 20, 25, 34, 45])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $zone_id);
                     if ($operation_admins->exists()) {
                         $to = array_merge($to, $operation_admins->pluck('email')->toArray());
                     }
@@ -5726,7 +5727,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 3, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 3, 9, 25, 45])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                         $query->where('hub_id', $hub_id);
                     });
                     if ($to_admins->exists()) {
