@@ -9661,24 +9661,25 @@ class AdminDashboardController extends Controller
         $kam = $request->kam;
         $ref = $request->ref;
         $shipper_ids = $request->shipper_ids;
-        if($shipper_ids){
-            if($kam == null  && $poc == null  && $ref == null){
-                return ['status' => 0 ,'error'=>"Atleast Select One!"];
-            }
-            else{
-                foreach($shipper_ids as $shipper_id){
-                    $sale_tier =  new SalesTierTypeTag();
+
+        if($kam == null  && $poc == null  && $ref == null){
+            return response()->json(['status'=>0,'error'=>"Atleast select one!"]);
+        }
+        else{
+            if($shipper_ids) {
+                foreach ($shipper_ids as $shipper_id) {
+                    $sale_tier = new SalesTierTypeTag();
                     $sale_tier->user_id = $shipper_id;
                     $sale_tier->poc = $poc;
                     $sale_tier->kam = $kam;
                     $sale_tier->ref = $ref;
                     $sale_tier->save();
                 }
-                return ['status' => 1,'success'=>"POC KAM REF Updated!"];
+                return response()->json(['status'=>1,'success'=>"Updated!"]);
             }
-        }
-        else{
-            return ['status' => 0 ,'error'=>"Select One Shipper!"];
+            else{
+                return ['status' => 0 ,'error'=>"Select One Shipper!"];
+            }
         }
      }
 }

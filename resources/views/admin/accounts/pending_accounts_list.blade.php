@@ -446,11 +446,10 @@
                             if(selected_rows != ''){
 
                                 $('#SalesTierTypeTagModal').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTierTypeTagSubmit').on('click',function () {
-                                    var poc = parseInt($('#poc').val());
-                                    var kam = parseInt($('#kam').val());
-                                    var ref = parseInt($('#ref').val());
+                                    var poc = $('#poc').val();
+                                    var kam = $('#kam').val();
+                                    var ref = $('#ref').val();
                                     swal({
                                         text: 'Are you sure, you want to Tag?',
                                         icon: 'info',
@@ -473,56 +472,49 @@
                                         dangerMode: true
                                     }).then(function(confirm) {
                                         if (confirm) {
-                                            if (poc != null && kam != null && ref != null) {
-                                                $.ajax({
-                                                    url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
-                                                    method: 'POST',
-                                                    data: {
-                                                        'poc': poc,
-                                                        'kam': kam,
-                                                        'ref': ref,
-                                                        'shipper_ids[]': selected_rows,
-                                                        '_token': '{{ csrf_token() }}'
-                                                    }
-                                                })
-                                                    .done(function (data) {
-                                                        if (data.status == 1) {
-                                                            $('#SalesTierTypeTagModal').modal('hide');
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
-                                                            });
-                                                        } else {
-                                                            toastr.error(data.error, 'Error!', {
-                                                                positionClass: 'toast-top-center',
-                                                                containerId: 'toast-top-center'
-                                                            });
-                                                        }
-                                                        selected_rows = [];
 
-                                                        table.rows().deselect();
-                                                        $('#poc').val('').trigger('change');
-                                                        $('#kam').val('').trigger('change');
-                                                        $('#ref').val('').trigger('change');
+                                            $.ajax({
+                                                url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
+                                                method: 'POST',
+                                                data: {
+                                                    'poc': poc,
+                                                    'kam': kam,
+                                                    'ref': ref,
+                                                    'shipper_ids[]': selected_rows,
+                                                    '_token': '{{ csrf_token() }}'
+                                                }
+                                            })
+                                                .done(function (data) {
+                                                    if (data.status === 0) {
+                                                        toastr.error(data.error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center'
+                                                        });
+                                                    } else {
                                                         $('#SalesTierTypeTagModal').modal('hide');
-                                                        table.draw(true);
-                                                        table.button('.tag').disable();
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    selected_rows = [];
+
+                                                    table.rows().deselect();
+                                                    $('#poc').val('').trigger('change');
+                                                    $('#kam').val('').trigger('change');
+                                                    $('#ref').val('').trigger('change');
+                                                    $('#SalesTierTypeTagModal').modal('hide');
+                                                    table.draw(true);
+                                                    table.button('.tag').disable();
 
 
-                                                    });
-                                            } else {
-                                                var error = "Atleast Select One";
-                                                toastr.error(error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
                                                 });
-                                            }
                                         }
                                     });
                                 });
 
                             }else{
-                                var error = "Atleast Select One";
+                                var error = "Atleast Select One Shipper";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         }
