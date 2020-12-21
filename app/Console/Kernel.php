@@ -73,6 +73,8 @@ class Kernel extends ConsoleKernel
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
         'App\Console\Commands\OverlandAgingReport',
+        'App\Console\Commands\PendingDeliveriesReport',
+        'App\Console\Commands\ReceiveDeliveriesReport',
 
 
     ];
@@ -228,6 +230,10 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
+
+        $schedule->command('email:pendingdeliveryreport')->dailyAt('21:00')->runInBackground();
+        $schedule->command('email:receivedeliveryreport')->dailyAt('21:00')->runInBackground();
+
     }
     /**
      * Register the commands for the application.
