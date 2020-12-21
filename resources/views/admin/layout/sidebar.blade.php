@@ -575,6 +575,9 @@
                                 @if (session('role_id') == 1 || in_array(141, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Pending</a></li>
                                 @endif
+                                @if (session('role_id') == 1 || in_array(141, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.month_closing.resolved.index') }}">Resolved</a></li>
+                                @endif
                             </ul>
                         </li>
                     @endif

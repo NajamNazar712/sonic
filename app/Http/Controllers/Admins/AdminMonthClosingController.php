@@ -7,11 +7,16 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\MonthClosing;
+use App\Http\Models\Admin\MonthClosingResponsible;
+use App\Http\Models\Admin\MonthClosingStatus;
+use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\ShipmentsJourney;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentStatus;
@@ -353,8 +358,9 @@ class AdminMonthClosingController extends Controller
      }
 
     public function pending_index(){
-        $admins = Admin::where('status', 1)->get();
-        return view('admin.month_closing.pending')->with(['admins' => $admins]);
+        $closing_types = MonthClosingType::all();
+        $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->get();
+        return view('admin.month_closing.pending')->with(['admins' => $admins, 'closing_types' => $closing_types]);
     }
 
     public function pending_list(){
@@ -371,18 +377,28 @@ class AdminMonthClosingController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
-            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
+            ->leftJoin('month_closings as mc', function ($join){
+                $join->on('mc.shipment_id', '=', 'shipments.id')
+                    ->where('mc.id', '=',
+                        DB::raw('(select max(id) from month_closings where month_closings.shipment_id = shipments.id)'));
+            })
+//            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
             ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.status_id')
             ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_type_id')
             ->leftJoin('crm_requests as cr', function ($join) {
                 $join->on('cr.shipment_id', '=', 'shipments.id')
-                    ->where('cr.created_at','=',
-                        DB::raw('(select max(created_at) from crm_requests where crm_requests.shipment_id = shipments.id)'));
+                    ->where('cr.id','=',
+                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.remarks','mcs.name as closing_status', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status', 'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address')
             ->whereIn('shipments.shipper_status_id', $month_closing_status)
+            ->where(function($query) {
+                $query->whereNull('mc.status_id')
+                    ->orWhereNotIn('mc.status_id', [2, 3]);
+            })
             ->groupBy('shipments.id');
+
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link',function ($shipments){
@@ -404,17 +420,148 @@ class AdminMonthClosingController extends Controller
             })
             ->addColumn('action', function($shipments) {
                 $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
+                $edit_assign_responsible = '<button type="button" class="dropdown-item edit_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Edit Responsible</div></button>';
 
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
+                if($shipments->month_closing_id == null){
+                    $dropdown .= $assign_responsible;
+                }
+                else{
+                    $dropdown = '';
+                }
 
-                $dropdown .= $assign_responsible;
                 return $dropdown;
 
             });
         return $datatable->make(true);
 
+    }
+    public function assign_responsible_submit(Request $request){
+        $responsible_persons = $request->responsible_persons;
+        if(count($responsible_persons) > 0){
+            $month_closing = new MonthClosing();
+            $month_closing->shipment_id = $request->shipment_id;
+            $month_closing->status_id = 1;
+            $month_closing->added_by = Auth::id();
+            $month_closing->remarks = $request->remarks;
+            $month_closing->save();
+            $month_closing_id = $month_closing->id;
+            $individual_flag = FALSE;
+            if($request->has('deduct_switch')){
+                $individual_flag = TRUE;
+            }
+
+            foreach ($responsible_persons as $person_id){
+                $month_closing_responsible = new MonthClosingResponsible();
+                $month_closing_responsible->month_closing_id = $month_closing_id;
+                $month_closing_responsible->responsible_person_id = $person_id;
+                $month_closing_responsible->added_by = Auth::id();
+                if($individual_flag){
+                    $month_closing_responsible->amount = $request->deduct_amount_individual[$person_id];
+                }else{
+                    $month_closing_responsible->amount = $request->deduct_amount;
+                }
+                $month_closing_responsible->save();
+            }
+
+            return redirect()->back()->with('success', 'Responsible Person(s) updated succeddfully!');
+
+        }
+        return redirect()->back()->with('error', 'No responsible persons selected!');
+    }
+
+    public function closing_status_submit(Request $request){
+
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $closing_type = $request->closing_type_id;
+
+        if(count($shipment_ids) > 0){
+            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 1)->whereNull('closing_type_id')->update(['closing_type_id' => $closing_type,'updated_by' => Auth::id()]);
+            return redirect()->back()->with('success', 'Closing Type updated successfully!');
+        }
+        return redirect()->back()->with('error' , 'No shipments selected!');
+    }
+    /*public function edit_assign_details(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id){
+            $month_closing = MonthClosing::where('shipment_id', $shipment_id)->where('status_id', 1);
+            if($month_closing->exists()){
+                $month_closing = $month_closing->first();
+            }
+        }
+    }
+    public function assign_responsible_update(Request $request){
+        return $request;
+    }*/
+    public function month_closing_resolved(Request $request){
+        $shipment_ids = $request->shipment_ids;
+
+        if(count($shipment_ids) > 0){
+            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 1)->whereNotNull('closing_type_id')->update(['status_id' => 2,'closing_updated_at' => Carbon::now(), 'updated_by' => Auth::id()]);
+            return response()->json(['status' => 0, 'success' => 'Closing Status Resolved updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
+
+    }
+
+    public function resolved_index(Request $request){
+        return view('admin.month_closing.resolved');
+    }
+    public function resolved_list(Request $request){
+        $month_closing = MonthClosing::leftjoin('shipments', 'shipments.id', '=', 'month_closings.shipment_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = month_closings.shipment_id)'));
+            })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'month_closings.status_id')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'month_closings.closing_type_id')
+            ->leftJoin('crm_requests as cr', function ($join) {
+                $join->on('cr.shipment_id', '=', 'month_closings.shipment_id')
+                    ->where('cr.id','=',
+                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = month_closings.shipment_id)'));
+            })
+            ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address')
+            ->where('month_closings.status_id', 2);
+
+        $datatable = Datatables::of($month_closing)
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('claim_id_link', function ($shipments) {
+                if($shipments->claim_id != null){
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->claim_id]) . '  target="_blank">' . str_pad($shipments->claim_id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            });
+        return $datatable->make(true);
+
+    }
+    public function month_closing_closed(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $date = Carbon::now();
+        if(count($shipment_ids) > 0){
+            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 2)->update(['status_id' => 3, 'closing_date' => $date,'closing_updated_at' => $date, 'updated_by' => Auth::id()]);
+            return response()->json(['status' => 0, 'success' => 'Closing Status updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
     }
 }

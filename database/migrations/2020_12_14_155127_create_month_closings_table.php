@@ -21,7 +21,7 @@ class CreateMonthClosingsTable extends Migration
             $table->timestamp('closing_date')->nullable();
             $table->tinyInteger('closing_type_id')->nullable();
             $table->integer('updated_by')->nullable()->index();
-            $table->timestamp('closing_updated_at')->index();
+            $table->timestamp('closing_updated_at')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
         });

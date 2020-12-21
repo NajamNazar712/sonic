@@ -1497,6 +1497,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function(){
             Route::get('','Admins\AdminMonthClosingController@pending_index')->name('index');
             Route::get('list','Admins\AdminMonthClosingController@pending_list')->name('list');
+            Route::post('assign','Admins\AdminMonthClosingController@assign_responsible_submit')->name('assign');
+            Route::post('closing_type_update','Admins\AdminMonthClosingController@closing_status_submit')->name('closing_type_update');
+            Route::post('resolved','Admins\AdminMonthClosingController@month_closing_resolved')->name('resolved');
+
+            Route::post('assign_details','Admins\AdminMonthClosingController@edit_assign_details')->name('assign_details');
+            Route::post('assign_update','Admins\AdminMonthClosingController@assign_responsible_update')->name('assign_update');
+
+        });
+
+        Route::prefix('resolved')->name('resolved.')->group(function(){
+            Route::get('','Admins\AdminMonthClosingController@resolved_index')->name('index');
+            Route::get('list','Admins\AdminMonthClosingController@resolved_list')->name('list');
+            Route::post('closed','Admins\AdminMonthClosingController@month_closing_closed')->name('closed');
+
         });
     });  
 

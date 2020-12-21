@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
-@section('title','Month Closing Pending')
+@section('title','Month Closing Resolved')
 
 
 @section('content')
     <h1 class="mb-1">
-        Month Closing-Pending
+        Month Closing-Resolved
     </h1>
 
     <div class="card">
@@ -33,7 +33,6 @@
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Comments</th>
                         <th class="border-primary border-darken-1">Closing Status</th>
-                        <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
                 </table>
@@ -42,120 +41,6 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="closing_type_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="closing_type_modal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Closing Status</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <form id="closing_status_form" class="mb-1 mt-2" method="POST" action="{{ route('admin.month_closing.pending.closing_type_update') }}" novalidate="novalidate">
-                    {{ csrf_field() }}
-                    <input type="hidden" name="shipment_ids" id="month_closing_status_shipment_ids">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <select name="closing_type_id" id="closing_type_select" class="form-control select2" data-rule-required="true" data-msg-required="Closing Status is required">
-                            @foreach($closing_types as $closing_type)
-                                <option value="{{ $closing_type->id }}" > {{ $closing_type->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="add_responsible_modal" role="dialog" aria-labelledby="add_responsible_modal_title" aria-hidden="true">
-         <div class="modal-dialog modal-lg" role="document">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h4 class="modal-title" id="add_responsible_modal_title">Assign Responsible(s)</h4>
-
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                         <span aria-hidden="true">×</span>
-                     </button>
-                 </div>
-                 <div class="modal-body text-center">
-                     <form id="add_responsible_form" class="form-horizontal mb-1 justify-content-center" method="post" action="{{ route('admin.month_closing.pending.assign') }}" novalidate="novalidate">
-                        @csrf
-                         <input type="hidden" name="shipment_id" id="responsible_person_shipment_id">
-                         <div class="form-group">
-                             <select name="responsible_persons[]" id="responsible_persons" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                 @foreach($admins as $admin)
-                                     <option rel="{{$admin->name}}" value="{{$admin->id}}">{{$admin->name}}  {{ ($admin->designation != null)? '( '.$admin->designation.' )':'' }}  ( {{ $admin->role->department->name }} )</option>
-                                 @endforeach
-                             </select>
-                         </div>
-                         <div class="form-group">
-                             <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct All</label>
-                             <input type="checkbox" name="deduct_switch" id="deduct_switch" class="switchery deduct_switch" data-color="success" data-size="sm"/>
-                             <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct Individually</label>
-
-                         </div>
-                         <div id="deduct_all_div">
-                             <div class="form-group">
-                                 <input type="text" name="deduct_amount" class="form-control deduct_amount" placeholder="Deduct Amount for selected person(s)" data-rule-required="true" data-msg-required="Deduct Amount is required">
-                             </div>
-                         </div>
-                         <div id="deduct_individual_div" style="display: none;">
-
-                         </div>
-
-                         <div class="form-group">
-                             <textarea name="remarks" class="form-control remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks required"></textarea>
-
-                         </div>
-                         <div class="form-group ml-1">
-                             <button type="submit" name="save" class="btn btn-primary save" value="save">Save</button>
-                         </div>
-                     </form>
-
-                 </div>
-
-             </div>
-         </div>
-     </div>
-    <div class="modal fade" id="edit_responsible_modal" role="dialog" aria-labelledby="edit_responsible_modal_title" aria-hidden="true">
-         <div class="modal-dialog modal-lg" role="document">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h4 class="modal-title" id="edit_responsible_modal_title">Edit Responsible(s)</h4>
-
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                         <span aria-hidden="true">×</span>
-                     </button>
-                 </div>
-                 <div class="modal-body text-center">
-                     <form id="edit_responsible_form" class="form-horizontal mb-1 justify-content-center" method="post" action="{{ route('admin.month_closing.pending.assign_update') }}" novalidate="novalidate">
-                        @csrf
-                         <input type="hidden" name="shipment_id" id="edit_responsible_person_shipment_id">
-
-                         <div id="edit_deduct_individual_div">
-
-                         </div>
-
-                         <div class="form-group">
-                             <textarea name="remarks" class="form-control remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks required"></textarea>
-
-                         </div>
-                         <div class="form-group ml-1">
-                             <button type="submit" name="save" class="btn btn-primary save" value="save">Save</button>
-                         </div>
-                     </form>
-
-                 </div>
-
-             </div>
-         </div>
-     </div>
 
 @endsection
 
@@ -224,82 +109,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#responsible_persons').select2({
-                width:'100%',
-                placeholder:"Search Name",
-                allowClear:true,
-            });
-            $('#closing_type_select').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Closing Type"
-            });
-            $('.deduct_amount').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 0,
-                'max': 10000000
-            });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.month_closing.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
-                            head.push('S.No');
-                            head.push('Tracking No.');
-                            /*  head.push('Current Status');*/
-                            head.push('COD Amount');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Shipper');
-                            head.push('Consignee Name');
-                            head.push('Number');
-                            head.push('Claim ID');
-                            head.push('Claim Type');
-                            /*  head.push('Closing Type');*/
-                            head.push('Consignee Address');
-                            head.push('Comments');
-
-
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-
-                                row.push(index + 1);
-                                row.push(values.tracking_number);
-                                /*   row.push(values.current_status);*/
-                                row.push(values.cod_amount);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.shipper);
-                                row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
-                                row.push(values.claim_id);
-                                row.push(values.claim_type);
-                                /*  row.push(values.closing_type);*/
-                                row.push(values.consignee_address);
-                                row.push(values.shipment_remarks);
-
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-
-                    return {body: body, header: head};
-                }
-            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -308,8 +118,8 @@
                 buttons: [
 
                     {
-                        text: 'Switch To Resolve',
-                        className: 'btn btn-primary resolve',
+                        text: 'Switch To Close',
+                        className: 'btn btn-primary close_action',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
@@ -339,7 +149,7 @@
                                         blockPagePermanently();
 
                                         $.ajax({
-                                            url:"{{route('admin.month_closing.pending.resolved')}}",
+                                            url:"{{route('admin.month_closing.resolved.closed')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
@@ -348,9 +158,7 @@
                                         }).done(function (data) {
                                             UnblockPagePermanently();
                                             selected_rows = [];
-                                            table.rows().deselect();
-                                            table.button('.resolved').disable();
-                                            table.button('.closing_status').disable();
+                                            table.button('.close_action').disable();
                                             table.draw(true);
                                             if(data.status == 0){
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -366,19 +174,6 @@
 
                             }else{
                                 var error = "Not selected any shipments!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
-                    {
-                        text: 'Closing Status',
-                        className: 'btn btn-primary closing_type_status',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                $('#closing_type_modal').modal('show');
-                            }else{
-                                var error = "No shipments selected!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         }
@@ -403,8 +198,7 @@
                                         selected_rows.push(id);
                                     }
 
-                                    table.button('.resolve').enable();
-                                    table.button('.closing_type_status').enable();
+                                    table.button('.close_action').enable();
 
                                 }
                             });
@@ -432,8 +226,7 @@
                                     }
 
                                     if (selected_rows.length == 0) {
-                                        table.button('.resolve').disable();
-                                        table.button('.closing_type_status').disable();
+                                        table.button('.close_action').disable();
                                     }
                                 }
                             });
@@ -441,7 +234,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Month Closing Pending',
+                        title: 'Month Closing Resolved',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
@@ -449,7 +242,7 @@
                 @else
                 buttons:[{
                     extend: 'excel',
-                    title: 'Month Closing Pending',
+                    title: 'Month Closing Resolved',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -469,7 +262,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.month_closing.pending.list') }}',
+                ajax: '{{ route('admin.month_closing.resolved.list') }}',
                 rowId: 'shipment_id',
                 order: [[1, 'asc']],
                 columns: [
@@ -490,19 +283,18 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'remarks', name: 'mc.remarks', class: 'align-middle remarks'},
                     {data: 'closing_status', name: 'mcs.name', class: 'align-middle closing_status'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if(data.month_closing_status_id == 1){
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
+
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
+                        table.row(row).select();
                     }
+
 
                 },
                 initComplete: function() {
@@ -592,14 +384,11 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.resolve').enable();
-                    table.button('.closing_type_status').enable();
+                    table.button('.close_action').enable();
 
                 }
                 else {
-                    table.button('.resolve').disable();
-                    table.button('.closing_type_status').disable();
-
+                    table.button('.close_action').disable();
                 }
 
             });
@@ -613,15 +402,15 @@
                         var html = '';
                         var responsible_ids = $('#responsible_persons').val();
                         $.each(responsible_ids, function (index, value) {
-                           var name = $('#responsible_persons').find('option[value="'+value+'"]').attr('rel');
-                           html += '<div class="form-group row justify-content-center">\n' +
-                               '                                 <div class="col-3">\n' +
-                               '                                     <label for="deduct_amount" class="mb-0 align-middle">'+ name +'</label>\n' +
-                               '                                 </div>\n' +
-                               '                                 <div class="form-group mb-0 col-6">\n' +
-                               '                                     <input type="text" id="deduct_amount_'+ value +'" name="deduct_amount_individual['+ value +']" class="form-control deduct_amount validated" placeholder="Deduct Amount" data-rule-required="true" data-msg-required="Deduct Amount is required">\n' +
-                               '                                 </div>\n' +
-                               '                             </div>';
+                            var name = $('#responsible_persons').find('option[value="'+value+'"]').attr('rel');
+                            html += '<div class="form-group row justify-content-center">\n' +
+                                '                                 <div class="col-3">\n' +
+                                '                                     <label for="deduct_amount" class="mb-0 align-middle">'+ name +'</label>\n' +
+                                '                                 </div>\n' +
+                                '                                 <div class="form-group mb-0 col-6">\n' +
+                                '                                     <input type="text" id="deduct_amount_'+ value +'" name="deduct_amount_individual['+ value +']" class="form-control deduct_amount validated" placeholder="Deduct Amount" data-rule-required="true" data-msg-required="Deduct Amount is required">\n' +
+                                '                                 </div>\n' +
+                                '                             </div>';
 
                         });
                         $('#deduct_individual_div').html(html);
@@ -664,7 +453,7 @@
                         $('#add_responsible_modal').modal('show');
                         $('#responsible_person_shipment_id').val(shipment_id);
                     }
-                    /*else if($(this).hasClass('edit_responsible')){
+                    else if($(this).hasClass('edit_responsible')){
                         $.ajax({
                             url: '{!! route('admin.month_closing.pending.assign_details') !!}',
                             method: 'POST',
@@ -673,86 +462,13 @@
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
-                        .done(function(data) {
-                            console.log(data)
-                        });
-                    }*/
+                            .done(function(data) {
+                                console.log(data)
+                            });
+                    }
                 }
             });
 
-            $('#add_responsible_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Responsible Person(s) are being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-
-            $('#edit_responsible_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Responsible Person(s) are being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-            $('#closing_status_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    $('#month_closing_status_shipment_ids').val(selected_rows);
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Closing Type is being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
 
 
         });
