@@ -38,7 +38,7 @@
 
     <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Tag Sales Person</h4>
@@ -59,7 +59,86 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DetailsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
 
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add_status_modal" role="dialog" aria-labelledby="add_status_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Update Status</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <select name="update_lead_status" id="update_lead_status" class="form-control select2">
+                                @foreach($lead_statuses as $lead_status)
+                                    <option value="{{ $lead_status->id }}" > {{ $lead_status->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -339,7 +418,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.leads.list') }}',
-                rowId: 'request_id',
+                rowId: 'lead_id',
                 order: [[8, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -417,37 +496,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('body').on('click','#datatable .quantity',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-
-                $.ajax({
-                    url: '{!! route('admin.packaging.requests.quantity_details') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': request_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        var html = '';
-                        html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Type</strong></th><th><strong>Size</strong></th><th><strong>Quantity</strong></th></tr></thead>';
-                        html += '<tbody>';
-                        $.each(data.types, function(index, value) {
-                            var ind = index+1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.type + '</td>';
-                            html += '<td>' + value.size + '</td>';
-                            html += '<td>' + value.quantity + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-
-                        $('#ViewTypeSizeModal .modal-body').html(html);
-                        $('#ViewTypeSizeModal').modal('show');
-                    }
-                    // console.log(data.success);
-                });
-            });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -520,58 +568,175 @@
                 }
 
             });
-            //confirm
-            $('body').on('click','.confirm',function(){
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
-                var booking_type_id = table.row($(this).parents('tr')).data().booking_type_id;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Confirm Packaging Material!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.packaging.requests.confirm') !!}',
-                            method: 'POST',
-                            data: {
-                                'id': request_id,
-                                'shipment_id': shipment_id_data,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
 
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                if(shipment_id_data != null && booking_type_id != null){
-                                    print(shipment_id_data, booking_type_id);
-                                }
-                                table.draw();
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                            }
+            $('body').on('click','#datatable .lead_log',function(){
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.leads.lead_log') !!}',
+                    method: 'POST',
+                    data: {
+                        'lead_id': lead_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Lead ID</strong></th><th><strong>Contact Person</strong></th><th><strong>Phone Number</strong></th><th><strong>Sales Person</strong></th><th><strong>Reference Person</strong></th><th><strong>Lead Status</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.leads, function(index, value) {
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.lead_id + '</td>';
+                            html += '<td>' + value.contact_person + '</td>';
+                            html += '<td>' + value.phone_number + '</td>';
+                            html += '<td>' + value.sales_person + '</td>';
+                            html += '<td>' + value.refernece_person + '</td>';
+                            html += '<td>' + value.status + '</td>';
+                            html += '<td>' + value.updated_by + '</td>';
+                            html += '<td>' + value.updated_at + '</td></tr>';
                         });
+                        html += '</tbody></table>';
+                        var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
+                        $('#DetailsModal .header').html(header);
+                        $('#DetailsModal .modal-body').html(html);
+                        $('#DetailsModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
+            });
 
+            $('body').on('click','#datatable .view_remarks',function(){
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.leads.view_remarks') !!}',
+                    method: 'POST',
+                    data: {
+                        'lead_id': lead_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Remarks</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.leads, function(index, value) {
+                            console.log(value.updated_at);
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.remarks + '</td>';
+                            html += '<td>' + value.updated_by + '</td>';
+                            html += '<td>' + value.updated_at + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
+                        $('#DetailsModal .header').html(header);
+                        $('#DetailsModal .modal-body').html(html);
+                        $('#DetailsModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+            var status_lead_id = null;
+            var remark_lead_id = null;
+
+            $("#update_lead_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Status",
+                width:'100%',
+                dropdownParent:$('#add_status_modal')
+            });
+
+            $('body').on('click','#datatable .update',function(){
+                status_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#add_status_modal').modal('show');
+            });
+
+            $('#add_status_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var new_status = $('#update_lead_status').val();
+                    if(new_status != null){
+                        blockPagePermanently();
+                        $.ajax({
+                            url:"{{route('admin.leads.add_status')}}",
+                            method:'POST',
+                            data:{
+                                'lead_id':remark_lead_id,
+                                'status':new_status,
+                                '_token':'{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            UnblockPagePermanently();
+                            $('#add_status_modal').modal('hide');
+                            new_status = null;
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        });
+                    }
+                    else{
+                        var error = 'Invalid Lead ID!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $('#add_status_modal').on('hide.bs.modal', function () {
+                $('#update_lead_status').val('').trigger('change');
+            });
+
+            $('body').on('click','#datatable .add_remarks',function(){
+                remark_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#add_remarks_modal').modal('show');
+            });
+
+            $('#add_remarks_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var remarks = $('#add_remarks').val();
+                    if(remark_lead_id != null){
+                        blockPagePermanently();
+                        $.ajax({
+                            url:"{{route('admin.leads.add_remarks')}}",
+                            method:'POST',
+                            data:{
+                                'lead_id':remark_lead_id,
+                                'remarks':remarks,
+                                '_token':'{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            UnblockPagePermanently();
+                            $('#add_remarks_modal').modal('hide');
+                            remark_lead_id = null;
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        });
+                    }
+                    else{
+                        var error = 'Invalid Lead ID!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $('#add_remarks_modal').on('hide.bs.modal', function () {
+                $('#add_remarks_form input.add_remarks').val('');
             });
         });
 

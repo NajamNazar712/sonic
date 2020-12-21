@@ -2452,6 +2452,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 	Route::prefix('leads')->name('leads.')->group(function(){
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+        Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
+        Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
+        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
     });
 });
 
