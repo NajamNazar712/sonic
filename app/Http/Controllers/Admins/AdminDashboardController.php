@@ -1422,8 +1422,6 @@ class AdminDashboardController extends Controller
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
                 if($old_sale_person){
                     $old_sale_person = $old_sale_person->sales_person;
-                    $old_sale_person = $old_sale_person->created_at;
-
                 }
                 else{
                     $old_sale_person = null;
