@@ -95,6 +95,47 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Tiers</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id1">
+                    <div class="mb-2">
+                        <select name="poc" id="poc" class="form-control select2">
+                            @foreach($sale_tier_types as $poc)
+                                <option value="{{ $poc->id }}" > {{ $poc->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="kam" id="kam" class="form-control select2">
+                            @foreach($sale_tier_types as $kam)
+                                <option value="{{ $kam->id }}" > {{ $kam->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <select name="ref" id="ref" class="form-control select2">
+                            @foreach($sale_tier_types as $ref)
+                                <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="SalesTagModal1" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal1"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -623,6 +664,96 @@
                             }
                         }
                     },
+                    {
+                       text: 'Sales Tier Tagging',
+                       className: 'btn btn-primary tag',
+                       enabled:false,
+                       action: function (e, dt, node, config) {
+                           if(selected_rows != ''){
+
+                               $('#SalesTierTypeTagModal').modal('show');
+                               // console.log(selected_rows);
+                               $('#salesTierTypeTagSubmit').on('click',function () {
+                                   var poc = parseInt($('#poc').val());
+                                   var kam = parseInt($('#kam').val());
+                                   var ref = parseInt($('#ref').val());
+                                   swal({
+                                       text: 'Are you sure, you want to Tag?',
+                                       icon: 'info',
+                                       buttons: {
+                                           cancel: {
+                                               text: 'No',
+                                               value: null,
+                                               visible: true,
+                                               closeModal: true,
+                                           },
+                                           confirm: {
+                                               text: 'Yes',
+                                               value: true,
+                                               visible: true,
+                                               closeModal: true
+                                           }
+                                       },
+                                       closeOnClickOutside: false,
+                                       closeOnEsc: false,
+                                       dangerMode: true
+                                   }).then(function(confirm) {
+                                       if (confirm) {
+
+                                               $.ajax({
+                                                   url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
+                                                   method: 'POST',
+                                                   data: {
+                                                       'poc': poc,
+                                                       'kam': kam,
+                                                       'ref': ref,
+                                                       'shipper_ids[]': selected_rows,
+                                                       '_token': '{{ csrf_token() }}'
+                                                   }
+                                               })
+                                                   .done(function (data) {
+                                                       if (data.status == 1) {
+                                                           $('#SalesTierTypeTagModal').modal('hide');
+                                                           toastr.success(data.success, 'Success!', {
+                                                               positionClass: 'toast-bottom-center',
+                                                               containerId: 'toast-bottom-center'
+                                                           });
+                                                       } else {
+                                                           toastr.error(data.error, 'Error!', {
+                                                               positionClass: 'toast-top-center',
+                                                               containerId: 'toast-top-center'
+                                                           });
+                                                       }
+                                                       selected_rows = [];
+
+                                                       table.rows().deselect();
+                                                       $('#poc').val('').trigger('change');
+                                                       $('#kam').val('').trigger('change');
+                                                       $('#ref').val('').trigger('change');
+                                                       $('#SalesTierTypeTagModal').modal('hide');
+                                                       table.draw(true);
+                                                       table.button('.tag').disable();
+
+
+                                                   });
+                                           } /*else {
+                                               var error = "Atleast Select One";
+                                               toastr.error(error, 'Error!', {
+                                                   positionClass: 'toast-top-center',
+                                                   containerId: 'toast-top-center'
+                                               });
+                                           }
+                                       }*/
+                                   });
+                               });
+
+                           }
+                           else{
+                               var error = "Atleast Select One";
+                               toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                           }
+                       }
+                   },
                     @endif
                     {
                         extend: 'selectAll',
@@ -663,6 +794,7 @@
                                         table.button('.set_commission').enable();
                                         table.button('.approve_commission').enable();
                                         table.button('.set_segment').enable();
+                                        table.button('.tag').enable();
                                     }
                                 }
                             });
@@ -693,6 +825,7 @@
                                         table.button('.set_commission').disable();
                                         table.button('.approve_commission').disable();
                                         table.button('.set_segment').disable();
+                                        table.button('.tag').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -957,6 +1090,22 @@
             width:'100%',
             dropdownParent:$('#SetSegment')
         });
+        $("#poc").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select POC",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+        $("#kam").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select KAM",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+        $("#ref").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select REFFERAL",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
             var shipper_id = $invoker.data('target-id');
@@ -1233,11 +1382,13 @@
                 if (selected_rows.length > 0) {
                     table.button('.bulk_tagging').enable();
                     table.button('.set_commission').enable();
+                    table.button('.tag').enable();
                     table.button('.approve_commission').enable();
 
                 }
                 else {
                     table.button('.bulk_tagging').disable();
+                    table.button('.tag').disable();
                     table.button('.set_commission').disable();
                     table.button('.approve_commission').disable();
                 }

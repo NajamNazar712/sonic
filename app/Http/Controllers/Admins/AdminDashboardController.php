@@ -56,6 +56,7 @@ use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\SalesTierTypeTag;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -1371,7 +1372,8 @@ class AdminDashboardController extends Controller
     public function pendingAccountsList(){
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types]);
     }
     public function activeAccountsList(){
         $shippers = User::whereIn('status', [3, 4])->get();
@@ -1379,7 +1381,8 @@ class AdminDashboardController extends Controller
         $products = Product::select('id','product_name')->get();
         $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types]);
 
     }
     public function blockAccountsList(){
@@ -9653,5 +9656,30 @@ class AdminDashboardController extends Controller
          return response()->json(['status' => 1, 'success' => 'Route type has been updated !']);
      }
 
+     public function kam_poc_ref_tag(Request $request){
+        $poc = $request->poc;
+        $kam = $request->kam;
+        $ref = $request->ref;
+        $shipper_ids = $request->shipper_ids;
+        if($shipper_ids){
+            if($kam == null  && $poc == null  && $ref == null){
+                return ['status' => 0 ,'error'=>"Atleast Select One!"];
+            }
+            else{
+                foreach($shipper_ids as $shipper_id){
+                    $sale_tier =  new SalesTierTypeTag();
+                    $sale_tier->user_id = $shipper_id;
+                    $sale_tier->poc = $poc;
+                    $sale_tier->kam = $kam;
+                    $sale_tier->ref = $ref;
+                    $sale_tier->save();
+                }
+                return ['status' => 1,'success'=>"POC KAM REF Updated!"];
+            }
+        }
+        else{
+            return ['status' => 0 ,'error'=>"Select One Shipper!"];
+        }
+     }
 }
 
