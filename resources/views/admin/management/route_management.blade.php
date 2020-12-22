@@ -79,18 +79,18 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <form id="route_location" action="{{route('admin.management.route.assign_location')}}" method="post">
+                        <form id="route_location" action="{{route('admin.management.route.assign_location')}}" method="post" novalidate="novalidate">
                             @method('post')
                             {{ csrf_field() }}
                             <input type="text" hidden id="route_id" name="route_id">
-                            <div class="row justify-content-center">
-                                <div class="col-12">
-                                    <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                            <div class="col-12">
+                                <fieldset class="form-group">
+                                    <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Location is required">
                                         @foreach($users as $user)
                                             <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                </fieldset>
                             </div>
 
                             <div class="row justify-content-center mt-4">
@@ -124,7 +124,7 @@
             $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Add Pickup Addresses",
-                allowClear:true,
+                //allowClear:true,
             });
            /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -503,6 +503,27 @@
                 }
             });
 
+        });
+        $( "#route_location" ).validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Location is being saved!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+
+                form.submit();
+            }
         });
 
         $("#addRoute").on("show.bs.modal", function(e) {
