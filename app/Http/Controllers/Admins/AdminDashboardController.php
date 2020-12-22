@@ -9695,14 +9695,16 @@ class AdminDashboardController extends Controller
                         $sale_tier->kam = $kam;
                         $sale_tier->ref = $ref;
                         $sale_tier->save();
-                        return response()->json(['status'=>1,'success'=>"Updated!"]);
+                       // return response()->json(['status'=>1,'success'=>"Updated!"]);
                     }
-                    $sale_tier = new SaleTierTag();
-                    $sale_tier->user_id = $shipper_id;
-                    $sale_tier->poc = $poc;
-                    $sale_tier->kam = $kam;
-                    $sale_tier->ref = $ref;
-                    $sale_tier->save();
+                    else{
+                        $sale_tier = new SaleTierTag();
+                        $sale_tier->user_id = $shipper_id;
+                        $sale_tier->poc = $poc;
+                        $sale_tier->kam = $kam;
+                        $sale_tier->ref = $ref;
+                        $sale_tier->save();
+                    }
                 }
                 return response()->json(['status'=>1,'success'=>"Updated!"]);
             }
