@@ -139,6 +139,7 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                             if(in_array($complaint_id, [11, 12, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
+                                                $present_shipments[] = $is_shipment->id;
                                                 $flag = true;
                                             }
                                             else{
@@ -157,6 +158,7 @@ class AdminCRMController extends Controller
                                     }
                                 }else{
                                     $present_shipments[] = $shipment->tracking_number;
+                                    $present_shipments[] = $is_shipment->id;
                                     $flag = true;
                                 }
                             }
@@ -171,6 +173,7 @@ class AdminCRMController extends Controller
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
+                                            $present_shipments[] = $is_shipment->id;
                                             $flag = true;
                                         }
                                         else{
@@ -207,6 +210,7 @@ class AdminCRMController extends Controller
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
+                                        $present_shipments[] = $is_shipment->id;
                                         $flag = true;
                                     }
                                     else{
@@ -228,12 +232,14 @@ class AdminCRMController extends Controller
                                 }
                             }else{
                                 $present_shipments[] = $shipment->tracking_number;
+                                $present_shipments[] = $is_shipment->id;
                                 $flag = true;
                             }
                         }else{
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
+                                    $present_shipments[] = $is_shipment->id;
                                     $flag = true;
                                 }
                                 else{
