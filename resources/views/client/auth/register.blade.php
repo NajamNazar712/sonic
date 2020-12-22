@@ -839,7 +839,7 @@
                     if (data.status == 0) {
                         $('#sale_person').empty();
 
-                        $.each(data.sales_persons_city, function (key, value) {
+                        $.each(data.sale_persons, function (key, value) {
                             var sale_person = parseInt(id + value.id);
 
                             var index = $.inArray(sale_person, already_selected_person);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\AccountType;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
@@ -605,8 +606,11 @@ class RegisterController extends Controller
         if($id){
             $sales_persons_city = City::where('id', $id);
             if ($sales_persons_city->exists()){
-                $sales_persons_city = Admin::join('admin_hubs as ah', 'admins.id','=', 'ah.admin_id')->join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
-                return response()->json(['status' => 0, 'sales_persons_city' => $sales_persons_city]);
+                $sales_persons_city = $sales_persons_city->first();
+                $hub_id = $sales_persons_city->hub_id;
+                $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->get();
+                return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;
                 return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
