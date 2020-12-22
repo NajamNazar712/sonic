@@ -36,7 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
-    Route::get('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
+    Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');

@@ -600,9 +600,18 @@ class RegisterController extends Controller
     }
 
     public function sales_person(Request $request){
+//        dd($request);
         $id = $request->id;
-        $sales_persons = Admin::leftjoin('admin_hubs as ah', 'admins.id','=', 'ah.admin_id')->join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
-        return response()->json($sales_persons);
+        if($id){
+            $sales_persons_city = City::where('id', $id);
+            if ($sales_persons_city->exists()){
+                $sales_persons_city = Admin::join('admin_hubs as ah', 'admins.id','=', 'ah.admin_id')->join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
+                return response()->json(['status' => 0, 'sales_persons_city' => $sales_persons_city]);
+            }else{
+                $sale_person_admin = City::find($id)->name;
+                return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
+            }
+        }
     }
 
 }
