@@ -2114,7 +2114,8 @@ class AdminReportsEmailController extends Controller
     static public function overland_aging_report()
     {
         $to = Carbon::yesterday()->toDateString();
-        $from = Carbon::parse($to)->subDays(7)->toDateString();
+        //$to = Carbon::parse($yesterday)->subDays(1)->toDateTimeString();
+        $from = Carbon::parse($to)->subDays(6)->toDateString();
         $today = Carbon::now();
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -2133,7 +2134,7 @@ class AdminReportsEmailController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })->select('shipments.id as shId', 'shipments.tracking_number as tracking', 'u.name as shipper','oc.id as origin_id','oc.name as origin', 'dc.name as destination','h.id as hub_id','h.name as hub',  'shipments.consignee_address','ss.name as current_status', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival_date','shipments.actual_weight as actual_weight','shipments.chargeable_weight as chargeable_weight')
             ->whereBetween('shipments_journey.created_at',[$from,$to])
             ->where('sm.id',2)
@@ -2168,10 +2169,10 @@ class AdminReportsEmailController extends Controller
             $days['total'] = 0;
 
             foreach ($shipments as $shipment) {
-                $arrival_date = $shipment->arrival_date;
+                $current_status_date = $shipment->current_status_date;
                 $today = Carbon::parse($today);
-                $arrival_date = Carbon::parse($arrival_date);
-                $aging = $arrival_date->diffInDays($today);
+                $current_status_date = Carbon::parse($current_status_date);
+                $aging = $current_status_date->diffInDays($today);
 
                 if ($aging == 0) {
                     $days['zero']++;
@@ -2199,21 +2200,29 @@ class AdminReportsEmailController extends Controller
 
             }
             $days_ratio['zero'] = ($days['total'] != 0) ? $days['zero'] / $days['total'] : 0;
-            $days_ratio['one'] = ($days['total'] != 0) ? $days['one'] / $days['total'] : 0;
-            $days_ratio['two'] = ($days['total'] != 0) ? $days['two'] / $days['total'] : 0;
-            $days_ratio['three'] = ($days['total'] != 0) ? $days['three'] / $days['total'] : 0;
-            $days_ratio['four'] = ($days['total'] != 0) ? $days['four'] / $days['total'] : 0;
-            $days_ratio['five'] = ($days['total'] != 0) ? $days['five'] / $days['total'] : 0;
-            $days_ratio['six'] = ($days['total'] != 0) ? $days['six'] / $days['total'] : 0;
-            $days_ratio['total'] = $days_ratio['zero'] + $days_ratio['one'] + $days_ratio['two'] + $days_ratio['three'] + $days_ratio['four'] + $days_ratio['five'] + $days_ratio['six'];
 
-            $overland_aging_day_wise_data['zero'] = ['Days' => '0', 'Count' => $days['zero'], 'Ratio' => $days_ratio['zero'] * 100 . '%'];
-            $overland_aging_day_wise_data['one'] = ['Days' => '1', 'Count' => $days['one'], 'Ratio' => $days_ratio['one'] * 100 . '%'];
-            $overland_aging_day_wise_data['two'] = ['Days' => '2', 'Count' => $days['two'], 'Ratio' => $days_ratio['two'] * 100 . '%'];
-            $overland_aging_day_wise_data['three'] = ['Days' => '3', 'Count' => $days['three'], 'Ratio' => $days_ratio['three'] * 100 . '%'];
-            $overland_aging_day_wise_data['four'] = ['Days' => '4', 'Count' => $days['four'], 'Ratio' => $days_ratio['four'] * 100 . '%'];
-            $overland_aging_day_wise_data['five'] = ['Days' => '5', 'Count' => $days['five'], 'Ratio' => $days_ratio['five'] * 100 . '%'];
-            $overland_aging_day_wise_data['six'] = ['Days' => '5+', 'Count' => $days['six'], 'Ratio' => $days_ratio['six'] * 100 . '%'];
+            $days_ratio['one'] = ($days['total'] != 0) ? $days['one'] / $days['total'] : 0;
+
+            $days_ratio['two'] = ($days['total'] != 0) ? $days['two'] / $days['total'] : 0;
+
+            $days_ratio['three'] = ($days['total'] != 0) ? $days['three'] / $days['total'] : 0;
+
+            $days_ratio['four'] = ($days['total'] != 0) ? $days['four'] / $days['total'] : 0;
+
+            $days_ratio['five'] = ($days['total'] != 0) ? $days['five'] / $days['total'] : 0;
+
+            $days_ratio['six'] = ($days['total'] != 0) ? $days['six'] / $days['total'] : 0;
+
+            $days_ratio['total'] =  $days_ratio['zero'] +  $days_ratio['one'] +  $days_ratio['two'] +  $days_ratio['three'] +  $days_ratio['four'] +  $days_ratio['five'] +  $days_ratio['six'];
+
+            $overland_aging_day_wise_data['zero'] = ['Days' => '0', 'Count' => $days['zero'], 'Ratio' => round($days_ratio['zero'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['one'] = ['Days' => '1', 'Count' => $days['one'], 'Ratio' => round($days_ratio['one'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['one'] = ['Days' => '1', 'Count' => $days['one'], 'Ratio' => round($days_ratio['one'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['two'] = ['Days' => '2', 'Count' => $days['two'], 'Ratio' => round($days_ratio['two'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['three'] = ['Days' => '3', 'Count' => $days['three'], 'Ratio' => round($days_ratio['three'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['four'] = ['Days' => '4', 'Count' => $days['four'], 'Ratio' => round($days_ratio['four'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['five'] = ['Days' => '5', 'Count' => $days['five'], 'Ratio' => round($days_ratio['five'] * 100,2) . '%'];
+            $overland_aging_day_wise_data['six'] = ['Days' => '5+', 'Count' => $days['six'], 'Ratio' => round($days_ratio['six'] * 100,2) . '%'];
             $overland_aging_day_wise_footer[] = ['Grand Total', 'Count' => $days['total'], 'Ratio' => $days_ratio['total'] * 100 . '%'];
 
             $overland_aging_day_wise = array_merge($overland_aging_day_wise_header, $overland_aging_day_wise_data, $overland_aging_day_wise_footer);
@@ -2222,43 +2231,43 @@ class AdminReportsEmailController extends Controller
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">0</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['zero'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['zero'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($days_ratio['zero'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">1</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['one'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['one'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($days_ratio['one'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">2</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['two'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['two'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($days_ratio['two'] * 100,2). '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">3</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['three'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['three'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .  round($days_ratio['three'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">4</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['four'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['four'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .  round($days_ratio['four'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">5</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['five'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['five'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .  round($days_ratio['five'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">5+</td>';
             $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days['six'] . '</td>';
-            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days_ratio['six'] * 100 . '%' . '</td>';
+            $day_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' .  round($days_ratio['six'] * 100,2) . '%' . '</td>';
             $day_wise .= '</tr>';
 
             $day_wise .= '<tr>';
@@ -2304,10 +2313,10 @@ class AdminReportsEmailController extends Controller
             foreach ($shipments as $shipment) {
 
                 $origin_id = $shipment->origin_id;
-                $arrival_date = $shipment->arrival_date;
+                $current_status_date = $shipment->current_status_date;
                 $today = Carbon::parse($today);
-                $arrival_date = Carbon::parse($arrival_date);
-                $aging = $arrival_date->diffInDays($today);
+                $current_status_date = Carbon::parse($current_status_date);
+                $aging = $current_status_date->diffInDays($today);
 
                 if (!array_key_exists($origin_id, $days)) {
                     $days[$origin_id]['zero'] = 0;
@@ -2354,6 +2363,21 @@ class AdminReportsEmailController extends Controller
             $total_days['six']['total'] = 0;
             $total_days['row']['total'] = 0;
             $ratio = 0;
+            $total_ratio = 0;
+            foreach($origins as $origin){
+                if (array_key_exists($origin->id, $days)) {
+                    $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$origin->id]['zero'];
+                    $total_days['one']['total'] = $total_days['one']['total'] + $days[$origin->id]['one'];
+                    $total_days['two']['total'] = $total_days['two']['total'] + $days[$origin->id]['two'];
+                    $total_days['three']['total'] = $total_days['three']['total'] + $days[$origin->id]['three'];
+                    $total_days['four']['total'] = $total_days['four']['total'] + $days[$origin->id]['four'];
+                    $total_days['five']['total'] = $total_days['five']['total'] + $days[$origin->id]['five'];
+                    $total_days['six']['total'] = $total_days['six']['total'] + $days[$origin->id]['six'];
+                    $total_days['row']['total'] = $total_days['row']['total'] + $days[$origin->id]['total'];
+                }
+            }
+
+
             foreach ($origins as $origin) {
                 if (array_key_exists($origin->id, $days)) {
 
@@ -2368,24 +2392,18 @@ class AdminReportsEmailController extends Controller
                     $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['six'] . '</td>';
                     $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$origin->id]['total'] . '</td>';
 
-                    $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$origin->id]['zero'];
-                    $total_days['one']['total'] = $total_days['one']['total'] + $days[$origin->id]['one'];
-                    $total_days['two']['total'] = $total_days['two']['total'] + $days[$origin->id]['two'];
-                    $total_days['three']['total'] = $total_days['three']['total'] + $days[$origin->id]['three'];
-                    $total_days['four']['total'] = $total_days['four']['total'] + $days[$origin->id]['four'];
-                    $total_days['five']['total'] = $total_days['five']['total'] + $days[$origin->id]['five'];
-                    $total_days['six']['total'] = $total_days['six']['total'] + $days[$origin->id]['six'];
-                    $total_days['row']['total'] = $total_days['row']['total'] + $days[$origin->id]['total'];
+                    $ratio =  $days[$origin->id]['total'] / $total_days['row']['total'];
 
-                    $ratio = $days[$origin_id]['total'] / $total_days['row']['total'];
-                    $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio * 100 . '%' . '</td>';
+                    //$ratio = round($ratio,2);
+                    $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($ratio * 100, 2) . '%' . '</td>';
                     $origin_wise .= '</tr>';
 
-                    $origin_wise_shipment_data[] = ['Origin' => $origin->name, '0' => $days[$origin->id]['zero'], '1' => $days[$origin->id]['one'], '2' => $days[$origin->id]['two'], '3' => $days[$origin->id]['three'], '4' => $days[$origin->id]['four'], '5' => $days[$origin->id]['five'], '5+' => $days[$origin->id]['five'], 'Total' => $days[$origin->id]['total'], 'Ratio' => $ratio * 100 . '%'];
+                    $origin_wise_shipment_data[] = ['Origin' => $origin->name, '0' => $days[$origin->id]['zero'], '1' => $days[$origin->id]['one'], '2' => $days[$origin->id]['two'], '3' => $days[$origin->id]['three'], '4' => $days[$origin->id]['four'], '5' => $days[$origin->id]['five'], '5+' => $days[$origin->id]['five'], 'Total' => $days[$origin->id]['total'], 'Ratio' => round($ratio * 100,2) . '%'];
 
+                    $total_ratio = $total_ratio + $ratio;
                 }
             }
-            $origin_wise_shipment_footer[] = ['Grand Total' => 'Grand Total', '0' => $total_days['zero']['total'], '1' => $total_days['one']['total'], '2' => $total_days['two']['total'], '3' => $total_days['three']['total'], '4' => $total_days['four']['total'], '5' => $total_days['five']['total'], '5+' => $total_days['six']['total'], 'Total' => $total_days['row']['total'], 'Ratio' => $ratio * 100 . '%'];
+            $origin_wise_shipment_footer[] = ['Grand Total' => 'Grand Total', '0' => $total_days['zero']['total'], '1' => $total_days['one']['total'], '2' => $total_days['two']['total'], '3' => $total_days['three']['total'], '4' => $total_days['four']['total'], '5' => $total_days['five']['total'], '5+' => $total_days['six']['total'], 'Total' => $total_days['row']['total'], 'Ratio' => $total_ratio * 100 . '%'];
 
             $origin_wise .= '<tr>';
             $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
@@ -2397,7 +2415,7 @@ class AdminReportsEmailController extends Controller
             $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['five']['total'] . '</td>';
             $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['six']['total'] . '</td>';
             $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['row']['total'] . '</td>';
-            $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio * 100 . '%' . '</td>';
+            $origin_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_ratio * 100 . '%' . '</td>';
             $origin_wise .= '</tr>';
             $origin_wise .= '</tbody></table>';
             $origin_wise .= '</div>';
@@ -2439,10 +2457,10 @@ class AdminReportsEmailController extends Controller
 
             foreach ($shipments as $shipment) {
                 $hub_id = $shipment->hub_id;
-                $arrival_date = $shipment->arrival_date;
+                $current_status_date = $shipment->current_status_date;
                 $today = Carbon::parse($today);
-                $arrival_date = Carbon::parse($arrival_date);
-                $aging = $arrival_date->diffInDays($today);
+                $current_status_date = Carbon::parse($current_status_date);
+                $aging = $current_status_date->diffInDays($today);
 
                 if (!array_key_exists($hub_id, $days)) {
                     $days[$hub_id]['zero'] = 0;
@@ -2488,7 +2506,19 @@ class AdminReportsEmailController extends Controller
             $total_days['five']['total'] = 0;
             $total_days['six']['total'] = 0;
             $total_days['row']['total'] = 0;
-
+            $total_ratio = 0;
+            foreach($hubs as $hub){
+                if (array_key_exists($hub->id, $days)) {
+                    $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$hub->id]['zero'];
+                    $total_days['one']['total'] = $total_days['one']['total'] + $days[$hub->id]['one'];
+                    $total_days['two']['total'] = $total_days['two']['total'] + $days[$hub->id]['two'];
+                    $total_days['three']['total'] = $total_days['three']['total'] + $days[$hub->id]['three'];
+                    $total_days['four']['total'] = $total_days['four']['total'] + $days[$hub->id]['four'];
+                    $total_days['five']['total'] = $total_days['five']['total'] + $days[$hub->id]['five'];
+                    $total_days['six']['total'] = $total_days['six']['total'] + $days[$hub->id]['six'];
+                    $total_days['row']['total'] = $total_days['row']['total'] + $days[$hub->id]['total'];
+                }
+            }
             foreach ($hubs as $hub) {
                 if (array_key_exists($hub->id, $days)) {
                     $hub_wise .= '<tr>';
@@ -2502,25 +2532,17 @@ class AdminReportsEmailController extends Controller
                     $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['six'] . '</td>';
                     $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $days[$hub->id]['total'] . '</td>';
 
-                    $total_days['zero']['total'] = $total_days['zero']['total'] + $days[$hub->id]['zero'];
-                    $total_days['one']['total'] = $total_days['one']['total'] + $days[$hub->id]['one'];
-                    $total_days['two']['total'] = $total_days['two']['total'] + $days[$hub->id]['two'];
-                    $total_days['three']['total'] = $total_days['three']['total'] + $days[$hub->id]['three'];
-                    $total_days['four']['total'] = $total_days['four']['total'] + $days[$hub->id]['four'];
-                    $total_days['five']['total'] = $total_days['five']['total'] + $days[$hub->id]['five'];
-                    $total_days['six']['total'] = $total_days['six']['total'] + $days[$hub->id]['six'];
-                    $total_days['row']['total'] = $total_days['row']['total'] + $days[$hub->id]['total'];
-
-                    $ratio = $days[$hub_id]['total'] / $total_days['row']['total'];
-                    $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio * 100 . '%' . '</td>';
+                    $ratio =  $days[$hub->id]['total'] / $total_days['row']['total'];
+                    $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($ratio * 100, 2) . '%' . '</td>';
                     $hub_wise .= '</tr>';
 
-                    $hub_wise_shipment_data[] = ['Hub' => $hub->name, '0' => $days[$hub->id]['zero'], '1' => $days[$hub->id]['one'], '2' => $days[$hub->id]['two'], '3' => $days[$hub->id]['three'], '4' => $days[$hub->id]['four'], '5' => $days[$hub->id]['five'], '5+' => $days[$hub->id]['six'], 'Total' => $days[$hub->id]['total'], 'Ratio' => $ratio * 100 . '%'];
+                    $hub_wise_shipment_data[] = ['Hub' => $hub->name, '0' => $days[$hub->id]['zero'], '1' => $days[$hub->id]['one'], '2' => $days[$hub->id]['two'], '3' => $days[$hub->id]['three'], '4' => $days[$hub->id]['four'], '5' => $days[$hub->id]['five'], '5+' => $days[$hub->id]['six'], 'Total' => $days[$hub->id]['total'], 'Ratio' => round($ratio * 100,2) . '%'];
 
+                    $total_ratio = $total_ratio + $ratio;
                 }
             }
 
-            $hub_wise_shipment_footer[] = ['Grand Total' => 'Grand Total', '0' => $total_days['zero']['total'], '1' => $total_days['one']['total'], '2' => $total_days['two']['total'], '3' => $total_days['three']['total'], '4' => $total_days['four']['total'], '5' => $total_days['five']['total'], '5+' => $total_days['six']['total'], 'Total' => $total_days['row']['total'], 'Ratio' => $ratio * 100 . '%'];
+            $hub_wise_shipment_footer[] = ['Grand Total' => 'Grand Total', '0' => $total_days['zero']['total'], '1' => $total_days['one']['total'], '2' => $total_days['two']['total'], '3' => $total_days['three']['total'], '4' => $total_days['four']['total'], '5' => $total_days['five']['total'], '5+' => $total_days['six']['total'], 'Total' => $total_days['row']['total'], 'Ratio' => $total_ratio * 100 . '%'];
 
             $hub_wise .= '<tr>';
             $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> Grand Total </td>';
@@ -2532,7 +2554,7 @@ class AdminReportsEmailController extends Controller
             $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['five']['total'] . '</td>';
             $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['six']['total'] . '</td>';
             $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_days['row']['total'] . '</td>';
-            $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio * 100 . '%' . '</td>';
+            $hub_wise .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $total_ratio * 100 . '%' . '</td>';
             $hub_wise .= '</tr>';
             $hub_wise .= '</tbody></table>';
             $hub_wise .= '</div>';
@@ -2550,7 +2572,7 @@ class AdminReportsEmailController extends Controller
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status</th>
-                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Arrival Date</th>
+                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Arrived At Origin Date</th>
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Current Status Date</th>
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Aging</th>
                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Actual Weight</th>
@@ -2558,8 +2580,8 @@ class AdminReportsEmailController extends Controller
             $html .= '</tr></thead><tbody>';
             $serial = 1;
 
-            $tracking_number_wise_header['header'] = ['S.No', 'Tracking Number', 'Shipper', 'Origin', 'Destination', 'Hub', 'Current Status', 'Arrival Date', 'Current Status Date', 'Aging', 'Actual Weight', 'Chargeable Weight'];
-            $tracking_number_wise_data[] = ['S.No' => '', 'Tracking Number' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Current Status' => '', 'Arrival Date' => '', 'Current Status Date' => '', 'Aging' => '', 'Actual Weight' => '', 'Chargeable Weight' => ''];
+            $tracking_number_wise_header['header'] = ['S.No', 'Tracking Number', 'Shipper', 'Origin', 'Destination', 'Hub', 'Current Status', 'Arrival At Origin Date', 'Current Status Date', 'Aging', 'Actual Weight', 'Chargeable Weight'];
+            $tracking_number_wise_data[] = ['S.No' => '', 'Tracking Number' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Current Status' => '', 'Arrival At Origin Date' => '', 'Current Status Date' => '', 'Aging' => '', 'Actual Weight' => '', 'Chargeable Weight' => ''];
 
 
             foreach ($shipments as $shipment) {
@@ -2572,8 +2594,8 @@ class AdminReportsEmailController extends Controller
                 $arrival_date = $shipment->arrival_date;
                 $current_status_date = $shipment->current_status_date;
                 $today = Carbon::parse($today);
-                $arrival_date = Carbon::parse($arrival_date);
-                $aging = $arrival_date->diffInDays($today) . ' days';
+                $current_status_date = Carbon::parse($current_status_date);
+                $aging = $current_status_date->diffInDays($today) . ' days';
                 $actual_weight = $shipment->actual_weight;
                 $chargeable_weight = $shipment->chargeable_weight;
 
@@ -2592,7 +2614,7 @@ class AdminReportsEmailController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $chargeable_weight . '</td>';
                 $html .= '</tr>';
 
-                $tracking_number_wise_data[] = ['S.No' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Current Status' => $current_status, 'Arrival Date' => $arrival_date, 'Current Status Date' => $current_status_date, 'Aging' => $aging, 'Actual Weight' => $actual_weight, 'Chargeable Weight' => $chargeable_weight];
+                $tracking_number_wise_data[] = ['S.No' => $serial, 'Tracking Number' => $tracking_number, 'Shipper' => $shipper, 'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Current Status' => $current_status, 'Arrival At Origin Date' => $arrival_date, 'Current Status Date' => $current_status_date, 'Aging' => $aging, 'Actual Weight' => $actual_weight, 'Chargeable Weight' => $chargeable_weight];
 
                 $serial++;
 
@@ -2776,8 +2798,8 @@ class AdminReportsEmailController extends Controller
             header('Content-Disposition: attachment;filename="outstanding_sdn_report.xlsx"');
             header('Cache-Control: max-age=0');
             $date_file_name = Carbon::today()->format('Y_m_d');
-            $file_name_without_path = "reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
-            $file_name = public_path() . "/reports/overland/overland_aging_report_" . $date_file_name . ".xlsx";
+            $file_name_without_path = "reports/overland_aging_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/overland_aging_report_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
             $link = url('/') . '/' . $file_name_without_path;
 

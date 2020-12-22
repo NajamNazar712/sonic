@@ -117,7 +117,7 @@
 
                                                                         <fieldset style="padding-top: 5px;">
                                                                             <div class="input-group input-group-sm form-group">
-                                                                                <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[{{$rate_status->box_id}}][{{$w_index}}]" data-rule-required="true" data-msg-required="This field is required" value="{{$weight_charge->spkg}}">
+                                                                                <input type="text" class="touchspin-color input-sm spkg" {{ ($rate_status->weight_addition == 1) ? 'disabled' : '' }} data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[{{$rate_status->box_id}}][{{$w_index}}]" data-rule-required="true" data-msg-required="This field is required" value="{{$weight_charge->spkg}}">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
