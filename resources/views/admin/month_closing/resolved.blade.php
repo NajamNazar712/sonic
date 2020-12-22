@@ -160,11 +160,77 @@
                                             selected_rows = [];
                                             table.button('.close_action').disable();
                                             table.draw(true);
-                                            if(data.status == 0){
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            if(data.status == 1) {
+
+                                                var html = '';
+
+                                                html += 'The following Shipment(s) could not be added:<br/>';
+
+                                                $.each(data.errors, function (index, message) {
+                                                    html += index + ', ';
+                                                });
+
+                                                html = html.slice(0, -2);
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    // title: 'Month Closing!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                                scan_sound(2);
+
                                             }
-                                            else{
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            else if(data.status == 2){
+                                                var success = "Shipment(s) has been successfully added";
+                                                toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                                scan_sound(1);
+                                            }
+                                            else if(data.status == 3){
+                                                var html = '';
+
+                                                html += 'Some Shipment(s) has been successfully added!<br/><br/>';
+
+                                                html += 'The following Shipment(s) could not be added:<br/>';
+
+                                                $.each(data.errors, function (index, message) {
+                                                    html += index + ', ';
+                                                });
+
+                                                html = html.slice(0, -2);
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    // title: 'Month Closing!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                                scan_sound(2);
                                             }
 
                                         });
@@ -289,12 +355,12 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
-                    $('td:eq(0)', row).addClass('select-checkbox');
-                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                        table.row(row).select();
+                    if(data.month_closing_status_id == 2){
+                        $('td:eq(0)', row).addClass('select-checkbox');
+                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
                     }
-
 
                 },
                 initComplete: function() {

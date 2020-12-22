@@ -699,13 +699,15 @@
                                    scan_sound(2);
                                    table.draw(true);
 
-                               }else if(data.status == 2){
+                               }
+                               else if(data.status == 2){
                                    var success = "Shipment(s) has been successfully added";
                                    toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                    scan_sound(1);
                                    table.draw(true);
-                               }else if(data.status == 3){
+                               }
+                               else if(data.status == 3){
                                    var html = '';
 
                                    html += 'Some Shipment(s) has been successfully added!<br/><br/>';

@@ -532,7 +532,7 @@ class AdminMonthClosingController extends Controller
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
             ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address')
-            ->where('month_closings.status_id', 2);
+            ->whereIn('month_closings.status_id', [2,3]);
 
         $datatable = Datatables::of($month_closing)
             ->editColumn('tracking_number_link',function ($shipments){
@@ -564,7 +564,8 @@ class AdminMonthClosingController extends Controller
             $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
             $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
             $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
-
+            $errors = array();
+            $success = array();
             foreach ($shipment_ids as $shipment_id){
                 $shipment = Shipment::find($shipment_id);
                 if($shipment->exists()){
@@ -583,6 +584,7 @@ class AdminMonthClosingController extends Controller
                     if($shipment_details->shipper_status_id != 51){
                         $month_closing = MonthClosing::where('shipment_id', $shipment_id)->where('status_id', 2);
                         if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
                             $remarks = $month_closing->remarks;
                             if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
                                 if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
@@ -592,7 +594,6 @@ class AdminMonthClosingController extends Controller
                                         $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                                         if($delivery){
                                             $errors[$shipment->tracking_number] = 'Shipment is in an Unverified Delivery Note';
-//                                    return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
                                         }
                                     }
                                 }
@@ -643,7 +644,7 @@ class AdminMonthClosingController extends Controller
                                             $shipment_details->consignee_status_id = 51;
                                             $shipment_details->save();
                                             ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-                                            $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
+                                            $success[$shipment->tracking_number] = 'Shipment is successfully added to Month Closing!';
 
 //                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                                         }
@@ -678,7 +679,13 @@ class AdminMonthClosingController extends Controller
                                 $shipment_details->consignee_status_id = 51;
                                 $shipment_details->save();
                                 ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-                                $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
+
+                                $month_closing->status_id = 3;
+                                $month_closing->closing_date = $date;
+                                $month_closing->closing_updated_at = $date;
+                                $month_closing->updated_by = Auth::id();
+                                $month_closing->save();
+                                $success[$shipment->tracking_number] = 'Shipment is successfully added to Month Closing!';
 //                        return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
 
                             }
@@ -695,11 +702,19 @@ class AdminMonthClosingController extends Controller
                         $errors[$shipment->tracking_number] = 'Shipment is already added as Month Closing!';
                     }
 
-
                 }
             }
-            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 2)->update(['status_id' => 3, 'closing_date' => $date,'closing_updated_at' => $date, 'updated_by' => Auth::id()]);
-            return response()->json(['status' => 0, 'success' => 'Closing Status updated successfully!']);
+            $status = 0;
+            if(!empty($errors) && empty($success)) {
+                $status = 1;
+            }
+            if(!empty($success)  && empty($errors)){
+                $status = 2;
+            }
+            if(!empty($errors) && !empty($success)){
+                $status = 3;
+            }
+            return response()->json(['status' => $status, 'success' => $success, 'errors' => $errors]);
         }
         return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
     }
