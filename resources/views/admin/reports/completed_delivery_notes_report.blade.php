@@ -127,6 +127,15 @@
                         </div>
 
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="rider_cnic" id="rider_cnic" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->cnic}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -138,6 +147,7 @@
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider CNIC No.</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
@@ -304,6 +314,10 @@
                 placeholder:'Search Rider',
                 width:'100%',
                 allowClear:true
+            });$('#rider_cnic').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider CNIC No.',
+                width:'100%',
+                allowClear:true
             });
 
             var submission_date = $('#submission_date').pickadate({
@@ -391,6 +405,7 @@
                             head.push('Delivery Note No.');
                             head.push('Hub');
                             head.push('Rider');
+                            head.push('Rider CNIC No.');
                             head.push('Route');
                             head.push('No Of Shipment(s)');
                             head.push('No Of Shipment(s) Delivered');
@@ -413,6 +428,7 @@
                                 row.push(values.delivery_note);
                                 row.push(values.hub);
                                 row.push(values.rider);
+                                row.push(values.cni);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
@@ -478,6 +494,7 @@
                     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     d.update_date_from = $('input[name="update_date_from_formatted"]').val();
                     d.update_date_to = $('input[name="update_date_to_formatted"]').val();
+                    d.rider_cnic = $('#rider_cnic').val();
                 }
                 },
                 rowId:'delivery_note_id',
@@ -487,6 +504,7 @@
                     { data:'delivery_note_link' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note_link'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'cni' ,name: 'riders.cnic', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},

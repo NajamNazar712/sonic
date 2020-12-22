@@ -1284,7 +1284,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1366,7 +1365,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1446,7 +1444,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1545,7 +1542,7 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                            html += id + '<br/>';
+
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
