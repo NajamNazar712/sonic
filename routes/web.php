@@ -36,6 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
+    Route::get('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -2463,6 +2464,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
         });
+    });
+
+	Route::prefix('leads')->name('leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+        Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
+        Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
+        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
     });
 });
 
