@@ -21,7 +21,7 @@
                         <th class="border-primary border-darken-1">Start Date</th>
                         <th class="border-primary border-darken-1">End Date</th>
                         <th class="border-primary border-darken-1">Target Shipments/Day</th>
-                        <th class="border-primary border-darken-1">Target Shipments/Week</th>
+                        <th class="border-primary border-darken-1">Target Shipments/Month</th>
                         <th class="border-primary border-darken-1">Average Revenue</th>
                     </tr>
                     </thead>
@@ -64,7 +64,7 @@
                             head.push('Start Date');
                             head.push('End Date');
                             head.push('Target Shipments/Day');
-                            head.push('Target Shipments/Week');
+                            head.push('Target Shipments/Month');
                             head.push('Average Revenue');
 
                             $.each(result.data, function(index, values) {
@@ -76,7 +76,7 @@
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
-                                row.push(values.target_week);
+                                row.push(values.target_month);
                                 
                                 row.push(values.average_revenue);
 
@@ -117,7 +117,7 @@
                     {data: 'start_date', name: 'sale_person_target_logs.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_target_logs.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_target_logs.target_days', class: 'align-middle target_days'},
-                    {data: 'target_week', name: 'sale_person_target_logs.target_week', class: 'align-middle target_week'},
+                    {data: 'target_month', name: 'sale_person_target_logs.target_month', class: 'align-middle target_month'},
                     {data: 'average_revenue', name: 'sale_person_target_logs.average_revenue', class: 'align-middle average_revenue'}
 
                 ],
