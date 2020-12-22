@@ -5,7 +5,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <form>
-                    <div class="form-group">
+                    <div class="form-group mb-0">
                         <select name="search_admin_sonic" id="search_admin_sonic" class="form-control select2">
                             @if(isset($search_sonic))
                             @foreach($search_sonic as $search)
@@ -24,7 +24,12 @@
 
 
 <script type="text/javascript">
-
+    $(document).ready(function(){
+        $(document).on('keydown', function ( e ) {
+            if (e.ctrlKey && e.shiftKey && ( String.fromCharCode(e.which).toLowerCase() === 'f') ) {
+                $("#GlobalSearchSonicModal").modal('show');
+            }
+        });
         $('#search_admin_sonic').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder:'Search Sonic',
@@ -33,6 +38,14 @@
             var url = $(this).val();
             window.location.href = url;
         });
+
+        $('#GlobalSearchSonicModal').on('shown.bs.modal', function (e) {
+            $('#search_admin_sonic').select2('open');
+        });
+        $('#GlobalSearchSonicModal').on('hidden.bs.modal', function (e) {
+            $('#search_admin_sonic').select2('close');
+        });
+    });
 
 
 </script>

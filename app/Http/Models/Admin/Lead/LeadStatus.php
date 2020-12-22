@@ -1,0 +1,10 @@
+<?php
+
+namespace App\http\Models\Admin\Lead;
+
+use Illuminate\Database\Eloquent\Model;
+
+class LeadStatus extends Model
+{
+    //
+}

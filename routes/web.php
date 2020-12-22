@@ -36,6 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
+    Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -373,6 +374,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     });
 
+    Route::prefix('telenor')->name('telenor.')->group(function () {
+        Route::prefix('data_conversion')->name('data_conversion.')->group(function () {
+            Route::get('', 'Shippers\ShipperTelenorController@data_conversion_index')->name('index');
+            Route::post('', 'Shippers\ShipperTelenorController@data_conversion_store')->name('store');
+        });
+    });
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -464,6 +471,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('set_segment/bulk','Admins\AdminDashboardController@setSegmentBulk')->name('set.segment_bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
+        Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -576,9 +584,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
             Route::post('/assign_location', 'Admins\AdminDashboardController@assign_locations_submit')->name('assign_location');
             Route::post('/view_assign_location', 'Admins\AdminDashboardController@view_assign_locations')->name('view_assign_location');
+            Route::post('/assign_locations_view', 'Admins\AdminDashboardController@assign_locations_view')->name('assign_locations_view');
+            Route::post('/set_pickup_route', 'Admins\AdminDashboardController@set_as_pickup_route')->name('set_pickup_route');
         });
         Route::prefix('rider')->name('rider.')->group(function (){
-            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+           // Route::get('','Admins\AdminDashboardController@riderView')->name('index');
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
             Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
@@ -823,6 +833,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
             });
 
+        });
+
+        Route::prefix('pickup_route')->name('pickup_route.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_list')->name('list');
+            Route::post('/ajax', 'Admins\V2Pickup\V2AdminPickupsController@edit_route_ajax')->name('edit_ajax');
+            //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
         });
 
     });
@@ -2447,6 +2464,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
         });
+    });
+
+	Route::prefix('leads')->name('leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+        Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
+        Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
+        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
     });
 });
 

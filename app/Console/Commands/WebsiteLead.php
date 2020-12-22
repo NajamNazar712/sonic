@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\http\Models\Admin\Lead\Lead;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
@@ -60,7 +61,15 @@ class WebsiteLead extends Command
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $lead) {
-                dd($lead);
+                $new_lead = new Lead();
+                $new_lead->lead_id = $lead->id;
+                $new_lead->contact_person = $lead->full_name;
+                $new_lead->city_id = $lead->city_id;
+                $new_lead->phone_number = $lead->phone_number;
+                $new_lead->email_address = $lead->email;
+                $new_lead->requested_date = $lead->created_at;
+                $new_lead->message = $lead->message;
+                $new_lead->save();
             }
         }
     }
