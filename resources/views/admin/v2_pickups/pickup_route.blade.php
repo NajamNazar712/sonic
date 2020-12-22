@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Route Management')
+@section('title', 'Pickup Routes')
 
 @section('content')
 
-    <h1>Route Management</h1>
+    <h1>Pickup Routes </h1>
 
     <section>
 
@@ -16,10 +16,9 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
-                           <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
@@ -28,7 +27,7 @@
                                     <th class="border-primary border-darken-1">Junction</th>
                                     <th class="border-primary border-darken-1">Added Date/Time</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Route Types</th>
+                                    {{--   <th class="border-primary border-darken-1">Route Types</th>--}}
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -48,6 +47,166 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade text-left" id="add_route" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRoute"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Add Route</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body ">
+
+                 <form action="{{route('admin.management.route.add')}}" method="post" class="mt-2" id="addRouteForm" novalidate="novalidate">
+                    {{csrf_field()}}
+
+                    <div class="row mb-2">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;text-align: left; " required data-rule-required="true" data-msg-required="This field is required">
+                                    <option value="" selected>Select a City</option>
+                                    @foreach($cities as $city)
+                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                            </fieldset>
+
+                        </div>
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="start"  id="startSearchTextField" placeholder="Start Point" required data-rule-required="true" data-msg-required="This field is required">
+                            </fieldset>
+                        </div>
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="end"  placeholder="End Point" required data-rule-required="true" data-msg-required="This field is required">
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <select name="rider_id" id="rider" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                    <option value="" selected>Select a Rider</option>
+                                    @foreach($riders as $rider)
+                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                     <input type="text"  name="route_type_id" hidden value="1">
+
+                    <div class="row mb-2">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add Route</button>
+                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+                    </div>
+                </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade text-left" id="edit_route_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditRoute"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Edit Route</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <form action="#" method="post" class="mt-2" id="editRouteForm" novalidate="novalidate">
+                            {{csrf_field()}}
+                            @method('PUT')
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <select name="city_id" id="city_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                            <option value="" selected>Select a City</option>
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" id="route_code" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="start"  id="start" placeholder="Start Point" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="end"  id="end" placeholder="End Point" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <select name="rider_id" id="rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                            <option value="" selected>Select a Rider</option>
+                                            @foreach($riders as $rider)
+                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                            <input type="text" name="route_type_id" hidden value="1">
+
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junstion_edit" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update Route</button>
+                                <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="AssignLocationsView" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignLocationsView"
              aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -103,19 +262,21 @@
                 </div>
             </div>
         </div>
+
     </section>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <style>
+        textarea#junction {
+            resize: none;
+        }
+    </style>
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
@@ -124,13 +285,35 @@
             $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Add Pickup Addresses",
-                //allowClear:true,
+               /* allowClear:true,*/
             });
-           /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Search Pickup Address'
-            });*/
-            var selected_rows = [];
+
+            $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select City',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#add_route")
+            });
+            $('#editRouteForm #city_id').select2({
+                placeholder:'Select City',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#edit_route_modal")
+            });
+
+            $('#editRouteForm #rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#edit_route_modal")
+            });
+            $('#rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#add_route")
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -138,7 +321,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.management.route.ajax') }}',
+                        url: '{{ route('admin.v2_pickups.pickup_route.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -150,7 +333,7 @@
                             head.push('Junction');
                             head.push('Added Date/Time');
                             head.push('Status');
-                            head.push('Route Type');
+                           /* head.push('Route Type');*/
 
 
                             $.each(result.data, function(index, values) {
@@ -164,7 +347,7 @@
                                 row.push(values.junction);
                                 row.push(values.created_at);
                                 row.push(values.status);
-                                row.push(values.route_type);
+                               /* row.push(values.route_type);*/
 
                                 body.push(row);
                             });
@@ -179,151 +362,31 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(93, session('permissions')))
 
-                    buttons: [{
-                        text: 'Add Route',
-                        className: 'btn btn-primary',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#addRoute').modal('show');
-
-                        }
-
-                    },{
-                    text: '<i class="la la-cogs"></i> Set as Pickup Route',
-                    className: 'btn btn-primary pickup',
-                    enabled:false,
+                buttons: [{
+                    text: 'Add Route',
+                    className: 'btn btn-primary',
+                    enabled: true,
                     action: function (e, dt, node, config) {
+                        $('#add_route').modal('show');
 
-                        $('input:hidden[name=id]').val(selected_rows);
-
-                        if(selected_rows.length === 0){
-                            table.button('.pickup').disable();
-                            return false;
-                        }
-                        else if(selected_rows !== ''){
-                            swal({
-                                title: 'Are You Sure?',
-                                text: 'Select Yes to set as pickup route !',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if (confirm) {
-                                    $.ajax({
-                                        url: '{!! route('admin.management.route.set_pickup_route') !!}',
-                                        method: 'POST',
-                                        data: {
-                                            '_token': '{{ csrf_token() }}',
-                                            'route_id': selected_rows
-                                        }
-                                    }).done(function(data){
-                                        if(data.status){
-                                            table.rows().deselect();
-                                            selected_rows = [];
-                                            table.button('.pickup').disable();
-                                            table.draw(true);
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                        }
-
-                                    });
-                                }
-                            });
-
-                        }else{
-                            var error = 'Route Not Found, Please Try again!';
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            table.button('.pickup').disable();
-                        }
                     }
-                },{
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'select_all',
-                    action : function(e) {
-                        e.preventDefault();
 
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.select();
-
-                                id = parseInt(row.id());
-
-                                var index = $.inArray(id, selected_rows);
-
-                                if (index === -1) {
-                                    selected_rows.push(id);
-                                }
-
-                                table.button('.pickup').enable();
-                            }
-                        });
-                    }
-                }, {
-                    extend: 'selectNone',
-                    text: 'Select None',
-                    className: 'select_none',
-                    action : function(e) {
-                        e.preventDefault();
-
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.deselect();
-
-                                id = parseInt(row.id());
-
-                                var index = $.inArray(id, selected_rows);
-
-                                if (index !== -1) {
-                                    selected_rows.splice(index, 1);
-                                }
-
-                                if (selected_rows.length == 0) {
-                                    table.button('.pickup').disable();
-                                }
-                            }
-                        });
-                    }
                 },
                     {
                         extend: 'excel',
-                        title: 'Route Management',
+                        title: 'Pickup Route',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
                 @else
                 buttons: [{
                     extend: 'excel',
-                    title: 'Route Management',
+                    title: 'Pickup Routes',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
                 @endif
                 scrollX: true, scrollY: '500px',
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -332,12 +395,12 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.management.route.ajax') }}',
+                ajax: '{{ route('admin.v2_pickups.pickup_route.list') }}',
                 rowId: 'id',
-                order: [[7, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    //{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id',orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'code', name: 'routes.code', class: 'align-middle code'},
                     {data: 'start', name: 'routes.start', class: 'align-middle start'},
@@ -345,22 +408,13 @@
                     {data: 'junction', name: 'routes.junction', class: 'align-middle junction'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'routes.status', class: 'align-middle status'},
-                    {data: 'route_type', name: 'rt.id', class: 'align-middle route_type'},
+                  /*  {data: 'route_type', name: 'rt.id', class: 'align-middle route_type'},*/
                     {data: 'action', name: 'action', class: 'align-middle action text-center', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
-
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
-                    if (data.route_type == 'Delivery') {
-                        $('td:eq(0)', row).addClass('select-checkbox');
-
-                        if ($.inArray(data.id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                 },
                 initComplete: function() {
@@ -381,7 +435,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -410,35 +464,49 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    $("#route_type").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Route Type",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+
                     this.api().table().columns.adjust();
                 }
             });
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                    var route_id = table.row( $(this).parents('tr') ).data().id;
+                    if ($(this).hasClass('update_route')) {
+                        $.ajax({
+                            url: '{!! route('admin.v2_pickups.pickup_route.edit_ajax') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'route_id': route_id
+                            }
+                        }).done(function(data){
+                            console.log(data);
+                            if(data.details.length != 0 ){
+                                /*$.each(data.details, function(index, value) {*/
+                                    var city_id = data.details.city_id;
+                                    var route_code = data.details.code;
+                                    var start = data.details.start;
+                                    var end = data.details.end;
+                                    var rider_id = data.details.rider_id;
+                                    var junctions = data.details.junctions;
 
-                var index = $.inArray(id, selected_rows);
+                                    $('#city_id').val(city_id).trigger('change');
+                                    $('#route_code').val(route_code);
+                                    $('#start').val(start);
+                                    $('#end').val(end);
+                                    $('#rider_id').val(rider_id).trigger('change');
+                                    $('#junstion_edit').val(junctions);
+                                //});
+                                $('#edit_route_modal').modal('show');
+                                var route = '{!! route('admin.management.route.edit', ':id') !!}';
+                                    route = route.replace(':id', route_id);
+                                $("#editRouteForm").attr('action', route);
 
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
+                            }
 
-                if (selected_rows.length > 0) {
-                    table.button('.pickup').enable();
-                }
-                else {
-                    table.button('.pickup').disable();
-                }
+                        });
+
+                    }
             });
-
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
@@ -503,6 +571,29 @@
                 }
             });
 
+
+        });
+
+        $( "#editRouteForm" ).validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Route is being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+
+                form.submit();
+            }
         });
         $( "#route_location" ).validate({
 
@@ -526,19 +617,27 @@
             }
         });
 
-        $("#addRoute").on("show.bs.modal", function(e) {
-                $.get( "/admin/management/route/add", function( data ) {
-                    $("#addRouteDiv").html(data);
+
+        $( "#addRouteForm" ).validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Route is being Saved!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
                 });
-        });
-        $("#editRoute").on("show.bs.modal", function(e) {
 
-            var id = $(e.relatedTarget).data('target-id');
-
-            $.get( "/admin/management/route/"+id+"/edit", function( data ) {
-                $("#editRouteDiv").html(data);
-            });
-
+                form.submit();
+            }
         });
 
         $('body').on('click','.deactivate',function (e) {
@@ -580,7 +679,7 @@
             });
 
 
-    });
+        });
     </script>
 
 @endsection

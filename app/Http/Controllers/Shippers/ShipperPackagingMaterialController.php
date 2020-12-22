@@ -429,7 +429,7 @@ class ShipperPackagingMaterialController extends Controller
                     $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
 
                 }else{
-                    return redirect()->back()->with('error','Can\'t  Request material!');
+                    return redirect()->route('cod.packaging.requests.index')->with('error','Can\'t  Request material!');
                 }
 
                 if($total_charges <= $balance){
