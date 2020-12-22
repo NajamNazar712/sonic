@@ -888,6 +888,12 @@
                           <li><a class="menu-item" href="{{ route('admin.reports.app_efficiency.index') }}">App Efficiency Report</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(414, session('permissions')))
+                          <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Month Closing - Individual</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(415, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Month Closing - Pivot</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

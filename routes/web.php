@@ -1837,6 +1837,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
         });
+
+        Route::prefix('month_closing')->name('month_closing.')->group(function(){
+            Route::prefix('individual')->name('individual.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
+            });
+            Route::prefix('pivot')->name('pivot.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
+            });
+            Route::get('','Admins\AdminMonthClosingController@resolved_index')->name('index');
+            Route::get('list','Admins\AdminMonthClosingController@resolved_list')->name('list');
+            Route::post('closed','Admins\AdminMonthClosingController@month_closing_closed')->name('closed');
+
+        });
     });
 
     //Reports end

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use DB;
+
 class UpdateModulePermissionForNewMonthClosingTableSeeder extends Seeder
 {
     /**
@@ -18,8 +18,16 @@ class UpdateModulePermissionForNewMonthClosingTableSeeder extends Seeder
             array('id' => 411, 'name' => 'Month Closing Closing Type - Action', 'module_id' => 15),
             array('id' => 412, 'name' => 'Month Closing Assign Responsible - Action', 'module_id' => 15),
             array('id' => 413, 'name' => 'Month Closing Close - Action', 'module_id' => 15),
+            array('id' => 414, 'name' => 'Month Closing Report - Individual', 'module_id' => 9),
+            array('id' => 415, 'name' => 'Month Closing Report - Pivot', 'module_id' => 9),
         ));
 
-        
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        DB::table('admins_screen_list')->insert(array(
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support  >  Month Closing  >  Pending', 'url'=>'admin.month_closing.pending.index', 'permission_id' => 408),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support  >  Month Closing  >  Resolved', 'url'=>'admin.month_closing.resolved.index', 'permission_id' => 409),
+        ));
+
+        DB::table('admins_screen_list')->where('url', 'admin.month_closing.index')->delete();
     }
 }
