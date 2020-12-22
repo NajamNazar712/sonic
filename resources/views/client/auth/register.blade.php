@@ -104,7 +104,7 @@
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="Person Name (Alphabet Only)" name="shipper_poc" value="{{old('shipper_poc')}}">
+                                                        <input type="text" class="form-control required" placeholder="Person Name (Alphabet Only)" name="shipper_poc" value="@if(old('shipper_poc') != null){{old('shipper_poc')}}@elseif($lead != null){{$lead->contact_person}}@else{{old('shipper_poc')}}@endif">
                                                     </div>
                                                 </div>
                                             </div>
@@ -122,7 +122,7 @@
                                                         <label for="shipper_phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
+                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="@if(old('shipper_phone') != null){{old('shipper_phone')}}@elseif($lead != null){{$lead->phone_number}}@else{{old('shipper_phone')}}@endif">
                                                     </div>
                                                 </div>
                                             </div>
@@ -172,7 +172,11 @@
                                                         <div>
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($all_cities as $city)
-                                                                    <option value="{{$city->id}}" {{ old('shipper_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
+                                                                    @if($lead != null)
+                                                                        <option value="{{$city->id}}" {{ $lead->city_id == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
+                                                                    @else
+                                                                        <option value="{{$city->id}}" {{ old('shipper_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -747,7 +751,7 @@
                                                             Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="{{ old('email') }}"  name="email">
+                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="@if(old('email') != null){{old('email')}}@elseif($lead != null){{$lead->email_address}}@else{{old('email')}}@endif"  name="email">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
@@ -825,10 +829,15 @@
     $(document).ready(function () {
 
 
-       $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select City',
-
-       });
+        @if($lead != null)
+           $('#shipper_city').select2({
+               placeholder:'Select City',
+           });
+       @else
+           $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
+               placeholder:'Select City',
+           });
+       @endif
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
 

@@ -66,7 +66,6 @@
                                     class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">
                                 <div class="chats">
                                     @if(!empty($details))
-
                                         @foreach($details as $detail)
                                             <div id="chat_{{$detail->id}}"
                                                  class="chat">
@@ -90,12 +89,11 @@
                             </section>
                             <section class="chat-app-form">
                                 <form class="chat-app-input row" id="chat_form">
-                                    <fieldset
-                                            class="form-group position-relative has-icon-left col-10 m-0">
+                                    <fieldset class="form-group position-relative has-icon-left col-10 m-0">
                                         <div class="form-control-position">
                                             <i class="la la-chevron-right"></i>
                                         </div>
-                                        <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
+                                        <textarea id="chat_input" class="form-control height-150" placeholder="Enter Remarks"></textarea>
                                     </fieldset>
                                     <div class="display-inline-block col-2">
                                         <fieldset
@@ -109,7 +107,6 @@
                                     </div>
                                 </form>
                             </section>
-
                         </div>
                     </div></div>
             </div>

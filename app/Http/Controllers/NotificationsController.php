@@ -6422,7 +6422,38 @@ class NotificationsController extends Controller
 
 
                 }
+                else if ($id == 113) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $lead = $reference_1_id;
+                    $route = route('cod.register', ['lead_id' => $lead->id]);
+                    if($lead != null){
+                        $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                        <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                    </div>';
 
+                        if (strpos($body, '[contact_person]') !== FALSE) {
+                            $body = str_replace('[contact_person]',$lead->contact_person, $body);
+                        }
+                        $link = '<div style="margin-top: 20px"><a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Continue to Registation</a></div>';
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]',$link, $body);
+                        }
+                        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff"><p>';
+
+                        $html .= $body . '</p>
+                    </div>
+                        <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year. ' By Trax Logistics, All Rights Reserved.</p>
+                    </div>';
+                        $to = $lead->email_address;
+                        self::email($subject, $html, $to);
+                    }
+
+
+                }
             }
         }
     }

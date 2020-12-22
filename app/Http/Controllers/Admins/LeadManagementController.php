@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\Lead\Lead;
 use App\http\Models\Admin\Lead\LeadLog;
@@ -82,6 +83,10 @@ class LeadManagementController extends Controller
             $lead->status_id = $status;
             $lead->updated_by = Auth::id();
             $lead->save();
+
+            if($status == 9){
+                NotificationsController::send(113, $lead);
+            }
 
             return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
         }
