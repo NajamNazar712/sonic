@@ -69,6 +69,9 @@
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
+                                        <th class="border-primary border-darken-1">POC Tagged</th>
+                                        <th class="border-primary border-darken-1">KAM Tagged</th>
+                                        <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
@@ -345,6 +348,9 @@
                         head.push('Product Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
+                        head.push('POC Tagged');
+                        head.push('KAM Tagged');
+                        head.push('REF Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
@@ -377,6 +383,9 @@
                             row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
+                            row.push(values.tagged_poc);
+                            row.push(values.kam);
+                            row.push(values.ref);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.updated_by);
@@ -664,96 +673,90 @@
                             }
                         }
                     },
-                    {
-                       text: 'Sales Tier Tagging',
-                       className: 'btn btn-primary tag',
-                       enabled:false,
-                       action: function (e, dt, node, config) {
-                           if(selected_rows != ''){
+               {
+                   text: 'Sales Tier Tagging',
+                   className: 'btn btn-primary tag',
+                   enabled:false,
+                   action: function (e, dt, node, config) {
+                       if(selected_rows != ''){
 
-                               $('#SalesTierTypeTagModal').modal('show');
-                               // console.log(selected_rows);
-                               $('#salesTierTypeTagSubmit').on('click',function () {
-                                   var poc = parseInt($('#poc').val());
-                                   var kam = parseInt($('#kam').val());
-                                   var ref = parseInt($('#ref').val());
-                                   swal({
-                                       text: 'Are you sure, you want to Tag?',
-                                       icon: 'info',
-                                       buttons: {
-                                           cancel: {
-                                               text: 'No',
-                                               value: null,
-                                               visible: true,
-                                               closeModal: true,
-                                           },
-                                           confirm: {
-                                               text: 'Yes',
-                                               value: true,
-                                               visible: true,
-                                               closeModal: true
-                                           }
+                           $('#SalesTierTypeTagModal').modal('show');
+                           $('#salesTierTypeTagSubmit').on('click',function () {
+                               var poc = $('#poc').val();
+                               var kam = $('#kam').val();
+                               var ref = $('#ref').val();
+                               swal({
+                                   text: 'Are you sure, you want to Tag?',
+                                   icon: 'info',
+                                   buttons: {
+                                       cancel: {
+                                           text: 'No',
+                                           value: null,
+                                           visible: true,
+                                           closeModal: true,
                                        },
-                                       closeOnClickOutside: false,
-                                       closeOnEsc: false,
-                                       dangerMode: true
-                                   }).then(function(confirm) {
-                                       if (confirm) {
+                                       confirm: {
+                                           text: 'Yes',
+                                           value: true,
+                                           visible: true,
+                                           closeModal: true
+                                       }
+                                   },
+                                   closeOnClickOutside: false,
+                                   closeOnEsc: false,
+                                   dangerMode: true
+                               }).then(function(confirm) {
+                                   if (confirm) {
 
-                                               $.ajax({
-                                                   url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
-                                                   method: 'POST',
-                                                   data: {
-                                                       'poc': poc,
-                                                       'kam': kam,
-                                                       'ref': ref,
-                                                       'shipper_ids[]': selected_rows,
-                                                       '_token': '{{ csrf_token() }}'
-                                                   }
-                                               })
-                                                   .done(function (data) {
-                                                       if (data.status == 1) {
-                                                           $('#SalesTierTypeTagModal').modal('hide');
-                                                           toastr.success(data.success, 'Success!', {
-                                                               positionClass: 'toast-bottom-center',
-                                                               containerId: 'toast-bottom-center'
-                                                           });
-                                                       } else {
-                                                           toastr.error(data.error, 'Error!', {
-                                                               positionClass: 'toast-top-center',
-                                                               containerId: 'toast-top-center'
-                                                           });
-                                                       }
-                                                       selected_rows = [];
-
-                                                       table.rows().deselect();
-                                                       $('#poc').val('').trigger('change');
-                                                       $('#kam').val('').trigger('change');
-                                                       $('#ref').val('').trigger('change');
-                                                       $('#SalesTierTypeTagModal').modal('hide');
-                                                       table.draw(true);
-                                                       table.button('.tag').disable();
-
-
-                                                   });
-                                           } /*else {
-                                               var error = "Atleast Select One";
-                                               toastr.error(error, 'Error!', {
-                                                   positionClass: 'toast-top-center',
-                                                   containerId: 'toast-top-center'
-                                               });
+                                       $.ajax({
+                                           url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
+                                           method: 'POST',
+                                           data: {
+                                               'poc': poc,
+                                               'kam': kam,
+                                               'ref': ref,
+                                               'shipper_ids[]': selected_rows,
+                                               '_token': '{{ csrf_token() }}'
                                            }
-                                       }*/
-                                   });
-                               });
+                                       })
+                                           .done(function (data) {
+                                               if (data.status === 0) {
+                                                   toastr.error(data.error, 'Error!', {
+                                                       positionClass: 'toast-top-center',
+                                                       containerId: 'toast-top-center'
+                                                   });
+                                               } else {
+                                                   $('#SalesTierTypeTagModal').modal('hide');
+                                                   toastr.success(data.success, 'Success!', {
+                                                       positionClass: 'toast-bottom-center',
+                                                       containerId: 'toast-bottom-center'
+                                                   });
+                                               }
+                                               selected_rows = [];
 
-                           }
-                           else{
-                               var error = "Atleast Select One";
-                               toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                           }
+                                               table.rows().deselect();
+                                               $('#poc').val('').trigger('change');
+                                               $('#kam').val('').trigger('change');
+                                               $('#ref').val('').trigger('change');
+                                               $('#SalesTierTypeTagModal').modal('hide');
+                                               table.draw(true);
+                                               table.button('.tag').disable();
+                                               table.button('.bulk_tagging').disable();
+                                               table.button('.set_commission').disable();
+                                               table.button('.approve_commission').disable();
+
+
+                                           });
+                                   }
+                               });
+                           });
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                        }
-                   },
+                   }
+               },
                     @endif
                     {
                         extend: 'selectAll',
@@ -881,6 +884,9 @@
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
+                {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
+                {data: 'kam', name: 'k.name', class: 'align-middle kam'},
+                {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},

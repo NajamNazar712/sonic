@@ -71,6 +71,9 @@
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
+                                        <th class="border-primary border-darken-1">POC Tagged</th>
+                                        <th class="border-primary border-darken-1">KAM Tagged</th>
+                                        <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -261,6 +264,9 @@
                         head.push('Request Date');
                         head.push('Status');
                         head.push('Sales Person Tagged');
+                        head.push('POC Tagged');
+                        head.push('KAM Tagged');
+                        head.push('REF Tagged');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -287,6 +293,9 @@
                             row.push(values.created_at);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
+                            row.push(values.tagged_poc);
+                            row.push(values.kam);
+                            row.push(values.ref);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -506,6 +515,7 @@
                                                     $('#SalesTierTypeTagModal').modal('hide');
                                                     table.draw(true);
                                                     table.button('.tag').disable();
+                                                    table.button('.assign_rider').disable();
 
 
                                                 });
@@ -644,6 +654,9 @@
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
+                {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
+                {data: 'kam', name: 'k.name', class: 'align-middle kam'},
+                {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},

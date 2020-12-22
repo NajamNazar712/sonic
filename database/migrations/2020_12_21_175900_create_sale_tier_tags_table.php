@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalesTierTypeTagHistoriesTable extends Migration
+class CreateSaleTierTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,12 @@ class CreateSalesTierTypeTagHistoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales_tier_type_tag_histories', function (Blueprint $table) {
+        Schema::create('sale_tier_tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('');
+            $table->integer('user_id');
+            $table->integer('poc');
+            $table->integer('kam');
+            $table->integer('ref');
             $table->timestamps();
         });
     }
@@ -27,6 +30,6 @@ class CreateSalesTierTypeTagHistoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_tier_type_tag_histories');
+        Schema::dropIfExists('sale_tier_tags');
     }
 }
