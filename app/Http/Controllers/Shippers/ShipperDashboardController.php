@@ -159,7 +159,7 @@ class ShipperDashboardController extends Controller
                 ->orwhereIn('shipments.user_id', session('sister_users'));
             })->count();
 
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
