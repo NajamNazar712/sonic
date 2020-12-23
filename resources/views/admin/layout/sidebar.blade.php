@@ -568,17 +568,13 @@
                         </li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(141, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.month_closing.index') }}">Month Closing</a></li>
-                    @endif
-
-                    @if (session('role_id') == 1 || count(array_intersect([141], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([408, 409], session('permissions'))) !== 0)
                         <li class=" nav-item"><a href="#"><span class="menu-title">Month Closing</span></a>
                             <ul class="menu-content">
-                                @if (session('role_id') == 1 || in_array(141, session('permissions')))
+                                @if (session('role_id') == 1 || in_array(408, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Pending</a></li>
                                 @endif
-                                @if (session('role_id') == 1 || in_array(141, session('permissions')))
+                                @if (session('role_id') == 1 || in_array(409, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.month_closing.resolved.index') }}">Resolved</a></li>
                                 @endif
                             </ul>
@@ -889,10 +885,10 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(414, session('permissions')))
-                          <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Month Closing - Individual</a></li>
+                          <li><a class="menu-item" href="{{ route('admin.reports.month_closing.individual.index') }}">Month Closing - Individual</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(415, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Month Closing - Pivot</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.month_closing.pivot.index') }}">Month Closing - Pivot</a></li>
                         @endif
                     </ul>
                 </li>

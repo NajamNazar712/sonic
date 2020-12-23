@@ -421,17 +421,22 @@ class AdminMonthClosingController extends Controller
             ->addColumn('action', function($shipments) {
                 $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
                 $edit_assign_responsible = '<button type="button" class="dropdown-item edit_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Edit Responsible</div></button>';
-
-                $dropdown = '
+                if (session('role_id') == 1 || in_array(412, session('permissions'))) {
+                    $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                if($shipments->month_closing_id == null){
-                    $dropdown .= $assign_responsible;
+                    if($shipments->month_closing_id == null){
+                        $dropdown .= $assign_responsible;
+                    }
+                    else{
+                        $dropdown = '';
+                    }
                 }
                 else{
                     $dropdown = '';
                 }
+
 
                 return $dropdown;
 
@@ -467,7 +472,7 @@ class AdminMonthClosingController extends Controller
                 $month_closing_responsible->save();
             }
 
-            return redirect()->back()->with('success', 'Responsible Person(s) updated succeddfully!');
+            return redirect()->back()->with('success', 'Responsible Person(s) updated successfully!');
 
         }
         return redirect()->back()->with('error', 'No responsible persons selected!');

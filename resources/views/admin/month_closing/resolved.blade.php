@@ -109,14 +109,73 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.month_closing.resolved.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Tracking No.');
+                            head.push('Current Status');
+                            head.push('COD Amount');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Shipper');
+                            head.push('Consignee Name');
+                            head.push('Number');
+                            head.push('Claim ID');
+                            head.push('Claim Type');
+                            head.push('Closing Type');
+                            head.push('Consignee Address');
+                            head.push('Comments');
+                            head.push('Closing Status');
 
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.current_status);
+                                row.push(values.cod_amount);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.shipper);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
+                                row.push(values.claim_id);
+                                row.push(values.claim_type);
+                                row.push(values.closing_type);
+                                row.push(values.consignee_address);
+                                row.push(values.remarks);
+                                row.push(values.closing_status);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([142, 143, 144], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([413], session('permissions'))) !== 0)
 
                 buttons: [
-
+                    @if (session('role_id') == 1 || in_array(413, session('permissions')))
                     {
                         text: 'Switch To Close',
                         className: 'btn btn-primary close_action',
@@ -244,6 +303,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -303,7 +363,7 @@
                         title: 'Month Closing Resolved',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },'reset'
                 ],
                 @else
                 buttons:[{
@@ -518,19 +578,6 @@
                     if ($(this).hasClass('assign_responsible')) {
                         $('#add_responsible_modal').modal('show');
                         $('#responsible_person_shipment_id').val(shipment_id);
-                    }
-                    else if($(this).hasClass('edit_responsible')){
-                        $.ajax({
-                            url: '{!! route('admin.month_closing.pending.assign_details') !!}',
-                            method: 'POST',
-                            data: {
-                                'shipment_id': shipment_id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                console.log(data)
-                            });
                     }
                 }
             });

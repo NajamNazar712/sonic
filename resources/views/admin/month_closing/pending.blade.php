@@ -249,13 +249,13 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.month_closing.list') }}',
+                        url: '{{ route('admin.month_closing.pending.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
-                            /*  head.push('Current Status');*/
+                            head.push('Current Status');
                             head.push('COD Amount');
                             head.push('Origin');
                             head.push('Destination');
@@ -265,9 +265,10 @@
                             head.push('Number');
                             head.push('Claim ID');
                             head.push('Claim Type');
-                            /*  head.push('Closing Type');*/
+                            head.push('Closing Type');
                             head.push('Consignee Address');
                             head.push('Comments');
+                            head.push('Closing Status');
 
 
                             $.each(result.data, function(index, values) {
@@ -276,7 +277,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                /*   row.push(values.current_status);*/
+                                row.push(values.current_status);
                                 row.push(values.cod_amount);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -286,9 +287,10 @@
                                 row.push(values.consignee_phone);
                                 row.push(values.claim_id);
                                 row.push(values.claim_type);
-                                /*  row.push(values.closing_type);*/
+                                row.push(values.closing_type);
                                 row.push(values.consignee_address);
-                                row.push(values.shipment_remarks);
+                                row.push(values.remarks);
+                                row.push(values.closing_status);
 
 
                                 body.push(row);
@@ -303,10 +305,10 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([142, 143, 144], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([408, 409, 410, 411], session('permissions'))) !== 0)
 
                 buttons: [
-
+                    @if (session('role_id') == 1 || in_array(410, session('permissions')))
                     {
                         text: 'Switch To Resolve',
                         className: 'btn btn-primary resolve',
@@ -370,6 +372,8 @@
                             }
                         }
                     },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(411, session('permissions')))
                     {
                         text: 'Closing Status',
                         className: 'btn btn-primary closing_type_status',
@@ -383,6 +387,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -444,7 +449,7 @@
                         title: 'Month Closing Pending',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },'reset'
                 ],
                 @else
                 buttons:[{
@@ -518,7 +523,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.shipment_remarks') ) {
+                        if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.action') ) {
                             $(td).appendTo($(search));
                         }
                         // else if($(header).is('.status')){
