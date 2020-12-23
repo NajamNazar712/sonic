@@ -465,7 +465,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select-checkbox')) {
                         $(td).appendTo($(search));
                     }
                     else {
@@ -478,6 +478,25 @@
                         }
                     }
                 });
+            }
+        });
+        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            var id = parseInt($(this).parent('tr').attr('id'));
+
+            var index = $.inArray(id, selected_rows);
+
+            if (index === -1) {
+                selected_rows.push(id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+
+            if (selected_rows.length > 0) {
+                table.button('.tag').enable();
+            }
+            else {
+                table.button('.tag').disable();
             }
         });
         $('body').on('click','button.blacklist',function () {
