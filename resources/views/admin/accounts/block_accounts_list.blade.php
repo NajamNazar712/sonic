@@ -438,7 +438,7 @@
                 {data: 'address', name: 'users.address', class: 'address'},
                 {data: 'email', name: 'users.email', class: 'email'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
-                {data: 'poc', name: 'a.name', class: 'align-middle poc'},
+                {data: 'poc_tagged', name: 'a.name', class: 'align-middle poc_tagged'},
                 {data: 'kam', name: 'd.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'h.name', class: 'align-middle ref'},
                 {data: 'reason', name: 'users.blacklist_reason', class: 'reason'},

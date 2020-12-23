@@ -7747,7 +7747,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a','a.id','=','st.poc')
             ->leftjoin('admins as d','d.id','=','st.kam')
             ->leftjoin('admins as h','h.id','=','st.ref')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc','d.name as kam','h.name as ref'])->where('blacklist',1);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc_tagged','d.name as kam','h.name as ref'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
