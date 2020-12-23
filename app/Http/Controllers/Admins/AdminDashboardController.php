@@ -1426,6 +1426,7 @@ class AdminDashboardController extends Controller
         if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
             if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                $old_sale_person_date = $old_sale_person->created_at;
                 if($old_sale_person){
                     $old_sale_person = $old_sale_person->sales_person;
                 }
