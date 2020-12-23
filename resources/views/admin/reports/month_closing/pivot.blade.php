@@ -221,14 +221,14 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+           /* $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var shipment_id = parseInt($(this).parents('tr').attr('id'));
                 if(shipment_id){
                     if ($(this).hasClass('shipment_count_popup')) {
 
                     }
                 }
-            });
+            });*/
 
         });
     </script>
