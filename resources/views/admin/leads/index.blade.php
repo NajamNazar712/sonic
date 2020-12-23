@@ -381,7 +381,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.leads.list') }}',
                 rowId: 'lead_id',
-                order: [[9, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -689,11 +689,16 @@
                                 '_token':'{{ csrf_token() }}'
                             }
                         }).done(function (data) {
-                            UnblockPagePermanently();
                             $('#add_status_modal').modal('hide');
+                            UnblockPagePermanently();
                             new_status = null;
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.draw();
+                            if(data.status == 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
                         });
                     }
                     else{
