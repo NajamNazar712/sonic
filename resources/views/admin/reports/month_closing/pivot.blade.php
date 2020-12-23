@@ -195,7 +195,7 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'responsible_person', name: 'rp.name', class: 'align-middle responsible_person'},
-                    {data: 'shipment_count_btn', name: 'shipment_count', class: 'align-middle shipment_count_btn'},
+                    {data: 'shipment_count', name: 'shipment_count', class: 'align-middle shipment_count'},
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
                     {data: 'cod_amount', name: 'shipments.amount', class: 'align-middle cod_amount'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
