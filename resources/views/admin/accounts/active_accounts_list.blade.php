@@ -289,23 +289,21 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="route_location" action="{{route('admin.accounts.view.rates')}}" method="post" novalidate="novalidate">
+                    <form id="rate_history" action="{{--{{route('admin.view.rates',['id' => $id])}}--}}" method="post" novalidate="novalidate">
                         @method('post')
                         {{ csrf_field() }}
                         <input type="text" hidden id="user_id" name="user_id">
                         <div class="col-12">
-                            <fieldset class="form-group">
-                                <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Location is required">
-                                   {{-- @foreach($users as $user)
-                                        <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
-                                    @endforeach--}}
+
+                                <select name="old_rate_date"  id="old_rate_date" class="form-control select2"required data-rule-required="true" data-msg-required="Date is required">
+
                                 </select>
-                            </fieldset>
+
                         </div>
 
                         <div class="row justify-content-center mt-4">
                             <div class="col-4">
-                                <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
+                                <button id="edit" type="submit" class="btn btn-primary btn-block">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -334,6 +332,7 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='search_cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $('body').on('change','#search_iban',function() {
@@ -1407,16 +1406,42 @@
                     });
             }
         });
+        var old_dates = [];
+
+        $('#old_rate_date').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Date',
+            width:'100%',
+            //allowClear:true
+        });
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
-            console.log(user_id);
-            //$('#route_id').val(route_id);
+
+            $('#user_id').val(user_id);
 
             if ($(this).hasClass('rates_history')) {
 
-                $('#RateHistoryModal').modal('show');
+                $.ajax({
+                    url: '{!! route('admin.view.user') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id
+                    }
+                }).done(function(data){
+                    if (data.status == 2) {
+
+                        $.each(data.details,function(key,value){
+
+                            var newOption = new Option(value.created_at, value.created_at, false, false);
+                            $('#old_rate_date').append(newOption).trigger('change');
+                        });
+
+
+                    }
+                    $('#RateHistoryModal').modal('show');
+                });
             }
         });
 
