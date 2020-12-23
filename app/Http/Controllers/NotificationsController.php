@@ -5295,7 +5295,8 @@ class NotificationsController extends Controller
                     $html .= '<thead><tr>
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
-                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th> 
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Tag Date</th> 
                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
                     $html .= '</tr></thead><tbody>';
 
@@ -5311,6 +5312,7 @@ class NotificationsController extends Controller
                         } else {
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
                         }
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person_date'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
                         $html .= '</tr>';
 
