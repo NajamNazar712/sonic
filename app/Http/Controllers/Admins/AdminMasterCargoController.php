@@ -16,7 +16,7 @@ use App\Http\Models\Admin\MasterCargo\MasterCargoBagExcel;
 use App\Http\Models\Admin\MasterCargo\MasterCargoExcel;
 use App\Http\Models\Admin\MasterCargo\MasterCargoJunctionReceival;
 use App\Http\Models\Admin\MasterCargo\MasterCargoStatus;
-use App\http\Models\Admins\ShipmentOnHold;
+use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\City;

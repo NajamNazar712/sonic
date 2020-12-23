@@ -42,7 +42,7 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
     <style type="text/css">
         #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
@@ -268,11 +268,7 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%">
-                                                                @foreach($sales_persons as $sales_person)
-                                                                    <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%"></select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -815,6 +811,7 @@
 <!-- BEGIN MODERN JS-->
 <script src="{{asset('app-assets/js/core/app-menu.js')}}" ></script>
 <script src="{{asset('app-assets/js/core/app.js')}}" ></script>
+<script type="text/javascript" src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js')}}"></script>
 <!-- END MODERN JS-->
 {{--<script src="{{asset('app-assets/js/scripts/customizer.js')}}" type="text/javascript"></script>--}}
 <!-- BEGIN PAGE LEVEL JS-->
@@ -824,13 +821,47 @@
     //$('.pickadate').pickadate();
     $(document).ready(function () {
 
-
+        var already_selected_person = [];
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
+           width: '100%',
            placeholder:'Select City',
+       }).bind('select2:select', function () {
+           var id = $(this).val();
+            if(id) {
+                $.ajax({
+                    url: '{!! route('cod.salesPerson') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if (data.status == 0) {
+                        $('#sale_person').empty();
 
-       });
+                        $.each(data.sale_persons, function (key, value) {
+                            var sale_person = parseInt(id + value.id);
+
+                            var index = $.inArray(sale_person, already_selected_person);
+
+                            if (index === -1) {
+
+                                var newOption = "<option>" + value.name + "</option>";
+                                $('#sale_person').append(newOption).trigger('change');
+                                $('#sale_person').val('').trigger('change');
+                            }
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            }
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+            });
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
             width:'100%',
@@ -1062,6 +1093,22 @@
 
         });
 
+        // $('#shipper_city').on('change',function () {
+        //     }).done(function (data) {
+        //         if(data.status == 0){
+        //             $('#sale_person').empty();
+        //
+        //             $.each(data.sizes,function (key,value) {
+        //                 var type_size = parseInt(type_id+value.id);
+        //
+        //                 var index = $.inArray(type_size, already_selected_size);
+        //
+        //                 if(index === -1){
+        //         }
+        //
+        //
+        // });
+
         // $('a[href="#next"]').on('click',function(e){
         //     // $("#registership").validate().element("");
         // });
@@ -1077,12 +1124,13 @@
 
     });
 
-    var reset = document.querySelector('#reset');
-    if (reset) {
-        reset.addEventListener('click', () => {
-          grecaptcha.reset()
-        });
-    }
+    // var reset = document.querySelector('#reset');
+    // if (reset) {
+    //     reset.addEventListener('click', () => {
+    //       grecaptcha.reset()
+    //     });
+    // }
+    //         }
 
 
 

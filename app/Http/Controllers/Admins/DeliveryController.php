@@ -19,7 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\http\Models\Admins\ShipmentOnHold;
+use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;

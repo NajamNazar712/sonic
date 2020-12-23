@@ -1042,6 +1042,19 @@ class VisionSoftAPIController extends Controller
                         $petty_cash_statement_details = $petty_cash_statement_details->get();
                         foreach ($petty_cash_statement_details as $petty_cash_statement_detail) {
                             try{
+                                if ($petty_cash_statement_detail->finance_amount !== null) {
+                                    $amount = $petty_cash_statement_detail->finance_amount;
+                                }
+                                else if ($petty_cash_statement_detail->operation_amount !== null) {
+                                    $amount = $petty_cash_statement_detail->operation_amount;
+                                }
+                                else if ($petty_cash_statement_detail->station_amount !== null) {
+                                    $amount = $petty_cash_statement_detail->station_amount;
+                                }
+                                else {
+                                    $amount = $petty_cash_statement_detail->amount;
+                                }
+
                                 $response = $client->post('DailyExp', [
                                     'form_params' => [
                                         'pin_code' => 6,
@@ -1050,7 +1063,7 @@ class VisionSoftAPIController extends Controller
                                         'pin_password' => 'meaumaur',
                                         'pin_tr_date' => $today->format('m/d/Y'),
                                         'pin_ref_stmt_no' => $petty_cash_statement->reference_no,
-                                        'pin_amount' => $petty_cash_statement_detail->amount,
+                                        'pin_amount' => $amount,
                                         'pin_hub_id' => $petty_cash_statement_detail->hub_id,
                                         'pin_account_head' => $petty_cash_statement_detail->heads->name,
                                         'pin_account_title' => $petty_cash_statement_detail->titles->name,

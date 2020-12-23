@@ -36,6 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
+    Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -470,6 +471,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('set_segment/bulk','Admins\AdminDashboardController@setSegmentBulk')->name('set.segment_bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
+        Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -2494,6 +2496,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
         });
+    });
+
+	Route::prefix('leads')->name('leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+        Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
+        Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
+        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
     });
 });
 
