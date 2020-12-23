@@ -277,13 +277,48 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="RateHistoryModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RateHistoryModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Select Date</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="route_location" action="{{route('admin.accounts.view.rates')}}" method="post" novalidate="novalidate">
+                        @method('post')
+                        {{ csrf_field() }}
+                        <input type="text" hidden id="user_id" name="user_id">
+                        <div class="col-12">
+                            <fieldset class="form-group">
+                                <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Location is required">
+                                   {{-- @foreach($users as $user)
+                                        <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
+                                    @endforeach--}}
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="row justify-content-center mt-4">
+                            <div class="col-4">
+                                <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-
 
 
 @endsection
@@ -1370,6 +1405,18 @@
                         }
 
                     });
+            }
+        });
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+
+            var user_id = table.row( $(this).parents('tr') ).data().id;
+            console.log(user_id);
+            //$('#route_id').val(route_id);
+
+            if ($(this).hasClass('rates_history')) {
+
+                $('#RateHistoryModal').modal('show');
             }
         });
 
