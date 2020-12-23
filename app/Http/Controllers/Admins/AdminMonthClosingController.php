@@ -37,7 +37,7 @@ class AdminMonthClosingController extends Controller
         $this->middleware('Permission');
     }
 
-    public function month_closing_index(){
+    /*public function month_closing_index(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -284,7 +284,7 @@ class AdminMonthClosingController extends Controller
         return response()->json(['status' => $status, 'success' => $success, 'errors' => $errors]);
 
 
-    }
+    }*/
 
     public function return_confirm_shipment(Request $request){
         $shipment_ids = $request->shipment_ids;
