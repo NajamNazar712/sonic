@@ -1389,7 +1389,8 @@ class AdminDashboardController extends Controller
     }
     public function blockAccountsList(){
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
-        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson,'sale_tier_types' => $sale_tier_types]);
     }
     public function UserStatus(Request $request){
 
@@ -7741,7 +7742,11 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id'])->where('blacklist',1);
+            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
+            ->leftjoin('admins as a','a.id','=','st.poc')
+            ->leftjoin('admins as d','d.id','=','st.kam')
+            ->leftjoin('admins as h','h.id','=','st.ref')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc','d.name as kam','h.name as ref'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
