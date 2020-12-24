@@ -47,7 +47,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Closing Status</h4>
+                    <h4 class="modal-title" id="">Closing Type</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -123,7 +123,7 @@
              </div>
          </div>
      </div>
-    <div class="modal fade" id="edit_responsible_modal" role="dialog" aria-labelledby="edit_responsible_modal_title" aria-hidden="true">
+    {{--<div class="modal fade" id="edit_responsible_modal" role="dialog" aria-labelledby="edit_responsible_modal_title" aria-hidden="true">
          <div class="modal-dialog modal-lg" role="document">
              <div class="modal-content">
                  <div class="modal-header">
@@ -155,7 +155,7 @@
 
              </div>
          </div>
-     </div>
+     </div--}}>
 
 @endsection
 
@@ -375,7 +375,7 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(411, session('permissions')))
                     {
-                        text: 'Closing Status',
+                        text: 'Closing Type',
                         className: 'btn btn-primary closing_type_status',
                         enabled: false,
                         action: function (e, dt, node, config) {

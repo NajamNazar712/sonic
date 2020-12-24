@@ -104,15 +104,16 @@
             });
 
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    title: 'Add',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Add Status',
-                    action:function (e) {
-                        $('#StatusModal').modal('show');
-                    }
-                },'reset'],
+                /* dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                *buttons:[{
+                     title: 'Add',
+                     className: 'btn btn-primary',
+                     text: '<i class="la la-plus"></i> Add Status',
+                     action:function (e) {
+                         $('#StatusModal').modal('show');
+                     }
+                 },'reset'],*/
+                dom: 'ltipr',
                 processing: true,
                 language: {
                     processing: data_table_loader

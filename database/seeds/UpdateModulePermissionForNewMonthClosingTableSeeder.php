@@ -32,7 +32,7 @@ class UpdateModulePermissionForNewMonthClosingTableSeeder extends Seeder
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support  >  Month Closing  >  Pending', 'url'=>'admin.month_closing.pending.index', 'permission_id' => 408),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support  >  Month Closing  >  Resolved', 'url'=>'admin.month_closing.resolved.index', 'permission_id' => 409),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports  >  Month Closing-Individual', 'url'=>'admin..reports.month_closing.individual.index', 'permission_id' => 414),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports  >  Month Closing-Individual', 'url'=>'admin.reports.month_closing.individual.index', 'permission_id' => 414),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting  > Support >  Month Closing  >  Types', 'url'=>'admin.settings.month_closing.types.index', 'permission_id' => 417),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting  > Support >  Month Closing  >  Status', 'url'=>'admin.settings.month_closing.status.index', 'permission_id' => 418),
 
