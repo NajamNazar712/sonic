@@ -356,6 +356,9 @@
 
                                             <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                                         </div>
+                                        <div class="form-group input-group" id="try_and_buy_charges_div">
+                                            <input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
+                                        </div>
 
                                         <div class="form-group">
                                             <select name="payment_mode" class="select2" id="payment_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
@@ -523,6 +526,38 @@
                 })
             }
 
+            function try_and_buy_product_numbering() {
+                setTimeout(function () {
+                    $('#try_and_buy .repeater div .product').each(function(index) {
+                        $(this).children('div').children('h4').children('span').html((index + 1));
+                    });
+                }, 500);
+            }
+
+            function try_and_buy_total_quantity() {
+                var total_quantity = 0;
+
+                $('#try_and_buy .repeater div .product .quantity').each(function(index) {
+                    if (this.value != '') {
+                        total_quantity += parseInt(this.value);
+
+                        $('#try_and_buy #total_quantity span').html(total_quantity);
+                    }
+                });
+            }
+
+            function try_and_buy_total_price() {
+                var total_price = 0;
+
+                $('#try_and_buy .repeater div .product .price').each(function(index) {
+                    if (this.value != '') {
+                        total_price += parseInt(this.value.replace(',', ''));
+
+                        $('#try_and_buy #total_price span').html(total_price.toLocaleString());
+                    }
+                });
+            }
+
             $('#delivery_type, #consignee_city').change(function () {
                 if($('#delivery_type').val() == 2){
                     $('#consignee_address').prop('disabled', true);
@@ -660,10 +695,17 @@
             }
             if (service_type == 2) {
                 $('#replacement').removeClass('d-none');
+                $('#try_and_buy_charges_div').addClass('d-none');
             }
             if (service_type == 3) {
                 $('#regular').addClass('d-none');
                 $('#try_and_buy').removeClass('d-none');
+                $('#try_and_buy_charges_div').removeClass('d-none');
+                $('#amount').prop('disabled', true);
+            }
+            else{
+                $('#amount').prop('disabled', false);
+                $('#try_and_buy_charges_div').addClass('d-none');
             }
 
             $('#select_service_type form #service_type').val(service_type).trigger('change');
@@ -693,10 +735,12 @@
                         $('#delivery_type_div').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#try_and_buy_charges_div').addClass('d-none');
                         $('#order_header_info').removeClass('mt-2');
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
                         $('#consignee_header_info').html('Consignee Information');
+                        $('#amount').prop('disabled', false);
                         $('#pieces_quantity').removeClass('d-none');
                         $('#self_collection_div').removeClass('d-none');
                     }
@@ -717,6 +761,8 @@
                         $('#order_header_info').removeClass('mt-2');
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
+                        $('#amount').prop('disabled', false);
+                        $('#try_and_buy_charges_div').addClass('d-none');
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
                     }
@@ -737,6 +783,8 @@
                         $('#order_header_info').removeClass('mt-2');
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
+                        $('#amount').prop('disabled', true);
+                        $('#try_and_buy_charges_div').removeClass('d-none');
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
                     }
@@ -758,6 +806,8 @@
                         $('#info_display').addClass('d-none');
                         $('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
                         $('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+                        $('#amount').prop('disabled', false);
+                        $('#try_and_buy_charges_div').addClass('d-none');
                         $('#self_collection_div').addClass('d-none');
                         var consignee_email = $('input[name="consignee_email_address"]');
                         consignee_email.attr('data-toggle', 'tooltip');
@@ -968,6 +1018,7 @@
                     parent.children('#item_price-error').remove();
                 }
             });
+            $('#try_and_buy .insurance').checkboxpicker();
 
             $('#package_type').checkboxpicker();
             var current_date = '{{$date}}';
@@ -978,13 +1029,14 @@
                 $(this).valid();
             });
 
-            $('#try_and_buy .select2').select2({
+            $('#try_and_buy .select2').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Product Type*'
             }).bind('change', function() {
                 $(this).valid();
             });
-
+            var repeater_limit = 5;
+            var repeater_count = 1;
             $('#try_and_buy .repeater').repeater({
                 isFirstItemUndeletable: true,
                 show: function() {
@@ -1042,6 +1094,11 @@
 
                     insurance.checkboxpicker();
 
+                    if(repeater_count === repeater_limit){
+
+                        $("#try_and_buy_add").hide("slow");
+                    }
+
                     try_and_buy_product_numbering();
                 },
                 hide: function(delete_element) {
@@ -1070,6 +1127,10 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if (confirm) {
+                            repeater_count--;
+                            if(repeater_count < repeater_limit){
+                                $("#try_and_buy_add").show("slow");
+                            }
                             $(this).slideUp(delete_element);
 
                             try_and_buy_product_numbering();
