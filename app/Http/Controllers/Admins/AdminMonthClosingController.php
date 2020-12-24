@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\MonthClosing;
+use App\Http\Models\Admin\MonthClosingResponsible;
+use App\Http\Models\Admin\MonthClosingStatus;
+use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\ShipmentsJourney;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentStatus;
@@ -31,7 +37,7 @@ class AdminMonthClosingController extends Controller
         $this->middleware('Permission');
     }
 
-    public function month_closing_index(){
+    /*public function month_closing_index(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -157,7 +163,7 @@ class AdminMonthClosingController extends Controller
                                 $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
                                 $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                                 if($delivery){
-                                    $errors[$tracking_number] = 'Shipment is in an Unverified Delivery Note';
+                                    $errors[$shipment->tracking_number] = 'Shipment is in an Unverified Delivery Note';
 //                                    return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
                                 }
                             }
@@ -278,7 +284,7 @@ class AdminMonthClosingController extends Controller
         return response()->json(['status' => $status, 'success' => $success, 'errors' => $errors]);
 
 
-    }
+    }*/
 
     public function return_confirm_shipment(Request $request){
         $shipment_ids = $request->shipment_ids;
@@ -350,4 +356,381 @@ class AdminMonthClosingController extends Controller
              return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )", 'untouched_shipments' => $not_updated_shipments, 'untouched' => $untouched]);
 
      }
+
+    public function pending_index(){
+        $closing_types = MonthClosingType::all();
+        $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->get();
+        return view('admin.month_closing.pending')->with(['admins' => $admins, 'closing_types' => $closing_types]);
+    }
+
+    public function pending_list(){
+//        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
+        $date = Carbon::now()->startOfMonth()->subMonth()->addDays(20)->toDateString();
+        $month_closing_status = [3, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 44, 45, 46, 47, 48, 60];
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('month_closings as mc', function ($join){
+                $join->on('mc.shipment_id', '=', 'shipments.id')
+                    ->where('mc.id', '=',
+                        DB::raw('(select max(id) from month_closings where month_closings.shipment_id = shipments.id)'));
+            })
+//            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 'shipments.id')
+            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'mc.status_id')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'mc.closing_type_id')
+            ->leftJoin('crm_requests as cr', function ($join) {
+                $join->on('cr.shipment_id', '=', 'shipments.id')
+                    ->where('cr.id','=',
+                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status', 'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address')
+            ->whereIn('shipments.shipper_status_id', $month_closing_status)
+            ->where(function($query) {
+                $query->whereNull('mc.status_id')
+                    ->orWhereNotIn('mc.status_id', [2, 3]);
+            })
+            ->whereDate('shipments.created_at', '<', $date)
+            ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('claim_id_link', function ($shipments) {
+                if($shipments->claim_id != null){
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->claim_id]) . '  target="_blank">' . str_pad($shipments->claim_id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
+            ->addColumn('action', function($shipments) {
+                $assign_responsible = '<button type="button" class="dropdown-item assign_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Assign Responsible</div></button>';
+                $edit_assign_responsible = '<button type="button" class="dropdown-item edit_responsible"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Edit Responsible</div></button>';
+                if (session('role_id') == 1 || in_array(412, session('permissions'))) {
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+                    if($shipments->month_closing_id == null){
+                        $dropdown .= $assign_responsible;
+                    }
+                    else{
+                        $dropdown = '';
+                    }
+                }
+                else{
+                    $dropdown = '';
+                }
+
+
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+
+    }
+    public function assign_responsible_submit(Request $request){
+        $responsible_persons = $request->responsible_persons;
+        if(count($responsible_persons) > 0){
+            $month_closing = new MonthClosing();
+            $month_closing->shipment_id = $request->shipment_id;
+            $month_closing->status_id = 1;
+            $month_closing->added_by = Auth::id();
+            $month_closing->remarks = $request->remarks;
+            $month_closing->save();
+            $month_closing_id = $month_closing->id;
+            $individual_flag = FALSE;
+            if($request->has('deduct_switch')){
+                $individual_flag = TRUE;
+            }
+
+            foreach ($responsible_persons as $person_id){
+                $month_closing_responsible = new MonthClosingResponsible();
+                $month_closing_responsible->month_closing_id = $month_closing_id;
+                $month_closing_responsible->responsible_person_id = $person_id;
+                $month_closing_responsible->added_by = Auth::id();
+                if($individual_flag){
+                    $month_closing_responsible->amount = $request->deduct_amount_individual[$person_id];
+                }else{
+                    $month_closing_responsible->amount = $request->deduct_amount;
+                }
+                $month_closing_responsible->save();
+            }
+
+            return redirect()->back()->with('success', 'Responsible Person(s) updated successfully!');
+
+        }
+        return redirect()->back()->with('error', 'No responsible persons selected!');
+    }
+
+    public function closing_status_submit(Request $request){
+
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $closing_type = $request->closing_type_id;
+
+        if(count($shipment_ids) > 0){
+            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 1)->whereNull('closing_type_id')->update(['closing_type_id' => $closing_type,'updated_by' => Auth::id()]);
+            return redirect()->back()->with('success', 'Closing Type updated successfully!');
+        }
+        return redirect()->back()->with('error' , 'No shipments selected!');
+    }
+    /*public function edit_assign_details(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id){
+            $month_closing = MonthClosing::where('shipment_id', $shipment_id)->where('status_id', 1);
+            if($month_closing->exists()){
+                $month_closing = $month_closing->first();
+            }
+        }
+    }
+    public function assign_responsible_update(Request $request){
+        return $request;
+    }*/
+    public function month_closing_resolved(Request $request){
+        $shipment_ids = $request->shipment_ids;
+
+        if(count($shipment_ids) > 0){
+            MonthClosing::whereIn('shipment_id', $shipment_ids)->where('status_id', 1)->whereNotNull('closing_type_id')->update(['status_id' => 2,'closing_updated_at' => Carbon::now(), 'updated_by' => Auth::id()]);
+            return response()->json(['status' => 0, 'success' => 'Closing Status Resolved updated successfully!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
+
+    }
+
+    public function resolved_index(Request $request){
+        return view('admin.month_closing.resolved');
+    }
+    public function resolved_list(Request $request){
+        $month_closing = MonthClosing::leftjoin('shipments', 'shipments.id', '=', 'month_closings.shipment_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = month_closings.shipment_id)'));
+            })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftjoin('month_closing_statuses as mcs', 'mcs.id', '=', 'month_closings.status_id')
+            ->leftjoin('month_closing_types as mct', 'mct.id', 'month_closings.closing_type_id')
+            ->leftJoin('crm_requests as cr', function ($join) {
+                $join->on('cr.shipment_id', '=', 'month_closings.shipment_id')
+                    ->where('cr.id','=',
+                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = month_closings.shipment_id)'));
+            })
+            ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address','month_closings.closing_updated_at')
+            ->whereIn('month_closings.status_id', [2,3]);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $month_closing->whereBetween('month_closings.closing_updated_at', [$from,$to]);
+        }
+        $datatable = Datatables::of($month_closing)
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('claim_id_link', function ($shipments) {
+                if($shipments->claim_id != null){
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipments->claim_id]) . '  target="_blank">' . str_pad($shipments->claim_id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            });
+        return $datatable->make(true);
+
+    }
+    public function month_closing_closed(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $date = Carbon::now();
+        if(count($shipment_ids) > 0){
+            $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
+            $intransit_status_array = array(3, 21, 26, 32);
+            $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
+            $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
+            $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
+            $errors = array();
+            $success = array();
+            foreach ($shipment_ids as $shipment_id){
+                $shipment_details = Shipment::find($shipment_id);
+                if($shipment_details){
+
+                    $journey=  ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
+                    if($journey)
+                    {
+                        $verification = $journey->verification;
+                        if($verification == 0)
+                        {
+                            continue;
+                        }
+
+                    }
+
+                    if($shipment_details->shipper_status_id != 51){
+                        $month_closing = MonthClosing::where('shipment_id', $shipment_id)->where('status_id', 2);
+                        if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
+                            $remarks = $month_closing->remarks;
+                            if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
+                                if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
+                                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
+                                    if ($delivery_note_shipment->exists()) {
+                                        $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
+                                        $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
+                                        if($delivery){
+                                            $errors[$shipment_details->tracking_number] = 'Shipment is in an Unverified Delivery Note';
+                                        }
+                                    }
+                                }
+                                if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
+                                    AdminFinanceController::return_confirmed_revert($shipment_details->id, 3);
+                                }
+
+                                if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
+                                    AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
+                                }
+                                if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
+                                    $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
+                                    if ($cargo_consignment_shipment->exists()) {
+                                        $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
+
+                                        $cargo = CargoConsignment::find($cargo_consignment_shipment);
+                                        $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
+                                        if (in_array($cargo->status_id, [1, 2])) {
+                                            $shipments_count = $cargo->shipments;
+                                            $shipment_weight = $cargo->shipment_weight;
+                                            $shipments_count = $shipments_count - 1;
+                                            $cargo->shipments = $shipments_count;
+                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                            if ($shipments_count == 0) {
+                                                $cargo->status_id = 5;
+                                            }
+                                            $cargo->save();
+//                                            $shipment_details->shipper_status_id = 51;
+//                                            $shipment_details->consignee_status_id = 51;
+//                                            $shipment_details->save();
+//                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+
+//                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+                                        } else if ($cargo->status_id == 4) {
+                                            $shipments_count = $cargo->shipments;
+                                            $shipments_received_count = $cargo->received_shipments;
+                                            $shipment_weight = $cargo->shipment_weight;
+                                            $shipments_count = $shipments_count - 1;
+                                            $cargo->shipments = $shipments_count;
+                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                            if ($shipments_count == 0) {
+                                                $cargo->status_id = 5;
+                                            } else if ($shipments_count == $shipments_received_count) {
+                                                $cargo->status_id = 3;
+                                            }
+                                            $cargo->save();
+//                                            $shipment_details->shipper_status_id = 51;
+//                                            $shipment_details->consignee_status_id = 51;
+//                                            $shipment_details->save();
+//                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+
+                                        }
+                                    }
+
+                                }
+
+                                if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){
+                                    $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment_details->id);
+                                    if($return_note_shipments_details->exists()){
+                                        $return_note_shipments_details = $return_note_shipments_details->get();
+                                        foreach ($return_note_shipments_details as $return_note_shipments){
+                                            $return_note = ReturnNote::find($return_note_shipments->return_note_id);
+                                            if($return_note){
+                                                if($return_note->status == 0){
+                                                    ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
+                                                    $return_note->shipments_count = $return_note->shipments_count - 1;
+                                                    if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
+                                                        $return_note->status = 1;
+                                                    }
+                                                    $return_note->save();
+                                                }
+                                            }
+
+                                        }
+
+                                    }
+                                }
+
+
+                                $shipment_details->shipper_status_id = 51;
+                                $shipment_details->consignee_status_id = 51;
+                                $shipment_details->save();
+                                ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+
+                                $month_closing->status_id = 3;
+                                $month_closing->closing_date = $date;
+                                $month_closing->closing_updated_at = $date;
+                                $month_closing->updated_by = Auth::id();
+                                $month_closing->save();
+                                $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+
+                            }
+                            else{
+                                $errors[$shipment_details->tracking_number] = 'Shipment can not added to Month Closing!';
+
+                            }
+                        }else{
+                            $errors[$shipment_details->tracking_number] = 'Shipment not on Month Closing Resolved!';
+                        }
+                    }
+                    else{
+                        $errors[$shipment_details->tracking_number] = 'Shipment is already added as Month Closing!';
+                    }
+
+                }
+            }
+            $status = 0;
+            if(!empty($errors) && empty($success)) {
+                $status = 1;
+            }
+            if(!empty($success)  && empty($errors)){
+                $status = 2;
+            }
+            if(!empty($errors) && !empty($success)){
+                $status = 3;
+            }
+            return response()->json(['status' => $status, 'success' => $success, 'errors' => $errors]);
+        }
+        return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
+    }
+
+
 }

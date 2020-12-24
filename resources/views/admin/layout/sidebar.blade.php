@@ -571,8 +571,17 @@
                         </li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(141, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.month_closing.index') }}">Month Closing</a></li>
+                    @if (session('role_id') == 1 || count(array_intersect([408, 409], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Month Closing</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(408, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.month_closing.pending.index') }}">Pending</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(409, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.month_closing.resolved.index') }}">Resolved</a></li>
+                                @endif
+                            </ul>
+                        </li>
                     @endif
 
                     @if (session('role_id') == 1 || count(array_intersect([107,108,119], session('permissions'))) !== 0)
@@ -878,12 +887,18 @@
                           <li><a class="menu-item" href="{{ route('admin.reports.app_efficiency.index') }}">App Efficiency Report</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(414, session('permissions')))
+                          <li><a class="menu-item" href="{{ route('admin.reports.month_closing.individual.index') }}">Month Closing - Individual</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(415, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.month_closing.pivot.index') }}">Month Closing - Pivot</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394, 417, 418], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367, 388], session('permissions'))) !== 0)
@@ -1149,7 +1164,7 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100,417, 418, 152, 279, 358,394], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394], session('permissions'))) !== 0)
@@ -1191,6 +1206,18 @@
                                         @if (session('role_id') == 1 || in_array(358, session('permissions')))
                                             <li class=" nav-item"><a href="{{ route('admin.settings.holidays.index') }}"><span class="menu-title">Holidays</span></a>
                                             </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || count(array_intersect([417, 418], session('permissions'))) !== 0)
+                                            <li class=" nav-item"><a href="#"><span class="menu-title">Month Closing</span></a>
+                                            <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(417, session('permissions')))
+                                                    <li><a class="menu-item" href="{{route('admin.settings.month_closing.types.index')}}">Types</a></li>
+                                                @endif
+                                                @if (session('role_id') == 1 || in_array(418, session('permissions')))
+                                                    <li><a class="menu-item" href="{{route('admin.settings.month_closing.status.index')}}">Status</a></li>
+                                                @endif
+                                            </ul>
+                                         </li>
                                         @endif
                                     @endif
                                 </ul>

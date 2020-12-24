@@ -355,11 +355,11 @@ class Permission
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
 
-            'month_closing.index' => 141,
-            'month_closing.list' => 141,
-            'month_closing.confirm' => 142,
-            'month_closing.reattempt' => 143,
-            'month_closing.add' => 144,
+            'month_closing.pending.index' => 408,
+            'month_closing.pending.list' => 408,
+            'month_closing.resolved.index' => 409,
+            'month_closing.resolved.list' => 409,
+
 
             'reports.pickup_note.index' => 64,
             'reports.pickup_note.list' => 64,
