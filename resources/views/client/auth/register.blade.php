@@ -828,7 +828,7 @@
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            width: '100%',
            placeholder:'Select City',
-       }).bind('select2:select', function () {
+       }).bind('change', function () {
            var id = $(this).val();
             if(id) {
                 $.ajax({
