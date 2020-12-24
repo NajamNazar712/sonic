@@ -846,7 +846,7 @@
 
                             if (index === -1) {
 
-                                var newOption = "<option>" + value.name + "</option>";
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#sale_person').append(newOption).trigger('change');
                                 $('#sale_person').val('').trigger('change');
                             }
