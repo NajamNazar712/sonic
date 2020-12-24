@@ -841,15 +841,15 @@
                         $('#sale_person').empty();
 
                         $.each(data.sale_persons, function (key, value) {
-                            var sale_person = parseInt(id + value.id);
                             var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                             $('#sale_person').append(newOption);
                         });
                         $('#sale_person').val('').trigger('change');
 
-
                         @if($lead != null)
-                            $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
+                            @if($lead->sale_person_id != null)
+                                $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
+                            @endif
                         @endif
                     } else {
                         toastr.error(data.error, 'Error!', {
