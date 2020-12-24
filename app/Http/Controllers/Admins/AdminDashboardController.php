@@ -1487,7 +1487,7 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->admin_id=$tag_id;
                         $sale_person_tag->user_id=$shipper_id;
                         $sale_person_tag->save();
-                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
 
                     }
                     // else{
