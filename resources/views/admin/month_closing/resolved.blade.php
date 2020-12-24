@@ -216,6 +216,7 @@
                                             }
                                         }).done(function (data) {
                                             UnblockPagePermanently();
+                                            table.rows().deselect();
                                             selected_rows = [];
                                             table.button('.close_action').disable();
                                             table.draw(true);

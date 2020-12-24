@@ -572,9 +572,9 @@ class AdminMonthClosingController extends Controller
             $errors = array();
             $success = array();
             foreach ($shipment_ids as $shipment_id){
-                $shipment = Shipment::find($shipment_id);
-                if($shipment->exists()){
-                    $shipment_details = $shipment->first();
+                $shipment_details = Shipment::find($shipment_id);
+                if($shipment_details){
+
                     $journey=  ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
                     if($journey)
                     {
@@ -598,7 +598,7 @@ class AdminMonthClosingController extends Controller
                                         $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
                                         $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                                         if($delivery){
-                                            $errors[$shipment->tracking_number] = 'Shipment is in an Unverified Delivery Note';
+                                            $errors[$shipment_details->tracking_number] = 'Shipment is in an Unverified Delivery Note';
                                         }
                                     }
                                 }
@@ -626,11 +626,12 @@ class AdminMonthClosingController extends Controller
                                                 $cargo->status_id = 5;
                                             }
                                             $cargo->save();
-                                            $shipment_details->shipper_status_id = 51;
-                                            $shipment_details->consignee_status_id = 51;
-                                            $shipment_details->save();
-                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-                                            $success[$shipment->tracking_number] = 'Shipment is successfully added to Month Closing!';
+//                                            $shipment_details->shipper_status_id = 51;
+//                                            $shipment_details->consignee_status_id = 51;
+//                                            $shipment_details->save();
+//                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+
 //                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                                         } else if ($cargo->status_id == 4) {
                                             $shipments_count = $cargo->shipments;
@@ -645,13 +646,12 @@ class AdminMonthClosingController extends Controller
                                                 $cargo->status_id = 3;
                                             }
                                             $cargo->save();
-                                            $shipment_details->shipper_status_id = 51;
-                                            $shipment_details->consignee_status_id = 51;
-                                            $shipment_details->save();
-                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-                                            $success[$shipment->tracking_number] = 'Shipment is successfully added to Month Closing!';
+//                                            $shipment_details->shipper_status_id = 51;
+//                                            $shipment_details->consignee_status_id = 51;
+//                                            $shipment_details->save();
+//                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
 
-//                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                                         }
                                     }
 
@@ -690,21 +690,19 @@ class AdminMonthClosingController extends Controller
                                 $month_closing->closing_updated_at = $date;
                                 $month_closing->updated_by = Auth::id();
                                 $month_closing->save();
-                                $success[$shipment->tracking_number] = 'Shipment is successfully added to Month Closing!';
-//                        return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+                                $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
 
                             }
                             else{
-                                $errors[$shipment->tracking_number] = 'Shipment can not added to Month Closing!';
+                                $errors[$shipment_details->tracking_number] = 'Shipment can not added to Month Closing!';
 
-//                        return response()->json(['status' => 0, 'error' => 'Shipment can not added to Month Closing!']);
                             }
                         }else{
-                            $errors[$shipment->tracking_number] = 'Shipment not on Month Closing Resolved!';
+                            $errors[$shipment_details->tracking_number] = 'Shipment not on Month Closing Resolved!';
                         }
                     }
                     else{
-                        $errors[$shipment->tracking_number] = 'Shipment is already added as Month Closing!';
+                        $errors[$shipment_details->tracking_number] = 'Shipment is already added as Month Closing!';
                     }
 
                 }
