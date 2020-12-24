@@ -823,8 +823,6 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
-
-        var already_selected_person = [];
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            width: '100%',
            placeholder:'Select City',
@@ -844,16 +842,10 @@
 
                         $.each(data.sale_persons, function (key, value) {
                             var sale_person = parseInt(id + value.id);
-
-                            var index = $.inArray(sale_person, already_selected_person);
-
-                            if (index === -1) {
-
-                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                $('#sale_person').append(newOption).trigger('change');
-                                $('#sale_person').val('').trigger('change');
-                            }
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            $('#sale_person').append(newOption);
                         });
+                        $('#sale_person').val('').trigger('change');
 
 
                         @if($lead != null)
