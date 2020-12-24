@@ -875,6 +875,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
             Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
             Route::post('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('update/remove_bulk','Admins\DeliveryController@receive_delivery_remove_bulk')->name('update.remove.bulk');
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('password/check','Admins\DeliveryController@receive_delivery_password_check')->name('password.check');
