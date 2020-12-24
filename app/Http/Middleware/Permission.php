@@ -355,11 +355,11 @@ class Permission
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
 
-            'month_closing.index' => 141,
-            'month_closing.list' => 141,
-            'month_closing.confirm' => 142,
-            'month_closing.reattempt' => 143,
-            'month_closing.add' => 144,
+            'month_closing.pending.index' => 408,
+            'month_closing.pending.list' => 408,
+            'month_closing.resolved.index' => 409,
+            'month_closing.resolved.list' => 409,
+
 
             'reports.pickup_note.index' => 64,
             'reports.pickup_note.list' => 64,
@@ -812,7 +812,16 @@ class Permission
             'telenor.return.shipment_info' => 400,
             'telenor.return.submit' => 400,
             'telenor.call.index' => 402,
-            'telenor.call.list' => 402
+            'telenor.call.list' => 402,
+
+
+            'leads.index' => 416,
+            'leads.list' => 416,
+            'leads.add_status' => 419,
+//            'leads.tag_sale_person' => 420,
+            'leads.lead_log' => 416,
+            'leads.add_remarks' => 416,
+            'leads.view_remarks' => 416
         ],
 
         'shipper' => [

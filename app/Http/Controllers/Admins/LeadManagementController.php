@@ -1,0 +1,337 @@
+<?php
+
+namespace App\Http\Controllers\Admins;
+
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Lead\Lead;
+use App\http\Models\Admin\Lead\LeadLog;
+use App\http\Models\Admin\Lead\LeadRemark;
+use App\http\Models\Admin\Lead\LeadStatus;
+use App\Http\Models\City;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Datatables;
+
+class LeadManagementController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
+    }
+
+    public function index(){
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+        $statuses = LeadStatus::all();
+        $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
+
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+
+        $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+
+        if (session('role_id') != 1) {
+            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+        }
+
+        $ratio_leads = $leads['total'];
+        if($ratio_leads->exists()){
+            $ratio_leads = $ratio_leads->get();
+            $days = 0;
+            $count = 0;
+            foreach ($ratio_leads as $ratio_lead){
+                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $count++;
+                }
+            }
+            if($count > 0){
+                $leads['ratio'] = $days/$count;
+            }
+            else{
+                $leads['ratio'] = 0;
+            }
+        }
+        else{
+            $leads['ratio'] = 0;
+        }
+
+
+        $leads['total'] = number_format($leads['total']->count());
+        $leads['in_process'] = number_format($leads['in_process']->count());
+        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+
+        $cities = City::select('id','name')->get();
+
+        $dates['current'] = Carbon::now();
+        $dates['old_date'] = Carbon::now()->subDays(29);
+        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
+    }
+
+    public function list(Request $request){
+        $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
+            ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
+            ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
+            ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
+
+        if (session('role_id') != 1) {
+            $leads = $leads->whereIn('c.hub_id', session('hubs'));
+        }
+
+        if($origin = $request->get('search_origin')){
+            $leads->where('leads.city_id', '=', $origin);
+        }
+        if($sale_person = $request->get('search_sale_person')){
+            $leads->where('leads.sale_person_id', '=', $sale_person);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $leads->whereBetween('leads.requested_date', [$from,$to]);
+        }
+        return Datatables::of($leads)
+            ->editColumn('lead_id', function ($lead) {
+                return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('aging',function ($lead){
+                $days = Carbon::now()->diffInDays($lead->requested_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('action', function($lead){
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                if(session('role_id') == 1 || in_array(419, session('permissions')))
+                {
+                    $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
+                }
+
+                $dropdown .= '<button type="button"  class="dropdown-item lead_log" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Lead Log</div></button>';
+
+                if(session('role_id') == 1 || in_array(420, session('permissions')))
+                {
+                    $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
+                }
+
+                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
+                $dropdown .= '<button type="button"  class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
+
+                return $dropdown;
+            })->make(true);
+    }
+
+    public function lead_statistics(Request $request){
+        $from = $request->search_date_from;
+        $to = $request->search_date_to;
+
+        $leads['total'] = Lead::whereBetween('requested_date',[$from,$to]);
+        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$from,$to]);
+        $leads['mature_leads'] = Lead::whereIn('status_id', [9, 12])->whereBetween('requested_date',[$from,$to]);
+        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
+
+        if($origin = $request->get('search_origin')){
+            $leads['total'] = $leads['total']->where('city_id', $origin);
+            $leads['in_process'] = $leads['in_process']->where('city_id', $origin);
+            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', $origin);
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', $origin);
+        }
+        if($sale_person = $request->get('search_sale_person')){
+            $leads['total'] = $leads['total']->where('sale_person_id', $sale_person);
+            $leads['in_process'] = $leads['in_process']->where('sale_person_id', $sale_person);
+            $leads['mature_leads'] = $leads['mature_leads']->where('sale_person_id', $sale_person);
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
+        }
+        if (session('role_id') != 1) {
+            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+        }
+
+        $ratio_leads = $leads['total'];
+        if($ratio_leads->exists()){
+            $ratio_leads = $ratio_leads->get();
+            $days = 0;
+            $count = 0;
+            foreach ($ratio_leads as $ratio_lead){
+                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $count++;
+                }
+            }
+            if($count > 0){
+                $leads['ratio'] = $days/$count;
+            }
+            else{
+                $leads['ratio'] = 0;
+            }
+        }
+        else{
+            $leads['ratio'] = 0;
+        }
+
+        $leads['total'] = number_format($leads['total']->count());
+        $leads['in_process'] = number_format($leads['in_process']->count());
+        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+
+        return response()->json(['status' => 1, 'leads' => $leads]);
+    }
+
+    public function add_status(Request $request){
+        $lead_id = $request->lead_id;
+        $lead = Lead::find($lead_id);
+        $status = $request->status;
+        if($status != NULL){
+            if ($lead->sale_person_id != null){
+                $lead_log = new LeadLog();
+                $lead_log->lead_id = $lead->id;
+                $lead_log->prev_status_id = $lead->status_id;
+                $lead_log->status_id = $status;
+                $lead_log->sale_person_id = $lead->sale_person_id;
+                $lead_log->reference_person_id = $lead->reference_person_id;
+                $lead_log->updated_by = Auth::id();
+                $lead_log->save();
+
+                $lead->status_id = $status;
+                $lead->updated_by = Auth::id();
+                $lead->save();
+
+                if($status == 9){
+                    NotificationsController::send(113, $lead);
+                }
+
+                return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Status!']);
+        }
+    }
+
+    public function lead_log_details(Request $request){
+        $lead_id = $request->lead_id;
+        $lead = Lead::find($lead_id);
+        $lead_logs = LeadLog::where('lead_id', $lead_id);
+        if($lead_logs->exists()){
+            $lead_logs = $lead_logs->get();
+            $details = array();
+            foreach ($lead_logs as $log){
+                $detail['lead_id'] = str_pad($lead->id, 3, '0', STR_PAD_LEFT);
+                $detail['contact_person'] = $lead->contact_person;
+                $detail['phone_number'] = $lead->phone_number;
+                if($log->sale_person_id != null){
+                    $detail['sales_person'] = $log->sales_person->name;
+                }
+                else{
+                    $detail['sales_person'] = '-';
+                }
+                if($log->reference_person_id != null){
+                    $detail['reference_person'] = $log->reference_person->name;
+                }
+                else{
+                    $detail['reference_person'] = '-';
+                }
+                $detail['status'] = $log->status->name;
+                $detail['updated_by'] = $log->admin->name;
+                $detail['updated_at'] = Carbon::parse($log->updated_at)->toDateTimeString();
+
+                $details[] = $detail;
+            }
+            return response()->json(['status' => 1, 'leads' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Logs Does\'nt exist!']);
+        }
+    }
+
+    public function add_remarks(Request $request){
+        $lead_id = $request->lead_id;
+        $lead = Lead::find($lead_id);
+        $remarks = $request->remarks;
+        if($remarks != NULL){
+            $lead_remarks = new LeadRemark();
+            $lead_remarks->lead_id = $lead->id;
+            $lead_remarks->remarks = $remarks;
+            $lead_remarks->updated_by = Auth::id();
+            $lead_remarks->save();
+            return response()->json(['status' => 1, 'success' => 'Remarks added Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Remarks!']);
+        }
+    }
+
+    public function view_remarks_index($id){
+        $lead_id = $id;
+        $lead_remarks = LeadRemark::where('lead_id', $lead_id);
+        $lead = Lead::find($lead_id);
+        $details = array();
+        if($lead_remarks->exists()){
+            $lead_remarks = $lead_remarks->get();
+            foreach ($lead_remarks as $remark){
+                $details[] = $remark;
+            }
+        }
+        return view('admin.leads.remarks')->with(['lead' => $lead, 'details' => $details]);
+    }
+
+    public function tag_sale_person_forward_lead(Request $request){
+        $lead_ids = $request->lead_ids;
+        $sale_person = $request->sale_person;
+        if($request->has('reference_person')){
+            $reference_person = $request->reference_person;
+        }
+        else{
+            $reference_person = null;
+        }
+        $leads = Lead::whereIn('id', $lead_ids);
+        if($leads->exists()){
+            $leads = $leads->get();
+            foreach ($leads as $lead){
+                $lead->sale_person_id = $sale_person;
+                if($request->has('reference_person')){
+                    $lead->reference_person_id = $reference_person;
+                }
+                $lead->updated_by = Auth::id();
+                $lead->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Lead(s) Does\'nt exist!']);
+        }
+    }
+}

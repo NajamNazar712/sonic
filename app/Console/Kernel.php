@@ -75,6 +75,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\OverlandAgingReport',
         'App\Console\Commands\PendingDeliveriesReport',
         'App\Console\Commands\ReceiveDeliveriesReport',
+        'App\Console\Commands\WebsiteLead',
 
 
     ];
@@ -234,6 +235,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:pendingdeliveryreport')->dailyAt('13:00')->runInBackground();
         $schedule->command('email:receivedeliveryreport')->dailyAt('13:00')->runInBackground();
 
+        $schedule->command('website:leads')->hourly()->runInBackground();
     }
     /**
      * Register the commands for the application.
