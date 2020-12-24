@@ -31,27 +31,19 @@ class LeadManagementController extends Controller
 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        if(session('role_id') == 1 || session('department_id') == 7){
-            $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
-            $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
-            $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
-            $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
-            $leads['ratio'] = 0;
+
+        $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['ratio'] = 0;
 
 
-            $leads['total'] = number_format($leads['total']->count());
-            $leads['in_process'] = number_format($leads['in_process']->count());
-            $leads['mature_leads'] = number_format($leads['mature_leads']->count());
-            $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
-            $leads['ratio'] = 0;
-        }
-        else{
-            $leads['total'] = 0;
-            $leads['in_process'] = 0;
-            $leads['mature_leads'] = 0;
-            $leads['pending_for_activation'] = 0;
-            $leads['ratio'] = 0;
-        }
+        $leads['total'] = number_format($leads['total']->count());
+        $leads['in_process'] = number_format($leads['in_process']->count());
+        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+        $leads['ratio'] = 0;
         $cities = City::select('id','name')->get();
 
         $dates['current'] = Carbon::now();
@@ -67,6 +59,17 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
 
+        if($origin = $request->get('search_origin')){
+            $leads->where('leads.city_id', '=', $origin);
+        }
+        if($sale_person = $request->get('search_sale_person')){
+            $leads->where('leads.sale_person_id', '=', $sale_person);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $leads->whereBetween('leads.requested_date', [$from,$to]);
+        }
         return Datatables::of($leads)
             ->editColumn('lead_id', function ($lead) {
                 return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
@@ -93,6 +96,38 @@ class LeadManagementController extends Controller
 
                 return $dropdown;
             })->make(true);
+    }
+
+    public function lead_statistics(Request $request){
+        $from = $request->search_date_from;
+        $to = $request->search_date_to;
+
+        $leads['total'] = Lead::whereBetween('requested_date',[$from,$to]);
+        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$from,$to]);
+        $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
+        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
+        $leads['ratio'] = 0;
+
+        if($origin = $request->get('search_origin')){
+            $leads['total'] = $leads['total']->where('city_id', $origin);
+            $leads['in_process'] = $leads['in_process']->where('city_id', $origin);
+            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', $origin);
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', $origin);
+        }
+        if($sale_person = $request->get('search_sale_person')){
+            $leads['total'] = $leads['total']->where('sale_person_id', $sale_person);
+            $leads['in_process'] = $leads['in_process']->where('sale_person_id', $sale_person);
+            $leads['mature_leads'] = $leads['mature_leads']->where('sale_person_id', $sale_person);
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
+        }
+
+        $leads['total'] = number_format($leads['total']->count());
+        $leads['in_process'] = number_format($leads['in_process']->count());
+        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+        $leads['ratio'] = 0;
+
+        return response()->json(['status' => 1, 'leads' => $leads]);
     }
 
     public function add_status(Request $request){

@@ -854,6 +854,11 @@
                                 $('#sale_person').val('').trigger('change');
                             }
                         });
+
+
+                        @if($lead != null)
+                            $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
+                        @endif
                     } else {
                         toastr.error(data.error, 'Error!', {
                             positionClass: 'toast-top-center',

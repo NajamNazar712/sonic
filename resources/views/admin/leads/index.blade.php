@@ -11,27 +11,26 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                @if(session('role_id') == 1 || session('department_id') == 7)
-                    <div class="row mt-2">
-                        <div class="card col-12">
-                            <div class="card-content collapse show">
-                                <div class="card-body">
-                                    <div id="shipment_statistics_chart" class="height-300 echart-container d-none"></div>
+                <div class="row mt-2">
+                    <div class="card col-12">
+                        <div class="card-content collapse show">
+                            <div class="card-body">
+                                <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
                                     <div class="row justify-content-center">
-                                        <div class="col">
-                                            <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
+                                        <div class="form-group col">
+                                            <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}" data-rule-required="true" data-msg-required="This field is required">
                                         </div>
-                                        <div class="col">
-                                            <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
+                                        <div class="form-group col">
+                                            <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}" data-rule-required="true" data-msg-required="This field is required">
                                         </div>
-                                        <div class="col">
-                                            <select name="origin" id="origin" class="select2 form-control">
+                                        <div class="form-group col">
+                                            <select name="search_origin" id="search_origin" class="select2 form-control">
                                                 @foreach($cities as $city)
                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col">
+                                        <div class="form-group col">
                                             <select name="search_sale_person" id="search_sale_person" class="select2 form-control">
                                                 @foreach($sale_name as $sn)
                                                     <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
@@ -39,15 +38,15 @@
                                             </select>
                                         </div>
                                         <div class="col-1">
-                                            <button type="button" class="btn round btn-primary statistics_search">Search <i class="ft-bar-chart"></i></button>
+                                            <button type="submit" class="btn round btn-primary search_button">Search <i class="ft-bar-chart"></i></button>
                                         </div>
                                     </div>
-
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    <div class="row justify-content-center">
+                </div>
+                <div class="row justify-content-center">
                         <div class="col-3">
                             <div class="card bg-gradient-directional-booked_shipments pull-up">
                                 <div class="card-content">
@@ -74,7 +73,7 @@
                                                 <i class="icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white">{{$leads['in_process']}}</h3>
+                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}}</h3>
                                                 <span>In Process</span>
                                             </div>
                                         </div>
@@ -91,7 +90,7 @@
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white">{{$leads['mature_leads']}}</h3>
+                                                <h3 class="text-white" id="mature_leads">{{$leads['mature_leads']}}</h3>
                                                 <span>Matured Leads</span>
                                             </div>
                                         </div>
@@ -100,7 +99,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row justify-content-center">
+                <div class="row justify-content-center">
                         <div class="col-3">
                             <div class="card bg-gradient-directional-pending_shipments pull-up">
                                 <div class="card-content">
@@ -110,7 +109,7 @@
                                                 <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white">{{$leads['pending_for_activation']}}</h3>
+                                                <h3 class="text-white" id="pending_for_activation">{{$leads['pending_for_activation']}}</h3>
                                                 <span>Request(s) pending for Activation</span>
                                             </div>
                                         </div>
@@ -127,7 +126,7 @@
                                                 <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white">{{ $leads['ratio']}}</h3>
+                                                <h3 class="text-white" id="ratio">{{ $leads['ratio']}}</h3>
                                                 <span>Lead Time Ratio</span>
                                             </div>
                                         </div>
@@ -136,7 +135,6 @@
                             </div>
                         </div>
                     </div>
-                @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -469,9 +467,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#total_leads').text();
-
-            $("#origin").prepend('<option value="" selected></option>').select2({
+            $("#search_origin").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Origin",
                 width:'100%'
             });
@@ -661,7 +657,15 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.leads.list') }}',
+                ajax: {
+                    url: '{{ route('admin.leads.list') }}',
+                    data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_sale_person = $('#search_sale_person').val();
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                    }
+                },
                 rowId: 'lead_id',
                 order: [[8, 'desc']],
                 columns: [
@@ -1037,6 +1041,34 @@
 
             $('#add_remarks_modal').on('hide.bs.modal', function () {
                 $('#add_remarks_form input.add_remarks').val('');
+            });
+            $( "#search_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: '{!! route('admin.leads.lead_statistics') !!}',
+                        method: 'POST',
+                        data: {
+                            'search_origin': $('#search_origin').val(),
+                            'search_sale_person': $('#search_sale_person').val(),
+                            'search_date_from': $('input[name="from_date_formatted"]').val(),
+                            'search_date_to': $('input[name="to_date_formatted"]').val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#total_leads').text(data.leads.total);
+                            $('#in_process').text(data.leads.in_process);
+                            $('#mature_leads').text(data.leads.mature_leads);
+                            $('#pending_for_activation').text(data.leads.pending_for_activation);
+                            $('#ratio').text(data.leads.ratio);
+                        }
+                    });
+                    table.draw();
+                }
             });
         });
 
