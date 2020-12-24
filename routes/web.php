@@ -2237,7 +2237,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
         });
 
-        
+        Route::prefix('month_closing')->name('month_closing.')->group(function () {
+            Route::prefix('types')->name('types.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@month_closing_type_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@month_closing_type_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@month_closing_type_add')->name('add');
+                Route::post('edit', 'Admins\GlobalSettingsController@month_closing_type_edit')->name('edit');
+            });
+            Route::prefix('status')->name('status.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@month_closing_status_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@month_closing_status_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@month_closing_status_add')->name('add');
+                Route::post('edit', 'Admins\GlobalSettingsController@month_closing_status_edit')->name('edit');
+            });
+        });
+
+
     });
 
 

@@ -10,6 +10,8 @@ use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\MonthClosingStatus;
+use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
@@ -3189,4 +3191,109 @@ class GlobalSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
-    }}
+    }
+
+    public function month_closing_type_index()
+    {
+        return view('admin.settings.month_closing.types');
+    }
+
+    public function month_closing_type_list(Request $request)
+    {
+        $types = MonthClosingType::select('id', 'name');
+        return Datatables::of($types)
+            ->addColumn('action', function ($types) {
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function month_closing_type_add(Request $request)
+    {
+        $type = trim($request->type);
+        if ($type) {
+            $closing_type = new MonthClosingType();
+            $closing_type->name = $type;
+            $closing_type->save();
+
+            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully added!']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty']);
+        }
+    }
+
+    public function month_closing_type_edit(Request $request)
+    {
+        $type_id = $request->type_id;
+        if ($type_id) {
+            $type = MonthClosingType::find($type_id);
+            $type->name = $request->type_name;
+            $type->save();
+
+            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully updated!']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty!']);
+        }
+    }
+
+
+    public function month_closing_status_index()
+    {
+        return view('admin.settings.month_closing.status');
+    }
+
+    public function month_closing_status_list(Request $request)
+    {
+        $types = MonthClosingStatus::select('id', 'name');
+        return Datatables::of($types)
+            ->addColumn('action', function ($types) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function month_closing_status_add(Request $request)
+    {
+        $type = trim($request->type);
+        if ($type) {
+            $closing_type = new MonthClosingStatus();
+            $closing_type->name = $type;
+            $closing_type->save();
+
+            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully added!']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty']);
+        }
+    }
+
+    public function month_closing_status_edit(Request $request)
+    {
+        $type_id = $request->type_id;
+        if ($type_id) {
+            $type = MonthClosingStatus::find($type_id);
+            $type->name = $request->type_name;
+            $type->save();
+
+            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully updated!']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty!']);
+        }
+    }
+
+}

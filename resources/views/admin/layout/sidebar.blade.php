@@ -1207,6 +1207,18 @@
                                             <li class=" nav-item"><a href="{{ route('admin.settings.holidays.index') }}"><span class="menu-title">Holidays</span></a>
                                             </li>
                                         @endif
+                                        @if (session('role_id') == 1 || count(array_intersect([417, 418], session('permissions'))) !== 0)
+                                            <li class=" nav-item"><a href="#"><span class="menu-title">Month Closing</span></a>
+                                            <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(417, session('permissions')))
+                                                    <li><a class="menu-item" href="{{route('admin.settings.month_closing.types.index')}}">Types</a></li>
+                                                @endif
+                                                @if (session('role_id') == 1 || in_array(418, session('permissions')))
+                                                    <li><a class="menu-item" href="{{route('admin.settings.month_closing.status.index')}}">Status</a></li>
+                                                @endif
+                                            </ul>
+                                         </li>
+                                        @endif
                                     @endif
                                 </ul>
                             </li>
