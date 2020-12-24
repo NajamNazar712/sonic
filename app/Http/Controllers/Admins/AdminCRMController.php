@@ -311,7 +311,6 @@ class AdminCRMController extends Controller
                         CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
                     } else {
                         $present_shipments[] = $shipment->tracking_number;
-                        $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
                         $flag = true;
                     }
                 }else{
