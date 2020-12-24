@@ -38,10 +38,10 @@ class LeadManagementController extends Controller
         $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->where('city_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->where('city_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', session('hubs'));
+            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
         }
 
         $ratio_leads = $leads['total'];
@@ -166,10 +166,10 @@ class LeadManagementController extends Controller
             $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
         }
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->where('city_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->where('city_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', session('hubs'));
+            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->where('c.hub_id', session('hubs'));
         }
 
         $ratio_leads = $leads['total'];
