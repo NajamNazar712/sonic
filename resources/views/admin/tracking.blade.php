@@ -444,7 +444,8 @@
                         }
 
                         if (data.shipments != undefined) {
-                            $.each(data.shipments, function (id, details) {
+                            $.each(data.shipments, function (index, details) {
+                                var id = details.shipment_id;
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
