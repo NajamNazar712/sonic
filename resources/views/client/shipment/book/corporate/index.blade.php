@@ -12,7 +12,7 @@
                     Book a Shipment (Corporate)
                     {{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
-                    <button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
+                    <button type="button" class="btn btn-prselected_service_type_nameimary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
                 </h1>
 
                 <div class="card">

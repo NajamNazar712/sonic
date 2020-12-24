@@ -2368,7 +2368,7 @@ class ShipperShipmentBookController extends Controller
         // if($current_time > $time){
         //     $date = Carbon::tomorrow();
         // }
-        $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
+        $booking_types = BookingType::whereNotIn('id', [4])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
