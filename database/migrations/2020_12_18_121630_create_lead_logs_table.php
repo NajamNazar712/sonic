@@ -15,12 +15,12 @@ class CreateLeadLogsTable extends Migration
     {
         Schema::create('lead_logs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('lead_id');
-            $table->integer('sale_person_id')->nullable();
-            $table->integer('reference_person_id')->nullable();
-            $table->integer('prev_status_id');
-            $table->integer('status_id');
-            $table->integer('updated_by');
+            $table->integer('lead_id')->index();
+            $table->integer('sale_person_id')->index()->nullable();
+            $table->integer('reference_person_id')->index()->nullable();
+            $table->integer('prev_status_id')->index();
+            $table->integer('status_id')->index();
+            $table->integer('updated_by')->index();
             $table->timestamps();
         });
     }
