@@ -173,7 +173,7 @@
                     $('#EditTypeModal').modal('show');
                     $('#edit_closing_type').val(type_name);
                 }else{
-                    var error = 'Head ID Not Found, Please Try again!';
+                    var error = 'Type ID Not Found, Please Try again!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });

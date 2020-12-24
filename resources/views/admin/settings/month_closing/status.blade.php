@@ -40,7 +40,7 @@
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <input name="type_name" id="type_name" class="form-control type_name" placeholder="Enter closing type name">
+                            <input name="status_name" id="status_name" class="form-control status_name" placeholder="Enter closing type name">
                         </div>
                     </div>
                     <div class="row justify-content-center">
@@ -65,7 +65,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <input type="hidden" id="edit_closing_type_id">
+                <input type="hidden" id="edit_closing_status_id">
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
@@ -167,34 +167,34 @@
             });
             $('body').on('click','#datatable button.edit',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                var type_name = $(this).parents('tr').find('td.name').text();
+                var status_name = $(this).parents('tr').find('td.name').text();
                 if(id){
-                    $('#edit_closing_type_id').val(id);
+                    $('#edit_closing_status_id').val(id);
                     $('#EditStatusModal').modal('show');
-                    $('#edit_closing_type').val(type_name);
+                    $('#edit_closing_type').val(status_name);
                 }else{
-                    var error = 'Head ID Not Found, Please Try again!';
+                    var error = 'Status ID Not Found, Please Try again!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
-            $('body').on('change','#StatusModal #type_name,#EditStatusModal #edit_closing_type',function() {
+            $('body').on('change','#StatusModal #status_name,#EditStatusModal #edit_closing_type',function() {
                 $(this).val($(this).val().trim());
             });
             $('body').on('click','#addStatus', function () {
-                var type = $('#type_name').val();
-                if(type != ''){
+                var status = $('#status_name').val();
+                if(status != ''){
                     $.ajax({
-                        url: '{!! route('admin.settings.month_closing.types.add') !!}',
+                        url: '{!! route('admin.settings.month_closing.status.add') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'type': type
+                            'status': status
                         }
                     }).done(function(data){
                         if(data.status){
                             table.draw(true);
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            $('#type_name').val('');
+                            $('#status_name').val('');
                             $('#StatusModal').modal('hide');
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -207,16 +207,16 @@
                 }
             });
             $('body').on('click','#edit_type', function () {
-                var type = $('#edit_closing_type').val();
-                var id = parseInt($('#edit_closing_type_id').val());
-                if(type != '' && id != ''){
+                var status = $('#edit_closing_type').val();
+                var id = parseInt($('#edit_closing_status_id').val());
+                if(status != '' && id != ''){
                     $.ajax({
-                        url: '{!! route('admin.settings.month_closing.types.edit') !!}',
+                        url: '{!! route('admin.settings.month_closing.status.edit') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'type_id': id,
-                            'type_name':type
+                            'status_id': id,
+                            'status_name':status
                         }
                     }).done(function(data){
                         if(data.status){

@@ -3270,29 +3270,29 @@ class GlobalSettingsController extends Controller
 
     public function month_closing_status_add(Request $request)
     {
-        $type = trim($request->type);
-        if ($type) {
-            $closing_type = new MonthClosingStatus();
-            $closing_type->name = $type;
-            $closing_type->save();
+        $status = trim($request->status);
+        if ($status) {
+            $closing_status = new MonthClosingStatus();
+            $closing_status->name = $status;
+            $closing_status->save();
 
-            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully added!']);
+            return response()->json(['status' => 1, 'success' => 'Month Closing Status successfully added!']);
         } else {
-            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty']);
+            return response()->json(['status' => 0, 'error' => 'Month Closing Status is empty']);
         }
     }
 
     public function month_closing_status_edit(Request $request)
     {
-        $type_id = $request->type_id;
-        if ($type_id) {
-            $type = MonthClosingStatus::find($type_id);
-            $type->name = $request->type_name;
-            $type->save();
+        $status_id = $request->status_id;
+        if ($status_id) {
+            $month_closing_status = MonthClosingStatus::find($status_id);
+            $month_closing_status->name = $request->status_name;
+            $month_closing_status->save();
 
-            return response()->json(['status' => 1, 'success' => 'Month Closing Type successfully updated!']);
+            return response()->json(['status' => 1, 'success' => 'Month Closing Status successfully updated!']);
         } else {
-            return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty!']);
+            return response()->json(['status' => 0, 'error' => 'Month Closing Status is empty!']);
         }
     }
 
