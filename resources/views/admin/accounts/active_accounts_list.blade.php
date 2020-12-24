@@ -289,24 +289,24 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="rate_history" action="{{--{{route('admin.view.rates',['id' => $id])}}--}}" method="post" novalidate="novalidate">
-                        @method('post')
-                        {{ csrf_field() }}
+                   {{-- <form id="rate_history" action="#"  novalidate="novalidate">--}}
+                       {{-- @method('post')--}}
+                      {{--  {{ csrf_field() }}--}}
                         <input type="text" hidden id="user_id" name="user_id">
                         <div class="col-12">
 
-                                <select name="old_rate_date"  id="old_rate_date" class="form-control select2"required data-rule-required="true" data-msg-required="Date is required">
+                                <select name="old_rate_date"  id="old_rate_date" class="form-control select2">
 
                                 </select>
 
                         </div>
 
-                        <div class="row justify-content-center mt-4">
+                        {{--<div class="row justify-content-center mt-4">
                             <div class="col-4">
                                 <button id="edit" type="submit" class="btn btn-primary btn-block">Submit</button>
                             </div>
                         </div>
-                    </form>
+                    </form>--}}
                 </div>
             </div>
         </div>
@@ -1413,6 +1413,9 @@
             width:'100%',
             //allowClear:true
         });
+        var redirect = '{!! url('/admin') !!}';
+
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
 
@@ -1430,17 +1433,41 @@
                         'user_id': user_id
                     }
                 }).done(function(data){
-                    if (data.status == 2) {
-
+                    if (data.status == 1) {
                         $.each(data.details,function(key,value){
-
-                            var newOption = new Option(value.created_at, value.created_at, false, false);
+                            var newOption = new Option(value, value, false, false);
                             $('#old_rate_date').append(newOption).trigger('change');
                         });
+                        $('#RateHistoryModal').modal('show');
 
+                        $('#RateHistoryModal #old_rate_date').bind('change', function () {
+                            var date = $(this).val();
+                            if (date != '') {
+                                console.log(data);
+                                if(data.account_type == 1){
 
+                                    var id = user_id;
+                                    var url = redirect + '/accounts/'+ id + '/view/rates/' + date;
+                                    console.log(url);
+                                    window.location = url;
+                                }
+                                else if(data.account_type == 2){
+                                    var id = user_id;
+                                    var url = redirect + '/corporate/'+ id + '/view/rates/' + date;
+                                    console.log(url);
+                                    window.location = url;
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            }
+                            return false;
+                        });
                     }
-                    $('#RateHistoryModal').modal('show');
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
                 });
             }
         });

@@ -536,7 +536,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
-    Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::get('/accounts/{id}/view/rates/{date?}','Admins\AdminDashboardController@viewRates')->name('view.rates');
     Route::post('user_id','Admins\AdminDashboardController@rate_history_date')->name('view.user');
     //Route::post('/accounts/rates_history','Admins\AdminDashboardController@viewRatesHistory')->name('view.rates.history');
     Route::get('/accounts/{id}/add_contacts','Admins\AdminDashboardController@add_contacts')->name('accounts.add_contacts');
@@ -550,7 +550,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
         Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
-        Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
+        Route::get('{id}/view/rates/{date?}','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
         Route::post('reject/submit','Admins\AdminCorporateAccountsController@rejectReasonSubmit')->name('rejectreason.submit');
 
     });
