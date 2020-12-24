@@ -31,7 +31,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
-    Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::get('/register/{lead_id?}','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
@@ -2517,9 +2517,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
         Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
-        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
+        Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
+        Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
     });
 });
 

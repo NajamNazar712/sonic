@@ -11,6 +11,130 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row mt-2">
+                    <div class="card col-12">
+                        <div class="card-content collapse show">
+                            <div class="card-body">
+                                <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
+                                    <div class="row justify-content-center">
+                                        <div class="form-group col">
+                                            <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                        <div class="form-group col">
+                                            <select name="search_origin" id="search_origin" class="select2 form-control">
+                                                @foreach($cities as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group col">
+                                            <select name="search_sale_person" id="search_sale_person" class="select2 form-control">
+                                                @foreach($sale_name as $sn)
+                                                    <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-1">
+                                            <button type="submit" class="btn round btn-primary search_button">Search <i class="ft-bar-chart"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_leads">{{$leads['total']}}</h3>
+                                                <span>Total Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}}</h3>
+                                                <span>In Process</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_delivered pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="mature_leads">{{$leads['mature_leads']}}</h3>
+                                                <span>Matured Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-pending_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="pending_for_activation">{{$leads['pending_for_activation']}}</h3>
+                                                <span>Request(s) pending for Activation</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="ratio">{{ $leads['ratio']}}</h3>
+                                                <span>Lead Time Ratio</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -25,6 +149,7 @@
                         <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
+                        <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
@@ -59,9 +184,40 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DetailsModal"
+    <div class="modal fade text-left" id="ForwardLeadModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ForwardLeadModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Forward Lead</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col mb-1">
+                        <select name="sale_person" id="saletag1" class="form-control select2">
+                            @foreach($sale_name as $sn)
+                                <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select name="reference_person" id="reference_person" class="form-control select2">
+                            @foreach($sale_name as $sn)
+                                <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="ForwardLeadSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DetailsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
 
@@ -70,7 +226,6 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -144,6 +299,13 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         table.dataTable {
@@ -191,6 +353,104 @@
             width: auto !important;
             text-align: left;
         }
+
+          .small-calender-icon{
+              font-size: 17px !important;
+          }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d , #90929a);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_in_process {
+            background-image: linear-gradient(45deg, #6A1FA2 , #FF4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_closed {
+            background-image: linear-gradient(45deg, #076500, #11F118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_rejected {
+            background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
+            background-repeat: repeat-x;
+        }
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .div_border{
+            border-style: double;
+        }
+
+        .statusBooked{
+            background-color: #5DADE2;
+        }
+        .statusOrigin{
+            background-color: #E67E22;
+        }
+        .statusIntransit{
+            background-color: #7F8C8D;
+        }
+        .statusDestination{
+            background-color: #F1C40F;
+        }
+        .statusNotattempted{
+            background-color: #1F618D;
+        }
+        .statusDeliveryunsuccessful{
+            background-color: #28B463;
+        }
+        .statusOnhold{
+            background-color: #154360;
+        }
+
     </style>
 @endsection
 
@@ -201,9 +461,53 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $("#search_origin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Origin",
+                width:'100%'
+            });
+
+            $("#search_sale_person").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sale Person",
+                width:'100%'
+            });
+
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                }
+            }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -211,7 +515,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.packaging.requests.list') }}',
+                        url: '{{ route('admin.leads.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -221,29 +525,31 @@
                             head.push('City');
                             head.push('Phone No');
                             head.push('Email Address');
+                            head.push('Message');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
+                            head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Aging');
+                            head.push('Updated By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper);
-                                row.push(values.created_at);
+                                row.push(values.lead_id);
+                                row.push(values.contact_person);
                                 row.push(values.city);
-                                row.push(values.total_quantity);
-                                row.push(values.amount);
-                                row.push(values.address);
-                                row.push(values.mode);
+                                row.push(values.phone_number);
+                                row.push(values.email_address);
+                                row.push(values.message);
+                                row.push(values.requested_date);
+                                row.push(values.sale_person);
+                                row.push(values.reference_person);
                                 row.push(values.status);
-                                row.push(values.remarks);
-                                row.push(values.requested_by);
                                 row.push(values.aging);
-                                row.push(values.confirmed_aging);
+                                row.push(values.updated_by);
 
                                 body.push(row);
                             });
@@ -266,76 +572,7 @@
                         enabled:false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
-
-                                $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
-                                $('#salesTagSubmit1').on('click',function () {
-                                    var assign = parseInt($('#saletag1').val());
-                                    swal({
-                                        text: 'Are you sure, you want to Tag?',
-                                        icon: 'info',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'No',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                            confirm: {
-                                                text: 'Yes',
-                                                value: true,
-                                                visible: true,
-                                                closeModal: true
-                                            }
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    }).then(function(confirm) {
-                                        if (confirm) {
-                                            if (assign) {
-                                                $.ajax({
-                                                    url: '{!! route('admin.accounts.tag.submit.bulk') !!}',
-                                                    method: 'POST',
-                                                    data: {
-                                                        'admin_id': assign,
-                                                        'shipper_ids[]': selected_rows,
-                                                        '_token': '{{ csrf_token() }}'
-                                                    }
-                                                })
-                                                    .done(function (data) {
-                                                        if (data.status == 1) {
-                                                            $('#SalesTagModal1').modal('hide');
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
-                                                            });
-                                                        } else {
-                                                            toastr.error(data.error, 'Error!', {
-                                                                positionClass: 'toast-top-center',
-                                                                containerId: 'toast-top-center'
-                                                            });
-                                                        }
-                                                        selected_rows = [];
-
-                                                        table.rows().deselect();
-                                                        $('#saletag1').val('').trigger('change');
-                                                        $('#SalesTagModal1').modal('hide');
-                                                        table.draw(true);
-                                                        table.button('.bulk_tagging').disable();
-
-                                                    });
-                                            } else {
-                                                var error = "Account Not Selected!";
-                                                toastr.error(error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-
+                                $('#SalesTagModal').modal('show');
                             }else{
                                 var error = "Account Not selected!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -417,7 +654,15 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.leads.list') }}',
+                ajax: {
+                    url: '{{ route('admin.leads.list') }}',
+                    data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_sale_person = $('#search_sale_person').val();
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                    }
+                },
                 rowId: 'lead_id',
                 order: [[8, 'desc']],
                 columns: [
@@ -431,6 +676,7 @@
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
+                    {data: 'reference_person', name:'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
@@ -457,7 +703,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -526,28 +772,98 @@
             $("#saletag1").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Sales Person",
                 width:'100%',
-                dropdownParent:$('#SalesTagModal1')
+                dropdownParent:$('#ForwardLeadModal')
             });
-            $("#set_segment").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Segment",
+            $("#reference_person").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reference Person",
                 width:'100%',
-                dropdownParent:$('#SetSegment')
-            });
-            $('#SalesTagModal').on('shown.bs.modal',function (e) {
-                var $invoker = $(e.relatedTarget);
-                var shipper_id = $invoker.data('target-id');
-                $('#shipper_id').val(shipper_id);
+                dropdownParent:$('#ForwardLeadModal')
             });
             $('#salesTagSubmit').on('click',function () {
-                var shipper = $('#shipper_id').val();
-                var tag = parseInt($('#saletag').val());
-                if(tag){
+                var assign = parseInt($('#saletag').val());
+                swal({
+                    text: 'Are you sure, you want to Tag?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        if (assign) {
+                            $.ajax({
+                                url: '{!! route('admin.leads.tag_sale_person') !!}',
+                                method: 'POST',
+                                data: {
+                                    'sale_person': assign,
+                                    'lead_ids[]': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 1) {
+                                        $('#SalesTagModal').modal('hide');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    selected_rows = [];
+
+                                    table.rows().deselect();
+                                    $('#saletag').val('').trigger('change');
+                                    $('#SalesTagModal').modal('hide');
+                                    table.draw(true);
+                                    table.button('.bulk_tagging').disable();
+
+                                });
+                        } else {
+                            var error = "Lead Not Selected!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                });
+            });
+            var status_lead_id = null;
+            var remark_lead_id = null;
+            var forward_lead_id = null;
+
+            $('body').on('click','#datatable .forward_lead',function(){
+                forward_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#ForwardLeadModal').modal('show');
+            });
+            $('#ForwardLeadSubmit').on('click',function () {
+                var tag = parseInt($('#saletag1').val());
+                var refer_person = parseInt($('#reference_person').val());
+                if(tag && refer_person){
                     $.ajax({
-                        url: '{!! route('admin.accounts.tag.submit') !!}',
+                        url: '{!! route('admin.leads.tag_sale_person') !!}',
                         method: 'POST',
                         data: {
-                            'admin_id': tag,
-                            'shipper_id':shipper,
+                            'sale_person': tag,
+                            'reference_person': refer_person,
+                            'lead_ids[]': forward_lead_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -558,13 +874,21 @@
                             else {
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                            $('#saletag').val('').trigger('change');
-                            $('#SalesTagModal').modal('hide');
+                            $('#saletag1').val('').trigger('change');
+                            $('#reference_person').val('').trigger('change');
+                            $('#ForwardLeadModal').modal('hide');
+                            forward_lead_id = null;
                             table.draw(true);
                         });
                 }else{
-                    var error = "Sales Person Not Selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    if(!tag){
+                        var error = "Sales Person Not Selected!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!refer_person){
+                        var error = "Reference Person Not Selected!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
 
             });
@@ -580,7 +904,7 @@
                     }
                 }).done(function (data) {
                     if(data.status === 1){
-                        var html = '';
+                        var html = '<div class="col">';
                         html += '<table class="table table-sm datatable text-center">';
                         html += '<thead><tr><th>S No.</th><th><strong>Lead ID</strong></th><th><strong>Contact Person</strong></th><th><strong>Phone Number</strong></th><th><strong>Sales Person</strong></th><th><strong>Reference Person</strong></th><th><strong>Lead Status</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
                         html += '<tbody>';
@@ -591,12 +915,12 @@
                             html += '<td>' + value.contact_person + '</td>';
                             html += '<td>' + value.phone_number + '</td>';
                             html += '<td>' + value.sales_person + '</td>';
-                            html += '<td>' + value.refernece_person + '</td>';
+                            html += '<td>' + value.reference_person + '</td>';
                             html += '<td>' + value.status + '</td>';
                             html += '<td>' + value.updated_by + '</td>';
                             html += '<td>' + value.updated_at + '</td></tr>';
                         });
-                        html += '</tbody></table>';
+                        html += '</tbody></table></div>';
                         var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
                         $('#DetailsModal .header').html(header);
                         $('#DetailsModal .modal-body').html(html);
@@ -609,39 +933,10 @@
 
             $('body').on('click','#datatable .view_remarks',function(){
                 var lead_id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url: '{!! route('admin.leads.view_remarks') !!}',
-                    method: 'POST',
-                    data: {
-                        'lead_id': lead_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        var html = '';
-                        html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Remarks</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
-                        html += '<tbody>';
-                        $.each(data.leads, function(index, value) {
-                            console.log(value.updated_at);
-                            var ind = index+1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.remarks + '</td>';
-                            html += '<td>' + value.updated_by + '</td>';
-                            html += '<td>' + value.updated_at + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-                        var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
-                        $('#DetailsModal .header').html(header);
-                        $('#DetailsModal .modal-body').html(html);
-                        $('#DetailsModal').modal('show');
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                });
+                var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';
+
+                window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;
             });
-            var status_lead_id = null;
-            var remark_lead_id = null;
 
             $("#update_lead_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Status",
@@ -666,25 +961,31 @@
                 },
                 submitHandler: function(form) {
                     var new_status = $('#update_lead_status').val();
-                    if(new_status != null){
+                    if(new_status){
                         blockPagePermanently();
                         $.ajax({
                             url:"{{route('admin.leads.add_status')}}",
                             method:'POST',
                             data:{
-                                'lead_id':remark_lead_id,
+                                'lead_id':status_lead_id,
                                 'status':new_status,
                                 '_token':'{{ csrf_token() }}'
                             }
                         }).done(function (data) {
-                            UnblockPagePermanently();
                             $('#add_status_modal').modal('hide');
+                            UnblockPagePermanently();
                             new_status = null;
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            if(data.status == 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
                         });
                     }
                     else{
-                        var error = 'Invalid Lead ID!';
+                        var error = 'Status not Selected!';
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
@@ -737,6 +1038,34 @@
 
             $('#add_remarks_modal').on('hide.bs.modal', function () {
                 $('#add_remarks_form input.add_remarks').val('');
+            });
+            $( "#search_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: '{!! route('admin.leads.lead_statistics') !!}',
+                        method: 'POST',
+                        data: {
+                            'search_origin': $('#search_origin').val(),
+                            'search_sale_person': $('#search_sale_person').val(),
+                            'search_date_from': $('input[name="from_date_formatted"]').val(),
+                            'search_date_to': $('input[name="to_date_formatted"]').val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#total_leads').text(data.leads.total);
+                            $('#in_process').text(data.leads.in_process);
+                            $('#mature_leads').text(data.leads.mature_leads);
+                            $('#pending_for_activation').text(data.leads.pending_for_activation);
+                            $('#ratio').text(data.leads.ratio);
+                        }
+                    });
+                    table.draw();
+                }
             });
         });
 

@@ -617,7 +617,6 @@ class AdminPackagingMaterialController extends Controller
             $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
             $order_process = new WmsOrderProcess();
             $order_process->shipment_id = $shipment->id;
-            $order_process->courier_id = 1;
             $order_process->sku_count = count($product_ids);
             $order_process->courier_id = 1;
             $order_process->quantity = $total_quantity;

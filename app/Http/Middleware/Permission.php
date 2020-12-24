@@ -812,7 +812,16 @@ class Permission
             'telenor.return.shipment_info' => 400,
             'telenor.return.submit' => 400,
             'telenor.call.index' => 402,
-            'telenor.call.list' => 402
+            'telenor.call.list' => 402,
+
+
+            'leads.index' => 416,
+            'leads.list' => 416,
+            'leads.add_status' => 419,
+            'leads.tag_sale_person' => 420,
+            'leads.lead_log' => 416,
+            'leads.add_remarks' => 416,
+            'leads.view_remarks' => 416
         ],
 
         'shipper' => [
