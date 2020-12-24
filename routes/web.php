@@ -31,7 +31,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
-    Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::get('/register/{lead_id?}','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
@@ -1510,6 +1510,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
         Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
         Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
+
+        Route::prefix('pending')->name('pending.')->group(function(){
+            Route::get('','Admins\AdminMonthClosingController@pending_index')->name('index');
+            Route::get('list','Admins\AdminMonthClosingController@pending_list')->name('list');
+            Route::post('assign','Admins\AdminMonthClosingController@assign_responsible_submit')->name('assign');
+            Route::post('closing_type_update','Admins\AdminMonthClosingController@closing_status_submit')->name('closing_type_update');
+            Route::post('resolved','Admins\AdminMonthClosingController@month_closing_resolved')->name('resolved');
+
+            Route::post('assign_details','Admins\AdminMonthClosingController@edit_assign_details')->name('assign_details');
+            Route::post('assign_update','Admins\AdminMonthClosingController@assign_responsible_update')->name('assign_update');
+
+        });
+
+        Route::prefix('resolved')->name('resolved.')->group(function(){
+            Route::get('','Admins\AdminMonthClosingController@resolved_index')->name('index');
+            Route::get('list','Admins\AdminMonthClosingController@resolved_list')->name('list');
+            Route::post('closed','Admins\AdminMonthClosingController@month_closing_closed')->name('closed');
+
+        });
     });  
 
 
@@ -1819,6 +1838,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('app_efficiency')->name('app_efficiency.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
+        });
+
+        Route::prefix('month_closing')->name('month_closing.')->group(function(){
+            Route::prefix('individual')->name('individual.')->group(function (){
+                Route::get('', 'Admins\AdminMonthClosingReportsController@month_closing_individual_index')->name('index');
+                Route::get('list', 'Admins\AdminMonthClosingReportsController@month_closing_individual_list')->name('list');
+            });
+            Route::prefix('pivot')->name('pivot.')->group(function (){
+                Route::get('', 'Admins\AdminMonthClosingReportsController@month_closing_pivot_index')->name('index');
+                Route::get('list', 'Admins\AdminMonthClosingReportsController@month_closing_pivot_list')->name('list');
+            });
+
+
         });
     });
 
@@ -2205,7 +2237,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
         });
 
-        
+        Route::prefix('month_closing')->name('month_closing.')->group(function () {
+            Route::prefix('types')->name('types.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@month_closing_type_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@month_closing_type_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@month_closing_type_add')->name('add');
+                Route::post('edit', 'Admins\GlobalSettingsController@month_closing_type_edit')->name('edit');
+            });
+            Route::prefix('status')->name('status.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@month_closing_status_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@month_closing_status_list')->name('list');
+                Route::post('add', 'Admins\GlobalSettingsController@month_closing_status_add')->name('add');
+                Route::post('edit', 'Admins\GlobalSettingsController@month_closing_status_edit')->name('edit');
+            });
+        });
+
+
     });
 
 
@@ -2470,9 +2517,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
         Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
-        Route::post('view_remarks', 'Admins\LeadManagementController@view_remarks_details')->name('view_remarks');
+        Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
+        Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
     });
 });
 

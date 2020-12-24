@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateLeadRemarksTable extends Migration
+class CreateMonthClosingResponsiblesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateLeadRemarksTable extends Migration
      */
     public function up()
     {
-        Schema::create('lead_remarks', function (Blueprint $table) {
+        Schema::create('month_closing_responsibles', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('lead_id')->index();
-            $table->string('remarks');
-            $table->integer('updated_by')->index();
+            $table->integer('month_closing_id')->index();
+            $table->integer('responsible_person_id')->index();
+            $table->integer('amount');
+            $table->integer('added_by')->index();
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateLeadRemarksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('lead_remarks');
+        Schema::dropIfExists('month_closing_responsibles');
     }
 }
