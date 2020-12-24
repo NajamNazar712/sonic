@@ -477,11 +477,10 @@
                 width:'100%'
             });
 
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: new Date(old_date_limit),
+                max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,

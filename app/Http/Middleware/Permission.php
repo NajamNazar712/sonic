@@ -817,8 +817,8 @@ class Permission
 
             'leads.index' => 416,
             'leads.list' => 416,
-            'leads.add_status' => 416,
-            'leads.tag_sale_person' => 416,
+            'leads.add_status' => 419,
+            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416

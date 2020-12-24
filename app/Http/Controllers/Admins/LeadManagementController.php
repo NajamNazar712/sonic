@@ -36,14 +36,42 @@ class LeadManagementController extends Controller
         $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
         $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
         $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
-        $leads['ratio'] = 0;
+
+        if (session('role_id') != 1) {
+            $leads['total'] = $leads['total']->where('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->where('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', session('hubs'));
+        }
+
+        $ratio_leads = $leads['total'];
+        if($ratio_leads->exists()){
+            $ratio_leads = $ratio_leads->get();
+            $days = 0;
+            $count = 0;
+            foreach ($ratio_leads as $ratio_lead){
+                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $count++;
+                }
+            }
+            $leads['ratio'] = $days/$count;
+        }
+        else{
+            $leads['ratio'] = 0;
+        }
 
 
         $leads['total'] = number_format($leads['total']->count());
         $leads['in_process'] = number_format($leads['in_process']->count());
         $leads['mature_leads'] = number_format($leads['mature_leads']->count());
         $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
-        $leads['ratio'] = 0;
+
         $cities = City::select('id','name')->get();
 
         $dates['current'] = Carbon::now();
@@ -58,6 +86,10 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
+
+        if (session('role_id') != 1) {
+            $users = $leads->whereIn('c.hub_id', session('hubs'));
+        }
 
         if($origin = $request->get('search_origin')){
             $leads->where('leads.city_id', '=', $origin);
@@ -88,9 +120,18 @@ class LeadManagementController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
+                if(session('role_id') == 1 || in_array(419, session('permissions')))
+                {
+                    $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
+                }
+
                 $dropdown .= '<button type="button"  class="dropdown-item lead_log" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Lead Log</div></button>';
-                $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
+
+                if(session('role_id') == 1 || in_array(420, session('permissions')))
+                {
+                    $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
+                }
+
                 $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button type="button"  class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
@@ -104,9 +145,8 @@ class LeadManagementController extends Controller
 
         $leads['total'] = Lead::whereBetween('requested_date',[$from,$to]);
         $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$from,$to]);
-        $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
+        $leads['mature_leads'] = Lead::whereIn('status_id', [9, 12])->whereBetween('requested_date',[$from,$to]);
         $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
-        $leads['ratio'] = 0;
 
         if($origin = $request->get('search_origin')){
             $leads['total'] = $leads['total']->where('city_id', $origin);
@@ -120,12 +160,39 @@ class LeadManagementController extends Controller
             $leads['mature_leads'] = $leads['mature_leads']->where('sale_person_id', $sale_person);
             $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
         }
+        if (session('role_id') != 1) {
+            $leads['total'] = $leads['total']->where('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->where('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', session('hubs'));
+        }
+
+        $ratio_leads = $leads['total'];
+        if($ratio_leads->exists()){
+            $ratio_leads = $ratio_leads->get();
+            $days = 0;
+            $count = 0;
+            foreach ($ratio_leads as $ratio_lead){
+                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $count++;
+                }
+            }
+            $leads['ratio'] = $days/$count;
+        }
+        else{
+            $leads['ratio'] = 0;
+        }
 
         $leads['total'] = number_format($leads['total']->count());
         $leads['in_process'] = number_format($leads['in_process']->count());
         $leads['mature_leads'] = number_format($leads['mature_leads']->count());
         $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
-        $leads['ratio'] = 0;
 
         return response()->json(['status' => 1, 'leads' => $leads]);
     }
