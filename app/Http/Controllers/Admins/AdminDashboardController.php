@@ -11,6 +11,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\http\Models\Admin\Lead\Lead;
+use App\http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -1404,6 +1405,22 @@ class AdminDashboardController extends Controller
             if($user->status == 2){
                 $now = Carbon::now();
                 $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now]);
+                if($user->lead_id != null){
+                    $lead = Lead::find($user->lead_id);
+                    
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = 12;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    $lead_log->reference_person_id = $lead->reference_person_id;
+                    $lead_log->updated_by = Auth::id();
+                    $lead_log->save();
+
+                    $lead->status_id = 12;
+                    $lead->updated_by = Auth::id();
+                    $lead->save();
+                }
                 if($action == 1){
                     NotificationsController::send(1, $id);
 

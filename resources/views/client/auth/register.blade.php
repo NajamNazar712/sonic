@@ -83,6 +83,9 @@
                                         <!-- Step 1 -->
                                         @csrf
                                         @method('post')
+                                        @if($lead != null)
+                                            <input type="hidden" name="lead_id" value="{{$lead->id}}">
+                                        @endif
                                         <h6>Profile Information</h6>
                                         @include('client.inc.messages')
                                         <fieldset>
