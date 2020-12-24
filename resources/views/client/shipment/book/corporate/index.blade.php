@@ -302,12 +302,12 @@
                                                 <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
                                             </div>
 
-                                            <div class="form-group">
+                                            {{--<div class="form-group">
                                                 <div class="form-group text-center p-1 border border-light rounded">
                                                     <label class="d-block">Type of Package</label>
                                                     <input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
                                                 </div>
-                                            </div>
+                                            </div>--}}
                                         </div>
 
                                         <div class="form-group">
@@ -1020,7 +1020,7 @@
             });
             $('#try_and_buy .insurance').checkboxpicker();
 
-            $('#package_type').checkboxpicker();
+            // $('#package_type').checkboxpicker();
             var current_date = '{{$date}}';
             $('#replacement_product_type').select2({
                 width: '100%',
