@@ -11,6 +11,132 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                @if(session('role_id') == 1 || session('department_id') == 7)
+                    <div class="row mt-2">
+                        <div class="card col-12">
+                            <div class="card-content collapse show">
+                                <div class="card-body">
+                                    <div id="shipment_statistics_chart" class="height-300 echart-container d-none"></div>
+                                    <div class="row justify-content-center">
+                                        <div class="col">
+                                            <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
+                                        </div>
+                                        <div class="col">
+                                            <select name="origin" id="origin" class="select2 form-control">
+                                                @foreach($cities as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <select name="search_sale_person" id="search_sale_person" class="select2 form-control">
+                                                @foreach($sale_name as $sn)
+                                                    <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-1">
+                                            <button type="button" class="btn round btn-primary statistics_search">Search <i class="ft-bar-chart"></i></button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_leads">{{$leads['total']}}</h3>
+                                                <span>Total Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">{{$leads['in_process']}}</h3>
+                                                <span>In Process</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_delivered pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">{{$leads['mature_leads']}}</h3>
+                                                <span>Matured Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-pending_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">{{$leads['pending_for_activation']}}</h3>
+                                                <span>Request(s) pending for Activation</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">{{ $leads['ratio']}}</h3>
+                                                <span>Lead Time Ratio</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -175,6 +301,13 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         table.dataTable {
@@ -222,6 +355,104 @@
             width: auto !important;
             text-align: left;
         }
+
+          .small-calender-icon{
+              font-size: 17px !important;
+          }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d , #90929a);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_in_process {
+            background-image: linear-gradient(45deg, #6A1FA2 , #FF4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_closed {
+            background-image: linear-gradient(45deg, #076500, #11F118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_rejected {
+            background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
+            background-repeat: repeat-x;
+        }
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .div_border{
+            border-style: double;
+        }
+
+        .statusBooked{
+            background-color: #5DADE2;
+        }
+        .statusOrigin{
+            background-color: #E67E22;
+        }
+        .statusIntransit{
+            background-color: #7F8C8D;
+        }
+        .statusDestination{
+            background-color: #F1C40F;
+        }
+        .statusNotattempted{
+            background-color: #1F618D;
+        }
+        .statusDeliveryunsuccessful{
+            background-color: #28B463;
+        }
+        .statusOnhold{
+            background-color: #154360;
+        }
+
     </style>
 @endsection
 
@@ -232,9 +463,58 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#total_leads').text();
+
+            $("#origin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Origin",
+                width:'100%'
+            });
+
+            $("#search_sale_person").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sale Person",
+                width:'100%'
+            });
+
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: new Date(old_date_limit),
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
+                    to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    var currentMoment = moment(current_date_formatted);
+                    var currentDate = moment(currentMoment).subtract(29, 'days');
+                    from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -242,7 +522,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.packaging.requests.list') }}',
+                        url: '{{ route('admin.leads.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -252,29 +532,31 @@
                             head.push('City');
                             head.push('Phone No');
                             head.push('Email Address');
+                            head.push('Message');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
+                            head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Aging');
+                            head.push('Updated By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper);
-                                row.push(values.created_at);
+                                row.push(values.lead_id);
+                                row.push(values.contact_person);
                                 row.push(values.city);
-                                row.push(values.total_quantity);
-                                row.push(values.amount);
-                                row.push(values.address);
-                                row.push(values.mode);
+                                row.push(values.phone_number);
+                                row.push(values.email_address);
+                                row.push(values.message);
+                                row.push(values.requested_date);
+                                row.push(values.sale_person);
+                                row.push(values.reference_person);
                                 row.push(values.status);
-                                row.push(values.remarks);
-                                row.push(values.requested_by);
                                 row.push(values.aging);
-                                row.push(values.confirmed_aging);
+                                row.push(values.updated_by);
 
                                 body.push(row);
                             });
@@ -420,7 +702,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))

@@ -8,6 +8,7 @@ use App\http\Models\Admin\Lead\Lead;
 use App\http\Models\Admin\Lead\LeadLog;
 use App\http\Models\Admin\Lead\LeadRemark;
 use App\http\Models\Admin\Lead\LeadStatus;
+use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -27,7 +28,35 @@ class LeadManagementController extends Controller
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $statuses = LeadStatus::all();
         $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
-        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses]);
+
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        if(session('role_id') == 1 || session('department_id') == 7){
+            $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['ratio'] = 0;
+
+
+            $leads['total'] = number_format($leads['total']->count());
+            $leads['in_process'] = number_format($leads['in_process']->count());
+            $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+            $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+            $leads['ratio'] = 0;
+        }
+        else{
+            $leads['total'] = 0;
+            $leads['in_process'] = 0;
+            $leads['mature_leads'] = 0;
+            $leads['pending_for_activation'] = 0;
+            $leads['ratio'] = 0;
+        }
+        $cities = City::select('id','name')->get();
+
+        $dates['current'] = Carbon::now();
+        $dates['old_date'] = Carbon::now()->subDays(29);
+        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
     }
 
     public function list(Request $request){

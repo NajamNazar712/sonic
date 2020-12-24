@@ -48,13 +48,17 @@
                             <tr>
                                 <th scope="row">Sale Person Tagged</th>
                                 <td class="name">
-                                    <h5 class="mb-0">{{$lead->sales_person->name}}</h5>
+                                    @if($lead->sale_person_id != null)
+                                        <h5 class="mb-0">{{$lead->sales_person->name}}</h5>
+                                    @else
+                                        <h5 class="mb-0">-</h5>
+                                    @endif
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Lead Status</th>
                                 <td class="name">
-                                    <h5 class="mb-0">{{$lead->created_at}}</h5>
+                                    <h5 class="mb-0">{{$lead->status->name}}</h5>
                                 </td>
                             </tr>
                             </tbody>
