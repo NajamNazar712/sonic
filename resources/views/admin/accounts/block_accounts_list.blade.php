@@ -32,6 +32,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
@@ -41,6 +42,9 @@
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
+                                        <th class="border-primary border-darken-1">POC Tagged</th>
+                                        <th class="border-primary border-darken-1">KAM Tagged</th>
+                                        <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
@@ -52,6 +56,47 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Tiers</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id1">
+                    <div class="mb-2">
+                        <select name="poc" id="poc" class="form-control select2">
+                            @foreach($sale_tier_types as $poc)
+                                <option value="{{ $poc->id }}" > {{ $poc->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="kam" id="kam" class="form-control select2">
+                            @foreach($sale_tier_types as $kam)
+                                <option value="{{ $kam->id }}" > {{ $kam->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <select name="ref" id="ref" class="form-control select2">
+                            @foreach($sale_tier_types as $ref)
+                                <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -123,6 +168,22 @@
             allowClear:true,
             dropdownParent:$('#search_form')
         });
+        $("#poc").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select POC",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+        $("#kam").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select KAM",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+        $("#ref").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select REFFERAL",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -144,6 +205,9 @@
                         head.push('Company Address');
                         head.push('Email Address');
                         head.push('Sales Person Tagged');
+                        head.push('POC Tagged');
+                        head.push('KAM Tagged');
+                        head.push('REF Tagged');
                         head.push('Reason');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -158,6 +222,9 @@
                             row.push(values.address);
                             row.push(values.email);
                             row.push(values.admin_tag_id);
+                            row.push(values.poc);
+                            row.push(values.kam);
+                            row.push(values.ref);
                             row.push(values.reason);
 
                             body.push(row);
@@ -169,10 +236,167 @@
                 return {body: body, header: head};
             }
         } );
+        var selected_rows = [];
+        var hub_ids = [];
         var table = $('.datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '500px',
             buttons: [
+                {
+                    text: 'Sales Tier Tagging',
+                    className: 'btn btn-primary tag',
+                    enabled:false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+
+                            $('#SalesTierTypeTagModal').modal('show');
+                            $('#salesTierTypeTagSubmit').on('click',function () {
+                                var poc = $('#poc').val();
+                                var kam = $('#kam').val();
+                                var ref = $('#ref').val();
+                                swal({
+                                    text: 'Are you sure, you want to Tag?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+
+                                        $.ajax({
+                                            url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'poc': poc,
+                                                'kam': kam,
+                                                'ref': ref,
+                                                'shipper_ids[]': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function (data) {
+                                                if (data.status === 0) {
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                                } else {
+                                                    $('#SalesTierTypeTagModal').modal('hide');
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                selected_rows = [];
+
+                                                table.rows().deselect();
+                                                $('#poc').val('').trigger('change');
+                                                $('#kam').val('').trigger('change');
+                                                $('#ref').val('').trigger('change');
+                                                $('#SalesTierTypeTagModal').modal('hide');
+                                                table.draw(true);
+                                                table.button('.tag').disable();
+                                                table.button('.assign_rider').disable();
+
+
+                                            });
+                                    }
+                                });
+                            });
+
+                        }else{
+                            var error = "Atleast Select One Shipper";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                },
+                {
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                id = parseInt(row.id());
+
+                                hub_id = $(row.node()).data('id');
+
+                                var allow = false;
+
+                                if(hub_ids.length == 0) {
+                                    hub_ids.push(hub_id);
+
+                                    allow = true;
+                                }
+                                else if(hub_ids[0] == hub_id) {
+                                    allow = true;
+                                }
+
+                                if (allow) {
+                                    row.select();
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.assign_rider').enable();
+                                    table.button('.tag').enable();
+
+                                }
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.assign_rider').disable();
+                                    table.button('.tag').disable();
+
+                                    hub_ids.splice(index, 1);
+                                }
+                            }
+                        });
+                    }
+                },
                 {
                     extend: 'excel',
                     title: 'Blocked Accounts',
@@ -181,6 +405,12 @@
                 },
                 'reset'
             ],
+            select: {
+                info: false,
+                style: 'multi',
+                selector: 'td.select-checkbox',
+                className: 'selected bg-primary bg-lighten-5 primary'
+            },
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
             pagingType: 'full_numbers',
@@ -198,6 +428,7 @@
                 }
             },
             columns: [
+                {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'account_id'},
                 {data: 'name', name: 'users.name', class: 'company_name'},
@@ -207,12 +438,22 @@
                 {data: 'address', name: 'users.address', class: 'address'},
                 {data: 'email', name: 'users.email', class: 'email'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
+                {data: 'poc_tagged', name: 'a.name', class: 'align-middle poc_tagged'},
+                {data: 'kam', name: 'd.name', class: 'align-middle kam'},
+                {data: 'ref', name: 'h.name', class: 'align-middle ref'},
                 {data: 'reason', name: 'users.blacklist_reason', class: 'reason'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {
+              /*  var info = table.page.info();
+                $('td:eq(0)', row).html(index + 1 + info.page * info.length);*/
                 var info = table.page.info();
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                if ($.inArray(data.id, selected_rows) !== -1) {
+                    table.row(row).select();
+                }
+
             },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -224,7 +465,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select-checkbox')) {
                         $(td).appendTo($(search));
                     }
                     else {
@@ -237,6 +478,25 @@
                         }
                     }
                 });
+            }
+        });
+        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            var id = parseInt($(this).parent('tr').attr('id'));
+
+            var index = $.inArray(id, selected_rows);
+
+            if (index === -1) {
+                selected_rows.push(id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+
+            if (selected_rows.length > 0) {
+                table.button('.tag').enable();
+            }
+            else {
+                table.button('.tag').disable();
             }
         });
         $('body').on('click','button.blacklist',function () {

@@ -188,7 +188,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-8">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -1284,7 +1284,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1366,7 +1365,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1446,7 +1444,6 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                        html += id + '<br/>';
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
@@ -1545,7 +1542,7 @@
 
                                     $.each(data.already_existed_shipments, function(index, tracking_number) {
                                         html += tracking_number + '<br/>';
-                                            html += id + '<br/>';
+
                                     });
 
                                     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
