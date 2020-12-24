@@ -10,6 +10,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
+use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -156,6 +157,7 @@ class AdminDashboardController extends Controller
         $stats = array();
         $graph = array();
         $sales=array();
+        $leads = array();
         $graph_dates = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -182,6 +184,22 @@ class AdminDashboardController extends Controller
         $sales['inactive_accounts']=User::where('status',4)->where('blacklist',0);
         $sales['pending_accounts']=User::whereIn('status',[0,1,2]);
         $sales['blocked_accounts']=User::where('blacklist',1);
+
+
+        if(session('role_id') == 1 || session('department_id') == 7){
+            $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+            $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+//            if($leads['total']->exists()){
+//                $total_leads = $leads['total'];
+//                $total_leads = $total_leads->get();
+//                foreach ($total_leads as $t_lead){
+//
+//                }
+//            }
+            $leads['ratio'] = 0;
+        }
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -306,6 +324,28 @@ class AdminDashboardController extends Controller
         $sales['inactive_accounts']=number_format($sales['inactive_accounts']->count());
         $sales['pending_accounts']=number_format($sales['pending_accounts']->count());
         $sales['blocked_accounts']=number_format( $sales['blocked_accounts']->count());
+        if(session('role_id') == 1 || session('department_id') == 7){
+            $leads['total'] = number_format($leads['total']->count());
+            $leads['in_process'] = number_format($leads['in_process']->count());
+            $leads['mature_leads'] = number_format($leads['mature_leads']->count());
+            $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+//            $leads['ratio'] = number_format($sales['ratio']->count());
+//            if($leads['total']->exists()){
+//                $total_leads = $leads['total'];
+//                $total_leads = $total_leads->get();
+//                foreach ($total_leads as $t_lead){
+//
+//                }
+//            }
+            $leads['ratio'] = 0;
+        }
+        else{
+            $leads['total'] = 0;
+            $leads['in_process'] = 0;
+            $leads['mature_leads'] = 0;
+            $leads['pending_for_activation'] = 0;
+            $leads['ratio'] = 0;
+        }
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -449,7 +489,7 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales,'leads'=>$leads]);
     }
     public function statistics_search(Request $request){
 //        return $request;
