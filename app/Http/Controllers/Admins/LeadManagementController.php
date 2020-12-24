@@ -88,7 +88,7 @@ class LeadManagementController extends Controller
             ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
 
         if (session('role_id') != 1) {
-            $users = $leads->whereIn('c.hub_id', session('hubs'));
+            $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
 
         if($origin = $request->get('search_origin')){
