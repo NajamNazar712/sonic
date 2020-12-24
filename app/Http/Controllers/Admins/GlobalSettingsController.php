@@ -1731,7 +1731,7 @@ class GlobalSettingsController extends Controller
     public function sales_person_targets_history_list(Request $request)
     {
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_week', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
+            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');
         return Datatables::of($targets)->make(true);
     }

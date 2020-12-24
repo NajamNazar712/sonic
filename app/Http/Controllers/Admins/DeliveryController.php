@@ -311,6 +311,7 @@ class DeliveryController extends Controller
             return false;
         }
     }
+
     public function get_shipment_details(Request $request)
     {
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -602,6 +603,7 @@ class DeliveryController extends Controller
         }
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
     }
+
     public function create_delivery_note(Request $request){
         $shipments = explode(',',$request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
@@ -2950,6 +2952,10 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+                    if($delivery_note->updated_by == NULL){
+                        $delivery_note->updated_by = Auth::id();
+                        $delivery_note->save();
+                    }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
                         return redirect()->back()->with(['success' => 'Delivery Note verified and updated successfully!', 'info' => 'Same consignee details found which are already marked as delivered of following Shipment(s): ' . $invalid_shipments]);
@@ -2957,7 +2963,8 @@ class DeliveryController extends Controller
                     else{
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
                     }
-                } else {
+                }
+                else {
                     $delivery_note_data = DeliveryNote::find($delivery_note_id);
                     $delivery_note_data->last_updated_at = $current_time;
                     $delivery_note_data->updated_by = Auth::id();
