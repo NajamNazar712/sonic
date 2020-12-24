@@ -11,7 +11,7 @@ class UpdateModulePermissionForNewMonthClosingTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('module_permissions')->whereIn('id', [408,409,410,411,412,413,414,415,417,418])->delete();
+        DB::table('module_permissions')->whereIn('id', [141,142,143,144,408,409,410,411,412,413,414,415,417,418])->delete();
         DB::table('admins_screen_list')->whereIn('permission_id', [408,409,414,417,418])->delete();
         DB::table('admins_screen_list')->where('url', 'admin.month_closing.index')->delete();
 
