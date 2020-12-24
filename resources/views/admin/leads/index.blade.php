@@ -488,11 +488,10 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
-                    var contractMoment = moment(old_date_formatted);
-                    var current = moment(contractMoment).add(29, 'days');
-                    to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                if (context.select) {
+                    $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
                 }
+            }
             });
 
             var to_date = $('#to_date').pickadate({
@@ -505,10 +504,9 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    var currentMoment = moment(current_date_formatted);
-                    var currentDate = moment(currentMoment).subtract(29, 'days');
-                    from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
