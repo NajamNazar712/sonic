@@ -46,6 +46,12 @@ class AdminMonthClosingReportsController extends Controller
             ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address','rp.name as responsible_person')
             ->whereIn('month_closings.status_id', [2,3]);
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $month_closing->whereBetween('month_closings.closing_updated_at', [$from,$to]);
+        }
+
         $datatable = Datatables::of($month_closing)
             ->editColumn('tracking_number_link',function ($shipments){
                 $route = route('admin.tracking.index');
