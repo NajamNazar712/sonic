@@ -121,8 +121,10 @@ class AdminCRMController extends Controller
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
                         if($shipment){
+
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
+                                $complain = $is_shipment->id;
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
@@ -139,7 +141,6 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                             if(in_array($complaint_id, [11, 12, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
-                                                $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
                                                 $flag = true;
                                             }
                                             else{
@@ -158,7 +159,7 @@ class AdminCRMController extends Controller
                                     }
                                 }else{
                                     $present_shipments[] = $shipment->tracking_number;
-                                    $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
+                                    $present_shipments[] = 'Complaint ID: '. $complain;
                                     $flag = true;
                                 }
                             }
@@ -173,7 +174,6 @@ class AdminCRMController extends Controller
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
-                                            $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
                                             $flag = true;
                                         }
                                         else{
@@ -206,11 +206,11 @@ class AdminCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
+                            $complain = $is_shipment->id;
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
-                                        $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
                                         $flag = true;
                                     }
                                     else{
@@ -232,14 +232,13 @@ class AdminCRMController extends Controller
                                 }
                             }else{
                                 $present_shipments[] = $shipment->tracking_number;
-                                $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
+                                $present_shipments[] = 'Complaint ID: '. $complain;
                                 $flag = true;
                             }
                         }else{
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
-                                    $present_shipments[] = 'Complaint ID: '. $is_shipment->id;
                                     $flag = true;
                                 }
                                 else{
