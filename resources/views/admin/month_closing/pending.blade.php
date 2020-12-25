@@ -90,7 +90,7 @@
                          <div class="form-group">
                              <select name="responsible_persons[]" id="responsible_persons" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                  @foreach($admins as $admin)
-                                     <option rel="{{$admin->name}}" value="{{$admin->id}}">{{$admin->name}}  {{ ($admin->designation != null)? '( '.$admin->designation.' )':'' }}  ( {{ $admin->role->department->name }} )</option>
+                                     <option rel="{{$admin->name}}" value="{{$admin->id}}">{{$admin->name}}  {{ ($admin->designation != null)? '( '.$admin->designation.' )':'' }} {{ (isset($admin->role->department)? '( '.$admin->role->department->name.' )':'') }} </option>
                                  @endforeach
                              </select>
                          </div>
