@@ -359,10 +359,7 @@ class AdminMonthClosingController extends Controller
 
     public function pending_index(){
         $closing_types = MonthClosingType::all();
-        $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->get();
-        foreach ($admins as $admin){
-            return $admin->role->department->name;
-        }
+        $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->with('role')->get();
         return view('admin.month_closing.pending')->with(['admins' => $admins, 'closing_types' => $closing_types]);
     }
 
