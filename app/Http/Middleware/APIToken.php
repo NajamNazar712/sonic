@@ -37,6 +37,9 @@ class APIToken
                         'message' => 'Your Account is not Activated yet.'
                     ]);
                 }
+                else if ($user->phone_number_verified == 0){
+                    return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
+                }
                 else {
                     $request->request->add(['user_id' => $user->id]);
 
