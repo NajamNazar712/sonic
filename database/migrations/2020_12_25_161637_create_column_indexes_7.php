@@ -164,10 +164,6 @@ class CreateColumnIndexes7 extends Migration
             $table->index('date');
         });
 
-        Schema::table('orderhive', function (Blueprint $table) {
-            $table->index('user_id');
-        });
-
         Schema::table('overnight_overland_report_datas', function (Blueprint $table) {
             $table->index('cargo_id');
             $table->index('origin_id');
@@ -380,10 +376,6 @@ class CreateColumnIndexes7 extends Migration
             $table->dropIndex(['user_mode']);
             $table->dropIndex(['user_id']);
             $table->dropIndex(['date']);
-        });
-
-        Schema::table('orderhive', function (Blueprint $table) {
-            $table->dropIndex(['user_id']);
         });
 
         Schema::table('overnight_overland_report_datas', function (Blueprint $table) {
