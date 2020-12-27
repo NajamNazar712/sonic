@@ -70,13 +70,6 @@ class CreateColumnIndexes5 extends Migration
             $table->index('shipment_id');
         });
 
-        Schema::table('feature_updates', function (Blueprint $table) {
-            $table->index('added_by');
-            $table->index('updated_by');
-            $table->index('audience');
-            $table->index('status');
-        });
-
         Schema::table('fuel_factor_histories', function (Blueprint $table) {
             $table->index('admin_id');
         });
@@ -148,13 +141,6 @@ class CreateColumnIndexes5 extends Migration
         Schema::table('draft_cargo_shipments', function (Blueprint $table) {
             $table->dropIndex(['draft_cargo_id']);
             $table->dropIndex(['shipment_id']);
-        });
-
-        Schema::table('feature_updates', function (Blueprint $table) {
-            $table->dropIndex(['added_by']);
-            $table->dropIndex(['updated_by']);
-            $table->dropIndex(['audience']);
-            $table->dropIndex(['status']);
         });
 
         Schema::table('fuel_factor_histories', function (Blueprint $table) {
