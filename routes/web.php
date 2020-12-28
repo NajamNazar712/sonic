@@ -2499,6 +2499,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 	Route::prefix('telenor')->name('telenor.')->group(function(){
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@arrival_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@arrival_submit')->name('submit');
+        });
         Route::prefix('delivery')->name('delivery.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@delivery_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@delivery_submit')->name('submit');
