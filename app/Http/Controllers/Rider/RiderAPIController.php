@@ -1104,9 +1104,9 @@ class RiderAPIController extends Controller {
                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6]);
                         ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
 
-                        if($shipment->packaging_material_request == 1){
+                        /*if($shipment->packaging_material_request == 1){
                             self::delivery_packaging_material_update($shipment->tracking_number);
-                        }
+                        }*/
                     }
                     $shipment->save();
                 }
@@ -1855,7 +1855,7 @@ class RiderAPIController extends Controller {
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
 
-    public function delivery_packaging_material_update($tracking_number){
+    /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
             $packaging_material_shipment->status_id = 4;
@@ -1894,5 +1894,5 @@ class RiderAPIController extends Controller {
                 }
             }
         }
-    }
+    }*/
 }
