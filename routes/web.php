@@ -269,11 +269,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
-    Route::get('/register/success','Auth\RegisterController@register_success');
+    Route::get('/register/user/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
-    Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
-    Route::get('/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
-    Route::get('/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
+    Route::get('/register/name/match/{name}','Auth\RegisterController@checkCompanyName');
+    Route::get('/register/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
+    Route::get('/register/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
     Route::get('terms_and_conditions/{token}/{id}/accept','ShipperAgreementController@accept')->name('terms.accept');
     Route::get('terms_and_conditions/{token}/{id}/download','ShipperAgreementController@crf_download')->name('terms.download');
     Route::get('/terms/success','Auth\RegisterController@register_success')->name('terms.success');
