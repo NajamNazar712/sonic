@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    @if (session()->has('phone_number_unverified'))
+    @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
         <div class="modal fade" id="PasswordModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="PasswordModal"
              aria-hidden="true" style="top:30%;">
             <div class="modal-dialog modal-md" role="document">
@@ -126,7 +126,7 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            @if (session()->has('phone_number_unverified'))
+            @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
 
             $('#password_input').inputmask({
                 'mask': '99999',
