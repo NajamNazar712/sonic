@@ -269,7 +269,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
-    Route::get('/register/success','Auth\RegisterController@register_success');
+    Route::get('/register/user/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/name/match/{name}','Auth\RegisterController@checkCompanyName');
     Route::get('/register/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
