@@ -116,7 +116,12 @@
         </div>
     @endif
 @endsection
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+@endsection
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -133,10 +138,9 @@
                 $('#PasswordModal').modal('show');
 
             $('body').on('keypress change','#password_input',function() {
+                $('#password_submit').attr('disabled', true);
                 if($(this).val().length == 5){
                     $('#password_submit').attr('disabled', false);
-                }else{
-                    $('#password_submit').attr('disabled', true);
                 }
             });
             $('#password_submit').on('click', function () {
@@ -151,15 +155,20 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
-                        if(data.status){
+                        if(data.status == 0){
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             $('#password_input').val('');
                             $('#password_submit').attr('disabled', true);
                         }else{
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             $('#PasswordModal').modal('hide');
                             $('#password').val(pass);
                         }
                     });
+                }
+                else{
+                    var error = 'Please Enter OTP Code!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
             $('#password_close').on('click', function(){
