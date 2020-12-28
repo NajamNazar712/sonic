@@ -677,7 +677,7 @@
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
                     {data: 'reference_person', name:'rp.name', class: 'align-middle sale_person'},
-                    {data: 'status', name: 'ls.id', class: 'align-middle status'},
+                    {data: 'status', name: 'leads.status_id', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}

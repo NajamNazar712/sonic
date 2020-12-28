@@ -61,7 +61,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;
@@ -189,7 +189,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;
