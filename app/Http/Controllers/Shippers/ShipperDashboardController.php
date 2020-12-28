@@ -142,6 +142,11 @@ class ShipperDashboardController extends Controller
             $otp_verification = UserOtpVerification::where('user_id', session('user_id'))->where('otp', $code);
             if($otp_verification->exists()){
                 $otp_verification->delete();
+                return response()->json(['status' => 1, 'success' => 'Your Phone Number verified for this month!']);
+
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP Code!']);
             }
         }
     }
