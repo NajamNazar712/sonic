@@ -901,7 +901,7 @@
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
-                {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
+                {data: 'international_rate_status', name: 'iui.status', class: 'align-middle international_rate_status'},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
@@ -931,13 +931,18 @@
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
+                var intl_drop_select = '<select name="intl_rate_status_select" id="intl_rate_status_select" class="select2 form-control">' +
+                    '<option value="1">Approved</option>' +
+                    '<option value="2">Requested</option>' +
+                    '<option value="3">Rejected</option>' +
+                    '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason')) {
+                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rejected_reason')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
@@ -954,6 +959,11 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                    }else if($(header).is('.international_rate_status')){
+                        $(intl_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -967,6 +977,12 @@
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#intl_rate_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select International Rate Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
