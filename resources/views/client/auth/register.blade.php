@@ -96,7 +96,7 @@
                                                             Company Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
+                                                        <input type="text" class="form-control required" value="{{ old('name') }}" name="name">
                                                         <span name="cname" class="danger" for="name" style="display: none;">Atleast 3 Characters Required</span>
                                                         <span name="ename" class="danger" for="name" style="display: none;">Company Name Already Exists</span>
                                                     </div>
