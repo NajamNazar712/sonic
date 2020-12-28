@@ -135,6 +135,8 @@
             $('body').on('keypress change','#password_input',function() {
                 if($(this).val().length == 5){
                     $('#password_submit').attr('disabled', false);
+                }else{
+                    $('#password_submit').attr('disabled', true);
                 }
             });
             $('#password_submit').on('click', function () {
