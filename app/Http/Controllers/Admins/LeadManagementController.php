@@ -111,6 +111,14 @@ class LeadManagementController extends Controller
             ->editColumn('lead_id', function ($lead) {
                 return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
             })
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('leads.status_id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('aging',function ($lead){
                 $days = Carbon::now()->diffInDays($lead->requested_date);
                 if($days == 0){
