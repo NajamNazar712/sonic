@@ -164,7 +164,7 @@ class LoginController extends Controller
                 auth('substitute_users')->logout();
                 return back()->with('info', 'Your Shipper\'s Account is Not Activated Yet, Contact Admin');
             }
-            else if ($user->phone_number_verified == 0){
+            else if ($shipper->phone_number_verified == 0){
                 auth('web')->logout();
                 return back()->with('info', 'Your Account phone number is not verified, Contact Admin');
             }
