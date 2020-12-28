@@ -6333,6 +6333,7 @@ class AdminCorporateAccountsController extends Controller
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         if($date == null){
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            return $switches;
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -6344,8 +6345,18 @@ class AdminCorporateAccountsController extends Controller
         }
         else{
 
-            $switches = HistoryCorporateRateStatus::where('user_id', $id)->where(DB::raw("DATE(created_at) = '".date('Y-m-d')."'"))->groupBy('shipping_mode_id')->get();
+            //$switches = HistoryCorporateRateStatus::where('user_id', $id)->where(DB::raw("DATE(created_at) = '". $date ."'"))->groupBy('shipping_mode_id')->get();
+            $switches = HistoryCorporateRateStatus::where('user_id', $id)->whereDate('created_at', $date)->groupBy('shipping_mode_id')->get();
+           //return $switches;
+            $switches = $switches
+                ->map(function ($item, $key) {
+                    return [$item['shipping_mode_id'] => $item] ;
+            });
+
+            return $switches;
+
             $min_weight = HistoryCorporateMinChargeableWeight::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
+
             $weight = HistoryCorporateWeightCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
             $bookingType = HistoryCorporateMinChargeableWeight::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
             $cash = HistoryCorporateCashHandlingCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
@@ -6354,7 +6365,7 @@ class AdminCorporateAccountsController extends Controller
             $fuel = HistoryCorporateFuelSurcharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
             $discount = HistoryCorporateDiscountCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
         }
-//        return $switches;
+        //return $switches;
 
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
         $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
