@@ -11,6 +11,9 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div id="camera_scan" class="d-none">
+                    <div id="camera_view" class="camera_view"></div>
+                </div>
 
                     <form id="add_shipment_form"   class="form-inline mb-4 justify-content-center" novalidate="novalidate" method="post">
                         <div class="form-group">
@@ -127,12 +130,20 @@
             var shipment_ids = [];
             var selected_rows = [];
 
-            $('#add_shipment_form input.tracking_number').focus();
-            $('#add_shipment_form input.tracking_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
+
+            $('#camera_scan_initiate').bind('click', function() {
+                if ($('#camera_scan').hasClass('d-none')) {
+                    $('#camera_scan').removeClass('d-none');
+
+                    camera_scanning_start('#camera_view');
+                }
+                else {
+                    $('#camera_scan').addClass('d-none');
+
+                    camera_scanning_stop();
+                }
             });
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true,
@@ -308,6 +319,7 @@
 
                                 if (selected_rows.length == 0) {
                                     table.button('.bulk_remove').disable();
+
                                 }
                             }
                         });
@@ -478,28 +490,28 @@
                 },
                 submitHandler: function(form) {
                     //$(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to enter!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
+                    // swal({
+                    //     title: 'Are You Sure?',
+                    //     text: 'Select Yes to enter!',
+                    //     icon: 'warning',
+                    //     buttons: {
+                    //         cancel: {
+                    //             text: 'No',
+                    //             value: null,
+                    //             visible: true,
+                    //             closeModal: true,
+                    //         },
+                    //         confirm: {
+                    //             text: 'Yes',
+                    //             value: true,
+                    //             visible: true,
+                    //             closeModal: true
+                    //         }
+                    //     },
+                    //     closeOnClickOutside: false,
+                    //     closeOnEsc: false,
+                    //     dangerMode: true
+                    // }).then(function (confirm) {
                         var tracking = $("#add_shipment_form #tracking_number").val();
                         console.log(tracking);
                         if (confirm) {
@@ -547,10 +559,22 @@
                             var error ='Not Found';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
-            });
+            // });
         }
 
         });
+            $('#add_shipment_form input.tracking_number').focus();
+            $('#add_shipment_form input.tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
         });
+        function camera_scan_detected(tracking_number) {
+            $('#add_shipment_form input.tracking_number').val(tracking_number);
+
+            $('#add_shipment_form input.tracking_number').focus();
+
+        }
     </script>
 @endsection
