@@ -5962,7 +5962,7 @@ class DeliveryController extends Controller
                         $delivery_note_shipment->shipment_id = $shipment->id;
                         $delivery_note_shipment->ordering = $serial;
                         $delivery_note_shipment->save();
-                        return response()->json(['status' => 0, 'success' => 'Shipments Addedw']);
+                        return response()->json(['status' => 0, 'success' => 'Shipments Added']);
 
         }
         else{

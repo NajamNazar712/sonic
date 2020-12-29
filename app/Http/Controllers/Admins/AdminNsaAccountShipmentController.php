@@ -525,7 +525,7 @@ class AdminNsaAccountShipmentController extends Controller
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
         }
-        $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', 2)->whereIn('user_id', $nsa_accounts);
+        $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', [2, 4])->whereIn('user_id', $nsa_accounts);
         if($shipment->exists()){
             $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number')->first();
             $data['id'] = $shipment->id;
