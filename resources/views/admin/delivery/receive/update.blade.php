@@ -11,26 +11,27 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+
                 <div id="camera_scan" class="d-none">
                     <div id="camera_view" class="camera_view"></div>
                 </div>
 
-                    <form id="add_shipment_form"   class="form-inline mb-4 justify-content-center" novalidate="novalidate" method="post">
-                        <div class="form-group">
+                <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                            <input type="text" name="tracking_number"  id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                    <div class="form-group">
+                        <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
-                            <div class="d-inline-block ml-1">
-                                <a href="#" id="camera_scan_initiate" tabindex="-1">
-                                    <i class="ft-camera h1"></i>
-                                </a>
-                            </div>
+                        <div class="d-inline-block ml-1">
+                            <a href="#" id="camera_scan_initiate" tabindex="-1">
+                                <i class="ft-camera h1"></i>
+                            </a>
                         </div>
+                    </div>
 
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" id="add_tracking_number" class="btn btn-primary add" value="Add">Add</button>
-                        </div>
-                    </form>
+                    <div class="form-group ml-1">
+                        <button type="submit" name="add" id="add_tracking_number" class="btn btn-primary add" value="Add">Add</button>
+                    </div>
+                </form>
 
                 <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note">
 
@@ -498,7 +499,7 @@
 
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
                         var tracking = $("#add_shipment_form #tracking_number").val();
