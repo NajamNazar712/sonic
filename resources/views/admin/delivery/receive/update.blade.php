@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                            <button type="submit" name="add" id="add_tracking_number" class="btn btn-primary add" value="Add">Add</button>
                         </div>
                     </form>
 
@@ -198,6 +198,10 @@
                                             table.button('.bulk_remove').disable();
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            $('#add_tracking_number').prop('disabled', true);
+                                            setTimeout(function() {
+                                                window.location.href = '{{ route('admin.delivery.receive.index') }}';
+                                            }, 2500);
                                         }
                                         else{
                                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -213,7 +217,8 @@
                             table.button('.bulk_remove').disable();
                         }
                     }
-                },{
+                },
+                    {
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled:true,
@@ -474,6 +479,13 @@
                             if(data.status == 0){
                                 UnblockPagePermanently();
                                 table.row( $(this).parents('tr') ).remove().draw();
+                                var total_rows = table.rows().count();
+                                if(total_rows <= 0){
+                                    $('#add_tracking_number').prop('disabled', true);
+                                    setTimeout(function() {
+                                        window.location.href = '{{ route('admin.delivery.receive.index') }}';
+                                    }, 2500);
+                                }
                             }else{
                                 UnblockPagePermanently();
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -489,34 +501,11 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    //$(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    // swal({
-                    //     title: 'Are You Sure?',
-                    //     text: 'Select Yes to enter!',
-                    //     icon: 'warning',
-                    //     buttons: {
-                    //         cancel: {
-                    //             text: 'No',
-                    //             value: null,
-                    //             visible: true,
-                    //             closeModal: true,
-                    //         },
-                    //         confirm: {
-                    //             text: 'Yes',
-                    //             value: true,
-                    //             visible: true,
-                    //             closeModal: true
-                    //         }
-                    //     },
-                    //     closeOnClickOutside: false,
-                    //     closeOnEsc: false,
-                    //     dangerMode: true
-                    // }).then(function (confirm) {
                         var tracking = $("#add_shipment_form #tracking_number").val();
-                        console.log(tracking);
+
                         if (confirm) {
                             $.ajax({
-                                {{--url:"{{ route('admin.delivery.note.shipment.info') }} ",--}}
+
                                 url:'{!! route('admin.delivery.note.shipment.info') !!}',
                                 method:'POST',
                                 data:{
@@ -526,8 +515,6 @@
                             }).done(function(data) {
                                 if(data.status == 0){
                                    var delivery_note_id = $('#delivery_note').val();
-                                   console.log(delivery_note_id);
-                                   console.log(data.shId);
                                     $.ajax({
 
                                         url: '{!! route('admin.delivery.receive.add.shipments') !!}',
@@ -553,6 +540,7 @@
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
+                                $('#tracking_number').val('');
                             });
                         }
                         else{
