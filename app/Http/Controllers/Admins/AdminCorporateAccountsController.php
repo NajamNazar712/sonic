@@ -6328,12 +6328,11 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function view_rates_index($id,$date =null)
-    {   //dd($date);
+    {
         $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         if($date == null){
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            return $switches;
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -6344,28 +6343,17 @@ class AdminCorporateAccountsController extends Controller
             $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         }
         else{
-
-            //$switches = HistoryCorporateRateStatus::where('user_id', $id)->where(DB::raw("DATE(created_at) = '". $date ."'"))->groupBy('shipping_mode_id')->get();
-            $switches = HistoryCorporateRateStatus::where('user_id', $id)->whereDate('created_at', $date)->groupBy('shipping_mode_id')->get();
-           //return $switches;
-            $switches = $switches
-                ->map(function ($item, $key) {
-                    return [$item['shipping_mode_id'] => $item] ;
-            });
-
-            return $switches;
-
-            $min_weight = HistoryCorporateMinChargeableWeight::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-
-            $weight = HistoryCorporateWeightCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $bookingType = HistoryCorporateMinChargeableWeight::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $cash = HistoryCorporateCashHandlingCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $insurance = HistoryCorporateInsuranceCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $return = HistoryCorporateReturnCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $fuel = HistoryCorporateFuelSurcharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
-            $discount = HistoryCorporateDiscountCharge::where('user_id', $id)->where('created_at',$date)->groupBy('shipping_mode_id')->get();
+            $tomorrow = Carbon::parse($date)->addDay(1);
+            $switches = HistoryCorporateRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $min_weight = HistoryCorporateMinChargeableWeight::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $weight = HistoryCorporateWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $bookingType = HistoryCorporateMinChargeableWeight::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $cash = HistoryCorporateCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $insurance = HistoryCorporateInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $return = HistoryCorporateReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $fuel = HistoryCorporateFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $discount = HistoryCorporateDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
         }
-        //return $switches;
 
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
         $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
@@ -6388,7 +6376,6 @@ class AdminCorporateAccountsController extends Controller
                 $packaging_charges[$charge->type_id][] = $charge;
             }
         }
-        //return $switches;
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
                 return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
