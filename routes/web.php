@@ -901,6 +901,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
             Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
             Route::post('reassign_rider','Admins\DeliveryController@reassign_rider')->name('reassign_rider');
+            Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){

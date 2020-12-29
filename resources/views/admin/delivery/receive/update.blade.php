@@ -12,12 +12,9 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note">
-
-                <div class="row justify-content-center mb-4">
-                    <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
+                    <form id="add_shipment_form"  class="form-inline mb-4 justify-content-center" novalidate="novalidate" method="post">
                         <div class="form-group">
+
                             <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
                             <div class="d-inline-block ml-1">
@@ -32,7 +29,7 @@
                         </div>
                     </form>
 
-                    </div>
+                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note">
 
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -65,6 +62,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
 
     <style>
         table.dataTable {
@@ -117,16 +115,24 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
-
+    <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
             var shipment_ids = [];
             var selected_rows = [];
 
+            $('#add_shipment_form input.tracking_number').focus();
+            $('#add_shipment_form input.tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true,
@@ -171,18 +177,21 @@
                                         method: 'POST',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
-                                            'shipment_id':selected_rows,
+                                            'shipment_ids':selected_rows,
                                             'delivery_note_id':delivery_note_id,
                                         }
                                     }).done(function(data){
-                                        if(data.status){
+                                        if(data.status == 0){
                                             table.rows().deselect();
                                             selected_rows = [];
                                             table.button('.bulk_remove').disable();
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                         }
-
+                                        else{
+                                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            table.button('.bulk_remove').disable();
+                                        }
                                     });
                                 }
                             });
@@ -192,6 +201,64 @@
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             table.button('.bulk_remove').disable();
                         }
+                    }
+                },{
+                    text: '<i class="la la-print"></i> Print',
+                    className: 'btn btn-primary print',
+                    enabled:true,
+                    action: function (e, dt, node, config) {
+                        var delivery_note_id = $('#delivery_note').val();
+
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to print!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.delivery.receive.print') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'id':delivery_note_id,
+                                        }
+                                    }).done(function(data){
+                                        var tab = window.open('', '_blank');
+
+                                        if(!tab) {
+                                            swal({
+                                                title: 'Popup Blocker Enabled!',
+                                                text: 'Please add this site to your exception list.',
+                                                icon: 'error',
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+                                        }
+                                        else {
+                                            tab.document.write(data);
+                                            tab.document.close();
+                                            tab.focus();
+                                        }
+                                    });
+                                }
+                            });
                     }
                 },{
                     extend: 'selectAll',
@@ -403,10 +470,87 @@
                     }
                 });
             });
+            $( "#add_shipment_form" ).validate({
 
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    //$(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to enter!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        var tracking = $("#add_shipment_form #tracking_number").val();
+                        console.log(tracking);
+                        if (confirm) {
+                            $.ajax({
+                                {{--url:"{{ route('admin.delivery.note.shipment.info') }} ",--}}
+                                url:'{!! route('admin.delivery.note.shipment.info') !!}',
+                                method:'POST',
+                                data:{
+                                    'tracking':tracking,
+                                    '_token': '{{ csrf_token() }}',
+                                }
+                            }).done(function(data) {
+                                if(data.status == 0){
+                                   var delivery_note_id = $('#delivery_note').val();
+                                   console.log(delivery_note_id);
+                                   console.log(data.shId);
+                                    $.ajax({
 
+                                        url: '{!! route('admin.delivery.receive.add.shipments') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            'shipment_id': data.shId,
+                                            'tracking_number':data.tracking_number,
+                                            'delivery_note_id': delivery_note_id,
+                                            '_token': '{{ csrf_token() }}',
+                                        }
+                                    })
+                                        .done(function (value){
+                                            if(value.status == 0){
+                                                    toastr.success(value.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                     table.draw();
+                                            }
+                                            else{
+                                                toastr.error(value.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+                                        }
+                                    )
 
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                        }
+                        else{
+                            var error ='Not Found';
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+            });
+        }
 
+        });
         });
     </script>
 @endsection
