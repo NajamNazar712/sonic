@@ -156,6 +156,9 @@ class APIController extends Controller
           else if ($user->status != 3) {
             return response()->json(['status' => 1, 'message' => 'Your Account is not Activated yet.']);
           }
+          else if ($user->phone_number_verified == 0){
+              return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
+          }
           else if (Hash::check($request->input('password'), $user->password)) {
             $information = array();
 

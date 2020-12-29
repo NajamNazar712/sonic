@@ -43,6 +43,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 
     Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
+    Route::post('otp_verify', 'Shippers\ShipperDashboardController@opt_verify')->name('opt_verify');
+    Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
@@ -267,11 +269,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
-    Route::get('/register/success','Auth\RegisterController@register_success');
+    Route::get('/register/user/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
-    Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
-    Route::get('/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
-    Route::get('/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
+    Route::get('/register/name/match/{name}','Auth\RegisterController@checkCompanyName');
+    Route::get('/register/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
+    Route::get('/register/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
     Route::get('terms_and_conditions/{token}/{id}/accept','ShipperAgreementController@accept')->name('terms.accept');
     Route::get('terms_and_conditions/{token}/{id}/download','ShipperAgreementController@crf_download')->name('terms.download');
     Route::get('/terms/success','Auth\RegisterController@register_success')->name('terms.success');
@@ -2497,6 +2499,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 	Route::prefix('telenor')->name('telenor.')->group(function(){
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@arrival_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@arrival_submit')->name('submit');
+        });
         Route::prefix('delivery')->name('delivery.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@delivery_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@delivery_submit')->name('submit');

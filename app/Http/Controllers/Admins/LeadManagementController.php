@@ -38,10 +38,10 @@ class LeadManagementController extends Controller
         $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
         }
 
         $ratio_leads = $leads['total'];
@@ -61,7 +61,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;
@@ -111,6 +111,14 @@ class LeadManagementController extends Controller
             ->editColumn('lead_id', function ($lead) {
                 return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
             })
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('leads.status_id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('aging',function ($lead){
                 $days = Carbon::now()->diffInDays($lead->requested_date);
                 if($days == 0){
@@ -125,7 +133,7 @@ class LeadManagementController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                if(session('role_id') == 1 || in_array(419, session('permissions')))
+                if(session('role_id') == 1 || in_array(419, session('permissions')) || $lead->status_id != 12)
                 {
                     $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
                 }
@@ -166,10 +174,10 @@ class LeadManagementController extends Controller
             $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
         }
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
+            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
+            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
         }
 
         $ratio_leads = $leads['total'];
@@ -189,7 +197,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;

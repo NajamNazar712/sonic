@@ -6451,8 +6451,17 @@ class NotificationsController extends Controller
                         $to = $lead->email_address;
                         self::email($subject, $html, $to);
                     }
-
-
+                }
+                else if ($id == 114){
+                    $code = $reference_1_id;
+                    $user_id = $reference_2_id;
+                    $body = $notification->body;
+                    if (strpos($body, '[code]') !== FALSE) {
+                        $body = str_replace('[code]', $code, $body);
+                    }
+                    $user_phone = User::find($user_id)->phone;
+                    $to = $user_phone;
+                    self::sms($body, $to);
                 }
             }
         }

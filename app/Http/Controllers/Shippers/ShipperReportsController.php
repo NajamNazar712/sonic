@@ -99,7 +99,17 @@ class ShipperReportsController extends Controller
                     return number_format($shipment->weight_charges, 2);
                 })
                 ->editColumn('cash_handling_charges', function($shipment){
-                    return number_format($shipment->cash_handling_charges, 2);
+                    if($shipment->current_status == 20 || $shipment->current_status == 21 || $shipment->current_status == 22 || $shipment->current_status == 23 || $shipment->current_status == 23 || $shipment->current_status == 25){
+                        return "-";
+                    }
+                    else{
+                        if($shipment->cash_handling_charges != null){
+                            return number_format($shipment->cash_handling_charges, 2);
+                        }
+                        else{
+                            return "-";
+                        }
+                    }
                 })
             ->editColumn('p_collection_amount',function($sale){
                 $amount = '';

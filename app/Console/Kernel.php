@@ -76,8 +76,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PendingDeliveriesReport',
         'App\Console\Commands\ReceiveDeliveriesReport',
         'App\Console\Commands\WebsiteLead',
-
-
+        'App\Console\Commands\UserOTPGenerate',
+        'App\Console\Commands\UserOTPVerifiy'
     ];
 
     /**
@@ -232,10 +232,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('21:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('21:00')->runInBackground();
+        $schedule->command('email:pendingdeliveryreport')->dailyAt('13:00')->runInBackground();
+        $schedule->command('email:receivedeliveryreport')->dailyAt('13:00')->runInBackground();
 
         $schedule->command('website:leads')->hourly()->runInBackground();
+
+        $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

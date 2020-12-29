@@ -806,6 +806,8 @@ class Permission
             'international.tracking_upload.index' => 398,
             'international.tracking_upload.list' => 398,
 
+            'telenor.arrival.index' => 421,
+            'telenor.arrival.submit' => 421,
             'telenor.delivery.index' => 399,
             'telenor.delivery.submit' => 399,
             'telenor.return.index' => 400,
@@ -818,7 +820,7 @@ class Permission
             'leads.index' => 416,
             'leads.list' => 416,
             'leads.add_status' => 419,
-            'leads.tag_sale_person' => 420,
+//            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416
