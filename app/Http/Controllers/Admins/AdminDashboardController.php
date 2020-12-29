@@ -1752,15 +1752,16 @@ class AdminDashboardController extends Controller
                 $packaging = PackagingCharge::all()->where('user_id', $id);
             }
             else{
-                $cash = HistoryCashHandlingCharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $insurance = HistoryInsuranceCharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $return = HistoryReturnCharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $fuel = HistoryFuelSurcharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $weight = HistoryWeightCharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $bookingType = HistoryBookingTypeCharges::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $switches = HistoryRateStatus::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $discount = HistoryDiscountCharge::where('user_id',$id)->whereDate('created_at',$date)->groupBy('shipping_mode_id')->get();
-                $packaging = HistoryPackagingCharge::where('user_id', $id)->whereDate('created_at',$date)->get();
+                $tomorrow = Carbon::parse($date)->addDay(1);
+                $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $fuel = HistoryFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $weight = HistoryWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $bookingType = HistoryBookingTypeCharges::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $switches = HistoryRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $discount = HistoryDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $packaging = HistoryPackagingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             }
 
 
@@ -9759,12 +9760,14 @@ class AdminDashboardController extends Controller
                     $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
                     foreach($old_reimbursement_account_dates as $date){
                         $date = Carbon::parse($date->created_at)->toDateString();
-                        $details[] = $date;
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
                     }
-                    return response()->json(['status' => 1,'account_type' => 1,'details' => $details]);
+                    return response()->json(['status' => 1,'account_type' => 1,'details' => $details, 'user_id' => $user_id]);
                 }
                 else{
-                    return response()->json(['status' => 0,'No Data Found']);
+                    return response()->json(['status' => 0,'error'=>'No Data Found']);
                 }
             }
             else{
@@ -9773,17 +9776,19 @@ class AdminDashboardController extends Controller
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach($old_corporate_account_dates as $date){
                         $date = Carbon::parse($date->created_at)->toDateString();
-                        $details[] = $date;
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
                     }
-                    return response()->json(['status' => 1,'account_type' => 2,'details' => $details, 'user_id' => $user_id]);
+                    return response()->json(['status' => 1,'success','account_type' => 2,'details' => $details, 'user_id' => $user_id]);
                 }
                 else{
-                    return response()->json(['status' => 0,'No Data Found']);
+                    return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             }
         }
         else{
-            return response()->json(['status' => 0,'No Data Found']);
+            return response()->json(['status' => 0, 'error' => 'No Data Found']);
         }
 
      }
