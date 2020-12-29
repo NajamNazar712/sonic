@@ -567,6 +567,11 @@
                                            href="{{ route('admin.telenor.return.index') }}">Return Update</a>
                                     </li>
                                 @endif
+                                @if (session('role_id') == 1 || in_array(422, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.order_id.index') }}">Bulk Order ID</a>
+                                    </li>
+                                @endif
 {{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
 {{--                                    <li><a class="menu-item"--}}
 {{--                                           href="{{ route('admin.telenor.call.index') }}">Call(s)</a>--}}

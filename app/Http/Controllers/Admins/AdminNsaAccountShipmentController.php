@@ -285,7 +285,7 @@ class AdminNsaAccountShipmentController extends Controller
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as delivered with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as Arrived with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
                 else{
                     $errors = array_map(function ($row, $errors) {
@@ -396,7 +396,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
                         if(count($nsa_accounts) > 0){
-                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 2)->exists()) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
                         }
@@ -539,7 +539,7 @@ class AdminNsaAccountShipmentController extends Controller
 
     public function return_submit(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
-        $nsa_shipments = Shipment::whereIn('id', $shipment_ids)->where('shipper_status_id', 2);
+        $nsa_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', [2, 4]);
         if ($nsa_shipments->exists()) {
             $nsa_shipments = $nsa_shipments->get();
             $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
@@ -623,5 +623,149 @@ class AdminNsaAccountShipmentController extends Controller
             }
         }
         return redirect()->back()->with('success', 'Shipment(s) Marked as Return Successfully');
+    }
+
+    public function order_id_index(){
+        return view('admin.telenor.order_ids');
+    }
+
+    public function order_id_submit(Request $request){
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'order_id' => 'Order ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'order_id' => ['nullable', 'filled', 'between:0,100']
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'order_id'];
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Order ID'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+                        break;
+                    }
+                }
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                }
+                else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $tracking_ids = array();
+                $tracking_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                    if (empty($errors['Row #' . $row_id])) {
+                        if (!empty(trim($row['tracking_number']))) {
+                            if (empty($tracking_ids)) {
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            }
+                            else {
+                                if (in_array($row['tracking_number'], $tracking_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                                }
+                                else {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                }
+                            }
+                        }
+
+                        $settings = GlobalSettings::where('type', 'nsa_accounts');
+                        $nsa_accounts = array();
+                        if($settings->exists()){
+                            $settings = $settings->first();
+                            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+                        }
+                        if(count($nsa_accounts) > 0){
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->exists()) {
+                                $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
+                            }
+                        }
+                        else{
+                            $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
+                        }
+                    }
+                }
+                if(empty($errors)){
+                    $tracking_numbers = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $tracking = trim($row['tracking_number']);
+                        $order_id = trim($row['order_id']);
+
+
+                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
+                        if($shipment_details){
+                            $shipment_details->order_id = $order_id;
+                            $shipment_details->save();
+                        }
+
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
+
+                    }
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                }
+                else{
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            }
+            else {
+                return redirect()->back()->with('error', 'No Shipments in File');
+            }
+
+        }
     }
 }
