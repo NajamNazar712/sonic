@@ -192,7 +192,7 @@
                                 row.push(values.phone);
                                 row.push(values.amount);
                                 row.push(values.charges);
-                                row.push(values.payable);
+                                row.push(values.overall_payable);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -239,7 +239,7 @@
                     { data:'phone' ,name: 'u.phone', class: 'align-middle name'},
                     { data:'amount' ,name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
                     { data:'charges' ,name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
-                    { data:'payable' ,name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
+                    { data:'overall_payable' ,name: 'overall_payable', class: 'align-middle overall_payable'},
                     { orderable: false, data:'status' ,name: 'status', class: 'align-middle status'}
 
                 ],
