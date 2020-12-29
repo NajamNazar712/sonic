@@ -1413,6 +1413,10 @@
         });
         var redirect = '{!! url('/admin') !!}';
 
+        $('#RateHistoryModal').on('hide.bs.modal', function (e) {
+            $('#old_rate_date').find('option').remove();
+            $('#old_rate_date').prepend('<option value="" selected="selected"></option>').trigger('change');
+        });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
@@ -1446,13 +1450,11 @@
 
                                     var id = user_id;
                                     var url = redirect + '/accounts/'+ id + '/view/rates/' + date;
-                                    console.log(url);
                                     window.location = url;
                                 }
                                 else if(data.account_type == 2){
                                     var id = user_id;
                                     var url = redirect + '/corporate/'+ id + '/view/rates/' + date;
-                                    console.log(url);
                                     window.location = url;
                                 }
                                 else{
