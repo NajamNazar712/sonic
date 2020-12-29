@@ -54,17 +54,17 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
-                            <th class="border-primary border-darken-1">Rider Status</th>
-                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
+                            <th class="border-primary border-darken-1">Attempts Count</th>
+                            <th class="border-primary border-darken-1">Open Box</th>
+                            <th class="border-primary border-darken-1">Rider Status</th>
+                            <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
-                            <th class="border-primary border-darken-1">Attempts Count</th>
-                            <th class="border-primary border-darken-1">Open Box</th>
 							<th class="border-primary border-darken-1">Consolidation</th>
                             <th class="border-primary border-darken-1">Consolidated IDs</th>
                             <th class="border-primary border-darken-1">Clear</th>
@@ -671,17 +671,17 @@
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
-                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
-                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
+                    {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
+                    {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
+                    {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
-                    {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
-                    {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
 					{data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
                     {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],

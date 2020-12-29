@@ -4170,7 +4170,7 @@ class NotificationsController extends Controller
                         ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->leftjoin('cities as c', 'c.id', '=', 'usi.city_id')
                         ->select('u.id as account_id', 'u.name as name', 'c.name as origin', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'))
-                        ->where('payable', '<', 0)->groupBy('u.id')->get();
+                        ->groupBy('u.id')->having('sum_payable', '<', 0)->get();
 
                     if (count($negative) > 0) {
                         $filtered_data = array();
