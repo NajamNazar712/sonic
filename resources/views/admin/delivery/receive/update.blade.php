@@ -12,10 +12,10 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                    <form id="add_shipment_form"  class="form-inline mb-4 justify-content-center" novalidate="novalidate" method="post">
+                    <form id="add_shipment_form"   class="form-inline mb-4 justify-content-center" novalidate="novalidate" method="post">
                         <div class="form-group">
 
-                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            <input type="text" name="tracking_number"  id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
                             <div class="d-inline-block ml-1">
                                 <a href="#" id="camera_scan_initiate" tabindex="-1">
