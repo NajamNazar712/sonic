@@ -3755,11 +3755,13 @@ class AdminReportsController extends Controller
 
         $negative = DB::connection('reports')->table('pending_payment_shipments')->join('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
             ->join('users as u','u.id','=','s.user_id')
-            ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+            ->leftjoin('sale_person_tags as st', function($join){
+                $join->on('st.user_id', '=', 'u.id')
+                    ->where('st.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0)'));
+            })
             ->leftjoin('admins as a','a.id','=','st.admin_id')
             ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
             ->where('payable','<',0)
-            ->where('st.status',0)
             ->groupBy('u.id');
 
         $datatable = Datatables::of($negative)
