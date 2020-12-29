@@ -232,8 +232,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('13:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('13:00')->runInBackground();
+        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
         $schedule->command('website:leads')->hourly()->runInBackground();
 

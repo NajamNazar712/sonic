@@ -27,7 +27,7 @@ class ShipperReportsController extends Controller
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes]);
     }
     public function sales_list(Request $request){
-        if (!in_array(session('user_id'), [167, 1159, 2035, 4740, 4758])) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758])) {
             $connection = 'reports';
         }
         else {
