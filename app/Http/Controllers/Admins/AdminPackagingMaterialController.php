@@ -617,7 +617,6 @@ class AdminPackagingMaterialController extends Controller
             $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
             $order_process = new WmsOrderProcess();
             $order_process->shipment_id = $shipment->id;
-            $order_process->courier_id = 1;
             $order_process->sku_count = count($product_ids);
             $order_process->courier_id = 1;
             $order_process->quantity = $total_quantity;
@@ -1216,6 +1215,13 @@ class AdminPackagingMaterialController extends Controller
         $type_history->updated_by = Auth::id();
         $type_history->save();
 
+        $product_check = false;
+        $setting = GlobalSettings::where('type', 'packaging_material');
+        if($setting->exists()) {
+            $setting = $setting->first();
+            $product_check = true;
+        }
+
         foreach($request->edit_size as $index => $type_size){
             if(array_key_exists($index, $request->size_id)){
                 $packaging_material_type_size = PackagingMaterialTypeSizes::where('id',$request->size_id[$index])->first();
@@ -1223,13 +1229,49 @@ class AdminPackagingMaterialController extends Controller
                 $packaging_material_type_size->type_id = $type->id;
                 $packaging_material_type_size->standard_charges = $request->edit_standard_charges[$index];
                 $packaging_material_type_size->save();
+                if($product_check){
+                    $product = WmsProduct::find($packaging_material_type_size->wms_product_id);
+                    $product->name = $packaging_material_type_size->type->type . ' - ' . $packaging_material_type_size->size;
+                    $product->description = 'Packaging Material Type-Size : ' . $packaging_material_type_size->type->type . '-' . $packaging_material_type_size->size;
+                    $product->user_id = $setting->setting_value;
+                    $product->save();
+                }
             }
             else{
+
                 $packaging_material_type_size = new PackagingMaterialTypeSizes();
                 $packaging_material_type_size->size = $type_size;
                 $packaging_material_type_size->type_id = $type->id;
                 $packaging_material_type_size->standard_charges = $request->edit_standard_charges[$index];
                 $packaging_material_type_size->save();
+
+                if($product_check) {
+                    $existing_product_category = WmsProductCategory::where('name', 'Packaging Material');
+                    if ($existing_product_category->exists()) {
+                        $product_type = $existing_product_category->first();
+                    } else {
+                        $product_type = new WmsProductCategory();
+                        $product_type->name = 'Packaging Material';
+                        $product_type->user_id = $setting->setting_value;
+                        $product_type->save();
+                    }
+
+                    $product = new WmsProduct();
+                    $product->name = $packaging_material_type_size->type->type . ' - ' . $packaging_material_type_size->size;
+                    $product->sku_id = 'PM-' . $packaging_material_type_size->type->id . '-' . $packaging_material_type_size->id;
+                    $product->description = 'Packaging Material Type-Size : ' . $packaging_material_type_size->type->type . '-' . $packaging_material_type_size->size;
+                    $product->buffer_quantity = 1;
+                    $product->status = 1;
+                    $product->user_id = $setting->setting_value;
+                    $product->category_id = $product_type->id;
+                    $product->save();
+                    $barcode = $setting->setting_value . '-' . strtoupper($product->sku_id);
+                    $product->barcode_series = $barcode;
+                    $product->save();
+
+                    $packaging_material_type_size->wms_product_id = $product->id;
+                    $packaging_material_type_size->save();
+                }
             }
             $type_size_history = new PackagingMaterialTypeSizesHistory();
             $type_size_history->size = $type_size;

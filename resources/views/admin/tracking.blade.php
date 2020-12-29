@@ -188,7 +188,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-8">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -444,7 +444,8 @@
                         }
 
                         if (data.shipments != undefined) {
-                            $.each(data.shipments, function (id, details) {
+                            $.each(data.shipments, function (index, details) {
+                                var id = details.shipment_id;
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';

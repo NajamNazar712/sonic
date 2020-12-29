@@ -15,9 +15,9 @@ class CreateLeadRemarksTable extends Migration
     {
         Schema::create('lead_remarks', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('lead_id');
+            $table->integer('lead_id')->index();
             $table->string('remarks');
-            $table->integer('updated_by');
+            $table->integer('updated_by')->index();
             $table->timestamps();
         });
     }

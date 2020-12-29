@@ -156,6 +156,9 @@ class APIController extends Controller
           else if ($user->status != 3) {
             return response()->json(['status' => 1, 'message' => 'Your Account is not Activated yet.']);
           }
+          else if ($user->phone_number_verified == 0){
+              return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
+          }
           else if (Hash::check($request->input('password'), $user->password)) {
             $information = array();
 
@@ -343,7 +346,7 @@ class APIController extends Controller
         else {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                    $query->whereNotIn('id', [3, 4]);
+                    $query->whereNotIn('id', [4]);
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
@@ -695,7 +698,6 @@ class APIController extends Controller
             else {
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
             }
-           	$tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
 			if($shipment_pre_book){
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);

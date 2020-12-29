@@ -44,6 +44,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="rider_cnic" id="rider_cnic" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->cnic}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
                                 @foreach($admins as $admin)
                                     <option value="{{$admin->id}}">{{$admin->name}}</option>
@@ -115,7 +124,9 @@
                             <input type="text" name="update_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_from" placeholder="Update Date (From)">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                </div>
+                <div class="row">
+                    <div class="col-4">
                         <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -126,15 +137,6 @@
                             <input type="text" name="update_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_to" placeholder="Update Date (To)">
                         </div>
 
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="rider_cnic" id="rider_cnic" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->cnic}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>

@@ -39,7 +39,7 @@ class WebsiteLead extends Command
      */
     public function handle()
     {
-        $environment = env('APP_ENV');
+        $environment = config('app.env');
         if($environment == 'production'){
             $base_uri = 'https://trax.pk/api';
         }
@@ -72,5 +72,7 @@ class WebsiteLead extends Command
                 $new_lead->save();
             }
         }
+
+        echo $response->message;
     }
 }
