@@ -806,6 +806,8 @@ class Permission
             'international.tracking_upload.index' => 398,
             'international.tracking_upload.list' => 398,
 
+            'telenor.arrival.index' => 421,
+            'telenor.arrival.submit' => 421,
             'telenor.delivery.index' => 399,
             'telenor.delivery.submit' => 399,
             'telenor.return.index' => 400,

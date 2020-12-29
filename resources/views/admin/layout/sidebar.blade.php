@@ -548,10 +548,15 @@
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Dispute</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402, 421, 422], session('permissions'))) !== 0)
                         <li class=" nav-item"><a href="#"><span class="menu-title">Telenor</span></a>
 
                             <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(421, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.arrival.index') }}">Bulk Arrival</a>
+                                    </li>
+                                @endif
                                 @if (session('role_id') == 1 || in_array(399, session('permissions')))
                                     <li><a class="menu-item"
                                            href="{{ route('admin.telenor.delivery.index') }}">Bulk Delivered</a>
@@ -560,6 +565,11 @@
                                 @if (session('role_id') == 1 || in_array(400, session('permissions')))
                                     <li><a class="menu-item"
                                            href="{{ route('admin.telenor.return.index') }}">Return Update</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(422, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.order_id.index') }}">Bulk Order ID</a>
                                     </li>
                                 @endif
 {{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}

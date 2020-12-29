@@ -3396,7 +3396,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }} disabled/></a>
@@ -3404,7 +3404,7 @@
                                 </div>
 
                             </div>
-                            
+
                             <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
                                 <div class="card-content">
                                     <div class="card-body pb-0">
@@ -3417,7 +3417,7 @@
                                                         @else
                                                             <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
                                                         @endif
-                                                        
+
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -3435,7 +3435,7 @@
 
                                         <div class="card border-primary p-2">
                                             <div class="row">
-                        
+
                                                 <div class="col-12">
                                                     <div class="row">
                                                         <div class="col-4 text-center">
@@ -3483,7 +3483,7 @@
                                                             @if($wms_user_info->storage_charges)
                                                             @foreach($wms_storage_charges as $key => $storage)
                                                             <div class="row">
-                                                                
+
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <select class="select2 form-control storage_type" name="storage_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled>
@@ -3503,15 +3503,15 @@
                                                             @endforeach
                                                             @endif
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="card-body">
                                                 <div>
                                                     <h3 class="card-title">Fulfillment Charges</h3>
@@ -3519,9 +3519,9 @@
 
                                             <div class="card border-primary p-2">
                                             <div class="row">
-                                                
+
                                                 <div class="col-12">
-                                                    
+
 
                                                     <div class="row">
                                                         <div class="col-3">
@@ -3579,7 +3579,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                        
+
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
@@ -3591,17 +3591,17 @@
                                                             </fieldset>
                                                         </div>
                                                     </div>
-                                                            
-                                                        
+
+
                                                     </div>
 
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -3610,7 +3610,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" disabled/></a>
@@ -3682,8 +3682,8 @@
                                             </table>
                                             </div>
                                         </div>
-                                    </div>  
-                                    
+                                    </div>
+
                                 </div>
                             @endif
 

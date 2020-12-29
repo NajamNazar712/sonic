@@ -16,12 +16,12 @@ class UpdateModulePermissionForNewMonthClosingTableSeeder extends Seeder
         DB::table('admins_screen_list')->where('url', 'admin.month_closing.index')->delete();
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 408, 'name' => 'Month Closing Pending - View', 'module_id' => 15),
-            array('id' => 409, 'name' => 'Month Closing Resolved - View', 'module_id' => 15),
-            array('id' => 410, 'name' => 'Month Closing Resolved - Action', 'module_id' => 15),
-            array('id' => 411, 'name' => 'Month Closing Closing Type - Action', 'module_id' => 15),
-            array('id' => 412, 'name' => 'Month Closing Assign Responsible - Action', 'module_id' => 15),
-            array('id' => 413, 'name' => 'Month Closing Close - Action', 'module_id' => 15),
+            array('id' => 408, 'name' => 'Month Closing Pending - View', 'module_id' => 16),
+            array('id' => 409, 'name' => 'Month Closing Resolved - View', 'module_id' => 16),
+            array('id' => 410, 'name' => 'Month Closing Resolved - Action', 'module_id' => 16),
+            array('id' => 411, 'name' => 'Month Closing Closing Type - Action', 'module_id' => 16),
+            array('id' => 412, 'name' => 'Month Closing Assign Responsible - Action', 'module_id' => 16),
+            array('id' => 413, 'name' => 'Month Closing Close - Action', 'module_id' => 16),
             array('id' => 414, 'name' => 'Month Closing Report - Individual', 'module_id' => 9),
             array('id' => 415, 'name' => 'Month Closing Report - Pivot', 'module_id' => 9),
             array('id' => 417, 'name' => 'Month Closing Setting - Closing Type', 'module_id' => 14),

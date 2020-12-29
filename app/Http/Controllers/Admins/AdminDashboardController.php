@@ -37,6 +37,7 @@ use App\Http\Models\PaymentCycle;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\Rates\HistoryCorporateRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Reference;
 use App\Http\Models\Operataions\OperationForecastShipments;
@@ -1735,56 +1736,69 @@ class AdminDashboardController extends Controller
 //            ->join('admin_roles as ar', 'ar.department_id', '=', 7)->get();
 //    }
 
-    public function viewRates($id){
+    public function viewRates($id,$date = null){
 
-        $user = User::find($id);
-        $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
-        $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-//        $cash = '';
-        $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
-        $packaging = PackagingCharge::all()->where('user_id', $id);
-        $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+            $user = User::find($id);
 
-        $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
-        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
-        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
-        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
-        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
-        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
-        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
-        $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-        $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
-        $packaging_charges = array();
-        if(count($packaging) > 0){
-
-            foreach($packaging as $charge){
-                $packaging_charges[$charge->type_id][] = $charge;
-            }
-        }
-
-        $sales_commission = SalesCommission::where('shipper_id', $id)->first();
-        if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+            if($date == null){
+                $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $packaging = PackagingCharge::all()->where('user_id', $id);
             }
             else{
-                return view('admin.access_denied');
+                $tomorrow = Carbon::parse($date)->addDay(1);
+                $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $fuel = HistoryFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $weight = HistoryWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $bookingType = HistoryBookingTypeCharges::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $switches = HistoryRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $discount = HistoryDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $packaging = HistoryPackagingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             }
-        }
-        else{
-            return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks,'sales_commission' => $sales_commission]);
-        }
+
+
+            $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+            $packaging = PackagingCharge::all()->where('user_id', $id);
+            $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
+            $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $packaging_charges = array();
+            if(count($packaging) > 0){
+
+                foreach($packaging as $charge){
+                    $packaging_charges[$charge->type_id][] = $charge;
+                }
+            }
+
+            $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
+                    return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
+            }
+            else{
+                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks,'sales_commission' => $sales_commission]);
+            }
     }
 
 
@@ -7374,6 +7388,8 @@ class AdminDashboardController extends Controller
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
+                            $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
+
                     }
                     else{
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
@@ -7382,6 +7398,9 @@ class AdminDashboardController extends Controller
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
+                            $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
+
+
                     }
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -9729,5 +9748,50 @@ class AdminDashboardController extends Controller
             }
         }
      }
+
+     public function rate_history_date(Request $request){
+        $user_id = $request->user_id;
+        $details = array();
+        if($user_id){
+            $user = User::find($user_id);
+            if($user->account_type_id == 1){
+                $old_reimbursement_account = HistoryRateStatus::where('user_id',$user_id);
+                if($old_reimbursement_account->exists()){
+                    $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
+                    foreach($old_reimbursement_account_dates as $date){
+                        $date = Carbon::parse($date->created_at)->toDateString();
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
+                    }
+                    return response()->json(['status' => 1,'account_type' => 1,'details' => $details, 'user_id' => $user_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'No Data Found']);
+                }
+            }
+            else{
+                $old_corporate_account = HistoryCorporateRateStatus::where('user_id',$user_id);
+                if ($old_corporate_account->exists()){
+                    $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
+                    foreach($old_corporate_account_dates as $date){
+                        $date = Carbon::parse($date->created_at)->toDateString();
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
+                    }
+                    return response()->json(['status' => 1,'success','account_type' => 2,'details' => $details, 'user_id' => $user_id]);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'No Data Found']);
+                }
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'No Data Found']);
+        }
+
+     }
+
 }
 

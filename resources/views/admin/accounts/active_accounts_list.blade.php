@@ -277,13 +277,46 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="RateHistoryModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RateHistoryModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Select Date</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                   {{-- <form id="rate_history" action="#"  novalidate="novalidate">--}}
+                       {{-- @method('post')--}}
+                      {{--  {{ csrf_field() }}--}}
+                        <input type="text" hidden id="user_id" name="user_id">
+                        <div class="col-12">
+
+                                <select name="old_rate_date"  id="old_rate_date" class="form-control select2">
+
+                                </select>
+
+                        </div>
+
+                        {{--<div class="row justify-content-center mt-4">
+                            <div class="col-4">
+                                <button id="edit" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </div>
+                        </div>
+                    </form>--}}
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-
 
 
 @endsection
@@ -299,6 +332,7 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='search_cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $('body').on('change','#search_iban',function() {
@@ -449,8 +483,6 @@
                                         window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
                                     }
                                 });
-
-
                             }
                             else{
                                 var error = "Something went wrong please refresh page and try again!";
@@ -1386,6 +1418,73 @@
                         }
 
                     });
+            }
+        });
+        var old_dates = [];
+
+        $('#old_rate_date').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Date',
+            width:'100%',
+            //allowClear:true
+        });
+        var redirect = '{!! url('/admin') !!}';
+
+        $('#RateHistoryModal').on('hide.bs.modal', function (e) {
+            $('#old_rate_date').find('option').remove();
+            $('#old_rate_date').prepend('<option value="" selected="selected"></option>').trigger('change');
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+
+            var user_id = table.row( $(this).parents('tr') ).data().id;
+
+            $('#user_id').val(user_id);
+
+            if ($(this).hasClass('rates_history')) {
+
+                $.ajax({
+                    url: '{!! route('admin.view.user') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id
+                    }
+                }).done(function(data){
+                    if (data.status == 1) {
+                        $.each(data.details,function(key,value){
+                            var newOption = new Option(value, value, false, false);
+                            $('#old_rate_date').append(newOption).trigger('change');
+                        });
+                        $('#RateHistoryModal').modal('show');
+
+                        $('#RateHistoryModal #old_rate_date').bind('change', function () {
+                            var date = $(this).val();
+                            if (date != '') {
+                                console.log(data);
+                                if(data.account_type == 1){
+
+                                    var id = user_id;
+                                    var url = redirect + '/accounts/'+ id + '/view/rates/' + date;
+                                    window.location = url;
+                                }
+                                else if(data.account_type == 2){
+                                    var id = user_id;
+                                    var url = redirect + '/corporate/'+ id + '/view/rates/' + date;
+                                    window.location = url;
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            }
+                            return false;
+                        });
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
+                });
             }
         });
 

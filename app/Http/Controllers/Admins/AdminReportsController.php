@@ -3760,10 +3760,10 @@ class AdminReportsController extends Controller
             ->join('users as u','u.id','=','s.user_id')
             ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
             ->leftjoin('admins as a','a.id','=','st.admin_id')
-            ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
-            ->where('payable','<',0)
+            ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
             ->where('st.status',0)
-            ->groupBy('u.id');
+            ->groupBy('u.id')
+            ->having('overall_payable', '<', 0);
 
         $datatable = Datatables::of($negative)
             ->setRowAttr([
@@ -3779,8 +3779,8 @@ class AdminReportsController extends Controller
             ->editColumn('charges', function($shipment){
                 return number_format($shipment->charges, 2);
             })
-            ->editColumn('payable', function($shipment){
-                return number_format($shipment->payable, 2);
+            ->editColumn('overall_payable', function($shipment){
+                return number_format($shipment->overall_payable, 2);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
