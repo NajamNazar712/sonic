@@ -1706,7 +1706,7 @@ class GlobalSettingsController extends Controller
                     $sale_person_target->end_date = $end_date;
                     $sale_person_target->sales_person_id = $person;
                     $sale_person_target->target_days = $request->target_shipment_days;
-                    $sale_person_target->target_week = $request->target_shipment_week;
+                    $sale_person_target->target_month = $request->target_shipment_month;
                     $sale_person_target->average_revenue = $request->average_revenue;
                     $sale_person_target->save();
                 }
