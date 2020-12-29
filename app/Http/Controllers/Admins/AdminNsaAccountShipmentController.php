@@ -285,7 +285,7 @@ class AdminNsaAccountShipmentController extends Controller
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as delivered with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as Arrived with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
                 else{
                     $errors = array_map(function ($row, $errors) {
