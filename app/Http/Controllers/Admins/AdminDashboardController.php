@@ -10,6 +10,8 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
+use App\http\Models\Admin\Lead\Lead;
+use App\http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -35,6 +37,7 @@ use App\Http\Models\PaymentCycle;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\Rates\HistoryCorporateRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Reference;
 use App\Http\Models\Operataions\OperationForecastShipments;
@@ -56,6 +59,9 @@ use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\SalesTierTypeTag;
+use App\Http\Models\SaleTierTag;
+use App\Http\Models\SaleTierTagHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -153,6 +159,7 @@ class AdminDashboardController extends Controller
         $stats = array();
         $graph = array();
         $sales=array();
+        $leads = array();
         $graph_dates = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
@@ -1371,7 +1378,8 @@ class AdminDashboardController extends Controller
     public function pendingAccountsList(){
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types]);
     }
     public function activeAccountsList(){
         $shippers = User::whereIn('status', [3, 4])->get();
@@ -1379,12 +1387,14 @@ class AdminDashboardController extends Controller
         $products = Product::select('id','product_name')->get();
         $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types]);
 
     }
     public function blockAccountsList(){
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
-        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
+        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson,'sale_tier_types' => $sale_tier_types]);
     }
     public function UserStatus(Request $request){
 
@@ -1396,6 +1406,22 @@ class AdminDashboardController extends Controller
             if($user->status == 2){
                 $now = Carbon::now();
                 $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now]);
+                if($user->lead_id != null){
+                    $lead = Lead::find($user->lead_id);
+
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = 12;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    $lead_log->reference_person_id = $lead->reference_person_id;
+                    $lead_log->updated_by = Auth::id();
+                    $lead_log->save();
+
+                    $lead->status_id = 12;
+                    $lead->updated_by = Auth::id();
+                    $lead->save();
+                }
                 if($action == 1){
                     NotificationsController::send(1, $id);
 
@@ -1420,6 +1446,7 @@ class AdminDashboardController extends Controller
         if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
             if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                $old_sale_person_date = $old_sale_person->created_at;
                 if($old_sale_person){
                     $old_sale_person = $old_sale_person->sales_person;
                 }
@@ -1436,7 +1463,7 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->admin_id=$tag_id;
                 $sale_person_tag->user_id=$shipper_id;
                 $sale_person_tag->save();
-                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ];
                 NotificationsController::send(81, $sale_persons, Auth::id());
 
 
@@ -1457,42 +1484,33 @@ class AdminDashboardController extends Controller
         $tag_id = $request->admin_id;
         $shipper_ids = $request->shipper_ids;
         $sale_persons = array();
-        $old_sale_person ='';
-        $new_sale_person ='';
         if($shipper_ids){
             foreach ($shipper_ids as $shipper_id){
+                $old_sale_person_data = '';
+                $old_sale_person_date = '';
                 $user = User::find($shipper_id);
                 $shipper_hub_id = $user->city->hub_id;
-                if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
-                    if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()) {
+                    if(!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id,'status' => 0])->exists()) {
                         $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
                         if($old_sale_person){
-                            $old_sale_person = $old_sale_person->sales_person;
+                            $old_sale_person_date = $old_sale_person->created_at;
+                            $old_sale_person->status = 1;
+                            $old_sale_person->save();
+                            $old_sale_person_data = $old_sale_person->sales_person;
                         }
                         $new_sale_person = Admin::find($tag_id);
-                        $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
-                        if($shipper_data->count() > 0){
-                            SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1,'admin_id' => $tag_id]);
-                        }
-                        $shipper = User::find($shipper_id);
+
                         $sale_person_tag = new SalePersonTag();
-                        $sale_person_tag->admin_id=$tag_id;
-                        $sale_person_tag->user_id=$shipper_id;
+                        $sale_person_tag->admin_id = $tag_id;
+                        $sale_person_tag->user_id = $shipper_id;
+                        $sale_person_tag->status = 0;
                         $sale_person_tag->save();
-                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person];
-
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person_data, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
                     }
-                    // else{
-                    //     $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->first();
-                    //     $shipper_data->admin_id=$tag_id;
-                    //     $sale_person_tag->user_id=$shipper_id;
-                    //     $sale_person_tag->save();
-
-                    // }
-
-                    // return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
                 }
             }
+
             NotificationsController::send(81,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
@@ -1718,56 +1736,69 @@ class AdminDashboardController extends Controller
 //            ->join('admin_roles as ar', 'ar.department_id', '=', 7)->get();
 //    }
 
-    public function viewRates($id){
+    public function viewRates($id,$date = null){
 
-        $user = User::find($id);
-        $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
-        $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-//        $cash = '';
-        $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
-        $packaging = PackagingCharge::all()->where('user_id', $id);
-        $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+            $user = User::find($id);
 
-        $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
-        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
-        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
-        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
-        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
-        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
-        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
-        $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-        $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
-        $packaging_charges = array();
-        if(count($packaging) > 0){
-
-            foreach($packaging as $charge){
-                $packaging_charges[$charge->type_id][] = $charge;
-            }
-        }
-
-        $sales_commission = SalesCommission::where('shipper_id', $id)->first();
-        if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+            if($date == null){
+                $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $packaging = PackagingCharge::all()->where('user_id', $id);
             }
             else{
-                return view('admin.access_denied');
+                $tomorrow = Carbon::parse($date)->addDay(1);
+                $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $fuel = HistoryFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $weight = HistoryWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $bookingType = HistoryBookingTypeCharges::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $switches = HistoryRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $discount = HistoryDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+                $packaging = HistoryPackagingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             }
-        }
-        else{
-            return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks,'sales_commission' => $sales_commission]);
-        }
+
+
+            $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+            $packaging = PackagingCharge::all()->where('user_id', $id);
+            $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
+            $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $packaging_charges = array();
+            if(count($packaging) > 0){
+
+                foreach($packaging as $charge){
+                    $packaging_charges[$charge->type_id][] = $charge;
+                }
+            }
+
+            $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
+                    return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
+            }
+            else{
+                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks,'sales_commission' => $sales_commission]);
+            }
     }
 
 
@@ -7145,7 +7176,11 @@ class AdminDashboardController extends Controller
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
+            ->leftjoin('admins as poc','poc.id','=','st.poc')
+            ->leftjoin('admins as k','k.id','=','st.kam')
+            ->leftjoin('admins as r','r.id','=','st.ref')
+            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7353,6 +7388,10 @@ class AdminDashboardController extends Controller
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
+                        if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
+                        }
+
                     }
                     else{
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
@@ -7361,6 +7400,10 @@ class AdminDashboardController extends Controller
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
+                        if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
+                        }
+
                     }
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -7441,7 +7484,11 @@ class AdminDashboardController extends Controller
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
+            ->leftjoin('admins as p','p.id','=','st.poc')
+            ->leftjoin('admins as k','k.id','=','st.kam')
+            ->leftjoin('admins as r','r.id','=','st.ref')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone as phone1','users.phone2 as phone2','users.address', 'users.cnic','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7728,7 +7775,11 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id'])->where('blacklist',1);
+            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
+            ->leftjoin('admins as a','a.id','=','st.poc')
+            ->leftjoin('admins as d','d.id','=','st.kam')
+            ->leftjoin('admins as h','h.id','=','st.ref')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc_tagged','d.name as kam','h.name as ref'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9651,6 +9702,98 @@ class AdminDashboardController extends Controller
              }
          }
          return response()->json(['status' => 1, 'success' => 'Route type has been updated !']);
+     }
+
+     public function kam_poc_ref_tag(Request $request){
+        $poc = $request->poc;
+        $kam = $request->kam;
+        $ref = $request->ref;
+        $shipper_ids = $request->shipper_ids;
+
+        if($kam == null  || $poc == null  || $ref == null){
+            return response()->json(['status'=>0,'error'=>"All fields are mandatory!"]);
+        }
+        else{
+            if($shipper_ids) {
+                foreach ($shipper_ids as $shipper_id) {
+                    $sale_tier =  SaleTierTag::where('user_id',$shipper_id);
+                    if($sale_tier->exists()){
+                        $sale_tier = $sale_tier->first();
+
+                        $sale_tier_history = new SaleTierTagHistory();
+                        $sale_tier_history->sale_tier_tag_id = $sale_tier->id;
+                        $sale_tier_history->user_id = $sale_tier->user_id;
+                        $sale_tier_history->poc = $sale_tier->poc;
+                        $sale_tier_history->kam = $sale_tier->kam;
+                        $sale_tier_history->ref = $sale_tier->ref;
+                        $sale_tier_history->save();
+
+                        $sale_tier->user_id = $shipper_id;
+                        $sale_tier->poc = $poc;
+                        $sale_tier->kam = $kam;
+                        $sale_tier->ref = $ref;
+                        $sale_tier->save();
+                       // return response()->json(['status'=>1,'success'=>"Updated!"]);
+                    }
+                    else{
+                        $sale_tier = new SaleTierTag();
+                        $sale_tier->user_id = $shipper_id;
+                        $sale_tier->poc = $poc;
+                        $sale_tier->kam = $kam;
+                        $sale_tier->ref = $ref;
+                        $sale_tier->save();
+                    }
+                }
+                return response()->json(['status'=>1,'success'=>"Updated!"]);
+            }
+            else{
+                return ['status' => 0 ,'error'=>"Select One Shipper!"];
+            }
+        }
+     }
+
+     public function rate_history_date(Request $request){
+        $user_id = $request->user_id;
+        $details = array();
+        if($user_id){
+            $user = User::find($user_id);
+            if($user->account_type_id == 1){
+                $old_reimbursement_account = HistoryRateStatus::where('user_id',$user_id);
+                if($old_reimbursement_account->exists()){
+                    $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
+                    foreach($old_reimbursement_account_dates as $date){
+                        $date = Carbon::parse($date->created_at)->toDateString();
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
+                    }
+                    return response()->json(['status' => 1,'account_type' => 1,'details' => $details, 'user_id' => $user_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'No Data Found']);
+                }
+            }
+            else{
+                $old_corporate_account = HistoryCorporateRateStatus::where('user_id',$user_id);
+                if ($old_corporate_account->exists()){
+                    $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
+                    foreach($old_corporate_account_dates as $date){
+                        $date = Carbon::parse($date->created_at)->toDateString();
+                        if(!in_array($date, $details)){
+                            $details[] = $date;
+                        }
+                    }
+                    return response()->json(['status' => 1,'success','account_type' => 2,'details' => $details, 'user_id' => $user_id]);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'No Data Found']);
+                }
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'No Data Found']);
+        }
+
      }
 
 }

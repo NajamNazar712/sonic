@@ -2799,7 +2799,7 @@ class AdminReportsController extends Controller
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
     }
     public function completed_delivery_notes_index(){
-        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id','name','cnic']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
@@ -2816,7 +2816,7 @@ class AdminReportsController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
             ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','riders.cnic as cni'])
             ->where('delivery_notes.status',1)->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -2890,6 +2890,9 @@ class AdminReportsController extends Controller
                 ->where('s.tracking_number', '=', $tracking);
         }
         if($rider = $request->get('search_rider')){
+            $datatable->where('riders.id','=',$rider);
+        }
+        if($rider = $request->get('rider_cnic')){
             $datatable->where('riders.id','=',$rider);
         }
         if($created_by = $request->get('search_assigned_by')){
@@ -3757,10 +3760,10 @@ class AdminReportsController extends Controller
             ->join('users as u','u.id','=','s.user_id')
             ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
             ->leftjoin('admins as a','a.id','=','st.admin_id')
-            ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
-            ->where('payable','<',0)
+            ->select('a.name as sales_person','u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges',DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
             ->where('st.status',0)
-            ->groupBy('u.id');
+            ->groupBy('u.id')
+            ->having('overall_payable', '<', 0);
 
         $datatable = Datatables::of($negative)
             ->setRowAttr([
@@ -3776,8 +3779,8 @@ class AdminReportsController extends Controller
             ->editColumn('charges', function($shipment){
                 return number_format($shipment->charges, 2);
             })
-            ->editColumn('payable', function($shipment){
-                return number_format($shipment->payable, 2);
+            ->editColumn('overall_payable', function($shipment){
+                return number_format($shipment->overall_payable, 2);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);

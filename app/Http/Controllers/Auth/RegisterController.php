@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\AccountType;
 use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
@@ -52,7 +54,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/cod/register/success';
+    protected $redirectTo = '/cod/register/user/success';
 
     /**
      * Create a new controller instance.
@@ -64,21 +66,27 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    public function showRegistrationForm()
+    public function showRegistrationForm($lead_id = NULL)
     {
+        if($lead_id != NULL){
+            $lead = Lead::find($lead_id);
+        }
+        else{
+            $lead = NULL;
+        }
         $account_type = AccountType::all();
         $products = Product::all();
         $banks = BanksList::all();
-        $city_list = City::where('status',1)->get();
+        $city_list = City::where('status',1)->where('business_category_id' ,1)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
-        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
+//        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
         $segments = Segment::all();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'sales_persons' => $sales_persons, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments, 'lead' => $lead]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -179,7 +187,7 @@ class RegisterController extends Controller
 //        $products = implode(',',$request->product_type);
 //
 //        return $request;
-        
+
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
 
@@ -332,6 +340,12 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        if(array_key_exists('lead_id', $data)){
+            $lead_id = $data['lead_id'];
+        }
+        else{
+            $lead_id = null;
+        }
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -354,6 +368,7 @@ class RegisterController extends Controller
             'email_verified' => 0,
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
+            'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -502,7 +517,7 @@ class RegisterController extends Controller
                         $html .= '<p>No bank information found.</p>';
                     }
 
-                    'To finish signing up, simply click below to verify your email address.</p>  <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
+        $html .= 'To finish signing up, simply click below to verify your email address.</p>  <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
                         <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
                     </div>
                 </div>
@@ -596,6 +611,24 @@ class RegisterController extends Controller
 //            ]);
             return 'true';
 
+        }
+    }
+
+    public function sales_person(Request $request){
+//        dd($request);
+        $id = $request->id;
+        if($id){
+            $sales_persons_city = City::where('id', $id);
+            if ($sales_persons_city->exists()){
+                $sales_persons_city = $sales_persons_city->first();
+                $hub_id = $sales_persons_city->hub_id;
+                $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->get();
+                return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
+            }else{
+                $sale_person_admin = City::find($id)->name;
+                return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
+            }
         }
     }
 

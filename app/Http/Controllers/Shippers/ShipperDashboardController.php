@@ -43,6 +43,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Shipper\UserOtpVerification;
 use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -135,7 +136,24 @@ class ShipperDashboardController extends Controller
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
         }
     }
+    public function opt_verify(Request $request){
+        $code = $request->code;
+        if($code){
+            $otp_verification = UserOtpVerification::where('user_id', session('user_id'))->where('otp', $code);
+            if($otp_verification->exists()){
+                $otp_verification->delete();
+                return response()->json(['status' => 1, 'success' => 'Your Phone Number verified for this month!']);
 
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP Code!']);
+            }
+        }
+    }
+    public function opt_verify_close(Request $request){
+        $request->session()->forget('phone_number_unverified');
+        return response()->json(['status' => 1]);
+    }
 
     public function orders_index() {
         $should_not_show_status = array(32,33,34,35,36,37,38,46);

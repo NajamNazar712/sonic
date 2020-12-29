@@ -10,6 +10,7 @@ use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -105,6 +106,10 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
+            else if ($user->phone_number_verified == 0){
+                auth('web')->logout();
+                return back()->with('info', 'Your Account phone number is not verified, Contact Admin');
+            }
             else if ($user->id == 8761) {
                 auth('web')->logout();
                 return back()->with('info', 'Access Denied!');
@@ -159,6 +164,10 @@ class LoginController extends Controller
                 auth('substitute_users')->logout();
                 return back()->with('info', 'Your Shipper\'s Account is Not Activated Yet, Contact Admin');
             }
+            else if ($shipper->phone_number_verified == 0){
+                auth('web')->logout();
+                return back()->with('info', 'Your Account phone number is not verified, Contact Admin');
+            }
             else if (!$user->status) {
                 auth('substitute_users')->logout();
                 return back()->with('info', 'Your Account is Disabled');
@@ -211,6 +220,10 @@ class LoginController extends Controller
         $international_rate_status = InternationalUsersInformation::where('user_id', $shipper_user_id)->where('status', 1);
         if($international_rate_status->exists()){
             session(['international_rates' => TRUE]);
+        }
+        $user_otp = UserOtpVerification::where('user_id', $shipper_user_id);
+        if($user_otp->exists()){
+            session(['phone_number_unverified' => TRUE]);
         }
         return redirect()->route('cod.welcome');
     }

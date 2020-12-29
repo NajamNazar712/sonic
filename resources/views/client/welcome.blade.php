@@ -88,4 +88,103 @@
             </div>
         </div>
     </div>
+
+    @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
+        <div class="modal fade" id="PasswordModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="PasswordModal"
+             aria-hidden="true" style="top:30%;">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white text-center">
+                        <h4 class="modal-title white">OTP Verification</h4>
+
+                    </div>
+                    <div class="modal-body  text-center">
+
+                        <div class="row justify-content-center">
+                            <div class="form-group form-inline">
+                                <input type="text" class="form-control password" autofocus id="password_input" placeholder="Enter Verification Code">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="password_submit" disabled>Enter</button>
+                        <button type="button" class="btn btn-info ml-1" id="password_close">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endsection
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+@endsection
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
+
+            $('#password_input').inputmask({
+                'mask': '99999',
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'clearIncomplete': true
+            });
+                $('#PasswordModal').modal('show');
+
+            $('body').on('keypress change','#password_input',function() {
+                $('#password_submit').attr('disabled', true);
+                if($(this).val().length == 5){
+                    $('#password_submit').attr('disabled', false);
+                }
+            });
+            $('#password_submit').on('click', function () {
+                var pass = $('#password_input').val();
+
+                if(pass){
+                    $.ajax({
+                        url: '{!! route('cod.opt_verify') !!}',
+                        type: 'POST',
+                        data: {
+                            'code': pass,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#password_input').val('');
+                            $('#password_submit').attr('disabled', true);
+                        }else{
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            $('#PasswordModal').modal('hide');
+                            $('#password').val(pass);
+                        }
+                    });
+                }
+                else{
+                    var error = 'Please Enter OTP Code!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+            $('#password_close').on('click', function(){
+
+                $.ajax({
+                    url: '{!! route('cod.opt_verify_close') !!}',
+                }).done(function (data) {
+                    if(data.status){
+                        $('#password_input').val('');
+                        $('#PasswordModal').modal('hide');
+                    }
+                });
+
+            });
+            @endif
+        });
+    </script>
+
 @endsection

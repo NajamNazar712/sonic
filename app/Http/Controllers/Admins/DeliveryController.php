@@ -19,7 +19,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\http\Models\Admins\ShipmentOnHold;
+use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
@@ -322,7 +322,6 @@ class DeliveryController extends Controller
             $rider_name='';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
-
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if($on_hold_shipment->exists()){
                     if(!in_array(Auth::id(), [10, 288, 423])){
@@ -1033,6 +1032,7 @@ class DeliveryController extends Controller
 
     public function received_print(Request $request)
     {
+//        dd($request);
         $delivery_note_id = $request->id;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -4852,7 +4852,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app']);
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app'])
+        ->groupBy('delivery_notes.id');
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -5861,5 +5862,157 @@ class DeliveryController extends Controller
                 }
             }
         }
+    }
+
+    public function receive_delivery_remove_bulk(Request $request){
+
+      $shipments = $request->shipment_ids;
+      $delivery_note_id = $request->delivery_note_id;
+      if($delivery_note_id){
+          foreach($shipments as $shipment_id){
+              $shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
+              if ($shipment->exists()) {
+                  $delivery_note = $delivery_note_id;
+                  $delivery = DeliveryNote::where('id', $delivery_note);
+                  if ($delivery->exists()) {
+                      $consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment_id);
+                      if($consolidation_shipments->exists()){
+                          $consolidation_shipments = $consolidation_shipments->first();
+                          $consolidation_id = $consolidation_shipments->consolidation_id;
+                          $consolidated_shipments = ConsolidationShipments::where('consolidation_id',$consolidation_id)->pluck('shipment_id')->toArray();
+                          $shipment_count = 0;
+                          $shipment_cod = 0;
+                          foreach ($consolidated_shipments as $consolidated_shipment) {
+                              $parcel = Shipment::where('id', $consolidated_shipment)->first();
+                              $shipment_cod += $parcel->amount;
+                              $shipment_count += 1;
+                              DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $consolidated_shipment])->delete();
+                              Shipment::where('id', $consolidated_shipment)->update(['shipper_status_id' => 6]);
+                              ShipmentsJourneyController::add($consolidated_shipment, 6, NULL, NULL, NULL, NULL, Auth::id(), $delivery_note_id);
+                          }
+                          $delivery = $delivery->first();
+                          $count = $delivery->shipments_count;
+                          $cod = $delivery->total_cod_amount;
+                          $count = $count - $shipment_count;
+                          if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                              $cod = $cod - $shipment_cod;
+                          }
+                          if ($count == 0) {
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                          } else {
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                          }
+
+                      }else{
+                          $parcel = Shipment::where('id',$shipment_id)->first();
+                          DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $shipment_id])->delete();
+                          $delivery = $delivery->first();
+                          $count = $delivery->shipments_count;
+                          $cod = $delivery->total_cod_amount;
+                          $count-=1;
+                          if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                              $cod = $cod - $parcel->amount;
+                          }
+                          if ($count == 0) {
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                          } else {
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                          }
+                          Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 6]);
+                          ShipmentsJourneyController::add($shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $delivery_note_id);
+                      }
+                  }
+              }
+          }
+          return ['status' => 0, 'success' => 'Shipments are successfully removed'];
+      }
+      else{
+          return ['status' => 1, 'error' => 'Something went wrong'];
+      }
+
+
+    }
+
+    public function add_shipments_in_recieve_deliveries(Request $request){
+
+        $shipment_id = $request->shipment_id;
+        $tracking_numbers = $request->tracking_number;
+        $delivery_note_id = $request->delivery_note_id;
+        $shipment = Shipment::find($shipment_id);
+        if($shipment){
+            $delivery_note = DeliveryNote::find($delivery_note_id);
+//                    if($delivery_note->hub_id == $shipment->consignee_city->hub_id){
+                        $total_shipments = $delivery_note->shipments_count;
+                        $total_shipments++;
+                        $cod_amount = $delivery_note->total_cod_amount;
+                        $cod_amount = $cod_amount + $shipment->amount;
+                        $delivery_note->shipments_count = $total_shipments;
+                        $delivery_note->total_cod_amount = $cod_amount;
+                        $delivery_note->save();
+
+                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('delivery_note_id','desc')->first();
+                        if($serial != null){
+                            $serial++;
+                        }
+                        else{
+                            $serial = null;
+                        }
+                        $delivery_note_shipment = new DeliveryNoteShipment();
+                        $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+                        $delivery_note_shipment->shipment_id = $shipment->id;
+                        $delivery_note_shipment->ordering = $serial;
+                        $delivery_note_shipment->save();
+                        return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
+        }
+
+//        if($shipment->exists()){
+//            $shipment = $shipment->first();
+//            if($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 4){
+//                $deliver_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->where('delivery_note_id',$delivery_note_id);
+//                if($deliver_note_shipment->exists()){
+//                    return response()->json(['status' => 1, 'error' => 'Shipments Already Exists']);
+//                }
+//                else{
+//                    $delivery_note = DeliveryNote::find($delivery_note_id);
+//                    if($delivery_note->hub_id == $shipment->consignee_city->hub_id){
+//                        $total_shipments = $delivery_note->shipments_count;
+//                        $total_shipments++;
+//                        $cod_amount = $delivery_note->total_cod_amount;
+//                        $cod_amount = $cod_amount + $shipment->amount;
+//                        $delivery_note->shipments_count = $total_shipments;
+//                        $delivery_note->total_cod_amount = $cod_amount;
+//                        $delivery_note->save();
+//
+//                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('delivery_note_id','desc')->first();
+//                        if($serial != null){
+//                            $serial++;
+//                        }
+//                        else{
+//                            $serial = null;
+//                        }
+//                        $delivery_note_shipment = new DeliveryNoteShipment();
+//                        $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+//                        $delivery_note_shipment->shipment_id = $shipment->id;
+//                        $delivery_note_shipment->ordering = $serial;
+//                        $delivery_note_shipment->save();
+//
+//                    }
+//                    else{
+//                        //return ['status' => 1, 'error' => 'Hubs are not the same'];
+//                        return response()->json(['status' => 1, 'error' => 'Hubs are not the same']);
+//                    }
+//                }
+//            }
+//            else{
+//                //return ['status' => 1, 'error' => 'Shipments Status Id is invalid'];
+//                return response()->json(['status' => 1, 'error' => 'Shipments Status Id is invalid']);
+//            }
+//        }
+
+
     }
 }

@@ -1,0 +1,1069 @@
+@extends('admin.layout.master')
+
+@section('title', 'Leads Management')
+
+@section('content')
+    <h1 class="mb-1">
+        Leads Management
+    </h1>
+
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-body">
+                @include('admin.inc.messages')
+                <div class="row mt-2">
+                    <div class="card col-12">
+                        <div class="card-content collapse show">
+                            <div class="card-body">
+                                <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
+                                    <div class="row justify-content-center">
+                                        <div class="form-group col">
+                                            <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                        <div class="form-group col">
+                                            <select name="search_origin" id="search_origin" class="select2 form-control">
+                                                @foreach($cities as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group col">
+                                            <select name="search_sale_person" id="search_sale_person" class="select2 form-control">
+                                                @foreach($sale_name as $sn)
+                                                    <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-1">
+                                            <button type="submit" class="btn round btn-primary search_button">Search <i class="ft-bar-chart"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_leads">{{$leads['total']}}</h3>
+                                                <span>Total Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}}</h3>
+                                                <span>In Process</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_delivered pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="mature_leads">{{$leads['mature_leads']}}</h3>
+                                                <span>Matured Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-pending_shipments pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="pending_for_activation">{{$leads['pending_for_activation']}}</h3>
+                                                <span>Request(s) pending for Activation</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="ratio">{{ $leads['ratio']}}</h3>
+                                                <span>Lead Time Ratio</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
+                        <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Lead ID</th>
+                        <th class="border-primary border-darken-1">Contact Person</th>
+                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Phone No</th>
+                        <th class="border-primary border-darken-1">Email Address</th>
+                        <th class="border-primary border-darken-1">Message</th>
+                        <th class="border-primary border-darken-1">Requested Date/Time</th>
+                        <th class="border-primary border-darken-1">Sale Person Tagged</th>
+                        <th class="border-primary border-darken-1">Reference Person</th>
+                        <th class="border-primary border-darken-1">Lead Status</th>
+                        <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Action</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Person</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id">
+                    <select name="Sale_person" id="saletag" class="form-control select2">
+                        @foreach($sale_name as $sn)
+                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="ForwardLeadModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ForwardLeadModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Forward Lead</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col mb-1">
+                        <select name="sale_person" id="saletag1" class="form-control select2">
+                            @foreach($sale_name as $sn)
+                                <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select name="reference_person" id="reference_person" class="form-control select2">
+                            @foreach($sale_name as $sn)
+                                <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="ForwardLeadSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DetailsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add_status_modal" role="dialog" aria-labelledby="add_status_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Update Status</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <select name="update_lead_status" id="update_lead_status" class="form-control select2">
+                                @foreach($lead_statuses as $lead_status)
+                                    <option value="{{ $lead_status->id }}" > {{ $lead_status->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+
+          .small-calender-icon{
+              font-size: 17px !important;
+          }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d , #90929a);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2 , #ff4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c  , #e0b668de);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_in_process {
+            background-image: linear-gradient(45deg, #6A1FA2 , #FF4961);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_closed {
+            background-image: linear-gradient(45deg, #076500, #11F118);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-complaints_rejected {
+            background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
+            background-repeat: repeat-x;
+        }
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .div_border{
+            border-style: double;
+        }
+
+        .statusBooked{
+            background-color: #5DADE2;
+        }
+        .statusOrigin{
+            background-color: #E67E22;
+        }
+        .statusIntransit{
+            background-color: #7F8C8D;
+        }
+        .statusDestination{
+            background-color: #F1C40F;
+        }
+        .statusNotattempted{
+            background-color: #1F618D;
+        }
+        .statusDeliveryunsuccessful{
+            background-color: #28B463;
+        }
+        .statusOnhold{
+            background-color: #154360;
+        }
+
+    </style>
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#search_origin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Origin",
+                width:'100%'
+            });
+
+            $("#search_sale_person").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sale Person",
+                width:'100%'
+            });
+
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                }
+            }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.leads.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Lead ID');
+                            head.push('Contact Person');
+                            head.push('City');
+                            head.push('Phone No');
+                            head.push('Email Address');
+                            head.push('Message');
+                            head.push('Requested Date/Time');
+                            head.push('Sale Person Tagged');
+                            head.push('Reference Person');
+                            head.push('Lead Status');
+                            head.push('Aging');
+                            head.push('Updated By');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.lead_id);
+                                row.push(values.contact_person);
+                                row.push(values.city);
+                                row.push(values.phone_number);
+                                row.push(values.email_address);
+                                row.push(values.message);
+                                row.push(values.requested_date);
+                                row.push(values.sale_person);
+                                row.push(values.reference_person);
+                                row.push(values.status);
+                                row.push(values.aging);
+                                row.push(values.updated_by);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+            var selected_rows = [];
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '500px',
+                buttons: [
+                        @if (session('role_id') == 1 || in_array(361, session('permissions')))
+                    {
+                        text: 'Bulk Tagging',
+                        className: 'btn btn-primary bulk_tagging',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                $('#SalesTagModal').modal('show');
+                            }else{
+                                var error = "Account Not selected!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+                        @endif
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    id = parseInt(row.id());
+                                    row.select();
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.bulk_tagging').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.bulk_tagging').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Lead Management',
+                        className:'btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                    'reset'
+                ],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('admin.leads.list') }}',
+                    data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_sale_person = $('#search_sale_person').val();
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                    }
+                },
+                rowId: 'lead_id',
+                order: [[8, 'desc']],
+                columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'lead_id', name: 'leads.id', class: 'align-middle lead_id'},
+                    {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
+                    {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
+                    {data: 'message', name: 'leads.message', class: 'align-middle message'},
+                    {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
+                    {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
+                    {data: 'reference_person', name:'rp.name', class: 'align-middle sale_person'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
+                    {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
+                            $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    var data1 = $.map({!! $statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                console.log(id);
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.bulk_tagging').enable();
+
+                }
+                else {
+                    table.button('.bulk_tagging').disable();
+                }
+            });
+
+            $("#saletag").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sales Person",
+                width:'100%',
+                dropdownParent:$('#SalesTagModal')
+            });
+            $("#saletag1").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sales Person",
+                width:'100%',
+                dropdownParent:$('#ForwardLeadModal')
+            });
+            $("#reference_person").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reference Person",
+                width:'100%',
+                dropdownParent:$('#ForwardLeadModal')
+            });
+            $('#salesTagSubmit').on('click',function () {
+                var assign = parseInt($('#saletag').val());
+                swal({
+                    text: 'Are you sure, you want to Tag?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        if (assign) {
+                            $.ajax({
+                                url: '{!! route('admin.leads.tag_sale_person') !!}',
+                                method: 'POST',
+                                data: {
+                                    'sale_person': assign,
+                                    'lead_ids[]': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 1) {
+                                        $('#SalesTagModal').modal('hide');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    selected_rows = [];
+
+                                    table.rows().deselect();
+                                    $('#saletag').val('').trigger('change');
+                                    $('#SalesTagModal').modal('hide');
+                                    table.draw(true);
+                                    table.button('.bulk_tagging').disable();
+
+                                });
+                        } else {
+                            var error = "Lead Not Selected!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                });
+            });
+            var status_lead_id = null;
+            var remark_lead_id = null;
+            var forward_lead_id = null;
+
+            $('body').on('click','#datatable .forward_lead',function(){
+                forward_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#ForwardLeadModal').modal('show');
+            });
+            $('#ForwardLeadSubmit').on('click',function () {
+                var tag = parseInt($('#saletag1').val());
+                var refer_person = parseInt($('#reference_person').val());
+                if(tag && refer_person){
+                    $.ajax({
+                        url: '{!! route('admin.leads.tag_sale_person') !!}',
+                        method: 'POST',
+                        data: {
+                            'sale_person': tag,
+                            'reference_person': refer_person,
+                            'lead_ids[]': forward_lead_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#saletag1').val('').trigger('change');
+                            $('#reference_person').val('').trigger('change');
+                            $('#ForwardLeadModal').modal('hide');
+                            forward_lead_id = null;
+                            table.draw(true);
+                        });
+                }else{
+                    if(!tag){
+                        var error = "Sales Person Not Selected!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!refer_person){
+                        var error = "Reference Person Not Selected!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+
+            });
+
+            $('body').on('click','#datatable .lead_log',function(){
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.leads.lead_log') !!}',
+                    method: 'POST',
+                    data: {
+                        'lead_id': lead_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '<div class="col">';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Lead ID</strong></th><th><strong>Contact Person</strong></th><th><strong>Phone Number</strong></th><th><strong>Sales Person</strong></th><th><strong>Reference Person</strong></th><th><strong>Lead Status</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.leads, function(index, value) {
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.lead_id + '</td>';
+                            html += '<td>' + value.contact_person + '</td>';
+                            html += '<td>' + value.phone_number + '</td>';
+                            html += '<td>' + value.sales_person + '</td>';
+                            html += '<td>' + value.reference_person + '</td>';
+                            html += '<td>' + value.status + '</td>';
+                            html += '<td>' + value.updated_by + '</td>';
+                            html += '<td>' + value.updated_at + '</td></tr>';
+                        });
+                        html += '</tbody></table></div>';
+                        var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
+                        $('#DetailsModal .header').html(header);
+                        $('#DetailsModal .modal-body').html(html);
+                        $('#DetailsModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+
+            $('body').on('click','#datatable .view_remarks',function(){
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+                var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';
+
+                window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;
+            });
+
+            $("#update_lead_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Status",
+                width:'100%',
+                dropdownParent:$('#add_status_modal')
+            });
+
+            $('body').on('click','#datatable .update',function(){
+                status_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#add_status_modal').modal('show');
+            });
+
+            $('#add_status_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var new_status = $('#update_lead_status').val();
+                    if(new_status){
+                        blockPagePermanently();
+                        $.ajax({
+                            url:"{{route('admin.leads.add_status')}}",
+                            method:'POST',
+                            data:{
+                                'lead_id':status_lead_id,
+                                'status':new_status,
+                                '_token':'{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            $('#add_status_modal').modal('hide');
+                            UnblockPagePermanently();
+                            new_status = null;
+                            if(data.status == 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                    else{
+                        var error = 'Status not Selected!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $('#add_status_modal').on('hide.bs.modal', function () {
+                $('#update_lead_status').val('').trigger('change');
+            });
+
+            $('body').on('click','#datatable .add_remarks',function(){
+                remark_lead_id = parseInt($(this).parents('tr').attr('id'));
+                $('#add_remarks_modal').modal('show');
+            });
+
+            $('#add_remarks_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var remarks = $('#add_remarks').val();
+                    if(remark_lead_id != null){
+                        blockPagePermanently();
+                        $.ajax({
+                            url:"{{route('admin.leads.add_remarks')}}",
+                            method:'POST',
+                            data:{
+                                'lead_id':remark_lead_id,
+                                'remarks':remarks,
+                                '_token':'{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            UnblockPagePermanently();
+                            $('#add_remarks_modal').modal('hide');
+                            remark_lead_id = null;
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        });
+                    }
+                    else{
+                        var error = 'Invalid Lead ID!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $('#add_remarks_modal').on('hide.bs.modal', function () {
+                $('#add_remarks_form input.add_remarks').val('');
+            });
+            $( "#search_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: '{!! route('admin.leads.lead_statistics') !!}',
+                        method: 'POST',
+                        data: {
+                            'search_origin': $('#search_origin').val(),
+                            'search_sale_person': $('#search_sale_person').val(),
+                            'search_date_from': $('input[name="from_date_formatted"]').val(),
+                            'search_date_to': $('input[name="to_date_formatted"]').val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#total_leads').text(data.leads.total);
+                            $('#in_process').text(data.leads.in_process);
+                            $('#mature_leads').text(data.leads.mature_leads);
+                            $('#pending_for_activation').text(data.leads.pending_for_activation);
+                            $('#ratio').text(data.leads.ratio);
+                        }
+                    });
+                    table.draw();
+                }
+            });
+        });
+
+    </script>
+@endsection

@@ -6,7 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
-use App\http\Models\Admins\ShipmentOnHold;
+use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\http\Models\CargoConsignmentExcel;
 use App\http\Models\CargoConsignmentJunctionSend;

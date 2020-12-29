@@ -59,7 +59,7 @@ class AdminTrackingController extends Controller
     		if ($shipment->exists()) {
     			$shipment = $shipment->first();
                 $check = false;
-
+                $details['shipment_id'] = $shipment->id;
                 if (session('department_id') == 7) {
                     if (session('role_id') != 4 ) {
                         if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
@@ -460,7 +460,7 @@ class AdminTrackingController extends Controller
 
                     // $details['complain']['id'] = 10;
                     // $details['complain']['tat'] = 3;
-                    $tracking['shipments'][$shipment->id] = $details;
+                    $tracking['shipments'] = $details;
                 }
                 else {
                     $tracking['unauthorized'][] = $tracking_number;
@@ -702,6 +702,7 @@ class AdminTrackingController extends Controller
     	$tracking = array();
 
     	foreach ($tracking_numbers as $tracking_number) {
+
     		$shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
     			$shipment = $shipment->first();
@@ -1208,7 +1209,9 @@ class AdminTrackingController extends Controller
                         $key_accounts_daily_shipment->save();
                     }
 
-                    $tracking['shipments'][$shipment->id] = $details;
+                    $details['shipment_id'] = $shipment->id;
+
+                    $tracking['shipments'][] = $details;
                 }
                 else {
                     $tracking['unauthorized'][] = $tracking_number;
@@ -1217,8 +1220,8 @@ class AdminTrackingController extends Controller
     		else {
     			$tracking['invalid'][] = $tracking_number;
     		}
-    	}
+        }
 
-    	return $tracking;
+        return $tracking;
     }
 }

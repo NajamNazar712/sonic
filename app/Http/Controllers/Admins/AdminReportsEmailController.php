@@ -348,6 +348,7 @@ class AdminReportsEmailController extends Controller
         $avg_shipment = array();
         $month_speed = array();
         $month_average_array = array();
+        $avg_revenue_per_day = array();
         $dates = [];
         $total_dates = [];
         $week_holidays = CrmTatHolidays::whereBetween('holiday', [$week_holiday_date_from, $week_holiday_date_to])->count();
@@ -393,27 +394,34 @@ class AdminReportsEmailController extends Controller
             } else {
                 $avg_shipment[$month_average->origin_id] = 0;
             }
+            if ($weekdays_count != 0) {
+                $avg_revenue_per_day[$month_average->origin_id] = $revenue[$month_average->origin_id] / $weekdays_count;
+            } else {
+                $avg_revenue_per_day[$month_average->origin_id] = 0;
+            }
             $month_speed[$month_average->origin_id] = $avg_shipment[$month_average->origin_id] * $total_month_weekdays_count;
             $total_shipments = $total_shipments + $month_average->shipment_count;
         }
 
-        $month_average_array['header'] = ['S. No.', 'Origin', 'Total Parcel', 'Revenue', 'Avg Revenue/Parcel', 'Avg Shipments/Day', 'Month Speed'];
+        $month_average_array['header'] = ['S. No.', 'Origin', 'Total Parcel', 'Revenue', 'Avg Revenue/Parcel', 'Avg Shipments/Day', 'Avg Revenue/Day', 'Month Speed'];
         $serial = 1;
 
         $total_shipments_count = 0;
         $total_revenue_count = 0;
         $total_avg_revenue_count = 0;
+        $total_avg_revenue_per_day_count = 0;
         $total_avg_shipment_count = 0;
         $total_month_speed_count = 0;
         MonthAverage::truncate();
         foreach ($months_average as $month_average) {
-            $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
+            $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Avg Revenue/Day' => round($avg_revenue_per_day[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
             $month_average_entry = new MonthAverage();
             $month_average_entry->origin_id = $month_average->origin_id;
             $month_average_entry->shipments = $month_average->shipment_count;
             $month_average_entry->revenue = round($revenue[$month_average->origin_id], 2);
             $month_average_entry->avg_revenue = round($avg_revenue[$month_average->origin_id], 2);
             $month_average_entry->avg_shipments = round($avg_shipment[$month_average->origin_id], 2);
+            $month_average_entry->avg_revenue_per_day = round($avg_revenue_per_day[$month_average->origin_id], 2);
             $month_average_entry->month_speed = round($month_speed[$month_average->origin_id], 2);
             $month_average_entry->save();
             $serial++;
@@ -422,6 +430,7 @@ class AdminReportsEmailController extends Controller
             $total_shipments_count = $total_shipments_count + $month_average->shipment_count;
             $total_revenue_count = $total_revenue_count + $revenue[$month_average->origin_id];
             $total_avg_shipment_count = $total_avg_shipment_count + $avg_shipment[$month_average->origin_id];
+            $total_avg_revenue_per_day_count = $total_avg_revenue_per_day_count + $avg_revenue_per_day[$month_average->origin_id];
             $total_month_speed_count = $total_month_speed_count + $month_speed[$month_average->origin_id];
         }
         if($total_shipments_count != 0){
@@ -431,8 +440,8 @@ class AdminReportsEmailController extends Controller
             $total_avg_revenue_count = 0;
         }
 
-        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Month Speed' => ''];
-        $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
+        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Avg Revenue/Day' => '', 'Month Speed' => ''];
+        $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Avg Revenue/Day' => round($total_avg_revenue_per_day_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
         $cell_st = [
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -443,7 +452,7 @@ class AdminReportsEmailController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($month_average_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
+        $sheet->getStyle("A2:H2")->applyFromArray($cell_st);
         $sheet->setTitle('Sale Person Numbers');
         $writer = new Xlsx($spreadsheet);
 

@@ -873,7 +873,7 @@
     
     <script type="text/javascript">
         $(document).ready(function () {
-          
+          $('#total_leads').text();
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
