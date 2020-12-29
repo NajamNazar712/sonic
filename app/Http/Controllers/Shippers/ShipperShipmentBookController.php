@@ -2277,7 +2277,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id) {
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges) {
 
 
         $shipment = new Shipment();
@@ -2310,6 +2310,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->business_category_id = $business_category_id;
+
+        $shipment->try_and_buy_fees = $try_and_buy_charges;
 
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
@@ -2368,7 +2370,7 @@ class ShipperShipmentBookController extends Controller
         // if($current_time > $time){
         //     $date = Carbon::tomorrow();
         // }
-        $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
+        $booking_types = BookingType::whereNotIn('id', [4])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
@@ -2535,12 +2537,20 @@ class ShipperShipmentBookController extends Controller
 
                 $amount = str_replace(',', '', $request->input('amount'));
 
+                if ($service_type_id == 3) {
+                    $try_and_buy_charges = $request->input('try_and_buy_charges');
+                    $amount = 0;
+                }
+                else {
+                    $try_and_buy_charges = NULL;
+                }
+
                 $pieces_quantity = 1;
                 if($service_type_id == 1){
                     $pieces_quantity = $request->pieces_quantity;
                 }
                 $business_category_id = 1;
-                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id);
+                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges);
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -3195,10 +3205,37 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_description' => 'Replacement Item Description',
             'replacement_item_quantity' =>'Replacement Item Quantity',
 
+            'item_product_type_id_1' => 'Try and Buy Item Product Type ID 1',
+            'item_description_1' => 'Try and Buy Item Description 1',
+            'item_quantity_1' => 'Try and Buy Item Quantity 1',
+            'item_insurance_1' => 'Try and Buy Item Insurance 1',
+            'item_price_1' => 'Try and Buy Product Value 1',
+            'item_product_type_id_2' => 'Try and Buy Item Product Type ID 2',
+            'item_description_2' => 'Try and Buy Item Description 2',
+            'item_quantity_2' => 'Try and Buy Item Quantity 2',
+            'item_insurance_2' => 'Try and Buy Item Insurance 2',
+            'item_price_2' => 'Try and Buy Product Value 2',
+            'item_product_type_id_3' => 'Try and Buy Item Product Type ID 3',
+            'item_description_3' => 'Try and Buy Item Description 3',
+            'item_quantity_3' => 'Try and Buy Item Quantity 3',
+            'item_insurance_3' => 'Try and Buy Item Insurance 3',
+            'item_price_3' => 'Try and Buy Product Value 3',
+            'item_product_type_id_4' => 'Try and Buy Item Product Type ID 4',
+            'item_description_4' => 'Try and Buy Item Description 4',
+            'item_quantity_4' => 'Try and Buy Item Quantity 4',
+            'item_insurance_4' => 'Try and Buy Item Insurance 4',
+            'item_price_4' => 'Try and Buy Product Value 4',
+            'item_product_type_id_5' => 'Try and Buy Item Product Type ID 5',
+            'item_description_5' => 'Try and Buy Item Description 5',
+            'item_quantity_5' => 'Try and Buy Item Quantity 5',
+            'item_insurance_5' => 'Try and Buy Item Insurance 5',
+            'item_price_5' => 'Try and Buy Product Value 5',
+
             'special_instructions' => 'Special Instructions',
             'estimated_weight' => 'Estimated Weight',
             'shipping_mode_id' => 'Shipping Mode ID',
             'same_day_timing_id' => 'Same Day Timing ID',
+            'try_and_buy_charges' => 'Try and Buy Charges',
             'amount' => 'Collection Amount',
             'payment_mode_id' => 'Payment Mode ID',
             'charges_mode_id' => 'Charges Mode ID'
@@ -3252,6 +3289,36 @@ class ShipperShipmentBookController extends Controller
 
             'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
+            'item_product_type_id_1' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_1' => ['required_if:service_type_id,3', 'nullable', 'between:0,1000'],
+            'item_quantity_1' => ['required_if:service_type_id,3','nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_1' => ['required_if:service_type_id,3','nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_1' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_2' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_2' => ['required_with:item_product_type_id_2,', 'nullable', 'between:0,1000'],
+            'item_quantity_2' => ['required_with:item_product_type_id_2,','nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_2' => ['required_with:item_product_type_id_2,','nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_2' => ['required_with:item_product_type_id_2,','nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_3' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_3' => ['required_with:item_product_type_id_3,', 'nullable', 'between:0,1000'],
+            'item_quantity_3' => ['required_with:item_product_type_id_3,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_3' => ['required_with:item_product_type_id_3,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_3' => ['required_with:item_product_type_id_3,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_4' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_4' => ['required_with:item_product_type_id_4,', 'nullable', 'between:0,1000'],
+            'item_quantity_4' => ['required_with:item_product_type_id_4,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_4' => ['required_with:item_product_type_id_4,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_4' => ['required_with:item_product_type_id_4,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+            'item_product_type_id_5' => ['nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
+            'item_description_5' => ['required_with:item_product_type_id_5,', 'nullable', 'between:0,1000'],
+            'item_quantity_5' => ['required_with:item_product_type_id_5,', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
+            'item_insurance_5' => ['required_with:item_product_type_id_5,', 'nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'item_price_5' => ['required_with:item_product_type_id_5,', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
@@ -3263,6 +3330,7 @@ class ShipperShipmentBookController extends Controller
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })]
@@ -3296,6 +3364,10 @@ class ShipperShipmentBookController extends Controller
             elseif (count($spreadsheet[0]) == 19){
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'order_date', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id'];
                 $service_type_check_id = 5;
+            }
+            elseif (count($spreadsheet[0]) == 43){
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id_1', 12 => 'item_description_1', 13 => 'item_quantity_1', 14 => 'item_insurance_1', 15 => 'item_price_1', 16 => 'item_product_type_id_2', 17 => 'item_description_2', 18 => 'item_quantity_2', 19 => 'item_insurance_2', 20 => 'item_price_2', 21 => 'item_product_type_id_3', 22 => 'item_description_3', 23 => 'item_quantity_3', 24 => 'item_insurance_3', 25 => 'item_price_3', 26 => 'item_product_type_id_4', 27 => 'item_description_4', 28 => 'item_quantity_4', 29 => 'item_insurance_4', 30 => 'item_price_4', 31 => 'item_product_type_id_5', 32 => 'item_description_5', 33 => 'item_quantity_5', 34 => 'item_insurance_5', 35 => 'item_price_5', 36 => 'special_instructions', 37 => 'estimated_weight', 38 => 'shipping_mode_id', 39 => 'same_day_timing_id', 40 => 'try_and_buy_charges', 41 => 'payment_mode_id', 42 => 'charges_mode_id'];
+                $service_type_check_id = 3;
             }
             else{
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');

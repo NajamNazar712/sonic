@@ -483,8 +483,6 @@
                                         window.location = link.substr(0, link.lastIndexOf('/')) + '/' + selected_rows;
                                     }
                                 });
-
-
                             }
                             else{
                                 var error = "Something went wrong please refresh page and try again!";

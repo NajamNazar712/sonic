@@ -88,20 +88,20 @@ class AdminCRMController extends Controller
                 $payment_id = $request->payment_id;
                 $payment_id_padded = str_pad($request->payment_id, 6, 0, STR_PAD_LEFT);
                 if(!empty($payment_id)){
-                        $payment = DonePayment::find($payment_id);
-                        $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
-                        $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
-                        if($is_shipment->exists()){
-                            return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
+                    $payment = DonePayment::find($payment_id);
+                    $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
+                    $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
+                    if($is_shipment->exists()){
+                        return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
+                    }
+                    else{
+                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment->id, $shipment->user_id, NULL ,$description);
+                        if($request->has('key_account')){
+                            $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                         }
-                        else{
-                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment->id, $shipment->user_id, NULL ,$description);
-                            if($request->has('key_account')){
-                                $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
-                            }
-                        }
-                        $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                    }
+                    $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
 
                     return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added'];
                 }else{
@@ -121,8 +121,10 @@ class AdminCRMController extends Controller
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
                         if($shipment){
+
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
+                                $complain = $is_shipment->id;
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
@@ -139,7 +141,6 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                             if(in_array($complaint_id, [11, 12, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
-                                                $present_shipments[] = $is_shipment->id;
                                                 $flag = true;
                                             }
                                             else{
@@ -158,7 +159,7 @@ class AdminCRMController extends Controller
                                     }
                                 }else{
                                     $present_shipments[] = $shipment->tracking_number;
-                                    $present_shipments[] = $is_shipment->id;
+                                    $present_shipments[] = 'Complaint ID: '. $complain;
                                     $flag = true;
                                 }
                             }
@@ -173,7 +174,6 @@ class AdminCRMController extends Controller
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
-                                            $present_shipments[] = $is_shipment->id;
                                             $flag = true;
                                         }
                                         else{
@@ -206,11 +206,11 @@ class AdminCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
+                            $complain = $is_shipment->id;
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
-                                        $present_shipments[] = $is_shipment->id;
                                         $flag = true;
                                     }
                                     else{
@@ -232,14 +232,13 @@ class AdminCRMController extends Controller
                                 }
                             }else{
                                 $present_shipments[] = $shipment->tracking_number;
-                                $present_shipments[] = $is_shipment->id;
+                                $present_shipments[] = 'Complaint ID: '. $complain;
                                 $flag = true;
                             }
                         }else{
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
-                                    $present_shipments[] = $is_shipment->id;
                                     $flag = true;
                                 }
                                 else{
@@ -267,7 +266,7 @@ class AdminCRMController extends Controller
                 }
             }
         }
-        
+
     }
 
 //    public function update_request(Request $request){

@@ -83,6 +83,9 @@
                                         <!-- Step 1 -->
                                         @csrf
                                         @method('post')
+                                        @if($lead != null)
+                                            <input type="hidden" name="lead_id" value="{{$lead->id}}">
+                                        @endif
                                         <h6>Profile Information</h6>
                                         @include('client.inc.messages')
                                         <fieldset>
@@ -93,7 +96,7 @@
                                                             Company Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
+                                                        <input type="text" class="form-control required" value="{{ old('name') }}" name="name">
                                                         <span name="cname" class="danger" for="name" style="display: none;">Atleast 3 Characters Required</span>
                                                         <span name="ename" class="danger" for="name" style="display: none;">Company Name Already Exists</span>
                                                     </div>
@@ -104,7 +107,7 @@
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="Person Name (Alphabet Only)" name="shipper_poc" value="{{old('shipper_poc')}}">
+                                                        <input type="text" class="form-control required" placeholder="Person Name (Alphabet Only)" name="shipper_poc" value="@if(old('shipper_poc') != null){{old('shipper_poc')}}@elseif($lead != null){{$lead->contact_person}}@else{{old('shipper_poc')}}@endif">
                                                     </div>
                                                 </div>
                                             </div>
@@ -122,7 +125,7 @@
                                                         <label for="shipper_phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
+                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="@if(old('shipper_phone') != null){{old('shipper_phone')}}@elseif($lead != null){{$lead->phone_number}}@else{{old('shipper_phone')}}@endif">
                                                     </div>
                                                 </div>
                                             </div>
@@ -743,7 +746,7 @@
                                                             Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="{{ old('email') }}"  name="email">
+                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="@if(old('email') != null){{old('email')}}@elseif($lead != null){{$lead->email_address}}@else{{old('email')}}@endif"  name="email">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
@@ -820,12 +823,10 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
-
-        var already_selected_person = [];
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            width: '100%',
            placeholder:'Select City',
-       }).bind('select2:select', function () {
+       }).bind('change', function () {
            var id = $(this).val();
             if(id) {
                 $.ajax({
@@ -840,17 +841,16 @@
                         $('#sale_person').empty();
 
                         $.each(data.sale_persons, function (key, value) {
-                            var sale_person = parseInt(id + value.id);
-
-                            var index = $.inArray(sale_person, already_selected_person);
-
-                            if (index === -1) {
-
-                                var newOption = "<option>" + value.name + "</option>";
-                                $('#sale_person').append(newOption).trigger('change');
-                                $('#sale_person').val('').trigger('change');
-                            }
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            $('#sale_person').append(newOption);
                         });
+                        $('#sale_person').val('').trigger('change');
+
+                        @if($lead != null)
+                            @if($lead->sale_person_id != null)
+                                $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
+                            @endif
+                        @endif
                     } else {
                         toastr.error(data.error, 'Error!', {
                             positionClass: 'toast-top-center',
@@ -862,6 +862,11 @@
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             });
+
+
+        @if($lead != null)
+            $('#shipper_city').val({{$lead->city_id}}).trigger('change');
+        @endif
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
             width:'100%',
