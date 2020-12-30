@@ -188,10 +188,6 @@
                     params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.returned_shipments.list') }}',
-                        method:'post',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -230,7 +226,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Revenue Report',
+                        title: 'Returned Shipment Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
