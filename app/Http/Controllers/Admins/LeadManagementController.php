@@ -61,7 +61,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;
@@ -110,6 +110,14 @@ class LeadManagementController extends Controller
         return Datatables::of($leads)
             ->editColumn('lead_id', function ($lead) {
                 return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('leads.status_id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->addColumn('aging',function ($lead){
                 $days = Carbon::now()->diffInDays($lead->requested_date);
@@ -189,7 +197,7 @@ class LeadManagementController extends Controller
                 }
             }
             if($count > 0){
-                $leads['ratio'] = $days/$count;
+                $leads['ratio'] = round($days/$count, 2);
             }
             else{
                 $leads['ratio'] = 0;

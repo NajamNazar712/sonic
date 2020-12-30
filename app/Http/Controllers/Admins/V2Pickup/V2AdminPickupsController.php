@@ -813,14 +813,16 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                    if($shipment->packaging_material_request == 0){
+                        if($shipment->booking_type_id == 4){
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        }else{
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
                         }
                     }
 
@@ -1355,14 +1357,16 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                    if($shipment->packaging_material_request == 0){
+                        if($shipment->booking_type_id == 4){
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        }else{
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
                         }
                     }
 
