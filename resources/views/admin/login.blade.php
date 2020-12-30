@@ -42,6 +42,7 @@
     <div class="content-wrapper">
         <div class="content-header row">
         </div>
+        <p align="right" style="color: white; font-size:16px;" class="mr-5" >For Help Dial : 111-1123-234 or email us info@trax.pk</p>
         <div class="content-body">
             <section class="flexbox-container">
                 <div class="col-12 d-flex align-items-center justify-content-end">
