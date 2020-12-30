@@ -79,7 +79,7 @@ class ShipperTelenorController extends Controller
                 $key = array_search(substr($row, 23, 10), $misidn);
 
                 if ($key !== FALSE) {
-                    $row = preg_replace("/\|+/", "|", $row);
+                    $row = preg_replace('~[\r\n]+~', '', preg_replace("/\|+/", "|", $row));
 
                     $length = $stationary_length - strlen($row);
 
