@@ -1858,6 +1858,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
+        Route::prefix('returned_shipments')->name('returned_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@returned_shipments_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@returned_shipments_list')->name('list');
+        });
     });
 
     //Reports end

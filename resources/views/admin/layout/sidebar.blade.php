@@ -896,6 +896,9 @@
                         @if (session('role_id') == 1 || in_array(401, session('permissions')))
                           <li><a class="menu-item" href="{{ route('admin.reports.app_efficiency.index') }}">App Efficiency Report</a></li>
                         @endif
+                            @if (session('role_id') == 1 || in_array(401, session('permissions')))
+                          <li><a class="menu-item" href="{{ route('admin.reports.returned_shipments.index') }}">Returned Shipments Report</a></li>
+                        @endif
 
                         @if (session('role_id') == 1 || in_array(414, session('permissions')))
                           <li><a class="menu-item" href="{{ route('admin.reports.month_closing.individual.index') }}">Month Closing - Individual</a></li>
