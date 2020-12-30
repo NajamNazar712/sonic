@@ -2343,6 +2343,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
+            Route::post('bulk', 'Admins\AdminCRMController@bulk_comment_for_shipper')->name('bulk');
         });
         Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
         Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
