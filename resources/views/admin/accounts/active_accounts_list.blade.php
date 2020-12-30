@@ -365,6 +365,10 @@
                 params.length = -1;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.active.ajax') }}',
+                    method: 'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: params,
                     success: function (result) {
                         head = [];
