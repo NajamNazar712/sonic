@@ -42,11 +42,15 @@
     <div class="content-wrapper">
         <div class="content-header row">
         </div>
-        <p align="right" style="color: white; font-size:16px;" class="mr-5" >For Help Dial : 111-1123-234 or email us info@trax.pk</p>
         <div class="content-body">
             <section class="flexbox-container">
                 <div class="col-12 d-flex align-items-center justify-content-end">
+
                     <div class="col-md-4 col-10 box-shadow-2 p-0">
+                        <div class="mb-3 text-center">
+                            <p class="white font-medium-1" >For Help Dial : 111-1123-234 or email us info@trax.pk</p>
+                        </div>
+
                         <div class="card border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">
                                 <div class="card-title text-center">
