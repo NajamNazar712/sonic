@@ -4077,7 +4077,7 @@ class AdminReportsController extends Controller
             $day_cut_off_time = 12;
         }
 
-        $hubs = DB::table('cities')->where('hub', 1)->select('id','name');
+        $hubs = DB::table('cities')->where('hub', 1)->where('business_category_id', 1)->select('id','name');
 
         if ($hub) {
             $hubs = $hubs->where('hub_id', '=', $hub);
