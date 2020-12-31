@@ -4169,8 +4169,7 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'delivery_unsucessful') {
                         $rows = $rows->where(function ($sub_query) use ($from) {
-                            $sub_query->where('sj.shipper_status_id', '=', 8)
-                                ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
+                            $sub_query->where('sj.shipper_status_id', '=', 8);
                         });
                     }
                     else if ($type == 'on_hold') {
