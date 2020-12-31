@@ -378,6 +378,11 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->join('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('month_closings as mc', function ($join){
                 $join->on('mc.shipment_id', '=', 'shipments.id')
@@ -399,7 +404,7 @@ class AdminMonthClosingController extends Controller
                 $query->whereNull('mc.status_id')
                     ->orWhereNotIn('mc.status_id', [2, 3]);
             })
-            ->where('shipments.created_at', '<', $date)
+            ->where('sj.created_at', '<', $date)
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
