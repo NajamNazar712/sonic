@@ -12,19 +12,21 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row justify-content-center">
+                <div class="row mb-2 justify-content-center">
 
-                     <div class="col-5">
+                     <div class="col-12">
                         <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
+                            <div class="col-4">
                             <div class="form-group">
                                  <input type="text" name="tracking_numbers" class="tracking_numbers" id="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                              </div>
+                            </div>
 
                         <div class="col-2">
                             <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
 
-                            <div class="col-4">
+                            <div class="col-5">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -35,7 +37,7 @@
                                     <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Returned Shipments Date (From)">
                                 </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-5">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -149,6 +151,33 @@
                     'allowMinus': false,
                     'allowPlus': false
                 });
+            $('#track_form #dr_search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #dr_search_date_to').pickadate('picker').set('min', $('#track_form #dr_search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#track_form #dr_search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #dr_search_date_from').pickadate('picker').set('min', $('#track_form #dr_search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
 
             var from_date = $('#dr_search_date_from').pickadate({
                 firstDay: 1,
@@ -221,7 +250,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                 deferLoading: [50, 0],
                 buttons: [
                     {
@@ -250,7 +279,7 @@
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[3, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
