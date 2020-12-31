@@ -22,6 +22,7 @@ use App\RiderDeliveryNoteStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Facades\DB;
 use Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,8 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use DB;
+use Yajra\Datatables\Datatables;
+
 class RiderAPIController extends Controller {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -1854,6 +1856,30 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $nodes]);
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
+    }
+
+    public function pickups_list_v2(Request $request) {
+
+        $rider_id = $request->rider_id;
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+
+        $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+            ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+            ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+            ->join('riders as r', 'pn.rider_id', 'r.id')
+            ->join('users as u', 'pr.shipper_id', 'u.id')
+            ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+            ->join('cities as c', 'usi.city_id', 'c.id')
+            ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.updated_at', 'v2_rider_pickups.shipments', 'pnpr.name as reason',  'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
+        ->where('r.id','=',$rider_id)->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+
+        if ($rider_pickups->exists()){
+            $rider_pickups = $rider_pickups->get();
+            return response()->json(["status" => 0, "pickups" => $rider_pickups]);
+        } else{
+            return response()->json(["status" => 1, "message" => "No pickups found!"]);
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
