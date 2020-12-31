@@ -367,7 +367,7 @@ class AdminMonthClosingController extends Controller
 //        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
         $date = Carbon::now()->startOfMonth()->subMonth()->addDays(20)->toDateString();
 
-        $month_closing_status = [3, 18, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 60];
+        $month_closing_status = [3, 5, 13, 18, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 60, ];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
