@@ -136,6 +136,13 @@
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
+                                    <div class="col-8" id="request_id_div">
+                                        <fieldset class="form-group">
+                                            <select name="request_id"  id="request_id" class="form-control select2">
+
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
@@ -650,6 +657,8 @@
                 dropdownParent:$('#add_request_form')
             }).bind('change', function () {
                 var id = parseInt($(this).val());
+                var lost =  $('#case_nature_claim').val();
+                console.log(lost);
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -660,7 +669,23 @@
                     $('#claim_product_picture_div').removeClass('d-none');
                     $('#claim_invoice_picture_div').removeClass('d-none');
                 }
+                if(lost === 17){
+                    $('#request_id_div').removeClass('d-none');
+                }
+                else{
+                    $('#request_id_div').addClass('d-none');
+                }
             });
+            $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Request Id",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            }).bind('change',function(){
+                var tracking_number = $('#requested_shipment_id');
+            });
+
+
             var max_char_request = 245;
             $('#feedback_description').on('keypress copy paste',function (e) {
                 if ($(this).val().length == max_char_request) {
