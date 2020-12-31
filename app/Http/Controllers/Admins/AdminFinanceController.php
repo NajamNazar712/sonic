@@ -18,6 +18,7 @@ use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
@@ -1376,7 +1377,11 @@ class AdminFinanceController extends Controller
                         $shipment->payment_status_id = 4;
         
                         $shipment->save();
-        
+
+                        if($shipment->booking_type_id == 3){
+                            ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
+                        }
+
                         $account_type_id = $shipment->user->account_type_id;
         
                         if ($account_type_id == 1) {
@@ -1523,6 +1528,10 @@ class AdminFinanceController extends Controller
                             $shipment->payment_status_id = 4;
 
                             $shipment->save();
+
+                            if($shipment->booking_type_id == 3){
+                                ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
+                            }
 
                             $account_type_id = $shipment->user->account_type_id;
 
@@ -3857,10 +3866,10 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
-        if ($tracking_number = $request->get('tracking_number')) {
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers));;
         }
 
         if ($shipper = $request->get('search_shipper')) {

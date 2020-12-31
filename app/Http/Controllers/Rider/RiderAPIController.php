@@ -1104,9 +1104,9 @@ class RiderAPIController extends Controller {
                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6]);
                         ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
 
-                        if($shipment->packaging_material_request == 1){
+                        /*if($shipment->packaging_material_request == 1){
                             self::delivery_packaging_material_update($shipment->tracking_number);
-                        }
+                        }*/
                     }
                     $shipment->save();
                 }
@@ -1334,6 +1334,7 @@ class RiderAPIController extends Controller {
                 $pickup['pickup_request_id'] = $pickup_request->id;
                 $pickup['status'] = $pickup_note_request->status;
                 $pickup['ordering'] = $pickup_note_request->ordering;
+                $pickup['shipments'] = $pickup_request->booked;
 
                 if ($pickup_note_request->status) {
                     $information['summary']['received']['pickups']++;
@@ -1854,4 +1855,45 @@ class RiderAPIController extends Controller {
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
+
+    /*public function delivery_packaging_material_update($tracking_number){
+        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
+        if($packaging_material_shipment != null){
+            $packaging_material_shipment->status_id = 4;
+            $packaging_material_shipment->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+            $packaging_request_history->status = 4;
+            $packaging_request_history->updated_by = 6;
+            $packaging_request_history->save();
+        }
+        $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $tracking_number);
+        if($warehouse_stock_request->exists()){
+            $warehouse_stock_request = $warehouse_stock_request->first();
+            $warehouse_stock_request->status_id = 4;
+            $warehouse_stock_request->save();
+
+            $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+            $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+            $warehouse_stock_request_history->status = 4;
+            $warehouse_stock_request_history->updated_by = 6;
+            $warehouse_stock_request_history->save();
+            foreach ($warehouse_stock_request->stock_request_details as $detail){
+                if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
+                    $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
+                    $receiver_stock->stock += $detail->quantity;
+                    $receiver_stock->save();
+                }else{
+
+                    $receiver_stock = new WarehouseStock();
+                    $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                    $receiver_stock->type_id = $detail->type_id;
+                    $receiver_stock->type_size_id = $detail->size_id;
+                    $receiver_stock->stock = $detail->quantity;
+                    $receiver_stock->save();
+                }
+            }
+        }
+    }*/
 }

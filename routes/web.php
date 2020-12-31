@@ -462,7 +462,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
         Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
-        Route::get('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
+        Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
         Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
@@ -538,7 +538,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
-    Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::get('/accounts/{id}/view/rates/{date?}','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::post('user_id','Admins\AdminDashboardController@rate_history_date')->name('view.user');
+    //Route::post('/accounts/rates_history','Admins\AdminDashboardController@viewRatesHistory')->name('view.rates.history');
     Route::get('/accounts/{id}/add_contacts','Admins\AdminDashboardController@add_contacts')->name('accounts.add_contacts');
     Route::post('/accounts/add_contacts.store','Admins\AdminDashboardController@add_contacts_store')->name('accounts.add_contacts.store');
 
@@ -550,7 +552,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
         Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
-        Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
+        Route::get('{id}/view/rates/{date?}','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
         Route::post('reject/submit','Admins\AdminCorporateAccountsController@rejectReasonSubmit')->name('rejectreason.submit');
 
     });
@@ -877,6 +879,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
             Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
             Route::post('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('update/remove_bulk','Admins\DeliveryController@receive_delivery_remove_bulk')->name('update.remove.bulk');
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('password/check','Admins\DeliveryController@receive_delivery_password_check')->name('password.check');
@@ -902,6 +905,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
             Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
             Route::post('reassign_rider','Admins\DeliveryController@reassign_rider')->name('reassign_rider');
+            Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){
@@ -2339,6 +2343,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
+            Route::post('bulk', 'Admins\AdminCRMController@bulk_comment_for_shipper')->name('bulk');
         });
         Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
         Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
@@ -2499,6 +2504,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 	Route::prefix('telenor')->name('telenor.')->group(function(){
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@arrival_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@arrival_submit')->name('submit');
+        });
+        Route::prefix('order_id')->name('order_id.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@order_id_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@order_id_submit')->name('submit');
+        });
         Route::prefix('delivery')->name('delivery.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@delivery_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@delivery_submit')->name('submit');
