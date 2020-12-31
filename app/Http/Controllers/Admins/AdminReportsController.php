@@ -7017,7 +7017,7 @@ class AdminReportsController extends Controller
             ])
             ->editColumn('tracking',function ($shipments){
                 $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
