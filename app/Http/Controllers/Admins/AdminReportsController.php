@@ -6975,11 +6975,6 @@ class AdminReportsController extends Controller
 //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->leftjoin('crm_requests as crm', function ($join) {
-                $join->on('crm.shipment_id', '=', 'shipments.id')
-                    ->where('crm.id','=',
-                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
-            })
             ->leftjoin('return_assigned_shipments as ras', function ($join) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
                     ->where('ras.id','=',
@@ -6987,13 +6982,8 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
-            ->leftjoin('consolidation_shipments as consolidations', function ($join){
-                $join->on('consolidations.shipment_id', '=', 'shipments.id')
-                    ->where('consolidations.consolidation_id','=',
-                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
-            })
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by')
-            ->whereIn('shipments.shipper_status_id', [12,52])
+            ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
+            ->where('shipments.shipper_status_id', 12)
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -7020,24 +7010,22 @@ class AdminReportsController extends Controller
                     }
                     if ($shipments->current_status_id == 52) {
                         return 'goldClass';
-                    }else if($shipments->booking_type_id == 3){
+                    }else if($shipments->booking_type_id == 3) {
                         return "tnb_row";
                     }
                 },
-                'consolidation_id' => function($shipments){
-                    if($shipments->consolidation_id != null){
-                        return $shipments->consolidation_id;
-                    } else {
-                        return '';
-                    }
-                }
             ])
-            ->editColumn('tracking_number',function ($shipments){
+            ->editColumn('tracking',function ($shipments){
                 $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                return "<u><a href='{$route}?tracking=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+            $datatable->whereBetween('shipments_journey.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

@@ -12,21 +12,15 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                        <div id="track_form" class="form-inline mb-1 " novalidate="novalidate">
 
-                     <div class="col-12">
-                        <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
                             <div class="col-4">
-                            <div class="form-group">
-                                 <input type="text" name="tracking_numbers" class="tracking_numbers" id="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                <fieldset class="form-group">
+                                    <input type="text" name="tracking_numbers" class="tracking_numbers" id="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                </fieldset>
                              </div>
-                            </div>
 
-                        <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                        </div>
-
-                            <div class="col-5">
+                            <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -37,7 +31,7 @@
                                     <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Returned Shipments Date (From)">
                                 </div>
                             </div>
-                            <div class="col-5">
+                            <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -48,10 +42,10 @@
                                     <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Returned Shipments Date (To)">
                                 </div>
                             </div>
-                    </form>
-                </div>
-
-                </div>
+                            <div class="col-2">
+                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 mt-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                            </div>
+                    </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -231,10 +225,10 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking);
                                 row.push(values.status_date);
                                 row.push(values.status);
-                                row.push(values.shipment_remarks);
+                                row.push(values.remarks);
                                 row.push(values.reason);
                                 body.push(row);
                             });
@@ -247,11 +241,10 @@
                 }
             });
 
-
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: false, scrollY: '500px',
-                deferLoading: [50, 0],
+                // deferLoading: [50, 0],
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -263,29 +256,23 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
-                language: {
-                    processing: data_table_loader
-                },
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.returned_shipments.list') }}',
-                    method:'post',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
+                rowId: 'shId',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
+                    { data:'tracking' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
+                    {data: 'remarks', name: 'admin_journey.remarks', class: 'align-middle remarks'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'}
                 ],
                 rowCallback: function(row, data, index) {
