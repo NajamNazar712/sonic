@@ -209,6 +209,33 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="corporate_rate_type_modal" data-backdrop="static" role="dialog" aria-labelledby="corporate_rate_type_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="corporate_rate_type_title">Corporate Rate Type</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="form-group">
+                        <input type="hidden" id="corporate_rate_type_shipper_id">
+                        <select name="corporate_rate_type_id" id="corporate_rate_type_select" class="form-control select2">
+                            @foreach($corporate_rate_types as $rate_type)
+                                <option value="{{ $rate_type->id }}" > {{ $rate_type->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="corporate_rate_type_btn" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -939,6 +966,7 @@
             width:'100%',
             dropdownParent:$('#SalesTagModal')
         });
+
         $("#saletag1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1040,6 +1068,24 @@
                     table.button('.assign_rider').disable();
                     table.button('.tag').disable();
                 }
+        });
+
+        $("#corporate_rate_type_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Corporate Rate Type",
+            width:'100%',
+            dropdownParent:$('#corporate_rate_type_modal')
+        });
+
+        $('body').on('click', 'button.rate_type',  function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $('#corporate_rate_type_modal').modal('show');
+
+            }
+        });
+
+        $('#corporate_rate_type_modal').on('hidden.bs.modal',function () {
+            $('#corporate_rate_type_select').val('').trigger('change');
         });
 
     });
