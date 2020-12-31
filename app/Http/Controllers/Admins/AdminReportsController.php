@@ -7005,9 +7005,6 @@ class AdminReportsController extends Controller
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
                     }
-                    if($shipments->reason_id == 12){
-                        return 'nsa_osa_reason';
-                    }
                     if ($shipments->current_status_id == 52) {
                         return 'goldClass';
                     }else if($shipments->booking_type_id == 3) {
