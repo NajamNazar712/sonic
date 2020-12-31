@@ -15,6 +15,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\ReceivingSheet;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -482,6 +483,26 @@ class ShipperCRMController extends Controller
                 return redirect()->back()->with(['error' => 'Request is already marked as Re-Open']);
             }
         }
+    }
+
+    public function lost_claim(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+        if($shipment){
+            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+                if($shipment->receiving_sheet_shipment){
+                    $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                    return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+                }
+            }
+            else{
+             return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+            }
+        }
+        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 
 }

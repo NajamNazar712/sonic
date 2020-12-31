@@ -307,6 +307,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('{id}/details', 'Shippers\ShipperCRMController@request_details')->name('details');
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
+            Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');

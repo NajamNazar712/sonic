@@ -136,7 +136,7 @@
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="request_id_div">
+                                    <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
                                             <select name="request_id"  id="request_id" class="form-control select2">
 
@@ -657,8 +657,38 @@
                 dropdownParent:$('#add_request_form')
             }).bind('change', function () {
                 var id = parseInt($(this).val());
-                var lost =  $('#case_nature_claim').val();
-                console.log(lost);
+
+                if (this.value && this.value == 17) {
+                    $('#receiving_sheet_div').removeClass('d-none');
+                    var shipment_id = $('#requested_shipment_id').val();
+                    $.ajax({
+                        url: '{!! route('cod.crm.request.lost.claim') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': shipment_id,
+                        }
+                    }).done(function (data) {
+                        $('#request_id').val('').trigger('change');
+                        if (data.status == 1) {
+                                var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                                $('#request_id').append(newOption).trigger('change');
+
+                        } else {
+
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#AddNewRequest').attr('disabled',true);
+                        }
+
+                    });
+                }
+                else{
+                    $('#receiving_sheet_div').addClass('d-none');
+                }
+
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -669,20 +699,14 @@
                     $('#claim_product_picture_div').removeClass('d-none');
                     $('#claim_invoice_picture_div').removeClass('d-none');
                 }
-                if(lost === 17){
-                    $('#request_id_div').removeClass('d-none');
-                }
-                else{
-                    $('#request_id_div').addClass('d-none');
-                }
+
+
             });
             $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Request Id",
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
-            }).bind('change',function(){
-                var tracking_number = $('#requested_shipment_id');
             });
 
 
