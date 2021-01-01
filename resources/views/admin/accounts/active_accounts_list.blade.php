@@ -23,11 +23,7 @@
                                         </select>
                                     </fieldset>
                                 </div>
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="search_phone" id="search_phone" class="form-control phone" placeholder="Phone Number">
-                                    </fieldset>
-                                </div>
+
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <input type="text" name="search_iban" id="search_iban" class="form-control iban" placeholder="IBAN">
@@ -60,12 +56,8 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        <th class="border-primary border-darken-1">Brand Name</th>
-                                        <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
@@ -377,12 +369,8 @@
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        head.push('Brand Name');
-                        head.push('City Name');
                         head.push('Contact Person');
-                        head.push('Phone No.');
                         head.push('Company Address');
-                        head.push('Email Address');
                         head.push('Product Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
@@ -412,12 +400,8 @@
                             row.push(values.id_padded);
                             row.push(values.account_type);
                             row.push(values.name);
-                            row.push(values.brand_name);
-                            row.push(values.city);
                             row.push(values.poc);
-                            row.push(values.shipper_phone);
                             row.push(values.address);
-                            row.push(values.email);
                             row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
@@ -903,7 +887,6 @@
                 },
                data: function (d) {
                    d.sale_persons = $('#search_admins').val();
-                   d.search_phone = $('#search_phone').val();
                    d.search_cnic = $('#search_cnic').val();
                    d.search_shipper = $('#search_shipper').val();
                    d.search_iban = $('#search_iban').val();
@@ -915,12 +898,8 @@
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                {data: 'brand_name', name: 'users.brand_name', class: 'align-middle brand_name'},
-                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle phone'},
                 {data: 'address', name: 'address', class: 'align-middle address'},
-                {data: 'email', name: 'email', class: 'align-middle email'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
