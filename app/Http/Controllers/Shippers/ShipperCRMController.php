@@ -186,11 +186,20 @@ class ShipperCRMController extends Controller
     }
 
     public function add_request(Request $request){
+
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
-        $description = $request->description;
+        $receiving_sheet_id = $request->receiving_sheet_id;
+        if($complaint_id == 17 && $receiving_sheet_id != null){
+            $description_text = $request->description ;
+            $description = $receiving_sheet_id. PHP_EOL. $description_text;
+        }
+        else{
+            $description = $request->description;
+        }
+
         $launched_by = 1;
         if(!$request->case_nature_id){
             return ['status' => 0, 'error' => 'Case nature not selected!'];
