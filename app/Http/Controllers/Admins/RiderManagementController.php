@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
@@ -594,5 +595,54 @@ class RiderManagementController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Rider found!'];
         }
+    }
+
+    public function rider_request_index()
+    {
+        return view('admin.management.riders.rider_request');
+    }
+
+    public function rider_request_list(Request $request)
+    {
+        $rider_request = RiderRequest::select('id', 'name', 'cnic', 'phone_no', 'created_at', 'updated_at', 'status')
+            ->where('status', 0);
+        return Datatables::of($rider_request)
+            ->editColumn('status', function ($rider_request) {
+                return ($rider_request->status == 0) ? 'Pending' : 'Processed';
+            })
+            ->make(true);
+
+        /*->addColumn("action", function ($rider_request) {
+        if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
+            $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+            if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                if ($rider_request->status == 0) {
+                    $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider_request->id . '  rel="riderApprove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+                }
+                else {
+                    $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                }
+            }
+
+            if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
+            }
+
+
+            $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+            return $dropdown;
+        } else {
+            return '';
+        }
+    })*/
     }
 }

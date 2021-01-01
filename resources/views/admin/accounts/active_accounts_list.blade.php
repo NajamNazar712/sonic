@@ -893,6 +893,10 @@
             order: [[2, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
+                method: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                data: function (d) {
                    d.sale_persons = $('#search_admins').val();
                    d.search_phone = $('#search_phone').val();
