@@ -91,7 +91,7 @@ Route::name('api.')->group(function () {
 
 
             Route::prefix('history')->name('history.')->group(function () {
-                Route::post('pickup', 'Rider\RiderAPIController@pickups_list_v2')->name('pickup');
+                Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
             });
 
 		});

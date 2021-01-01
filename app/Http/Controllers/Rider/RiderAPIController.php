@@ -1858,7 +1858,7 @@ class RiderAPIController extends Controller {
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
 
-    public function pickups_list_v2(Request $request) {
+    public function pickups_history(Request $request) {
 
         $rider_id = $request->rider_id;
         $from = $request->get('search_date_from');
@@ -1871,7 +1871,7 @@ class RiderAPIController extends Controller {
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.updated_at', 'v2_rider_pickups.shipments', 'pnpr.name as reason',  'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
+            ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.shipments', 'pnpr.name as reason',  'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
         ->where('r.id','=',$rider_id)->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
 
         if ($rider_pickups->exists()){
