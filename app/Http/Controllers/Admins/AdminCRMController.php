@@ -80,7 +80,14 @@ class AdminCRMController extends Controller
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
-        $description = $request->description;
+        $receiving_sheet_id = $request->receiving_sheet_id;
+        if($complaint_id == 17 && $receiving_sheet_id != null){
+            $description_text = $request->description;
+            $description = '<strong>' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+        }
+        else{
+            $description = $request->description;
+        }
         $flag = false;
         $present_shipments = array();
         if ($request->has('payment_request')) {
@@ -4037,5 +4044,25 @@ class AdminCRMController extends Controller
             return response()->json(['status'=> 0,'error'=>"Select Request First"]);
         }
 
+    }
+
+    public function lost_claim(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+        if($shipment){
+            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+                if($shipment->receiving_sheet_shipment){
+                    $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                    return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+            }
+        }
+        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 }

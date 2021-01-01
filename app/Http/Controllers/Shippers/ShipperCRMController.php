@@ -194,7 +194,7 @@ class ShipperCRMController extends Controller
         $receiving_sheet_id = $request->receiving_sheet_id;
         if($complaint_id == 17 && $receiving_sheet_id != null){
             $description_text = $request->description ;
-            $description = $receiving_sheet_id. PHP_EOL. $description_text;
+            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
         }
         else{
             $description = $request->description;
@@ -251,9 +251,11 @@ class ShipperCRMController extends Controller
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
+
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
                             }else{
@@ -276,6 +278,7 @@ class ShipperCRMController extends Controller
                 }
             }
         }
+
         else{
             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                 $shipment_ids = explode(',', $request->input('shipment_ids'));
@@ -289,7 +292,9 @@ class ShipperCRMController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
+
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
@@ -315,8 +320,15 @@ class ShipperCRMController extends Controller
                                 $flag = true;
                             }
                         }else{
+
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                if($nature_id == 4){
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+
                             }
                             else{
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){

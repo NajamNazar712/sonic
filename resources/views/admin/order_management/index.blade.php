@@ -220,6 +220,13 @@
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
+                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                        <fieldset class="form-group">
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
+
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
@@ -455,13 +462,55 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
+            var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Claim Type",
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
-            }).bind('change', function () {
+            }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
+                var value = $('#case_nature_claim').val();
+                console.log(value);
+                if (this.value && this.value == 17 && lost_flag === true) {
+                    $('#receiving_sheet_div').removeClass('d-none');
+                    var shipment_id = $('#requested_shipment_ids').val();
+                    $.ajax({
+                        url: '{!! route('admin.crm.request.lost.claim') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': shipment_id,
+                        }
+                    }).done(function (data) {
+                        $('#request_id').empty().trigger('change');
+                        $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
+                            width:'100%',
+                            placeholder:"Select Receiving Sheet Id",
+                            allowClear:true,
+                            dropdownParent:$('#add_request_form')
+                        });
+                        if (data.status == 1) {
+                            var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                            $('#request_id').append(newOption).trigger('change');
+
+                        } else {
+                            lost_flag = true;
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#AddNewRequest').attr('disabled',true);
+                        }
+
+                    });
+                }
+                else{
+                    lost_flag = true;
+                    $('#receiving_sheet_div').addClass('d-none');
+                    $('#AddNewRequest').attr('disabled',false);
+
+                }
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -1480,6 +1529,8 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
+                                $('#request_id').val('').trigger('change');
+                                $('#receiving_sheet_div').addClass('d-none');
                                 $('#AddNewRequest').attr('disabled',false);
                             });
                     }

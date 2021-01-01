@@ -671,7 +671,7 @@
                          $('#request_id').empty().trigger('change');
                         $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
                             width:'100%',
-                            placeholder:"Select Request Id",
+                            placeholder:"Select Receiving Sheet Id",
                             allowClear:true,
                             dropdownParent:$('#add_request_form')
                         });
@@ -852,14 +852,7 @@
                         $('#shipment_ids').val($('#requested_shipment_id').val());
                         $('#case_nature_id').val(case_nature_id);
                         $('#complaint_id').val(case_nature_claim_id);
-
-                        if(case_nature_claim_id === 17 && claim_description != null ){
-                           var description =  $('#claim_description').val(claim_description);
-
-                        }
-                        else{
-                            $('#claim_description').val(claim_description);
-                        }
+                        $('#claim_description').val(claim_description);
 
                         var formData = new FormData($('#add_request_form')[0]);
                         if(!case_nature_claim_id){
@@ -939,6 +932,8 @@
                                     }
 
                                     $('#AddRequestModal').modal('hide');
+                                    $('#request_id').val('').trigger('change');
+                                    $('#receiving_sheet_div').addClass('d-none');
                                     $('#AddNewRequest').attr('disabled',false);
                                 });
                         }
@@ -1003,6 +998,8 @@
                                     });
                                 }
                                 $('#AddRequestModal').modal('hide');
+                                $('#request_id').val('').trigger('change');
+                                $('#receiving_sheet_div').addClass('d-none');
                                 $('#AddNewRequest').attr('disabled',false);
                             });
                     }
