@@ -150,7 +150,8 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Channel</th>
                         <th class="border-primary border-darken-1">Agent</th>
-                        <th class="border-primary border-darken-1">COD Adjusted Amount</th>
+                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
@@ -345,7 +346,8 @@
                             head.push('Arrival Date');
                             head.push('Channel');
                             head.push('Agent');
-                            head.push('COD Adjusted Amount');
+                            head.push('COD Amount');
+                            head.push('Adjusted Amount');
                             head.push('Request Status');
                             head.push('Launched By');
                             head.push('Launched By User Type');
@@ -378,7 +380,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.channel);
                                 row.push(values.agent);
-                                row.push(values.cod_adjusted);
+                                row.push(values.cod_amount);
+                                row.push(values.adjusted_amount);
                                 row.push(values.request_status);
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
@@ -461,7 +464,8 @@
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'a.name', class: 'align-middle agent'},
-                    {data: 'cod_adjusted', name: 'dps.amount', class: 'align-middle cod_adjusted'},
+                    {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
+                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
                     {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
