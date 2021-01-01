@@ -363,7 +363,7 @@ class AdminMonthClosingController extends Controller
         return view('admin.month_closing.pending')->with(['admins' => $admins, 'closing_types' => $closing_types]);
     }
 
-    public function pending_list(){
+    public function pending_list(Request $request){
 //        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
         $date = Carbon::now()->startOfMonth()->subMonth()->addDays(20)->toDateString();
 
@@ -407,6 +407,17 @@ class AdminMonthClosingController extends Controller
             ->where('sj.created_at', '<', $date)
             ->groupBy('shipments.id');
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('sj.created_at', [$from,$to]);
+        }
+        else{
+            $shipments->where('sj.created_at', '<', $date);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         if (session('role_id') != 1) {
             $shipments->whereIn('dc.hub_id', session('hubs'));
         }
