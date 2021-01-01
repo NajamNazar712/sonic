@@ -1916,7 +1916,7 @@ class RiderAPIController extends Controller {
                         $rider_request->pin = bcrypt($request->pin);
                         $rider_request->save();
                         $response['status'] = 0;
-                        $message = 'Rider Request Has Been Submitted';
+                        $message = 'Rider Request Has Been Submitted and Pending for Approval';
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }

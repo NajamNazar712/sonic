@@ -24,7 +24,7 @@
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                 </tr>
                                 </thead>
                             </table>
@@ -152,7 +152,7 @@
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
+                    // {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -273,6 +273,14 @@
                     }
                 });
 
+            });
+
+            $("#addRider").on("show.bs.modal", function(e) {
+                $.get( "/admin/management/riders/add", function( data ) {
+                    $("#addRiderDiv").html(data);
+                    var html = '<input name="rider_type" value="1" type="hidden">';
+                    $('#addRiderForm').append(html);
+                });
             });
 
             $('body').on('click','button.blacklist',function (e) {
