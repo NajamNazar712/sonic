@@ -1882,6 +1882,31 @@ class RiderAPIController extends Controller {
         }
     }
 
+    public function delivery_history(Request $request) {
+        $rider_id = $request->rider_id;
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+        $rider_deliveries = DeliveryNote::
+        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.delivered_shipments','delivery_notes.shipments_count'])
+            ->where('riders.id', '=', $rider_id)
+            ->whereBetween('delivery_notes.created_at', [$from, $to])
+            ->groupBy('delivery_notes.id');
+        if ($rider_deliveries->exists()){
+            $rider_deliveries = $rider_deliveries->get();
+            return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
+        } else{
+            return response()->json(["status" => 1, "message" => "No deliveries found!"]);
+        }
+
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
