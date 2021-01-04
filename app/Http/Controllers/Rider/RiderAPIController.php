@@ -1336,7 +1336,6 @@ class RiderAPIController extends Controller {
                 $pickup['pickup_request_id'] = $pickup_request->id;
                 $pickup['status'] = $pickup_note_request->status;
                 $pickup['ordering'] = $pickup_note_request->ordering;
-                $pickup['shipments'] = $pickup_request->booked;
 
                 if ($pickup_note_request->status) {
                     $information['summary']['received']['pickups']++;
