@@ -2525,5 +2525,41 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
     });
+
+	Route::prefix('retail')->name('retail.')->group(function(){
+        Route::prefix('franchise')->name('franchise.')->group(function(){
+            Route::get('', 'Admins\Retail\RetailAdminUserManagementController@franchise_index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@franchise_list')->name('list');
+            Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@franchise_enable_disable')->name('status');
+            Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
+            Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
+        });
+        Route::prefix('trax_center')->name('trax_center.')->group(function(){
+            Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@trax_center_list')->name('list');
+            Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@trax_center_enable_disable')->name('status');
+            Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
+            Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
+        });
+        Route::prefix('users')->name('users.')->group(function(){
+            Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
+        });
+    });
+});
+
+Route::prefix('retail')->name('retail.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('retail.login');
+    });
+    Route::get('404', 'Auth\RetailLoginController@not_found')->name('404');
+
+    Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
+    Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
+    Route::get('/logout','Auth\RetailLoginController@logout')->name('logout');
+    Route::get('/dashboard', 'Retail\RetailDashboardController@dashboard')->name('dashboard.index');
+
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::get('/booking', 'Retail\RetailShipmentBookController@index')->name('index');
+    });
 });
 
