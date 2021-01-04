@@ -1431,7 +1431,7 @@
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_ids').val();
                     $.ajax({
-                        url: '{!! route('admin.crm.request.lost.claim') !!}',
+                        url: '{!! route('cod.crm.request.lost.claim') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
