@@ -6463,6 +6463,42 @@ class NotificationsController extends Controller
                     $to = $user_phone;
                     self::sms($body, $to);
                 }
+                else if($id == 115){
+                    $shipment_id = $reference_1_id;
+                    $user_id = $reference_1_id;
+                    $body = $notification->body;
+                    if($shipment_id){
+                        $tracking_number = Shipment::find($shipment_id)->tracking_number;
+                        $user = User::find($user_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $user->name, $body);
+                        }
+                        $to = $user->email;
+                        self::email($subject, $html, $to);
+                    }
+                }
+                else if($id == 116){
+                    $shipment_id = $reference_1_id;
+                    $user_id = $reference_1_id;
+                    $body = $notification->body;
+                    if($shipment_id){
+                        $tracking_number = Shipment::find($shipment_id)->tracking_number;
+                        $user = User::find($user_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $user->name, $body);
+                        }
+                        $to = $user->email;
+                        self::email($subject, $html, $to);
+                    }
+                }
             }
         }
     }
