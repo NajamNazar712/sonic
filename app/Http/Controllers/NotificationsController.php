@@ -6465,7 +6465,7 @@ class NotificationsController extends Controller
                 }
                 else if($id == 115){
                     $shipment_id = $reference_1_id;
-                    $user_id = $reference_1_id;
+                    $user_id = $reference_2_id;
                     $body = $notification->body;
                     if($shipment_id){
                         $tracking_number = Shipment::find($shipment_id)->tracking_number;
@@ -6478,12 +6478,12 @@ class NotificationsController extends Controller
                             $body = str_replace('[shipper]', $user->name, $body);
                         }
                         $to = $user->email;
-                        self::email($subject, $html, $to);
+                        self::email($subject, $body, $to);
                     }
                 }
                 else if($id == 116){
                     $shipment_id = $reference_1_id;
-                    $user_id = $reference_1_id;
+                    $user_id = $reference_2_id;
                     $body = $notification->body;
                     if($shipment_id){
                         $tracking_number = Shipment::find($shipment_id)->tracking_number;
@@ -6496,7 +6496,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[shipper]', $user->name, $body);
                         }
                         $to = $user->email;
-                        self::email($subject, $html, $to);
+                        self::email($subject, $body, $to);
                     }
                 }
             }
