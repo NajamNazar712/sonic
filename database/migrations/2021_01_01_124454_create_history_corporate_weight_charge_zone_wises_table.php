@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCorporateWeightChargeZoneWisesTable extends Migration
+class CreateHistoryCorporateWeightChargeZoneWisesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateCorporateWeightChargeZoneWisesTable extends Migration
      */
     public function up()
     {
-        Schema::create('corporate_weight_charge_zone_wises', function (Blueprint $table) {
+        Schema::create('history_corporate_weight_charge_zone_wises', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
@@ -36,6 +36,6 @@ class CreateCorporateWeightChargeZoneWisesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('corporate_weight_charge_zone_wises');
+        Schema::dropIfExists('history_corporate_weight_charge_zone_wises');
     }
 }

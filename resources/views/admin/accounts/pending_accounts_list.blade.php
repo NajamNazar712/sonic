@@ -1080,12 +1080,41 @@
             var id = $(this).parents('tr').attr('id');
             if(id){
                 $('#corporate_rate_type_modal').modal('show');
-
+                $('#corporate_rate_type_shipper_id').val(id);
             }
         });
 
-        $('#corporate_rate_type_modal').on('hidden.bs.modal',function () {
-            $('#corporate_rate_type_select').val('').trigger('change');
+        $('#corporate_rate_type_btn').on('click',function () {
+            var shipper = parseInt($('#corporate_rate_type_shipper_id').val());
+            var rate_type = parseInt($('#corporate_rate_type_select').val());
+            if(rate_type){
+                $.ajax({
+                    url: '{!! route('admin.accounts.rate_type.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipper_id':shipper,
+                        'rate_type':rate_type,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                        $('#corporate_rate_type_select').val('').trigger('change');
+                        $('#corporate_rate_type_modal').modal('hide');
+                        table.draw(true);
+                    });
+            }else{
+                var error = "Rate Type Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
         });
 
     });

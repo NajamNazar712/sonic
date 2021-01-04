@@ -7692,7 +7692,7 @@ class AdminDashboardController extends Controller
                         }
                     }else{
                         if($result->corporate_rate_type_id == null){
-                            $dropdown .= '<button type="button" class="dropdown-item rate_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart-2"></i></div><div class="col-9 offset-1">Rate Type</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item rate_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart-2"></i></div><div class="col-9 offset-1">Add Rate Type</div></button>';
                         }
                         else{
                             if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
