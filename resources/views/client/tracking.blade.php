@@ -855,16 +855,16 @@
                         $('#claim_description').val(claim_description);
 
                         var formData = new FormData($('#add_request_form')[0]);
-                        if(case_nature_claim_id === 17){
-                            if($('#request_id').val() == "" || $('#request_id').val() == null){
-                                nature_flag = false;
-                                var error = "Please select receiving sheet!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        }
+                        // if(case_nature_claim_id === 17){
+                        //     if($('#request_id').val() == "" || $('#request_id').val() == null){
+                        //         nature_flag = false;
+                        //         var error = "Please select receiving sheet!";
+                        //         toastr.error(error, 'Error!', {
+                        //             positionClass: 'toast-top-center',
+                        //             containerId: 'toast-top-center'
+                        //         });
+                        //     }
+                        // }
                         if(!case_nature_claim_id){
                             nature_flag = false;
                             var error = "Please select Claim type!";
