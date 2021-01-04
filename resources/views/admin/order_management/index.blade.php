@@ -1552,6 +1552,8 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
+                $('#request_id').val('').trigger('change');
+                $('#receiving_sheet_div').addClass('d-none');
 
             });
 
