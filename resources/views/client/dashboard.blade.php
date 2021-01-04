@@ -254,7 +254,7 @@
                                     </div>
                                     <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
-                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">
 
                                             </select>
                                         </fieldset>
@@ -1441,7 +1441,7 @@
                         $('#request_id').empty().trigger('change');
                         $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
                             width:'100%',
-                            placeholder:"Select Receiving Sheet Id",
+                            placeholder:"Select Receiving Sheet ID",
                             allowClear:true,
                             dropdownParent:$('#add_request_form')
                         });
@@ -1502,42 +1502,43 @@
                 },
                 submitHandler: function(form) {
                     var case_nature_id = parseInt($('#case_nature_select').val());
-                    if(case_nature_id === 1){
+                    if (case_nature_id === 1) {
                         var complaint_id = $('#case_nature_complaints').val();
                         var description = $('#complaint_description').val();
-                    }
-                    else if(case_nature_id === 3){
+                    } else if (case_nature_id === 3) {
                         var feedback_flag = true;
                         var feedback_description = $('#feedback_description_request').val();
-                    }else{
+                    } else {
                         var complaint_id = $('#case_nature_requests').val();
                         var description = $('#service_description').val();
                     }
 
-                    if(case_nature_id === 3)
-                    {
-                        if(!feedback_description){
+                    if (case_nature_id === 3) {
+                        if (!feedback_description) {
                             feedback_flag = false;
                             var error = "Please Enter Description!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
-                        if(feedback_flag){
-                            $('#AddNewRequest').attr('disabled',true);
+                        if (feedback_flag) {
+                            $('#AddNewRequest').attr('disabled', true);
                             $.ajax({
                                 url: '{!! route('cod.crm.feedback.add') !!}',
                                 method: 'POST',
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'shipment_ids': selected_rows,
-                                    'description' : feedback_description
+                                    'description': feedback_description
                                 }
                             })
-                                .done(function(data) {
-                                    if(data.status){
-                                        if(data.flag){
+                                .done(function (data) {
+                                    if (data.status) {
+                                        if (data.flag) {
                                             var html = '';
 
-                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
                                                 html += tracking_number + '<br/>';
                                             });
 
@@ -1562,7 +1563,7 @@
                                                 closeOnEsc: false,
                                                 dangerMode: true
                                             });
-                                        }else{
+                                        } else {
                                             toastr.success(data.success, 'Success!', {
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
@@ -1586,12 +1587,20 @@
                                     table.draw('false');
 
                                     $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled',false);
+                                    $('#AddNewRequest').attr('disabled', false);
                                 });
                         }
-                    }
-                    else if(case_nature_id === 4)
-                    {
+                    } else if (case_nature_id === 4) {
+                        if(selected_rows.length > 1){
+                            var error = "Cannot select more than one shipment";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled', false);
+                        }
+                        else{
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
                         var product_cost = $('#claim_product_cost').val();
@@ -1601,30 +1610,52 @@
                         $('#case_nature_id').val(case_nature_id);
                         $('#complaint_id').val(case_nature_claim_id);
                         var formData = new FormData($('#add_request_form')[0]);
-                        if(!case_nature_claim_id){
+                        if(case_nature_claim_id === 17){
+                            if($('#request_id').val() == "" || $('#request_id').val() == null){
+                                nature_flag = false;
+                                var error = "Please select receiving sheet!";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                        if (!case_nature_claim_id) {
                             nature_flag = false;
                             var error = "Please select Claim type!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
-                        if(case_nature_claim_id !== "26"){
-                            if(!check_product_picture){
+                        if (case_nature_claim_id !== "26") {
+                            if (!check_product_picture) {
                                 nature_flag = false;
                                 var error = "Please attach Product Picture!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
-                            if(!product_cost){
+                            if (!product_cost) {
                                 nature_flag = false;
                                 var error = "Please enter Product Cost!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
-                            if(!check_invoice_picture){
+                            if (!check_invoice_picture) {
                                 nature_flag = false;
                                 var error = "Please attach Invoice Picture!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         }
-                        if(nature_flag){
-                            $('#AddNewRequest').attr('disabled',true);
+                        if (nature_flag) {
+                            $('#AddNewRequest').attr('disabled', true);
                             $.ajax({
                                 url: '{!! route('cod.crm.request.add') !!}',
                                 method: 'POST',
@@ -1634,12 +1665,12 @@
                                 processData: false,
                                 contentType: false,
                             })
-                                .done(function(data) {
-                                    if(data.status){
-                                        if(data.flag){
+                                .done(function (data) {
+                                    if (data.status) {
+                                        if (data.flag) {
                                             var html = '';
 
-                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
                                                 html += tracking_number + '<br/>';
                                             });
 
@@ -1664,7 +1695,7 @@
                                                 closeOnEsc: false,
                                                 dangerMode: true
                                             });
-                                        }else{
+                                        } else {
                                             toastr.success(data.success, 'Success!', {
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
@@ -1687,10 +1718,11 @@
                                     table.draw('false');
 
                                     $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled',false);
+                                    $('#AddNewRequest').attr('disabled', false);
                                 });
                         }
                     }
+                }
                     else {
                         $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
