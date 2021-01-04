@@ -326,10 +326,11 @@
                                                 containerId: 'toast-top-center'
                                             });
                                         }
+
                                         selected_rows = [];
-
                                         table.rows().deselect();
-
+                                        $('#comment').val('').trigger('change');
+                                        $('#BulkCommentModal').modal('hide');
                                         table.draw('false');
                                     });
                             } else {
