@@ -159,7 +159,7 @@
                                 row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
-                                row.push(values.description);
+                                row.push(values.descr);
                                 row.push(values.channel);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);

@@ -136,6 +136,13 @@
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
+                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                        <fieldset class="form-group">
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet" >
+
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
@@ -642,14 +649,53 @@
                     $('#request_claims').addClass('d-none');
                 }
             });
-
+            var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Claim Type",
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
-            }).bind('change', function () {
+            }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
+                if (this.value && this.value == 17 && lost_flag === true) {
+                    $('#receiving_sheet_div').removeClass('d-none');
+                    var shipment_id = $('#requested_shipment_id').val();
+                    $.ajax({
+                        url: '{!! route('cod.crm.request.lost.claim') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': shipment_id,
+                        }
+                    }).done(function (data) {
+                         $('#request_id').empty().trigger('change');
+                        $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
+                            width:'100%',
+                            placeholder:"Select Receiving Sheet ID",
+                            allowClear:true,
+                            dropdownParent:$('#add_request_form')
+                        });
+                        if (data.status == 1) {
+                            var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                                $('#request_id').append(newOption).trigger('change');
+
+                        } else {
+                            lost_flag = true;
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#AddNewRequest').attr('disabled',true);
+                        }
+                    });
+                }
+                else{
+                    lost_flag = true;
+                    $('#receiving_sheet_div').addClass('d-none');
+                    $('#AddNewRequest').attr('disabled',false);
+
+                }
+
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -660,7 +706,12 @@
                     $('#claim_product_picture_div').removeClass('d-none');
                     $('#claim_invoice_picture_div').removeClass('d-none');
                 }
+
+
             });
+
+
+
             var max_char_request = 245;
             $('#feedback_description').on('keypress copy paste',function (e) {
                 if ($(this).val().length == max_char_request) {
@@ -797,10 +848,23 @@
                         var product_cost = $('#claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
+                        var claim_description = $('#claim_description').val();
                         $('#shipment_ids').val($('#requested_shipment_id').val());
                         $('#case_nature_id').val(case_nature_id);
                         $('#complaint_id').val(case_nature_claim_id);
+                        $('#claim_description').val(claim_description);
+
                         var formData = new FormData($('#add_request_form')[0]);
+                        // if(case_nature_claim_id === 17){
+                        //     if($('#request_id').val() == "" || $('#request_id').val() == null){
+                        //         nature_flag = false;
+                        //         var error = "Please select receiving sheet!";
+                        //         toastr.error(error, 'Error!', {
+                        //             positionClass: 'toast-top-center',
+                        //             containerId: 'toast-top-center'
+                        //         });
+                        //     }
+                        // }
                         if(!case_nature_claim_id){
                             nature_flag = false;
                             var error = "Please select Claim type!";
@@ -878,6 +942,8 @@
                                     }
 
                                     $('#AddRequestModal').modal('hide');
+                                    $('#request_id').val('').trigger('change');
+                                    $('#receiving_sheet_div').addClass('d-none');
                                     $('#AddNewRequest').attr('disabled',false);
                                 });
                         }
@@ -942,6 +1008,8 @@
                                     });
                                 }
                                 $('#AddRequestModal').modal('hide');
+                                $('#request_id').val('').trigger('change');
+                                $('#receiving_sheet_div').addClass('d-none');
                                 $('#AddNewRequest').attr('disabled',false);
                             });
                     }
@@ -964,6 +1032,8 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
+                // $('#request_id').val('').trigger('change');
+                // $('#receiving_sheet_div').addClass('d-none');
             });
 		});
 	</script>
