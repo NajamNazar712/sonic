@@ -126,7 +126,10 @@ class RetailAdminUserManagementController extends Controller
         $franchise->status = 1;
         $franchise->save();
 
-        $code = 'FR-' . $request->hub . '-' . str_pad($franchise->id, 4, 0, STR_PAD_LEFT);
+        $hub_name = City::find($request->hub)->name;
+        $hub_code = substr($hub_name, 0, 3);
+        $hub_code = strtoupper($hub_code);
+        $code = 'FR-' . $hub_code . '-' . str_pad($franchise->id, 3, 0, STR_PAD_LEFT);
 
         $franchise->code = $code;
         $franchise->save();
@@ -150,7 +153,10 @@ class RetailAdminUserManagementController extends Controller
             });
         if(!$retail_user->exists()) {
             $franchise = RetailFranchise::find($request->franchise_id);
-            $code = 'FR-' . $request->hub . '-' . str_pad($franchise->id, 4, 0, STR_PAD_LEFT);
+            $hub_name = City::find($request->hub)->name;
+            $hub_code = substr($hub_name, 0, 3);
+            $hub_code = strtoupper($hub_code);
+            $code = 'FR-' . $hub_code . '-' . str_pad($franchise->id, 3, 0, STR_PAD_LEFT);
 
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
@@ -265,7 +271,10 @@ class RetailAdminUserManagementController extends Controller
         $trax_center->status = 1;
         $trax_center->save();
 
-        $code = 'TC-' . $request->hub . '-' . str_pad($trax_center->id, 4, 0, STR_PAD_LEFT);
+        $hub_name = City::find($request->hub)->name;
+        $hub_code = substr($hub_name, 0, 3);
+        $hub_code = strtoupper($hub_code);
+        $code = 'TC-' . $hub_code. '-' . str_pad($trax_center->id, 3, 0, STR_PAD_LEFT);
 
         $trax_center->code = $code;
         $trax_center->save();
@@ -288,7 +297,10 @@ class RetailAdminUserManagementController extends Controller
             });
         if(!$retail_user->exists()){
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
-            $code = 'TC-' . $request->hub . '-' . str_pad($trax_center->id, 4, 0, STR_PAD_LEFT);
+            $hub_name = City::find($request->hub)->name;
+            $hub_code = substr($hub_name, 0, 3);
+            $hub_code = strtoupper($hub_code);
+            $code = 'TC-' . $hub_code . '-' . str_pad($trax_center->id, 3, 0, STR_PAD_LEFT);
 
             $trax_center->name = $request->name;
             $trax_center->phone_no = $request->phone_number;
@@ -301,7 +313,6 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->updated_by = Auth::id();
             $trax_center->status = 1;
             $trax_center->save();
-
             if($request->password != null){
                 $user = RetailUser::find($trax_center->user_id);
                 if($user){

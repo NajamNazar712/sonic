@@ -2573,8 +2573,11 @@ Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/logout','Auth\RetailLoginController@logout')->name('logout');
     Route::get('/dashboard', 'Retail\RetailDashboardController@dashboard')->name('dashboard.index');
 
-    Route::prefix('booking')->name('booking.')->group(function () {
-        Route::get('/booking', 'Retail\RetailShipmentBookController@index')->name('index');
+    Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('book')->name('book.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@index')->name('index');
+            Route::post('/store', 'Retail\RetailShipmentBookController@store')->name('store');
+        });
     });
 });
 

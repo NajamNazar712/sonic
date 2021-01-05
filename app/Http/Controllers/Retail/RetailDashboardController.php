@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Retail;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Session;
 
 class RetailDashboardController extends Controller
 {
@@ -14,7 +14,6 @@ class RetailDashboardController extends Controller
 //        $this->middleware('Permission');
     }
     public function dashboard(){
-//        return view('retail.dashboard');
-        return redirect()->route('retail.booking.index');
+        return view('retail.dashboard');
     }
 }

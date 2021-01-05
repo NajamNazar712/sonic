@@ -33,7 +33,7 @@ class RetailLoginController extends Controller
                 auth('retail')->logout();
                 return back()->with('info', 'Your Account is Disabled, Contact Admin');
             }
-            return redirect()->intended(route('retail.dashboard.index'));
+            return redirect()->intended(route('retail.shipment.book.index'));
         }
         $errors = [$this->username() => trans('auth.failed')];
         return redirect()->back()->withInput($request->only('name','remember'))->withErrors($errors);

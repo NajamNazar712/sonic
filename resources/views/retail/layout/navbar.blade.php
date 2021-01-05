@@ -36,17 +36,11 @@
 {{--                                </div>--}}
 {{--                            </a>--}}
 {{--                        @endif--}}
-                        {{--<a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">--}}
-                            {{--<div class="m-0 bg-white primary rounded custom-nav-buttons-padding">--}}
-                                {{--<span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>--}}
-                                {{--<h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>--}}
-                            {{--</div>--}}
-                        {{--</a>--}}
 
                         <a class="dropdown-toggle nav-link d-flex d-md-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                             <span class="d-inline-block align-middle">
                                 <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
-{{--                                <div class="border-top-white text-right">{{Auth::user()->role->department->name}}</div>--}}
+                                <div class="border-top-white text-right">{{Auth::user()->store->code}}</div>
                             </span>
 
                             <i class="ft-chevron-down"></i>

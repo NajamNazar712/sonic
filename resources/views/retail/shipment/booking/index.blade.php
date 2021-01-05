@@ -1,13 +1,30 @@
 @extends('retail.layout.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Booking Form')
 
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
             </div>
-            @include('retail.inc.messages')
+            <div class="card">
+                <div class="card-content" aria-expanded="true">
+                    <div class="card-body">
+                        @include('retail.inc.messages')
+                        <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('retail.shipment.book.store') }}" novalidate="novalidate">
+                            {{ csrf_field() }}
+                            <div class="row">
+                                <div id="consignment_info" class="col-3">
+                                    <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignment Info</h4>
+                                </div>
+                                <div id="consignee_shipper_info" class="col-6">
+                                    <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
