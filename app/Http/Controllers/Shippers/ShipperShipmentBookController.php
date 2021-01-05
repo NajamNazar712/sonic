@@ -2206,7 +2206,7 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors)) {
                     if (empty($nsa_error)) {
-                        if(empty($blacklist_errors)){
+                        if(TRUE || empty($blacklist_errors)){
                             foreach ($rows as $key => $row) {
                                 $row['user_id'] = $user_id;
                                 $row['account_type_id'] = 1;
@@ -3691,7 +3691,7 @@ class ShipperShipmentBookController extends Controller
 
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                    if(empty($blacklist_errors)){
+                    if(TRUE || empty($blacklist_errors)){
                         $tracking_numbers = array();
 
                         foreach ($rows as $key => $row) {
@@ -4565,7 +4565,7 @@ class ShipperShipmentBookController extends Controller
 
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                    if(empty($blacklist_errors)){
+                    if(TRUE || empty($blacklist_errors)){
                         foreach ($rows as $key => $row) {
                             $row['user_id'] = $user_id;
                             $row['account_type_id'] = 1;
