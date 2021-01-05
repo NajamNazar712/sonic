@@ -16,6 +16,30 @@
                             <div class="row">
                                 <div id="consignment_info" class="col-3">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignment Info</h4>
+                                    <div class="form-group">
+                                        <select name="product" id="product" class="select2 form-control">
+                                            @foreach($products as $product)
+                                                <option value="{{$product->id}}">{{$product->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="shipper_account_no" class="form-control shipper_account_no" id="shipper_account_no" placeholder="Shipper Account No" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <select name="business_category" id="business_category" class="select2 form-control">
+                                            @foreach($business_categories as $business_category)
+                                                <option value="{{$business_category->id}}">{{$business_category->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <select name="shipping_mode" id="shipping_mode" class="select2 form-control">
+                                            @foreach($shipping_modes as $shipping_mode)
+                                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                                 <div id="consignee_shipper_info" class="col-6">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
@@ -60,6 +84,20 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#product').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipment*",
+                allowClear:true
+            });
+            $('#business_category').select2({
+                width:'100%',
+                placeholder:"Select Shipment Category*"
+            });
+            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Product*",
+                allowClear:true
+            });
         });
     </script>
 @endsection
