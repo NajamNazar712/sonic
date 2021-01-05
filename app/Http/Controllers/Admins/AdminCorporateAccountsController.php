@@ -8361,8 +8361,12 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-
-                    CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->whereNotIn('id', $request->on_hub_weight_record)->delete();
+                    if($request->has('on_hub_weight_record')){
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->whereNotIn('id', $request->on_hub_weight_record)->delete();
+                    }
+                    else{
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->delete();
+                    }
                     if ($request->has('on_hub_to_hub_switch') && $request->on_hub_to_hub_switch == 'on') {
 
                         $wa_switch = array();
@@ -8674,7 +8678,13 @@ class AdminCorporateAccountsController extends Controller
                     }
                     $wa_switch = array();
 
-                    CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->whereNotIn('id', $request->ol_hub_weight_record)->delete();
+                    if($request->has('ol_hub_weight_record')){
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->whereNotIn('id', $request->ol_hub_weight_record)->delete();
+                    }
+                    else{
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->delete();
+                    }
+
                     if ($request->has('ol_hub_to_hub_switch') && $request->ol_hub_to_hub_switch == 'on') {
                         foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
                             if ($request->has('ol_hub_wa_switch')) {
@@ -8979,7 +8989,13 @@ class AdminCorporateAccountsController extends Controller
                     }
                     $wa_switch = array();
 
-                    CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->detain_hub_weight_record)->delete();
+                    if($request->has('ol_hub_weight_record')){
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->detain_hub_weight_record)->delete();
+                    }
+                    else{
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->delete();
+                    }
+
                     if ($request->has('detain_hub_to_hub_switch') && $request->detain_hub_to_hub_switch == 'on') {
                         foreach ($request->detain_hub_weight_record as $index => $detain_hub_weight_record) {
                             if ($request->has('detain_hub_wa_switch')) {
@@ -9286,8 +9302,12 @@ class AdminCorporateAccountsController extends Controller
 
                     }
                     $wa_switch = array();
-
-                    CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
+                    if($request->has('ol_hub_weight_record')){
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
+                    }
+                    else{
+                        CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->delete();
+                    }
                     if ($request->has('sameday_hub_to_hub_switch') && $request->sameday_hub_to_hub_switch == 'on') {
                         foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
                             if ($request->has('sameday_hub_wa_switch')) {
