@@ -114,7 +114,7 @@
                             <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
                             <div class="form-control-position" id="eye">
                                 <i class="la la-eye success"></i>
                             </div>

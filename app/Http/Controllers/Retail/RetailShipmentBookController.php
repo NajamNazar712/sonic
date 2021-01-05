@@ -15,6 +15,6 @@ class RetailShipmentBookController extends Controller
     }
 
     public function index(){
-        return view('retail.booking.index');
+        return view('retail.shipment.booking.index');
     }
 }
