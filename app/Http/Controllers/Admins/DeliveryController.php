@@ -2919,7 +2919,7 @@ class DeliveryController extends Controller
                         DisputeController::add_delivery_wrong_status_dispute($delivery_note_id, $dispute_shipments);
                     }
                     $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
-                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
+                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->whereNotIn('status', [8 ,10, 11])->select('shipment_id')->get();
                     $dncc_amount = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->where(function ($query) {
                         $query->where(function ($sub_query) {
                             $sub_query->where('booking_type_id', '!=', 4);
@@ -2943,7 +2943,7 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    $delivery_note_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->pluck('shipment_id')->toArray();
+                    $delivery_note_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->whereNotIn('status', [8 ,10, 11])->pluck('shipment_id')->toArray();
                     if(count($delivery_note_shipment_ids) > 0){
                         foreach($delivery_note_shipment_ids as $delivery_note_shipment_id){
                             $shipment = Shipment::find($delivery_note_shipment_id);
