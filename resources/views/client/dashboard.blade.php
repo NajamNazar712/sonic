@@ -265,6 +265,37 @@
                                             <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
+
+                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">
+                                        <fieldset class="form-group">
+                                            <label for="product_picture"><b>Damage Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <label for="product_picture"><b>Product Packaging Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <label for="product_picture"><b>Actual Product Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Actual Damaged Product Price">
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-8 text-left d-none" id="claim_content_short_div">
+                                        <fieldset class="form-group">
+                                            <label for="product_picture"><b>Missing Product Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <label for="product_picture"><b>Product Packaging Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <label for="product_picture"><b>Actual Product Picture:</b></label>
+                                            <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                            <br>
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Actual Missing Product Price">
+                                        </fieldset>
+                                    </div>
+
                                     <div class="col-8 text-left" id="claim_invoice_picture_div">
                                         <fieldset class="form-group">
                                             <label for="invoice_picture"><b>Invoice Picture:</b></label>
@@ -1426,7 +1457,7 @@
             }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
-                console.log(value);
+                // console.log(value);
                 if (this.value && this.value == 17 && lost_flag === true) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_ids').val();
@@ -1466,6 +1497,22 @@
                     $('#AddNewRequest').attr('disabled',false);
 
                 }
+                if (this.value && this.value == 15)
+                {
+                    $('#claim_shipment_damage_div').removeClass('d-none');
+                }
+                else {
+                    $('#claim_shipment_damage_div').addClass('d-none');
+                }
+
+                if (this.value && this.value == 16)
+                {
+                    $('#claim_content_short_div').removeClass('d-none');
+                }
+                else {
+                    $('#claim_content_short_div').addClass('d-none');
+                }
+
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
