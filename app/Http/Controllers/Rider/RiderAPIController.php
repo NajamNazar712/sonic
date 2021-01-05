@@ -418,6 +418,7 @@ class RiderAPIController extends Controller {
         }
         else {
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -450,6 +451,9 @@ class RiderAPIController extends Controller {
                 else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
+            }
+            elseif ($rider_request->exists()){
+                return response()->json(['status' => 1, 'message' => 'Pending for approval']);
             }
             else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
