@@ -868,6 +868,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
             });
+            Route::prefix('retail')->name('retail.')->group(function(){
+                Route::get('', 'Admins\Retail\RetailPendingCashCollection@retail_index')->name('index');
+                Route::get('list', 'Admins\Retail\RetailPendingCashCollection@retail_list')->name('list');
+
+                Route::prefix('cod')->name('cod.')->group(function(){
+                    Route::get('', 'Admins\Retail\RetailPendingCashCollection@cod_index')->name('index');
+                    Route::get('list', 'Admins\Retail\RetailPendingCashCollection@cod_list')->name('list');
+                });
+                Route::prefix('pending')->name('pending.')->group(function(){
+                    Route::post('shipments','Admins\Retail\RetailPendingCashCollection@number_of_shipments')->name('shipments');
+                    Route::post('shipments/delivered','Admins\Retail\RetailPendingCashCollection@shipments_delivered')->name('shipments.delivered');
+                });
+
+            });
         });
         Route::prefix('receive')->name('receive.')->group(function (){
             Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
@@ -1006,6 +1020,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
