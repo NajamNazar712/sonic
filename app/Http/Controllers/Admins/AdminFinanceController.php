@@ -3866,10 +3866,10 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
-        if ($tracking_number = $request->get('tracking_number')) {
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers));;
         }
 
         if ($shipper = $request->get('search_shipper')) {
@@ -4330,13 +4330,16 @@ class AdminFinanceController extends Controller
       $total_payable = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
-            $shipment_weight= $shipment->actual_weight;
-            if($done_payment_shipment->type == 0){
+
+            $shipment_weight = $shipment->actual_weight;
+            $weight_charges = $shipment->weight_charges;
+
+            if($done_payment_shipment->type != 2){
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if($change_shipment_weight_log->exists()){
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
                     $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $total_weight_charges = $change_shipment_weight_log->old_charges;
+                    $weight_charges = $change_shipment_weight_log->old_charges;
                 }
             }
 
@@ -4366,7 +4369,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment_weight   . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -4388,7 +4391,7 @@ class AdminFinanceController extends Controller
                             $total_return_charges += $shipment->return_charges;
                         }
 
-                        $total_weight_charges += $shipment->weight_charges;
+                        $total_weight_charges += $weight_charges;
 
                         if ($shipment->packaging_material_request) {
                             $total_packaging_material_charges += $shipment->packaging_material_charges;
@@ -4622,6 +4625,18 @@ class AdminFinanceController extends Controller
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            $shipment_weight = $shipment->actual_weight;
+            $weight_charges = $shipment->weight_charges;
+
+            if($done_payment_shipment->type != 2){
+              $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+              if($change_shipment_weight_log->exists()){
+                  $change_shipment_weight_log = $change_shipment_weight_log->first();
+                  $shipment_weight = $change_shipment_weight_log->old_weight;
+                  $weight_charges = $change_shipment_weight_log->old_charges;
+              }
+            }
+
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
             }
@@ -4647,9 +4662,9 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_phone_number_1;
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
-            $row[] = $shipment->actual_weight;
+            $row[] = $shipment_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
             $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);

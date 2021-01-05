@@ -4077,7 +4077,7 @@ class AdminReportsController extends Controller
             $day_cut_off_time = 12;
         }
 
-        $hubs = DB::table('cities')->where('hub', 1)->select('id','name');
+        $hubs = DB::table('cities')->where('hub', 1)->where('business_category_id', 1)->select('id','name');
 
         if ($hub) {
             $hubs = $hubs->where('hub_id', '=', $hub);
@@ -4169,8 +4169,7 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'delivery_unsucessful') {
                         $rows = $rows->where(function ($sub_query) use ($from) {
-                            $sub_query->where('sj.shipper_status_id', '=', 8)
-                                ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
+                            $sub_query->where('sj.shipper_status_id', '=', 8);
                         });
                     }
                     else if ($type == 'on_hold') {

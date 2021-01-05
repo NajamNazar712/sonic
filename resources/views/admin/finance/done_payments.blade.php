@@ -21,9 +21,7 @@
 									<form id="tracking_number_search_form"
 										  class="form" novalidate="novalidate">
 										<div class="form-group">
-											<input type="text" name="tracking_number"
-												   class="form-control tracking_number" id="tracking_number"
-												   placeholder="Tracking Number">
+											<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
 										</div>
 									</form>
 								</div>
@@ -354,6 +352,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
@@ -365,6 +364,7 @@
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
@@ -691,6 +691,7 @@
                         d.search_to = $('input[name="search_to_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_status_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_status_to_formatted"]').val();
+						d.tracking_numbers = $('#tracking_number_search_form .tracking_numbers').val();
 					}
 				},
 				rowId: 'id',
@@ -1101,6 +1102,34 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+			var select = $('#tracking_number_search_form .tracking_numbers').selectize({
+				placeholder: 'Tracking Number(s)',
+				delimiter: ',',
+				createOnBlur: true,
+				persist: false,
+				plugins: ['remove_button'],
+				onDropdownOpen: function(dropdown) {
+					dropdown.remove();
+				},
+				onType: function(str) {
+					var regex = /^[0-9,]+$/;
+
+					if (!regex.test(str)) {
+						select[0].selectize.setTextboxValue('');
+					}
+				},
+				create: function(input) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+						return {
+							value: input,
+							text: input
+						}
+					}
+					else {
+						return false;
+					}
+				},
+			});
 
             var max_char = 245;
             $('#complaint_description').on('keypress copy paste',function (e) {

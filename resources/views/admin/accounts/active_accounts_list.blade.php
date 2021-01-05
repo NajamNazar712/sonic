@@ -23,11 +23,7 @@
                                         </select>
                                     </fieldset>
                                 </div>
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="search_phone" id="search_phone" class="form-control phone" placeholder="Phone Number">
-                                    </fieldset>
-                                </div>
+
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <input type="text" name="search_iban" id="search_iban" class="form-control iban" placeholder="IBAN">
@@ -60,12 +56,8 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        <th class="border-primary border-darken-1">Brand Name</th>
-                                        <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
@@ -365,6 +357,10 @@
                 params.length = -1;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.active.ajax') }}',
+                    method: 'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: params,
                     success: function (result) {
                         head = [];
@@ -373,12 +369,8 @@
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        head.push('Brand Name');
-                        head.push('City Name');
                         head.push('Contact Person');
-                        head.push('Phone No.');
                         head.push('Company Address');
-                        head.push('Email Address');
                         head.push('Product Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
@@ -408,12 +400,8 @@
                             row.push(values.id_padded);
                             row.push(values.account_type);
                             row.push(values.name);
-                            row.push(values.brand_name);
-                            row.push(values.city);
                             row.push(values.poc);
-                            row.push(values.shipper_phone);
                             row.push(values.address);
-                            row.push(values.email);
                             row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
@@ -893,9 +881,12 @@
             order: [[2, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
+                method: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                data: function (d) {
                    d.sale_persons = $('#search_admins').val();
-                   d.search_phone = $('#search_phone').val();
                    d.search_cnic = $('#search_cnic').val();
                    d.search_shipper = $('#search_shipper').val();
                    d.search_iban = $('#search_iban').val();
@@ -907,12 +898,8 @@
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                {data: 'brand_name', name: 'users.brand_name', class: 'align-middle brand_name'},
-                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle phone'},
                 {data: 'address', name: 'address', class: 'align-middle address'},
-                {data: 'email', name: 'email', class: 'align-middle email'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
@@ -933,7 +920,7 @@
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
-                {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
+                {data: 'international_rate_status', name: 'iui.status', class: 'align-middle international_rate_status'},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
@@ -963,13 +950,18 @@
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
+                var intl_drop_select = '<select name="intl_rate_status_select" id="intl_rate_status_select" class="select2 form-control">' +
+                    '<option value="1">Approved</option>' +
+                    '<option value="2">Requested</option>' +
+                    '<option value="3">Rejected</option>' +
+                    '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason')) {
+                    if ($(header).is('.select') || $(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rejected_reason')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
@@ -986,6 +978,11 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
+                    }else if($(header).is('.international_rate_status')){
+                        $(intl_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -999,6 +996,12 @@
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#intl_rate_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select International Rate Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'

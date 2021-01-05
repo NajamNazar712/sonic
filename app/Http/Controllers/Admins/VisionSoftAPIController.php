@@ -77,6 +77,14 @@ class VisionSoftAPIController extends Controller
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             foreach ($shippers as $shipper) {
                 $sale_person = SalePersonTag::where('status', 0)->where('user_id', $shipper->id)->first();
+
+                if ($sale_person) {
+                    $sale_person = $sale_person->sales_person->name;
+                }
+                else {
+                    $sale_person = '';
+                }
+
                 try {
                     $response = $client->post('Customers', [
                         'form_params' => [
@@ -91,7 +99,7 @@ class VisionSoftAPIController extends Controller
                             'pin_phone_no' => $shipper->phone,
                             'pin_company_addr' => $shipper->address,
                             'pin_city_name' => $shipper->city->name,
-                            'pin_sperson_tagged' => $sale_person->sales_person->name
+                            'pin_sperson_tagged' => $sale_person
                         ]
                     ]);
                     $status_code = $response->getStatusCode();

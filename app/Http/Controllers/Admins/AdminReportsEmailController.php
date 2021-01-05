@@ -1925,12 +1925,17 @@ class AdminReportsEmailController extends Controller
 
     static public function pending_deliveries($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
-        $date_from = $date_from . ' 09:00:00';
+        $settings = DB::table('global_settings')->where('type', 'debriefing_report_day_cut_off_time')->first();
 
-        $yesterday = Carbon::parse($date)->addDays(1);
-        $date_to = $yesterday->toDateString();
-        $date_to = $date_to . ' 08:59:59';
+        if ($settings) {
+            $day_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $day_cut_off_time = 12;
+        }
+
+        $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
 
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -2035,11 +2040,18 @@ class AdminReportsEmailController extends Controller
 
     static public function receive_deliveries($date)
     {
-        $date_from = Carbon::createFromFormat("Y-m-d", $date)->toDateString();
-        $date_from = $date_from . ' 09:00:00';
-        $next_day = Carbon::parse($date)->addDay(1);
-        $date_to = $next_day->toDateString();
-        $date_to = $date_to . ' 08:59:59';
+        $settings = DB::table('global_settings')->where('type', 'debriefing_report_day_cut_off_time')->first();
+
+        if ($settings) {
+            $day_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $day_cut_off_time = 12;
+        }
+
+        $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
+
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
