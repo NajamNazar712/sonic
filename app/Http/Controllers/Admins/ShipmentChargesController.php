@@ -9,6 +9,7 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
+use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\InternationalRatesCashHandlingCharges;
 use App\Http\Models\InternationalRatesDiscountCharges;
@@ -213,7 +214,6 @@ class ShipmentChargesController extends Controller
                                 $zone_wise = 2;
                             }
                         }
-
                     }
                 }
 
@@ -967,7 +967,8 @@ class ShipmentChargesController extends Controller
         $shipment = Shipment::find($id);
         if($shipment->business_category_id == 1){
             $account_type_id = $shipment->user->account_type_id;
-
+            $rate_type_id = $shipment->user->corporate_rate_type_id;
+            $zone_wise = 1;
             if ($account_type_id == 1) {
                 $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
             }
@@ -980,7 +981,12 @@ class ShipmentChargesController extends Controller
                     $return_charge = ReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
                 }
                 else {
-                    $return_charge = CorporateReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                    if($rate_type_id == null || $rate_type_id == 1){
+                        $return_charge = CorporateReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                    }
+                    else{
+                        $return_charge = CorporateReturnChargeZoneWise::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                    }
                 }
 
                 $today = Carbon::today();
@@ -1021,19 +1027,30 @@ class ShipmentChargesController extends Controller
                         else {
                             $type_of_charges = 1;
 
-                            $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+                            if($rate_type_id == null || $rate_type_id == 1){
+                                $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
 
-                            if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
-                                $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                                if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                                    $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                                }
+                                else {
+                                    $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                                }
+
+                                if ($zone_class_city->exists()) {
+                                    $zone_class_city = $zone_class_city->first();
+
+                                    $class = $zone_class_city->class;
+                                }
                             }
-                            else {
-                                $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
-                            }
-
-                            if ($zone_class_city->exists()) {
-                                $zone_class_city = $zone_class_city->first();
-
-                                $class = $zone_class_city->class;
+                            else{
+                                $consignee_zone_id = City::find($shipment->consignee_city_id)->zone_id;
+                                $destination_zone_id = $shipment->pickup_address->city->zone_id;
+                                if($destination_zone_id == $consignee_zone_id){
+                                    $zone_wise = 1;
+                                }else{
+                                    $zone_wise = 2;
+                                }
                             }
                         }
                     }
@@ -1042,33 +1059,54 @@ class ShipmentChargesController extends Controller
                         $charges = $return_charge->local;
                     }
                     else {
-                        if ($class == 1) {
-                            if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        if($rate_type_id == null || $rate_type_id == 1){
+                            if ($class == 1) {
+                                if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
+                                    $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                                }
+                                else {
+                                    $charges = intval($return_charge->national_charges_class_1);
+                                }
+                            }
+                            else if ($class == 2) {
+                                if (strpos($return_charge->national_charges_class_2, '%') !== FALSE) {
+                                    $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_2)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                                }
+                                else {
+                                    $charges = intval($return_charge->national_charges_class_2);
+                                }
+                            }
+                            else if ($class == 3) {
+                                if (strpos($return_charge->national_charges_class_3, '%') !== FALSE) {
+                                    $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_3)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                                }
+                                else {
+                                    $charges = intval($return_charge->national_charges_class_3);
+                                }
                             }
                             else {
-                                $charges = intval($return_charge->national_charges_class_1);
+                                $charges = $return_charge->national_charges_class_0;
                             }
                         }
-                        else if ($class == 2) {
-                            if (strpos($return_charge->national_charges_class_2, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_2)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        else{
+                            if($zone_wise == 1){
+                                if (strpos($return_charge->same_zone, '%') !== FALSE) {
+                                    $charges = ((floatval(str_replace('%', '', $return_charge->same_zone)) / 100) * $return_charge->local) + $return_charge->local;
+                                }
+                                else {
+                                    $charges = intval($return_charge->same_zone);
+                                }
                             }
-                            else {
-                                $charges = intval($return_charge->national_charges_class_2);
+                            else{
+                                if (strpos($return_charge->different_zone, '%') !== FALSE) {
+                                    $charges = ((floatval(str_replace('%', '', $return_charge->different_zone)) / 100) * $return_charge->local) + $return_charge->local;
+                                }
+                                else {
+                                    $charges = intval($return_charge->different_zone);
+                                }
                             }
                         }
-                        else if ($class == 3) {
-                            if (strpos($return_charge->national_charges_class_3, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_3)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
-                            }
-                            else {
-                                $charges = intval($return_charge->national_charges_class_3);
-                            }
-                        }
-                        else {
-                            $charges = $return_charge->national_charges_class_0;
-                        }
+
                     }
 
                     if (strpos($discount, '%') !== FALSE) {
