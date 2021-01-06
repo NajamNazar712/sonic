@@ -124,6 +124,7 @@
             $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Pickup Addresses",
+                dropdownParent: $("#assign_location")
                 //allowClear:true,
             });
            /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
