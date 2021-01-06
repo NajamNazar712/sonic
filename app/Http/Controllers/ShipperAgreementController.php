@@ -14,6 +14,7 @@ use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
@@ -361,6 +362,24 @@ otherwise it will be rejected</li>
                           
                         </tbody>
                       </table>';
+
+            $international_rates = FALSE;
+            $rate_status = FALSE;
+            if(InternationalRatesStatus::where('user_id', $id)->exists()){
+                $international_rates = TRUE;
+            }
+
+            if($shipper->account_type_id == 1){
+                if(RateStatus::where('user_id', $id)->exists()){
+                    $rate_status = TRUE;
+                }
+            }
+            else{
+                if(CorporateRateStatus::where('user_id', $id)->exists()){
+                    $rate_status = TRUE;
+                }
+            }
+
 
 
             $packaging_details = '';
