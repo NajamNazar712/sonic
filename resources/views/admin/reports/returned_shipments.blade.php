@@ -42,7 +42,7 @@
                                     <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Returned Shipments Date (To)">
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="form-group ml-1">
                                 <button type="button" id="search_filter_btn" class="mr-1 mb-1 mt-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                             </div>
                     </div>
