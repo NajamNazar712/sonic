@@ -350,16 +350,16 @@
                                                     Cash Collection</span></a>
                                         <ul class="menu-content">
                                             <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending
-                                                    Cash Collection</a>
+                                                    Cash Collection COD</a>
                                             </li>
+                                            @endif
+                                            @if (session('role_id') == 1 || in_array(423, session('permissions')))
                                             <li>
                                                 <a class="menu-item" href="{{ route('admin.delivery.cash_collection.retail.index') }}">Pending Cash Collection Retail</a>
                                             </li>
-                                            <li>
-                                                <a class="menu-item" href="{{ route('admin.delivery.cash_collection.retail.cod.index') }}">Pending Cash Collection COD</a>
-                                            </li>
+                                            @endif
                                         </ul>
-                                        @endif
+
 
                                     @if (session('role_id') == 1 || in_array(40, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a>

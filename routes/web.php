@@ -872,13 +872,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\Retail\RetailPendingCashCollection@retail_index')->name('index');
                 Route::get('list', 'Admins\Retail\RetailPendingCashCollection@retail_list')->name('list');
 
-                Route::prefix('cod')->name('cod.')->group(function(){
-                    Route::get('', 'Admins\Retail\RetailPendingCashCollection@cod_index')->name('index');
-                    Route::get('list', 'Admins\Retail\RetailPendingCashCollection@cod_list')->name('list');
-                });
                 Route::prefix('pending')->name('pending.')->group(function(){
                     Route::post('shipments','Admins\Retail\RetailPendingCashCollection@number_of_shipments')->name('shipments');
                     Route::post('shipments/delivered','Admins\Retail\RetailPendingCashCollection@shipments_delivered')->name('shipments.delivered');
+                    Route::post('collect', 'Admins\Retail\RetailPendingCashCollection@pending_cash_collect')->name('collect');
+                    Route::post('all','Admins\Retail\RetailPendingCashCollection@pending_cash_collect_all')->name('all');
                 });
 
             });
