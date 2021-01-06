@@ -634,6 +634,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('rider_request')->name('rider_request.')->group(function (){
                 Route::get('','Admins\RiderManagementController@rider_request_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');
+                Route::post('/approve', 'Admins\RiderManagementController@approveRider')->name('approve');
             });
 
             Route::prefix('sms_history')->name('sms_history.')->group(function (){
