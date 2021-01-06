@@ -96,6 +96,7 @@
                 </div>
             </div>
         </div>
+    </div>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
