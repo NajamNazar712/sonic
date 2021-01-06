@@ -14,35 +14,164 @@
                         <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('retail.shipment.book.store') }}" novalidate="novalidate">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div id="consignment_info" class="col-3">
+                                <div id="consignment_info" class="col-3 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignment Info</h4>
                                     <div class="form-group">
-                                        <select name="product" id="product" class="select2 form-control">
+                                        <select name="product" id="product" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment is required">
                                             @foreach($products as $product)
                                                 <option value="{{$product->id}}">{{$product->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <input name="shipper_account_no" class="form-control shipper_account_no" id="shipper_account_no" placeholder="Shipper Account No" value="">
+                                        <input name="shipper_account_no" class="form-control number" id="shipper_account_no" placeholder="Shipper Account No" value="">
                                     </div>
                                     <div class="form-group">
-                                        <select name="business_category" id="business_category" class="select2 form-control">
+                                        <select name="business_category" id="business_category" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment Category is required">
                                             @foreach($business_categories as $business_category)
                                                 <option value="{{$business_category->id}}">{{$business_category->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <select name="shipping_mode" id="shipping_mode" class="select2 form-control">
+                                        <select name="shipping_mode" id="shipping_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Product is required">
                                             @foreach($shipping_modes as $shipping_mode)
                                                 <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group d-none" id="domestic_destination_div">
+                                        <select name="domestic_destination" id="domestic_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
+                                            @foreach($domestic_cities as $domestic_city)
+                                                <option value="{{$domestic_city->id}}">{{$domestic_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <label class="mr-1">Volumetric Weight</label>
+                                        <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                    </div>
+                                    <div class="form-group d-none" id="domestic_overland_city_div">
+                                        <select name="domestic_destination" id="domestic_overland_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
+                                            @foreach($domestic_overland_cities as $domestic_overland_city)
+                                                <option value="{{$domestic_overland_city->id}}">{{$domestic_overland_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+{{--                                    <div class="form-group">--}}
+{{--                                        <input name="discount" class="form-control discount" id="discount" placeholder="Discount" value="">--}}
+{{--                                    </div>--}}
+                                    <div class="form-group input-group">
+                                        <input  type="text" name="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+                                    </div>
+                                    <div class="form-group">
+                                        <select name="payment_mode" id="payment_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Payment Mode is required">
+                                            @foreach($payment_modes as $payment_mode)
+                                                <option value="{{$payment_mode->id}}">{{$payment_mode->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">
+                                    </div>
                                 </div>
-                                <div id="consignee_shipper_info" class="col-6">
+                                <div id="consignee_shipper_info" class="ml-1 col-6 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
+
+                                    <div class="form-group col-6">
+                                        <input type="text" name="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <input type="text" name="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <input type="text" name="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC*" data-rule-required="true" data-msg-required="Shipper CNIC is required">
+                                    </div>
+                                    <div class="form-group col">
+                                        <textarea name="shipper_address" class="form-control address" id="address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <input type="text" name="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <input type="text" name="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <input type="text" name="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC*" data-rule-required="true" data-msg-required="Consignee CNIC is required">
+                                    </div>
+                                    <div class="form-group col">
+                                        <textarea name="consignee_address" class="form-control address" id="address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row ">
+                                            <div class="form-group col-6">
+                                                <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6 text-right">
+                                                <input type="text" name="total_charges" class="form-control amount" placeholder="Total Charges*" data-rule-required="true" data-msg-required="Total Charges is required">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-6 d-none">
+                                            <input type="text" name="insurance_amount" class="form-control amount" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                        </div>
+                                        <div class="row ">
+                                            <div class="form-group col-6">
+                                                <select name="trax_box" id="trax_box" class="select2 form-control" data-rule-required="true" data-msg-required="Trax Box is required">
+                                                    @foreach($trax_boxes as $trax_box)
+                                                        <option value="{{$trax_box->id}}">{{$trax_box->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6 text-right">
+                                                <input type="text" name="gst_charges" class="form-control amount" placeholder="GST Charges*" data-rule-required="true" data-msg-required="GST Charges is required">
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-end">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="total_amount" class="form-control amount" placeholder="Total Amount*" data-rule-required="true" data-msg-required="Total Amount is required">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="external_info" class="ml-1 col border">
+                                    <div class="col pt-5 mt-2 mb-3">
+                                        <div class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Bulk Shipment</label>
+                                            <input type="checkbox" name="insurance" class="switch hidden insurance">
+                                        </div>
+                                    </div>
+                                    <div class="col pt-2">
+                                        <div class="form-group text-center p-1 border border-light rounded" style="background-color: black">
+                                            <div id='tiles'>
+                                                <span>0</span>
+                                                <span>0</span>
+                                                <span>0</span>
+                                                <span>0</span>
+                                                <span>0</span>
+                                                <span>0</span>
+                                            </div>
+
+                                            <div class="mt-1">
+                                                <h6 class="white">Incentive Counter</h6>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -63,6 +192,54 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style>
+        #tiles{
+            position: relative;
+            z-index: 1;
+        }
+
+        #tiles > span{
+            width: auto;
+            font: bold 32px 'Droid Sans', Arial, sans-serif;
+            text-align: center;
+            color: #111;
+            background-color: #ddd;
+            background-image: -webkit-linear-gradient(top, #bbb, #eee);
+            background-image:    -moz-linear-gradient(top, #bbb, #eee);
+            background-image:     -ms-linear-gradient(top, #bbb, #eee);
+            background-image:      -o-linear-gradient(top, #bbb, #eee);
+            border-top: 1px solid #fff;
+            border-radius: 3px;
+            box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.7);
+            margin: auto;
+            padding: auto;
+            display: inline-block;
+            position: relative;
+        }
+
+        #tiles > span:before{
+            content:"";
+            width: 100%;
+            height: 13px;
+            background: #111;
+            display: block;
+            padding: auto;
+            position: absolute;
+            top: 41%; left: -3px;
+            z-index: -1;
+        }
+
+        #tiles > span:after{
+            content:"";
+            width: 100%;
+            height: 1px;
+            background: #eee;
+            border-top: 1px solid #333;
+            display: block;
+            position: absolute;
+            top: 48%; left: 0;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -95,8 +272,120 @@
             });
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select Product*",
+                placeholder:"Select Product*"
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#domestic_overland_destination_div').removeClass('d-none');
+                    $('#domestic_destination_div').addClass('d-none');
+                }
+                else{
+                    $('#domestic_destination_div').removeClass('d-none');
+                    $('#domestic_overland_destination_div').addClass('d-none');
+                }
+            });
+            $('.destination').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Destination*",
                 allowClear:true
+            });
+
+            $(this).find('.pieces').TouchSpin({
+                min: 1,
+                max: 10,
+                buttondown_class: 'btn btn-primary rounded-left',
+                buttonup_class: 'btn btn-primary rounded-right',
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            }).bind('input change', function() {
+                $(this).tooltip('show');
+
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
+
+            $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Payment Mode*",
+                allowClear:true
+            });
+
+            $('#booking_form input.volumetric_weight').checkboxpicker().bind('change', function() {
+                if (this.checked) {
+                    $('#booking_form input.weight').val('').prop('disabled', true);
+
+                    $('#booking_form .volumetric_weights input').val('').prop('disabled', false);
+                }
+                else {
+                    $('#booking_form input.weight').val('').prop('disabled', false);
+
+                    $('#booking_form .volumetric_weights input').val('').prop('disabled', true);
+                }
+            });
+
+            $('#booking_form .volumetric_weights input.length').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
+            $('#booking_form .volumetric_weights input.breadth').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
+            $('#booking_form .volumetric_weights input.height').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
+            $('.number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                dropdownParent:$('#booking_form')
+            });
+
+
+            $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
+
+            $('.amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Insurance Offered*",
+                allowClear:true
+            });
+
+            $('#trax_box').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Trax Box*",
+                allowClear:true
+            });
+
+
+            $('#regular .insurance').checkboxpicker().bind('change', function() {
+                var parent = $(this).parent('.form-group').next('.form-group');
+
+                if (this.checked) {
+                    parent.removeClass('d-none');
+                }
+                else {
+                    parent.addClass('d-none');
+
+                    parent.children('#item_price-error').remove();
+                }
             });
         });
     </script>
