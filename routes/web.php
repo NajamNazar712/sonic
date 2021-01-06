@@ -925,6 +925,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('dncc/list','Admins\DeliveryController@get_sdn_list')->name('dncc.list');
             Route::post('shipments','Admins\DeliveryController@completed_shipments')->name('shipments');
             Route::post('shipments/delivered','Admins\DeliveryController@completed_shipments_delivered')->name('shipments.delivered');
+
+
+            Route::prefix('retail')->name('retail.')->group(function() {
+                Route::get('', 'Admins\Retail\RetailCompletedDeliveries@index')->name('index');
+                Route::get('list', 'Admins\Retail\DeliveryController@list')->name('list');
+            });
         });
         Route::prefix('sdn')->name('sdn.')->group(function (){
             Route::get('','Admins\DeliveryController@sdn_view')->name('index');
