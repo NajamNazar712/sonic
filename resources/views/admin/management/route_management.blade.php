@@ -95,7 +95,7 @@
 
                             <div class="row justify-content-center mt-4">
                                 <div class="col-4">
-                                    <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
                                 </div>
                             </div>
                         </form>
@@ -457,7 +457,6 @@
                             'route_id': route_id
                         }
                     }).done(function(data){
-
                         $('#pickup_address').val('All').trigger('change');
                         if(data.pickup_address_ids.length != 0 ){
                             $('#pickup_address').val(data.pickup_address_ids).trigger('change');
