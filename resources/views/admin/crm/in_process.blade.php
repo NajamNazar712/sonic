@@ -302,6 +302,9 @@
                         $('#BulkCommentModal').modal('show');
                         $('#BulkCommentModal').on('shown.bs.modal',function (e) {
                         });
+                        $('#BulkCommentModal').on('hide.bs.modal', function (e) {
+                            $('#comment').val('').trigger('change');
+                        });
                         $('#commentSubmit').on('click',function () {
                             var comment = $('#BulkCommentModal #comment').val();
                             if (comment) {
@@ -971,6 +974,7 @@
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_comment').disable();
+                    $('#comment').val('').trigger('change');
                 }
             });
 
