@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Businees Category</th>
+                                    <th class="border-primary border-darken-1">Shipping Mode Type</th>
                                     <th class="border-primary border-darken-1">GC Area</th>
                                     <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -88,6 +89,7 @@
                             head.push('Hub Code');
                             head.push('Zone');
                             head.push('Business Category');
+                            head.push('Shipping Mode Type');
                             head.push('GC Area');
                             head.push('Attempt Tat');
                             head.push('Status');
@@ -106,6 +108,7 @@
                                 row.push(values.hub_id);
                                 row.push(values.zone);
                                 row.push(values.business_category);
+                                row.push(values.modes);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
                                 row.push(values.status);
@@ -192,6 +195,7 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
+                    {data: 'modes', name: 'sm.mode', class: 'align-middle modes'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},

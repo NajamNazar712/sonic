@@ -22,6 +22,7 @@ use App\RiderDeliveryNoteStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Psy\Util\Json;
 use Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
@@ -36,6 +37,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\PickupRequest;
@@ -416,6 +418,7 @@ class RiderAPIController extends Controller {
         }
         else {
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -448,6 +451,9 @@ class RiderAPIController extends Controller {
                 else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
+            }
+            elseif ($rider_request->exists()){
+                return response()->json(['status' => 1, 'message' => 'Pending for approval']);
             }
             else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
@@ -1854,6 +1860,129 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $nodes]);
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
+    }
+
+    public function rider_signup(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'name' => ['required'],
+                'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'pin' => ['required', 'integer', 'digits:4']
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic'));
+
+                $rider = Rider::where('phone', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic'));
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
+                    $rider_request = $rider_request->first();
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider_request->cnic == $request->input('cnic')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } //Check Rider Already Exist
+                else if ($rider->exists()) {
+                    $rider = $rider->first();
+                    if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider->phone == $request->phone_number) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider->cnic == $request->input('cnic')) {
+                        $message = "CNIC Already Exist";
+                    }
+
+                } else {
+                    try {
+                        $rider_request = new RiderRequest();
+                        $rider_request->name = $request->name;
+                        $rider_request->cnic = $request->cnic;
+                        $rider_request->phone_no = $request->phone_number;
+                        $rider_request->pin = $request->pin;
+                        $rider_request->save();
+                        $response['status'] = 0;
+                        $message = 'Rider Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                }
+
+
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
+    }
+
+    public function pickups_history(Request $request) {
+
+        $rider_id = $request->rider_id;
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+
+        $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+            ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+            ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+            ->join('riders as r', 'pn.rider_id', 'r.id')
+            ->join('users as u', 'pr.shipper_id', 'u.id')
+            ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+            ->join('cities as c', 'usi.city_id', 'c.id')
+            ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.shipments', 'pnpr.name as reason',  'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
+            ->where('r.id','=',$rider_id)->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+
+        if ($rider_pickups->exists()){
+            $rider_pickups = $rider_pickups->get();
+            return response()->json(["status" => 0, "pickups" => $rider_pickups]);
+        } else{
+            return response()->json(["status" => 1, "message" => "No pickups found!"]);
+        }
+    }
+
+    public function delivery_history(Request $request) {
+        $rider_id = $request->rider_id;
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+        $rider_deliveries = DeliveryNote::
+        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.delivered_shipments','delivery_notes.shipments_count'])
+            ->where('riders.id', '=', $rider_id)
+            ->whereBetween('delivery_notes.created_at', [$from, $to])
+            ->groupBy('delivery_notes.id');
+        if ($rider_deliveries->exists()){
+            $rider_deliveries = $rider_deliveries->get();
+            return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
+        } else{
+            return response()->json(["status" => 1, "message" => "No deliveries found!"]);
+        }
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

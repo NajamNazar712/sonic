@@ -167,7 +167,7 @@
                                             <tr>
                                                 <th scope="row">Description</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$crm_details->description}}</h5>
+                                                    <h5 class="mb-0">{{strip_tags($crm_details->description)}}</h5>
                                                 </td>
                                             </tr>
                                             </tbody>
