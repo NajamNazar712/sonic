@@ -83,8 +83,8 @@
                             @method('post')
                             {{ csrf_field() }}
                             <input type="text" hidden id="route_id" name="route_id">
-                            <div class="col-12">
-                                <fieldset class="form-group">
+                            <div class="">
+                                <fieldset class="col-12 form-group">
                                     <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Location is required">
                                         @foreach($users as $user)
                                             <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
@@ -95,7 +95,7 @@
 
                             <div class="row justify-content-center mt-4">
                                 <div class="col-4">
-                                    <button id="edit" type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Assign Shippers</button>
                                 </div>
                             </div>
                         </form>
@@ -123,7 +123,8 @@
         $(document).ready(function() {
             $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Add Pickup Addresses",
+                placeholder:"Pickup Addresses",
+                dropdownParent: $("#assign_location")
                 //allowClear:true,
             });
            /* $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
@@ -442,64 +443,65 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
+                var route_id = $(this).parents('tr').attr('id');
+                if(route_id){
 
-                var route_id = table.row( $(this).parents('tr') ).data().id;
+                    $('#route_id').val(route_id);
 
-                $('#route_id').val(route_id);
-
-                if ($(this).hasClass('assign_location')) {
-
-                    $.ajax({
-                        url: '{!! route('admin.management.route.view_assign_location') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'route_id': route_id
-                        }
-                    }).done(function(data){
-
-                        $('#pickup_address').val('All').trigger('change');
-                        if(data.pickup_address_ids.length != 0 ){
-                            $('#pickup_address').val(data.pickup_address_ids).trigger('change');
-                        }
-
-                    });
-                    $('#assign_location').modal('show');
+                    if ($(this).hasClass('assign_location')) {
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.management.route.view_assign_location') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'route_id': route_id
+                            }
+                        }).done(function(data){
+                            $('#pickup_address').val('All').trigger('change');
+                            if(data.pickup_address_ids.length != 0 ){
+                                $('#pickup_address').val(data.pickup_address_ids).trigger('change');
+                            }
+                            $('#assign_location').modal('show');
+                            UnblockPagePermanently();
+                        });
+                    }
                 }
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu  .dropdown-item', function() {
 
                 if ($(this).hasClass('view_location')) {
-                    var route_id = table.row( $(this).parents('tr') ).data().id;
-                    console.log(route_id);
+                    var route_id =$(this).parents('tr').attr('id');
+                    if(route_id){
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.management.route.assign_locations_view') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'route_id': route_id
+                            }
+                        }).done(function(data){
+                            if(data.locations.length != 0){
+                                var html = '';
+                                html += '<table class="table table-sm datatable text-center">';
+                                html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
+                                html += '<tbody>';
+                                $.each(data.locations, function(index, value) {
+                                    var ind = index+1;
+                                    html += '<tr class=""><td>' + ind + '</td>';
+                                    html += '<td>' + value + '</td>';
+                                });
+                                html += '</tbody></table>';
 
-                    $.ajax({
-                        url: '{!! route('admin.management.route.assign_locations_view') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'route_id': route_id
-                        }
-                    }).done(function(data){
-                        if(data.locations.length != 0){
-                            console.log(data.locations);
-                            var html = '';
-                            html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
-                            html += '<tbody>';
-                            $.each(data.locations, function(index, value) {
-                                var ind = index+1;
-                                html += '<tr class=""><td>' + ind + '</td>';
-                                html += '<td>' + value + '</td>';
-                            });
-                            html += '</tbody></table>';
+                                $('#AssignLocationsView .modal-body').html(html);
+                                $('#AssignLocationsView').modal('show');
+                            }
+                            UnblockPagePermanently();
+                        });
+                    }
 
-                            $('#AssignLocationsView .modal-body').html(html);
-                            $('#AssignLocationsView').modal('show');
-                        }
-
-                    });
                 }
             });
 

@@ -9630,13 +9630,9 @@ class AdminDashboardController extends Controller
 
     public function view_assign_locations(Request $request){
         $route_id = $request->route_id;
-        $data = array();
         if($route_id != null){
-            $pickup_addresses = RouteLocations::where('route_id',$route_id)->select('pickup_address_id')->get();
-           foreach($pickup_addresses as $pickup_address){
-                $data[] = $pickup_address->pickup_address_id;
-           }
-            return response()->json(['pickup_address_ids' => $data]);
+            $pickup_addresses = RouteLocations::where('route_id',$route_id)->pluck('pickup_address_id')->toArray();
+            return response()->json(['pickup_address_ids' => $pickup_addresses]);
         }
     }
 
