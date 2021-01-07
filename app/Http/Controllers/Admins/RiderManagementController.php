@@ -616,14 +616,14 @@ class RiderManagementController extends Controller
                 return ($rider_request->status == 0) ? 'Pending' : 'Processed';
             })
             ->addColumn("action", function ($rider_request) {
-                if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([426], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(426, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
 
                     }
@@ -649,7 +649,7 @@ class RiderManagementController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
-            'pin' => 'required|numeric',
+            'pin' => 'required|integer|digits:4',
             'trax_id'=>'required|max:255|string',
             'rider_request_id' => 'required',
         ];
