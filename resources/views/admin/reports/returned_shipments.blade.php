@@ -225,7 +225,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking);
+                                row.push(values.tracking_number);
                                 row.push(values.status_date);
                                 row.push(values.status);
                                 row.push(values.remarks);
