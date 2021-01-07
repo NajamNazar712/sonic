@@ -41,10 +41,10 @@ class WebsiteLead extends Command
     {
         $environment = config('app.env');
         if($environment == 'production'){
-            $base_uri = 'https://trax.pk/api';
+            $base_uri = 'https://trax.pk/api/';
         }
 //        elseif ($environment == 'staging'){
-//            $base_uri = 'https://trax.pk/api';
+//            $base_uri = 'https://trax.pk/api/';
 //        }
         else{
             $base_uri = 'website.test/api/';

@@ -36,11 +36,8 @@
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Phone Number</th>
-                                        <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
@@ -199,11 +196,8 @@
                         head.push('S.No');
                         head.push('Account ID');
                         head.push('Company Name');
-                        head.push('City Name');
                         head.push('Contact Person');
-                        head.push('Phone No.');
-                        head.push('Company Address');
-                        head.push('Email Address');
+                        head.push('City');
                         head.push('Sales Person Tagged');
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
@@ -216,11 +210,8 @@
                             row.push(index + 1);
                             row.push(values.id_padded);
                             row.push(values.name);
-                            row.push(values.city);
                             row.push(values.poc);
-                            row.push(values.phone);
-                            row.push(values.address);
-                            row.push(values.email);
+                            row.push(values.city);
                             row.push(values.admin_tag_id);
                             row.push(values.poc);
                             row.push(values.kam);
@@ -432,11 +423,8 @@
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'account_id'},
                 {data: 'name', name: 'users.name', class: 'company_name'},
-                {data: 'city', name: 'cities.name', class: 'city'},
                 {data: 'poc', name: 'users.poc', class: 'contact_person'},
-                {data: 'phone', name: 'users.phone', class: 'phone'},
-                {data: 'address', name: 'users.address', class: 'address'},
-                {data: 'email', name: 'users.email', class: 'email'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'poc_tagged', name: 'a.name', class: 'align-middle poc_tagged'},
                 {data: 'kam', name: 'd.name', class: 'align-middle kam'},
