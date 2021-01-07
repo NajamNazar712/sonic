@@ -2164,9 +2164,9 @@ class ReturnController extends Controller
                         border-top: 1px dashed #000000;
                       }
 
-                      table.table-bordered {
+                      /*table.table-bordered {
                         page-break-inside: avoid;
-                      }
+                      }*/
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
@@ -2886,9 +2886,9 @@ class ReturnController extends Controller
                         border-top: 1px dashed #000000;
                       }
 
-                      table.table-bordered {
+                      /*table.table-bordered {
                         page-break-inside: avoid;
-                      }
+                      }*/
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
