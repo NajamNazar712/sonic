@@ -3635,7 +3635,12 @@ class AdminFinanceController extends Controller
         $done_payment->status = 1;
 
         $done_payment->save();
-        $charges = ($shipment->amount - $shipment->gst);
+        if($type == 0){
+            $charges = ($shipment->amount - $shipment->gst);
+        }
+        else{
+            $charges = ($shipment->received_amount - $shipment->gst);
+        }
 
         $done_payment_shipment = new DonePaymentShipment();
 
