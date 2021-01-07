@@ -138,7 +138,7 @@
                                     </div>
                                     <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
-                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet" >
 
                                             </select>
                                         </fieldset>
@@ -671,7 +671,7 @@
                          $('#request_id').empty().trigger('change');
                         $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
                             width:'100%',
-                            placeholder:"Select Receiving Sheet Id",
+                            placeholder:"Select Receiving Sheet ID",
                             allowClear:true,
                             dropdownParent:$('#add_request_form')
                         });
@@ -855,6 +855,16 @@
                         $('#claim_description').val(claim_description);
 
                         var formData = new FormData($('#add_request_form')[0]);
+                        // if(case_nature_claim_id === 17){
+                        //     if($('#request_id').val() == "" || $('#request_id').val() == null){
+                        //         nature_flag = false;
+                        //         var error = "Please select receiving sheet!";
+                        //         toastr.error(error, 'Error!', {
+                        //             positionClass: 'toast-top-center',
+                        //             containerId: 'toast-top-center'
+                        //         });
+                        //     }
+                        // }
                         if(!case_nature_claim_id){
                             nature_flag = false;
                             var error = "Please select Claim type!";
