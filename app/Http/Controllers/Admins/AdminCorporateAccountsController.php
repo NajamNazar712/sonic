@@ -6265,12 +6265,12 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get()) {
-                    foreach ($packing_charges as $packing_charges) {
+                    foreach ($packing_charges as $packing_charge) {
                         $history_packing_charge = new WmsPackingCharge();
                         $history_packing_charge->user_id = $id;
-                        $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
-                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
-                        $history_packing_charge->charges = $packing_charges['charges'];
+                        $history_packing_charge->packing_type_id = $packing_charge['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charge['packing_size_id'];
+                        $history_packing_charge->charges = $packing_charge['charges'];
                         $history_packing_charge->save();
                     }
                 }
