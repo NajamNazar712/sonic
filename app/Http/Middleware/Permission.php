@@ -261,6 +261,7 @@ class Permission
             'delivery.fake_status.log.index' => 262,
             'delivery.fake_status.log.list' => 262,
 
+
             'return.index' => 44,
             'return.list' => 44,
             'return.confirm.status' => 45,
@@ -896,6 +897,9 @@ class Permission
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
+
+
+            'retail.pending_cash_collection.index' => 423,
 
         ]
     ];

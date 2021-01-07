@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Pending Cash Collection
+        Pending Cash Collection COD
     </h1>
 
     <div class="card">

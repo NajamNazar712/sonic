@@ -341,10 +341,25 @@
                                         <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(105, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending
-                                                Cash Collection</a></li>
-                                    @endif
+{{--                                    @if (session('role_id') == 1 || in_array(105, session('permissions')))--}}
+{{--                                        <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending--}}
+{{--                                                Cash Collection</a></li>--}}
+{{--                                    @endif--}}
+                                        @if (session('role_id') == 1 || in_array(105, session('permissions')))
+                                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Pending
+                                                    Cash Collection</span></a>
+                                        <ul class="menu-content">
+                                            <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending
+                                                    Cash Collection COD</a>
+                                            </li>
+                                            @endif
+                                            @if (session('role_id') == 1 || in_array(423, session('permissions')))
+                                            <li>
+                                                <a class="menu-item" href="{{ route('admin.delivery.cash_collection.retail.index') }}">Pending Cash Collection Retail</a>
+                                            </li>
+                                            @endif
+                                        </ul>
+
 
                                     @if (session('role_id') == 1 || in_array(40, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a>
