@@ -6,6 +6,9 @@
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
+                <h1 class="mb-1">
+                    Retail-Booking Screen
+                </h1>
             </div>
             <div class="card">
                 <div class="card-content" aria-expanded="true">
@@ -102,7 +105,6 @@
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
-
                                     <div class="form-group col-6">
                                         <input type="text" name="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
@@ -110,35 +112,37 @@
                                         <input type="text" name="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC*" data-rule-required="true" data-msg-required="Consignee CNIC is required">
+                                        <input type="text" name="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC">
                                     </div>
                                     <div class="form-group col">
                                         <textarea name="consignee_address" class="form-control address" id="address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="col">
-                                        <div class="row ">
+                                        <div class="row justify-content-end">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-6 text-right">
+                                            <div class="form-group col-6">
                                                 <input type="text" name="total_charges" class="form-control amount" placeholder="Total Charges*" data-rule-required="true" data-msg-required="Total Charges is required">
                                             </div>
                                         </div>
-                                        <div class="form-group col-6 d-none">
-                                            <input type="text" name="insurance_amount" class="form-control amount" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
-                                        </div>
-                                        <div class="row ">
+                                        <div class="row d-none" id="insurance_amount_div">
                                             <div class="form-group col-6">
+                                                <input type="text" name="insurance_amount" class="form-control amount" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-end">
+                                            <div class="form-group col-6 d-none" id="trax_box_div">
                                                 <select name="trax_box" id="trax_box" class="select2 form-control" data-rule-required="true" data-msg-required="Trax Box is required">
                                                     @foreach($trax_boxes as $trax_box)
                                                         <option value="{{$trax_box->id}}">{{$trax_box->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-6 text-right">
+                                            <div class="form-group col-6">
                                                 <input type="text" name="gst_charges" class="form-control amount" placeholder="GST Charges*" data-rule-required="true" data-msg-required="GST Charges is required">
                                             </div>
                                         </div>
@@ -153,7 +157,7 @@
                                     <div class="col pt-5 mt-2 mb-3">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Bulk Shipment</label>
-                                            <input type="checkbox" name="insurance" class="switch hidden insurance">
+                                            <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
                                         </div>
                                     </div>
                                     <div class="col pt-2">
@@ -172,6 +176,16 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row justify-content-center">
+                                        <div class="position-absolute" style="bottom: 0;">
+                                            <div class="form-group text-center d-none" id="save">
+                                                <input type="hidden" name="book_button" id="book_button" value="1">
+                                                <button type="button" name="save" id="book" class="btn btn-primary width-200" value="save">Save</button>
+                                            </div>
+                                            <div class="form-group text-center" id="book_and_print">
+                                                <button type="submit" name="book_and_print" class="btn btn-primary width-200" value="Book & Print">Book & Print</button>
+                                            </div>
+                                        </div></div>
                                 </div>
                             </div>
                         </form>
@@ -282,6 +296,12 @@
                 else{
                     $('#domestic_destination_div').removeClass('d-none');
                     $('#domestic_overland_destination_div').addClass('d-none');
+                    if(id == 5){
+                        $('#trax_box_div').removeClass('d-none');
+                    }
+                    else{
+                        $('#trax_box_div').addClass('d-none');
+                    }
                 }
             });
             $('.destination').prepend('<option value="" selected="selected"></option>').select2({
@@ -305,7 +325,7 @@
                 }
             });
 
-            $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+            $('#payment_mode').select2({
                 width:'100%',
                 placeholder:"Select Payment Mode*",
                 allowClear:true
@@ -366,6 +386,14 @@
                 width:'100%',
                 placeholder:"Insurance Offered*",
                 allowClear:true
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 1){
+                    $('#insurance_amount_div').removeClass('d-none');
+                }
+                else{
+                    $('#insurance_amount_div').addClass('d-none');
+                }
             });
 
             $('#trax_box').prepend('<option value="" selected="selected"></option>').select2({
@@ -374,17 +402,54 @@
                 allowClear:true
             });
 
-
-            $('#regular .insurance').checkboxpicker().bind('change', function() {
-                var parent = $(this).parent('.form-group').next('.form-group');
-
+            $('.bulk_shipment').checkboxpicker().bind('change', function() {
                 if (this.checked) {
-                    parent.removeClass('d-none');
+                    $('#save').removeClass('d-none');
+                    $('#book_and_print').addClass('d-none');
                 }
                 else {
-                    parent.addClass('d-none');
+                    $('#save').addClass('d-none');
+                    $('#book_and_print').removeClass('d-none');
+                }
+            });
 
-                    parent.children('#item_price-error').remove();
+            $('#book').on('click', function () {
+               // var validator = $('#booking_form').valid();
+               // if(validator) {
+                    $('#book_button').val(0);
+                   var booking_form = new FormData($('#booking_form')[0]);
+                   $('#book').attr('disabled', true);
+                   $.ajax({
+                       url: '{!! route('retail.shipment.book.store') !!}',
+                       method: 'POST',
+                       enctype: 'multipart/form-data',
+                       data: booking_form,
+                       dataType: 'json',
+                       processData: false,
+                       contentType: false,
+                   })
+                       .done(function (data) {
+                           console.log(data);
+                           // if (data.status) {
+                           //
+                           // }
+                       });
+
+                    $('#book_button').val(1);
+               // }
+            });
+
+            $('#booking_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
                 }
             });
         });
