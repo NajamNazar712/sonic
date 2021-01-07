@@ -57,7 +57,7 @@
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
@@ -370,7 +370,7 @@
                         head.push('Account Type');
                         head.push('Company Name');
                         head.push('Contact Person');
-                        head.push('Company Address');
+                        head.push('City');
                         head.push('Product Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
@@ -401,7 +401,7 @@
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
-                            row.push(values.address);
+                            row.push(values.city);
                             row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
@@ -899,7 +899,7 @@
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'address', name: 'address', class: 'align-middle address'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
