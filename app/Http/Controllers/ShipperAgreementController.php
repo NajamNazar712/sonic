@@ -71,9 +71,9 @@ class ShipperAgreementController extends Controller
                       h4{
                       font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                       }
-                      table.table-bordered {
+                      /*table.table-bordered {
                         page-break-inside: avoid;
-                      }
+                      }*/
 
 //                      table.table-bordered tbody tr td {
 //                        border: 1px solid #09262e !important;
