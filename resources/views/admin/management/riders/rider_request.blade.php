@@ -420,7 +420,6 @@
             });
 
             $('body').on('click', '.approve', function (e) {
-                // $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').clear();
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
                 var cnic = table.row($(this).parents('tr')).data().cnic;
@@ -433,6 +432,15 @@
                 $('#rider_pin').val(pin);
                 $('#approveRiderModal').modal('show');
 
+            });
+
+            $('body').on('hidden.bs.modal', '#approveRiderModal', function () {
+                $('#rider_trax_id').val('');
+                $('#address').val('');
+                $('#rider_type_list').val(null).trigger('change');
+                $('#city_list').val(null).trigger('change');
+                $('#category_list').val(null).trigger('change');
+                $('#route_list').val(null).trigger('change');
             });
         });
     </script>
