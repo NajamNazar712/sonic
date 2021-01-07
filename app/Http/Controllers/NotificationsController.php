@@ -6024,12 +6024,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[head_of_sales]') !== FALSE) {
                             $body = str_replace('[head_of_sales]', $admins_sales->name, $body);
                         }
-                        $to[] = $admins_sales->email;
 
-                        $to_admins = Admin::where('role_id', 31)->where('status', 1);
-                        if ($to_admins->exists()) {
-                            $to = array_merge($to, $to_admins->pluck('email')->toArray());
-                        }
+                        $to = $admins_sales->email;
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 101) {
