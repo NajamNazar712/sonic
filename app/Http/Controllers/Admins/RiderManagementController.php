@@ -652,6 +652,7 @@ class RiderManagementController extends Controller
             'pin' => 'required|integer|digits:4',
             'trax_id'=>'required|max:255|string',
             'rider_request_id' => 'required',
+            'rider_type' => "required|numeric"
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -672,6 +673,7 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $request->trax_id,
+            'rider_type_id'  => $request->rider_type
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);

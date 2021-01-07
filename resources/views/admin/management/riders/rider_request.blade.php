@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Riders Request')
+@section('title', 'Riders Pending Request')
 
 @section('content')
-    <h1>Riders Request</h1>
+    <h1>Riders Pending Request</h1>
 
     <section>
         <div class="row">
@@ -191,6 +191,12 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Type',
+                dropdownParent: $('#approveRiderModal')
+            });
+
             $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select City',
@@ -279,40 +285,22 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Trax ID');
-                            head.push('City Name');
-                            head.push('Hub Name');
                             head.push('Rider Name');
-                            head.push('Phone No.');
                             head.push('CNIC');
-                            head.push('Address');
-                            head.push('Type');
-                            head.push('Route');
-                            head.push('Category');
-                            head.push('Added On');
+                            head.push('Phone No.');
+                            head.push('Created At');
+                            head.push('Updated At');
                             head.push('Status');
-                            head.push('Created By');
-                            head.push('Updated By');
-
 
                             $.each(result.data, function (index, values) {
                                 row = [];
-
                                 row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.city);
-                                row.push(values.hub);
-                                row.push(values.rider);
-                                row.push(values.phone);
+                                row.push(values.name);
                                 row.push(values.cnic);
-                                row.push(values.address);
-                                row.push(values.rider_type);
-                                row.push(values.route);
-                                row.push(values.category);
+                                row.push(values.phone_no);
                                 row.push(values.created_at);
+                                row.push(values.updated_at);
                                 row.push(values.status);
-                                row.push(values.created_by);
-                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
@@ -327,7 +315,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Blacklisted Riders',
+                        title: 'Riders Pending Request',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -380,22 +368,12 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Pending</option>' +
-                        '<option value="1">Processed</option>' +
-                        '</select>';
-
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') || $(header).is('.status')) {
                             $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -442,6 +420,7 @@
             });
 
             $('body').on('click', '.approve', function (e) {
+                // $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').clear();
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
                 var cnic = table.row($(this).parents('tr')).data().cnic;
