@@ -6569,7 +6569,6 @@ class AdminCorporateAccountsController extends Controller
 
     public function add_rates_zone_wise_submit(Request $request, $id)
     {
-//        return $request;
 
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
@@ -7811,6 +7810,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_zone_wise_submit(Request $request, $id){
+
         $user = User::find($id);
         if ($user['status'] != 3) {
 
@@ -8051,9 +8051,9 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_same_zone_charges.*' => 'required',
                     'on_door_different_zone_charges.*' => 'required',
-                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_hub_same_zone_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_hub_different_zone_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_replacement_charges' => 'required|numeric',
@@ -8086,9 +8086,9 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_same_zone_charges.*' => 'required',
                     'ol_door_different_zone_charges.*' => 'required',
-                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_hub_same_zone_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_hub_different_zone_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_replacement_charges' => 'required|numeric',
@@ -8121,9 +8121,9 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_same_zone_charges.*' => 'required',
                     'detain_door_different_zone_charges.*' => 'required',
-                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_hub_same_zone_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_hub_different_zone_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_replacement_charges' => 'required|numeric',
@@ -8155,9 +8155,9 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_same_zone_charges.*' => 'required',
-                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_hub_same_zone_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_hub_different_zone_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_replacement_charges' => 'required|numeric',
@@ -10001,9 +10001,9 @@ class AdminCorporateAccountsController extends Controller
                     'on_door_local_charges.*' => 'required|numeric',
                     'on_door_same_zone_charges.*' => 'required',
                     'on_door_different_zone_charges.*' => 'required',
-                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on|numeric',
+                    'on_hub_range_up.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_range_down.*' => 'required_if:on_hub_to_hub_switch,==,on',
+                    'on_hub_local_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_hub_same_zone_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_hub_different_zone_charges.*' => 'required_if:on_hub_to_hub_switch,==,on',
                     'on_replacement_charges' => 'required|numeric',
@@ -10036,9 +10036,9 @@ class AdminCorporateAccountsController extends Controller
                     'ol_door_local_charges.*' => 'required|numeric',
                     'ol_door_same_zone_charges.*' => 'required',
                     'ol_door_different_zone_charges.*' => 'required',
-                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on|numeric',
+                    'ol_hub_range_up.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_range_down.*' => 'required_if:ol_hub_to_hub_switch,==,on',
+                    'ol_hub_local_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_hub_same_zone_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_hub_different_zone_charges.*' => 'required_if:ol_hub_to_hub_switch,==,on',
                     'ol_replacement_charges' => 'required|numeric',
@@ -10071,9 +10071,9 @@ class AdminCorporateAccountsController extends Controller
                     'detain_door_local_charges.*' => 'required|numeric',
                     'detain_door_same_zone_charges.*' => 'required',
                     'detain_door_different_zone_charges.*' => 'required',
-                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on|numeric',
+                    'detain_hub_range_up.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_range_down.*' => 'required_if:detain_hub_to_hub_switch,==,on',
+                    'detain_hub_local_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_hub_same_zone_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_hub_different_zone_charges.*' => 'required_if:detain_hub_to_hub_switch,==,on',
                     'detain_replacement_charges' => 'required|numeric',
@@ -10105,9 +10105,9 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_door_range_down.*' => 'required|numeric|between:0,100000',
                     'sameday_door_local_charges.*' => 'required|numeric',
                     'sameday_door_same_zone_charges.*' => 'required',
-                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric|between:0,100000',
-                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on|numeric',
+                    'sameday_hub_range_up.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_range_down.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
+                    'sameday_hub_local_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_hub_same_zone_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_hub_different_zone_charges.*' => 'required_if:sameday_hub_to_hub_switch,==,on',
                     'sameday_replacement_charges' => 'required|numeric',
@@ -10127,20 +10127,6 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_discount_cash_rate' => 'required_if:sameday_discount_cash_switch,==,on',
                     'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
-                ];
-            }
-
-            if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
-                $warehouse_validations = [
-                    'invoicing_cycle' => 'required|numeric',
-                    'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
-                    'ppc_charges' => 'required_if:ppc_switch,==,on',
-                    'psf_charges' => 'required_if:psf_switch,==,on',
-                    'storage_type.*' => 'required_if:storage_charges_switch,==,on',
-                    'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
-                    'packing_type.*' => 'required_if:packing_charges_switch,==,on',
-                    'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
-                    'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
                 ];
             }
 
