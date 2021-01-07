@@ -1046,9 +1046,12 @@
                                                     <li><a class="menu-item" href="{{route('admin.management.route.index')}}">Route</a></li>
                                                 @endif
 
-                                                    @if (session('role_id') == 1 || count(array_intersect([377, 378, 379, 380], session('permissions'))) !== 0)
+                                                    @if (session('role_id') == 1 || count(array_intersect([377, 378, 379, 380, 425], session('permissions'))) !== 0)
                                                     <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Riders</span></a>
                                                         <ul class="menu-content">
+                                                            @if (session('role_id') == 1 || in_array(425, session('permissions')))
+                                                                <li><a class="menu-item" href="{{route('admin.management.riders.rider_request.index')}}">Riders Request</a></li>
+                                                            @endif
                                                             @if (session('role_id') == 1 || in_array(377, session('permissions')))
                                                                 <li><a class="menu-item" href="{{route('admin.management.riders.permanent.index')}}">Permanent</a></li>
                                                             @endif

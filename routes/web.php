@@ -307,6 +307,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('{id}/details', 'Shippers\ShipperCRMController@request_details')->name('details');
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
+            Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
@@ -628,6 +629,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('blacklist')->name('blacklist.')->group(function (){
                 Route::get('','Admins\RiderManagementController@blacklist_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
+            });
+
+            Route::prefix('rider_request')->name('rider_request.')->group(function (){
+                Route::get('','Admins\RiderManagementController@rider_request_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');
+                Route::post('/approve', 'Admins\RiderManagementController@approveRider')->name('approve');
             });
 
             Route::prefix('sms_history')->name('sms_history.')->group(function (){
@@ -2315,6 +2322,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('image_details','Admins\AdminCRMController@crm_image_details')->name('image_details');
             Route::post('image_submit','Admins\AdminCRMController@crm_image_submit')->name('image_submit');
             Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
+            Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -2347,6 +2355,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
+            Route::post('bulk', 'Admins\AdminCRMController@bulk_comment_for_shipper')->name('bulk');
         });
         Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
         Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
