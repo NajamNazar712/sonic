@@ -2404,6 +2404,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
                     }
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->delete();
+                    }
 
                     //Replacement and Try and Buy charges
                     if ($request->on_booking_record != null) {
@@ -2720,6 +2723,9 @@ class AdminCorporateAccountsController extends Controller
                             }
 
                         }
+                    }
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->delete();
                     }
 
 
@@ -3045,7 +3051,9 @@ class AdminCorporateAccountsController extends Controller
 
                         }
                     }
-
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->delete();
+                    }
 
 
                     //Replacement and Try and Buy charges
@@ -3372,7 +3380,9 @@ class AdminCorporateAccountsController extends Controller
 
                         }
                     }
-
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->delete();
+                    }
 
 
                     //Replacement and Try and Buy charges
@@ -4294,6 +4304,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
                     }
+                    else{
+                        PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->delete();
+                    }
 
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
@@ -4484,6 +4497,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->shipping_mode_id = 2;
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
+                    }
+                    else{
+                        PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->delete();
                     }
 
 
@@ -4681,6 +4697,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
                     }
+                    else{
+                        PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->delete();
+                    }
 
 
 
@@ -4871,6 +4890,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->shipping_mode_id = 4;
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
+                    }
+                    else{
+                        PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->delete();
                     }
 
 
@@ -8440,6 +8462,9 @@ class AdminCorporateAccountsController extends Controller
                         $delivery_type_status->status = 1;
                         $delivery_type_status->save();
                     }
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->delete();
+                    }
 
                     //Replacement and Try and Buy charges
                     if ($request->on_booking_record != null) {
@@ -8746,8 +8771,16 @@ class AdminCorporateAccountsController extends Controller
                             }
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 2;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
-
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->delete();
+                    }
 
                     //Replacement and Try and Buy charges
                     if ($request->ol_booking_record != null) {
@@ -9009,7 +9042,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     $wa_switch = array();
 
-                    if($request->has('ol_hub_weight_record')){
+                    if($request->has('detain_hub_weight_record')){
                         CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->detain_hub_weight_record)->delete();
                     }
                     else{
@@ -9058,8 +9091,16 @@ class AdminCorporateAccountsController extends Controller
                             }
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 3;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
-
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->delete();
+                    }
 
 
                     //Replacement and Try and Buy charges
@@ -9322,7 +9363,7 @@ class AdminCorporateAccountsController extends Controller
 
                     }
                     $wa_switch = array();
-                    if($request->has('ol_hub_weight_record')){
+                    if($request->has('sameday_hub_weight_record')){
                         CorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
                     }
                     else{
@@ -9371,8 +9412,16 @@ class AdminCorporateAccountsController extends Controller
 
 
                         }
+                        $delivery_type_status = new CorporateDeliveryTypeStatus();
+                        $delivery_type_status->user_id = $id;
+                        $delivery_type_status->delivery_type_id = 2;
+                        $delivery_type_status->shipping_mode_id = 4;
+                        $delivery_type_status->status = 1;
+                        $delivery_type_status->save();
                     }
-
+                    else{
+                        CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->delete();
+                    }
 
 
                     //Replacement and Try and Buy charges
