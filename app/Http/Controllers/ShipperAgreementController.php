@@ -12,6 +12,7 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\PackagingCharge;
@@ -407,7 +408,13 @@ otherwise it will be rejected</li>
                 if($shipper->account_type_id == 1){
                     $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                 }else{
-                    $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    if($shipper->corporate_rate_type_id == 1 || $shipper->corporate_rate_type_id == null){
+                        $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }
+                    else{
+                        $weight_charges = CorporateWeightChargeZoneWise::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }
+
                 }
 
                 if($weight_charges){
