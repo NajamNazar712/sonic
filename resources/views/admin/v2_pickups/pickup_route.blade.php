@@ -654,6 +654,7 @@
 
                                 }
                             });
+                            $('#pickup_address').empty().trigger('change');
                         }
                     });
                 }
@@ -838,7 +839,8 @@
         $('#assign_location').on('hidden.bs.modal', function () {
             $('#pickup_address').val('').trigger('change');
             $('#users').val('').trigger('change');
-           // view_address.clear();
+            var view_address = $('#view_address').DataTable();
+            view_address.clear();
             view_address.draw();
             selected_rows = [];
             rows_count = 0;
