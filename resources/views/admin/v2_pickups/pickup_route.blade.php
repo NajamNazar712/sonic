@@ -263,6 +263,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -544,6 +545,7 @@
                 searching: false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'user', class: 'align-middle user form-group'},
                     {name: 'address', class: 'align-middle address form-group'},
                     {name: 'action', class: 'align-middle action'},
                 ],
@@ -611,16 +613,6 @@
 
                 if ($(this).hasClass('assign_location')) {
                     $('#assign_location').modal('show');
-                    $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
-                        width:'100%',
-                        placeholder:"Select Pickup Address",
-                        dropdownParent:$('#route_location')
-                    }).bind('select2:select',function(){
-                        var address_id = $(this).val();
-                        var address = $(this).text();
-                        add_row(address_id,address);
-
-                    });
 
                     $('#users').prepend('<option value="" selected="selected"></option>').select2({
                         width:'100%',
@@ -641,9 +633,9 @@
                                     $.each(data.addresses, function(key,value) {
                                         var newOption = new Option(value.pickup_address,value.id, false, false);
                                         $('#pickup_address').append(newOption).trigger('change');
+
                                     });
                                     $('#pickup_address').val('').trigger('change');
-
                                 }
                                 else {
                                     toastr.error(data.error, 'Error!', {
@@ -656,6 +648,18 @@
                             });
                             $('#pickup_address').empty().trigger('change');
                         }
+                    });
+                    $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+                        width:'100%',
+                        placeholder:"Select Pickup Address",
+                        allowClear:true,
+                        dropdownParent:$('#route_location')
+                    }).bind('select2:select',function(){
+                        var address_id = $(this).val();
+                        var address = $(this).text();
+                        var user = $( "#users option:selected" ).text();
+                        add_row(address_id,address,user);
+
                     });
                 }
             });
@@ -697,27 +701,39 @@
             var rows_count = 0;
             var selected_rows = [];
             var locations = [];
-            function add_row(pickup_address_id,pickup_address_location) {
-                rows_count++;
-                console.log(pickup_address_location);
-                if (rows_count == 1){
-                    var remove = '';
-                }else{
-                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
+            function add_row(pickup_address_id,pickup_address_location,user) {
+
+                var index = $.inArray(pickup_address_id, locations);
+                if (index === -1) {
+                    rows_count++;
+                    if (rows_count == 1){
+                        var remove = '';
+                    }else{
+                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                    }
+
+                    view_address.row.add([0,user,pickup_address_location,remove]).node().id = pickup_address_id;
                 }
-                view_address.row.add([0, pickup_address_location,remove]).node().id = pickup_address_id;
+                else{
+                    var error = "Address already exists";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+
+
                 locations.push(pickup_address_id);
                 view_address.draw(true);
-                console.log(locations);
+
                 $('#route_location #pickup_address_id').val(locations);
                 $('#edit').attr('disabled', false);
-
             }
 
             $('body').on('click', 'a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
-                console.log(rid);
                 var index = $.inArray(rid, locations);
 
                 if (index === -1) {
