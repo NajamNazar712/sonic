@@ -896,9 +896,8 @@
                             $('#BulkCommentModal').modal('hide');
                             table.draw('false');
                             table.button('.assign').disable();
-                            table.button('.un_tag').disable();
-                            table.button('.close_request').disable();
-                            table.button('.tag').disable();
+                            table.button('.valid').disable();
+                            table.button('.in_valid').disable();
                             table.button('.bulk_comment').disable();
                         });
                 } else {
