@@ -711,7 +711,6 @@
                         var remove = '';
                     }else{
                         var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-
                     }
 
                     view_address.row.add([0,user,pickup_address_location,remove]).node().id = pickup_address_id;
