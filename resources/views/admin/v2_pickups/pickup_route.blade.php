@@ -635,7 +635,7 @@
                                         $('#pickup_address').append(newOption).trigger('change');
 
                                     });
-                                    $('#pickup_address').val('').trigger('change');
+                                     $('#pickup_address').val('').trigger('change');
                                 }
                                 else {
                                     toastr.error(data.error, 'Error!', {
@@ -646,7 +646,7 @@
 
                                 }
                             });
-                            $('#pickup_address').empty().trigger('change');
+                            //$('#pickup_address').empty().trigger('change');
                         }
                     });
                     $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
@@ -655,7 +655,7 @@
                         allowClear:true,
                         dropdownParent:$('#route_location')
                     }).bind('select2:select',function(){
-                        var address_id = $(this).val();
+                        var address_id = parseInt($(this).val());
                         var address = $(this).text();
                         var user = $( "#users option:selected" ).text();
                         add_row(address_id,address,user);
@@ -714,6 +714,8 @@
                     }
 
                     view_address.row.add([0,user,pickup_address_location,remove]).node().id = pickup_address_id;
+                    locations.push(pickup_address_id);
+                    view_address.draw(true);
                 }
                 else{
                     var error = "Address already exists";
@@ -723,13 +725,9 @@
                     });
                 }
 
-
-                locations.push(pickup_address_id);
-                view_address.draw(true);
-
-                $('#route_location #pickup_address_id').val(locations);
                 $('#edit').attr('disabled', false);
             }
+
 
             $('body').on('click', 'a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
@@ -742,6 +740,7 @@
                 view_address.row( $(this).parents('tr') ).remove().draw();
             });
 
+
             $( "#route_location" ).validate({
 
                 errorClass:"danger",
@@ -750,6 +749,7 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $('#route_location #pickup_address_id').val(locations);
                     swal({
                         title: 'Please Wait!',
                         text: 'Location is being saved!',
@@ -762,7 +762,7 @@
                     form.submit();
                 }
             });
-        });
+
 
         $( "#editRouteForm" ).validate({
 
@@ -856,12 +856,13 @@
             $('#users').val('').trigger('change');
             var view_address = $('#view_address').DataTable();
             view_address.clear();
+            locations = [];
             view_address.draw();
             selected_rows = [];
             rows_count = 0;
             // $('#return_note_image_view_table tbody').html('');
         });
-
+        });
     </script>
 
 @endsection
