@@ -295,57 +295,14 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                   /* {
+                   {
                     text: 'Bulk Comment',
                     className: 'btn btn-primary bulk_comment',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         $('#BulkCommentModal').modal('show');
-
-                        $('#commentSubmit').on('click',function () {
-                            var comment = $('#BulkCommentModal #comment').val();
-                            if (comment) {
-                                $.ajax({
-                                    url: '{!! route('admin.crm.comment.bulk') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'comment': comment,
-                                        'crm_request_ids[]': selected_rows,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function (data) {
-                                        if (data.status == 1) {
-                                            $('#BulkCommentModal').modal('hide');
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        } else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-
-                                        selected_rows = [];
-                                        table.rows().deselect();
-                                        $('#comment').val('').trigger('change');
-                                        $('#BulkCommentModal').modal('hide');
-                                        table.draw('false');
-                                    });
-                            } else {
-                                var error = "Add Comment First!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        });
-
-
                     }
-                },*/
+                },
                     {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
@@ -441,95 +398,6 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             $('#AssignAgentModal').modal('show');
-
-                            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                            });
-                            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
-                                $('#assign_agent').val('').trigger('change');
-                            });
-                            $('#assign_agentSubmit').on('click',function () {
-                                var assign = parseInt($('#assign_agent').val());
-                                swal({
-                                    text: 'Are you sure, you want to Assign these Request(s)?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        if (assign) {
-                                            $.ajax({
-                                                url: '{!! route('admin.crm.assign') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'admin_id': assign,
-                                                    'crm_request_ids[]': selected_rows,
-                                                    'multiple': 1,
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                                .done(function (data) {
-                                                    if (data.status == 0) {
-                                                        $('#AssignAgentModal').modal('hide');
-                                                        toastr.success(data.success, 'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                    } else {
-                                                        toastr.error(data.error, 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center'
-                                                        });
-                                                    }
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
-
-                                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                            row.deselect();
-
-                                                            id = parseInt(row.id());
-
-                                                            var index = $.inArray(id, selected_rows);
-
-                                                            if (index !== -1) {
-                                                                selected_rows.splice(index, 1);
-                                                            }
-
-                                                            if (selected_rows.length == 0) {
-                                                                table.button('.assign').disable();
-                                                                table.button('.un_tag').disable();
-                                                                table.button('.close_request').disable();
-                                                                table.button('.tag').disable();
-                                                            }
-                                                        }
-                                                    });
-                                                    $('#assign_agent').val('').trigger('change');
-                                                    table.draw('false');
-                                                });
-                                        } else {
-                                            var error = "Agent Not Selected!";
-                                            toastr.error(error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                    }
-                                });
-                            });
                         }
                     },
                         @endif
@@ -940,10 +808,137 @@
                 }
             });
 
+            $('#commentSubmit').on('click',function () {
+                var comment = $('#BulkCommentModal #comment').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment': comment,
+                            'crm_request_ids': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#BulkCommentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#comment').val('').trigger('change');
+                            $('#BulkCommentModal').modal('hide');
+                            table.draw('false');
+                        });
+                } else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
                 dropdownParent:$('#AssignAgentModal')
+            });
+
+            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                $('#assign_agent').val('').trigger('change');
+            });
+            $('#assign_agentSubmit').on('click',function () {
+                var assign = parseInt($('#assign_agent').val());
+                swal({
+                    text: 'Are you sure, you want to Assign these Request(s)?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        if (assign) {
+                            $.ajax({
+                                url: '{!! route('admin.crm.assign') !!}',
+                                method: 'POST',
+                                data: {
+                                    'admin_id': assign,
+                                    'crm_request_ids[]': selected_rows,
+                                    'multiple': 1,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 0) {
+                                        $('#AssignAgentModal').modal('hide');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+
+                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                            row.deselect();
+
+                                            id = parseInt(row.id());
+
+                                            var index = $.inArray(id, selected_rows);
+
+                                            if (index !== -1) {
+                                                selected_rows.splice(index, 1);
+                                            }
+
+                                            if (selected_rows.length == 0) {
+                                                table.button('.assign').disable();
+                                                table.button('.un_tag').disable();
+                                                table.button('.close_request').disable();
+                                                table.button('.tag').disable();
+                                            }
+                                        }
+                                    });
+                                    $('#assign_agent').val('').trigger('change');
+                                    table.draw('false');
+                                });
+                        } else {
+                            var error = "Agent Not Selected!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                });
             });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {

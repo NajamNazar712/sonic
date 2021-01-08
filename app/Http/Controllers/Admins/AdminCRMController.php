@@ -4014,9 +4014,10 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_comment_for_shipper(Request $request){
+
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
-        if($crm_request_ids){
+        if(count($crm_request_ids) > 0){
             if($comment != null){
                 foreach ($crm_request_ids as $request_id){
                     $crm_comment = new CrmComments();

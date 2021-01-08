@@ -324,56 +324,15 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    /*{
+                    {
                     text: 'Bulk Comment',
                     className: 'btn btn-primary bulk_comment',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         $('#BulkCommentModal').modal('show');
-                        $('#BulkCommentModal').on('shown.bs.modal',function (e) {
-                        });
-                        $('#commentSubmit').on('click',function () {
-                            var comment = $('#BulkCommentModal #comment').val();
-                            if (comment) {
-                                $.ajax({
-                                    url: '{!! route('admin.crm.comment.bulk') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'comment': comment,
-                                        'crm_request_ids[]': selected_rows,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                    .done(function (data) {
-                                        if (data.status == 1) {
-                                            $('#BulkCommentModal').modal('hide');
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        } else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                        selected_rows = [];
-                                        table.rows().deselect();
-                                        $('#comment').val('').trigger('change');
-                                        $('#BulkCommentModal').modal('hide');
-                                        table.draw('false');
-                                    });
-                            } else {
-                                var error = "Add Comment First!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        });
 
                     }
-                },*/
+                },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
                     {
                         text: 'Valid',
@@ -903,6 +862,46 @@
 
 
                     this.api().table().columns.adjust();
+                }
+            });
+
+            $('#commentSubmit').on('click',function () {
+                var comment = $('#BulkCommentModal #comment').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment': comment,
+                            'crm_request_ids[]': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#BulkCommentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#comment').val('').trigger('change');
+                            $('#BulkCommentModal').modal('hide');
+                            table.draw('false');
+                        });
+                } else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
                 }
             });
 
