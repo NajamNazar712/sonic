@@ -9605,20 +9605,21 @@ class AdminDashboardController extends Controller
     }
 
     public function assign_locations_submit(Request $request){
+
         $request->validate([
             'route_id' => 'required',
             'pickup_address' =>'required']);
 
         $route_id = $request->route_id;
-        $pickup_addresses = $request->pickup_address;
+        $pickup_addresses_ids = explode(',',$request->pickup_address_id);
 
-       foreach($pickup_addresses as $address){
+       foreach($pickup_addresses_ids as $address){
            RouteLocations::where('pickup_address_id',$address)->delete();
        }
         RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
-            foreach($pickup_addresses as $pickup_address){
+            foreach($pickup_addresses_ids as $pickup_address){
                 $location = new RouteLocations();
                 $location->route_id = $route_id;
                 $location->pickup_address_id = $pickup_address;
@@ -9628,11 +9629,18 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
     }
 
-    public function view_assign_locations(Request $request){
-        $route_id = $request->route_id;
-        if($route_id != null){
-            $pickup_addresses = RouteLocations::where('route_id',$route_id)->pluck('pickup_address_id')->toArray();
-            return response()->json(['pickup_address_ids' => $pickup_addresses]);
+    public function user_address(Request $request){
+
+        $user_id = $request->user_id;
+        if($user_id != null){
+            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.status',1)->get();
+            if($addresses)
+            {
+                return response()->json(['status'=> 1,'addresses' => $addresses]);
+            }
+            else{
+                return response()->json(['status'=> 0,'error' => 'Address Not Found']);
+            }
         }
     }
 
