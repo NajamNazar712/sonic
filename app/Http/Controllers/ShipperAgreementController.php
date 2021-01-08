@@ -74,9 +74,9 @@ class ShipperAgreementController extends Controller
                         page-break-inside: avoid;
                       }
 
-//                      table.table-bordered tbody tr td {
-//                        border: 1px solid #09262e !important;
-//                      }
+/*                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }*/
 
                       .color.primary {
                         background: #c8c8c8 !important;
@@ -362,6 +362,7 @@ otherwise it will be rejected</li>
                           
                         </tbody>
                       </table>';
+        $html .= $page;
 
             $international_rates = FALSE;
             $rate_status = FALSE;
@@ -381,226 +382,229 @@ otherwise it will be rejected</li>
             }
 
 
+            if($rate_status){
+                $packaging_details = '';
+                $packaging_charges = PackagingCharge::where('user_id', $id)->get();
+                if($packaging_charges){
+                $packaging_details .= '<table class="table table-sm table-bordered mb-0">
+                                    <tbody>';
 
-            $packaging_details = '';
-            $packaging_charges = PackagingCharge::where('user_id', $id)->get();
-            if($packaging_charges){
-            $packaging_details .= '<table class="table table-sm table-bordered mb-0">
-                                <tbody>';
 
+                    $ptype = '';
+                    $packaging_details .= '<tr class="color secondary"><td colspan="5"><strong>Packaging Materials</strong></td></tr>';
 
-                $ptype = '';
-                $packaging_details .= '<tr class="color secondary"><td colspan="5"><strong>Packaging Materials</strong></td></tr>';
-
-                foreach ($packaging_charges as $type){
-                    if($ptype != $type->type_id){
-                        $packaging_details .= '<tr class="color primary"><td colspan="5"><strong>' . $type->packaging_type->type . '</strong></td></tr>';
-                        $ptype = $type->type_id;
-                        $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
+                    foreach ($packaging_charges as $type){
+                        if($ptype != $type->type_id){
+                            $packaging_details .= '<tr class="color primary"><td colspan="5"><strong>' . $type->packaging_type->type . '</strong></td></tr>';
+                            $ptype = $type->type_id;
+                            $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
+                        }
+                        $packaging_details .= '<tr><td colspan="1">' . $type->packaging_size->size . '</td>';
+                        $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
                     }
-                    $packaging_details .= '<tr><td colspan="1">' . $type->packaging_size->size . '</td>';
-                    $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
+                    $packaging_details .=  '</tbody>
+                                  </table>';
                 }
-                $packaging_details .=  '</tbody>
-                              </table>';
-            }
-
-            if($shipper->account_type_id == 1){
-                $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
-
-            }else if($shipper->account_type_id == 2){
-                $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
-            }
-
-            $rate_details = '';
-
-            foreach ($rates_switch as $rate){
-                $service_type_details = '';
-                $chargeable_weight_details = '';
-                $weight_charges_details = '';
-                $service_type = ShippingMode::find($rate->shipping_mode_id);
-                $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
-<tr>
-<td><strong>Shipping Mode </strong></td>
-<td>' . $service_type->mode . '</td>
-</tr></thead></table></div></div>';
-
 
                 if($shipper->account_type_id == 1){
-                    $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
-                }else{
-                    $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
+
+                }else if($shipper->account_type_id == 2){
+                    $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
                 }
 
-                if($weight_charges){
-                    $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                    if($shipper->account_type_id == 2){
-                        $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
+                $rate_details = '';
 
-                        $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0 mt-0">
-                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                          </table></div></div>';
-                        $weight_charges_details .= $chargeable_weight_details;
-                        if($rate->shipping_mode_id != 4){
-                            $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                foreach ($rates_switch as $rate){
+                    $service_type_details = '';
+                    $chargeable_weight_details = '';
+                    $weight_charges_details = '';
+                    $service_type = ShippingMode::find($rate->shipping_mode_id);
+                    $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+    <tr>
+    <td><strong>Shipping Mode </strong></td>
+    <td>' . $service_type->mode . '</td>
+    </tr></thead></table></div></div>';
 
-                            foreach ($weight_charges as $weight_charge){
-                                if($weight_charge->delivery_type_id == 1){
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
-                                }
-                            }
 
-                            $corporate_delivery_type = CorporateDeliveryTypeStatus::where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2);
-                            if($corporate_delivery_type->exists()){
-                                $weight_charges_details .= '</tbody></table>';
-                                $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
-                                if($chargeable_weight){
-                                    $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                          </table></div></div>';
-                                    $weight_charges_details .= $chargeable_weight_details;
-                                }
+                    if($shipper->account_type_id == 1){
+                        $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }else{
+                        $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }
 
-                                $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                    if($weight_charges){
+                        $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
+                        if($shipper->account_type_id == 2){
+                            $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
+
+                            $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0 mt-0">
+                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                              </table></div></div>';
+                            $weight_charges_details .= $chargeable_weight_details;
+                            if($rate->shipping_mode_id != 4){
+                                $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+
                                 foreach ($weight_charges as $weight_charge){
-                                    if($weight_charge->delivery_type_id == 2){
+                                    if($weight_charge->delivery_type_id == 1){
                                         $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
                                     }
                                 }
-                                $weight_charges_details .= '</tbody></table>';
-                            }
 
-                        }else{
-                            $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>6hr Charges</th><th>Sameday Charges</th></tr></thead><tbody>';
+                                $corporate_delivery_type = CorporateDeliveryTypeStatus::where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2);
+                                if($corporate_delivery_type->exists()){
+                                    $weight_charges_details .= '</tbody></table>';
+                                    $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
+                                    if($chargeable_weight){
+                                        $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                              </table></div></div>';
+                                        $weight_charges_details .= $chargeable_weight_details;
+                                    }
 
-                            foreach ($weight_charges as $weight_charge){
-                                if($weight_charge->delivery_type_id == 1){
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
-                                }
-                            }
-                            $corporate_delivery_type = CorporateDeliveryTypeStatus::where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2);
-                            if($corporate_delivery_type->exists()){
-                                $weight_charges_details .= '</tbody></table>';
-
-                                $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
-                                if($chargeable_weight){
-                                    $chargeable_weight_details = '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                          </table></div></div>';
-                                    $weight_charges_details .= $chargeable_weight_details;
+                                    $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                                    foreach ($weight_charges as $weight_charge){
+                                        if($weight_charge->delivery_type_id == 2){
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                        }
+                                    }
+                                    $weight_charges_details .= '</tbody></table>';
                                 }
 
+                            }else{
                                 $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>6hr Charges</th><th>Sameday Charges</th></tr></thead><tbody>';
+
                                 foreach ($weight_charges as $weight_charge){
-                                    if($weight_charge->delivery_type_id == 2){
+                                    if($weight_charge->delivery_type_id == 1){
                                         $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                    }
+                                }
+                                $corporate_delivery_type = CorporateDeliveryTypeStatus::where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2);
+                                if($corporate_delivery_type->exists()){
+                                    $weight_charges_details .= '</tbody></table>';
+
+                                    $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
+                                    if($chargeable_weight){
+                                        $chargeable_weight_details = '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                              </table></div></div>';
+                                        $weight_charges_details .= $chargeable_weight_details;
+                                    }
+
+                                    $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>6hr Charges</th><th>Sameday Charges</th></tr></thead><tbody>';
+                                    foreach ($weight_charges as $weight_charge){
+                                        if($weight_charge->delivery_type_id == 2){
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                        }
+                                    }
+                                    $weight_charges_details .= '</tbody></table>';
+                                }
+
+
+                            }
+
+
+                        }
+                        if($shipper->account_type_id == 1) {
+                            if($rate->shipping_mode_id != 4){
+                                $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Local Charges</th><th>National Charges Class A</th><th>National Charges Class B</th><th>National Charges Class C</th><th>National Charges Class D</th></tr></thead><tbody>';
+
+                                foreach ($weight_charges as $weight_charge) {
+                                    if ($shipper->account_type_id == 1) {
+                                        $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                    }
+                                }
+                                $weight_charges_details .= '</tbody></table>';
+                            }else{
+                                $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>6hr Charges</th><th>Sameday  Charges</th></tr></thead><tbody>';
+
+                                foreach ($weight_charges as $weight_charge) {
+                                    if ($shipper->account_type_id == 1) {
+                                        $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
                                     }
                                 }
                                 $weight_charges_details .= '</tbody></table>';
                             }
 
-
                         }
-
-
                     }
-                    if($shipper->account_type_id == 1) {
-                        if($rate->shipping_mode_id != 4){
-                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Local Charges</th><th>National Charges Class A</th><th>National Charges Class B</th><th>National Charges Class C</th><th>National Charges Class D</th></tr></thead><tbody>';
 
-                            foreach ($weight_charges as $weight_charge) {
-                                if ($shipper->account_type_id == 1) {
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
-                                }
-                            }
-                            $weight_charges_details .= '</tbody></table>';
-                        }else{
-                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>6hr Charges</th><th>Sameday  Charges</th></tr></thead><tbody>';
-
-                            foreach ($weight_charges as $weight_charge) {
-                                if ($shipper->account_type_id == 1) {
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
-                                }
-                            }
-                            $weight_charges_details .= '</tbody></table>';
-                        }
-
-                    }
-                }
-
-                $cash_handling_details = '';
-                if($shipper->account_type_id == 1){
-                    $cash_handling = CashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
-                }else{
-                    $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
-                }
-                if(count($cash_handling) > 0){
-                    $cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
-                    $cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
-                    foreach ($cash_handling as $cash){
-                        $cash_handling_details .= '<tr><td>' . $cash->range_up . '</td><td>' . $cash->range_down . '</td><td>' . $cash->charges . '</td></tr>';
-                    }
-                    $cash_handling_details .= '</tbody></table></div></div>';
-                }
-
-                $fuel_surcharge_charges_details = '';
-                if($shipper->account_type_id == 1){
-                    $fuel_surcharge = FuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                }else{
-                    $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                }
-                if($fuel_surcharge){
-                    $fuel_surcharge_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Fuel Surcharge </strong></thead></table></div></div>';
-                    $fuel_surcharge_charges_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                            <tbody><tr><td class="color primary" ><strong>Fuel Charges</strong></td><td>' . $fuel_surcharge->fuel_surcharge . '%</td></tr></tr></tbody>
-                          </table></div></div>';
-                }
-
-                $return_charges_details = '';
-                if($shipper->account_type_id == 1){
-                    $return_charges = ReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                }else{
-                    $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                }
-                if($return_charges){
-                    $return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
-                    if($rate->shipping_mode_id != 4){
-
-
-                            $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
-                            foreach ($return_charges as $return_charge){
-                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $return_charges->national_charges_class_3 . '</td></tr>';
-                            }
-                            $return_charges_details .= '</tbody></table></div></div>';
-
-
+                    $cash_handling_details = '';
+                    if($shipper->account_type_id == 1){
+                        $cash_handling = CashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                     }else{
-                            $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>National</th></tr></thead><tbody>';
-                            foreach ($return_charges as $return_charge){
-                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td></tr>';
-                            }
-                            $return_charges_details .= '</tbody></table></div></div>';
-
+                        $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                     }
+                    if(count($cash_handling) > 0){
+                        $cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
+                        $cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
+                        foreach ($cash_handling as $cash){
+                            $cash_handling_details .= '<tr><td>' . $cash->range_up . '</td><td>' . $cash->range_down . '</td><td>' . $cash->charges . '</td></tr>';
+                        }
+                        $cash_handling_details .= '</tbody></table></div></div>';
+                    }
+
+                    $fuel_surcharge_charges_details = '';
+                    if($shipper->account_type_id == 1){
+                        $fuel_surcharge = FuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }else{
+                        $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }
+                    if($fuel_surcharge){
+                        $fuel_surcharge_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Fuel Surcharge </strong></thead></table></div></div>';
+                        $fuel_surcharge_charges_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                                <tbody><tr><td class="color primary" ><strong>Fuel Charges</strong></td><td>' . $fuel_surcharge->fuel_surcharge . '%</td></tr></tr></tbody>
+                              </table></div></div>';
+                    }
+
+                    $return_charges_details = '';
+                    if($shipper->account_type_id == 1){
+                        $return_charges = ReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }else{
+                        $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }
+                    if($return_charges){
+                        $return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
+                        if($rate->shipping_mode_id != 4){
+
+
+                                $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
+                                foreach ($return_charges as $return_charge){
+                                    $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $return_charges->national_charges_class_3 . '</td></tr>';
+                                }
+                                $return_charges_details .= '</tbody></table></div></div>';
+
+
+                        }else{
+                                $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>National</th></tr></thead><tbody>';
+                                foreach ($return_charges as $return_charge){
+                                    $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td></tr>';
+                                }
+                                $return_charges_details .= '</tbody></table></div></div>';
+
+                        }
+                    }
+
+
+
+                $rate_details .= $service_type_details;
+                $rate_details .= $weight_charges_details;
+                $rate_details .= $cash_handling_details;
+                $rate_details .= $fuel_surcharge_charges_details;
+                $rate_details .= $return_charges_details;
+                $rate_details .= '<div class="new-page"></div>';
                 }
 
+                $html .= $packaging_details;
+                $html .= $rate_details;
+            }
 
+            if($international_rates){
 
-            $rate_details .= $service_type_details;
-            $rate_details .= $weight_charges_details;
-            $rate_details .= $cash_handling_details;
-            $rate_details .= $fuel_surcharge_charges_details;
-            $rate_details .= $return_charges_details;
-            $rate_details .= '<div class="new-page"></div>';
             }
 
 
 
-
-        $html .= $page;
-        $html .= $packaging_details;
-
-        $html .= $rate_details;
         $html .=$claim_policy;
         $html .= '</div>';
         $fuel_charge = '';
