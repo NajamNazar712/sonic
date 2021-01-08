@@ -668,9 +668,8 @@
                 $('#edit').attr('disabled', false);
             }
 
-            var addresses = [];
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                
+
                 var route_id = $(this).parents('tr').attr('id');
 
                 $('#route_id').val(route_id);
@@ -695,7 +694,7 @@
                             'user_id': this.value,
                         }
                     }).done(function(data){
-                        console.log(locations);
+
                         if (data.status == 1) {
                             $('#pickup_address').empty().trigger('change');
                             $.each(data.addresses, function(key,value) {
@@ -733,7 +732,7 @@
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, locations);
 
-                if (index === -1) {
+                if (index !== -1) {
                     locations.splice(index, 1);
                 }
                 $('#route_location #pickup_address_id').val(locations);
@@ -785,8 +784,6 @@
                 form.submit();
             }
         });
-
-
 
         $( "#addRouteForm" ).validate({
 

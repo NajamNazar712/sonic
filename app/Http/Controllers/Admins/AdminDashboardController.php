@@ -9609,21 +9609,13 @@ class AdminDashboardController extends Controller
     }
 
     public function assign_locations_submit(Request $request){
-
-        $request->validate([
-            'route_id' => 'required',
-            'pickup_address' =>'required']);
-
         $route_id = $request->route_id;
-        $pickup_addresses_ids = explode(',',$request->pickup_address_id);
-
-       foreach($pickup_addresses_ids as $address){
-           RouteLocations::where('pickup_address_id',$address)->delete();
-       }
-        //RouteLocations::where('route_id',$route_id)->delete();
+        $pickup_address_ids = explode(',',$request->pickup_address_id);
+//        RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
-            foreach($pickup_addresses_ids as $pickup_address){
+            RouteLocations::whereIn('pickup_address_id',$pickup_address_ids)->delete();
+            foreach($pickup_address_ids as $pickup_address){
                 $location = new RouteLocations();
                 $location->route_id = $route_id;
                 $location->pickup_address_id = $pickup_address;
