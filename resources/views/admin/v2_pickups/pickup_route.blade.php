@@ -603,66 +603,6 @@
 
                     }
             });
-            var addresses = [];
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-
-
-                var route_id = table.row( $(this).parents('tr') ).data().id;
-
-                $('#route_id').val(route_id);
-
-                if ($(this).hasClass('assign_location')) {
-                    $('#assign_location').modal('show');
-
-                    $('#users').prepend('<option value="" selected="selected"></option>').select2({
-                        width:'100%',
-                        placeholder:"Select Shipper",
-                        dropdownParent:$('#route_location')
-                    }).bind('select2:select', function () {
-                        if(this.value){
-                            $.ajax({
-                                url: '{!! route('admin.management.route.user_address') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'user_id': this.value,
-                                }
-                            }).done(function(data){
-                                if (data.status == 1) {
-                                    $('#pickup_address').empty().trigger('change');
-                                    $.each(data.addresses, function(key,value) {
-                                        var newOption = new Option(value.pickup_address,value.id, false, false);
-                                        $('#pickup_address').append(newOption).trigger('change');
-
-                                    });
-                                     $('#pickup_address').val('').trigger('change');
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                    $('#assign_location').modal('hide');
-
-                                }
-                            });
-                            //$('#pickup_address').empty().trigger('change');
-                        }
-                    });
-                    $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
-                        width:'100%',
-                        placeholder:"Select Pickup Address",
-                        allowClear:true,
-                        dropdownParent:$('#route_location')
-                    }).bind('select2:select',function(){
-                        var address_id = parseInt($(this).val());
-                        var address = $(this).text();
-                        var user = $( "#users option:selected" ).text();
-                        add_row(address_id,address,user);
-
-                    });
-                }
-            });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu  .dropdown-item', function() {
 
@@ -728,7 +668,67 @@
                 $('#edit').attr('disabled', false);
             }
 
+            var addresses = [];
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                
+                var route_id = $(this).parents('tr').attr('id');
 
+                $('#route_id').val(route_id);
+
+                if ($(this).hasClass('assign_location')) {
+                    $('#assign_location').modal('show');
+
+                }
+            });
+
+            $('#users').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                dropdownParent:$('#route_location')
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.management.route.user_address') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'user_id': this.value,
+                        }
+                    }).done(function(data){
+                        console.log(locations);
+                        if (data.status == 1) {
+                            $('#pickup_address').empty().trigger('change');
+                            $.each(data.addresses, function(key,value) {
+                                var newOption = new Option(value.pickup_address,value.id, false, false);
+                                $('#pickup_address').append(newOption).trigger('change');
+
+                            });
+                            $('#pickup_address').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#assign_location').modal('hide');
+
+                        }
+                    });
+                    //$('#pickup_address').empty().trigger('change');
+                }
+            });
+            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Pickup Address",
+                allowClear:true,
+                dropdownParent:$('#route_location')
+            }).bind('select2:select',function(){
+                var address_id = parseInt($(this).val());
+                var address = $(this).text();
+                var user = $( "#users option:selected" ).text();
+                add_row(address_id,address,user);
+
+            });
             $('body').on('click', 'a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, locations);
