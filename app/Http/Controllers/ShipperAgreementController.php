@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\City;
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateFuelSurcharge;
@@ -14,6 +15,7 @@ use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\InternationalRatesHub;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\RateStatus;
@@ -420,7 +422,7 @@ otherwise it will be rejected</li>
                     $chargeable_weight_details = '';
                     $weight_charges_details = '';
                     $service_type = ShippingMode::find($rate->shipping_mode_id);
-                    $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+                    $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary">
     <tr>
     <td><strong>Shipping Mode </strong></td>
     <td>' . $service_type->mode . '</td>
@@ -600,7 +602,33 @@ otherwise it will be rejected</li>
             }
 
             if($international_rates){
+                $international_rate_boxes = '';
+                $international_rate_statuses = InternationalRatesStatus::where('user_id', $id)->get();
+                if(count($international_rate_statuses) > 0){
+                    $international_rate_hubs = InternationalRatesHub::all()->where('user_id', $shipper_id)->groupBy('box_id');
 
+                    $intl_box = '';
+                    foreach ($international_rate_statuses as $index => $rate_status){
+                        $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
+                        <tr><td><strong>International Rate(s) '. $rate_status->box_id .'</strong></td></tr></thead></table>';
+                        $rate_hubs = '';
+                        if(count($international_rate_hubs) > 0){
+                            foreach ($international_rate_hubs[$rate_status->box_id] as $rate_hub){
+
+                                if($rate_hub->box_id == $rate_status->box_id){
+                                    $rate_hubs .= City::find($rate_hub->hub_id)->name . ', ';
+                                }
+                            }
+                            $intl_box .= '<div class="row mb-0"><div class="col-12"><table class="table table-sm table-bordered mb-0 mt-0">
+                                <tbody><tr><td class="color primary" ><strong>Hub(s)</strong></td><td>' . $rate_hubs . '</td></tr></tbody>
+                              </table></div></div>';
+                            $intl_box .= '</div></div>';
+                        }
+
+                    }
+                    $international_rate_boxes .= $intl_box;
+                    $html .= $international_rate_boxes;
+                }
             }
 
 

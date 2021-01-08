@@ -258,12 +258,12 @@
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_up }}" disabled>
+                                                            <input name="ins_range_up[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $insurance_charge->range_up }}" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" disabled value="{{ $insurance_charge->range_down }}" disabled>
+                                                            <input name="ins_range_down[1][1]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" value="{{ $insurance_charge->range_down }}" disabled>
                                                         </fieldset>
                                                     </div>
 
