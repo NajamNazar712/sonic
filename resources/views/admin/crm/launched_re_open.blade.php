@@ -330,7 +330,6 @@
                     enabled: false,
                     action: function (e, dt, node, config) {
                         $('#BulkCommentModal').modal('show');
-
                     }
                 },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
@@ -427,8 +426,7 @@
                                                 'valid': 0,
                                                 '_token': '{{ csrf_token() }}'
                                             }
-                                        })
-                                            .done(function (data) {
+                                        }).done(function (data) {
                                                 if (data.status == 1) {
                                                     $('#AssignAgentModal').modal('hide');
                                                     toastr.success(data.success, 'Success!', {
@@ -460,8 +458,6 @@
                         action: function (e, dt, node, config) {
                             $('#AssignAgentModal').modal('show');
 
-                            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                            });
                             $('#AssignAgentModal').on('hide.bs.modal', function (e) {
                                 $('#assign_agent').val('').trigger('change');
                             });
@@ -518,6 +514,10 @@
                                                     table.rows().deselect();
 
                                                     table.draw('false');
+                                                    table.button('.assign').disable();
+                                                    table.button('.valid').disable();
+                                                    table.button('.in_valid').disable();
+                                                    table.button('.bulk_comment').disable();
                                                 });
                                         } else {
                                             var error = "Agent Not Selected!";
@@ -895,6 +895,11 @@
                             $('#comment').val('').trigger('change');
                             $('#BulkCommentModal').modal('hide');
                             table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.un_tag').disable();
+                            table.button('.close_request').disable();
+                            table.button('.tag').disable();
+                            table.button('.bulk_comment').disable();
                         });
                 } else {
                     var error = "Add Comment First!";

@@ -375,15 +375,16 @@
                                                     if (index !== -1) {
                                                         selected_rows.splice(index, 1);
                                                     }
-
-                                                    if (selected_rows.length == 0) {
-                                                        table.button('.assign').disable();
-                                                        table.button('.un_tag').disable();
-                                                        table.button('.close_request').disable();
-                                                        table.button('.tag').disable();
-                                                    }
                                                 }
                                             });
+                                            if (selected_rows.length == 0) {
+                                                table.button('.assign').disable();
+                                                table.button('.un_tag').disable();
+                                                table.button('.close_request').disable();
+                                                table.button('.tag').disable();
+                                                table.button('.bulk_comment').disable();
+
+                                            }
                                             table.draw('false');
                                         });
                                     }
@@ -469,6 +470,8 @@
                                                                 table.button('.un_tag').disable();
                                                                 table.button('.close_request').disable();
                                                                 table.button('.tag').disable();
+                                                                table.button('.bulk_comment').disable();
+
                                                             }
                                                         }
                                                     });
@@ -819,8 +822,7 @@
                             'crm_request_ids': selected_rows,
                             '_token': '{{ csrf_token() }}'
                         }
-                    })
-                        .done(function (data) {
+                    }).done(function (data) {
                             if (data.status == 1) {
                                 $('#BulkCommentModal').modal('hide');
                                 toastr.success(data.success, 'Success!', {
@@ -839,6 +841,11 @@
                             $('#comment').val('').trigger('change');
                             $('#BulkCommentModal').modal('hide');
                             table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.un_tag').disable();
+                            table.button('.close_request').disable();
+                            table.button('.tag').disable();
+                            table.button('.bulk_comment').disable();
                         });
                 } else {
                     var error = "Add Comment First!";
