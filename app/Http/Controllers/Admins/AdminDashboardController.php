@@ -9620,7 +9620,7 @@ class AdminDashboardController extends Controller
        foreach($pickup_addresses_ids as $address){
            RouteLocations::where('pickup_address_id',$address)->delete();
        }
-        RouteLocations::where('route_id',$route_id)->delete();
+        //RouteLocations::where('route_id',$route_id)->delete();
 
         if($route_id){
             foreach($pickup_addresses_ids as $pickup_address){
