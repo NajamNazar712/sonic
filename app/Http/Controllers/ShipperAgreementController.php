@@ -383,26 +383,29 @@ otherwise it will be rejected</li>
 
 
             $packaging_details = '';
-            if($shipper->account_type_id == 1){
-                $packaging_details .= '<table class="table table-sm table-bordered mb-0">
-                            <tbody>';
-                $packaging_charges = PackagingCharge::where('user_id', $id)->get();
-                if($packaging_charges){
-                    $ptype = '';
-                    $packaging_details .= '<tr class="color secondary"><td colspan="5"><strong>Packaging Materials</strong></td></tr>';
+            $packaging_charges = PackagingCharge::where('user_id', $id)->get();
+            if($packaging_charges){
+            $packaging_details .= '<table class="table table-sm table-bordered mb-0">
+                                <tbody>';
 
-                    foreach ($packaging_charges as $type){
-                        if($ptype != $type->type_id){
-                            $packaging_details .= '<tr class="color primary"><td colspan="5"><strong>' . $type->packaging_type->type . '</strong></td></tr>';
-                            $ptype = $type->type_id;
-                            $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
-                        }
-                        $packaging_details .= '<tr><td colspan="1">' . $type->packaging_size->size . '</td>';
-                        $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
+
+                $ptype = '';
+                $packaging_details .= '<tr class="color secondary"><td colspan="5"><strong>Packaging Materials</strong></td></tr>';
+
+                foreach ($packaging_charges as $type){
+                    if($ptype != $type->type_id){
+                        $packaging_details .= '<tr class="color primary"><td colspan="5"><strong>' . $type->packaging_type->type . '</strong></td></tr>';
+                        $ptype = $type->type_id;
+                        $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
                     }
+                    $packaging_details .= '<tr><td colspan="1">' . $type->packaging_size->size . '</td>';
+                    $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
                 }
                 $packaging_details .=  '</tbody>
-                          </table>';
+                              </table>';
+            }
+
+            if($shipper->account_type_id == 1){
                 $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
 
             }else if($shipper->account_type_id == 2){
@@ -531,7 +534,7 @@ otherwise it will be rejected</li>
                 }else{
                     $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                 }
-                if($cash_handling){
+                if(count($cash_handling) > 0){
                     $cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
                     $cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
                     foreach ($cash_handling as $cash){
