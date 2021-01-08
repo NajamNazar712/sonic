@@ -71,6 +71,32 @@
         </div>
     </div>
     </section>
+    <div class="modal fade text-left" id="BulkCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkCommentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Comment </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <div class="col">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="5" id="comment" placeholder="Add Comment"></textarea>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success" id="commentSubmit">Save</button>
+                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -269,6 +295,14 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                   {
+                    text: 'Bulk Comment',
+                    className: 'btn btn-primary bulk_comment',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        $('#BulkCommentModal').modal('show');
+                    }
+                },
                     {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
@@ -341,15 +375,16 @@
                                                     if (index !== -1) {
                                                         selected_rows.splice(index, 1);
                                                     }
-
-                                                    if (selected_rows.length == 0) {
-                                                        table.button('.assign').disable();
-                                                        table.button('.un_tag').disable();
-                                                        table.button('.close_request').disable();
-                                                        table.button('.tag').disable();
-                                                    }
                                                 }
                                             });
+                                            if (selected_rows.length == 0) {
+                                                table.button('.assign').disable();
+                                                table.button('.un_tag').disable();
+                                                table.button('.close_request').disable();
+                                                table.button('.tag').disable();
+                                                table.button('.bulk_comment').disable();
+
+                                            }
                                             table.draw('false');
                                         });
                                     }
@@ -364,95 +399,6 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             $('#AssignAgentModal').modal('show');
-
-                            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                            });
-                            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
-                                $('#assign_agent').val('').trigger('change');
-                            });
-                            $('#assign_agentSubmit').on('click',function () {
-                                var assign = parseInt($('#assign_agent').val());
-                                swal({
-                                    text: 'Are you sure, you want to Assign these Request(s)?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        if (assign) {
-                                            $.ajax({
-                                                url: '{!! route('admin.crm.assign') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'admin_id': assign,
-                                                    'crm_request_ids[]': selected_rows,
-                                                    'multiple': 1,
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                                .done(function (data) {
-                                                    if (data.status == 0) {
-                                                        $('#AssignAgentModal').modal('hide');
-                                                        toastr.success(data.success, 'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                    } else {
-                                                        toastr.error(data.error, 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center'
-                                                        });
-                                                    }
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
-
-                                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                            row.deselect();
-
-                                                            id = parseInt(row.id());
-
-                                                            var index = $.inArray(id, selected_rows);
-
-                                                            if (index !== -1) {
-                                                                selected_rows.splice(index, 1);
-                                                            }
-
-                                                            if (selected_rows.length == 0) {
-                                                                table.button('.assign').disable();
-                                                                table.button('.un_tag').disable();
-                                                                table.button('.close_request').disable();
-                                                                table.button('.tag').disable();
-                                                            }
-                                                        }
-                                                    });
-                                                    $('#assign_agent').val('').trigger('change');
-                                                    table.draw('false');
-                                                });
-                                        } else {
-                                            var error = "Agent Not Selected!";
-                                            toastr.error(error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                    }
-                                });
-                            });
                         }
                     },
                         @endif
@@ -524,6 +470,8 @@
                                                                 table.button('.un_tag').disable();
                                                                 table.button('.close_request').disable();
                                                                 table.button('.tag').disable();
+                                                                table.button('.bulk_comment').disable();
+
                                                             }
                                                         }
                                                     });
@@ -560,6 +508,7 @@
                                     table.button('.close_request').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
+                                    table.button('.bulk_comment').enable();
 
                                 }
                             });
@@ -590,6 +539,7 @@
                                         table.button('.close_request').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
+                                        table.button('.bulk_comment').disable();
                                     }
                                 }
                             });
@@ -861,10 +811,141 @@
                 }
             });
 
+            $('#commentSubmit').on('click',function () {
+                var comment = $('#BulkCommentModal #comment').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment': comment,
+                            'crm_request_ids': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                            if (data.status == 1) {
+                                $('#BulkCommentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#comment').val('').trigger('change');
+                            $('#BulkCommentModal').modal('hide');
+                            table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.un_tag').disable();
+                            table.button('.close_request').disable();
+                            table.button('.tag').disable();
+                            table.button('.bulk_comment').disable();
+                        });
+                } else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
                 dropdownParent:$('#AssignAgentModal')
+            });
+
+            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                $('#assign_agent').val('').trigger('change');
+            });
+            $('#assign_agentSubmit').on('click',function () {
+                var assign = parseInt($('#assign_agent').val());
+                swal({
+                    text: 'Are you sure, you want to Assign these Request(s)?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        if (assign) {
+                            $.ajax({
+                                url: '{!! route('admin.crm.assign') !!}',
+                                method: 'POST',
+                                data: {
+                                    'admin_id': assign,
+                                    'crm_request_ids[]': selected_rows,
+                                    'multiple': 1,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 0) {
+                                        $('#AssignAgentModal').modal('hide');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+
+                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                            row.deselect();
+
+                                            id = parseInt(row.id());
+
+                                            var index = $.inArray(id, selected_rows);
+
+                                            if (index !== -1) {
+                                                selected_rows.splice(index, 1);
+                                            }
+
+                                            if (selected_rows.length == 0) {
+                                                table.button('.assign').disable();
+                                                table.button('.un_tag').disable();
+                                                table.button('.close_request').disable();
+                                                table.button('.tag').disable();
+                                            }
+                                        }
+                                    });
+                                    $('#assign_agent').val('').trigger('change');
+                                    table.draw('false');
+                                });
+                        } else {
+                            var error = "Agent Not Selected!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                });
             });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
@@ -884,12 +965,14 @@
                     table.button('.close_request').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
+                    table.button('.bulk_comment').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
+                    table.button('.bulk_comment').disable();
                 }
             });
 

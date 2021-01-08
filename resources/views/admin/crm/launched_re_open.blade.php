@@ -90,6 +90,32 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="BulkCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkCommentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Comment </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <div class="col">
+                                <div class="form-group">
+                                    <textarea class="form-control" rows="5" id="comment" placeholder="Add Comment"></textarea>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-success" id="commentSubmit">Save</button>
+                                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                </div>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
 
     {{--<div class="modal fade text-left" id="UpdateRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateRequestModal"--}}
          {{--aria-hidden="true">--}}
@@ -298,6 +324,14 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                    text: 'Bulk Comment',
+                    className: 'btn btn-primary bulk_comment',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        $('#BulkCommentModal').modal('show');
+                    }
+                },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
                     {
                         text: 'Valid',
@@ -392,8 +426,7 @@
                                                 'valid': 0,
                                                 '_token': '{{ csrf_token() }}'
                                             }
-                                        })
-                                            .done(function (data) {
+                                        }).done(function (data) {
                                                 if (data.status == 1) {
                                                     $('#AssignAgentModal').modal('hide');
                                                     toastr.success(data.success, 'Success!', {
@@ -425,8 +458,6 @@
                         action: function (e, dt, node, config) {
                             $('#AssignAgentModal').modal('show');
 
-                            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                            });
                             $('#AssignAgentModal').on('hide.bs.modal', function (e) {
                                 $('#assign_agent').val('').trigger('change');
                             });
@@ -483,6 +514,10 @@
                                                     table.rows().deselect();
 
                                                     table.draw('false');
+                                                    table.button('.assign').disable();
+                                                    table.button('.valid').disable();
+                                                    table.button('.in_valid').disable();
+                                                    table.button('.bulk_comment').disable();
                                                 });
                                         } else {
                                             var error = "Agent Not Selected!";
@@ -521,6 +556,7 @@
                                     table.button('.assign').enable();
                                     table.button('.valid').enable();
                                     table.button('.in_valid').enable();
+                                    table.button('.bulk_comment').enable();
                                 }
                             });
                         }
@@ -549,6 +585,7 @@
                                         table.button('.assign').disable();
                                         table.button('.valid').disable();
                                         table.button('.in_valid').disable();
+                                        table.button('.bulk_comment').disable();
                                     }
                                 }
                             });
@@ -828,6 +865,50 @@
                 }
             });
 
+            $('#commentSubmit').on('click',function () {
+                var comment = $('#BulkCommentModal #comment').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment': comment,
+                            'crm_request_ids[]': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#BulkCommentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#comment').val('').trigger('change');
+                            $('#BulkCommentModal').modal('hide');
+                            table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.valid').disable();
+                            table.button('.in_valid').disable();
+                            table.button('.bulk_comment').disable();
+                        });
+                } else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
@@ -880,11 +961,13 @@
                     table.button('.assign').enable();
                     table.button('.valid').enable();
                     table.button('.in_valid').enable();
+                    table.button('.bulk_comment').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.valid').disable();
                     table.button('.in_valid').disable();
+                    table.button('.bulk_comment').disable();
                 }
             });
 

@@ -474,6 +474,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
+        Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -554,7 +555,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
         Route::get('{id}/view/rates/{date?}','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
         Route::post('reject/submit','Admins\AdminCorporateAccountsController@rejectReasonSubmit')->name('rejectreason.submit');
-
+        Route::prefix('zone_wise')->name('zone_wise.')->group(function (){
+            Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_zone_wise_submit')->name('add.rates');
+            Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_zone_wise_submit')->name('edit.rates');
+        });
     });
     //ajax request
 
@@ -2343,6 +2347,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
             Route::post('edit', 'Admins\AdminCRMController@edit_comment')->name('edit');
+            Route::post('bulk', 'Admins\AdminCRMController@bulk_comment_for_shipper')->name('bulk');
         });
         Route::post('escalation_status', 'Admins\AdminCRMController@escalation_status')->name('escalation_status');
         Route::post('escalate', 'Admins\AdminCRMController@escalate')->name('escalate');
