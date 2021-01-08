@@ -323,7 +323,8 @@
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                    /*{
                     text: 'Bulk Comment',
                     className: 'btn btn-primary bulk_comment',
                     enabled: false,
@@ -372,7 +373,7 @@
                         });
 
                     }
-                },
+                },*/
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
                     {
                         text: 'Valid',
