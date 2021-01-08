@@ -96,6 +96,7 @@
                 </div>
             </div>
         </div>
+    </div>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -293,14 +294,14 @@
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                   /* {
                     text: 'Bulk Comment',
                     className: 'btn btn-primary bulk_comment',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         $('#BulkCommentModal').modal('show');
-                        $('#BulkCommentModal').on('shown.bs.modal',function (e) {
-                        });
+
                         $('#commentSubmit').on('click',function () {
                             var comment = $('#BulkCommentModal #comment').val();
                             if (comment) {
@@ -344,7 +345,7 @@
 
 
                     }
-                },
+                },*/
                     {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
