@@ -1599,8 +1599,9 @@ class AdminPettyCashController extends Controller
                     }
                     else if ($petty->finance_approved_by == null && $petty->operation_approved_by != null) {
                         return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
-                    } else if ($petty->finance_approved_by == null) {
-                        if (session('role_id') == 1 || in_array(173, session('permissions'))) {
+                    }
+                    else if ($petty->finance_received_statement_by != null && $petty->finance_approved_by == null){
+                            if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                             $petty->finance_approved_by = Auth::id();
                             $petty->finance_approved_at = Carbon::now();
                             $petty->status = 3;
