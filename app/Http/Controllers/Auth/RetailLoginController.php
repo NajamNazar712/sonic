@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,13 @@ class RetailLoginController extends Controller
                 auth('retail')->logout();
                 return back()->with('info', 'Your Account is Disabled, Contact Admin');
             }
+
+            $setting = GlobalSettings::where('type', 'retail_store')->first();
+            $shipper_user_id = $setting->setting_value;
+            $pickup_address_id = $admin->user()->store->pickup_address_id;
+            $category = $admin->user()->category;
+            $category_id = $admin->user()->category_id;
+            session(['user_id' => $shipper_user_id, 'pickup_address_id' => $pickup_address_id, 'category' => $category, 'category_id' => $category_id]);
             return redirect()->intended(route('retail.shipment.book.index'));
         }
         $errors = [$this->username() => trans('auth.failed')];

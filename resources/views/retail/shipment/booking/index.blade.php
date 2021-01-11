@@ -50,28 +50,28 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group text-center">
-                                        <label class="mr-1">Volumetric Weight</label>
-                                        <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
-                                    </div>
-                                    <div class="form-group volumetric_weights">
-                                        <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                    </div>
-                                    <div class="form-group volumetric_weights">
-                                        <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                    </div>
-                                    <div class="form-group volumetric_weights">
-                                        <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
-                                    </div>
                                     <div class="form-group d-none" id="domestic_overland_city_div">
                                         <select name="domestic_destination" id="domestic_overland_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
                                             @foreach($domestic_overland_cities as $domestic_overland_city)
                                                 <option value="{{$domestic_overland_city->id}}">{{$domestic_overland_city->name}}</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <label class="mr-1">Volumetric Weight</label>
+                                        <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="length" id="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="breadth" id="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group volumetric_weights">
+                                        <input type="text" name="height" id="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="weight" id="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
                                     </div>
 {{--                                    <div class="form-group">--}}
 {{--                                        <input name="discount" class="form-control discount" id="discount" placeholder="Discount" value="">--}}
@@ -86,9 +86,9 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">
-                                    </div>
+{{--                                    <div class="form-group">--}}
+{{--                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">--}}
+{{--                                    </div>--}}
                                 </div>
                                 <div id="consignee_shipper_info" class="ml-1 col-6 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
@@ -103,19 +103,19 @@
                                         <input type="text" name="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC*" data-rule-required="true" data-msg-required="Shipper CNIC is required">
                                     </div>
                                     <div class="form-group col">
-                                        <textarea name="shipper_address" class="form-control address" id="address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
+                                        <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
+                                        <input type="text" name="consignee_name" id="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC">
+                                        <input type="text" name="consignee_cnic" id="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC">
                                     </div>
                                     <div class="form-group col">
-                                        <textarea name="consignee_address" class="form-control address" id="address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
+                                        <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="col">
                                         <div class="row justify-content-end">
@@ -126,7 +126,7 @@
                                                 </select>
                                             </div>
                                             <div class="form-group col-6">
-                                                <input type="text" name="total_charges" class="form-control amount" placeholder="Total Charges*" data-rule-required="true" data-msg-required="Total Charges is required">
+                                                <input type="text" name="total_charges" id="total_charges" class="form-control amount" placeholder="Total Charges*" data-rule-required="true" data-msg-required="Total Charges is required">
                                             </div>
                                         </div>
                                         <div class="row d-none" id="insurance_amount_div">
@@ -143,12 +143,12 @@
                                                 </select>
                                             </div>
                                             <div class="form-group col-6">
-                                                <input type="text" name="gst_charges" class="form-control amount" placeholder="GST Charges*" data-rule-required="true" data-msg-required="GST Charges is required">
+                                                <input type="text" name="gst_charges" id="gst_charges" class="form-control amount" placeholder="GST Charges*" data-rule-required="true" data-msg-required="GST Charges is required">
                                             </div>
                                         </div>
                                         <div class="row justify-content-end">
                                             <div class="form-group col-6">
-                                                <input type="text" name="total_amount" class="form-control amount" placeholder="Total Amount*" data-rule-required="true" data-msg-required="Total Amount is required">
+                                                <input type="text" name="total_amount" id="total_amount" class="form-control amount" placeholder="Total Amount*" data-rule-required="true" data-msg-required="Total Amount is required">
                                             </div>
                                         </div>
                                     </div>
@@ -160,22 +160,22 @@
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
                                         </div>
                                     </div>
-                                    <div class="col pt-2">
-                                        <div class="form-group text-center p-1 border border-light rounded" style="background-color: black">
-                                            <div id='tiles'>
-                                                <span>0</span>
-                                                <span>0</span>
-                                                <span>0</span>
-                                                <span>0</span>
-                                                <span>0</span>
-                                                <span>0</span>
-                                            </div>
+{{--                                    <div class="col pt-2">--}}
+{{--                                        <div class="form-group text-center p-1 border border-light rounded" style="background-color: black">--}}
+{{--                                            <div id='tiles'>--}}
+{{--                                                <span>0</span>--}}
+{{--                                                <span>0</span>--}}
+{{--                                                <span>0</span>--}}
+{{--                                                <span>0</span>--}}
+{{--                                                <span>0</span>--}}
+{{--                                                <span>0</span>--}}
+{{--                                            </div>--}}
 
-                                            <div class="mt-1">
-                                                <h6 class="white">Incentive Counter</h6>
-                                            </div>
-                                        </div>
-                                    </div>
+{{--                                            <div class="mt-1">--}}
+{{--                                                <h6 class="white">Incentive Counter</h6>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
                                     <div class="row justify-content-center">
                                         <div class="position-absolute" style="bottom: 0;">
                                             <div class="form-group text-center d-none" id="save">
@@ -414,8 +414,16 @@
             });
 
             $('#book').on('click', function () {
-               // var validator = $('#booking_form').valid();
-               // if(validator) {
+               var validator = $('#booking_form').valid();
+               if(validator) {
+                   swal({
+                       title: 'Please Wait!',
+                       text: 'Your shipment is being booked!',
+                       icon: 'info',
+                       buttons: false,
+                       closeOnClickOutside: false,
+                       closeOnEsc: false
+                   });
                     $('#book_button').val(0);
                    var booking_form = new FormData($('#booking_form')[0]);
                    $('#book').attr('disabled', true);
@@ -429,14 +437,51 @@
                        contentType: false,
                    })
                        .done(function (data) {
-                           console.log(data);
-                           // if (data.status) {
-                           //
-                           // }
+                           swal.close();
+                           if (data.status) {
+                               html = data.success;
+                               html += '</br>Please click on print button to print';
+
+                               content = document.createElement('div');
+                               content.innerHTML = html;
+
+                               swal({
+                                   title: 'Shipment Booked!',
+                                   content: content,
+                                   icon: 'success',
+                                   buttons: {
+                                       cancel: {
+                                           text: 'Close',
+                                           value: null,
+                                           visible: true,
+                                           closeModal: true,
+                                       },
+                                   },
+                                   closeOnClickOutside: false,
+                                   closeOnEsc: false,
+                                   dangerMode: true
+                               });
+                           }
                        });
+                        $('#length').val('');
+                        $('#breadth').val('');
+                        $('#height').val('');
+                        $('#weight').val('');
+                        $('#domestic_destination').val('').trigger('change');
+                        $('#domestic_overland_destination').val('').trigger('change');
+                        $('#pieces').val('');
+                        $('#consignee_phone_no').val('');
+                        $('#consignee_name').val('');
+                        $('#consignee_cnic').val('');
+                        $('#consignee_address').val('');
+                        $('#total_charges').val('');
+                        $('#gst_charges').val('');
+                        $('#total_amount').val('');
+                        $('#trax_box').val('').trigger('change');
 
                     $('#book_button').val(1);
-               // }
+                    $('#book').attr('disabled', false);
+               }
             });
 
             $('#booking_form').validate({
@@ -449,7 +494,15 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment is being booked!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
                 }
             });
         });
