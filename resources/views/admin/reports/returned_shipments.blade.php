@@ -12,15 +12,14 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                        <div id="track_form" class="form-inline mb-1 " novalidate="novalidate">
-
-                            <div class="col-4">
-                                <fieldset class="form-group">
-                                    <input type="text" name="tracking_numbers" class="tracking_numbers" id="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                                </fieldset>
-                             </div>
-
-                            <div class="col-4">
+                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="col-4">
+                     <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                        </div>
+                    </div>
+                        <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -42,10 +41,12 @@
                                     <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Returned Shipments Date (To)">
                                 </div>
                             </div>
-                            <div class="form-group ml-1">
-                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 mt-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                            </div>
+                    <div class="form-group justify-content-center">
+                        <button id="search_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width mt-2"><i
+                                    class="la la-search"></i> Search
+                        </button>
                     </div>
+                </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -145,35 +146,7 @@
                     'allowMinus': false,
                     'allowPlus': false
                 });
-            $('#track_form #dr_search_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #dr_search_date_to').pickadate('picker').set('min', $('#track_form #dr_search_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-
-            $('#track_form #dr_search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #dr_search_date_from').pickadate('picker').set('min', $('#track_form #dr_search_date_to').pickadate('picker').get('select'));
-                    }
-                }
-            });
-
-            var from_date = $('#dr_search_date_from').pickadate({
+            $('#dr_search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -187,19 +160,47 @@
                 }
             });
 
-            var to_date = $('#dr_search_date_to').pickadate({
+            $('#dr_search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#dr_search_date_from').pickadate('picker').set('max', $('#dr_search_date_to').pickadate('picker').get('select'));
+                        $('#dr_search_date_from').pickadate('picker').set('min', $('#dr_search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
+
+            // var from_date = $('#dr_search_date_from').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             $('#dr_search_date_to').pickadate('picker').set('min', $('#dr_search_date_from').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
+
+            // var to_date = $('#dr_search_date_to').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             $('#dr_search_date_from').pickadate('picker').set('max', $('#dr_search_date_to').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
 
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
