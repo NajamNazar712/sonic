@@ -929,7 +929,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('retail')->name('retail.')->group(function() {
                 Route::get('', 'Admins\Retail\RetailCompletedDeliveries@index')->name('index');
-                Route::get('list', 'Admins\Retail\DeliveryController@list')->name('list');
+                Route::get('list', 'Admins\Retail\RetailCompletedDeliveries@list')->name('list');
+                Route::post('shipments/delivered','Admins\Retail\RetailPendingCashCollection@shipments_delivered')->name('shipments.delivered');
+                Route::post('collect', 'Admins\Retail\RetailPendingCashCollection@pending_cash_collect')->name('collect');
+                Route::post('all','Admins\Retail\RetailPendingCashCollection@pending_cash_collect_all')->name('all');
             });
         });
         Route::prefix('sdn')->name('sdn.')->group(function (){

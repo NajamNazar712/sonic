@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Cash Collection Retail')
+@section('title', 'Completed Deliveries Retail')
 
 @section('content')
 
@@ -19,6 +19,14 @@
                         <div class="col-3">
                             <fieldset class="position-relative has-icon-left">
                                 <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
+                                <div class="form-control-position">
+                                    <i class="ft-search"></i>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="position-relative has-icon-left">
+                                <input type="text" class="form-control" placeholder="Scan To Select" id="select_dn">
                                 <div class="form-control-position">
                                     <i class="ft-search"></i>
                                 </div>
@@ -43,6 +51,7 @@
                             <th class="border-primary border-darken-1">Cash Collected By</th>
                             <th class="border-primary border-darken-1">Cash Collection Date</th>
                             <th class="border-primary border-darken-1">PNCC Amount</th>
+                            <th class="border-primary border-darken-1">Action</th>
                         </tr>
                         </thead>
                     </table>
@@ -332,6 +341,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -371,6 +381,40 @@
 
             $('#search_tracking').on('change',function () {
                 table.draw();
+            });
+            $('#select_dn').on('change',function () {
+                var id = $(this).val();
+                row = table.row('#' + id);
+                if(row.length >0) {
+                    row.select();
+                    scan_sound(1);
+                    if (hub_ids.length == 0) {
+                        hub_ids.push(row.data().hub_id);
+                    }
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+                        selected_rows.push(id);
+                    }
+                    else {
+                        row.deselect();
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length > 0) {
+                        table.button('.delivered').enable();
+                    }
+                    else {
+                        table.button('.delivered').disable();
+                        hub_ids.splice(index, 1);
+                    }
+                }else{
+                    scan_sound(2);
+                    var error = "Delivery Note not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                $(this).val('');
+
             });
             var hub_ids = [];
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
