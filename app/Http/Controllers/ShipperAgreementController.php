@@ -9,6 +9,7 @@ use App\Http\Models\City;
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
@@ -17,6 +18,7 @@ use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\InsuranceCharge;
 use App\Http\Models\InternationalRatesCashHandlingCharges;
 use App\Http\Models\InternationalRatesHub;
 use App\Http\Models\InternationalRatesInsuranceCharges;
@@ -597,6 +599,21 @@ otherwise it will be rejected</li>
                         $cash_handling_details .= '</tbody></table></div></div>';
                     }
 
+                    $insurance_charges_details = '';
+                    if($shipper->account_type_id == 1){
+                        $insurance_charges = InsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }else{
+                        $insurance_charges = CorporateInsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                    }
+                    if(count($insurance_charges) > 0){
+                        $insurance_charges_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Insurance Charges </strong></thead></table></div></div>';
+                        $insurance_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
+                        foreach ($insurance_charges as $insurance){
+                            $insurance_charges_details .= '<tr><td>' . $insurance->range_up . '</td><td>' . $insurance->range_down . '</td><td>' . $insurance->charges . '</td></tr>';
+                        }
+                        $insurance_charges_details .= '</tbody></table></div></div>';
+                    }
+
                     $fuel_surcharge_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $fuel_surcharge = FuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
@@ -664,6 +681,7 @@ otherwise it will be rejected</li>
                     $rate_details .= $service_type_details;
                     $rate_details .= $weight_charges_details;
                     $rate_details .= $cash_handling_details;
+                    $rate_details .= $insurance_charges_details;
                     $rate_details .= $fuel_surcharge_charges_details;
                     $rate_details .= $return_charges_details;
                     $rate_details .= '<div class="new-page"></div>';
