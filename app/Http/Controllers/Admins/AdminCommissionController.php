@@ -178,7 +178,7 @@ class AdminCommissionController extends Controller
           $shipper_id = $user->id;
           $status = $user->status;
             $total_commission = $request->total_commission;
-            $users_count = count($request->user_id);
+            $users_count = count($user_ids);
 
             $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
             if($sales_commission->exists()){
