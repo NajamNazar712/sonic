@@ -321,7 +321,7 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'franchise' ,name: 'rf.name', class: 'align-middle franchise text-center'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'code' ,name: 'rf.id.shipments_count', class: 'align-middle code text-center'},
+                    { data:'code' ,name: 'rf.code', class: 'align-middle code text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},

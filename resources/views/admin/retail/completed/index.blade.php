@@ -155,14 +155,14 @@
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {
-                        text: '<i class="la la-creative-commons"></i> Cash Collect',
-                        className: 'btn btn-primary cash_collect_all',
+                        text: 'Deposit DNCC',
+                        className: 'btn btn-primary delivered',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Select Yes to collect cash!',
+                                    text: 'Select Yes to Deposit DNCC!',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
@@ -187,42 +187,11 @@
                                         var delivery_note_ids = $('#delivery_note_ids').val();
                                         // console.log(delivery_note_ids)
                                         if(delivery_note_ids != ''){
-                                            $.ajax({
-                                                url:'{!! route('admin.delivery.cash_collection.retail.pending.all') !!}',
-                                                method:'POST',
-                                                data:{
-                                                    'delivery_note_ids':delivery_note_ids,
-                                                    '_token':'{{csrf_token()}}'
-                                                }
-                                            }).done(function (data) {
-                                                table.button(0).disable();
-                                                if(data.status == 1){
-                                                    $('#delivery_note_ids').val('');
-                                                    selected_rows = [];
-                                                    hub_ids = [];
-                                                    table.draw();
-                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                                }else{
-                                                    $('#delivery_note_ids').val('');
-                                                    table.draw();
-                                                    hub_ids = [];
-                                                    selected_rows = [];
-                                                    $msg = data.error;
-                                                    if(data.notes != null){
-                                                        $.each(data.notes,function (index,id) {
-                                                            $msg += '<br>';
-                                                            $msg += 'Delivery Note # '+id;
-                                                        });
-                                                    }
-                                                    toastr.error($msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                                }
-                                            });
+                                            $('#post_delivery_note_ids_form').submit();
                                         }
-
                                     }
                                 });
+
 
                             }else{
                                 var error = "Something went wrong please refresh page and try again!";
@@ -320,7 +289,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url:'{{ route('admin.delivery.cash_collection.retail.list') }}',
+                    url:'{{ route('admin.delivery.completed.retail.list') }}',
                     data:function (d) {
                         d.search_tracking = $('#search_tracking').val();
                     }
@@ -333,12 +302,12 @@
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'franchise' ,name: 'rf.name', class: 'align-middle franchise'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
+                    { data:'code' ,name: 'rf.code', class: 'align-middle code text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
+                    { data:'cash_collected' ,name: 'cash_collected', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
@@ -516,13 +485,13 @@
             });
 
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
+                $('#delivered_shipments_modal .modal-body').html('');
+                $('#delivered_shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.cash_collection.pending.shipments') !!}',
+                    url: '{!! route('admin.delivery.completed.shipments.delivered') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -538,7 +507,7 @@
                                     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                 });
                             }
-                            $('#shipments_modal .modal-body').html(html);
+                            $('#delivered_shipments_modal .modal-body').html(html);
                         }
                     });
 
