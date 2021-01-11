@@ -12,7 +12,9 @@ use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InternationalRatesCashHandlingCharges;
@@ -389,11 +391,18 @@ otherwise it will be rejected</li>
 
 
             if($rate_status){
+                $corporate_rate_type = 1;
+                if($shipper->corporate_rate_type_id == 1 || $shipper->corporate_rate_type_id == null){
+                    $corporate_rate_type = 1;
+                }
+                else{
+                    $corporate_rate_type = 2;
+                }
                 $packaging_details = '';
                 $packaging_charges = PackagingCharge::where('user_id', $id)->get();
                 if($packaging_charges){
-                $packaging_details .= '<table class="table table-sm table-bordered mb-0">
-                                    <tbody>';
+                    $packaging_details .= '<table class="table table-sm table-bordered mb-0">
+                                <tbody>';
 
 
                     $ptype = '';
@@ -409,7 +418,7 @@ otherwise it will be rejected</li>
                         $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
                     }
                     $packaging_details .=  '</tbody>
-                                  </table>';
+                              </table>';
                 }
 
                 if($shipper->account_type_id == 1){
@@ -426,17 +435,23 @@ otherwise it will be rejected</li>
                     $chargeable_weight_details = '';
                     $weight_charges_details = '';
                     $service_type = ShippingMode::find($rate->shipping_mode_id);
-                    $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary">
-    <tr>
-    <td><strong>Shipping Mode </strong></td>
-    <td>' . $service_type->mode . '</td>
-    </tr></thead></table></div></div>';
+                    $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Shipping Mode </strong></td>
+<td>' . $service_type->mode . '</td>
+</tr></thead></table></div></div>';
 
 
                     if($shipper->account_type_id == 1){
                         $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                     }else{
-                        $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        if($corporate_rate_type == 1){
+                            $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
+                        else{
+                            $weight_charges = CorporateWeightChargeZoneWise::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
+
                     }
 
                     if($weight_charges){
@@ -445,15 +460,26 @@ otherwise it will be rejected</li>
                             $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
 
                             $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0 mt-0">
-                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                              </table></div></div>';
+                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                          </table></div></div>';
                             $weight_charges_details .= $chargeable_weight_details;
                             if($rate->shipping_mode_id != 4){
-                                $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                                if($corporate_rate_type == 1){
+                                    $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                                }
+                                else{
+                                    $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (Same-Zone)</th><th>Flat Charges/KG (Different-Zone)</th></tr></thead><tbody>';
+                                }
+
 
                                 foreach ($weight_charges as $weight_charge){
                                     if($weight_charge->delivery_type_id == 1){
-                                        $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                        if($corporate_rate_type == 1){
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                        }
+                                        else{
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local . '</td><td>' . $weight_charge->same_zone . '</td><td>' . $weight_charge->different_zone . '</td></tr>';
+                                        }
                                     }
                                 }
 
@@ -463,15 +489,25 @@ otherwise it will be rejected</li>
                                     $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
                                     if($chargeable_weight){
                                         $chargeable_weight_details = '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                              </table></div></div>';
+                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                          </table></div></div>';
                                         $weight_charges_details .= $chargeable_weight_details;
                                     }
+                                    if($corporate_rate_type == 1){
+                                        $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
+                                    }
+                                    else{
+                                        $weight_charges_details .= '<table class="table table-sm table-bordered mt-0 mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (Same-Zone)</th><th>Flat Charges/KG (Different-Zone)</th></tr></thead><tbody>';
+                                    }
 
-                                    $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
                                     foreach ($weight_charges as $weight_charge){
                                         if($weight_charge->delivery_type_id == 2){
-                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                            if($corporate_rate_type == 1){
+                                                $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                                            }
+                                            else{
+                                                $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local . '</td><td>' . $weight_charge->same_zone . '</td><td>' . $weight_charge->different_zone . '</td></tr>';
+                                            }
                                         }
                                     }
                                     $weight_charges_details .= '</tbody></table>';
@@ -482,7 +518,13 @@ otherwise it will be rejected</li>
 
                                 foreach ($weight_charges as $weight_charge){
                                     if($weight_charge->delivery_type_id == 1){
-                                        $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                        if($corporate_rate_type == 1){
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                        }
+                                        else{
+                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local . '</td><td>' . $weight_charge->same_zone . '</td></tr>';
+                                        }
+
                                     }
                                 }
                                 $corporate_delivery_type = CorporateDeliveryTypeStatus::where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2);
@@ -492,15 +534,20 @@ otherwise it will be rejected</li>
                                     $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 2)->first();
                                     if($chargeable_weight){
                                         $chargeable_weight_details = '<div class="row mb-1"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                                <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
-                              </table></div></div>';
+                            <tbody><tr><td class="color primary" ><strong>Delivery Type</strong></td><td>' . $chargeable_weight->delivery_type->delivery_type . '</td></tr><tr><td class="color primary"><strong>Charges</strong></td><td>' . $chargeable_weight->min_chargeable_weight . '</td></tr></tbody>
+                          </table></div></div>';
                                         $weight_charges_details .= $chargeable_weight_details;
                                     }
 
                                     $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>6hr Charges</th><th>Sameday Charges</th></tr></thead><tbody>';
                                     foreach ($weight_charges as $weight_charge){
                                         if($weight_charge->delivery_type_id == 2){
-                                            $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                            if($corporate_rate_type == 1){
+                                                $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td></tr>';
+                                            }
+                                            else{
+                                                $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local . '</td><td>' . $weight_charge->same_zone . '</td></tr>';
+                                            }
                                         }
                                     }
                                     $weight_charges_details .= '</tbody></table>';
@@ -559,48 +606,68 @@ otherwise it will be rejected</li>
                     if($fuel_surcharge){
                         $fuel_surcharge_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Fuel Surcharge </strong></thead></table></div></div>';
                         $fuel_surcharge_charges_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                                <tbody><tr><td class="color primary" ><strong>Fuel Charges</strong></td><td>' . $fuel_surcharge->fuel_surcharge . '%</td></tr></tr></tbody>
-                              </table></div></div>';
+                            <tbody><tr><td class="color primary" ><strong>Fuel Charges</strong></td><td>' . $fuel_surcharge->fuel_surcharge . '%</td></tr></tr></tbody>
+                          </table></div></div>';
                     }
 
                     $return_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $return_charges = ReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                     }else{
-                        $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        if($corporate_rate_type == 1){
+                            $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                        else{
+                            $return_charges = CorporateReturnChargeZoneWise::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
                     }
                     if($return_charges){
                         $return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
                         if($rate->shipping_mode_id != 4){
-
-
+                            if($corporate_rate_type == 1){
                                 $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
-                                foreach ($return_charges as $return_charge){
-                                    $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $return_charges->national_charges_class_3 . '</td></tr>';
-                                }
-                                $return_charges_details .= '</tbody></table></div></div>';
+                            }
+                            else{
+                                $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Same Zone</th><th>Different Zone</th></tr></thead><tbody>';
+                            }
+
+
+                            if($corporate_rate_type == 1){
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $return_charges->national_charges_class_3 . '</td></tr>';
+                            }
+                            else{
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->same_zone . '</td><td>' . $return_charges->different_zone . '</td></tr>';
+                            }
+
+
+                            $return_charges_details .= '</tbody></table></div></div>';
 
 
                         }else{
-                                $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>National</th></tr></thead><tbody>';
-                                foreach ($return_charges as $return_charge){
-                                    $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td></tr>';
-                                }
-                                $return_charges_details .= '</tbody></table></div></div>';
+                            $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>National</th></tr></thead><tbody>';
+
+                            if($corporate_rate_type == 1){
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td></tr>';
+                            }
+                            else{
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->same_zone . '</td></tr>';
+                            }
+
+
+                            $return_charges_details .= '</tbody></table></div></div>';
 
                         }
                     }
 
 
 
-                $rate_details .= $service_type_details;
-                $rate_details .= $weight_charges_details;
-                $rate_details .= $cash_handling_details;
-                $rate_details .= $fuel_surcharge_charges_details;
-                $rate_details .= $return_charges_details;
-                $rate_details .= '<div class="new-page"></div>';
+                    $rate_details .= $service_type_details;
+                    $rate_details .= $weight_charges_details;
+                    $rate_details .= $cash_handling_details;
+                    $rate_details .= $fuel_surcharge_charges_details;
+                    $rate_details .= $return_charges_details;
+                    $rate_details .= '<div class="new-page"></div>';
                 }
-
                 $html .= $packaging_details;
                 $html .= $rate_details;
             }
