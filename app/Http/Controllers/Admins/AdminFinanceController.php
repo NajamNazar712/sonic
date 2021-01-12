@@ -5777,6 +5777,18 @@ class AdminFinanceController extends Controller
                 foreach ($payment_shipments as $invoice_shipment) {
                     $shipment = $invoice_shipment->shipment;
 
+                    $shipment_weight = $shipment->actual_weight;
+                    $weight_charges = $shipment->weight_charges;
+
+                    if($done_payment_shipment->type != 2) {
+                        $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                        if($change_shipment_weight_log->exists()){
+                            $change_shipment_weight_log = $change_shipment_weight_log->first();
+                            $shipment_weight = $change_shipment_weight_log->old_weight;
+                            $weight_charges = $change_shipment_weight_log->old_charges;
+                        }
+                    }
+
                     if ($invoice_shipment->type != 2 || ($invoice_shipment->type == 2 && $invoice_shipment->payable < 0)) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -5797,8 +5809,8 @@ class AdminFinanceController extends Controller
                                       <td>' . $shipment->consignee_city->name . '</td>
                                       <td>' . $shipment->shipping_mode->mode . '</td>
                                       <td>' . $date . '</td>
-                                      <td>' . $shipment->actual_weight . '</td>
-                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                                      <td>' . $shipment_weight . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format($weight_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
@@ -5820,7 +5832,7 @@ class AdminFinanceController extends Controller
                                 $total_return_charges += $shipment->return_charges;
                             }
 
-                            $total_weight_charges += $shipment->weight_charges;
+                            $total_weight_charges += $weight_charges;
 
                             if ($shipment->packaging_material_request) {
                                 $total_packaging_material_charges += $shipment->packaging_material_charges;
