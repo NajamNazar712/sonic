@@ -835,7 +835,7 @@ class RiderAPIController extends Controller {
                 }
 
 
-                if(CrmRequest::where('shipment_id', $shipment_data->id)->whereIn('case_nature_id', [1,2,4])->whereNotIn('status_id', [3,4])->exists()){
+                if(CrmRequest::where('shipment_id', $shipment_data->id)->whereIn('case_nature_id', [1,2])->whereNotIn('status_id', [3,4])->exists()){
                     $deliveries['request'] = array();
                     $crm_request = CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', '!=', 3)->latest()->first();
                     $deliveries['request']['id'] = $crm_request->id;
@@ -845,15 +845,10 @@ class RiderAPIController extends Controller {
                         $deliveries['ordering'] = 1;
                         $deliveries['request']['type'] = 1;
                     }
-                    if($crm_request->case_nature_id == 2){
+                    else {
                         $information['summary']['requests']['service_requests']++;
                         $deliveries['ordering'] = 2;
                         $deliveries['request']['type'] = 2;
-                    }
-                    if($crm_request->case_nature_id == 4){
-                        $information['summary']['requests']['claims']++;
-                        $deliveries['ordering'] = 3;
-                        $deliveries['request']['type'] = 4;
                     }
 
                     $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
