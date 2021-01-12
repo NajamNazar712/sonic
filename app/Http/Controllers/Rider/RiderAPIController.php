@@ -418,6 +418,7 @@ class RiderAPIController extends Controller {
         }
         else {
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -450,6 +451,9 @@ class RiderAPIController extends Controller {
                 else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
+            }
+            elseif ($rider_request->exists()){
+                return response()->json(['status' => 1, 'message' => 'Pending for approval']);
             }
             else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
@@ -1331,6 +1335,7 @@ class RiderAPIController extends Controller {
                 $pickup['pickup_request_id'] = $pickup_request->id;
                 $pickup['status'] = $pickup_note_request->status;
                 $pickup['ordering'] = $pickup_note_request->ordering;
+                $pickup['shipments'] = $pickup_request->booked;
 
                 if ($pickup_note_request->status) {
                     $information['summary']['received']['pickups']++;
@@ -1908,7 +1913,7 @@ class RiderAPIController extends Controller {
                         $rider_request->name = $request->name;
                         $rider_request->cnic = $request->cnic;
                         $rider_request->phone_no = $request->phone_number;
-                        $rider_request->pin = bcrypt($request->pin);
+                        $rider_request->pin = $request->pin;
                         $rider_request->save();
                         $response['status'] = 0;
                         $message = 'Rider Request Has Been Submitted and Pending for Approval';
@@ -1948,8 +1953,7 @@ class RiderAPIController extends Controller {
                 ->where('r.id', '=', $rider_id);
 
             if ($from_date != null) {
-//                $to_date = str_replace("00:00:00", "23:59:59", $from_date);
-                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at',$from_date);
+                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at', $from_date);
             }
             if ($pickup_request_id != null) {
                 $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
@@ -1988,10 +1992,10 @@ class RiderAPIController extends Controller {
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
                 ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
+                ->where('delivery_notes.status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
             if ($from_date != null) {
-//                $to_date = str_replace("00:00:00", "23:59:59", $from_date);
                 $rider_deliveries = $rider_deliveries->whereDate('delivery_notes.created_at', $from_date)
                     ->groupBy('delivery_notes.id');
             }
