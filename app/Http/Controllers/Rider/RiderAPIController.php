@@ -1953,8 +1953,7 @@ class RiderAPIController extends Controller {
                 ->where('r.id', '=', $rider_id);
 
             if ($from_date != null) {
-//                $to_date = str_replace("00:00:00", "23:59:59", $from_date);
-                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at',$from_date);
+                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at', $from_date);
             }
             if ($pickup_request_id != null) {
                 $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
@@ -1996,7 +1995,6 @@ class RiderAPIController extends Controller {
                 ->where('riders.id', '=', $rider_id);
 
             if ($from_date != null) {
-//                $to_date = str_replace("00:00:00", "23:59:59", $from_date);
                 $rider_deliveries = $rider_deliveries->whereDate('delivery_notes.created_at', $from_date)
                     ->groupBy('delivery_notes.id');
             }
