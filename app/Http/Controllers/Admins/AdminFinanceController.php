@@ -5780,7 +5780,7 @@ class AdminFinanceController extends Controller
                     $shipment_weight = $shipment->actual_weight;
                     $weight_charges = $shipment->weight_charges;
 
-                    if($done_payment_shipment->type != 2) {
+                    if($invoice_shipment->type != 2) {
                         $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                         if($change_shipment_weight_log->exists()){
                             $change_shipment_weight_log = $change_shipment_weight_log->first();
