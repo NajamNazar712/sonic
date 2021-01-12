@@ -1577,7 +1577,8 @@ class AdminPettyCashController extends Controller
         if (count($statement_ids) > 0) {
             foreach ($statement_ids as $statement_id) {
                 $petty = PettyCashStatement::find($statement_id);
-                if ($petty) {
+                if ($petty)
+                {
                     if ($petty->created_by != null && $petty->station_approved_by == null) {
                         if (session('role_id') == 1 || in_array(190, session('permissions'))) {
                             $petty->station_approved_by = Auth::id();
@@ -1587,9 +1588,6 @@ class AdminPettyCashController extends Controller
                             $this->petty_cash_statement_details_auto_approve($request->statement_id);
                             $flag = TRUE;
                         }
-                    }
-                    else if ($petty->station_approved_by != null)  {
-                            return response()->json(['status' => 1, 'error' => 'Already Approved!']);
                     }
                     else if ($petty->station_approved_by != null && $petty->operation_approved_by == null) {
                         if (session('role_id') == 1 || in_array(191, session('permissions'))) {
@@ -1601,16 +1599,7 @@ class AdminPettyCashController extends Controller
                             $flag = TRUE;
                         }
                     }
-                    else if ($petty->operation_approved_by != null){
-                        return response()->json(['status' => 1, 'error' => 'Already Approved!']);
-                    }
-                    else if ($petty->operation_approved_by != null && $petty->finance_approved_by == null) {
-                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
-                    }
-                    else if ($petty->created_by != null && $petty->operation_approved_by == null) {
-                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
-                    }
-                    else if ($petty->finance_received_statement_by != null && $petty->finance_approved_by == null){
+                    else if ($petty->finance_received_statement_by != null && $petty->finance_received_by == null) {
                         if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                             $petty->finance_approved_by = Auth::id();
                             $petty->finance_approved_at = Carbon::now();
@@ -1620,17 +1609,23 @@ class AdminPettyCashController extends Controller
                             $flag = TRUE;
                         }
                     }
-                    if ($flag) {
-                        return response()->json(['status' => 0, 'success' => 'Approved!']);
-                    } else {
+                    else if ($petty->station_approved_by != null || $petty->operation_approved_by != null){
                         return response()->json(['status' => 1, 'error' => 'Already Approved!']);
                     }
+                    else if ($petty->operation_approved_by != null && $petty->finance_approved_by == null){
+                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
+                    }
+                    else if ($petty->finance_received_statement_by != null && $petty->finance_approved_by == null){
+                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
+                    }
                 }
-            }
-            if ($flag) {
-                return response()->json(['status' => 0, 'success' => 'Approved!']);
-            } else {
-                return response()->json(['status' => 1, 'error' => 'Already Approved!']);
+
+                if ($flag) {
+                    return response()->json(['status' => 0, 'success' => 'Approved!']);
+                }
+                else {
+                    return response()->json(['status' => 1, 'error' => 'Not approved']);
+                }
             }
         }
         return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);
