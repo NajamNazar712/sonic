@@ -2001,11 +2001,13 @@ class RiderAPIController extends Controller {
             }
 
             if ($delivery_note_id != null) {
-                $rider_deliveries = $rider_deliveries->where('delivery_notes.id', $delivery_note_id);
+                $rider_deliveries = $rider_deliveries->where('delivery_notes.id', $delivery_note_id)
+                    ->groupBy('delivery_notes.id');
             }
 
             if ($tracking_no != null) {
-                $rider_deliveries = $rider_deliveries->where('delivery_note_shipments.shipment_id', $tracking_no);
+                $rider_deliveries = $rider_deliveries->where('delivery_note_shipments.shipment_id', $tracking_no)
+                    ->groupBy('delivery_notes.id');
             }
 
 
