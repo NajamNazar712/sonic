@@ -1997,8 +1997,8 @@ class RiderAPIController extends Controller {
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
                 ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
-                ->where('riders.id', '=', $rider_id)
-                ->where('delivery_notes.status', '=', 1);
+                ->where('delivery_notes.status', '=', 1)
+                ->where('riders.id', '=', $rider_id);
 
             if ($from_date != null) {
                 $rider_deliveries = $rider_deliveries->whereDate('delivery_notes.created_at', $from_date)
