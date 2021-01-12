@@ -1936,6 +1936,8 @@ class RiderAPIController extends Controller {
         $rider_id = $request->rider_id;
         $from = $request->get('search_date_from');
         $to = $request->get('search_date_to');
+        $pickup_request_id = $request->get('pickup_request_id');
+        $pickup_note_id = $request->get('pickup_note_id');
 
         $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
             ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
@@ -1945,7 +1947,17 @@ class RiderAPIController extends Controller {
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
             ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.shipments', 'pnpr.name as reason',  'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
-            ->where('r.id','=',$rider_id)->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+            ->where('r.id','=',$rider_id);
+
+        if ($to != null && $from != null) {
+            $rider_pickups = $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
+        }
+        if ($pickup_request_id != null) {
+            $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
+        }
+        if ($pickup_note_id != null) {
+            $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_note_id', $pickup_note_id);
+        }
 
         if ($rider_pickups->exists()){
             $rider_pickups = $rider_pickups->get();
