@@ -99,7 +99,7 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required" value="{{ $weight_charge->spkg }}" disabled>
+                                                                <input type="text" class="touchspin-color input-sm spkg" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="spkg[1][1]" data-rule-required="true" data-msg-required="This field is required" value="{{ $weight_charge->spkg }}" disabled>
                                                             </div>
                                                         </fieldset>
                                                     </div>
