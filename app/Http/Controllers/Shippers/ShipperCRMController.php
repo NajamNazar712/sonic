@@ -288,7 +288,7 @@ class ShipperCRMController extends Controller
                 }
             }
             if(!empty($shipment_ids)){
-                dd($shipment_ids);
+//                dd($shipment_ids);
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
@@ -298,7 +298,7 @@ class ShipperCRMController extends Controller
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture') && $request->hasFile('damage_product_picture')  && $request->hasFile('product_packaging_picture') && $request->hasFile('actual_product_picture') && $request->hasFile('missing_product_picture') && $request->hasFile('product_packaging_picture_for_content_short') && $request->hasFile('actual_product_picture_for_content_short')) {
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price, $request->file('missing_product_picture'), $request->file('product_packaging_picture_for_content_short'), $request->file('actual_product_picture_for_content_short'), $request->missing_product_price);
                                 }
                                 else{
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -323,7 +323,7 @@ class ShipperCRMController extends Controller
 
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                                 if($nature_id == 4){
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price, $request->file('missing_product_picture'), $request->file('product_packaging_picture_for_content_short'), $request->file('actual_product_picture_for_content_short'), $request->missing_product_price);
                                 }
                                 else{
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price, $request->file('missing_product_picture'), $request->file('product_packaging_picture_for_content_short'), $request->file('actual_product_picture_for_content_short'), $request->missing_product_price);
