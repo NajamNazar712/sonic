@@ -3616,54 +3616,56 @@ class AdminDashboardController extends Controller
 
             }
 
-            if($request->total_commission == 1){
-                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                if($existing_sale_commission){
-                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                    SalesCommission::where('shipper_id', $id)->delete();
-                }
-                $total_commission = $request->total_commission;
-                $users_count = count($request->user_id);
-
-                $sales_commission = new SalesCommission();
-                $sales_commission->shipper_id = $id;
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                foreach($request->tier_id as $row_id => $tier){
-                    $sales_tier = SalesTier::find($tier);
-                    if($sales_tier){
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if($sales_tier->tier_type == 1){
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }else if($sales_tier->tier_type == 2){
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
-                        }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
+            if($request->has('edit_commission') && $request->edit_commission == 1){
+                if($request->total_commission > 0){
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
+                    $total_commission = $request->total_commission;
+                    $users_count = count($request->user_id);
+
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach($request->tier_id as $row_id => $tier){
+                        $sales_tier = SalesTier::find($tier);
+                        if($sales_tier){
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if($sales_tier->tier_type == 1){
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }else if($sales_tier->tier_type == 2){
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
+                        }
+                    }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
                 }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
-            }
-            else{
-                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                if($existing_sale_commission){
-                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                    SalesCommission::where('shipper_id', $id)->delete();
+                else{
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
                 }
             }
             if($request->authorize == 1){
@@ -5880,54 +5882,56 @@ class AdminDashboardController extends Controller
                 $rate_remark->save();
             }
 
-            if($request->total_commission == 1){
-                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                if($existing_sale_commission){
-                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                    SalesCommission::where('shipper_id', $id)->delete();
-                }
-                $total_commission = $request->total_commission;
-                $users_count = count($request->user_id);
-
-                $sales_commission = new SalesCommission();
-                $sales_commission->shipper_id = $id;
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                foreach($request->tier_id as $row_id => $tier){
-                    $sales_tier = SalesTier::find($tier);
-                    if($sales_tier){
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if($sales_tier->tier_type == 1){
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }else if($sales_tier->tier_type == 2){
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
-                        }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
+            if($request->has('edit_commission') && $request->edit_commission == 1){
+                if($request->total_commission > 0){
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
+                    $total_commission = $request->total_commission;
+                    $users_count = count($request->user_id);
+
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach($request->tier_id as $row_id => $tier){
+                        $sales_tier = SalesTier::find($tier);
+                        if($sales_tier){
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if($sales_tier->tier_type == 1){
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }else if($sales_tier->tier_type == 2){
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
+                        }
+                    }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
                 }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
-            }
-            else{
-                $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                if($existing_sale_commission){
-                    SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                    SalesCommissionExternalUser::where('shipper_id',$id)->delete();
-                    SalesCommission::where('shipper_id', $id)->delete();
+                else{
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    if($existing_sale_commission){
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
+                    }
                 }
             }
 
@@ -7822,8 +7826,6 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments]);
     }
 
-
-
     public function updateProfile(Request $request)
     {
         $user_id = $request->user_id;
@@ -7915,8 +7917,6 @@ class AdminDashboardController extends Controller
         ]);
         return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
     }
-
-
 
     public function getPickups(Request $request)
     {
