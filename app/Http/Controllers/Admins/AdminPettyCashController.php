@@ -1587,7 +1587,11 @@ class AdminPettyCashController extends Controller
                             $this->petty_cash_statement_details_auto_approve($request->statement_id);
                             $flag = TRUE;
                         }
-                    } else if ($petty->operation_approved_by == null && $petty->station_approved_by != null) {
+                    }
+                    else if ($petty->station_approved_by != null)  {
+                            return response()->json(['status' => 1, 'error' => 'Already Approved!']);
+                    }
+                    else if ($petty->operation_approved_by == null && $petty->station_approved_by != null) {
                         if (session('role_id') == 1 || in_array(191, session('permissions'))) {
                             $petty->operation_approved_by = Auth::id();
                             $petty->operation_approved_at = Carbon::now();
@@ -1596,6 +1600,9 @@ class AdminPettyCashController extends Controller
                             $this->petty_cash_statement_details_auto_approve($request->statement_id);
                             $flag = TRUE;
                         }
+                    }
+                    else if ($petty->station_approved_by != null)  {
+                        return response()->json(['status' => 1, 'error' => 'Already Approved!']);
                     }
                     else if ($petty->finance_received_statement_by != null && $petty->finance_approved_by == null){
                         if (session('role_id') == 1 || in_array(173, session('permissions'))) {
@@ -1608,6 +1615,12 @@ class AdminPettyCashController extends Controller
                         }
                     }
                     else if ($petty->finance_approved_by == null && $petty->operation_approved_by != null) {
+                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
+                    }
+                    if ($flag) {
+                        return response()->json(['status' => 0, 'success' => 'Approved!']);
+                    }
+                    else {
                         return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
                     }
                 }
