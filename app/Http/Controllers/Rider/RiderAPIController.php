@@ -1989,6 +1989,7 @@ class RiderAPIController extends Controller {
                 ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
                 ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
                 ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+                ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
                 ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
@@ -2006,7 +2007,7 @@ class RiderAPIController extends Controller {
             }
 
             if ($tracking_no != null) {
-                $rider_deliveries = $rider_deliveries->where('delivery_note_shipments.shipment_id', $tracking_no)
+                $rider_deliveries = $rider_deliveries->where('shipments.tracking_number', $tracking_no)
                     ->groupBy('delivery_notes.id');
             }
 
