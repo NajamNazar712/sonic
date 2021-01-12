@@ -2575,7 +2575,10 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Retail\RetailShipmentBookController@index')->name('index');
             Route::post('/store', 'Retail\RetailShipmentBookController@store')->name('store');
+            Route::post('/slip', 'Retail\RetailShipmentBookController@slip')->name('slip');
+            Route::post('/calculate_rates', 'Retail\RetailShipmentBookController@calculate_rates')->name('calculate_rates');
         });
+        Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
     });
 });
 

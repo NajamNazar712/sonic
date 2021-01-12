@@ -112,4 +112,8 @@ class Shipment extends Model
     public function business_category() {
         return $this->belongsTo('App\Http\Models\BusinessCategory');
     }
+
+    public function retail() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipment', 'id', 'shipment_id');
+    }
 }

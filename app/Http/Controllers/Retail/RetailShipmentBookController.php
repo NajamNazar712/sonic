@@ -3,26 +3,21 @@
 namespace App\Http\Controllers\Retail;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
 use App\http\Models\Admin\Retail\RetailProduct;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
-use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
-use App\Http\Models\ConsigneeLocation;
-use App\Http\Models\ConsigneeShipmentLocation;
-use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
-use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPiece;
-use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
-use App\http\Models\SubstituteUserShipment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +31,7 @@ class RetailShipmentBookController extends Controller
 //        $this->middleware('Permission');
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height) {
 
         $shipment = new Shipment();
 
@@ -58,9 +53,14 @@ class RetailShipmentBookController extends Controller
 
 
         $shipment->estimated_weight = $estimated_weight;
+        $shipment->length = $length;
+        $shipment->breadth = $breadth;
+        $shipment->height = $height;
+
         $shipment->shipping_mode_id = $shipping_mode_id;
         $shipment->same_day_timing_id = $same_day_timing_id;
 
+        $shipment->received_amount = $r_amount;
         $shipment->amount = $amount;
         $shipment->payment_mode_id = $payment_mode_id;
         $shipment->charges_mode_id = $charges_mode_id;
@@ -136,15 +136,12 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-        return $request;
-//        dd($request);
         $user_id = session('user_id');
         $pickup_address_id = session('pickup_address_id');
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
 
-        $consignee_city_id = $request->input('domestic_destination');
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
@@ -154,22 +151,31 @@ class RetailShipmentBookController extends Controller
         $package_type = FALSE;
         $special_instructions = NULL;
 
-        $estimated_weight = $request->input('weight');
+
         $shipping_mode_check = $request->input('shipping_mode');
-        if ($shipping_mode_check == 2) {
+        if ($shipping_mode_check == 1) {
+            $consignee_city_id = $request->input('domestic_overland_destination');
             $shipping_mode_id = 2;
         }
         elseif ($shipping_mode_check == 4){
+            $consignee_city_id = $request->input('domestic_destination');
             $shipping_mode_id = 3;
         }
         else{
+            $consignee_city_id = $request->input('domestic_destination');
             $shipping_mode_id = 1;
         }
         $same_day_timing_id = NULL;
 
-        $amount = str_replace(',', '', $request->input('total_amount'));
+        $city = City::find($consignee_city_id);
+        $gst = $city->zone->gst;
+        $total_charges = $request->weight_charges + $request->cash_handling_charges + $request->fuel_surcharge;
+        $gst_charges = $gst * $total_charges;
+        $total_amount = $total_charges + $gst_charges;
+
+        $amount = $total_amount;
+        $r_amount = $total_amount;
         $payment_mode_id = 1;
-        $retail_payment_mode_id = $request->input('payment_mode');
         $try_and_buy_charges = NULL;
 
         $pieces_quantity = $request->input('pieces');
@@ -177,7 +183,19 @@ class RetailShipmentBookController extends Controller
 
         $charges_mode_id = 1;
 
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id);
+        if ($request->volumetric_weight == "on") {
+            $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            $length = $request->length;
+            $breadth = $request->breadth;
+            $height = $request->height;
+        } else {
+            $estimated_weight = $request->input('weight');
+            $length = null;
+            $breadth = null;
+            $height = null;
+        }
+
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -203,6 +221,53 @@ class RetailShipmentBookController extends Controller
         if($pieces_quantity > 1){
             $this->create_shipment_pieces($shipment_id, $pieces_quantity);
         }
+
+        if($request->shipping_mode == 1){
+            $destination = $request->domestic_overland_destination;
+        }
+        else{
+            $destination = $request->domestic_destination;
+        }
+
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
+        if($shipper_info->exists()){
+            $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->save();
+        }
+        else{
+            $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->save();
+        }
+        $retail_shipment = new RetailShipment();
+        $retail_shipment->shipment_id = $shipment_id;
+        $retail_shipment->product_type_id = $request->product;
+        $retail_shipment->shipping_mode = $request->shipping_mode;
+        $retail_shipment->destination = $destination;
+        $retail_shipment->payment_mode_id = $request->payment_mode;
+        $retail_shipment->shipper_phone_no = $request->shipper_phone_no;
+        $retail_shipment->shipper_name = $request->shipper_name;
+        $retail_shipment->shipper_cnic = $request->shipper_cnic;
+        $retail_shipment->shipper_address = $request->shipper_address;
+        $retail_shipment->trax_box_id = $request->trax_box;
+        $retail_shipment->total_charges = $total_charges;
+        $retail_shipment->gst_charges = $gst_charges;
+        $retail_shipment->total_amount = $total_amount;
+        $retail_shipment->weight_charges = $request->weight_charges;
+        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
+        $retail_shipment->fuel_surcharge = $request->fuel_surcharge;
+        $retail_shipment->shipper_account_no = $shipper_info->id;
+        $retail_shipment->weight = $estimated_weight;
+        $retail_shipment->length = $length;
+        $retail_shipment->breadth = $breadth;
+        $retail_shipment->height = $height;
+        $retail_shipment->save();
+
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
         }
@@ -211,4 +276,335 @@ class RetailShipmentBookController extends Controller
             return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
         }
     }
+    public function calculate_rates(Request $request){
+        if($request->has('total_charges') && $request->has('city_id')){
+            $city = City::find($request->city_id);
+            $total_charges = $request->total_charges;
+            $gst = $city->zone->gst;
+            $gst_charges = $gst * $total_charges;
+            $total_amount = $gst_charges + $total_charges;
+            $details = array();
+
+            $details['total_charges'] = $total_charges;
+            $details['gst_charges'] = $gst_charges;
+            $details['total_amount'] = $total_amount;
+            return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
+        }
+    }
+
+    public function shipper_info(Request $request){
+        if($request->has('shipper_account_no')){
+            if($request->shipper_account_no != null && $request->shipper_account_no != ''){
+                $shipper_info = RetailShipperInfo::find($request->shipper_account_no);
+            }
+        }
+        elseif($request->has('shipper_phone_no')){
+            if($request->shipper_phone_no != null && $request->shipper_phone_no != ''){
+                $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
+                if($shipper_info->exists()){
+                    $shipper_info = $shipper_info->first();
+                }
+            }
+        }
+
+        if($shipper_info){
+            $details = array();
+            $details['shipper_account_no'] = $shipper_info->id;
+            $details['shipper_phone_no'] = $shipper_info->shipper_phone_no;
+            $details['shipper_name'] = $shipper_info->shipper_name;
+            $details['shipper_cnic'] = $shipper_info->shipper_cnic;
+            $details['shipper_address'] = $shipper_info->shipper_address;
+            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details]);
+        }
+    }
+
+    public function slip(Request $request) {
+
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $user_name = Auth::user()->name . ' (Retail)';
+        $print_details = '
+            <div class="small mt-1">Printed By: ' . $user_name . '</div>
+        ';
+
+        $html = '';
+
+        $html .= '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') . '">
+        ';
+        $html .= '
+            <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+        ';
+
+        $html .= '
+                <title>Slip</title>
+
+                <style>
+                  @page {
+                    size: A4 portrait;
+                  }
+
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+
+                  body {
+                    background: none !important;
+                    color: #09262e !important;
+                    font-size: 0.9rem !important;
+                  }
+
+                  hr {
+                    border-top: 1px dashed #000000;
+                  }
+
+                  table.table-bordered {
+                    page-break-inside: avoid;
+                  }
+
+                  table.table-bordered tbody tr td {
+                    width: 12.5% !important;
+                    border: 1px solid #09262e !important;
+                  }
+
+                  .color.primary {
+                    background: #c8c8c8 !important;
+                  }
+
+                  .color.secondary {
+                    background: #ebebeb !important;
+                  }
+
+                  .border {
+                    border: 1px solid #09262e !important;
+                  }
+
+                  .border.twice {
+                    border-width: 2px !important;
+                  }
+
+                  .border.twice-top {
+                    border-top-width: 2px !important;
+                  }
+
+                  .border.twice-bottom {
+                    border-bottom-width: 2px !important;
+                  }
+
+                  .border.twice-left {
+                    border-left-width: 2px !important;
+                  }
+
+                  .border.twice-right {
+                    border-right-width: 2px !important;
+                  }
+
+                  td.replacement span {
+                    width: 22px;
+                  }
+
+                  td.replacement span img {
+                    display: block;
+                    width: 100%;
+                    margin: auto;
+                    background: #c8c8c8;
+                    border-radius: 25px;
+                  }
+
+                  .void {
+                    top: 0;
+                    bottom: 0;
+                    right: 0;
+                    left: 0;
+                    height: 80px;
+                    font-size: 5rem;
+                    line-height: 3.5rem;
+                    opacity: 0.25;
+                  }
+                   div.page
+                    {
+                        page-break-after: always;
+                        page-break-inside: avoid;
+                    }
+                    .piece_number{
+                        font-size: 2.5rem;
+                    }
+                </style>
+              </head>
+              <body>
+                <div>
+        ';
+
+        $html .= '
+            <style>
+              @font-face {
+                font-family: "Fajer Noori Nastalique";
+                src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot') . '");
+                src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot?#iefix') . '") format("embedded-opentype"),
+                url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.woff') . '") format("woff"),
+                url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.otf') . '") format("opentype"),
+                url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.ttf') . '") format("truetype"),
+                url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.svg#FajerNooriNastalique') . '") format("svg");
+                font-weight: normal;
+                font-style: normal;
+                unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+              }
+
+              .urdu {
+                font-family: "Fajer Noori Nastalique";
+              }
+            </style>
+        ';
+
+        $shipment_details = '';
+        foreach($request->ids as $id) {
+            $shipment = Shipment::find($id);
+                    $table_start = '
+                      <div class="position-relative">
+                        <table class="table table-sm table-bordered border twice">
+                            <tbody>
+                ';
+
+                    $table_start .= '
+                          <tr>
+                            <td rowspan="2" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
+                            <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
+                            <td colspan="2" class="color primary"><strong>Origin</strong></td>
+                            <td colspan="4" class="border twice-right"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                        </tr>
+                          <tr>
+                            <td colspan="3" class="color primary border"><strong>Airway Bill Number</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Destination</strong></td>
+                            <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                          </tr>
+                ';
+
+                    $table_start .= '
+                          <tr>
+                            <td colspan="7" class="text-center color primary border twice-top twice-left twice-right"><strong>Shipper</strong></td>
+                            <td colspan="6" class="text-center color primary border twice-top twice-left twice-right"><strong>Consignee</strong></td>
+                          </tr>
+                ';
+
+                    $table_start .= '
+                          <tr>
+                            <td colspan="1" class="color secondary twice-left"><strong>Name</strong></td>
+                            <td colspan="2" class="border">' . $shipment->retail->shipper_name . '</td>
+                            <td colspan="2" class="color secondary border"><strong>Phone No</strong></td>
+                            <td colspan="2">' . $shipment->retail->shipper_phone_no . '</td>
+                            <td colspan="1" class="color secondary border twice-left"><strong>Name</strong></td>
+                            <td colspan="1">' . $shipment->consignee_name . '</td>
+                            <td colspan="2" class="color secondary border"><strong>Phone No</strong></td>
+                            <td colspan="2" class="border twice-right"">' . $shipment->consignee_phone_number_1 . '</td>
+                          </tr>
+                ';
+                    $table_start .= '
+                      <tr>
+                        <td class="color secondary border twice-bottom"><strong>Address</strong></td>
+                        <td colspan="6" class="border twice-bottom twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                        <td class="color secondary border twice-bottom twice-left"><strong>Address</strong></td>
+                        <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
+                      </tr>
+                ';
+                    $fuel_and_gst = $shipment->fuel_surcharge + $shipment->gst;
+                    $table_start .= '
+                              <tr>
+                                <td colspan="3" class="color primary border twice-left"><strong>Destination</strong></td>
+                                <td colspan="2" class="color primary"><strong>Pieces</strong></td>
+                                <td colspan="3" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
+                                <td colspan="3" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                            </tr>
+                              <tr>
+                                <td colspan="3" class="border twice-bottom twice-left">' . $shipment->consignee_city->name . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->actual_weight . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $fuel_and_gst . '</td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->total_charges . '</td>
+                              </tr>';
+
+                    foreach($shipment->items as $item){
+                        if($item->insurance == 1){
+                            $insurance = '<i class="la la-check-square "> Yes</i> <i class="la la-minus-square"> No</i>';
+                        }
+                        else{
+                            $insurance = '<i class="la la-minus-square"> Yes</i> <i class="la la-check-square"> No</i>';
+                        }
+                        $table_start .= '
+                              <tr>
+                                <td colspan="1" class="color primary border twice-left twice-bottom"><strong>Product Name</strong></td>
+                                <td colspan="3" class="color border twice-bottom">'. $shipment->retail->product->name . '</td>
+                                <td colspan="5" class="color border twice-bottom text-center mr-3"><strong>Insurance: Do you required coverage</strong> '. $insurance . '</td>
+                                <td colspan="2" class="color primary border twice-bottom"><strong>Declared Value</strong></td>
+                                <td colspan="2" class="color border twice-bottom twice-right">' . $item->price . '</td>
+                            </tr>';
+                    }
+
+                    if($shipment->length != null && $shipment->breadth != null && $shipment->height != null){
+                        $dimensions = $shipment->length . 'x' . $shipment->breadth . 'x' . $shipment->height;
+                    }
+                    else{
+                        $dimensions = '';
+                    }
+
+                    $table_start .= '
+                              <tr>
+                                <td colspan="4" class="color primary border twice-left twice-bottom"><strong>DIMENSIONS OF SHIPMENT (LxWxD)</strong></td>
+                                <td colspan="5" class="color border twice-bottom">'. $dimensions . '</td>
+                                <td colspan="2" class="color primary border twice-left"><strong>Collection By</strong></td>
+                                <td colspan="4" class="color border twice-right">' . Auth::user()->name . '</td>
+                            </tr>';
+                    $table_start .= '
+                              <tr>
+                                <td colspan="4" rowspan="2" class="color primary border twice-left"><strong>Shipper\'s Signature</strong></td>
+                                <td colspan="5" rowspan="2" class="color border twice-bottom"></td>
+                                <td colspan="2" class="color primary border twice-left"><strong>Code</strong></td>
+                                <td colspan="4" class="color border twice-right">' . Auth::user()->store->code . '</td>
+                            </tr>';
+                    $table_start .= '
+                              <tr>
+                                <td colspan="2" class="color primary border twice-left"><strong>Date</strong></td>
+                                <td colspan="4" class="color border twice-bottom twice-right">' . Carbon::now() . '</td>
+                            </tr>
+                            </tbody>
+                            </table>
+                            </div>
+                           ';
+
+            $table_start .= '
+                  <div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                  <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                ';
+            $shipment_details .= $table_start;
+        }
+
+        $html .= $shipment_details;
+
+        $html .= '
+                </div>
+        ';
+
+            $html .= '
+            <script>
+              window.onload = function() {
+                window.print();
+              }
+            </script>
+            ';
+
+        $html .= '
+              </body>
+            </html>
+        ';
+
+        return $html;
+    }
+
 }

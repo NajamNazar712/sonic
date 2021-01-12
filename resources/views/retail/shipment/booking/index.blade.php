@@ -50,8 +50,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group d-none" id="domestic_overland_city_div">
-                                        <select name="domestic_destination" id="domestic_overland_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
+                                    <div class="form-group d-none" id="domestic_overland_destination_div">
+                                        <select name="domestic_overland_destination" id="domestic_overland_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
                                             @foreach($domestic_overland_cities as $domestic_overland_city)
                                                 <option value="{{$domestic_overland_city->id}}">{{$domestic_overland_city->name}}</option>
                                             @endforeach
@@ -94,13 +94,13 @@
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
 
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                        <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
+                                        <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC*" data-rule-required="true" data-msg-required="Shipper CNIC is required">
+                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC*" data-rule-required="true" data-msg-required="Shipper CNIC is required">
                                     </div>
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
@@ -126,12 +126,12 @@
                                                 </select>
                                             </div>
                                             <div class="form-group col-6">
-                                                <input type="text" name="total_charges" id="total_charges" class="form-control amount" placeholder="Total Charges*" data-rule-required="true" data-msg-required="Total Charges is required">
+                                                <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
                                             </div>
                                         </div>
                                         <div class="row d-none" id="insurance_amount_div">
                                             <div class="form-group col-6">
-                                                <input type="text" name="insurance_amount" class="form-control amount" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                                <input type="text" name="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
                                             </div>
                                         </div>
                                         <div class="row justify-content-end">
@@ -143,12 +143,12 @@
                                                 </select>
                                             </div>
                                             <div class="form-group col-6">
-                                                <input type="text" name="gst_charges" id="gst_charges" class="form-control amount" placeholder="GST Charges*" data-rule-required="true" data-msg-required="GST Charges is required">
+                                                <input type="text" name="cash_handling_charges" id="cash_handling_charges" class="form-control decimal" placeholder="Cash Handling Charges*" data-rule-required="true" data-msg-required="Cash Handling Charges is required">
                                             </div>
                                         </div>
                                         <div class="row justify-content-end">
                                             <div class="form-group col-6">
-                                                <input type="text" name="total_amount" id="total_amount" class="form-control amount" placeholder="Total Amount*" data-rule-required="true" data-msg-required="Total Amount is required">
+                                                <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
                                         </div>
                                     </div>
@@ -176,8 +176,25 @@
 {{--                                            </div>--}}
 {{--                                        </div>--}}
 {{--                                    </div>--}}
+                                    <div class="col pt-5">
+                                        <div class="form-group">
+                                            <input type="text" name="total_charges" id="total_charges" class="form-control decimal" placeholder="Total Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="gst_charges" id="gst_charges" class="form-control decimal" placeholder="GST Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="total_amount" id="total_amount" class="form-control decimal" placeholder="Total Amount" disabled>
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-200" value="calculate_rates">Calculate Rates</button>
+                                        </div>
+                                    </div>
                                     <div class="row justify-content-center">
                                         <div class="position-absolute" style="bottom: 0;">
+                                            <div class="form-group text-center d-none" id="print_div">
+                                                <button type="button" name="print" id="print" class="btn btn-outline-cyan width-200" value="print">Print Slip</button>
+                                            </div>
                                             <div class="form-group text-center d-none" id="save">
                                                 <input type="hidden" name="book_button" id="book_button" value="1">
                                                 <button type="button" name="save" id="book" class="btn btn-primary width-200" value="save">Save</button>
@@ -185,7 +202,8 @@
                                             <div class="form-group text-center" id="book_and_print">
                                                 <button type="submit" name="book_and_print" class="btn btn-primary width-200" value="Book & Print">Book & Print</button>
                                             </div>
-                                        </div></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -275,6 +293,38 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            function print(ids){
+                $.ajax({
+                    url: '{!! route('retail.shipment.book.slip') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'ids[]': ids
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            @if (session('print'))
+                print({{ session('print') }});
+            @endif
+
             $('#product').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Shipment*",
@@ -284,6 +334,7 @@
                 width:'100%',
                 placeholder:"Select Shipment Category*"
             });
+            var overland = false;
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Product*"
@@ -292,6 +343,7 @@
                 if(id === 1){
                     $('#domestic_overland_destination_div').removeClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
+                    overland = true;
                 }
                 else{
                     $('#domestic_destination_div').removeClass('d-none');
@@ -302,6 +354,7 @@
                     else{
                         $('#trax_box_div').addClass('d-none');
                     }
+                    overland = false;
                 }
             });
             $('.destination').prepend('<option value="" selected="selected"></option>').select2({
@@ -382,6 +435,16 @@
                 'allowPlus': false
             });
 
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
+                'max': 1000
+            });
+
             $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Insurance Offered*",
@@ -412,7 +475,54 @@
                     $('#book_and_print').removeClass('d-none');
                 }
             });
+            var shipper_info = false;
+            $('#shipper_account_no').on('change', function () {
+                if(this.value !== '' && this.value != null && shipper_info === false){
+                    $.ajax({
+                        url: '{!! route('retail.shipment.shipper_info') !!}',
+                        method: 'POST',
+                        data: {
+                            'shipper_account_no': this.value,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if(data.status){
+                                $('#shipper_account_no').val(data.details.shipper_account_no);
+                                $('#shipper_phone_no').val(data.details.shipper_phone_no);
+                                $('#shipper_name').val(data.details.shipper_name);
+                                $('#shipper_cnic').val(data.details.shipper_cnic);
+                                $('#shipper_address').val(data.details.shipper_address);
+                                shipper_info = true;
+                            }
+                        });
+                }
+            });
 
+            $('#shipper_phone_no').on('change', function () {
+                if(this.value !== '' && this.value != null && shipper_info === false){
+                    $.ajax({
+                        url: '{!! route('retail.shipment.shipper_info') !!}',
+                        method: 'POST',
+                        data: {
+                            'shipper_phone_no': this.value,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if(data.status){
+                                $('#shipper_account_no').val(data.details.shipper_account_no);
+                                $('#shipper_phone_no').val(data.details.shipper_phone_no);
+                                $('#shipper_name').val(data.details.shipper_name);
+                                $('#shipper_cnic').val(data.details.shipper_cnic);
+                                $('#shipper_address').val(data.details.shipper_address);
+                                shipper_info = true;
+                            }
+                        });
+                }
+            });
+
+            var shipment_ids = [];
             $('#book').on('click', function () {
                var validator = $('#booking_form').valid();
                if(validator) {
@@ -439,8 +549,9 @@
                        .done(function (data) {
                            swal.close();
                            if (data.status) {
+                               shipment_ids.push(data.shipment_id);
                                html = data.success;
-                               html += '</br>Please click on print button to print';
+                               html += '</br><p style="red">Note: Please click on print button to print all bulk Shipment(s) Slip</p>';
 
                                content = document.createElement('div');
                                content.innerHTML = html;
@@ -461,6 +572,7 @@
                                    closeOnEsc: false,
                                    dangerMode: true
                                });
+                               $('#print_div').removeClass('d-none');
                            }
                        });
                         $('#length').val('');
@@ -474,10 +586,14 @@
                         $('#consignee_name').val('');
                         $('#consignee_cnic').val('');
                         $('#consignee_address').val('');
+                        $('#weight_charges').val('');
+                        $('#cash_handling_charges').val('');
+                        $('#fuel_surcharge').val('');
                         $('#total_charges').val('');
                         $('#gst_charges').val('');
                         $('#total_amount').val('');
                         $('#trax_box').val('').trigger('change');
+                        $('#insurance_offered').val('').trigger('change');
 
                     $('#book_button').val(1);
                     $('#book').attr('disabled', false);
@@ -503,6 +619,44 @@
                         closeOnEsc: false
                     });
                     form.submit();
+                }
+            });
+            var city_id = null;
+            $('#calculate_rates').on('click', function () {
+                if(overland){
+                    city_id = $('#domestic_overland_destination').val();
+                }
+                else{
+                    city_id = $('#domestic_destination').val();
+                }
+                if(city_id != '' && $('#weight_charges').val() != '' && $('#cash_handling_charges').val() != '' && $('#fuel_surcharge').val() != ''){
+                    var weight_charges = parseFloat($('#weight_charges').val());
+                    var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
+                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val());
+
+                    var total_charges = weight_charges + cash_handling_charges + fuel_surcharge;
+                    $.ajax({
+                        url: '{!! route('retail.shipment.book.calculate_rates') !!}',
+                        method: 'POST',
+                        data: {
+                            'total_charges': total_charges,
+                            'city_id': parseInt(city_id),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if(data.status){
+                                $('#total_charges').val(data.details.total_charges);
+                                $('#gst_charges').val(data.details.gst_charges);
+                                $('#total_amount').val(data.details.total_amount);
+                            }
+                        });
+                }
+            });
+
+            $('#print').on('click', function () {
+                if(shipment_ids.length > 0){
+                    print(shipment_ids);
                 }
             });
         });
