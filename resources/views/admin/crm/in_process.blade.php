@@ -96,6 +96,7 @@
                 </div>
             </div>
         </div>
+    </div>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -262,7 +263,7 @@
                                 row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
-                                row.push(values.description);
+                                row.push(values.descr);
                                 row.push(values.channel);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
@@ -300,6 +301,9 @@
                     action: function (e, dt, node, config) {
                         $('#BulkCommentModal').modal('show');
                         $('#BulkCommentModal').on('shown.bs.modal',function (e) {
+                        });
+                        $('#BulkCommentModal').on('hide.bs.modal', function (e) {
+                            $('#comment').val('').trigger('change');
                         });
                         $('#commentSubmit').on('click',function () {
                             var comment = $('#BulkCommentModal #comment').val();
@@ -970,6 +974,7 @@
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_comment').disable();
+                    $('#comment').val('').trigger('change');
                 }
             });
 
