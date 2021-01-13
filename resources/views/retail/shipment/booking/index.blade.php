@@ -187,7 +187,7 @@
                                             <input type="text" name="total_amount" id="total_amount" class="form-control decimal" placeholder="Total Amount" disabled>
                                         </div>
                                         <div class="form-group text-center">
-                                            <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-200" value="calculate_rates">Calculate Rates</button>
+                                            <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
