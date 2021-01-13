@@ -634,6 +634,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('rider_request')->name('rider_request.')->group(function (){
                 Route::get('','Admins\RiderManagementController@rider_request_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');
+                Route::post('/approve', 'Admins\RiderManagementController@approveRider')->name('approve');
             });
 
             Route::prefix('sms_history')->name('sms_history.')->group(function (){
@@ -1491,7 +1492,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
             Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
             Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
-            Route::post('station_operation_approved','Admins\AdminPettyCashController@petty_cash_station_operation_approved_all')->name('station_operation_approved');
+            Route::post('station_operation_finance_approved','Admins\AdminPettyCashController@petty_cash_station_operation_finance_approved_all')->name('station_operation_finance_approved');
 
         });
         Route::prefix('approved')->name('approved.')->group(function (){
@@ -1863,6 +1864,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
 
+        });
+        Route::prefix('returned_shipments')->name('returned_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@returned_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@returned_shipments_list')->name('list');
         });
     });
 
