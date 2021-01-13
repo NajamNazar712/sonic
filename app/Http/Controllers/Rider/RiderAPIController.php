@@ -1922,7 +1922,7 @@ class RiderAPIController extends Controller {
                             $rider_request->name = $request->name;
                             $rider_request->cnic = $request->cnic;
                             $rider_request->phone_no = $request->phone_number;
-                            $rider_request->pin = bcrypt($request->pin);
+                            $rider_request->pin = $request->pin;
                             $rider_request->save();
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
