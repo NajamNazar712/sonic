@@ -418,7 +418,6 @@ class RiderAPIController extends Controller {
         }
         else {
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-            $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -452,11 +451,15 @@ class RiderAPIController extends Controller {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
             }
-            elseif ($rider_request->exists()){
-                return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-            }
             else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+                if ($rider_request->exists()){
+                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
             }
         }
     }
@@ -1885,8 +1888,6 @@ class RiderAPIController extends Controller {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic'));
 
-                $rider = Rider::where('phone', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic'));
                 //Check RiderRequest Already Exist
                 if ($rider_request->exists()) {
                     $rider_request = $rider_request->first();
@@ -1900,34 +1901,36 @@ class RiderAPIController extends Controller {
                         $message = "CNIC Already Exist";
                     }
                 } //Check Rider Already Exist
-                else if ($rider->exists()) {
-                    $rider = $rider->first();
-                    if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
-                        $message = "Phone Number & CNIC Already Exists";
+                else {
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic'));
 
-                    } else if ($rider->phone == $request->phone_number) {
-                        $message = "Phone Number Already Exist";
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
+                            $message = "Phone Number & CNIC Already Exists";
 
-                    } else if ($rider->cnic == $request->input('cnic')) {
-                        $message = "CNIC Already Exist";
-                    }
+                        } else if ($rider->phone == $request->phone_number) {
+                            $message = "Phone Number Already Exist";
 
-                } else {
-                    try {
-                        $rider_request = new RiderRequest();
-                        $rider_request->name = $request->name;
-                        $rider_request->cnic = $request->cnic;
-                        $rider_request->phone_no = $request->phone_number;
-                        $rider_request->pin = bcrypt($request->pin);
-                        $rider_request->save();
-                        $response['status'] = 0;
-                        $message = 'Rider Request Has Been Submitted and Pending for Approval';
-                    } catch (Exception $ex) {
-                        $response['message'] = $ex;
+                        } else if ($rider->cnic == $request->input('cnic')) {
+                            $message = "CNIC Already Exist";
+                        }
+
+                    } else {
+                        try {
+                            $rider_request = new RiderRequest();
+                            $rider_request->name = $request->name;
+                            $rider_request->cnic = $request->cnic;
+                            $rider_request->phone_no = $request->phone_number;
+                            $rider_request->pin = bcrypt($request->pin);
+                            $rider_request->save();
+                            $response['status'] = 0;
+                            $message = 'Rider Request Has Been Submitted and Pending for Approval';
+                        } catch (Exception $ex) {
+                            $response['message'] = $ex;
+                        }
                     }
                 }
-
-
             }
         } else {
             $message = 'Post Method is Required';
