@@ -441,8 +441,8 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'digits': 3,
-                'min': 0.00,
-                'max': 1000
+                'min': 0.01,
+                'max': 10000000
             });
 
             $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
