@@ -4,7 +4,8 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
 {{--            <li class=" nav-item"><a href="{{route('admin.dashboard.index')}}"><i class="la la-area-chart"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a>--}}
 {{--            </li>--}}
-                <li><a class="menu-item" href="{{route('admin.leads.index')}}"><i class="la la-cart-plus"></i>Booking</a></li>
+                <li><a class="menu-item" href="{{route('retail.shipment.book.index')}}"><i class="la la-cart-plus"></i>Booking</a></li>
+                <li><a class="menu-item" href="{{route('retail.cash_deposit.index')}}"><i class="la la-cart-plus"></i>Cash Deposit</a></li>
         </ul>
     </div>
 </div>

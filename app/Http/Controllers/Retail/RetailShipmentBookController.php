@@ -268,6 +268,7 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->length = $length;
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
+        $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->save();
 
         if($request->book_button == 0){
