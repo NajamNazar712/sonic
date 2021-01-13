@@ -232,6 +232,7 @@ class RetailShipmentBookController extends Controller
         $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
         if($shipper_info->exists()){
             $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
@@ -239,6 +240,7 @@ class RetailShipmentBookController extends Controller
         }
         else{
             $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
