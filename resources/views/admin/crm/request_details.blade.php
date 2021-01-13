@@ -412,7 +412,31 @@
                                                 <div class="col-3">
                                                     <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
                                                 </div>
+                                                @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)
+                                                <div class="col-3">
+                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.damage_product_image', ['id' => $crm_details->id])}}" target="_blank">View Damage Product</a></button>
+                                                </div>
                                             </div>
+                                                <div class="row justify-content-center mt-1">
+                                                <div class="col-3">
+                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>
+                                                </div>
+                                                    @endif
+                                                    @if ($crm_details->missing_product_picture != null && $crm_details->product_packaging_picture_for_content_short != null && $crm_details->actual_product_picture_for_content_short != null)
+                                                    <div class="col-3">
+                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.missing_product_image', ['id' => $crm_details->id])}}" target="_blank">View Missing Product</a></button>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>
+                                                    </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Actual Product Packaging</a></button>
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">

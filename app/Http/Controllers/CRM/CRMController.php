@@ -19,6 +19,7 @@ class CRMController extends Controller
     //launched_by = 2 => Substitute Shipper
 
     static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL){
+//        dd($missing_product_picture,$product_packaging_picture_for_content_short,$actual_product_picture_for_content_short,$missing_product_price);
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -95,7 +96,7 @@ class CRMController extends Controller
             $crm_request->product_packaging_picture_for_content_short = $filename;
         }
         else{
-            $crm_request->product_packaging_picture_for_content_short = $actual_product_picture_for_content_short;
+            $crm_request->product_packaging_picture_for_content_short = $product_packaging_picture_for_content_short;
         }
         if($actual_product_picture_for_content_short != null){
             $filename = 'claim_invoice_' . $crm_request->id . '.png';
