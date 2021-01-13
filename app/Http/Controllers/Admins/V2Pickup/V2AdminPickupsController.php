@@ -13,6 +13,7 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommission;
@@ -813,17 +814,27 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
-                        }
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                    if($retail_shipment->exists()){
+                        $retail_check = true;
+                    }
+                    else{
+                        $retail_check = false;
                     }
 
+                    if($retail_check == false){
+                        if($shipment->booking_type_id == 4){
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        }else{
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
+                        }
+                    }
 
                     if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
@@ -1355,14 +1366,25 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                    if($retail_shipment->exists()){
+                        $retail_check = true;
+                    }
+                    else{
+                        $retail_check = false;
+                    }
+
+                    if($retail_check == false) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
                         }
                     }
 
