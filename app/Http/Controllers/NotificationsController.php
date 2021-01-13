@@ -3615,7 +3615,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);
 
 
-                    $cc = ['asad@trax.pk', 'syed.sharique@trax.pk'];
+                    $cc = ['asad@trax.pk', 'syed.sharique@trax.pk', 'fawwad.haider@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
 
@@ -3707,7 +3707,7 @@ class NotificationsController extends Controller
                     $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
 
                     $cc = array_merge($cc, $extra_admins);
-
+                    $cc[] = 'fawwad.haider@trax.pk';
                     self::email($subject, $body, $to, $cc);
                     $to = array();
                     $admins = Admin::whereIn('role_id', [8, 9, 10, 22, 25, 30, 46])->where('status', 1);
@@ -3807,7 +3807,7 @@ class NotificationsController extends Controller
                     $ceo = Admin::find(8);
 
                     $cc = array();
-                    $cc = [$ceo->email, 'asad@trax.pk'];
+                    $cc = [$ceo->email, 'asad@trax.pk', 'fawwad.haider@trax.pk'];
 
                     $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
                     $to = array_merge($to, $extra_admins);
