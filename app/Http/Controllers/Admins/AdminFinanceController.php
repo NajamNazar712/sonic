@@ -5846,7 +5846,7 @@ class AdminFinanceController extends Controller
                         else {
                             $total_adjustment_charges += $invoice_shipment->payable;
 
-                            $total_charges += $invoice_shipment->payable;
+                            $total_invoice_amount += $invoice_shipment->payable;
                         }
 
                         $total_charges += $invoice_shipment->charges;
@@ -5958,10 +5958,6 @@ class AdminFinanceController extends Controller
                           <td class="text-left">Packaging Charges</td>
                           <td class="text-right">' . number_format($total_packaging_material_charges, 2) . '</td>
                         </tr>
-                        <tr>
-                          <td class="text-left">Adjustment Charges</td>
-                          <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
-                        </tr>
                       </tbody>
                     </table>
 
@@ -5976,6 +5972,10 @@ class AdminFinanceController extends Controller
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Adjustment Charges (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
                                 </tr>
                 ';
 
