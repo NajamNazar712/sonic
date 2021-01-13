@@ -2577,8 +2577,14 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/store', 'Retail\RetailShipmentBookController@store')->name('store');
             Route::post('/slip', 'Retail\RetailShipmentBookController@slip')->name('slip');
             Route::post('/calculate_rates', 'Retail\RetailShipmentBookController@calculate_rates')->name('calculate_rates');
+            Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
+    });
+
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
+        Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
     });
 });
 
