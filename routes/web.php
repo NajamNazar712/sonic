@@ -2585,6 +2585,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
         Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
+        Route::post('track_v2', 'Retail\RetailTrackingController@track_v2')->name('track_v2');
     });
 });
 
