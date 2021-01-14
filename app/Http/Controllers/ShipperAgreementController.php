@@ -31,8 +31,12 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
-use Barryvdh\Snappy\Facades\SnappyPdf;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use SnappyImage;
+use SnappyPDF;
 
 class ShipperAgreementController extends Controller
 {
@@ -867,7 +871,30 @@ otherwise it will be rejected</li>
         return view('client.terms_success');
     }
 
-    public function crf_download($token, $id){
+
+    public function crf_download(Request $request, $token, $id){
+        $names = [
+            'id' => 'Shipper ID',
+            'token' => 'Token',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'string' => ':attribute must be a String.',
+        ];
+        $rules = [
+            'id' => ['required', 'integer', Rule::exists('users', 'id')],
+            'token' => ['required', 'string']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+        $validate->setAttributeNames($names);
+
+        if ($validate->fails()) {
+            return redirect(route('cod.404'));
+        }
         if(($id != null) && ($token !== null)){
             $user = User::find($id);
             if($user && $user->term_and_conditions == 0){
@@ -882,7 +909,6 @@ otherwise it will be rejected</li>
                 }
             }else{
                 return redirect(route('cod.404'));
-
             }
         }
     }
