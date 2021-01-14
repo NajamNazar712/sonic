@@ -513,11 +513,11 @@
                     $('#book_and_print').addClass('d-none');
                 }
                 else {
+                    $('#booking_form').reset();
                     $('#save').addClass('d-none');
                     $('#book_and_print').removeClass('d-none');
                 }
             });
-            var shipper_info = false;
             var complete_shipper_info = false;
             var first_shipment = false;
             $('#shipper_account_no').on('change', function () {
