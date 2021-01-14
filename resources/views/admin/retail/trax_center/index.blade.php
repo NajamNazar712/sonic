@@ -59,8 +59,8 @@
                             <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="eye">
+                            <input type="password" class="form-control" id="add_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <div class="form-control-position" id="add_eye">
                                 <i class="la la-eye success"></i>
                             </div>
                         </div>
@@ -114,8 +114,8 @@
                             <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="eye">
+                            <input type="password" class="form-control" id="edit_password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <div class="form-control-position" id="edit_eye">
                                 <i class="la la-eye success"></i>
                             </div>
                         </div>
@@ -183,7 +183,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#add_eye').on('mousedown',function(){$('#add_password').attr('type','text')}).on('mouseup',function(){$('#add_password').attr('type','password')});
+            $('#edit_eye').on('mousedown',function(){$('#edit_password').attr('type','text')}).on('mouseup',function(){$('#edit_password').attr('type','password')});
 
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
