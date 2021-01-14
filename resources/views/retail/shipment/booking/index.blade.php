@@ -547,6 +547,7 @@
                                 }
                             }
                             else{
+                                complete_shipper_info = false;
                                 first_shipment = true;
                                 $('#account_details').removeClass('d-none')
                             }
