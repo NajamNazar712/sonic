@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Retail;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
 use App\http\Models\Admin\Retail\RetailProduct;
@@ -10,6 +11,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
@@ -21,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class RetailShipmentBookController extends Controller
 {
@@ -132,7 +135,8 @@ class RetailShipmentBookController extends Controller
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes]);
+        $banks = BanksList::all();
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
     }
 
     public function store(Request $request){
@@ -236,6 +240,20 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+
+            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                $file = $request->file('cheque_image');
+
+                Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                $shipper_info->cheque_image = $filename;
+                $shipper_info->completed_status = 1;
+            }
             $shipper_info->save();
         }
         else{
@@ -244,6 +262,19 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                $file = $request->file('cheque_image');
+
+                Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                $shipper_info->cheque_image = $filename;
+                $shipper_info->completed_status = 1;
+            }
             $shipper_info->save();
         }
         $retail_shipment = new RetailShipment();
@@ -270,6 +301,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->save();
+
+        NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
@@ -317,7 +350,17 @@ class RetailShipmentBookController extends Controller
             $details['shipper_name'] = $shipper_info->shipper_name;
             $details['shipper_cnic'] = $shipper_info->shipper_cnic;
             $details['shipper_address'] = $shipper_info->shipper_address;
-            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details]);
+
+            if($shipper_info->completed_status == 1){
+                $complete_info = true;
+            }
+            else{
+                $complete_info = false;
+            }
+            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details, 'complete_info' => $complete_info]);
+        }
+        else{
+            return response()->json(['status' => 2, 'error' => 'Shipper Info Not Found!']);
         }
     }
 

@@ -14,7 +14,7 @@
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
                         @include('retail.inc.messages')
-                        <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('retail.shipment.book.store') }}" novalidate="novalidate">
+                        <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('retail.shipment.book.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="row">
                                 <div id="consignment_info" class="col-3 border">
@@ -203,6 +203,41 @@
                                                 <button type="submit" name="book_and_print" class="btn btn-primary width-150" value="Book & Print">Book & Print</button>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center p-2 d-none" id="account_details">
+                                <div class="col-5 border">
+                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
+                                    <div class="form-group col">
+                                        <label for="iban">
+                                            IBAN Number:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="account_name">Account Number:
+                                            <span class="danger">*</span></label>
+                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Bank Name:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <select name="bank" id="bank" class="select2 form-control required">
+                                            @foreach($banks as $bank)
+                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Cheque Image:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                     </div>
                                 </div>
                             </div>
@@ -476,8 +511,10 @@
                 }
             });
             var shipper_info = false;
+            var complete_shipper_info = false;
+            var first_shipment = false;
             $('#shipper_account_no').on('change', function () {
-                if(this.value !== '' && this.value != null && shipper_info === false){
+                if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
                     $.ajax({
                         url: '{!! route('retail.shipment.shipper_info') !!}',
                         method: 'POST',
@@ -487,20 +524,31 @@
                         }
                     })
                         .done(function (data) {
-                            if(data.status){
+                            if(data.status == 1){
                                 $('#shipper_account_no').val(data.details.shipper_account_no);
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
-                                shipper_info = true;
+                                if(data.complete_info == false){
+                                    complete_shipper_info = false;
+                                    $('#account_details').removeClass('d-none')
+                                }
+                                else{
+                                    complete_shipper_info = true;
+                                    $('#account_details').addClass('d-none')
+                                }
+                            }
+                            else{
+                                first_shipment = true;
+                                $('#account_details').removeClass('d-none')
                             }
                         });
                 }
             });
 
             $('#shipper_phone_no').on('change', function () {
-                if(this.value !== '' && this.value != null && shipper_info === false){
+                if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
                     $.ajax({
                         url: '{!! route('retail.shipment.shipper_info') !!}',
                         method: 'POST',
@@ -510,20 +558,52 @@
                         }
                     })
                         .done(function (data) {
-                            if(data.status){
+                            if(data.status == 1){
                                 $('#shipper_account_no').val(data.details.shipper_account_no);
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
-                                shipper_info = true;
+                                if(data.complete_info == false){
+                                    complete_shipper_info = false;
+                                    $('#account_details').removeClass('d-none')
+                                }
+                                else{
+                                    complete_shipper_info = true;
+                                    $('#account_details').addClass('d-none')
+                                }
+                            }
+                            else{
+                                first_shipment = true;
+                                $('#account_details').removeClass('d-none')
                             }
                         });
                 }
             });
 
             var shipment_ids = [];
+            var allow_first_time = true;
             $('#book').on('click', function () {
+                if(complete_shipper_info == false){
+                    if(first_shipment == true){
+                        if(allow_first_time == true){
+                            $('#iban_no').removeClass('required');
+                            $('#account_no').removeClass('required');
+                            $('#bank').removeClass('required');
+                            allow_first_time = false;
+                        }
+                        else{
+                            $('#iban_no').addClass('required');
+                            $('#account_no').addClass('required');
+                            $('#bank').addClass('required');
+                        }
+                    }
+                    else{
+                        $('#iban_no').addClass('required');
+                        $('#account_no').addClass('required');
+                        $('#bank').addClass('required');
+                    }
+                }
                var validator = $('#booking_form').valid();
                if(validator) {
                    swal({
@@ -619,6 +699,24 @@
                         closeOnEsc: false
                     });
                     form.submit();
+                }
+            });
+
+            $('#bank').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:'Select Bank',
+            });
+            $('#account_details_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#book').click;
                 }
             });
             var city_id = null;

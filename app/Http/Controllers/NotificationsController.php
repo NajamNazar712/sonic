@@ -6,6 +6,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommission;
@@ -6465,38 +6466,36 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
                 else if($id == 115){
-                    $shipment_id = $reference_1_id;
-                    $user_id = $reference_2_id;
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
                     $body = $notification->body;
-                    if($shipment_id){
-                        $tracking_number = Shipment::find($shipment_id)->tracking_number;
-                        $user = RetailUser::find($user_id);
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
 
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
                         }
                         if (strpos($body, '[shipper]') !== FALSE) {
-                            $body = str_replace('[shipper]', $user->name, $body);
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
                         }
-                        $to = $user->phone;
+                        $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to);
                     }
                 }
                 else if($id == 116){
-                    $shipment_id = $reference_1_id;
-                    $user_id = $reference_2_id;
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
                     $body = $notification->body;
-                    if($shipment_id){
-                        $tracking_number = Shipment::find($shipment_id)->tracking_number;
-                        $user = RetailUser::find($user_id);
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
 
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
                         }
                         if (strpos($body, '[shipper]') !== FALSE) {
-                            $body = str_replace('[shipper]', $user->name, $body);
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
                         }
-                        $to = $user->phone;
+                        $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to);
                     }
                 }
