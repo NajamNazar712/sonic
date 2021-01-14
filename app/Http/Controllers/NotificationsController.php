@@ -5141,6 +5141,7 @@ class NotificationsController extends Controller
                         $to[] = 'faizan.ahmed@trax.pk';
                         $cc[] = 'fawad.ahmed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $cc[] = 'shafay.tariq@trax.pk';
                     }
 
                     self::email($subject, $body, $to, $cc, $bcc);
