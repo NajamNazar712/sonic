@@ -861,6 +861,7 @@ otherwise it will be rejected</li>
                 return redirect(route('cod.404'));
             }
         }
+        return redirect(route('cod.404'));
     }
     public function accept_success(){
         return view('client.terms_success');
