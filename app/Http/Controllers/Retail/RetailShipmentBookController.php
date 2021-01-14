@@ -579,10 +579,10 @@ class RetailShipmentBookController extends Controller
 
                     foreach($shipment->items as $item){
                         if($item->insurance == 1){
-                            $insurance = '<i class="la la-check-square "> Yes</i> <i class="la la-minus-square"> No</i>';
+                            $insurance = '<b><i class="la la-check-square "> Yes</i></b> <i class="la la-minus-square"> No</i>';
                         }
                         else{
-                            $insurance = '<i class="la la-minus-square"> Yes</i> <i class="la la-check-square"> No</i>';
+                            $insurance = '<i class="la la-minus-square"> Yes</i> <b><i class="la la-check-square"> No</i></b>';
                         }
                         $table_start .= '
                               <tr>
