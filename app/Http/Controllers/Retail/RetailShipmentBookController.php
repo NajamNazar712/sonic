@@ -240,6 +240,7 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+//            $shipper_info->city_id = $pickup_city_id;
 
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
@@ -262,6 +263,7 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+//            $shipper_info->city_id = $pickup_city_id;
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
 

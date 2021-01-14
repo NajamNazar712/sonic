@@ -596,12 +596,14 @@
                         $('#iban_no').removeClass('required');
                         $('#account_no').removeClass('required');
                         $('#bank').removeClass('required');
+                        $('#cheque_image').removeClass('required');
                         first_shipment = false;
                     }
                     else{
                         $('#iban_no').addClass('required');
                         $('#account_no').addClass('required');
                         $('#bank').addClass('required');
+                        $('#cheque_image').addClass('required');
                     }
                 }
                var validator = $('#booking_form').valid();
