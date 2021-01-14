@@ -206,7 +206,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row justify-content-center p-2 d-none" id="account_details">
+                            <div class="row justify-content-center p-2" id="account_details">
                                 <div class="col-5 border">
                                     <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
                                     <div class="form-group col">

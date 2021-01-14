@@ -27,7 +27,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Store Code</th>
-                        <th class="border-primary border-darken-1">Location Lat/Long</th>
+                        <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -247,7 +247,6 @@
                             head.push('Updated By');
                             head.push('Status');
                             head.push('Store Code');
-                            head.push('Location Lat/Long');
 
 
                             $.each(result.data, function(index, values) {
@@ -264,7 +263,6 @@
                                 row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
-                                row.push(values.location);
                                 body.push(row);
                             });
                         },
