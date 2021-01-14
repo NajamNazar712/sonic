@@ -77,7 +77,7 @@
 {{--                                        <input name="discount" class="form-control discount" id="discount" placeholder="Discount" value="">--}}
 {{--                                    </div>--}}
                                     <div class="form-group input-group">
-                                        <input  type="text" name="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+                                        <input  type="text" name="pieces" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
                                     </div>
                                     <div class="form-group">
                                         <select name="payment_mode" id="payment_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Payment Mode is required">
@@ -131,7 +131,7 @@
                                         </div>
                                         <div class="row d-none" id="insurance_amount_div">
                                             <div class="form-group col-6">
-                                                <input type="text" name="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                                <input type="text" name="insurance_amount" id="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
                                             </div>
                                         </div>
                                         <div class="row justify-content-end">
@@ -419,6 +419,13 @@
                 allowClear:true
             });
 
+            $('#weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
             $('#booking_form input.volumetric_weight').checkboxpicker().bind('change', function() {
                 if (this.checked) {
                     $('#booking_form input.weight').val('').prop('disabled', true);
@@ -672,6 +679,7 @@
                         $('#total_charges').val('');
                         $('#gst_charges').val('');
                         $('#total_amount').val('');
+                        $('#insurance_amount').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
 
