@@ -581,6 +581,7 @@
                                 }
                             }
                             else{
+                                complete_shipper_info = false;
                                 first_shipment = true;
                                 $('#account_details').removeClass('d-none')
                             }
@@ -589,21 +590,13 @@
             });
 
             var shipment_ids = [];
-            var allow_first_time = true;
             $('#book').on('click', function () {
                 if(complete_shipper_info == false){
                     if(first_shipment == true){
-                        if(allow_first_time == true){
-                            $('#iban_no').removeClass('required');
-                            $('#account_no').removeClass('required');
-                            $('#bank').removeClass('required');
-                            allow_first_time = false;
-                        }
-                        else{
-                            $('#iban_no').addClass('required');
-                            $('#account_no').addClass('required');
-                            $('#bank').addClass('required');
-                        }
+                        $('#iban_no').removeClass('required');
+                        $('#account_no').removeClass('required');
+                        $('#bank').removeClass('required');
+                        first_shipment = false;
                     }
                     else{
                         $('#iban_no').addClass('required');
