@@ -2854,13 +2854,15 @@ class NotificationsController extends Controller
                                 $body = str_replace('[trax_logo]', $logo, $body);
                             }
 
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
                             if (strpos($body, '[button]') !== FALSE) {
                                 $body = str_replace('[button]', $button, $body);
                             }
 
-                            if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
-                            }
+
                             $sale_person_id = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->select('admin_id')->first();
                             if ($sale_person_id) {
                                 $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
