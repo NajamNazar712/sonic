@@ -1114,9 +1114,17 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function type_add(Request $request){
+        $packaging_type = 3;
+        if($request->has('packaging_type') && $request->packaging_type == 'external'){
+            $packaging_type = 2;
+        }else if($request->has('packaging_type') && $request->packaging_type == 'internal'){
+            $packaging_type = 1;
+        }
+
         $type = new PackagingMaterialTypes();
         $type->type = $request->type;
         $type->description = $request->description;
+        $type->packaging_type = $packaging_type;
         $type->status = 1;
         $type->created_by = Auth::id();
 
@@ -1193,10 +1201,17 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function type_edit(Request $request){
+        $packaging_type = 3;
+        if($request->has('packaging_type') && $request->packaging_type == 'external'){
+            $packaging_type = 2;
+        }else if($request->has('packaging_type') && $request->packaging_type == 'internal'){
+            $packaging_type = 1;
+        }
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->type = $request->edit_type;
         $type->description = $request->edit_description;
         $type->updated_by = Auth::id();
+        $type->packaging_type = $packaging_type;
 
         if ($request->hasFile('edit_packaging_picture')) {
             $filename = 'packaging_picture_' . $type->id . '.png';
