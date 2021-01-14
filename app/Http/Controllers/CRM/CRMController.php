@@ -19,7 +19,6 @@ class CRMController extends Controller
     //launched_by = 2 => Substitute Shipper
 
     static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL){
-//        dd($missing_product_picture,$product_packaging_picture_for_content_short,$actual_product_picture_for_content_short,$missing_product_price);
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -54,7 +53,7 @@ class CRMController extends Controller
             $crm_request->invoice_picture = $invoice_picture;
         }
         if($damage_product_picture != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_damage_product_' . $crm_request->id . '.png';
             $file = $damage_product_picture;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->damage_product_picture = $filename;
@@ -63,7 +62,7 @@ class CRMController extends Controller
             $crm_request->damage_product_picture = $damage_product_picture;
         }
         if($product_packaging_picture != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_product_packaging_' . $crm_request->id . '.png';
             $file = $product_packaging_picture;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->product_packaging_picture = $filename;
@@ -72,7 +71,7 @@ class CRMController extends Controller
             $crm_request->product_packaging_picture = $product_packaging_picture;
         }
         if($actual_product_picture != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_actual_product_' . $crm_request->id . '.png';
             $file = $actual_product_picture;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->actual_product_picture = $filename;
@@ -81,7 +80,7 @@ class CRMController extends Controller
             $crm_request->actual_product_picture = $actual_product_picture;
         }
         if($missing_product_picture != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_missing_product_' . $crm_request->id . '.png';
             $file = $missing_product_picture;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->missing_product_picture = $filename;
@@ -90,7 +89,7 @@ class CRMController extends Controller
             $crm_request->missing_product_picture = $missing_product_picture;
         }
         if($product_packaging_picture_for_content_short != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_product_content_short_' . $crm_request->id . '.png';
             $file = $product_packaging_picture_for_content_short;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->product_packaging_picture_for_content_short = $filename;
@@ -99,7 +98,7 @@ class CRMController extends Controller
             $crm_request->product_packaging_picture_for_content_short = $product_packaging_picture_for_content_short;
         }
         if($actual_product_picture_for_content_short != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
+            $filename = 'claim_actual_content_short_' . $crm_request->id . '.png';
             $file = $actual_product_picture_for_content_short;
             Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
             $crm_request->actual_product_picture_for_content_short = $filename;

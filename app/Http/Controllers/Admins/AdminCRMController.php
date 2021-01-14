@@ -2434,32 +2434,32 @@ class AdminCRMController extends Controller
     }
 
     public function damage_product_image($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_damage_product_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
     public function product_packaging_image($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_product_packaging_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
     public function actual_product_image($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_actual_product_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
     public function missing_product_image($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_missing_product_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
     public function product_packaging_image_for_content_short($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_product_content_short_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
     public function actual_product_image_for_content_short($id){
-        $url = Storage::url('crm_claims/claim_product_' . $id . '.png');
+        $url = Storage::url('crm_claims/claim_actual_content_short_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
