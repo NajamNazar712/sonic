@@ -6,7 +6,6 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
-use App\http\Models\Admin\Retail\RetailProduct;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
@@ -15,6 +14,7 @@ use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\Product;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -128,7 +128,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function index(){
-        $products = RetailProduct::all();
+        $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
@@ -203,7 +203,7 @@ class RetailShipmentBookController extends Controller
 
         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-        $product_type_id = 24;
+        $product_type_id = $request->product;
 
         $item_description = NULL;
 
@@ -240,6 +240,7 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+//            $shipper_info->city_id = $pickup_city_id;
 
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
@@ -262,6 +263,7 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_name = $request->shipper_name;
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
+//            $shipper_info->city_id = $pickup_city_id;
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
 
@@ -336,10 +338,7 @@ class RetailShipmentBookController extends Controller
         }
         elseif($request->has('shipper_phone_no')){
             if($request->shipper_phone_no != null && $request->shipper_phone_no != ''){
-                $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
-                if($shipper_info->exists()){
-                    $shipper_info = $shipper_info->first();
-                }
+                $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)->first();
             }
         }
 
@@ -554,34 +553,34 @@ class RetailShipmentBookController extends Controller
                     $table_start .= '
                       <tr>
                         <td class="color secondary border twice-bottom"><strong>Address</strong></td>
-                        <td colspan="6" class="border twice-bottom twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                        <td colspan="6" class="border twice-bottom twice-right">' . $shipment->retail->shipper_address . '</td>
                         <td class="color secondary border twice-bottom twice-left"><strong>Address</strong></td>
                         <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
                       </tr>
                 ';
-                    $fuel_and_gst = $shipment->fuel_surcharge + $shipment->gst;
+                    $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst_charges;
                     $table_start .= '
                               <tr>
                                 <td colspan="3" class="color primary border twice-left"><strong>Destination</strong></td>
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="3" class="color primary"><strong>Weight</strong></td>
                                 <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
-                                <td colspan="3" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                                <td colspan="3" class="color primary border twice-right"><strong>Total Amount</strong></td>
                             </tr>
                               <tr>
                                 <td colspan="3" class="border twice-bottom twice-left">' . $shipment->consignee_city->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="3" class="border twice-bottom">' . $shipment->actual_weight . '</td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->estimated_weight . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $fuel_and_gst . '</td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->total_charges . '</td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->total_amount . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){
                         if($item->insurance == 1){
-                            $insurance = '<i class="la la-check-square "> Yes</i> <i class="la la-minus-square"> No</i>';
+                            $insurance = '<b><i class="la la-check-square "> Yes</i></b> <i class="la la-minus-square"> No</i>';
                         }
                         else{
-                            $insurance = '<i class="la la-minus-square"> Yes</i> <i class="la la-check-square"> No</i>';
+                            $insurance = '<i class="la la-minus-square"> Yes</i> <b><i class="la la-check-square"> No</i></b>';
                         }
                         $table_start .= '
                               <tr>

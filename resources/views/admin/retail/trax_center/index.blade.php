@@ -27,7 +27,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Store Code</th>
-                        <th class="border-primary border-darken-1">Location Lat/Long</th>
+                        <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -247,7 +247,6 @@
                             head.push('Updated By');
                             head.push('Status');
                             head.push('Store Code');
-                            head.push('Location Lat/Long');
 
 
                             $.each(result.data, function(index, values) {
@@ -261,9 +260,9 @@
                                 row.push(values.default_hub);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
-                                row.push(values.location);
                                 body.push(row);
                             });
                         },
@@ -276,7 +275,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 // scrollX: true, scrollY: '500px',
-                autoWidth:true,
+                autoWidth: false,
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
@@ -290,7 +289,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Activation Report',
+                        title: 'Trax Center',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

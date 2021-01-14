@@ -22,7 +22,7 @@
                                     <div class="form-group">
                                         <select name="product" id="product" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment is required">
                                             @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{$product->name}}</option>
+                                                <option value="{{$product->id}}">{{$product->product_name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -77,7 +77,7 @@
 {{--                                        <input name="discount" class="form-control discount" id="discount" placeholder="Discount" value="">--}}
 {{--                                    </div>--}}
                                     <div class="form-group input-group">
-                                        <input  type="text" name="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+                                        <input  type="text" name="pieces" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
                                     </div>
                                     <div class="form-group">
                                         <select name="payment_mode" id="payment_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Payment Mode is required">
@@ -131,7 +131,7 @@
                                         </div>
                                         <div class="row d-none" id="insurance_amount_div">
                                             <div class="form-group col-6">
-                                                <input type="text" name="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                                <input type="text" name="insurance_amount" id="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
                                             </div>
                                         </div>
                                         <div class="row justify-content-end">
@@ -206,7 +206,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row justify-content-center p-2 d-none" id="account_details">
+                            <div class="row justify-content-center p-2" id="account_details">
                                 <div class="col-5 border">
                                     <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
                                     <div class="form-group col">
@@ -419,6 +419,13 @@
                 allowClear:true
             });
 
+            $('#weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
             $('#booking_form input.volumetric_weight').checkboxpicker().bind('change', function() {
                 if (this.checked) {
                     $('#booking_form input.weight').val('').prop('disabled', true);
@@ -506,11 +513,11 @@
                     $('#book_and_print').addClass('d-none');
                 }
                 else {
+                    $('#booking_form').reset();
                     $('#save').addClass('d-none');
                     $('#book_and_print').removeClass('d-none');
                 }
             });
-            var shipper_info = false;
             var complete_shipper_info = false;
             var first_shipment = false;
             $('#shipper_account_no').on('change', function () {
@@ -540,6 +547,7 @@
                                 }
                             }
                             else{
+                                complete_shipper_info = false;
                                 first_shipment = true;
                                 $('#account_details').removeClass('d-none')
                             }
@@ -574,6 +582,7 @@
                                 }
                             }
                             else{
+                                complete_shipper_info = false;
                                 first_shipment = true;
                                 $('#account_details').removeClass('d-none')
                             }
@@ -582,26 +591,20 @@
             });
 
             var shipment_ids = [];
-            var allow_first_time = true;
             $('#book').on('click', function () {
                 if(complete_shipper_info == false){
                     if(first_shipment == true){
-                        if(allow_first_time == true){
-                            $('#iban_no').removeClass('required');
-                            $('#account_no').removeClass('required');
-                            $('#bank').removeClass('required');
-                            allow_first_time = false;
-                        }
-                        else{
-                            $('#iban_no').addClass('required');
-                            $('#account_no').addClass('required');
-                            $('#bank').addClass('required');
-                        }
+                        $('#iban_no').removeClass('required');
+                        $('#account_no').removeClass('required');
+                        $('#bank').removeClass('required');
+                        $('#cheque_image').removeClass('required');
+                        first_shipment = false;
                     }
                     else{
                         $('#iban_no').addClass('required');
                         $('#account_no').addClass('required');
                         $('#bank').addClass('required');
+                        $('#cheque_image').addClass('required');
                     }
                 }
                var validator = $('#booking_form').valid();
@@ -672,6 +675,7 @@
                         $('#total_charges').val('');
                         $('#gst_charges').val('');
                         $('#total_amount').val('');
+                        $('#insurance_amount').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
 
