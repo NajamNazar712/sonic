@@ -873,7 +873,7 @@ otherwise it will be rejected</li>
 
                 $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
                 if($term->exists()){
-                    $html = self::view_crf_agreement($id);
+                    $html = self::view_crf_agreement($id, 1);
                     $pdf = SnappyPDF::loadHTML($html);
 
                     $filename = 'Customer Registration Form' . '.pdf';
