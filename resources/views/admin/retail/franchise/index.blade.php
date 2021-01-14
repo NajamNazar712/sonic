@@ -260,6 +260,7 @@
                                 row.push(values.default_hub);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
                                 row.push(values.location);
@@ -275,7 +276,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 // scrollX: true, scrollY: '500px',
-                autoWidth:true,
+                autoWidth: false,
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
@@ -289,7 +290,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Activation Report',
+                        title: 'Franchise',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
