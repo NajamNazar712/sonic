@@ -6,7 +6,6 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
-use App\http\Models\Admin\Retail\RetailProduct;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
@@ -204,7 +203,7 @@ class RetailShipmentBookController extends Controller
 
         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-        $product_type_id = 24;
+        $product_type_id = $request->product;
 
         $item_description = NULL;
 
@@ -560,7 +559,7 @@ class RetailShipmentBookController extends Controller
                         <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
                       </tr>
                 ';
-                    $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
+                    $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst_charges;
                     $table_start .= '
                               <tr>
                                 <td colspan="3" class="color primary border twice-left"><strong>Destination</strong></td>

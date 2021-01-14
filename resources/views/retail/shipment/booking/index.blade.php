@@ -22,7 +22,7 @@
                                     <div class="form-group">
                                         <select name="product" id="product" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment is required">
                                             @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{$product->name}}</option>
+                                                <option value="{{$product->id}}">{{$product->product_name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
