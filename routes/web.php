@@ -2568,7 +2568,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
     Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
     Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
-    Route::get('/logout','Auth\RetailLoginController@logout')->name('logout');
+    Route::post('/logout','Auth\RetailLoginController@logout')->name('logout');
     Route::get('/dashboard', 'Retail\RetailDashboardController@dashboard')->name('dashboard.index');
 
     Route::prefix('shipment')->name('shipment.')->group(function () {

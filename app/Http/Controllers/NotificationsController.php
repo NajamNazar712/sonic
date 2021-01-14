@@ -6,6 +6,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
@@ -6469,7 +6470,7 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     if($shipment_id){
                         $tracking_number = Shipment::find($shipment_id)->tracking_number;
-                        $user = User::find($user_id);
+                        $user = RetailUser::find($user_id);
 
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
@@ -6477,8 +6478,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[shipper]') !== FALSE) {
                             $body = str_replace('[shipper]', $user->name, $body);
                         }
-                        $to = $user->email;
-                        self::email($subject, $body, $to);
+                        $to = $user->phone;
+                        self::sms($body, $to);
                     }
                 }
                 else if($id == 116){
@@ -6487,7 +6488,7 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     if($shipment_id){
                         $tracking_number = Shipment::find($shipment_id)->tracking_number;
-                        $user = User::find($user_id);
+                        $user = RetailUser::find($user_id);
 
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
@@ -6495,8 +6496,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[shipper]') !== FALSE) {
                             $body = str_replace('[shipper]', $user->name, $body);
                         }
-                        $to = $user->email;
-                        self::email($subject, $body, $to);
+                        $to = $user->phone;
+                        self::sms($body, $to);
                     }
                 }
             }

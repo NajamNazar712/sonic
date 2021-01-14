@@ -187,20 +187,20 @@
                                             <input type="text" name="total_amount" id="total_amount" class="form-control decimal" placeholder="Total Amount" disabled>
                                         </div>
                                         <div class="form-group text-center">
-                                            <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-200" value="calculate_rates">Calculate Rates</button>
+                                            <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
                                         <div class="position-absolute" style="bottom: 0;">
                                             <div class="form-group text-center d-none" id="print_div">
-                                                <button type="button" name="print" id="print" class="btn btn-outline-cyan width-200" value="print">Print Slip</button>
+                                                <button type="button" name="print" id="print" class="btn btn-outline-cyan width-150" value="print">Print Slip</button>
                                             </div>
                                             <div class="form-group text-center d-none" id="save">
                                                 <input type="hidden" name="book_button" id="book_button" value="1">
-                                                <button type="button" name="save" id="book" class="btn btn-primary width-200" value="save">Save</button>
+                                                <button type="button" name="save" id="book" class="btn btn-primary width-150" value="save">Save</button>
                                             </div>
                                             <div class="form-group text-center" id="book_and_print">
-                                                <button type="submit" name="book_and_print" class="btn btn-primary width-200" value="Book & Print">Book & Print</button>
+                                                <button type="submit" name="book_and_print" class="btn btn-primary width-150" value="Book & Print">Book & Print</button>
                                             </div>
                                         </div>
                                     </div>
@@ -441,8 +441,8 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'digits': 3,
-                'min': 0.00,
-                'max': 1000
+                'min': 0.01,
+                'max': 10000000
             });
 
             $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
