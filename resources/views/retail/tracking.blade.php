@@ -490,7 +490,7 @@
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
-                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td colspan="3"><strong>City</strong></td>';
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
@@ -513,11 +513,11 @@
                                 }
                                 shipment += '<td><strong> Retail User Name</strong></td>';
 
-                                shipment += '<td>' + details.pickup.person_of_contact + '</td>';
+                                shipment += '<td>' + details.retail_user.name + '</td>';
 
                                 shipment += '<td><strong> Branch</strong></td>';
 
-                               /* shipment += '<td colspan="3">' + details.pickup.code + '</td>';*/
+                                shipment += '<td colspan="3">' + details.retail_user.code + '</td>';
 
 
                                 shipment += '</tr>';
@@ -673,7 +673,7 @@
                                 shipment += '<th><strong>Status</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>Remarks</strong></th>';
-                                shipment += '<th><strong>User</strong></th>';
+                                // shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
@@ -688,7 +688,7 @@
                                     shipment += '<td>' + history.status + '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
                                     shipment += '<td>' + history.remarks + '</td>';
-                                    shipment += '<td>' + history.user + '</td>';
+                                    // shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';

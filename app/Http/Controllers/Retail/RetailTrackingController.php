@@ -7,6 +7,10 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequest;
@@ -523,7 +527,21 @@ class RetailTrackingController extends Controller
                     $details['pickup']['origin'] = $pickup->city->name;
                     $details['pickup']['address'] = $pickup->pickup_address;
 
-                    $retail_user = 
+                    $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                    $retail_user_id = $retail_shipment->retail_user_id;
+                    $retail_user = RetailUser::find($retail_user_id);
+                    if($retail_user->category == 1){
+                        $franchise = RetailFranchise::find($retail_user->category_id);
+                        $details['retail_user']['name'] = $franchise->name;
+                        $details['retail_user']['code'] = $franchise->code;
+
+                    }
+                    else{
+                        $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                        $details['retail_user']['name'] = $trax_center->name;
+                        $details['retail_user']['code'] = $trax_center->code;
+                    }
+
 
 
                     $details['consignee']['name'] = $shipment->consignee_name;
