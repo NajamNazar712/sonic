@@ -31,12 +31,8 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
-
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use SnappyImage;
-use SnappyPDF;
 
 class ShipperAgreementController extends Controller
 {
@@ -871,8 +867,26 @@ otherwise it will be rejected</li>
         return view('client.terms_success');
     }
 
+    public function crf_download($token, $id){
+        if(($id != null) && ($token !== null)){
+            $user = User::find($id);
+            if($user && $user->term_and_conditions == 0){
 
-    public function crf_download(Request $request, $token, $id){
+                $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
+                if($term->exists()){
+                    $html = self::view_crf_agreement($id, 1);
+                    $pdf = SnappyPDF::loadHTML($html);
+
+                    $filename = 'Customer Registration Form' . '.pdf';
+                    return $pdf->download($filename);
+                }
+            }else{
+                return redirect(route('cod.404'));
+
+            }
+        }
+    }
+    /*public function old_crf_download(Request $request, $token, $id){
         $names = [
             'id' => 'Shipper ID',
             'token' => 'Token',
@@ -911,5 +925,5 @@ otherwise it will be rejected</li>
                 return redirect(route('cod.404'));
             }
         }
-    }
+    }*/
 }
