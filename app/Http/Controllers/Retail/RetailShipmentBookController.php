@@ -336,10 +336,7 @@ class RetailShipmentBookController extends Controller
         }
         elseif($request->has('shipper_phone_no')){
             if($request->shipper_phone_no != null && $request->shipper_phone_no != ''){
-                $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
-                if($shipper_info->exists()){
-                    $shipper_info = $shipper_info->first();
-                }
+                $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)->first();
             }
         }
 
