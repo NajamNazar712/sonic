@@ -40,8 +40,7 @@ class RetailCashCollectionController extends Controller
             })
             ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category'])
            ->whereIn('retail_pickup_notes.status', [1,2,3])
-           ->where('retail_pickup_notes.pncc_status', '=', 0)
-        ;
+           ->where('retail_pickup_notes.pncc_status', '=', 0);
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('count', function($deliveries) {
