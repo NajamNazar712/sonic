@@ -505,7 +505,7 @@
                     $('#book_and_print').addClass('d-none');
                 }
                 else {
-                    $('#booking_form').reset();
+                    $('#booking_form').trigger("reset");
                     $('#save').addClass('d-none');
                     $('#book_and_print').removeClass('d-none');
                 }
