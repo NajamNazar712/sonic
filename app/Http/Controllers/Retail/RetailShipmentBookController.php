@@ -334,7 +334,7 @@ class RetailShipmentBookController extends Controller
         $cash_deposit_shipment->shipment_id = $shipment_id;
         $cash_deposit_shipment->save();
 
-        
+
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 

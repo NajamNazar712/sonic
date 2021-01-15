@@ -152,8 +152,8 @@
                             head.push('S.No');
                             head.push('Product');
                             head.push('Total CN Number');
-                            head.push('Performa No,');
-                            head.push('Trax/Franchise');
+                            head.push('Performa No.');
+                            head.push('Trax Center/Franchise');
                             head.push('Booking Code');
                             head.push('Cash');
                             head.push('Booking Date');
@@ -163,7 +163,7 @@
                                 row.push(index + 1);
                                 row.push(values.shipping_mode);
                                 row.push(values.total_shipments);
-                                row.push(values.perform_no);
+                                row.push(values.performa_no);
                                 row.push(values.category);
                                 row.push(values.booking_code);
                                 row.push(values.total_cash);
@@ -184,7 +184,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending Deliveries',
+                        title: 'Cash Deposit',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
