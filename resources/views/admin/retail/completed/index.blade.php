@@ -40,7 +40,7 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1"></th>
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">DNCC & PNCC No.</th>
+                            <th class="border-primary border-darken-1">PNCC No.</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Rider</th>
                             <th class="border-primary border-darken-1">Center/Franchise Name</th>
@@ -51,7 +51,7 @@
                             <th class="border-primary border-darken-1">Cash Collected By</th>
                             <th class="border-primary border-darken-1">Cash Collection Date</th>
                             <th class="border-primary border-darken-1">PNCC Amount</th>
-                            <th class="border-primary border-darken-1">Action</th>
+{{--                            <th class="border-primary border-darken-1">Action</th>--}}
                         </tr>
                         </thead>
                     </table>
@@ -130,13 +130,14 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.pncc_no);
+                                row.push(values.retail_pickup_note_id);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.franchise_name);
-                                row.push(values.shipments_count);
-                                row.push(values.frnachise_code);
+                                row.push(values.store);
+                                row.push(values.count);
+                                row.push(values.code);
                                 row.push(values.assignee);
+                                row.push(values.time);
                                 row.push(values.created_at);
                                 row.push(values.pncc_amount);
 
@@ -155,7 +156,7 @@
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {
-                        text: 'Deposit DNCC',
+                        text: 'Deposit PNCC',
                         className: 'btn btn-primary delivered',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -294,23 +295,23 @@
                         d.search_tracking = $('#search_tracking').val();
                     }
                 },
-                rowId: 'delivery_note_id',
+                rowId: 'retail_pickup_note_id',
                 order: [[1, 'asc']],
                 columns: [
-                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'retail_pickup_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'retail_pickup_note_id' ,name: 'retail_pickup_notes.id', class: 'align-middle text-center retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'franchise' ,name: 'rf.name', class: 'align-middle franchise'},
-                    { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
-                    { data:'code' ,name: 'rf.code', class: 'align-middle code text-center'},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'cash_collected' ,name: 'cash_collected', class: 'align-middle cash_collected'},
-                    { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
-                    { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+                    { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
+                    { data:'store' ,name: 'store', class: 'align-middle store'},
+                    { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
+                    { data:'code' ,name: 'code', class: 'align-middle code text-center'},
+                    { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
+                    { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time'},
+                    { data:'collected_by' ,name: 'h.name', class: 'align-middle collected_by'},
+                    { data:'cash_collected_at' ,name: 'retail_pickup_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
+                    { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
+                    // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -379,7 +380,7 @@
                     }
                 }else{
                     scan_sound(2);
-                    var error = "Delivery Note not found!";
+                    var error = "Pickup Note not found!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 $(this).val('');
@@ -433,69 +434,19 @@
                     }
                 }
             });
-            $('body').on('click','.cash_collect',function () {
-                var rowid = $(this).parents('tr').attr('id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to collect cash!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url:'{!! route('admin.delivery.cash_collection.retail.pending.collect') !!}',
-                            method:'POST',
-                            data:{
-                                'delivery_note_id':rowid,
-                                '_token':'{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            if(data.status === 1){
-                                table.draw();
-                                selected_rows = [];
-                                hub_ids = [];
-                                if(selected_rows.length == 0){
-                                    table.button('.cash_collect_all').disable();
-                                }
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                            }
-                        });
-                    }
-                });
-
-            });
 
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+            $('#datatable tbody').on('click','tr td.count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#delivered_shipments_modal .modal-body').html('');
                 $('#delivered_shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.completed.shipments.delivered') !!}',
+                    url: '{!! route('admin.delivery.completed.retail.shipments.delivered') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'retail_pickup_note_id': id
                     }
                 })
                     .done(function(data) {
