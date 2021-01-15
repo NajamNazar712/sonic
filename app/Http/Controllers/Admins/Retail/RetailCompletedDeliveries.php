@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
+use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 
@@ -22,92 +25,52 @@ class RetailCompletedDeliveries extends Controller
 
     public function list(Request $request)
     {
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
-            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('retail_franchises as rf','rf.default_hub','=','delivery_notes.hub_id')  //to be removed in future
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone', 'delivery_notes.status','rf.name as franchise','rf.code as code'])
-            ->where('delivery_notes.cash_collection_status', 1)
-            ->where('delivery_notes.dncc_status', 0);
+        $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
+            ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
+            ->join('admins as h', 'h.id', '=', 'retail_pickup_notes.cash_collected_by')
+            ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+            ->leftJoin('retail_franchises as rf', function ($join) {
+                $join->on('rf.id', '=', 'ru.category_id')
+                    ->where('ru.category', '=',1);
+            })
+            ->leftJoin('retail_trax_centers as rc', function ($join) {
+                $join->on('rc.id', '=', 'ru.category')
+                    ->where('ru.category', '=',2);
+            })
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category','h.name as collected_by','retail_pickup_notes.cash_collected_at as cash_collected_at'])
+            ->where('retail_pickup_notes.status', 4)
+            ->where('retail_pickup_notes.pncc_status', '=', 0);
 
-        if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
-        }
 
         $datatable = Datatables::of($deliveries)
-            ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
-            })
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
-            })
-            ->addColumn('delivery_note_id_padded', function ($deliveries) {
-                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
-            })
-            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
-                return $query->where('delivery_notes.id', '=', $keyword);
-            })
-            ->setRowAttr([
-                'data-hub' => function ($deliveries) {
-                    return $deliveries->hub_id;
-                },
-            ])
-            ->editColumn('shipments_count_link', function($deliveries) {
-                if ($deliveries->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+            ->editColumn('count', function($deliveries) {
+                if ($deliveries->count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->count . '</button>';
                 }
                 else {
                     return 0;
                 }
             })
-            ->editColumn('delivered_shipments_link', function($deliveries) {
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+            ->editColumn('store', function ($user) {
+                if($user->category == 1){
+                    return $user->franchise;
                 }
-                else {
-                    return 0;
-                }
-            })
-            ->editColumn('rider', function ($rider) {
-                if($rider->special_rider){
-                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
-                }else{
-                    return $rider->rider;
+                else{
+                    return $user->center;
                 }
             })
-            ->editColumn('route', function ($rider) {
-                return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
-            })
-            ->filterColumn('route', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-                if ($keyword != '') {
-                    $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
-                } else {
-                    $query->whereRaw('false');
+            ->editColumn('code', function ($user) {
+                if($user->category == 1){
+                    return $user->franchise_code;
                 }
-            })
-            ->addColumn('action', function ($deliveries) {
-                if (session('role_id') == 1 || in_array(106, session('permissions'))) {
-                    $dropdown = '
-                          <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
-                            </div>
-                          </div>
-                        ';
-
-                    return $dropdown;
+                else{
+                    return $user->center_code;
                 }
-                return '';
             });
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+            $datatable->join('retail_pickup_note_shipments as rpns', 'retail_pickup_notes.id', '=', 'rpns.retail_pickup_note_id')
+                ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
 
@@ -116,62 +79,24 @@ class RetailCompletedDeliveries extends Controller
     }
 
     public function shipments_delivered(Request $request){
-        $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','>',1)->get();
-        $shipments = array();
-        if($delivery_note_shipments->count() != 0){
-            foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+
+        $pickup_note_id = $request->retail_pickup_note_id;
+        $pickup_note_shipments= RetailPickupNoteShipment::where('retail_pickup_note_id',$pickup_note_id);
+        if($pickup_note_shipments->exists()){
+            $pickup_note_shipments = $pickup_note_shipments->get();
+            $shipments = array();
+            foreach ($pickup_note_shipments as $note){
+                $shipment = Shipment::find($note->shipment_id);
+
                 $shipments[] = $shipment->tracking_number;
             }
-            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+            return ['status' => 0, 'success' => 'Pickup Note  Shipments', 'shipments' => $shipments];
+
         }else{
-            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
-        }
-    }
-
-    public function pending_cash_collect(Request $request)
-    {
-        $delivery_note_id = $request->delivery_note_id;
-        if ($delivery_note_id != null) {
-            $delivery_note_details = DeliveryNote::find($delivery_note_id);
-            if ($delivery_note_details->cash_collection_status == 0) {
-                $delivery_note_details = DeliveryNote::where('id', $delivery_note_id)->where('cash_collection_status', 0)->first();
-                $delivery_note_details->cash_collection_status = 1;
-                $delivery_note_details->cash_collected_by = Auth::id();
-                $delivery_note_details->cash_collected_at = Carbon::now();
-                $delivery_note_details->save();
-                return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Cash is already collected!']);
-            }
-        } else {
-            return response()->json(['status' => 0, 'error' => 'Delivery note not found!']);
-        }
-    }
-
-    public function pending_cash_collect_all(Request $request)
-    {
-        $note_ids = explode(',', $request->delivery_note_ids);
-        $notes = array();
-        foreach ($note_ids as $note_id) {
-            $note_details = DeliveryNote::where('id', $note_id)->where('cash_collection_status', 0)->first();
-            if ($note_details) {
-                $note_details->cash_collection_status = 1;
-                $note_details->cash_collected_by = Auth::id();
-                $note_details->cash_collected_at = Carbon::now();
-                $note_details->save();
-            } else {
-                $notes[] = $note_id;
-            }
-        }
-        if (empty($notes)) {
-            return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
-        } else {
-            return response()->json(['status' => 0, 'error' => 'These delivery notes could not be updated!', 'notes' => $notes]);
+            return ['status' => 0, 'success' => 'No Pickup Note Shipments', 'shipments' => FALSE];
         }
 
     }
+
 
 }
