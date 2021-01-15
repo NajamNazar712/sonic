@@ -869,14 +869,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
             });
             Route::prefix('retail')->name('retail.')->group(function(){
-                Route::get('', 'Admins\Retail\RetailPendingCashCollection@retail_index')->name('index');
-                Route::get('list', 'Admins\Retail\RetailPendingCashCollection@retail_list')->name('list');
+                Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
+                Route::get('list', 'Admins\Retail\RetailCashCollectionController@retail_list')->name('list');
 
                 Route::prefix('pending')->name('pending.')->group(function(){
-                    Route::post('shipments','Admins\Retail\RetailPendingCashCollection@number_of_shipments')->name('shipments');
-                    Route::post('shipments/delivered','Admins\Retail\RetailPendingCashCollection@shipments_delivered')->name('shipments.delivered');
-                    Route::post('collect', 'Admins\Retail\RetailPendingCashCollection@pending_cash_collect')->name('collect');
-                    Route::post('all','Admins\Retail\RetailPendingCashCollection@pending_cash_collect_all')->name('all');
+                    Route::post('shipments','Admins\Retail\RetailCashCollectionController@number_of_shipments')->name('shipments');
+                    Route::post('shipments/delivered','Admins\Retail\RetailCashCollectionController@shipments_delivered')->name('shipments.delivered');
+                    Route::post('collect', 'Admins\Retail\RetailCashCollectionController@pending_cash_collect')->name('collect');
+                    Route::post('all','Admins\Retail\RetailCashCollectionController@pending_cash_collect_all')->name('all');
                 });
 
             });
@@ -2584,6 +2584,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/store', 'Retail\RetailShipmentBookController@store')->name('store');
             Route::post('/slip', 'Retail\RetailShipmentBookController@slip')->name('slip');
             Route::post('/calculate_rates', 'Retail\RetailShipmentBookController@calculate_rates')->name('calculate_rates');
+            Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
     });
@@ -2592,6 +2593,22 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
     });
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
+        Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
+        Route::post('track_v2', 'Retail\RetailTrackingController@track_v2')->name('track_v2');
+//        Route::post('rider_information', 'Retail\RetailTrackingController@rider_information')->name('rider_information');
+    });
 
+    Route::prefix('crm')->name('crm.')->group(function () {
+        Route::prefix('request')->name('request.')->group(function () {
+            Route::post('add', 'Retail\RetailCRMController@add_request')->name('add');
+            Route::get('{id}', 'Retail\RetailCRMController@request_details')->name('details');
+        });
+        Route::prefix('feedback')->name('feedback.')->group(function(){
+            Route::post('add', 'Retail\RetailCRMController@add_feedback')->name('add');
+        });
+
+    });
 });
 

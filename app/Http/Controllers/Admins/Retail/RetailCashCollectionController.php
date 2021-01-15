@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
-class RetailPendingCashCollection extends Controller
+class RetailCashCollectionController extends Controller
 {
     public function __construct() {
         $this->middleware('auth:admin')->except('cancel');
@@ -24,14 +25,12 @@ class RetailPendingCashCollection extends Controller
 
     public function retail_list(Request $request)
     {
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->leftjoin('retail_franchises as rf','rf.default_hub','=','delivery_notes.hub_id')  //to be removed in future
-            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rf.name as franchise','rf.id as code'])
+        $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders', 'retail_pickup_notes.rider_id', '=', 'riders.id')
+            ->join('admins', 'admins.id', '=', 'retail_pickup_notes.assigned_by')
+            ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments_count', 'retail_pickup_notes.amount','rf.name as franchise','rf.id as code'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
