@@ -2326,7 +2326,7 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
                                 }
 
-                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
                                 });
 
@@ -2361,7 +2361,7 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 45])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 31])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -3331,7 +3331,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            // $to = array();
+                             $to = array();
 
                             //   $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)->where('cities.zone_id','=', $zone->id);
                             //   if ($operation_admins->exists()) {
@@ -3345,7 +3345,12 @@ class NotificationsController extends Controller
                             //     $cc = $general_managers->pluck('admins.email')->toArray();
                             // }
 
-                            $to = 'ammar.mir@trax.pk';
+                            $to[] = 'ammar.mir@trax.pk';
+                            $admins = Admin::whereIn('role_id', [31])->where('status', 1);
+
+                            if ($admins->exists()) {
+                                $to = array_merge($to, $admins->pluck('email')->toArray());
+                            }
                             $cc = ['shahbaz.abbasi@trax.pk'];
 
                             self::email($subject, $body, $to, $cc);
@@ -3587,7 +3592,7 @@ class NotificationsController extends Controller
                     $to = array();
                     $cc = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 45])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 31])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -3683,7 +3688,7 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $cc = array();
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 45])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 31])->where('status', 1);
 
                     if ($admins->exists()) {
                         $cc = $admins->pluck('email')->toArray();
@@ -3787,7 +3792,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 45])->where('status', 1);
+                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 31])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -4152,7 +4157,7 @@ class NotificationsController extends Controller
                     $to = array();
                     $cc = array();
 
-                    $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4])->where('admins.status', 1);
+                    $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4, 31])->where('admins.status', 1);
 
 
                     $cc_admins = Admin::whereIn('id', [8, 3]);
@@ -4231,7 +4236,7 @@ class NotificationsController extends Controller
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
-                                $to[] = 'sarosh.tariq@trax.pk';
+//                                $to[] = 'sarosh.tariq@trax.pk';
                                 if ($check == true) {
                                     self::email($subject, $body, $to, $cc);
                                 }
@@ -6118,7 +6123,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->join('cities', 'cities.id', '=', 'admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9, 25])->where('admins.status', 1)->where('cities.zone_id', '=', $zone->id);
+                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->join('cities', 'cities.id', '=', 'admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9, 25, 31])->where('admins.status', 1)->where('cities.zone_id', '=', $zone->id);
                     if ($operation_admins->exists()) {
                         $to = array_merge($to, $operation_admins->pluck('email')->toArray());
                     }

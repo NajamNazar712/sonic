@@ -545,6 +545,8 @@ class Permission
             'management.riders.blacklist.list' => 379,
             'management.riders.sms_history.index' => 380,
             'management.riders.sms_history.list' => 380,
+            'management.riders.rider_request.index' => 425,
+            'management.riders.rider_request.list' => 425,
 
 
             'management.city_list' => 205,

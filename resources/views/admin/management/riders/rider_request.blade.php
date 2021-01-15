@@ -426,11 +426,13 @@
                 var cnic = table.row($(this).parents('tr')).data().cnic;
                 var phone_no = table.row($(this).parents('tr')).data().phone_no;
                 var pin = table.row($(this).parents('tr')).data().pin;
+                var city_id = table.row($(this).parents('tr')).data().city_id;
                 $('#rider_name').val(name);
                 $('#rider_cnic').val(cnic);
                 $('#rider_phone').val(phone_no);
                 $('#rider_request_id').val(id);
                 $('#rider_pin').val(pin);
+                $('#city_list').val(city_id).trigger('change');
                 $('#approveRiderModal').modal('show');
 
             });

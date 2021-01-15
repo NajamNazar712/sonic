@@ -1872,7 +1872,8 @@ class RiderAPIController extends Controller {
                 'name' => ['required'],
                 'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-                'pin' => ['required', 'integer', 'digits:4']
+                'pin' => ['required', 'integer', 'digits:4'],
+                'city_id' => ['required', 'integer']
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -1923,6 +1924,7 @@ class RiderAPIController extends Controller {
                             $rider_request->cnic = $request->cnic;
                             $rider_request->phone_no = $request->phone_number;
                             $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
                             $rider_request->save();
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
@@ -2030,6 +2032,30 @@ class RiderAPIController extends Controller {
 
     }
 
+    public function cities(Request $request) {
+
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->get();
+
+            $details = array();
+
+            foreach ($cities as $city) {
+                $detail = array();
+
+                $detail['id'] = $city->id;
+                $detail['name'] = $city->name;
+
+                $details[] = $detail;
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+        }
+        else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

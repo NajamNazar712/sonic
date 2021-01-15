@@ -64,6 +64,7 @@ Route::name('api.')->group(function () {
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
+        Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
 
 		Route::middleware('RiderAPIToken')->group(function () {
 			Route::prefix('pickup')->name('pickup.')->group(function () {
