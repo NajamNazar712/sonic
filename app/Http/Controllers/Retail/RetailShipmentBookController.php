@@ -82,7 +82,7 @@ class RetailShipmentBookController extends Controller
 
         $shipment_id = $shipment->id;
 
-        AdminPickupsController::generate($shipment_id);
+
         $reference_1_id = null;
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
 
@@ -307,7 +307,7 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->save();
-
+        AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         if($request->book_button == 0){
