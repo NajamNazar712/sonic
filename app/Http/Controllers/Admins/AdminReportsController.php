@@ -6961,12 +6961,12 @@ class AdminReportsController extends Controller
             ->leftJoin('shipments_journey as sret', function ($join) {
                 $join->on('sret.shipment_id', '=', 'shipments.id')
                     ->where('sret.id','=',
-                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.verification = 1)'));
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sret.status_reason_id')
-            ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
+            ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'sret.remarks as remarks','sret.created_at as status_date')
 //            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
-//            ->where('sret.verification', 1)
+            ->where('sret.verification', 1)
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -6981,18 +6981,6 @@ class AdminReportsController extends Controller
 //        }
 
         $datatable = Datatables::of($shipments)
-            ->setRowAttr([
-                'class' => function ($shipments) {
-                    if ($shipments->complaint != null) {
-                        return 'complaint_row';
-                    }
-//                    if ($shipments->current_status_id == 52) {
-//                        return 'goldClass';
-//                    }else if($shipments->booking_type_id == 3) {
-//                        return "tnb_row";
-//                    }
-                },
-            ])
             ->editColumn('tracking',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
