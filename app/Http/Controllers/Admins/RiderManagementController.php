@@ -610,7 +610,7 @@ class RiderManagementController extends Controller
     public function rider_request_list(Request $request)
     {
         $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
-            ->select('rider_requests.id', 'rider_requests.name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id')
+            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name')
             ->where('rider_requests.status', 0);
 
         if (session('role_id') != 1) {
