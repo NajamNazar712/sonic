@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRetailCashDepositsTable extends Migration
+class CreateRetailCashDepositShipmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreateRetailCashDepositsTable extends Migration
      */
     public function up()
     {
-        Schema::create('retail_cash_deposits', function (Blueprint $table) {
+        Schema::create('retail_cash_deposit_shipments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipping_mode_id')->index();
-            $table->integer('total_cn');
-            $table->integer('category')->index();
-            $table->integer('retail_user_id')->index();
-            $table->decimal('total_cash', 20,2);
+            $table->integer('cash_deposit_id')->index();
+            $table->integer('shipment_id')->index();
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ class CreateRetailCashDepositsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('retail_cash_deposits');
+        Schema::dropIfExists('retail_cash_deposit_shipments');
     }
 }

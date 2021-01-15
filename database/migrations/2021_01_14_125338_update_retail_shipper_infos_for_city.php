@@ -14,7 +14,7 @@ class UpdateRetailShipperInfosForCity extends Migration
     public function up()
     {
         Schema::table('retail_shipper_infos', function (Blueprint $table) {
-            $table->integer('city_id');
+            $table->integer('city_id')->index();
         });
     }
 

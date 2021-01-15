@@ -1,6 +1,6 @@
 @extends('retail.layout.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Cash Deposit')
 
 @section('content')
     <div class="app-content content">
@@ -22,7 +22,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" data-value="">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Search Date (From)" data-value="">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -32,7 +32,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" data-value="">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Search Date (To)" data-value="">
                                 </div>
                             </div>
                             <div class="col-2">
@@ -58,6 +58,26 @@
             </div>
         </div>
     </div>
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Total CN(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 
 @endsection
 @section('css')
@@ -124,7 +144,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.pending.list') }}',
+                        url: '{{ route('retail.cash_deposit.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -141,13 +161,13 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.consignee_name);
-                                row.push(values.phone);
+                                row.push(values.shipping_mode);
+                                row.push(values.total_shipments);
+                                row.push(values.perform_no);
+                                row.push(values.category);
+                                row.push(values.booking_code);
+                                row.push(values.total_cash);
+                                row.push(values.booking_date);
 
                                 body.push(row);
                             });
@@ -168,7 +188,6 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
-                    'reset'
                 ],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -186,22 +205,17 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                rowId: 'shipping_mode_id',
-                order: [[15, 'desc']],
+                rowId: 'performa_no',
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'shipping_mode', name: 'retail_shipping_modes.id', class: 'align-middle shipping_mode'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
-                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type'}
-
+                    {data: 'shipping_mode', name: 'retail_shipping_modes.id', class: 'align-middle text-center shipping_mode'},
+                    {data: 'shipments_button', name: 'retail_cash_deposits.total_cn', class: 'align-middle text-center shipments_button'},
+                    {data: 'performa_button', name: 'retail_cash_deposits.id', class: 'align-middle text-center performa_button'},
+                    {data: 'category', name: 'retail_cash_deposits.category', class: 'align-middle text-center category'},
+                    {data: 'booking_code', name: 'ru.id', class: 'align-middle text-center booking_code'},
+                    {data: 'total_cash', name: 'retail_cash_deposits.total_cash', class: 'align-middle text-center total_cash'},
+                    {data: 'booking_date', name: 'retail_cash_deposits.created_at', class: 'align-middle text-center booking_date'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -254,6 +268,41 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+
+            var route = '{!! route('retail.tracking.index') !!}';
+
+            $('#datatable tbody').on('click','tr td.shipments_button button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('retail.cash_deposit.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'performa_no': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.status == 1) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                            $('#shipments_modal').modal('show');
+                        }
+                    });
+
+            });
+
+            $('#search_filter_btn').on('click', function(){
+                table.draw(true);
+            })
         });
     </script>
 @endsection

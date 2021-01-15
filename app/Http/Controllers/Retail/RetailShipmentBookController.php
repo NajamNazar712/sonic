@@ -6,6 +6,8 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Retail\RetailCashDeposit;
+use App\http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
