@@ -6991,7 +6991,7 @@ class AdminReportsController extends Controller
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
-            $datatable->whereBetween('shipments_journey.created_at', [$from,$to]);
+            $datatable->whereBetween('sret.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }
