@@ -2609,5 +2609,5 @@ Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         });
 
     });
-});});
+});
 
