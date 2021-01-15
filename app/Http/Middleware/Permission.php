@@ -901,7 +901,7 @@ class Permission
 
             'retail.pending_cash_collection.index' => 423,
             'retail.completed.index' => 424,
-
+			'retail.accounts.index' => 428,
         ]
     ];
 

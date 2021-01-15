@@ -25,7 +25,7 @@ class CreateRetailFranchisesTable extends Migration
             $table->string('code')->nullbale();
             $table->string('location_latitude')->nullable();
             $table->string('location_longitude')->nullable();
-            $table->integer('user_id')->nullable();
+            $table->integer('user_id')->nullable()->index();
             $table->timestamps();
         });
     }

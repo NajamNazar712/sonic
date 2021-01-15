@@ -6,8 +6,17 @@
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
+                <h1 class="mb-1">
+                    Dashboard
+                </h1>
             </div>
-            @include('retail.inc.messages')
+            <div class="card">
+                <div class="card-content" aria-expanded="true">
+                    <div class="card-body">
+                        @include('retail.inc.messages')
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

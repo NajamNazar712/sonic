@@ -27,7 +27,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Store Code</th>
-                        <th class="border-primary border-darken-1">Location Lat/Long</th>
+                        <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -59,8 +59,8 @@
                             <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="eye">
+                            <input type="password" class="form-control" id="add_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <div class="form-control-position" id="add_eye">
                                 <i class="la la-eye success"></i>
                             </div>
                         </div>
@@ -114,8 +114,8 @@
                             <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="eye">
+                            <input type="password" class="form-control" id="edit_password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <div class="form-control-position" id="edit_eye">
                                 <i class="la la-eye success"></i>
                             </div>
                         </div>
@@ -183,7 +183,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#add_eye').on('mousedown',function(){$('#add_password').attr('type','text')}).on('mouseup',function(){$('#add_password').attr('type','password')});
+            $('#edit_eye').on('mousedown',function(){$('#edit_password').attr('type','text')}).on('mouseup',function(){$('#edit_password').attr('type','password')});
 
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
@@ -246,7 +247,6 @@
                             head.push('Updated By');
                             head.push('Status');
                             head.push('Store Code');
-                            head.push('Location Lat/Long');
 
 
                             $.each(result.data, function(index, values) {
@@ -260,9 +260,9 @@
                                 row.push(values.default_hub);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
-                                row.push(values.location);
                                 body.push(row);
                             });
                         },
@@ -274,8 +274,8 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // scrollX: true, scrollY: '500px',
-                autoWidth:true,
+                scrollX: true, scrollY: '500px',
+                // autoWidth: false,
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
@@ -289,7 +289,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Activation Report',
+                        title: 'Trax Center',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -317,9 +317,9 @@
                     { data:'updated_at' ,name: 'retail_trax_centers.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_trax_centers.status', class: 'align-middle text-center status'},
-                    { data:'code' ,name: 'retail_trax_centers.id', class: 'align-middle text-center code'},
-                    { data:'location' ,name: 'location', class: 'align-middle text-center location'},
-                    { data:'action' ,name: 'action', class: 'align-middle text-center action'},
+                    { data:'code' ,name: 'retail_trax_centers.code', class: 'align-middle text-center code'},
+                    { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
+                    { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
@@ -47,6 +51,7 @@ use App\Http\Models\Zone;
 use Auth;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -64,13 +69,17 @@ class AdminPickupsController extends Controller
               if(in_array($shipment->shipper_status_id, [1, 17])){
 
                   if($shipment->shipper_status_id == 17){
-                      $shipment->shipper_status_id == 1;
-                      $shipment->consignee_status_id == 1;
+                      $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                      if($retail_shipment->exists()){
+                         return false;
+                      }
+                      $shipment->shipper_status_id = 1;
+                      $shipment->consignee_status_id = 1;
                   }
                   $shipment->pickup_date = Carbon::now();
                   $shipment->save();
                   $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
-
+                  $pickup_request_id = NULL;
                   $shipments_count = 0;
                   $shipments = array();
                   $try_and_buy = FALSE;
@@ -79,7 +88,7 @@ class AdminPickupsController extends Controller
                   $reverse_pickup = FALSE;
                   if ($pickup_request->exists()) {
                       $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
-
+                      $pickup_request_id = $pickup_request->id;
                       if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
                           $bookings = $pickup_request->booked + 1;
 
@@ -141,9 +150,9 @@ class AdminPickupsController extends Controller
                           $pickup_request->reverse_pickup = 1;
                       }
                       $pickup_request->save();
-
+                      $pickup_request_id = $pickup_request->id;
                       $allow = TRUE;
-                      self::auto_pickup_assign($pickup_request->id);
+                      self::auto_pickup_assign($pickup_request_id);
                   }
 
                   if ($allow) {
@@ -169,6 +178,48 @@ class AdminPickupsController extends Controller
                               $pickup_request_assigned_shipment->save();
                           }
                       }
+                  }
+
+                  $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                  if($retail_shipment->exists()){
+                      $date = Carbon::today()->toDateString();
+                      $retail_shipment = $retail_shipment->first();
+                      $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->whereDate('created_at', $date)->whereIn('status', [1,2]);
+                      if($retail_pickup_note->exists()){
+                          Log::info('exists here added');
+
+                          $retail_pickup_note = $retail_pickup_note->first();
+                          $retail_pickup_note_shipments = RetailPickupNoteShipment::where('retail_pickup_note_id', $retail_pickup_note->id)->where('shipment_id', $shipment_id);
+                          if(!$retail_pickup_note_shipments->exists()){
+                              $retail_pickup_note_shipment = new RetailPickupNoteShipment();
+                              $retail_pickup_note_shipment->retail_pickup_note_id = $retail_pickup_note->id;
+                              $retail_pickup_note_shipment->shipment_id = $shipment_id;
+                              $retail_pickup_note_shipment->save();
+
+                              $retail_pickup_note->shipments = $retail_pickup_note->shipments + 1;
+                              $retail_pickup_note->save();
+                          }
+                      }
+                      else{
+                          Log::info('here added');
+                        $retail_pickup_note_create = new RetailPickupNote();
+                        $retail_pickup_note_create->pickup_address_id = $shipment->pickup_address_id;
+                        $retail_pickup_note_create->hub_id = $shipment->pickup_address->city->hub_id;
+                        $retail_pickup_note_create->retail_user_id = $retail_shipment->retail_user_id;
+                        $retail_pickup_note_create->pickup_request_id = $pickup_request_id;
+                        $retail_pickup_note_create->shipments = 1;
+                        $retail_pickup_note_create->amount = $shipment->amount;
+                        $retail_pickup_note_create->status = 1;
+                        $retail_pickup_note_create->save();
+
+                        $retail_pickup_note_shipment = new RetailPickupNoteShipment();
+                        $retail_pickup_note_shipment->retail_pickup_note_id = $retail_pickup_note_create->id;
+                        $retail_pickup_note_shipment->shipment_id = $shipment_id;
+                        $retail_pickup_note_shipment->save();
+                      }
+                  }
+                  else{
+                      Log::info('asdfasdfsaf here added');
                   }
               }
         }
@@ -3005,7 +3056,7 @@ class AdminPickupsController extends Controller
                 $pickup_request_attempt->save();
 
                 $pickups++;
-
+                V2AdminPickupsController::retail_pickup_assign($pickup_request_id, $rider_id);
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id != $rider_id){
@@ -3032,6 +3083,7 @@ class AdminPickupsController extends Controller
                         }
                     }
                     $pickups++;
+                    V2AdminPickupsController::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
 
             }

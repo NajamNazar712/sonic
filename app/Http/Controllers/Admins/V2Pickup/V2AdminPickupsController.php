@@ -13,6 +13,8 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommission;
@@ -313,7 +315,6 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
-                $pickup_request->current_rider_id = $rider_ids;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
 
@@ -329,7 +330,7 @@ class V2AdminPickupsController extends Controller
                 }
 
                 $pickups++;
-
+                self::retail_pickup_assign($pickup_request_id, $rider_id);
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id == $rider_id){
@@ -361,6 +362,7 @@ class V2AdminPickupsController extends Controller
                             $pickup_note->save();
                         }
                     }
+
                     $pickups++;
                     if(!in_array($pickup_request_id, $allowed_pickup_requests)){
                         $allowed_pickup_requests[] = $pickup_request_id;
@@ -369,6 +371,7 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(106, $riders, $pickup_request_id);
                         NotificationsController::send(107, $riders, $pickup_request_id);
                     }
+                    self::retail_pickup_assign($pickup_request_id, $rider_id);
 
                 }
 
@@ -813,17 +816,27 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
-                        }
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                    if($retail_shipment->exists()){
+                        $retail_check = true;
+                    }
+                    else{
+                        $retail_check = false;
                     }
 
+                    if($retail_check == false){
+                        if($shipment->booking_type_id == 4){
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        }else{
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
+                        }
+                    }
 
                     if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
@@ -1355,14 +1368,25 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->booking_type_id == 4){
-                        ShipmentChargesController::walkin_weight($shipment_id);
-                    }else{
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::cash_handling($shipment_id);
-                        ShipmentChargesController::insurance($shipment_id);
-                        if($shipment->business_category_id == 1) {
-                            ShipmentChargesController::fuel_surcharge($shipment_id);
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                    if($retail_shipment->exists()){
+                        $retail_check = true;
+                    }
+                    else{
+                        $retail_check = false;
+                    }
+
+                    if($retail_check == false) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            }
                         }
                     }
 
@@ -2487,5 +2511,15 @@ class V2AdminPickupsController extends Controller
         }
     }
 
-
+   static public function retail_pickup_assign($pickup_request_id, $rider_id){
+        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 1);
+        if($retail_pickup_note->exists()){
+            $retail_pickup_note = $retail_pickup_note->first();
+            $retail_pickup_note->rider_id = $rider_id;
+            $retail_pickup_note->assigned_by = Auth::id();
+            $retail_pickup_note->assigned_at = Carbon::now();
+            $retail_pickup_note->status = 2;
+            $retail_pickup_note->save();
+        }
+    }
 }

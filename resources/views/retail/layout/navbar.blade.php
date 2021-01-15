@@ -4,7 +4,7 @@
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
                 <li class="nav-item">
-                    <a class="navbar-brand" href="{{route('retail.dashboard.index')}}">
+                    <a class="navbar-brand" href="{{route('retail.shipment.book.index')}}">
                         <img class="brand-logo sonic" alt="Sonic" src="{{ asset('img/sonic_logo_white_new.png') }}">
                         <img class="brand-logo trax" alt="Trax" src="{{ asset('img/trax_logo_white_new.png') }}">
                     </a>
@@ -22,14 +22,14 @@
                 </ul>
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
-{{--                        <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.tracking.index') }}" target="_blank">--}}
-{{--                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">--}}
-{{--                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>--}}
-{{--                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>--}}
-{{--                            </div>--}}
-{{--                        </a>--}}
+                        <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('retail.tracking.index') }}" target="_blank">
+                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
+                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
+                            </div>
+                        </a>
 {{--                        @if(session('role_id') == 1 || in_array(204, session('permissions')))--}}
-{{--                            <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.cx_quick_tracking.cx_index') }}" target="_blank">--}}
+{{--                            <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('retail.cx_quick_tracking.cx_index') }}" target="_blank">--}}
 {{--                                <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">--}}
 {{--                                    <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Quick Tracking</span>--}}
 {{--                                    <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>--}}
