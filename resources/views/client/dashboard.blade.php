@@ -247,7 +247,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="claim_product_cost_div">
+                                    <div class="col-8" id="claim_x_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
@@ -1677,6 +1677,8 @@
                         else{
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
+                        var product_cost = $('#claim_product_cost').val();
+                        // var damage_product_cost = $('#claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#shipment_ids').val(selected_rows);
@@ -1897,6 +1899,7 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
+                // $('#damage_claim_product_cost').val('');
                 $('#request_id').val('').trigger('change');
                 $('#receiving_sheet_div').addClass('d-none');
             });
