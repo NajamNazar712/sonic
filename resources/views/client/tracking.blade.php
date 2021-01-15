@@ -171,7 +171,7 @@
                                             <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">
+                                            <input class="form-control damage_claim_product_cost" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">
                                         </fieldset>
 
                                     </div>
@@ -235,7 +235,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
 			function print(id) {
@@ -266,6 +266,34 @@
 					}
 				});
 			}
+
+            $('#damage_claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+			$('#claim_content_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+			$('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
 
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
@@ -760,6 +788,8 @@
                     $('#claim_product_picture_div').removeClass('d-none');
                     $('#claim_invoice_picture_div').removeClass('d-none');
                 }
+
+
 
 
             });

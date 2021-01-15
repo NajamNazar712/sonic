@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -290,16 +291,18 @@
                             head.push('Phone No.');
                             head.push('Created At');
                             head.push('Updated At');
+                            head.push('City');
                             head.push('Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.name);
+                                row.push(values.rider_name);
                                 row.push(values.cnic);
                                 row.push(values.phone_no);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.city_name);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -344,11 +347,12 @@
                             return '';
                         }
                     },
-                    {data: 'name', name: 'name', class: 'align-middle name'},
+                    {data: 'rider_name', name: 'rider_name', class: 'align-middle rider_name'},
                     {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
                     {data: 'phone_no', name: 'phone_no', class: 'align-middle phone_no'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
+                    {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {
                         data: 'action',

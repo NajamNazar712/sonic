@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Returned Shipments Report')
+@section('title', 'Confirmation Pending Shipments Report')
 
 @section('content')
     <h1 class="mb-1">
-        Returned Shipments Report
+        Confirmation Pending Shipments Report
     </h1>
 
     <div class="card">
@@ -165,7 +165,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
@@ -211,7 +211,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.returned_shipments.list') }}',
+                        url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -259,7 +259,7 @@
                 processing: true,
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.returned_shipments.list') }}',
+                    url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
@@ -269,7 +269,7 @@
                 rowId: 'shId',
                 order: [[2, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'r', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'status', name: 'status', class: 'align-middle status'},

@@ -265,7 +265,8 @@
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows
+                                                'statement_ids': selected_rows,
+                                                'action': 'station'
                                             }
                                         }).done(function(data){
                                             if(data.status == 0){
@@ -334,7 +335,8 @@
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows
+                                                'statement_ids': selected_rows,
+                                                'action': 'operation'
                                             }
                                         }).done(function(data){
                                             if(data.status == 0){
@@ -403,7 +405,8 @@
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows
+                                                'statement_ids': selected_rows,
+                                                'action': 'finance'
                                             }
                                         }).done(function(data){
                                             if(data.status == 0){

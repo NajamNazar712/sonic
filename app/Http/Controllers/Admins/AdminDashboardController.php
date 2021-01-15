@@ -7989,6 +7989,15 @@ class AdminDashboardController extends Controller
             ->editColumn('gc_area', function ($cities) {
                 return ($cities->gc_area == 1)? 'Yes': 'No';
             })
+            ->filterColumn('modes',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
 //        ->filterColumn('status', function($query, $keyword) {
 //            $keyword = strtolower($keyword);
 //
