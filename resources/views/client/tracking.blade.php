@@ -267,6 +267,25 @@
 				});
 			}
 
+            // $('#damage_claim_product_cost').inputmask({
+            //     'alias': 'decimal',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            //     'digits': 2,
+            //     'min': 0.00,
+            //     'max': 1000000.00
+            // });
+			// $('#claim_content_product_cost').inputmask({
+            //     'alias': 'decimal',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            //     'digits': 2,
+            //     'min': 0.00,
+            //     'max': 1000000.00
+            // });
+
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',

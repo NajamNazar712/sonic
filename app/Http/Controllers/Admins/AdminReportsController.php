@@ -6970,9 +6970,9 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sret', function ($join) {
                 $join->on('sret.shipment_id', '=', 'shipments.id')
-                    ->where('sret.verification','=',1);
-//                    ->where('sret.id','=',
-//                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
+                    ->where('sret.verification','=',1)
+                    ->where('sret.id','=',
+                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
             ->leftjoin('return_assigned_shipments as ras', function ($join) {
