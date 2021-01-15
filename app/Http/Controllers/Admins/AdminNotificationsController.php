@@ -348,6 +348,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 114){
             $details['fields'] = ['code'];
         }
+        else if ($id == 115){
+            $details['fields'] = ['shipper','tracking_number'];
+        }
+        else if ($id == 115){
+            $details['fields'] = ['shipper','tracking_number'];
+        }
 
 		return $details;
     }

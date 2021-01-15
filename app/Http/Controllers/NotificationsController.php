@@ -6,6 +6,8 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
@@ -6471,6 +6473,40 @@ class NotificationsController extends Controller
                     $user_phone = User::find($user_id)->phone;
                     $to = $user_phone;
                     self::sms($body, $to);
+                }
+                else if($id == 115){
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
+                    $body = $notification->body;
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        $to = $shipper_info->shipper_phone_no;
+                        self::sms($body, $to);
+                    }
+                }
+                else if($id == 116){
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
+                    $body = $notification->body;
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        $to = $shipper_info->shipper_phone_no;
+                        self::sms($body, $to);
+                    }
                 }
             }
         }

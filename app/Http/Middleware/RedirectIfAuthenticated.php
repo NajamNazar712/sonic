@@ -23,6 +23,11 @@ class RedirectIfAuthenticated
                     return redirect()->route('admin.dashboard.index');
                 }
                 break;
+            case 'retail':
+                if(Auth::guard($guard)->check()){
+                    return redirect()->route('retail.shipment.book.index');
+                }
+                break;
             default:
                 if (Auth::guard($guard)->check()) {
                     return redirect()->route('cod.dashboard');

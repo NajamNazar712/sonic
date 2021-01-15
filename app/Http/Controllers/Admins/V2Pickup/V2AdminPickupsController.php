@@ -13,6 +13,8 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommission;
@@ -813,7 +815,7 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->packaging_material_request == 0){
+                    if($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1){
                         if($shipment->booking_type_id == 4){
                             ShipmentChargesController::walkin_weight($shipment_id);
                         }else{
@@ -825,7 +827,6 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-
 
                     if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
@@ -845,6 +846,8 @@ class V2AdminPickupsController extends Controller
                     if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1 ) && $shipment->booking_type_id == 4){
                         $walkin_shipment_ids[] = $shipment->id;
                     }
+
+
                 }
             }else {
                 unset($shipment_ids[$key]);
@@ -894,6 +897,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                 }
+                $this->retail_pickup_arrival($pickup_request_id);
             }
         }
         if(!empty($pickup_note_ids)){
@@ -1357,7 +1361,7 @@ class V2AdminPickupsController extends Controller
                     if($booking_sms->exists()){
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if($shipment->packaging_material_request == 0){
+                    if($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1){
                         if($shipment->booking_type_id == 4){
                             ShipmentChargesController::walkin_weight($shipment_id);
                         }else{
@@ -1438,6 +1442,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                 }
+                $this->retail_pickup_arrival($pickup_request_id);
             }
         }
         if(!empty($pickup_note_ids)){
@@ -2492,5 +2497,24 @@ class V2AdminPickupsController extends Controller
         }
     }
 
+    static public function retail_pickup_assign($pickup_request_id, $rider_id){
+        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 1);
+        if($retail_pickup_note->exists()){
+            $retail_pickup_note = $retail_pickup_note->first();
+            $retail_pickup_note->rider_id = $rider_id;
+            $retail_pickup_note->assigned_by = Auth::id();
+            $retail_pickup_note->assigned_at = Carbon::now();
+            $retail_pickup_note->status = 2;
+            $retail_pickup_note->save();
+        }
+    }
+    public function retail_pickup_arrival($pickup_request_id){
+        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+        if($retail_pickup_note->exists()){
+            $retail_pickup_note = $retail_pickup_note->first();
+            $retail_pickup_note->status = 3;
+            $retail_pickup_note->save();
+        }
+    }
 
 }
