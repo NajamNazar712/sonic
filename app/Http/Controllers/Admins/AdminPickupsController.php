@@ -51,6 +51,7 @@ use App\Http\Models\Zone;
 use Auth;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -185,6 +186,8 @@ class AdminPickupsController extends Controller
                       $retail_shipment = $retail_shipment->first();
                       $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->whereDate('created_at', $date)->whereIn('status', [1,2]);
                       if($retail_pickup_note->exists()){
+                          Log::info('exists here added');
+
                           $retail_pickup_note = $retail_pickup_note->first();
                           $retail_pickup_note_shipments = RetailPickupNoteShipment::where('retail_pickup_note_id', $retail_pickup_note->id)->where('shipment_id', $shipment_id);
                           if(!$retail_pickup_note_shipments->exists()){
@@ -198,21 +201,25 @@ class AdminPickupsController extends Controller
                           }
                       }
                       else{
-                        $retail_pickup_note = new RetailPickupNote();
-                        $retail_pickup_note->pickup_address_id = $shipment->pickup_address_id;
-                        $retail_pickup_note->hub_id = $shipment->pickup_address->city->hub_id;
-                        $retail_pickup_note->retail_user_id = $retail_shipment->retail_user_id;
-                        $retail_pickup_note->pickup_request_id = $pickup_request_id;
-                        $retail_pickup_note->shipments = 1;
-                        $retail_pickup_note->amount = $shipment->amount;
-                        $retail_pickup_note->status = 1;
-                        $retail_pickup_note->save();
+                          Log::info('here added');
+                        $retail_pickup_note_create = new RetailPickupNote();
+                        $retail_pickup_note_create->pickup_address_id = $shipment->pickup_address_id;
+                        $retail_pickup_note_create->hub_id = $shipment->pickup_address->city->hub_id;
+                        $retail_pickup_note_create->retail_user_id = $retail_shipment->retail_user_id;
+                        $retail_pickup_note_create->pickup_request_id = $pickup_request_id;
+                        $retail_pickup_note_create->shipments = 1;
+                        $retail_pickup_note_create->amount = $shipment->amount;
+                        $retail_pickup_note_create->status = 1;
+                        $retail_pickup_note_create->save();
 
                         $retail_pickup_note_shipment = new RetailPickupNoteShipment();
-                        $retail_pickup_note_shipment->retail_pickup_note_id = $retail_pickup_note->id;
+                        $retail_pickup_note_shipment->retail_pickup_note_id = $retail_pickup_note_create->id;
                         $retail_pickup_note_shipment->shipment_id = $shipment_id;
                         $retail_pickup_note_shipment->save();
                       }
+                  }
+                  else{
+                      Log::info('asdfasdfsaf here added');
                   }
               }
         }
