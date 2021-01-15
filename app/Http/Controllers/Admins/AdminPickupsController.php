@@ -64,8 +64,8 @@ class AdminPickupsController extends Controller
               if(in_array($shipment->shipper_status_id, [1, 17])){
 
                   if($shipment->shipper_status_id == 17){
-                      $shipment->shipper_status_id == 1;
-                      $shipment->consignee_status_id == 1;
+                      $shipment->shipper_status_id = 1;
+                      $shipment->consignee_status_id = 1;
                   }
                   $shipment->pickup_date = Carbon::now();
                   $shipment->save();
