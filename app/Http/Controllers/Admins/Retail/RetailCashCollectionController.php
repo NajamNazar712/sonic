@@ -149,7 +149,7 @@ class RetailCashCollectionController extends Controller
         $note_ids =  $request->pickup_note_ids;
         $notes = array();
         foreach ($note_ids as $note_id) {
-            $note_details = RetailPickupNote::where('id', $note_id)->where('status', 2)->first();
+            $note_details = RetailPickupNote::where('id', $note_id)->where('status', 3)->first();
             if ($note_details) {
                 $note_details->status = 4;
                 $note_details->cash_collected_by = Auth::id();
