@@ -311,20 +311,20 @@
                         d.search_tracking = $('#search_tracking').val();
                     }
                 },
-                rowId: 'delivery_note_id',
+                 rowId: 'retail_pickup_note_id',
                 order: [[1, 'asc']],
                 columns: [
-                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                     {data: 'retail_pickup_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'retail_pickup_note_id',name:'retail_pickup_notes.id', class: 'text-center align-middle retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
                     { data:'store' ,name: 'store', class: 'align-middle store text-center'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
                     { data:'code' ,name: 'code', class: 'align-middle code text-center'},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'retail_pickup_notes.assigned_at' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle retail_pickup_notes.assigned_at'},
-                    { data:'retail_pickup_notes.amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle retail_pickup_notes.amount'},
+                    { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
+                    { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time text-center'},
+                    { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -466,17 +466,17 @@
             });
 
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+            $('#datatable tbody').on('click','tr td.count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.cash_collection.pending.shipments') !!}',
+                    url: '{!! route('admin.delivery.cash_collection.retail.pending.shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'pickup_note_id': id
                     }
                 })
                     .done(function(data) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,8 +27,8 @@ class RetailCashCollectionController extends Controller
     public function retail_list(Request $request)
     {
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('riders', 'retail_pickup_notes.rider_id', '=', 'riders.id')
-            ->join('admins', 'admins.id', '=', 'retail_pickup_notes.assigned_by')
+            ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
+            ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
             ->leftJoin('retail_franchises as rf', function ($join) {
                 $join->on('rf.id', '=', 'ru.category_id')
@@ -37,54 +38,32 @@ class RetailCashCollectionController extends Controller
                 $join->on('rc.id', '=', 'ru.category')
                     ->where('ru.category', '=',2);
             })
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments', 'retail_pickup_notes.amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category'])
-//            ->where('delivery_notes.cash_collection_status', 0)
-            ->where('retail_pickup_notes.status', '=', 1);
-
-        if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
-        }
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category'])
+           ->where('retail_pickup_notes.status', '=', 1)
+        ;
 
         $datatable = Datatables::of($deliveries)
-            ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>PNCC</u></a>";
-            })
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
-            })
-//            ->addColumn('delivery_note_id_padded', function ($deliveries) {
-//                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
-//            })
-//            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
-//                return $query->where('delivery_notes.id', '=', $keyword);
-//            })
-            ->setRowAttr([
-                'data-hub' => function ($deliveries) {
-                    return $deliveries->hub_id;
-                },
-            ])
-            ->editColumn('shipments_count_link', function($deliveries) {
-                if ($deliveries->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+            ->editColumn('count', function($deliveries) {
+                if ($deliveries->count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->count . '</button>';
                 }
                 else {
                     return 0;
                 }
             })
-            ->editColumn('delivered_shipments_link', function($deliveries) {
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+//            ->editColumn('delivered_shipments_link', function($deliveries) {
+//                if ($deliveries->delivered_shipments != 0) {
+//                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+//                }
+//                else {
+//                    return 0;
+//                }
+//            })
+            ->editColumn('time', function ($user) {
+                if($user->time == null) {
+                    return '-';
                 }
-                else {
-                    return 0;
-                }
-            })
-            ->editColumn('rider', function ($rider) {
-                if($rider->special_rider){
-                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
-                }else{
-                    return $rider->rider;
-                }
+
             })
             ->editColumn('store', function ($user) {
                if($user->category == 1){
@@ -124,36 +103,39 @@ class RetailCashCollectionController extends Controller
     }
 
     public function number_of_shipments(Request $request){
-        $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        $shipments = array();
-        if($delivery_note_shipments->count() != 0){
-            foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+        $pickup_note_id = $request->input('pickup_note_id');
+        $pickup_note_shipments= RetailPickupNoteShipment::where('retail_pickup_note_id',$pickup_note_id);
+        if($pickup_note_shipments->exists()){
+            $pickup_note_shipments = $pickup_note_shipments->get();
+             $shipments = array();
+            foreach ($pickup_note_shipments as $note){
+                $shipment = Shipment::find($note->shipment_id);
+
                 $shipments[] = $shipment->tracking_number;
             }
-            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+            return ['status' => 0, 'success' => 'Pickup Note  Shipments', 'shipments' => $shipments];
+
         }else{
-            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+            return ['status' => 0, 'success' => 'No Pickup Note Shipments', 'shipments' => FALSE];
         }
+
     }
 
-    public function shipments_delivered(Request $request){
-        $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','>',1)->get();
-        $shipments = array();
-        if($delivery_note_shipments->count() != 0){
-            foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
-                $shipments[] = $shipment->tracking_number;
-            }
-            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
-        }else{
-            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
-        }
-    }
+//    public function shipments_delivered(Request $request){
+//        $delivery_note_id = $request->input('delivery_note_id');
+//        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+//        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','>',1)->get();
+//        $shipments = array();
+//        if($delivery_note_shipments->count() != 0){
+//            foreach ($delivery_note_shipments as $delivery_note_shipment){
+//                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+//                $shipments[] = $shipment->tracking_number;
+//            }
+//            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+//        }else{
+//            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+//        }
+//    }
 
     public function pending_cash_collect(Request $request)
     {
