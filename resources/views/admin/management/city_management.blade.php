@@ -195,7 +195,7 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'modes', name: 'sm.mode', class: 'align-middle modes'},
+                    {data: 'modes', name: 'modes', class: 'align-middle modes'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
@@ -225,6 +225,14 @@
                        '<option value="0">No</option>' +
                        '<option value="1">Yes</option>' +
                        '</select>';
+
+                   var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
+                       '<option value="1">Overnight</option>' +
+                       '<option value="2">Overland</option>' +
+                       '<option value="3">Detain</option>' +
+                       '<option value="4">Same-day</option>' +
+                       '</select>';
+
                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
                        var column = this;
@@ -234,6 +242,12 @@
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
+                               .on( 'change', function () {
+                                   column.search($(this).val(), false, false, true).draw();
+                               } ).wrap(td);
+                       }
+                       else if($(header).is('.modes')){
+                           $(shipping_mode_type).appendTo($(search))
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
@@ -260,6 +274,12 @@
                    });
                    $("#status_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select Status",
+                       width:'100%',
+                       containerCssClass: 'select-xs',
+                       dropdownCssClass: 'form-control-sm p-0'
+                   });
+                   $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
+                       placeholder: "Select Shipping Mode Type",
                        width:'100%',
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
