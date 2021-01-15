@@ -25,11 +25,7 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-4">
-                                <fieldset class="form-group">
-                                    <input type="text" name="search_phone" id="search_phone" class="form-control phone" placeholder="Phone Number">
-                                </fieldset>
-                            </div>
+
                             <div class="col-4">
                                 <fieldset class="form-group">
                                     <input type="text" name="search_iban" id="search_iban" class="form-control iban" placeholder="IBAN">
@@ -61,12 +57,8 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company</th>
-                                        <th class="border-primary border-darken-1">Brand Name</th>
-                                        <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Phone No.</th>
-                                        <th class="border-primary border-darken-1">Company Address</th>
-                                        <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
@@ -209,6 +201,33 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="corporate_rate_type_modal" data-backdrop="static" role="dialog" aria-labelledby="corporate_rate_type_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="corporate_rate_type_title">Corporate Rate Type</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="form-group">
+                        <input type="hidden" id="corporate_rate_type_shipper_id">
+                        <select name="corporate_rate_type_id" id="corporate_rate_type_select" class="form-control select2">
+                            @foreach($corporate_rate_types as $rate_type)
+                                <option value="{{ $rate_type->id }}" > {{ $rate_type->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="corporate_rate_type_btn" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -254,12 +273,8 @@
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        head.push('Brand Name');
-                        head.push('City Name');
                         head.push('Contact Person');
-                        head.push('Phone No.');
-                        head.push('Company Address');
-                        head.push('Email Address');
+                        head.push('City');
                         head.push('Product Type');
                         head.push('Request Date');
                         head.push('Status');
@@ -283,12 +298,8 @@
                             row.push(values.id_padded);
                             row.push(values.account_type);
                             row.push(values.name);
-                            row.push(values.brand_name);
-                            row.push(values.city);
                             row.push(values.poc);
-                            row.push(values.shipper_phone);
-                            row.push(values.address);
-                            row.push(values.email);
+                            row.push(values.city);
                             row.push(values.product_type);
                             row.push(values.created_at);
                             row.push(values.status);
@@ -632,7 +643,6 @@
                 url: '{{ route('admin.accounts.pending.ajax') }}',
                 data: function (d) {
                     d.sale_persons = $('#search_admins').val();
-                    d.search_phone = $('#search_phone').val();
                     d.search_cnic = $('#search_cnic').val();
                     d.search_shipper = $('#search_shipper').val();
                     d.search_iban = $('#search_iban').val();
@@ -644,12 +654,8 @@
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                {data: 'brand_name', name: 'users.name', class: 'align-middle brand_name'},
-                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle phone'},
-                {data: 'address', name: 'address', class: 'align-middle address'},
-                {data: 'email', name: 'email', class: 'align-middle email'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -939,6 +945,7 @@
             width:'100%',
             dropdownParent:$('#SalesTagModal')
         });
+
         $("#saletag1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1040,6 +1047,53 @@
                     table.button('.assign_rider').disable();
                     table.button('.tag').disable();
                 }
+        });
+
+        $("#corporate_rate_type_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Corporate Rate Type",
+            width:'100%',
+            dropdownParent:$('#corporate_rate_type_modal')
+        });
+
+        $('body').on('click', 'button.rate_type',  function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $('#corporate_rate_type_modal').modal('show');
+                $('#corporate_rate_type_shipper_id').val(id);
+            }
+        });
+
+        $('#corporate_rate_type_btn').on('click',function () {
+            var shipper = parseInt($('#corporate_rate_type_shipper_id').val());
+            var rate_type = parseInt($('#corporate_rate_type_select').val());
+            if(rate_type){
+                $.ajax({
+                    url: '{!! route('admin.accounts.rate_type.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipper_id':shipper,
+                        'rate_type':rate_type,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                        $('#corporate_rate_type_select').val('').trigger('change');
+                        $('#corporate_rate_type_modal').modal('hide');
+                        table.draw(true);
+                    });
+            }else{
+                var error = "Rate Type Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
         });
 
     });
