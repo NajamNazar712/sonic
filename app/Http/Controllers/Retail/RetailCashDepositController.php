@@ -73,7 +73,7 @@ class RetailCashDepositController extends Controller
                 $shipment = Shipment::find($cash_deposit_shipment->shipment_id);
                 $shipments[] = $shipment->tracking_number;
             }
-            return ['status' => 0, 'success' => 'Cash Deposit Shipments', 'shipments' => $shipments];
+            return ['status' => 1, 'success' => 'Cash Deposit Shipments', 'shipments' => $shipments];
         }else{
             return ['status' => 0, 'success' => 'No Cash Deposit Shipments', 'shipments' => FALSE];
         }

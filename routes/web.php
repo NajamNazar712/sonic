@@ -2593,6 +2593,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
     });
+    
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
         Route::post('track', 'Retail\RetailTrackingController@track')->name('track');

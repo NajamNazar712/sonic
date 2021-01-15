@@ -270,7 +270,7 @@
             });
 
 
-            var route = '{!! route('admin.tracking.index') !!}';
+            var route = '{!! route('retail.tracking.index') !!}';
 
             $('#datatable tbody').on('click','tr td.shipments_button button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
