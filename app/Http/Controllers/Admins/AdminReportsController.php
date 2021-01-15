@@ -6958,33 +6958,15 @@ class AdminReportsController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-//            ->leftJoin('shipments_journey as admin_journey', function ($join) {
-//                $join->on('admin_journey.shipment_id', '=', 'shipments.id')
-//                    ->where('admin_journey.id','=',
-//                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
-//            })
-//            ->leftJoin('shipments_journey as sj', function ($join) {
-//                $join->on('sj.shipment_id', '=', 'shipments.id')
-//                    ->where('sj.id','=',
-//                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-//            })
             ->leftJoin('shipments_journey as sret', function ($join) {
                 $join->on('sret.shipment_id', '=', 'shipments.id')
-                    ->where('sret.verification','=',1)
                     ->where('sret.id','=',
-                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13 and shipments_journey.verification = 1)'));
+                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.verification = 1)'));
             })
-            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->leftjoin('return_assigned_shipments as ras', function ($join) {
-                $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where('ras.id','=',
-                        DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.shipment_id = shipments.id and return_assigned_shipments.status = 1)'));
-            })
-            ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
-//            ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sret.status_reason_id')
             ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
 //            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
-            ->where('sret.verification', 1)
+//            ->where('sret.verification', 1)
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -6993,12 +6975,7 @@ class AdminReportsController extends Controller
                 });
             }
         }
-        if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-            if (in_array(317, session('permissions'))) {
-                $shipments = $shipments->where('ras.admin_id', Auth::id());
-            }
-        }
+
 //        if(count($shipments) <2) {
 //
 //        }
