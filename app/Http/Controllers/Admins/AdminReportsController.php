@@ -6942,15 +6942,15 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
-    public function returned_shipments_index(){
+    public function confirmation_shipments_index(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->where('shipment_status_reason_id','<>', 2)->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->get();
-        return view('admin.reports.returned_shipments')->with(['shipment_status'=>$shipment_status, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents]);
+        return view('admin.reports.confirmation_pending_report')->with(['shipment_status'=>$shipment_status, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents]);
     }
 
-    public function returned_shipments_list(Request $request){
+    public function confirmation_shipments_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {

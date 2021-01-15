@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Returned Shipments Report')
+@section('title', 'Confirmation Pending Shipments Report')
 
 @section('content')
     <h1 class="mb-1">
-        Returned Shipments Report
+        Confirmation Pending Shipments Report
     </h1>
 
     <div class="card">
@@ -211,7 +211,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.returned_shipments.list') }}',
+                        url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -259,7 +259,7 @@
                 processing: true,
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.returned_shipments.list') }}',
+                    url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();

@@ -1869,9 +1869,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
-        Route::prefix('returned_shipments')->name('returned_shipments.')->group(function (){
-            Route::get('', 'Admins\AdminReportsController@returned_shipments_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@returned_shipments_list')->name('list');
+        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
         });
     });
 
