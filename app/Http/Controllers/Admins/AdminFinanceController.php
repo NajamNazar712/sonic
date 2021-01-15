@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\Admin\AdjustmentType;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\RevertStatusRequest;
@@ -1951,7 +1952,8 @@ class AdminFinanceController extends Controller
     }
 
     public function add_shipment_adjustment_index() {
-        return view('admin.finance.add_shipment_adjustment');
+        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11])->get();
+        return view('admin.finance.add_shipment_adjustment')->with(['adjustment_types' => $adjustment_types]);
     }
 
     public function add_shipment_adjustment_shipment_details(Request $request) {
@@ -2000,8 +2002,9 @@ class AdminFinanceController extends Controller
         $shipment_id = $request->input('shipment_id');
         $payable = str_replace(',', '', $request->input('payable'));
         $payable_remarks = $request->input('payable_remarks');
+        $adjustment_type = $request->input('adjustment_type');
 
-        $this->add_adjustment($shipment_id, $payable, $payable_remarks, 4);
+        $this->add_adjustment($shipment_id, $payable, $payable_remarks, $adjustment_type);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }

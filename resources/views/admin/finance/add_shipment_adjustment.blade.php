@@ -41,6 +41,14 @@
 									</div>
 
 									<div class="form-group ml-1">
+										<select name="adjustment_type" id="adjustment_types" class="select2 form-control" data-rule-required="true" data-msg-required="Adjustment Type is required">
+											@foreach($adjustment_types as $adjustment_type)
+												<option value="{{$adjustment_type->id}}">{{$adjustment_type->name}}</option>
+											@endforeach
+										</select>
+									</div>
+
+									<div class="form-group ml-1">
 										<input type="text" name="payable_remarks" class="form-control" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
 									</div>
 
@@ -74,6 +82,11 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#adjustment_types').prepend('<option value="" selected="selected"></option>').select2({
+				width:'100%',
+				placeholder:"Select Adjustment Type",
+				allowClear:true
+			});
 			$('#search_form input.tracking_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
