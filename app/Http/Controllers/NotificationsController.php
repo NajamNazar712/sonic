@@ -2361,7 +2361,7 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 31])->where('status', 1);
+                    /*$admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 31])->where('status', 1);
 
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
@@ -2377,8 +2377,8 @@ class NotificationsController extends Controller
 
                     if ($ceo) {
                         $to[] = $ceo->email;
-                    }
-                    $extra_admins = ['asad@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawwad.haider@trax.pk','muhammad.waqas@trax.pk'];
+                    }*/
+                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
                     foreach ($to as $individual_to) {
@@ -2854,13 +2854,15 @@ class NotificationsController extends Controller
                                 $body = str_replace('[trax_logo]', $logo, $body);
                             }
 
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
                             if (strpos($body, '[button]') !== FALSE) {
                                 $body = str_replace('[button]', $button, $body);
                             }
 
-                            if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
-                            }
+
                             $sale_person_id = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->select('admin_id')->first();
                             if ($sale_person_id) {
                                 $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
@@ -2886,10 +2888,11 @@ class NotificationsController extends Controller
 //                            if($department_head_email) {
 //                                $cc[] = $department_head_email;
 //                            }
-
+                            $bcc = array();
+                            $bcc = ['danish.zahid@trax.pk'];
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc);
+                            self::email($subject, $body, $to, $cc, $bcc);
 
                         }
                     }
@@ -3615,7 +3618,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);
 
 
-                    $cc = ['asad@trax.pk', 'syed.sharique@trax.pk'];
+                    $cc = ['asad@trax.pk', 'syed.sharique@trax.pk', 'fawwad.haider@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
 
@@ -3707,7 +3710,7 @@ class NotificationsController extends Controller
                     $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
 
                     $cc = array_merge($cc, $extra_admins);
-
+                    $cc[] = 'fawwad.haider@trax.pk';
                     self::email($subject, $body, $to, $cc);
                     $to = array();
                     $admins = Admin::whereIn('role_id', [8, 9, 10, 22, 25, 30, 46])->where('status', 1);
@@ -3807,7 +3810,7 @@ class NotificationsController extends Controller
                     $ceo = Admin::find(8);
 
                     $cc = array();
-                    $cc = [$ceo->email, 'asad@trax.pk'];
+                    $cc = [$ceo->email, 'asad@trax.pk', 'fawwad.haider@trax.pk'];
 
                     $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
                     $to = array_merge($to, $extra_admins);
@@ -5138,6 +5141,7 @@ class NotificationsController extends Controller
                         $to[] = 'faizan.ahmed@trax.pk';
                         $cc[] = 'fawad.ahmed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $cc[] = 'shafay.tariq@trax.pk';
                     }
 
                     self::email($subject, $body, $to, $cc, $bcc);

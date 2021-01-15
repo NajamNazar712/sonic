@@ -21,7 +21,13 @@ class AdjustmentTypeTableSeeder extends Seeder
             array('id' => 2, 'name' => 'Adjusted from Delivered', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 3, 'name' => 'Adjusted from Month Closing', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 4, 'name' => 'Manual Adjustment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-
+            array('id' => 5, 'name' => 'Replacement to Regular Adjustment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 6, 'name' => 'Manual Adjustment - Weight Dispute', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 7, 'name' => 'Manual Adjustment - Amount Change', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 8, 'name' => 'Manual Adjustment - Damage Shipment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 9, 'name' => 'Manual Adjustment - Short Content', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 10, 'name' => 'Manual Adjustment - Shipment Lost', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 11, 'name' => 'Manual Adjustment - Charges Wave Off', 'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }

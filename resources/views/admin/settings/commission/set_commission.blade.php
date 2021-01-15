@@ -3,94 +3,108 @@
 @section('title', 'Set Commission')
 
 @section('content')
-    <h1>Set Commission</h1>
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Commission Set For : {{$user_names}}
+                </h1>
 
-       <div class="row">
-            <div class="col-12">
                 <div class="card">
-                    <div class="row shipperhead mt-2">
-                    <h5>Commission Set For : {{$user_names}} </h5>
-                    </div>
-                   
-                    <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.settings.commission.set_commission.submit')}}" method="post" novalidate="novalidate">
-                    @csrf
-                    <input type="hidden" name="user_ids" value="{{ $ids }}"/>
-                    
-                            <div class="row justify-content-center mt-2" id="commission_div">
-                            
-                                <div class="form-group row">
-                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
-                                    <div class="col-md-8">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Total Commission" id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <div class="row">
                                 <div class="col-12">
-                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
-                                        <div class="row justify-content-center">
-                                            <div class="col-2 form-group">
-                                                <select name="sales_tier" class="select2" id="sales_tier_select" data-rule-required="true" data-msg-required="Sales Tier is required">
-                                                    @foreach($sales_tiers as $tier)
-                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}" sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <input type="text" id="external_person_name" name="external_person_name" class="form-control" placeholder="External Tier Person Name" disabled data-rule-required="true" data-msg-required="Person Name is required">
-                                            </div>
-                                            <div class="col-2 form-group">
-                                                <select name="user" class="select2" id="user_select" data-rule-required="true" data-msg-required="User is required" disabled>
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <div class="input-group form-group">
-                                                    <input type="text" id="user_commission" class="form-control commission" placeholder="User Commission" name="user_commission" data-rule-required="true" data-msg-required="User Commission is required">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">%</span>
+                                    <div class="card">
+
+                                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.settings.commission.set_commission.submit')}}" method="post" novalidate="novalidate">
+                                            @csrf
+                                            <input type="hidden" name="user_ids" value="{{ $ids }}"/>
+
+                                            <div class="row justify-content-center mt-2" id="commission_div">
+
+                                                <div class="form-group row">
+                                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                                    <div class="col-md-8">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" placeholder="Total Commission" id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                <div class="col-12">
+                                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                                        <div class="row justify-content-center">
+                                                            <div class="col-2 form-group">
+                                                                <select name="sales_tier" class="select2" id="sales_tier_select" data-rule-required="true" data-msg-required="Sales Tier is required">
+                                                                    @foreach($sales_tiers as $tier)
+                                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}" sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3 form-group">
+                                                                <input type="text" id="external_person_name" name="external_person_name" class="form-control" placeholder="External Tier Person Name" disabled data-rule-required="true" data-msg-required="Person Name is required">
+                                                            </div>
+                                                            <div class="col-2 form-group">
+                                                                <select name="user" class="select2" id="user_select" data-rule-required="true" data-msg-required="User is required" disabled>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3 form-group">
+                                                                <div class="input-group form-group">
+                                                                    <input type="text" id="user_commission" class="form-control commission" placeholder="User Commission" name="user_commission" data-rule-required="true" data-msg-required="User Commission is required">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-1 form-group">
+                                                                <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                                        <thead>
+                                                        <tr role="row" class="bg-primary white">
+                                                            <th class="border-primary border-darken-1">S. No.</th>
+                                                            <th class="border-primary border-darken-1">User Name</th>
+                                                            <th class="border-primary border-darken-1">Tier</th>
+                                                            <th class="border-primary border-darken-1">Commission Percentage</th>
+                                                            <th class="border-primary border-darken-1"></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tfoot>
+                                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                                <div class="text-center mt-2">
+                                                    <div class="form-group">
+
+                                                        <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Submit</button>
+                                                    </div>
+                                                </div>
+
                                             </div>
-                                            <div class="col-1 form-group">
-                                                <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
-                                            </div>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                        <thead>
-                                        <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">S. No.</th>
-                                            <th class="border-primary border-darken-1">User Name</th>
-                                            <th class="border-primary border-darken-1">Tier</th>
-                                            <th class="border-primary border-darken-1">Commission Percentage</th>
-                                            <th class="border-primary border-darken-1"></th>
-                                        </tr>
-                                        </thead>
-                                        <tfoot>
-                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
-                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                                <div class="text-center mt-2">
-                                    <div class="form-group">
-
-                                        <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Submit</button>
-                                    </div>
-                                </div>
-
                             </div>
-                        </form>
-                  </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div> 
-
+        </div>
+    </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">

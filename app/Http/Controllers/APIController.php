@@ -251,11 +251,11 @@ class APIController extends Controller
         $city = City::find($request->input('city_id'));
 
         if (!$city->status) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id') . ' is deactivated']);
         }
 
         if (!$city->zone_id) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id') . ' is deactivated']);
         }
 
         if (!$city->pickup) {
@@ -438,11 +438,11 @@ class APIController extends Controller
                 }
 
                 if (!$user_shipping_info->city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
 
                 if (!$user_shipping_info->city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
 
                 if (!$user_shipping_info->city->pickup) {
@@ -452,11 +452,11 @@ class APIController extends Controller
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
                 if (!$consignee_city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
 
                 if (!$consignee_city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
 
                 $pickup_city_id = $user_shipping_info->city_id;
@@ -499,11 +499,11 @@ class APIController extends Controller
             else{
                 $pickup_consignee_city = City::find($request->input('consignee_city_id'));
                 if (!$pickup_consignee_city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
                 }
 
                 if (!$pickup_consignee_city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
                 }
 
                 if ($user_id != 7762) {
@@ -517,11 +517,11 @@ class APIController extends Controller
                 $delivery_city = City::find($pickup_address_for_delivery->city_id);
 
                 if (!$delivery_city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
 
                 if (!$delivery_city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
 
                 $pickup_city_id = $pickup_consignee_city->id;
@@ -1571,11 +1571,11 @@ class APIController extends Controller
         $origin_city = City::find($request->input('origin_city_id'));
 
         if (!$origin_city->status) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('origin_city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('origin_city_id') . ' is deactivated']);
         }
 
         if (!$origin_city->zone_id) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('origin_city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('origin_city_id') . ' is deactivated']);
         }
 
         if (!$origin_city->pickup) {
@@ -1585,11 +1585,11 @@ class APIController extends Controller
         $destination_city = City::find($request->input('destination_city_id'));
 
         if (!$destination_city->status) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('destination_city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('destination_city_id') . ' is deactivated']);
         }
 
         if (!$destination_city->zone_id) {
-          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('destination_city_id')]) . ' is deactivated';
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('destination_city_id') . ' is deactivated']);
         }
 
         if ($request->input('origin_city_id') != $request->input('destination_city_id') && $request->input('shipping_mode_id') == 4) {
@@ -2000,11 +2000,11 @@ class APIController extends Controller
                 }
 
                 if (!$user_shipping_info->city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
 
                 if (!$user_shipping_info->city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
 
                 if (!$user_shipping_info->city->pickup) {
@@ -2014,11 +2014,11 @@ class APIController extends Controller
                 $consignee_city = City::find($gul_ahmed_city->city_id);
 
                 if (!$consignee_city->status) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id . ' is deactivated']);
                 }
 
                 if (!$consignee_city->zone_id) {
-                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id]) . ' is deactivated';
+                    return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $consignee_city->id . ' is deactivated']);
                 }
 
                 $pickup_city_id = $user_shipping_info->city_id;

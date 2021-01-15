@@ -40,7 +40,7 @@ class OutstandingShipmentEmail extends Command
     public function handle()
     {
         $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
-        $end_date = Carbon::yesterday()->endOfDay()->addHours(10)->toDateTimeString();
+        $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
         $response = AdminReportsEmailController::outstanding_shipments($start_date, $end_date);
     }
 }

@@ -52,6 +52,7 @@ class VisionSoftApi extends Command
         VisionSoftAPIController::cod_payment();
         VisionSoftAPIController::cod_payment_clear();
         VisionSoftAPIController::daily_exp();
+        VisionSoftAPIController::adjustment();
         VisionSoftAPIController::prc_load_api_data();
     }
 }

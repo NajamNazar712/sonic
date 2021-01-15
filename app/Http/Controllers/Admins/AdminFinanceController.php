@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\Admin\AdjustmentType;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\RevertStatusRequest;
@@ -1951,7 +1952,8 @@ class AdminFinanceController extends Controller
     }
 
     public function add_shipment_adjustment_index() {
-        return view('admin.finance.add_shipment_adjustment');
+        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11])->get();
+        return view('admin.finance.add_shipment_adjustment')->with(['adjustment_types' => $adjustment_types]);
     }
 
     public function add_shipment_adjustment_shipment_details(Request $request) {
@@ -2000,8 +2002,9 @@ class AdminFinanceController extends Controller
         $shipment_id = $request->input('shipment_id');
         $payable = str_replace(',', '', $request->input('payable'));
         $payable_remarks = $request->input('payable_remarks');
+        $adjustment_type = $request->input('adjustment_type');
 
-        $this->add_adjustment($shipment_id, $payable, $payable_remarks, 4);
+        $this->add_adjustment($shipment_id, $payable, $payable_remarks, $adjustment_type);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
@@ -5777,6 +5780,18 @@ class AdminFinanceController extends Controller
                 foreach ($payment_shipments as $invoice_shipment) {
                     $shipment = $invoice_shipment->shipment;
 
+                    $shipment_weight = $shipment->actual_weight;
+                    $weight_charges = $shipment->weight_charges;
+
+                    if($invoice_shipment->type != 2) {
+                        $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                        if($change_shipment_weight_log->exists()){
+                            $change_shipment_weight_log = $change_shipment_weight_log->first();
+                            $shipment_weight = $change_shipment_weight_log->old_weight;
+                            $weight_charges = $change_shipment_weight_log->old_charges;
+                        }
+                    }
+
                     if ($invoice_shipment->type != 2 || ($invoice_shipment->type == 2 && $invoice_shipment->payable < 0)) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -5797,8 +5812,8 @@ class AdminFinanceController extends Controller
                                       <td>' . $shipment->consignee_city->name . '</td>
                                       <td>' . $shipment->shipping_mode->mode . '</td>
                                       <td>' . $date . '</td>
-                                      <td>' . $shipment->actual_weight . '</td>
-                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                                      <td>' . $shipment_weight . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format($weight_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
@@ -5820,7 +5835,7 @@ class AdminFinanceController extends Controller
                                 $total_return_charges += $shipment->return_charges;
                             }
 
-                            $total_weight_charges += $shipment->weight_charges;
+                            $total_weight_charges += $weight_charges;
 
                             if ($shipment->packaging_material_request) {
                                 $total_packaging_material_charges += $shipment->packaging_material_charges;
@@ -5834,7 +5849,7 @@ class AdminFinanceController extends Controller
                         else {
                             $total_adjustment_charges += $invoice_shipment->payable;
 
-                            $total_charges += $invoice_shipment->payable;
+                            $total_invoice_amount += $invoice_shipment->payable;
                         }
 
                         $total_charges += $invoice_shipment->charges;
@@ -5946,10 +5961,6 @@ class AdminFinanceController extends Controller
                           <td class="text-left">Packaging Charges</td>
                           <td class="text-right">' . number_format($total_packaging_material_charges, 2) . '</td>
                         </tr>
-                        <tr>
-                          <td class="text-left">Adjustment Charges</td>
-                          <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
-                        </tr>
                       </tbody>
                     </table>
 
@@ -5964,6 +5975,10 @@ class AdminFinanceController extends Controller
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Adjustment Charges (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
                                 </tr>
                 ';
 

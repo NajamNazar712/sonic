@@ -242,15 +242,33 @@
                             @method('post')
                             {{ csrf_field() }}
                             <input type="text" hidden id="route_id" name="route_id">
+                            <input type="text" hidden id="pickup_address_id" name="pickup_address_id">
                             <div class="col-12">
                                 <fieldset class="form-group">
-                                    <select name="pickup_address[]"  id="pickup_address" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Location is required">
+                                    <select name="users"  id="users" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($users as $user)
-                                            <option value="{{$user->address_id}}">{{$user->name}} - {{$user->pickup_address}}</option>
+                                            <option value="{{$user->id}}">{{$user->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-12">
+                                <fieldset class="form-group pickup_address_parent ">
+                                    <select name="pickup_address[]"  id="pickup_address" class="form-control select2" data-rule-required="true" data-msg-required="Location is required">
+
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <table class="table table-bordered datatable" id="view_address" style="z-index: 3;">
+                                <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1"></th>
+                                </tr>
+                                </thead>
+                            </table>
 
                             <div class="row justify-content-center mt-4">
                                 <div class="col-4">
@@ -268,9 +286,64 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <style>
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+        #view_address_info{
+            text-align: center;
+        }
+
+        table.dataTable .dataTables_info{
+            text-align: center;
+        }
         textarea#junction {
             resize: none;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
         }
     </style>
 @endsection
@@ -278,15 +351,12 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
 
         $(document).ready(function() {
-            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Add Pickup Addresses",
-               /* allowClear:true,*/
-            });
 
             $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select City',
@@ -358,7 +428,7 @@
                     return {body: body, header: head};
                 }
             } );
-            var table =  $('.datatable').DataTable({
+            var table =  $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(93, session('permissions')))
 
@@ -468,6 +538,32 @@
                     this.api().table().columns.adjust();
                 }
             });
+            var view_address = $('#view_address').DataTable({
+                dom: '<"d-inline-block"l>tipr',
+                ordering:false,
+                paging:false,
+                searching: false,
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'user', class: 'align-middle user form-group'},
+                    {name: 'address', class: 'align-middle address form-group'},
+                    {name: 'action', class: 'align-middle action'},
+                ],
+
+                rowCallback: function(row, data, index) {
+                    var info = view_address.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+
+                    // this.api().table().columns.adjust();
+                }
+
+            });
+
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                     var route_id = table.row( $(this).parents('tr') ).data().id;
                     if ($(this).hasClass('update_route')) {
@@ -479,7 +575,7 @@
                                 'route_id': route_id
                             }
                         }).done(function(data){
-                            console.log(data);
+
                             if(data.details.length != 0 ){
                                 /*$.each(data.details, function(index, value) {*/
                                     var city_id = data.details.city_id;
@@ -508,39 +604,10 @@
                     }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-
-
-                var route_id = table.row( $(this).parents('tr') ).data().id;
-
-                $('#route_id').val(route_id);
-
-                if ($(this).hasClass('assign_location')) {
-
-                    $.ajax({
-                        url: '{!! route('admin.management.route.view_assign_location') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'route_id': route_id
-                        }
-                    }).done(function(data){
-
-                        $('#pickup_address').val('All').trigger('change');
-                        if(data.pickup_address_ids.length != 0 ){
-                            $('#pickup_address').val(data.pickup_address_ids).trigger('change');
-                        }
-
-                    });
-                    $('#assign_location').modal('show');
-                }
-            });
-
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu  .dropdown-item', function() {
 
                 if ($(this).hasClass('view_location')) {
                     var route_id = table.row( $(this).parents('tr') ).data().id;
-                    console.log(route_id);
 
                     $.ajax({
                         url: '{!! route('admin.management.route.assign_locations_view') !!}',
@@ -551,7 +618,7 @@
                         }
                     }).done(function(data){
                         if(data.locations.length != 0){
-                            console.log(data.locations);
+
                             var html = '';
                             html += '<table class="table table-sm datatable text-center">';
                             html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
@@ -571,8 +638,130 @@
                 }
             });
 
+            var rows_count = 0;
+            var selected_rows = [];
+            var locations = [];
 
-        });
+            function add_row(pickup_address_id,pickup_address_location,user) {
+
+                var index = $.inArray(pickup_address_id, locations);
+                if (index === -1) {
+                    rows_count++;
+                    if (rows_count == 1){
+                        var remove = '';
+                    }else{
+                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+                    }
+
+                    view_address.row.add([0,user,pickup_address_location,remove]).node().id = pickup_address_id;
+                    locations.push(pickup_address_id);
+                    view_address.draw(true);
+                }
+                else{
+                    var error = "Address already exists";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+
+                $('#edit').attr('disabled', false);
+            }
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+                var route_id = $(this).parents('tr').attr('id');
+
+                $('#route_id').val(route_id);
+
+                if ($(this).hasClass('assign_location')) {
+                    $('#assign_location').modal('show');
+
+                }
+            });
+
+            $('#users').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                dropdownParent:$('#route_location')
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.management.route.user_address') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'user_id': this.value,
+                        }
+                    }).done(function(data){
+
+                        if (data.status == 1) {
+                            $('#pickup_address').empty().trigger('change');
+                            $.each(data.addresses, function(key,value) {
+                                var newOption = new Option(value.pickup_address,value.id, false, false);
+                                $('#pickup_address').append(newOption).trigger('change');
+
+                            });
+                            $('#pickup_address').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#assign_location').modal('hide');
+
+                        }
+                    });
+                    //$('#pickup_address').empty().trigger('change');
+                }
+            });
+            $('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Pickup Address",
+                allowClear:true,
+                dropdownParent:$('#route_location')
+            }).bind('select2:select',function(){
+                var address_id = parseInt($(this).val());
+                var address = $(this).text();
+                var user = $( "#users option:selected" ).text();
+                add_row(address_id,address,user);
+
+            });
+            $('body').on('click', 'a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, locations);
+
+                if (index !== -1) {
+                    locations.splice(index, 1);
+                }
+                $('#route_location #pickup_address_id').val(locations);
+                view_address.row( $(this).parents('tr') ).remove().draw();
+            });
+
+
+            $( "#route_location" ).validate({
+
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $('#route_location #pickup_address_id').val(locations);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Location is being saved!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
 
         $( "#editRouteForm" ).validate({
 
@@ -595,28 +784,6 @@
                 form.submit();
             }
         });
-        $( "#route_location" ).validate({
-
-            errorClass:"danger",
-            errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parent('.form-group'));
-            },
-            submitHandler: function(form) {
-
-                $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                swal({
-                    title: 'Please Wait!',
-                    text: 'Location is being saved!',
-                    icon: 'info',
-                    buttons: false,
-                    closeOnClickOutside: false,
-                    closeOnEsc: false
-                });
-
-                form.submit();
-            }
-        });
-
 
         $( "#addRouteForm" ).validate({
 
@@ -678,7 +845,20 @@
                 }
             });
 
+        });
 
+
+        $('#assign_location').on('hidden.bs.modal', function () {
+            $('#pickup_address').val('').trigger('change');
+            $('#users').val('').trigger('change');
+            var view_address = $('#view_address').DataTable();
+            view_address.clear();
+            locations = [];
+            view_address.draw();
+            selected_rows = [];
+            rows_count = 0;
+            // $('#return_note_image_view_table tbody').html('');
+        });
         });
     </script>
 

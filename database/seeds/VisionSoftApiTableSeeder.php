@@ -28,7 +28,8 @@ class VisionSoftApiTableSeeder extends Seeder
             array('id' => 12, 'name' => 'Cities','created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 13, 'name' => 'BankDeposit','created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 14, 'name' => 'DailyExp','created_at'=>$timestamp,'updated_at'=>$timestamp),
-            array('id' => 15, 'name' => 'CodReceivable','created_at'=>$timestamp,'updated_at'=>$timestamp)
+            array('id' => 15, 'name' => 'CodReceivable','created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 16, 'name' => 'Adjustments','created_at'=>$timestamp,'updated_at'=>$timestamp)
         ));
     }
 }
