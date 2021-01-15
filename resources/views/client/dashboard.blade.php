@@ -286,9 +286,11 @@
                                             <label for="actual_product_picture"><b>Actual Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
+{{--                                        <div class="col-8" id="damage_claim_product_cost_div">--}}
                                         <fieldset class="form-group">
                                             <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Price">
                                         </fieldset>
+{{--                                        </div>--}}
                                     </div>
 
                                     <div class="col-8 text-left d-none" id="claim_content_short_div">
@@ -1676,6 +1678,7 @@
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
                         var product_cost = $('#claim_product_cost').val();
+                        var damage_product_cost = $('#damage_claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#shipment_ids').val(selected_rows);
@@ -1717,6 +1720,14 @@
                                     containerId: 'toast-top-center'
                                 });
                             }
+                                if (!damage_product_cost) {
+                                    nature_flag = false;
+                                    var error = "Please enter Damage Product Cost!";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                             if (!check_invoice_picture) {
                                 nature_flag = false;
                                 var error = "Please attach Invoice Picture!";
@@ -1888,6 +1899,7 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
+                $('#damage_claim_product_cost').val('');
                 $('#request_id').val('').trigger('change');
                 $('#receiving_sheet_div').addClass('d-none');
             });
