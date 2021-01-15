@@ -336,12 +336,8 @@
                 dropdownParent:$('#add_request_form')
             });
             function print(id, booking_type_id) {
-                if (booking_type_id != 4) {
-                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
-                }
-                else {
-                    var url = '{!! route('retail.shipment.book.print_air_waybill') !!}';
-                }
+                    var url = '{!! route('retail.shipment.book.slip') !!}';
+
                 $.ajax({
                     url: url,
                     method: 'POST',
