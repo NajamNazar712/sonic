@@ -30,43 +30,6 @@
                             <div class="tracking" id="tracking">
                             </div>
 
-                            <div class="modal fade" id="rider_information" role="dialog" aria-labelledby="rider_information_title" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title" id="rider_information_title">Rider Information</h4>
-
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">×</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{--<div class="modal fade" id="cargo_consignment_details" role="dialog" aria-labelledby="cargo_consignment_details_title" aria-hidden="true">--}}
-                            {{--<div class="modal-dialog modal-lg" role="document">--}}
-                            {{--<div class="modal-content">--}}
-                            {{--<div class="modal-header">--}}
-                            {{--<h4 class="modal-title" id="cargo_consignment_details_title">Cargo Consignment Details</h4>--}}
-
-                            {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                            {{--<span aria-hidden="true">×</span>--}}
-                            {{--</button>--}}
-                            {{--</div>--}}
-                            {{--<div class="modal-body">--}}
-                            {{--</div>--}}
-                            {{--<div class="modal-footer">--}}
-                            {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
-                            {{--</div>--}}
-                            {{--</div>--}}
-                            {{--</div>--}}
-                            {{--</div>--}}
                         </div>
                     </div>
                 </div>
@@ -408,8 +371,8 @@
                     });
             }
 
-            {{--var complain_route = '{{ route('admin.crm.request.details', 0) }}';--}}
-            {{--complain_route = complain_route.slice(0, -1);--}}
+            var complain_route = '{{ route('retail.crm.request.details', 0) }}';
+            complain_route = complain_route.slice(0, -1);
 
             function track(tracking_numbers) {
                 $.ajax({
@@ -676,8 +639,8 @@
                                 // shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
-                                shipment += '<th><strong>IP Address</strong></th>';
-                                shipment += '<th><strong>Rider</strong></th>';
+                                // shipment += '<th><strong>IP Address</strong></th>';
+                                // shipment += '<th><strong>Rider</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
@@ -691,8 +654,8 @@
                                     // shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                    shipment += '<td>' + history.ip + '</td>';
-                                    shipment += '<td>' + history.rider + '</td>';
+                                    // shipment += '<td>' + history.ip + '</td>';
+                                    // shipment += '<td>' + history.rider + '</td>';
                                     shipment += '</tr>';
                                 });
 
@@ -995,6 +958,13 @@
                                 ]
                             });
                         }
+                        else{
+                            var message = 'Tracking Number(s) does not belong here ';
+                            toastr.error(message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
                     });
             }
 
@@ -1063,151 +1033,6 @@
 
             });
 
-            {{--$('#tracking').on('click', '.rider_information', function () {--}}
-            {{--    id = $(this).attr('data-id');--}}
-
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.tracking.rider_information') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            '_token': '{{ csrf_token() }}',--}}
-            {{--            'id': id--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function (data) {--}}
-            {{--            var details = '<table class="table table-sm table-bordered"><tbody>';--}}
-
-            {{--            details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';--}}
-            {{--            details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';--}}
-            {{--            details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';--}}
-            {{--            details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';--}}
-            {{--            details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';--}}
-
-            {{--            details += '</tbody></table>';--}}
-
-            {{--            $('#rider_information .modal-body').html(details);--}}
-
-            {{--            $('#rider_information').modal('show');--}}
-            {{--        });--}}
-            {{--});--}}
-
-            {{--$('#tracking').on('click', '.cargo_note_print', function () {--}}
-            {{--    id = $(this).attr('data-id');--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.cargo.in_transit.print') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'id': id,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function (data) {--}}
-            {{--            var tab = window.open('', '_blank');--}}
-
-            {{--            if (!tab) {--}}
-            {{--                swal({--}}
-            {{--                    title: 'Popup Blocker Enabled!',--}}
-            {{--                    text: 'Please add this site to your exception list.',--}}
-            {{--                    icon: 'error',--}}
-            {{--                    closeOnClickOutside: false,--}}
-            {{--                    closeOnEsc: false--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--            else {--}}
-            {{--                tab.document.write(data);--}}
-            {{--                tab.document.close();--}}
-            {{--                tab.focus();--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--});--}}
-            {{--$('#tracking').on('click', '.return_note_print', function () {--}}
-            {{--    id = $(this).attr('data-id');--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.return.receive.rn.print') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'id': id,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function(data) {--}}
-            {{--            var tab = window.open('', '_blank');--}}
-
-            {{--            if(!tab) {--}}
-            {{--                swal({--}}
-            {{--                    title: 'Popup Blocker Enabled!',--}}
-            {{--                    text: 'Please add this site to your exception list.',--}}
-            {{--                    icon: 'error',--}}
-            {{--                    closeOnClickOutside: false,--}}
-            {{--                    closeOnEsc: false--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--            else {--}}
-            {{--                tab.document.write(data);--}}
-            {{--                tab.document.close();--}}
-            {{--                tab.focus();--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--});--}}
-            {{--$('#tracking').on('click', '.delivery_note_print', function () {--}}
-            {{--    id = $(this).attr('data-id');--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.delivery.receive.print') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'id': id,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function (data) {--}}
-            {{--            var tab = window.open('', '_blank');--}}
-
-            {{--            if (!tab) {--}}
-            {{--                swal({--}}
-            {{--                    title: 'Popup Blocker Enabled!',--}}
-            {{--                    text: 'Please add this site to your exception list.',--}}
-            {{--                    icon: 'error',--}}
-            {{--                    closeOnClickOutside: false,--}}
-            {{--                    closeOnEsc: false--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--            else {--}}
-            {{--                tab.document.write(data);--}}
-            {{--                tab.document.close();--}}
-            {{--                tab.focus();--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--});--}}
-            {{--$('#tracking').on('click', '.payment_print', function () {--}}
-            {{--    id = $(this).attr('data-id');--}}
-            {{--    console.log(id);--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.finance.done_payments.details_print') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            '_token': '{{ csrf_token() }}',--}}
-            {{--            'id': id--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function (data) {--}}
-            {{--            var tab = window.open('', '_blank');--}}
-
-            {{--            if (!tab) {--}}
-            {{--                swal({--}}
-            {{--                    title: 'Popup Blocker Enabled!',--}}
-            {{--                    text: 'Please add this site to your exception list.',--}}
-            {{--                    icon: 'error',--}}
-            {{--                    closeOnClickOutside: false,--}}
-            {{--                    closeOnEsc: false--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--            else {--}}
-            {{--                tab.document.write(data);--}}
-            {{--                tab.document.close();--}}
-            {{--                tab.focus();--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--});--}}
         });
 
 
@@ -1243,351 +1068,345 @@
         $( "#add_request_form" ).bind('submit', function (e) {
             e.preventDefault();
             var case_nature_id = parseInt($('#case_nature_select').val());
-            if (case_nature_id === 1) {
+            if(case_nature_id === 1){
                 var nature_flag = true;
                 var case_nature_complaint_id = $('#case_nature_complaints').val();
                 var case_nature_channel_id = $('#complaint_channels').val();
                 var complaint_description = $('#complaint_description').val();
-                if (!case_nature_complaint_id) {
+                if(!case_nature_complaint_id){
                     nature_flag = false;
                     var error = "Please select Complaint type!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-                if (!case_nature_channel_id) {
+                if(!case_nature_channel_id){
                     nature_flag = false;
                     var error = "Please select Channel!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-                if (!complaint_description) {
+                if(!complaint_description){
                     nature_flag = false;
                     var error = "Please select Description!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+                if(nature_flag){
+                    $('#AddNewRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('retail.crm.request.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': $('#requested_shipment_id').val(),
+                            'case_nature_id' : case_nature_id,
+                            'complaint_id' : case_nature_complaint_id,
+                            'channel_id': case_nature_channel_id,
+                            'description' : complaint_description
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                if(data.flag){
+                                    var html = '';
+
+                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                        html += tracking_number + '<br/>';
+                                    });
+
+                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+
+                                    swal({
+                                        title: 'Request / Complaint Already Lodged!',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }else{
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled',false);
+                        });
+                }
+
+            }else if(case_nature_id == 2){
+                var nature_flag = true;
+                var case_nature_complaint_id = $('#case_nature_requests').val();
+                var case_nature_channel_id = $('#request_channels').val();
+                var service_description = $('#service_description').val();
+                if(!case_nature_complaint_id){
+                    nature_flag = false;
+                    var error = "Please select Complaint type!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!case_nature_channel_id){
+                    nature_flag = false;
+                    var error = "Please select Channel!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!service_description){
+                    nature_flag = false;
+                    var error = "Please select Description!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(nature_flag){
+                    $('#AddNewRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('retail.crm.request.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': $('#requested_shipment_id').val(),
+                            'case_nature_id' : case_nature_id,
+                            'complaint_id' : case_nature_complaint_id,
+                            'channel_id': case_nature_channel_id,
+                            'description' : service_description
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                if(data.flag){
+                                    var html = '';
+
+                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                        html += tracking_number + '<br/>';
+                                    });
+
+                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+
+                                    swal({
+                                        title: 'Request / Complaint Already Lodged!',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }else{
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled',false);
+                        });
+                }
+            }else if(case_nature_id == 3) {
+                var feedback_flag = true;
+                var feedback_channel = $('#feedback_channel_request').val();
+                var feedback_description = $('#feedback_description_request').val();
+                if (!feedback_description) {
+                    feedback_flag = false;
+                    var error = "Please select Description!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                if (!feedback_channel) {
+                    feedback_flag = false;
+                    var error = "Please select Channel!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                if (feedback_flag) {
+                    $('#AddNewRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('retail.crm.feedback.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'channel_id': $('#feedback_channel_request').val(),
+                            'shipment_id': $('#requested_shipment_id').val(),
+                            'description': feedback_description
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status) {
+                                if(data.flag){
+                                    var html = '';
+
+                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                        html += tracking_number + '<br/>';
+                                    });
+
+                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+
+                                    swal({
+                                        title: 'Request / Complaint Already Lodged!',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }else{
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled',false);
+                        });
+                }
+            }
+            else if(case_nature_id === 4){
+                var nature_flag = true;
+                var case_nature_claim_id = $('#case_nature_claim').val();
+                var case_nature_channel_id = $('#claim_channel').val();
+                var product_cost = $('#claim_product_cost').val();
+                var check_product_picture = $('#product_picture').val();
+                var check_invoice_picture = $('#invoice_picture').val();
+                $('#shipment_ids').val($('#requested_shipment_id').val());
+                $('#case_nature_id').val(case_nature_id);
+                $('#channel_id').val(case_nature_channel_id);
+                $('#complaint_id').val(case_nature_claim_id);
+                var formData = new FormData($('#add_request_form')[0]);
+                if(!case_nature_claim_id){
+                    nature_flag = false;
+                    var error = "Please select Claim type!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!case_nature_channel_id){
+                    nature_flag = false;
+                    var error = "Please select Channel!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(case_nature_claim_id !== "26"){
+                    if(!check_product_picture){
+                        nature_flag = false;
+                        var error = "Please attach Product Picture!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!product_cost){
+                        nature_flag = false;
+                        var error = "Please enter Product Cost!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!check_invoice_picture){
+                        nature_flag = false;
+                        var error = "Please attach Invoice Picture!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+                if(nature_flag){
+                    $('#AddNewRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('retail.crm.request.add') !!}',
+                        method: 'POST',
+                        enctype: 'multipart/form-data',
+                        data: formData,
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                if(data.flag){
+                                    var html = '';
+
+                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                        html += tracking_number + '<br/>';
+
+                                    });
+
+                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+
+                                    swal({
+                                        title: 'Request / Complaint Already Lodged!',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }else{
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled',false);
+                        });
+                }
+
             }
         });
-                {{--        if(nature_flag){--}}
-                {{--            $('#AddNewRequest').attr('disabled',true);--}}
-                {{--            $.ajax({--}}
-                {{--                url: '{!! route('admin.crm.request.add') !!}',--}}
-                {{--                method: 'POST',--}}
-                {{--                data: {--}}
-                {{--                    '_token': '{{ csrf_token() }}',--}}
-                {{--                    'shipment_id': $('#requested_shipment_id').val(),--}}
-                {{--                    'case_nature_id' : case_nature_id,--}}
-                {{--                    'complaint_id' : case_nature_complaint_id,--}}
-                {{--                    'channel_id': case_nature_channel_id,--}}
-                {{--                    'description' : complaint_description--}}
-                {{--                }--}}
-                {{--            })--}}
-                {{--                .done(function(data) {--}}
-                {{--                    if (data.status) {--}}
-                {{--                        if(data.flag){--}}
-                {{--                            var html = '';--}}
-
-                {{--                            $.each(data.already_existed_shipments, function(index, tracking_number) {--}}
-                {{--                                html += tracking_number + '<br/>';--}}
-                {{--                            });--}}
-
-                {{--                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';--}}
-
-                {{--                            content = document.createElement('div');--}}
-                {{--                            content.innerHTML = html;--}}
-
-                {{--                            swal({--}}
-                {{--                                title: 'Request / Complaint Already Lodged!',--}}
-                {{--                                content: content,--}}
-                {{--                                icon: 'warning',--}}
-                {{--                                buttons: {--}}
-                {{--                                    cancel: {--}}
-                {{--                                        text: 'Close',--}}
-                {{--                                        value: null,--}}
-                {{--                                        visible: true,--}}
-                {{--                                        closeModal: true,--}}
-                {{--                                    },--}}
-                {{--                                },--}}
-                {{--                                closeOnClickOutside: false,--}}
-                {{--                                closeOnEsc: false,--}}
-                {{--                                dangerMode: true--}}
-                {{--                            });--}}
-                {{--                        }else{--}}
-                {{--                            toastr.success(data.success, 'Success!', {--}}
-                {{--                                positionClass: 'toast-bottom-center',--}}
-                {{--                                containerId: 'toast-bottom-center'--}}
-                {{--                            });--}}
-                {{--                        }--}}
-                {{--                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                {{--                    }--}}
-                {{--                    else {--}}
-                {{--                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--                    }--}}
-
-                {{--                    $('#AddRequestModal').modal('hide');--}}
-                {{--                    $('#AddNewRequest').attr('disabled',false);--}}
-                {{--                });--}}
-                {{--        }--}}
-
-                {{--    }else if(case_nature_id == 2){--}}
-                {{--        var nature_flag = true;--}}
-                {{--        var case_nature_complaint_id = $('#case_nature_requests').val();--}}
-                {{--        var case_nature_channel_id = $('#request_channels').val();--}}
-                {{--        var service_description = $('#service_description').val();--}}
-                {{--        if(!case_nature_complaint_id){--}}
-                {{--            nature_flag = false;--}}
-                {{--            var error = "Please select Complaint type!";--}}
-                {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--        }--}}
-                {{--        if(!case_nature_channel_id){--}}
-                {{--            nature_flag = false;--}}
-                {{--            var error = "Please select Channel!";--}}
-                {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--        }--}}
-                {{--        if(!service_description){--}}
-                {{--            nature_flag = false;--}}
-                {{--            var error = "Please select Description!";--}}
-                {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--        }--}}
-                {{--        if(nature_flag){--}}
-                {{--            $('#AddNewRequest').attr('disabled',true);--}}
-                {{--            $.ajax({--}}
-                {{--                url: '{!! route('admin.crm.request.add') !!}',--}}
-                {{--                method: 'POST',--}}
-                {{--                data: {--}}
-                {{--                    '_token': '{{ csrf_token() }}',--}}
-                {{--                    'shipment_id': $('#requested_shipment_id').val(),--}}
-                {{--                    'case_nature_id' : case_nature_id,--}}
-                {{--                    'complaint_id' : case_nature_complaint_id,--}}
-                {{--                    'channel_id': case_nature_channel_id,--}}
-                {{--                    'description' : service_description--}}
-                {{--                }--}}
-                {{--            })--}}
-                {{--                .done(function(data) {--}}
-                {{--                    if (data.status) {--}}
-                {{--                        if(data.flag){--}}
-                {{--                            var html = '';--}}
-
-                {{--                            $.each(data.already_existed_shipments, function(index, tracking_number) {--}}
-                {{--                                html += tracking_number + '<br/>';--}}
-                {{--                            });--}}
-
-                {{--                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';--}}
-
-                {{--                            content = document.createElement('div');--}}
-                {{--                            content.innerHTML = html;--}}
-
-                {{--                            swal({--}}
-                {{--                                title: 'Request / Complaint Already Lodged!',--}}
-                {{--                                content: content,--}}
-                {{--                                icon: 'warning',--}}
-                {{--                                buttons: {--}}
-                {{--                                    cancel: {--}}
-                {{--                                        text: 'Close',--}}
-                {{--                                        value: null,--}}
-                {{--                                        visible: true,--}}
-                {{--                                        closeModal: true,--}}
-                {{--                                    },--}}
-                {{--                                },--}}
-                {{--                                closeOnClickOutside: false,--}}
-                {{--                                closeOnEsc: false,--}}
-                {{--                                dangerMode: true--}}
-                {{--                            });--}}
-                {{--                        }else{--}}
-                {{--                            toastr.success(data.success, 'Success!', {--}}
-                {{--                                positionClass: 'toast-bottom-center',--}}
-                {{--                                containerId: 'toast-bottom-center'--}}
-                {{--                            });--}}
-                {{--                        }--}}
-                {{--                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                {{--                    }--}}
-                {{--                    else {--}}
-                {{--                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--                    }--}}
-
-
-                {{--                    $('#AddRequestModal').modal('hide');--}}
-                {{--                    $('#AddNewRequest').attr('disabled',false);--}}
-                {{--                });--}}
-                {{--        }--}}
-                {{--    }else if(case_nature_id == 3) {--}}
-                {{--        var feedback_flag = true;--}}
-                {{--        var feedback_channel = $('#feedback_channel_request').val();--}}
-                {{--        var feedback_description = $('#feedback_description_request').val();--}}
-                {{--        if (!feedback_description) {--}}
-                {{--            feedback_flag = false;--}}
-                {{--            var error = "Please select Description!";--}}
-                {{--            toastr.error(error, 'Error!', {--}}
-                {{--                positionClass: 'toast-top-center',--}}
-                {{--                containerId: 'toast-top-center'--}}
-                {{--            });--}}
-                {{--        }--}}
-                {{--        if (!feedback_channel) {--}}
-                {{--            feedback_flag = false;--}}
-                {{--            var error = "Please select Channel!";--}}
-                {{--            toastr.error(error, 'Error!', {--}}
-                {{--                positionClass: 'toast-top-center',--}}
-                {{--                containerId: 'toast-top-center'--}}
-                {{--            });--}}
-                {{--        }--}}
-                {{--        if (feedback_flag) {--}}
-                {{--            $('#AddNewRequest').attr('disabled',true);--}}
-                {{--            $.ajax({--}}
-                {{--                url: '{!! route('admin.crm.feedback.add') !!}',--}}
-                {{--                method: 'POST',--}}
-                {{--                data: {--}}
-                {{--                    '_token': '{{ csrf_token() }}',--}}
-                {{--                    'channel_id': $('#feedback_channel_request').val(),--}}
-                {{--                    'shipment_id': $('#requested_shipment_id').val(),--}}
-                {{--                    'description': feedback_description--}}
-                {{--                }--}}
-                {{--            })--}}
-                {{--                .done(function (data) {--}}
-                {{--                    if (data.status) {--}}
-                {{--                        if(data.flag){--}}
-                {{--                            var html = '';--}}
-
-                {{--                            $.each(data.already_existed_shipments, function(index, tracking_number) {--}}
-                {{--                                html += tracking_number + '<br/>';--}}
-                {{--                            });--}}
-
-                {{--                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';--}}
-
-                {{--                            content = document.createElement('div');--}}
-                {{--                            content.innerHTML = html;--}}
-
-                {{--                            swal({--}}
-                {{--                                title: 'Request / Complaint Already Lodged!',--}}
-                {{--                                content: content,--}}
-                {{--                                icon: 'warning',--}}
-                {{--                                buttons: {--}}
-                {{--                                    cancel: {--}}
-                {{--                                        text: 'Close',--}}
-                {{--                                        value: null,--}}
-                {{--                                        visible: true,--}}
-                {{--                                        closeModal: true,--}}
-                {{--                                    },--}}
-                {{--                                },--}}
-                {{--                                closeOnClickOutside: false,--}}
-                {{--                                closeOnEsc: false,--}}
-                {{--                                dangerMode: true--}}
-                {{--                            });--}}
-                {{--                        }else{--}}
-                {{--                            toastr.success(data.success, 'Success!', {--}}
-                {{--                                positionClass: 'toast-bottom-center',--}}
-                {{--                                containerId: 'toast-bottom-center'--}}
-                {{--                            });--}}
-                {{--                        }--}}
-                {{--                    } else {--}}
-                {{--                        toastr.error(data.error, 'Error!', {--}}
-                {{--                            positionClass: 'toast-top-center',--}}
-                {{--                            containerId: 'toast-top-center'--}}
-                {{--                        });--}}
-                {{--                    }--}}
-
-                {{--                    $('#AddRequestModal').modal('hide');--}}
-                {{--                    $('#AddNewRequest').attr('disabled',false);--}}
-                {{--                });--}}
-                {{--        }--}}
-                {{--    }--}}
-                {{--    else if(case_nature_id === 4){--}}
-                {{--        var nature_flag = true;--}}
-                {{--        var case_nature_claim_id = $('#case_nature_claim').val();--}}
-                {{--        var case_nature_channel_id = $('#claim_channel').val();--}}
-                {{--        var product_cost = $('#claim_product_cost').val();--}}
-                {{--        var check_product_picture = $('#product_picture').val();--}}
-                {{--        var check_invoice_picture = $('#invoice_picture').val();--}}
-                {{--        $('#shipment_ids').val($('#requested_shipment_id').val());--}}
-                {{--        $('#case_nature_id').val(case_nature_id);--}}
-                {{--        $('#channel_id').val(case_nature_channel_id);--}}
-                {{--        $('#complaint_id').val(case_nature_claim_id);--}}
-                {{--        var formData = new FormData($('#add_request_form')[0]);--}}
-                {{--        if(!case_nature_claim_id){--}}
-                {{--            nature_flag = false;--}}
-                {{--            var error = "Please select Claim type!";--}}
-                {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--        }--}}
-                {{--        if(!case_nature_channel_id){--}}
-                {{--            nature_flag = false;--}}
-                {{--            var error = "Please select Channel!";--}}
-                {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--        }--}}
-                {{--        if(case_nature_claim_id !== "26"){--}}
-                {{--            if(!check_product_picture){--}}
-                {{--                nature_flag = false;--}}
-                {{--                var error = "Please attach Product Picture!";--}}
-                {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--            }--}}
-                {{--            if(!product_cost){--}}
-                {{--                nature_flag = false;--}}
-                {{--                var error = "Please enter Product Cost!";--}}
-                {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--            }--}}
-                {{--            if(!check_invoice_picture){--}}
-                {{--                nature_flag = false;--}}
-                {{--                var error = "Please attach Invoice Picture!";--}}
-                {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--            }--}}
-                {{--        }--}}
-                {{--        if(nature_flag){--}}
-                {{--            $('#AddNewRequest').attr('disabled',true);--}}
-                {{--            $.ajax({--}}
-                {{--                url: '{!! route('admin.crm.request.add') !!}',--}}
-                {{--                method: 'POST',--}}
-                {{--                enctype: 'multipart/form-data',--}}
-                {{--                data: formData,--}}
-                {{--                dataType: 'json',--}}
-                {{--                processData: false,--}}
-                {{--                contentType: false,--}}
-                {{--            })--}}
-                {{--                .done(function(data) {--}}
-                {{--                    if (data.status) {--}}
-                {{--                        if(data.flag){--}}
-                {{--                            var html = '';--}}
-
-                {{--                            $.each(data.already_existed_shipments, function(index, tracking_number) {--}}
-                {{--                                html += tracking_number + '<br/>';--}}
-
-                {{--                            });--}}
-
-                {{--                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';--}}
-
-                {{--                            content = document.createElement('div');--}}
-                {{--                            content.innerHTML = html;--}}
-
-                {{--                            swal({--}}
-                {{--                                title: 'Request / Complaint Already Lodged!',--}}
-                {{--                                content: content,--}}
-                {{--                                icon: 'warning',--}}
-                {{--                                buttons: {--}}
-                {{--                                    cancel: {--}}
-                {{--                                        text: 'Close',--}}
-                {{--                                        value: null,--}}
-                {{--                                        visible: true,--}}
-                {{--                                        closeModal: true,--}}
-                {{--                                    },--}}
-                {{--                                },--}}
-                {{--                                closeOnClickOutside: false,--}}
-                {{--                                closeOnEsc: false,--}}
-                {{--                                dangerMode: true--}}
-                {{--                            });--}}
-                {{--                        }else{--}}
-                {{--                            toastr.success(data.success, 'Success!', {--}}
-                {{--                                positionClass: 'toast-bottom-center',--}}
-                {{--                                containerId: 'toast-bottom-center'--}}
-                {{--                            });--}}
-                {{--                        }--}}
-                {{--                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                {{--                    }--}}
-                {{--                    else {--}}
-                {{--                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--                    }--}}
-
-                {{--                    $('#AddRequestModal').modal('hide');--}}
-                {{--                    $('#AddNewRequest').attr('disabled',false);--}}
-                {{--                });--}}
-                {{--        }--}}
-
-                {{--    }--}}
-                {{--});--}}
-
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
             $('#add_request_form')[0].reset();
             $('#case_nature_complaints').val('').trigger('change');

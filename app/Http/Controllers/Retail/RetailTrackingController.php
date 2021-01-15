@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Retail;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\http\Models\Admin\Retail\RetailFranchise;
 use App\http\Models\Admin\Retail\RetailShipment;
@@ -23,10 +25,13 @@ use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Shipper\User;
 use App\http\Models\SubstituteUserShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Datatables;
 
 class RetailTrackingController extends Controller
 {
@@ -528,21 +533,25 @@ class RetailTrackingController extends Controller
                     $details['pickup']['address'] = $pickup->pickup_address;
 
                     $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
-                    $retail_user_id = $retail_shipment->retail_user_id;
-                    $retail_user = RetailUser::find($retail_user_id);
-                    if($retail_user->category == 1){
-                        $franchise = RetailFranchise::find($retail_user->category_id);
-                        $details['retail_user']['name'] = $franchise->name;
-                        $details['retail_user']['code'] = $franchise->code;
-
+                    if($retail_shipment){
+                        $retail_user_id = $retail_shipment->retail_user_id;
+                        $retail_user = RetailUser::find($retail_user_id);
+                        if($retail_user->category == 1){
+                            $franchise = RetailFranchise::find($retail_user->category_id);
+                            $details['retail_user']['name'] = $franchise->name;
+                            $details['retail_user']['code'] = $franchise->code;
+                        }
+                        else{
+                            $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                            $details['retail_user']['name'] = $trax_center->name;
+                            $details['retail_user']['code'] = $trax_center->code;
+                        }
                     }
                     else{
-                        $trax_center  = RetailTraxCenter::find($retail_user->category_id);
-                        $details['retail_user']['name'] = $trax_center->name;
-                        $details['retail_user']['code'] = $trax_center->code;
+                        $details['retail_user']['name'] = null;
+                        $details['retail_user']['code'] = null;
+                        $tracking['invalid'][] = $tracking_number;
                     }
-
-
 
                     $details['consignee']['name'] = $shipment->consignee_name;
                     $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
@@ -552,6 +561,7 @@ class RetailTrackingController extends Controller
                     $details['consignee']['email'] = $shipment->consignee_email;
 
                     foreach ($shipment->items as $item) {
+
                         $item_details = array();
 
                         $item_details['product_type'] = $item->product->product_name;
@@ -560,6 +570,7 @@ class RetailTrackingController extends Controller
 
                         $details['order_information']['items'][] = $item_details;
                     }
+
 
                     $details['order_information']['order_id'] = $shipment->order_id;
                     $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
@@ -605,59 +616,63 @@ class RetailTrackingController extends Controller
                             }
                         }
 
-                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if ($journey->shipper_status_id == 3) {
-                                $bag = Bag::where('id', $journey->reference_1_id);
-                                if($bag->exists()){
-                                    $bag = $bag->first();
-                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
-                                    if($master_cargo_bags->exists()){
-                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
-                                    }
-                                    else{
-                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
-                                    }
-                                }
-                                else{
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
-                                }
-                            }
-                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
-                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                            }
-                            else {
-                                if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
-                                        $return_note = ReturnNote::find($journey->reference_1_id);
-                                        if($return_note && $return_note->actual_date != null){
-                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
-                                        }
-                                    }
-                                }
-                                else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                                }
-                                else{
-                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
-                                }
+//                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
+//                            if ($journey->shipper_status_id == 3) {
+//                                $bag = Bag::where('id', $journey->reference_1_id);
+//                                if($bag->exists()){
+//                                    $bag = $bag->first();
+//                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+//                                    if($master_cargo_bags->exists()){
+//                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+//                                    }
+//                                    else{
+//                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+//                                    }
+//                                }
+//                                else{
+//                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+//                                }
+//                            }
+//                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
+//                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+//                            }
+//                            else {
+//                                if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
+////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+//                                    $journey_details['status'] .= $journey->reference_1_id;
+//                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+//                                        $return_note = ReturnNote::find($journey->reference_1_id);
+//                                        if($return_note && $return_note->actual_date != null){
+//                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+//                                        }
+//                                    }
+//                                }
+//                                else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
+////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+////                                    $journey_details['status'] .= $journey->reference_1_id;
+//                                }
+//                                else{
+//                                    //$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+//                                    $journey_details['status'] .= $journey->reference_1_id;
+//                                }
+//
+//                                if ($journey->reference_2_id) {
+//                                    if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+//                                        $rider = Rider::find($journey->reference_2_id);
+//                                        if($rider){
+////                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+//
+//                                        }
+//
+//                                    }
+//                                    else {
+//                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+//                                    }
+//                                }
+//                            }
 
-                                if ($journey->reference_2_id) {
-                                    if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
-                                        $rider = Rider::find($journey->reference_2_id);
-                                        if($rider){
-                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-                                        }
-
-                                    }
-                                    else {
-                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-                                    }
-                                }
-                            }
-
-                            $journey_details['status'] .= ')';
-                        }
+                            //$journey_details['status'] .= ')';
+                        //}
                         $user = '';
                         if($journey->admin_id){
                             $user = $journey->admin->name;
@@ -687,7 +702,7 @@ class RetailTrackingController extends Controller
                                 $journey_details['status'] = $journey->status->name;
                             }
                             else{
-                                $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                                $journey_details['status'] = $journey->status->name;
                             }
                             $journey_details['user'] = $journey->admin->name;
                             $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
@@ -928,4 +943,5 @@ class RetailTrackingController extends Controller
 
         return $tracking;
     }
+
 }
