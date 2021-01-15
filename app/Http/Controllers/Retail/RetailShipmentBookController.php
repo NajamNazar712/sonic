@@ -993,7 +993,7 @@ class RetailShipmentBookController extends Controller
                                 </tr>
                                 <tr>
                                 <td class="color primary border twice-left"><strong>Shipper</strong></td>
-                                <td class="border">'. $shipment->user->name .'</td>
+                                <td class="border">'. $shipment->retail->shipper_name .'</td>
                                 <td class="color primary border "><strong>Booking Date</strong></td>
                                 <td class="border">'. $shipment->created_at .'</td>
 </tr>

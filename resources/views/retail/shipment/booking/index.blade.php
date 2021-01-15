@@ -118,7 +118,7 @@
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
-                                                    <option value="1">Yes</option>
+{{--                                                    <option value="1">Yes</option>--}}
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
@@ -479,7 +479,7 @@
                 'max': 10000000
             });
 
-            $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
+            $('#insurance_offered').select2({
                 width:'100%',
                 placeholder:"Insurance Offered*",
                 allowClear:true
