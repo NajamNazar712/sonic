@@ -157,7 +157,7 @@
                 buttons: [
                     {
                         text: 'Deposit PNCC',
-                        className: 'btn btn-primary delivered',
+                        className: 'btn btn-primary deposit',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
@@ -236,7 +236,7 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.cash_collect_all').enable();
+                                        table.button('.deposit').enable();
                                     }
                                 }
                             });
@@ -263,7 +263,7 @@
                                     }
 
                                     if (selected_rows.length == 0) {
-                                        table.button('.cash_collect_all').disable();
+                                        table.button('.deposit').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
@@ -372,10 +372,10 @@
                     }
 
                     if (selected_rows.length > 0) {
-                        table.button('.delivered').enable();
+                        table.button('.deposit').enable();
                     }
                     else {
-                        table.button('.delivered').disable();
+                        table.button('.deposit').disable();
                         hub_ids.splice(index, 1);
                     }
                 }else{
@@ -403,10 +403,10 @@
                     }
 
                     if (selected_rows.length > 0) {
-                        table.button('.cash_collect_all').enable();
+                        table.button('.deposit').enable();
                     }
                     else {
-                        table.button('.cash_collect_all').disable();
+                        table.button('.deposit').disable();
                         hub_ids.splice(index, 1);
                     }
                 }else{
@@ -421,11 +421,11 @@
                         }
 
                         if (selected_rows.length > 0) {
-                            table.button('.cash_collect_all').enable();
+                            table.button('.deposit').enable();
                         }
                         else {
                             hub_ids.splice(index, 1);
-                            table.button('.cash_collect_all').disable();
+                            table.button('.deposit').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";
