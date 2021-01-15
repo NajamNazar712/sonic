@@ -300,6 +300,38 @@
 
             });
 
+            $('#datatable tbody').on('click','tr td.performa_button button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                print(id);
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('retail.cash_deposit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
             $('#search_filter_btn').on('click', function(){
                 table.draw(true);
             })
