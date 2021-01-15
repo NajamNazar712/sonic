@@ -598,8 +598,9 @@ class RiderManagementController extends Controller
         }
     }
 
-    public function rider_request_index()
+    public function rider_request_index(Request $request)
     {
+//        dd($request);
         $rider_type = RiderType::all();
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
@@ -609,8 +610,13 @@ class RiderManagementController extends Controller
 
     public function rider_request_list(Request $request)
     {
-        $rider_request = RiderRequest::select('id', 'name', 'cnic', 'phone_no', 'pin', 'created_at', 'updated_at', 'status')
-            ->where('status', 0);
+        $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
+            ->select('rider_requests.id', 'rider_requests.name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status')
+            ->where('rider_requests.status', 0);
+
+        if (session('role_id') != 1) {
+            $rider_request = $rider_request->whereIn('c.hub_id', session('hubs'));
+        }
         return Datatables::of($rider_request)
             ->editColumn('status', function ($rider_request) {
                 return ($rider_request->status == 0) ? 'Pending' : 'Processed';

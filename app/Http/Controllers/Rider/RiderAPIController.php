@@ -1872,7 +1872,8 @@ class RiderAPIController extends Controller {
                 'name' => ['required'],
                 'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-                'pin' => ['required', 'integer', 'digits:4']
+                'pin' => ['required', 'integer', 'digits:4'],
+                'city_id' => ['required', 'integer']
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -1923,6 +1924,7 @@ class RiderAPIController extends Controller {
                             $rider_request->cnic = $request->cnic;
                             $rider_request->phone_no = $request->phone_number;
                             $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
                             $rider_request->save();
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
