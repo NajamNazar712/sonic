@@ -199,7 +199,7 @@
                                                     if(data.notes != null){
                                                         $.each(data.notes,function (index,id) {
                                                             $msg += '<br>';
-                                                            $msg += 'Delivery Note # '+id;
+                                                            $msg += 'PNCC # '+id;
                                                         });
                                                     }
                                                     toastr.error($msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
