@@ -933,6 +933,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\Retail\RetailPendingCashCollection@shipments_delivered')->name('shipments.delivered');
                 Route::post('collect', 'Admins\Retail\RetailPendingCashCollection@pending_cash_collect')->name('collect');
                 Route::post('all','Admins\Retail\RetailPendingCashCollection@pending_cash_collect_all')->name('all');
+
+                Route::post('deposit/pncc','Admins\Retail\RetailCompletedDeliveries@completed_deliveries_selected_pncc')->name('deposit.pncc');
+                Route::get('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_view')->name('sdn.create');
+                Route::post('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_submit')->name('sdn.create.submit');
             });
         });
         Route::prefix('sdn')->name('sdn.')->group(function (){
