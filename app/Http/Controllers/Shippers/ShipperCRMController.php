@@ -189,7 +189,6 @@ class ShipperCRMController extends Controller
     }
 
     public function add_request(Request $request){
-
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
@@ -325,14 +324,17 @@ class ShipperCRMController extends Controller
                         }else{
 
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                if($nature_id == 4){
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                if($nature_id == 4) {
+                                    if ($complaint_id == 15 || $complaint_id == 16) {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                    } else {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+                                    }
                                 }
                                 else{
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                    }
                                 }
-
-                            }
                             else{
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 12, 13])){
@@ -354,11 +356,13 @@ class ShipperCRMController extends Controller
                 return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
             }
-            elseif (!empty($shipment_id)){
+            else if (!empty($shipment_id)){
+//                dd($shipment_id);
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     if($is_shipment){
+//                        dd($is_shipment);
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 12, 13])){
@@ -366,6 +370,7 @@ class ShipperCRMController extends Controller
                                     $flag = true;
                                 }
                                 else{
+                                    dd('hello');
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
                             }

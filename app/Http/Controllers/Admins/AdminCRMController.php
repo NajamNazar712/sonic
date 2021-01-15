@@ -172,7 +172,12 @@ class AdminCRMController extends Controller
                             }
                             else{
                                 if ($nature_id == 4) {
+                                    if ($complaint_id == 15 || $complaint_id == 16) {
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                    }
+                                    else {
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    }
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -2429,6 +2434,37 @@ class AdminCRMController extends Controller
 
     public function invoice_image($id){
         $url = Storage::url('crm_claims/claim_invoice_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+
+    public function damage_product_image($id){
+        $url = Storage::url('crm_claims/claim_damage_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function product_packaging_image($id){
+        $url = Storage::url('crm_claims/claim_product_packaging_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function actual_product_image($id){
+        $url = Storage::url('crm_claims/claim_actual_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function missing_product_image($id){
+        $url = Storage::url('crm_claims/claim_missing_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function product_packaging_image_for_content_short($id){
+        $url = Storage::url('crm_claims/claim_product_content_short_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function actual_product_image_for_content_short($id){
+        $url = Storage::url('crm_claims/claim_actual_content_short_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }

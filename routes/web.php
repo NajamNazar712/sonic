@@ -2370,6 +2370,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('claim')->name('claim.')->group(function(){
             Route::get('product_image/{id}', 'Admins\AdminCRMController@product_image')->name('product_image');
             Route::get('invoice_image/{id}', 'Admins\AdminCRMController@invoice_image')->name('invoice_image');
+            Route::get('damage_product_image/{id}', 'Admins\AdminCRMController@damage_product_image')->name('damage_product_image');
+            Route::get('product_packaging_image/{id}', 'Admins\AdminCRMController@product_packaging_image')->name('product_packaging_image');
+            Route::get('actual_product_image/{id}', 'Admins\AdminCRMController@actual_product_image')->name('actual_product_image');
+            Route::get('missing_product_image/{id}', 'Admins\AdminCRMController@missing_product_image')->name('missing_product_image');
+            Route::get('product_packaging_image_for_content_short/{id}', 'Admins\AdminCRMController@product_packaging_image_for_content_short')->name('product_packaging_image_for_content_short');
+            Route::get('actual_product_image_for_content_short/{id}', 'Admins\AdminCRMController@actual_product_image_for_content_short')->name('actual_product_image_for_content_short');
         });
         Route::prefix('consignee_info')->name('consignee_info.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@consignee_info_index')->name('index');

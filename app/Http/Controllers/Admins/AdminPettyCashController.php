@@ -1609,22 +1609,17 @@ class AdminPettyCashController extends Controller
                             $flag = TRUE;
                         }
                     }
-                    else if ($petty->station_approved_by != null || $petty->operation_approved_by != null){
-                        return response()->json(['status' => 1, 'error' => 'Already Approved!']);
-                    }
                     else if ($petty->operation_approved_by != null && $petty->finance_approved_by == null){
-                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
-                    }
-                    else if ($petty->finance_received_statement_by != null && $petty->finance_approved_by == null){
-                        return response()->json(['status' => 1, 'error' => 'Previous status is not updated yet!']);
+                        console.log('hello');
                     }
                 }
+
 
                 if ($flag) {
                     return response()->json(['status' => 0, 'success' => 'Approved!']);
                 }
                 else {
-                    return response()->json(['status' => 1, 'error' => 'Not approved']);
+                    return response()->json(['status' => 1, 'error' => 'Already approved']);
                 }
             }
         }
