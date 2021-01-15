@@ -6951,10 +6951,6 @@ class AdminReportsController extends Controller
 
     public function returned_shipments_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-//            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-//            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -6986,7 +6982,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
 //            ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
             ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
-            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55])
+            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -7001,6 +6997,9 @@ class AdminReportsController extends Controller
                 $shipments = $shipments->where('ras.admin_id', Auth::id());
             }
         }
+//        if(count($shipments) <2) {
+//
+//        }
 
         $datatable = Datatables::of($shipments)
             ->setRowAttr([
