@@ -2032,6 +2032,30 @@ class RiderAPIController extends Controller {
 
     }
 
+    public function cities(Request $request) {
+
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->get();
+
+            $details = array();
+
+            foreach ($cities as $city) {
+                $detail = array();
+
+                $detail['id'] = $city->id;
+                $detail['name'] = $city->name;
+
+                $details[] = $detail;
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+        }
+        else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
