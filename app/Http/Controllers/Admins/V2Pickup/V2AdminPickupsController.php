@@ -905,6 +905,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                 }
+                $this->retail_pickup_arrival($pickup_request_id);
             }
         }
         if(!empty($pickup_note_ids)){
@@ -1458,6 +1459,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                 }
+                $this->retail_pickup_arrival($pickup_request_id);
             }
         }
         if(!empty($pickup_note_ids)){
@@ -2521,5 +2523,14 @@ class V2AdminPickupsController extends Controller
             $retail_pickup_note->status = 2;
             $retail_pickup_note->save();
         }
-    }
+   }
+   public function retail_pickup_arrival($pickup_request_id){
+        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+        if($retail_pickup_note->exists()){
+            $retail_pickup_note = $retail_pickup_note->first();
+            $retail_pickup_note->status = 3;
+            $retail_pickup_note->save();
+        }
+   }
+
 }

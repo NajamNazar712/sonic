@@ -151,7 +151,7 @@ class RetailCashCollectionController extends Controller
         foreach ($note_ids as $note_id) {
             $note_details = RetailPickupNote::where('id', $note_id)->where('status', 2)->first();
             if ($note_details) {
-                $note_details->pncc_status = 3;
+                $note_details->status = 4;
                 $note_details->cash_collected_by = Auth::id();
                 $note_details->cash_collected_at = Carbon::now();
                 $note_details->save();
