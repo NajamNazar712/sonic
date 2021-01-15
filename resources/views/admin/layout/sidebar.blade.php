@@ -13,7 +13,7 @@
                         @if (session('role_id') == 1 || in_array(364, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.shipment.receiving_sheet.index')}}">Receiving Sheets</a></li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([5, 11, 15, 242], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([5, 11, 15, 242,428], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                                                     data-i18n="nav.dash.main">Accounts</span></a>
                                 <ul class="menu-content">
@@ -30,6 +30,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.accounts.merged_account.index')}}">Merged</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(428, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.retail.accounts.index')}}">Retail Accounts</a></li>
                                     @endif
 
                                 </ul>

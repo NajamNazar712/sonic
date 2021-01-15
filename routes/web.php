@@ -2557,7 +2557,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('users')->name('users.')->group(function(){
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
         });
+
+        Route::prefix('accounts')->name('accounts.')->group(function () {
+            Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
+            Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
+//            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@bank_info')->name('bank_info');
+        });
     });
+
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {
@@ -2581,8 +2588,11 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
     });
-
-    Route::prefix('tracking')->name('tracking.')->group(function () {
+Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
+        Route::get('', 'Retail\RatailCashDepositController@index')->name('index');
+        Route::post('/list', 'Retail\RatailCashDepositController@list')->name('list');
+    });
+ Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
         Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
         Route::post('track_v2', 'Retail\RetailTrackingController@track_v2')->name('track_v2');
@@ -2599,5 +2609,5 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
 
     });
-});
+});});
 

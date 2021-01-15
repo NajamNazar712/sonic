@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class RetailShipment extends Model
 {
-
     public function product() {
-        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailProduct', 'product_type_id', 'id');
+        return $this->belongsTo('App\Http\Models\Product', 'product_type_id', 'id');
+    }
+    public function payment_mode() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailPaymentMode', 'payment_mode_id', 'id');
     }
 }

@@ -27,7 +27,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Franchise Code</th>
-                        <th class="border-primary border-darken-1">Location Lat/Long</th>
+                        <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -246,7 +246,6 @@
                             head.push('Updated By');
                             head.push('Status');
                             head.push('Franchise Code');
-                            head.push('Location Lat/Long');
 
 
                             $.each(result.data, function(index, values) {
@@ -260,9 +259,9 @@
                                 row.push(values.default_hub);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
-                                row.push(values.location);
                                 body.push(row);
                             });
                         },
@@ -274,8 +273,8 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // scrollX: true, scrollY: '500px',
-                autoWidth:true,
+                scrollX: true, scrollY: '500px',
+                // autoWidth: false,
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
@@ -289,7 +288,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Activation Report',
+                        title: 'Franchise',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -317,9 +316,9 @@
                     { data:'updated_at' ,name: 'retail_franchises.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_franchises.status', class: 'align-middle text-center status'},
-                    { data:'code' ,name: 'retail_franchises.id', class: 'align-middle text-center code'},
-                    { data:'location' ,name: 'location', class: 'align-middle text-center location'},
-                    { data:'action' ,name: 'action', class: 'align-middle text-center action'},
+                    { data:'code' ,name: 'retail_franchises.code', class: 'align-middle text-center code'},
+                    { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
+                    { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

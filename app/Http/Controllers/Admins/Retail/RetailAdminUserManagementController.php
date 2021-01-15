@@ -80,8 +80,10 @@ class RetailAdminUserManagementController extends Controller
                 }
             })
             ->addColumn('location', function ($data){
-                if($data->location_latitude != null && $data->location_longitude != null){
-                    return $data->location_latitude . ', ' . $data->location_longitude;
+                $location = '<div class="text-center">';
+                if($data->latitude != null && $data->longitude != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->location_latitude . ',' . $data->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
                 }
                 else{
                     return '-';
@@ -111,6 +113,16 @@ class RetailAdminUserManagementController extends Controller
             $franchise->status = 1;
             $franchise->updated_by = Auth::id();
             $franchise->save();
+
+            $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 0);
+            if($franchise_users->exists()){
+                $franchise_users = $franchise_users->get();
+                foreach ($franchise_users as $franchise_user){
+                    $franchise_user->status = 1;
+                    $franchise_user->updated_by = Auth::id();
+                    $franchise_user->save();
+                }
+            }
 
             return response()->json(['status' => 1, 'success' => 'Franchise Enabled Successfully']);
         }
@@ -193,15 +205,15 @@ class RetailAdminUserManagementController extends Controller
             $franchise->location_latitude = $request->lat;
             $franchise->location_longitude = $request->long;
             $franchise->updated_by = Auth::id();
-            $franchise->status = 1;
             $franchise->save();
 
+            $user = RetailUser::find($franchise->user_id);
+            if($user){
+            $user->name = $request->name;
             if($request->password != null){
-                $user = RetailUser::find($franchise->user_id);
-                if($user){
                     $user->password = Hash::make($request->password);
-                    $user->save();
-                }
+            }
+            $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($franchise->pickup_address_id);
@@ -243,8 +255,10 @@ class RetailAdminUserManagementController extends Controller
                 }
             })
             ->addColumn('location', function ($data){
-                if($data->location_latitude != null && $data->location_longitude != null){
-                    return $data->location_latitude . ', ' . $data->location_longitude;
+                $location = '<div class="text-center">';
+                if($data->latitude != null && $data->longitude != null){
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->location_latitude . ',' . $data->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
                 }
                 else{
                     return '-';
@@ -274,6 +288,15 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->status = 1;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
+            $trax_center_users = RetailUser::where('category', 2)->where('category_id', $trax_center->id)->where('status', 0);
+            if($trax_center_users->exists()){
+                $trax_center_users = $trax_center_users->get();
+                foreach ($trax_center_users as $trax_center_user){
+                    $trax_center_user->status = 1;
+                    $trax_center_user->updated_by = Auth::id();
+                    $trax_center_user->save();
+                }
+            }
 
             return response()->json(['status' => 1, 'success' => 'Trax Center Enabled Successfully']);
         }
@@ -355,14 +378,15 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->location_latitude = $request->lat;
             $trax_center->location_longitude = $request->long;
             $trax_center->updated_by = Auth::id();
-            $trax_center->status = 1;
             $trax_center->save();
-            if($request->password != null){
-                $user = RetailUser::find($trax_center->user_id);
-                if($user){
+
+            $user = RetailUser::find($trax_center->user_id);
+            if($user){
+                $user->name = $request->name;
+                if($request->password != null){
                     $user->password = Hash::make($request->password);
-                    $user->save();
                 }
+                $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($trax_center->pickup_address_id);
