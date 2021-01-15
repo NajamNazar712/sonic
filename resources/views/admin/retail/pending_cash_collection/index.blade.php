@@ -41,7 +41,7 @@
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
                             <th class="border-primary border-darken-1">PNCC Amount</th>
-                            <th class="border-primary border-darken-1">Action</th>
+{{--                            <th class="border-primary border-darken-1">Action</th>--}}
                         </tr>
                         </thead>
                     </table>
@@ -169,28 +169,29 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-                                        $('#delivery_note_ids').val(selected_rows);
-                                        var delivery_note_ids = $('#delivery_note_ids').val();
-                                        // console.log(delivery_note_ids)
-                                        if(delivery_note_ids != ''){
+                                        // $('#delivery_note_ids').val(selected_rows);
+                                        // var delivery_note_ids = $('#delivery_note_ids').val();
+                                        // // console.log(delivery_note_ids)
+                                        // if(delivery_note_ids != ''){
                                             $.ajax({
-                                                url:'{!! route('admin.delivery.cash_collection.retail.pending.all') !!}',
+                                                url:'{!! route('admin.delivery.cash_collection.retail.pending.collect_all') !!}',
                                                 method:'POST',
                                                 data:{
-                                                    'delivery_note_ids':delivery_note_ids,
+                                                    // 'pickup_note_ids':delivery_note_ids,
+                                                    'pickup_note_ids':selected_rows,
                                                     '_token':'{{csrf_token()}}'
                                                 }
                                             }).done(function (data) {
                                                 table.button(0).disable();
                                                 if(data.status == 1){
-                                                    $('#delivery_note_ids').val('');
+                                                    // $('#delivery_note_ids').val('');
                                                     selected_rows = [];
                                                     hub_ids = [];
                                                     table.draw();
                                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                                 }else{
-                                                    $('#delivery_note_ids').val('');
+                                                    // $('#delivery_note_ids').val('');
                                                     table.draw();
                                                     hub_ids = [];
                                                     selected_rows = [];
@@ -207,7 +208,7 @@
                                             });
                                         }
 
-                                    }
+                                    //}
                                 });
 
                             }else{
@@ -325,7 +326,7 @@
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
                     { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time text-center'},
                     { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
-                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+                    // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -414,56 +415,56 @@
                     }
                 }
             });
-            $('body').on('click','.cash_collect',function () {
-                var rowid = $(this).parents('tr').attr('id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to collect cash!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url:'{!! route('admin.delivery.cash_collection.retail.pending.collect') !!}',
-                            method:'POST',
-                            data:{
-                                'delivery_note_id':rowid,
-                                '_token':'{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            if(data.status === 1){
-                                table.draw();
-                                selected_rows = [];
-                                hub_ids = [];
-                                if(selected_rows.length == 0){
-                                    table.button('.cash_collect_all').disable();
-                                }
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            {{--$('body').on('click','.cash_collect',function () {--}}
+            {{--    var rowid = $(this).parents('tr').attr('id');--}}
+            {{--    swal({--}}
+            {{--        title: 'Are You Sure?',--}}
+            {{--        text: 'Select Yes to collect cash!',--}}
+            {{--        icon: 'warning',--}}
+            {{--        buttons: {--}}
+            {{--            cancel: {--}}
+            {{--                text: 'No',--}}
+            {{--                value: null,--}}
+            {{--                visible: true,--}}
+            {{--                closeModal: true,--}}
+            {{--            },--}}
+            {{--            confirm: {--}}
+            {{--                text: 'Yes',--}}
+            {{--                value: true,--}}
+            {{--                visible: true,--}}
+            {{--                closeModal: true--}}
+            {{--            }--}}
+            {{--        },--}}
+            {{--        closeOnClickOutside: false,--}}
+            {{--        closeOnEsc: false,--}}
+            {{--        dangerMode: true--}}
+            {{--    }).then(function (confirm) {--}}
+            {{--        if (confirm) {--}}
+            {{--            $.ajax({--}}
+            {{--                url:'{!! route('admin.delivery.cash_collection.retail.pending.collect_all') !!}',--}}
+            {{--                method:'POST',--}}
+            {{--                data:{--}}
+            {{--                    'pickup_note_id':rowid,--}}
+            {{--                    '_token':'{{ csrf_token() }}'--}}
+            {{--                }--}}
+            {{--            }).done(function (data) {--}}
+            {{--                if(data.status === 1){--}}
+            {{--                    table.draw();--}}
+            {{--                    selected_rows = [];--}}
+            {{--                    hub_ids = [];--}}
+            {{--                    if(selected_rows.length == 0){--}}
+            {{--                        table.button('.cash_collect_all').disable();--}}
+            {{--                    }--}}
+            {{--                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--                }else{--}}
+            {{--                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                            }
-                        });
-                    }
-                });
+            {{--                }--}}
+            {{--            });--}}
+            {{--        }--}}
+            {{--    });--}}
 
-            });
+            {{--});--}}
 
             var route = '{!! route('admin.tracking.index') !!}';
             $('#datatable tbody').on('click','tr td.count button',function () {

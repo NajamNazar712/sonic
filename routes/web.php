@@ -876,7 +876,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('shipments','Admins\Retail\RetailCashCollectionController@number_of_shipments')->name('shipments');
                     Route::post('shipments/delivered','Admins\Retail\RetailCashCollectionController@shipments_delivered')->name('shipments.delivered');
                     Route::post('collect', 'Admins\Retail\RetailCashCollectionController@pending_cash_collect')->name('collect');
-                    Route::post('all','Admins\Retail\RetailCashCollectionController@pending_cash_collect_all')->name('all');
+                    Route::post('all','Admins\Retail\RetailCashCollectionController@pending_cash_collect_all')->name('collect_all');
                 });
 
             });

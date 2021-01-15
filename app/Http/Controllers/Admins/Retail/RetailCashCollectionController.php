@@ -40,6 +40,7 @@ class RetailCashCollectionController extends Controller
             })
             ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category'])
            ->where('retail_pickup_notes.status', '=', 1)
+           ->where('retail_pickup_notes.pncc_status', '=', 0)
         ;
 
         $datatable = Datatables::of($deliveries)
@@ -121,50 +122,37 @@ class RetailCashCollectionController extends Controller
 
     }
 
-//    public function shipments_delivered(Request $request){
-//        $delivery_note_id = $request->input('delivery_note_id');
-//        $delivery_note_details = DeliveryNote::find($delivery_note_id);
-//        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','>',1)->get();
-//        $shipments = array();
-//        if($delivery_note_shipments->count() != 0){
-//            foreach ($delivery_note_shipments as $delivery_note_shipment){
-//                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
-//                $shipments[] = $shipment->tracking_number;
+
+
+//    public function pending_cash_collect(Request $request)
+//    {
+//        $delivery_note_id = $request->delivery_note_id;
+//        if ($delivery_note_id != null) {
+//            $delivery_note_details = DeliveryNote::find($delivery_note_id);
+//            if ($delivery_note_details->cash_collection_status == 0) {
+//                $delivery_note_details = DeliveryNote::where('id', $delivery_note_id)->where('cash_collection_status', 0)->first();
+//                $delivery_note_details->cash_collection_status = 1;
+//                $delivery_note_details->cash_collected_by = Auth::id();
+//                $delivery_note_details->cash_collected_at = Carbon::now();
+//                $delivery_note_details->save();
+//                return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
+//            } else {
+//                return response()->json(['status' => 0, 'error' => 'Cash is already collected!']);
 //            }
-//            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
-//        }else{
-//            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+//        } else {
+//            return response()->json(['status' => 0, 'error' => 'Delivery note not found!']);
 //        }
 //    }
 
-    public function pending_cash_collect(Request $request)
-    {
-        $delivery_note_id = $request->delivery_note_id;
-        if ($delivery_note_id != null) {
-            $delivery_note_details = DeliveryNote::find($delivery_note_id);
-            if ($delivery_note_details->cash_collection_status == 0) {
-                $delivery_note_details = DeliveryNote::where('id', $delivery_note_id)->where('cash_collection_status', 0)->first();
-                $delivery_note_details->cash_collection_status = 1;
-                $delivery_note_details->cash_collected_by = Auth::id();
-                $delivery_note_details->cash_collected_at = Carbon::now();
-                $delivery_note_details->save();
-                return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Cash is already collected!']);
-            }
-        } else {
-            return response()->json(['status' => 0, 'error' => 'Delivery note not found!']);
-        }
-    }
-
     public function pending_cash_collect_all(Request $request)
     {
-        $note_ids = explode(',', $request->delivery_note_ids);
+//        $note_ids = explode(',', $request->pickup_note_ids);
+        $note_ids =  $request->pickup_note_ids;
         $notes = array();
         foreach ($note_ids as $note_id) {
-            $note_details = DeliveryNote::where('id', $note_id)->where('cash_collection_status', 0)->first();
+            $note_details = RetailPickupNote::where('id', $note_id)->where('pncc_status', 3)->first();
             if ($note_details) {
-                $note_details->cash_collection_status = 1;
+                $note_details->pncc_status = 4;
                 $note_details->cash_collected_by = Auth::id();
                 $note_details->cash_collected_at = Carbon::now();
                 $note_details->save();
@@ -175,7 +163,7 @@ class RetailCashCollectionController extends Controller
         if (empty($notes)) {
             return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
         } else {
-            return response()->json(['status' => 0, 'error' => 'These delivery notes could not be updated!', 'notes' => $notes]);
+            return response()->json(['status' => 0, 'error' => 'These Pickup notes could not be updated!', 'notes' => $notes]);
         }
 
     }
