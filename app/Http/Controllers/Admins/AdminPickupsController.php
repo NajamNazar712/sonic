@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
@@ -169,6 +170,11 @@ class AdminPickupsController extends Controller
                               $pickup_request_assigned_shipment->save();
                           }
                       }
+                  }
+                  $retail_check = false;
+                  $retail_shipment = RetailShipment::where('shipment_id', $shipment_id);
+                  if($retail_shipment->exists()){
+                      $retail_check = true;
                   }
               }
         }
