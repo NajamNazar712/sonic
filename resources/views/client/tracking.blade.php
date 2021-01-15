@@ -900,7 +900,6 @@
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
                         var product_cost = $('#claim_product_cost').val();
-                        // var damage_product_cost = $('#damage_claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         var claim_description = $('#claim_description').val();
@@ -936,11 +935,6 @@
                                 var error = "Please enter Product Cost!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
-                            // if(!damage_product_cost) {
-                            //     nature_flag = false;
-                            //     var error = "Please enter Damage Product Cost!";
-                            //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            // }
                             if(!check_invoice_picture){
                                 nature_flag = false;
                                 var error = "Please attach Invoice Picture!";

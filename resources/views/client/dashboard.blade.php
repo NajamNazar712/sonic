@@ -1677,8 +1677,6 @@
                         else{
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
-                        var damage_product_cost = $('#damage_claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#shipment_ids').val(selected_rows);
@@ -1720,14 +1718,14 @@
                                     containerId: 'toast-top-center'
                                 });
                             }
-                                if (!damage_product_cost) {
-                                    nature_flag = false;
-                                    var error = "Please enter Damage Product Cost!";
-                                    toastr.error(error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
+                                // if (!damage_product_cost) {
+                                //     nature_flag = false;
+                                //     var error = "Please enter Damage Product Cost!";
+                                //     toastr.error(error, 'Error!', {
+                                //         positionClass: 'toast-top-center',
+                                //         containerId: 'toast-top-center'
+                                //     });
+                                // }
                             if (!check_invoice_picture) {
                                 nature_flag = false;
                                 var error = "Please attach Invoice Picture!";
@@ -1899,7 +1897,6 @@
                 $('#case_nature_claim').val('').trigger('change');
                 $('#claim_channel').val('').trigger('change');
                 $('#claim_product_cost').val('');
-                $('#damage_claim_product_cost').val('');
                 $('#request_id').val('').trigger('change');
                 $('#receiving_sheet_div').addClass('d-none');
             });
