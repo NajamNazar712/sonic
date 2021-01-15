@@ -235,7 +235,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
 			function print(id) {
@@ -277,6 +277,15 @@
                 'max': 1000000.00
             });
 			$('#claim_content_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+			$('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -763,18 +772,7 @@
 
                 if (this.value && this.value == 16)
                 {
-                    console.log('here');
                     $('#claim_content_short_div').removeClass('d-none');
-                    $('#claim_shipment_damage_div .damage_claim_product_cost').inputmask({
-                        'alias': 'decimal',
-                        'allowMinus': false,
-                        'allowPlus': false,
-                        'rightAlign': false,
-                        'digits': 2,
-                        'min': 0.00,
-                        'max': 1000000.00
-                    });
-
                 }
                 else {
                     $('#claim_content_short_div').addClass('d-none');

@@ -247,7 +247,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="claim_x_div">
+                                    <div class="col-8" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
