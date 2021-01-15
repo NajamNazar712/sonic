@@ -2588,8 +2588,9 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
-        Route::get('', 'Retail\RatailCashDepositController@index')->name('index');
-        Route::post('/list', 'Retail\RatailCashDepositController@list')->name('list');
+        Route::get('', 'Retail\RetailCashDepositController@index')->name('index');
+        Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
+        Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
     });
 
 });

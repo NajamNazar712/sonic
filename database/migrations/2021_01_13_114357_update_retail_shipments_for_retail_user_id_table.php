@@ -14,7 +14,7 @@ class UpdateRetailShipmentsForRetailUserIdTable extends Migration
     public function up()
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
-            $table->integer('retail_user_id');
+            $table->integer('retail_user_id')->index();
         });
     }
 
