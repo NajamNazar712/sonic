@@ -19,9 +19,9 @@ class UserOTPController extends Controller
                 $otp->user_id = $user_id;
                 $otp->otp = $password;
                 $otp->save();
-                if(in_array($user_id, [1358])){
-                    NotificationsController::send(114, $password, $user_id);
-                }
+
+                NotificationsController::send(114, $password, $user_id);
+
             }
         }
     }
