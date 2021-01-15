@@ -27,9 +27,6 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <input name="shipper_account_no" class="form-control number" id="shipper_account_no" placeholder="Shipper Account No" value="">
-                                    </div>
-                                    <div class="form-group">
                                         <select name="business_category" id="business_category" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment Category is required">
                                             @foreach($business_categories as $business_category)
                                                 <option value="{{$business_category->id}}">{{$business_category->name}}</option>
@@ -118,23 +115,18 @@
                                         <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="col">
-                                        <div class="row justify-content-end">
+                                        <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-6">
-                                                <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
-                                            </div>
-                                        </div>
-                                        <div class="row d-none" id="insurance_amount_div">
-                                            <div class="form-group col-6">
+                                            <div class="form-group col-6 d-none" id="insurance_amount_div">
                                                 <input type="text" name="insurance_amount" id="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
                                             </div>
                                         </div>
-                                        <div class="row justify-content-end">
+                                        <div class="row">
                                             <div class="form-group col-6 d-none" id="trax_box_div">
                                                 <select name="trax_box" id="trax_box" class="select2 form-control" data-rule-required="true" data-msg-required="Trax Box is required">
                                                     @foreach($trax_boxes as $trax_box)
@@ -142,11 +134,11 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-6">
-                                                <input type="text" name="cash_handling_charges" id="cash_handling_charges" class="form-control decimal" placeholder="Cash Handling Charges*" data-rule-required="true" data-msg-required="Cash Handling Charges is required">
-                                            </div>
                                         </div>
-                                        <div class="row justify-content-end">
+                                        <div class="row border-dashed">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
+                                            </div>
                                             <div class="form-group col-6">
                                                 <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
@@ -178,13 +170,13 @@
 {{--                                    </div>--}}
                                     <div class="col pt-5">
                                         <div class="form-group">
+                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control decimal" placeholder="Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="gst" id="gst" class="form-control decimal" placeholder="GST" disabled>
+                                        </div>
+                                        <div class="form-group">
                                             <input type="text" name="total_charges" id="total_charges" class="form-control decimal" placeholder="Total Charges" disabled>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="text" name="gst_charges" id="gst_charges" class="form-control decimal" placeholder="GST Charges" disabled>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="text" name="total_amount" id="total_amount" class="form-control decimal" placeholder="Total Amount" disabled>
                                         </div>
                                         <div class="form-group text-center">
                                             <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
@@ -206,41 +198,41 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row justify-content-center p-2" id="account_details">
-                                <div class="col-5 border">
-                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
-                                    <div class="form-group col">
-                                        <label for="iban">
-                                            IBAN Number:
-                                            <span class="danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
-                                    </div>
-                                    <div class="form-group col">
-                                        <label for="account_name">Account Number:
-                                            <span class="danger">*</span></label>
-                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
-                                    </div>
-                                    <div class="form-group col">
-                                        <label for="bank">
-                                            Bank Name:
-                                            <span class="danger">*</span>
-                                        </label>
-                                        <select name="bank" id="bank" class="select2 form-control required">
-                                            @foreach($banks as $bank)
-                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group col">
-                                        <label for="bank">
-                                            Cheque Image:
-                                            <span class="danger">*</span>
-                                        </label>
-                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
-                                    </div>
-                                </div>
-                            </div>
+{{--                            <div class="row justify-content-center p-2" id="account_details">--}}
+{{--                                <div class="col-5 border">--}}
+{{--                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>--}}
+{{--                                    <div class="form-group col">--}}
+{{--                                        <label for="iban">--}}
+{{--                                            IBAN Number:--}}
+{{--                                            <span class="danger">*</span>--}}
+{{--                                        </label>--}}
+{{--                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">--}}
+{{--                                    </div>--}}
+{{--                                    <div class="form-group col">--}}
+{{--                                        <label for="account_name">Account Number:--}}
+{{--                                            <span class="danger">*</span></label>--}}
+{{--                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">--}}
+{{--                                    </div>--}}
+{{--                                    <div class="form-group col">--}}
+{{--                                        <label for="bank">--}}
+{{--                                            Bank Name:--}}
+{{--                                            <span class="danger">*</span>--}}
+{{--                                        </label>--}}
+{{--                                        <select name="bank" id="bank" class="select2 form-control required">--}}
+{{--                                            @foreach($banks as $bank)--}}
+{{--                                                <option value="{{$bank->id}}">{{$bank->name}}</option>--}}
+{{--                                            @endforeach--}}
+{{--                                        </select>--}}
+{{--                                    </div>--}}
+{{--                                    <div class="form-group col">--}}
+{{--                                        <label for="bank">--}}
+{{--                                            Cheque Image:--}}
+{{--                                            <span class="danger">*</span>--}}
+{{--                                        </label>--}}
+{{--                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
                         </form>
                     </div>
                 </div>
@@ -520,40 +512,6 @@
             });
             var complete_shipper_info = false;
             var first_shipment = false;
-            $('#shipper_account_no').on('change', function () {
-                if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
-                    $.ajax({
-                        url: '{!! route('retail.shipment.shipper_info') !!}',
-                        method: 'POST',
-                        data: {
-                            'shipper_account_no': this.value,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
-                            if(data.status == 1){
-                                $('#shipper_account_no').val(data.details.shipper_account_no);
-                                $('#shipper_phone_no').val(data.details.shipper_phone_no);
-                                $('#shipper_name').val(data.details.shipper_name);
-                                $('#shipper_cnic').val(data.details.shipper_cnic);
-                                $('#shipper_address').val(data.details.shipper_address);
-                                if(data.complete_info == false){
-                                    complete_shipper_info = false;
-                                    $('#account_details').removeClass('d-none')
-                                }
-                                else{
-                                    complete_shipper_info = true;
-                                    $('#account_details').addClass('d-none')
-                                }
-                            }
-                            else{
-                                complete_shipper_info = false;
-                                first_shipment = true;
-                                $('#account_details').removeClass('d-none')
-                            }
-                        });
-                }
-            });
 
             $('#shipper_phone_no').on('change', function () {
                 if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
@@ -567,46 +525,46 @@
                     })
                         .done(function (data) {
                             if(data.status == 1){
-                                $('#shipper_account_no').val(data.details.shipper_account_no);
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
-                                if(data.complete_info == false){
-                                    complete_shipper_info = false;
-                                    $('#account_details').removeClass('d-none')
-                                }
-                                else{
-                                    complete_shipper_info = true;
-                                    $('#account_details').addClass('d-none')
-                                }
+                                // if(data.complete_info == false){
+                                //     complete_shipper_info = false;
+                                //     $('#account_details').removeClass('d-none');
+                                // }
+                                // else{
+                                //     complete_shipper_info = true;
+                                //     $('#account_details').addClass('d-none');
+                                // }
                             }
-                            else{
-                                complete_shipper_info = false;
-                                first_shipment = true;
-                                $('#account_details').removeClass('d-none')
-                            }
+                            // else{
+                            //     complete_shipper_info = false;
+                            //     first_shipment = true;
+                            //     $('#account_details').removeClass('d-none');
+                            // }
                         });
                 }
             });
 
             var shipment_ids = [];
             $('#book').on('click', function () {
-                if(complete_shipper_info == false){
-                    if(first_shipment == true){
-                        $('#iban_no').removeClass('required');
-                        $('#account_no').removeClass('required');
-                        $('#bank').removeClass('required');
-                        $('#cheque_image').removeClass('required');
-                        first_shipment = false;
-                    }
-                    else{
-                        $('#iban_no').addClass('required');
-                        $('#account_no').addClass('required');
-                        $('#bank').addClass('required');
-                        $('#cheque_image').addClass('required');
-                    }
-                }
+                // if(complete_shipper_info == false){
+                //     if(first_shipment == true){
+                //         $('#iban_no').removeClass('required');
+                //         $('#account_no').removeClass('required');
+                //         $('#bank').removeClass('required');
+                //         $('#cheque_image').removeClass('required');
+                //         first_shipment = false;
+                //     }
+                //     else{
+                //         $('#account_details').removeClass('d-none');
+                //         $('#iban_no').addClass('required');
+                //         $('#account_no').addClass('required');
+                //         $('#bank').addClass('required');
+                //         $('#cheque_image').addClass('required');
+                //     }
+                // }
                var validator = $('#booking_form').valid();
                if(validator) {
                    swal({
@@ -670,11 +628,11 @@
                         $('#consignee_cnic').val('');
                         $('#consignee_address').val('');
                         $('#weight_charges').val('');
-                        $('#cash_handling_charges').val('');
+                        // $('#cash_handling_charges').val('');
                         $('#fuel_surcharge').val('');
+                        $('#total_charges_without_gst').val('');
+                        $('#gst').val('');
                         $('#total_charges').val('');
-                        $('#gst_charges').val('');
-                        $('#total_amount').val('');
                         $('#insurance_amount').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
@@ -731,26 +689,27 @@
                 else{
                     city_id = $('#domestic_destination').val();
                 }
-                if(city_id != '' && $('#weight_charges').val() != '' && $('#cash_handling_charges').val() != '' && $('#fuel_surcharge').val() != ''){
+                if(city_id != '' && $('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
                     var weight_charges = parseFloat($('#weight_charges').val());
-                    var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
+                    // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
                     var fuel_surcharge = parseFloat($('#fuel_surcharge').val());
 
-                    var total_charges = weight_charges + cash_handling_charges + fuel_surcharge;
+                    // var total_charges_without_gst = weight_charges + cash_handling_charges + fuel_surcharge;
+                    var total_charges_without_gst = weight_charges + fuel_surcharge;
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',
                         method: 'POST',
                         data: {
-                            'total_charges': total_charges,
+                            'total_charges_without_gst': total_charges_without_gst,
                             'city_id': parseInt(city_id),
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
                             if(data.status){
+                                $('#total_charges_without_gst').val(data.details.total_charges_without_gst);
+                                $('#gst').val(data.details.gst);
                                 $('#total_charges').val(data.details.total_charges);
-                                $('#gst_charges').val(data.details.gst_charges);
-                                $('#total_amount').val(data.details.total_amount);
                             }
                         });
                 }
