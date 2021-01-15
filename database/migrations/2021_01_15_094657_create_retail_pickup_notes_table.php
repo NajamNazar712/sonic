@@ -16,6 +16,7 @@ class CreateRetailPickupNotesTable extends Migration
         Schema::create('retail_pickup_notes', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('pickup_address_id')->index();
+            $table->integer('hub_id')->index();
             $table->integer('retail_user_id')->index();
             $table->integer('pickup_request_id');
             $table->integer('rider_id')->nullabl()->index();
