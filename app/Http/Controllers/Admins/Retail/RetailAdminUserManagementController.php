@@ -114,7 +114,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
-            $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 1);
+            $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 0);
             if($franchise_users->exists()){
                 $franchise_users = $franchise_users->get();
                 foreach ($franchise_users as $franchise_user){
@@ -207,12 +207,13 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
+            $user = RetailUser::find($franchise->user_id);
+            if($user){
+            $user->name = $request->name;
             if($request->password != null){
-                $user = RetailUser::find($franchise->user_id);
-                if($user){
                     $user->password = Hash::make($request->password);
-                    $user->save();
-                }
+            }
+            $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($franchise->pickup_address_id);
@@ -287,7 +288,7 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->status = 1;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
-            $trax_center_users = RetailUser::where('category', 2)->where('category_id', $trax_center->id)->where('status', 1);
+            $trax_center_users = RetailUser::where('category', 2)->where('category_id', $trax_center->id)->where('status', 0);
             if($trax_center_users->exists()){
                 $trax_center_users = $trax_center_users->get();
                 foreach ($trax_center_users as $trax_center_user){
@@ -378,12 +379,14 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->location_longitude = $request->long;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
-            if($request->password != null){
-                $user = RetailUser::find($trax_center->user_id);
-                if($user){
+
+            $user = RetailUser::find($trax_center->user_id);
+            if($user){
+                $user->name = $request->name;
+                if($request->password != null){
                     $user->password = Hash::make($request->password);
-                    $user->save();
                 }
+                $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($trax_center->pickup_address_id);

@@ -2584,6 +2584,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/store', 'Retail\RetailShipmentBookController@store')->name('store');
             Route::post('/slip', 'Retail\RetailShipmentBookController@slip')->name('slip');
             Route::post('/calculate_rates', 'Retail\RetailShipmentBookController@calculate_rates')->name('calculate_rates');
+            Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
     });
@@ -2591,6 +2592,22 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('', 'Retail\RatailCashDepositController@index')->name('index');
         Route::post('/list', 'Retail\RatailCashDepositController@list')->name('list');
     });
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
+        Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
+        Route::post('track_v2', 'Retail\RetailTrackingController@track_v2')->name('track_v2');
+//        Route::post('rider_information', 'Retail\RetailTrackingController@rider_information')->name('rider_information');
+    });
 
+    Route::prefix('crm')->name('crm.')->group(function () {
+        Route::prefix('request')->name('request.')->group(function () {
+            Route::post('add', 'Retail\RetailCRMController@add_request')->name('add');
+            Route::get('{id}', 'Retail\RetailCRMController@request_details')->name('details');
+        });
+        Route::prefix('feedback')->name('feedback.')->group(function(){
+            Route::post('add', 'Retail\RetailCRMController@add_feedback')->name('add');
+        });
+
+    });
 });
 

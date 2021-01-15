@@ -274,8 +274,8 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // scrollX: true, scrollY: '500px',
-                autoWidth: false,
+                scrollX: true, scrollY: '500px',
+                // autoWidth: false,
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
@@ -317,9 +317,9 @@
                     { data:'updated_at' ,name: 'retail_trax_centers.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_trax_centers.status', class: 'align-middle text-center status'},
-                    { data:'code' ,name: 'retail_trax_centers.id', class: 'align-middle text-center code'},
-                    { data:'location' ,name: 'location', class: 'align-middle text-center location'},
-                    { data:'action' ,name: 'action', class: 'align-middle text-center action'},
+                    { data:'code' ,name: 'retail_trax_centers.code', class: 'align-middle text-center code'},
+                    { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
+                    { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
