@@ -207,13 +207,13 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
+            $user = RetailUser::find($franchise->user_id);
+            if($user){
+            $user->name = $request->name;
             if($request->password != null){
-                $user = RetailUser::find($franchise->user_id);
-                if($user){
-                    $user->password = $request->name;
                     $user->password = Hash::make($request->password);
-                    $user->save();
-                }
+            }
+            $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($franchise->pickup_address_id);
@@ -379,13 +379,14 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->location_longitude = $request->long;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
-            if($request->password != null){
-                $user = RetailUser::find($trax_center->user_id);
-                if($user){
-                    $user->password = $request->name;
+
+            $user = RetailUser::find($trax_center->user_id);
+            if($user){
+                $user->name = $request->name;
+                if($request->password != null){
                     $user->password = Hash::make($request->password);
-                    $user->save();
                 }
+                $user->save();
             }
 
             $pickup_address = UserShippingInfo::find($trax_center->pickup_address_id);
