@@ -6983,7 +6983,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
 //            ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
             ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'shipments.order_id', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
-            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
+//            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
