@@ -25,4 +25,7 @@ class StationDepositNote extends Model
     public function deposit_note_slips() {
         return $this->hasMany('App\Http\Models\Admin\StationDepositNoteSlip', 'station_deposit_note_id');
     }
+    public function pickup_notes_list(){
+        return $this->hasMany('App\Http\Models\Admin\PickupNoteStationDepositNote');
+    }
 }

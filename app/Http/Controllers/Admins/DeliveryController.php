@@ -17,6 +17,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
@@ -3940,13 +3941,18 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted']);
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($sdn)
+            ->setRowAttr([
+                'data-type' => function ($sdn) {
+                    return $sdn->sdn_type;
+                },
+            ])
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
@@ -4458,17 +4464,36 @@ class DeliveryController extends Controller
     public function sdn_dncc_list(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
-        $dn_list = $sdn_details->delivery_notes_list;
-        if ($dn_list->count() != 0) {
-            $delivery_notes = array();
-            foreach ($dn_list as $notes) {
-                $delivery_notes[] = $notes->delivery_note_id;
+        if($sdn_details && $sdn_details->sdn_type == 2){
+            $dn_list = $sdn_details->pickup_notes_list;
+
+            if ($dn_list->count() != 0) {
+                $pickup_notes = array();
+                foreach ($dn_list as $notes) {
+                    $pickup_notes[] = $notes->retail_pickup_note_id;
+                }
+                return ['status' => 1, 'success' => 'Booked Shipments', 'pickup_notes' => $pickup_notes];
             }
-            return ['status' => 0, 'success' => 'Booked Shipments', 'delivery_notes' => $delivery_notes];
+            else {
+                return ['status' => 0, 'success' => 'No Booked Shipments', 'pickup_notes' => FALSE];
+            }
         }
-        else {
-            return ['status' => 0, 'success' => 'No Booked Shipments', 'delivery_notes' => FALSE];
+        else{
+            $dn_list = $sdn_details->delivery_notes_list;
+
+            if ($dn_list->count() != 0) {
+                $delivery_notes = array();
+                foreach ($dn_list as $notes) {
+                    $delivery_notes[] = $notes->delivery_note_id;
+                }
+                return ['status' => 2, 'success' => 'Booked Shipments', 'delivery_notes' => $delivery_notes];
+            }
+            else {
+                return ['status' => 0, 'success' => 'No Booked Shipments', 'delivery_notes' => FALSE];
+            }
         }
+
+
     }
     public function sdn_dncc_print(Request $request)
     {
@@ -4745,19 +4770,37 @@ class DeliveryController extends Controller
     public function sdn_delivered_shipments(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
-        $dn_list = $sdn_details->delivery_notes_list;
-        if($dn_list->count() != 0){
-            $shipments = array();
-            foreach ($dn_list as $note){
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->where('status', '!=', 10)->select('shipment_id')->get();
-                foreach ($shipment_ids as $id){
-                    $shipments[$note->delivery_note_id][] = Shipment::find($id)->pluck('tracking_number');
+        if($sdn_details && $sdn_details->sdn_type == 2){
+            $dn_list = $sdn_details->pickup_notes_list;
+            if($dn_list->count() != 0){
+                $shipments = array();
+                foreach ($dn_list as $note){
+                    $shipment_ids = RetailPickupNoteShipment::where('retail_pickup_note_id',$note->retail_pickup_note_id)->select('shipment_id')->get();
+                    foreach ($shipment_ids as $id){
+                        $shipments[$note->retail_pickup_note_id][] = Shipment::find($id)->pluck('tracking_number');
+                    }
                 }
-            }
-            return ['status' => 0, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
-        }else{
-            return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
+                return ['status' => 1, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
+            }else{
+                return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
 
+            }
+        }
+        else{
+            $dn_list = $sdn_details->delivery_notes_list;
+            if($dn_list->count() != 0){
+                $shipments = array();
+                foreach ($dn_list as $note){
+                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->where('status', '!=', 10)->select('shipment_id')->get();
+                    foreach ($shipment_ids as $id){
+                        $shipments[$note->delivery_note_id][] = Shipment::find($id)->pluck('tracking_number');
+                    }
+                }
+                return ['status' => 2, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
+            }else{
+                return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
+
+            }
         }
 
     }

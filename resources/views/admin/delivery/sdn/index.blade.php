@@ -151,6 +151,26 @@
     </div>
     <!--Shipments popup -->
     <!--Shipments popup -->
+    <div class="modal fade" id="pncc_modal" data-backdrop="static" role="dialog" aria-labelledby="pncc_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="pncc_modal_title">No. Of PNCC(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
+    <!--Shipments popup -->
     <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
@@ -705,19 +725,29 @@
 
             $('#datatable tbody').on('click','tr td.dncc_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#dncc_modal .modal-body').html('');
-                $('#dncc_modal').modal('show');
-
+                if(id){}
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.dn') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'sdn_id': id
+                        'sdn_id': id,
                     }
                 })
                     .done(function(data) {
-                        if (data) {
+                        if (data.status == 1) {
+                            var notes = '<div>PNCC Number(s) :</div>';
+
+                            if (data.pickup_notes) {
+                                $.each(data.pickup_notes, function(index, value) {
+                                    notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="'+value+'">'+value+'</a></u><br>';
+                                });
+                            }
+                            $('#pncc_modal .modal-body').html('');
+                            $('#pncc_modal').modal('show');
+                            $('#pncc_modal .modal-body').html(notes);
+                        }
+                        else if(data.status == 2){
                             var notes = '<div>DNCC Number(s) :</div>';
 
                             if (data.delivery_notes) {
@@ -725,9 +755,15 @@
                                     notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="'+value+'">'+value+'</a></u><br>';
                                 });
                             }
+                            $('#dncc_modal .modal-body').html('');
+                            $('#dncc_modal').modal('show');
                             $('#dncc_modal .modal-body').html(notes);
-
-
+                        }
+                        else if(data.status == 0){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        else{
+                            toastr.error('Something went wrong!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
 
@@ -746,12 +782,20 @@
                     }
                 })
                     .done(function(data) {
-                        if (data) {
+                        if (data.status == 1 || data.status == 2) {
                             var html = '<div><b>Delivered Shipment(s) :</b></div>';
-
+                            var dn_pn_title = '';
+                            if(data.status == 1){
+                                dn_pn_title = 'PNCC Number ';
+                            }
+                            else{
+                                dn_pn_title = 'DNCC Number ';
+                            }
                             if (data.shipments) {
                                 $.each(data.shipments, function(index, value) {
-                                    html += 'DNCC Number '+ index +': <br>';
+
+                                    html += dn_pn_title + index +': <br>';
+
                                     $.each(value, function (ind, tracking_number) {
                                         html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                     });
