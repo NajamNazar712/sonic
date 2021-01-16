@@ -3834,7 +3834,6 @@ class DeliveryController extends Controller
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'delivery_notes.received_cod_amount', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments'])
             ->whereIn('delivery_notes.id', $dncc_ids);
 

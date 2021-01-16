@@ -30,14 +30,8 @@ class RetailCashCollectionController extends Controller
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
-            ->leftJoin('retail_franchises as rf', function ($join) {
-                $join->on('rf.id', '=', 'ru.category_id')
-                    ->where('ru.category', '=',1);
-            })
-            ->leftJoin('retail_trax_centers as rc', function ($join) {
-                $join->on('rc.id', '=', 'ru.category')
-                    ->where('ru.category', '=',2);
-            })
+            ->leftJoin('retail_franchises as rf', 'rf.user_id', '=', 'ru.id')
+            ->leftJoin('retail_trax_centers as rc', 'rc.user_id', '=', 'ru.id')
             ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.id as franchise_code','rc.name as center','rc.id as center_code','ru.category as category'])
            ->whereIn('retail_pickup_notes.status', [1,2,3])
            ->where('retail_pickup_notes.pncc_status', '=', 0);

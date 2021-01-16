@@ -948,6 +948,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\Retail\RetailCompletedDeliveries@shipments_delivered')->name('shipments.delivered');
 
                 Route::post('deposit/pncc','Admins\Retail\RetailCompletedDeliveries@completed_deliveries_selected_pncc')->name('deposit.pncc');
+                Route::get('pncc/list','Admins\Retail\RetailCompletedDeliveries@get_sdn_list')->name('pncc.list');
+
                 Route::get('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_view')->name('sdn.create');
                 Route::post('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_submit')->name('sdn.create.submit');
             });

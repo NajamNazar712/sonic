@@ -35,6 +35,11 @@
 
                     </div>
 
+                    <form id="post_pickup_note_ids_form" action="{{route('admin.delivery.completed.retail.deposit.pncc')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="pickup_note_ids" id="pickup_note_ids">
+                    </form>
+
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
@@ -44,7 +49,7 @@
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Rider</th>
                             <th class="border-primary border-darken-1">Center/Franchise Name</th>
-                            <th class="border-primary border-darken-1">No Of Shipments Delivered</th>
+                            <th class="border-primary border-darken-1">No Of Shipments</th>
                             <th class="border-primary border-darken-1">Center and Franchise Code</th>
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
@@ -163,7 +168,7 @@
                             if(selected_rows != ''){
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Select Yes to Deposit DNCC!',
+                                    text: 'Select Yes to Deposit PNCC!',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
@@ -184,11 +189,11 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-                                        $('#delivery_note_ids').val(selected_rows);
-                                        var delivery_note_ids = $('#delivery_note_ids').val();
-                                        // console.log(delivery_note_ids)
-                                        if(delivery_note_ids != ''){
-                                            $('#post_delivery_note_ids_form').submit();
+                                        $('#pickup_note_ids').val(selected_rows);
+                                        var pickup_note_ids = $('#pickup_note_ids').val();
+                                        // console.log(pickup_note_ids)
+                                        if(pickup_note_ids != ''){
+                                            $('#post_pickup_note_ids_form').submit();
                                         }
                                     }
                                 });
@@ -307,8 +312,8 @@
                     { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
                     { data:'code' ,name: 'code', class: 'align-middle code text-center'},
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
-                    { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time'},
-                    { data:'collected_by' ,name: 'h.name', class: 'align-middle collected_by'},
+                    { data:'assigned_at' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle assigned_at'},
+                    { data:'collected_by' ,name: 'cc.name', class: 'align-middle collected_by'},
                     { data:'cash_collected_at' ,name: 'retail_pickup_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
                     // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
@@ -438,29 +443,32 @@
             var route = '{!! route('admin.tracking.index') !!}';
             $('#datatable tbody').on('click','tr td.count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#delivered_shipments_modal .modal-body').html('');
-                $('#delivered_shipments_modal').modal('show');
 
-                $.ajax({
-                    url: '{!! route('admin.delivery.completed.retail.shipments.delivered') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'retail_pickup_note_id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var html = '';
+                if(id){
 
-                            if (data.shipments) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#delivered_shipments_modal .modal-body').html(html);
+                    $.ajax({
+                        url: '{!! route('admin.delivery.completed.retail.shipments.delivered') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'retail_pickup_note_id': id
                         }
-                    });
+                    })
+                        .done(function(data) {
+                            if (data) {
+                                var html = '';
+
+                                if (data.shipments) {
+                                    $.each(data.shipments, function(index, tracking_number) {
+                                        html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    });
+                                }
+                                $('#delivered_shipments_modal .modal-body').html('');
+                                $('#delivered_shipments_modal').modal('show');
+                                $('#delivered_shipments_modal .modal-body').html(html);
+                            }
+                        });
+                }
 
             });
 
