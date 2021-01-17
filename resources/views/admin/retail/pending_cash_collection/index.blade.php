@@ -96,7 +96,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.cash_collection.pending.list') }}',
+                        url: '{{ route('admin.delivery.cash_collection.retail.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -119,11 +119,11 @@
                                 row.push(values.pncc_no);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.franchise_name);
+                                row.push(values.store);
                                 row.push(values.shipments_count);
-                                row.push(values.frnachise_code);
+                                row.push(values.code);
                                 row.push(values.assignee);
-                                row.push(values.created_at);
+                                row.push(values.assigned_at);
                                 row.push(values.pncc_amount);
 
                                 body.push(row);
