@@ -42,7 +42,7 @@ class RetailAdminUserManagementController extends Controller
         return $user->id;
     }
 
-    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $default, $pickup_address_lat, $pickup_address_long) {
+    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $default, $location_latitude, $location_longitude) {
         $user_shipping_info = new UserShippingInfo();
 
         $user_shipping_info->user_id = $user_id;
@@ -52,8 +52,8 @@ class RetailAdminUserManagementController extends Controller
         $user_shipping_info->email = $email_address;
         $user_shipping_info->city_id = $city_id;
         $user_shipping_info->default_address = $default;
-        $user_shipping_info->pickup_address_lat = $pickup_address_lat;
-        $user_shipping_info->pickup_address_long = $pickup_address_long;
+        $user_shipping_info->location_latitude = $location_latitude;
+        $user_shipping_info->location_longitude = $location_longitude;
 
         $user_shipping_info->save();
 
@@ -223,8 +223,8 @@ class RetailAdminUserManagementController extends Controller
                 $pickup_address->phone = $franchise->phone_no;
                 $pickup_address->email = $franchise->email;
                 $pickup_address->city_id = $franchise->default_hub;
-                $pickup_address->pickup_address_lat = $franchise->location_latitude;
-                $pickup_address->pickup_address_long = $franchise->location_longitude;
+                $pickup_address->location_latitude = $franchise->location_latitude;
+                $pickup_address->location_longitude = $franchise->location_longitude;
                 $pickup_address->save();
             }
 
@@ -396,8 +396,8 @@ class RetailAdminUserManagementController extends Controller
                 $pickup_address->phone = $trax_center->phone_no;
                 $pickup_address->email = $trax_center->email;
                 $pickup_address->city_id = $trax_center->default_hub;
-                $pickup_address->pickup_address_lat = $trax_center->location_latitude;
-                $pickup_address->pickup_address_long = $trax_center->location_longitude;
+                $pickup_address->location_latitude = $trax_center->location_latitude;
+                $pickup_address->location_longitude = $trax_center->location_longitude;
                 $pickup_address->save();
             }
 
