@@ -97,7 +97,7 @@
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC*" data-rule-required="true" data-msg-required="Shipper CNIC is required">
+                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC">
                                     </div>
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
@@ -140,7 +140,7 @@
                                                 <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
                                             </div>
                                             <div class="form-group col-6">
-                                                <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
+                                                <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control fuel_decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
                                         </div>
                                     </div>
@@ -476,6 +476,15 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.01,
+                'max': 10000000
+            });
+            $('.fuel_decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
                 'max': 10000000
             });
 
