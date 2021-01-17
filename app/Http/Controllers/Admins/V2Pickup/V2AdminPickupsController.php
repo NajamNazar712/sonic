@@ -315,7 +315,6 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
-                $pickup_request->current_rider_id = $rider_ids;
                 $pickup_request->last_updated_by = Auth::id();
                 $pickup_request->save();
 
@@ -331,7 +330,7 @@ class V2AdminPickupsController extends Controller
                 }
 
                 $pickups++;
-
+                self::retail_pickup_assign($pickup_request_id, $rider_id);
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id == $rider_id){
@@ -371,7 +370,7 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(106, $riders, $pickup_request_id);
                         NotificationsController::send(107, $riders, $pickup_request_id);
                     }
-
+                    self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
 
             }
