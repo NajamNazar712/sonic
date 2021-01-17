@@ -56,6 +56,8 @@ class RetailCashCollectionController extends Controller
             ->addColumn('time', function ($user) {
                 if($user->assigned_at == null) {
                     return '-';
+                }else{
+                    return $user->assigned_at;
                 }
             })
             ->editColumn('store', function ($user) {
