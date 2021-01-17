@@ -449,8 +449,8 @@
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
-                                shipment += '<td colspan="3"><strong>City</strong></td>';
-                                shipment += '<td>' + details.shipper.city + '</td>';
+                                // shipment += '<td colspan="3"><strong>City</strong></td>';
+                                // shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
                                 shipment += '<tr>';
@@ -463,13 +463,13 @@
                                     shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
                                 }
 
-                                shipment += '<td><strong>Email</strong></td>';
-                                if (details.shipper.email) {
-                                    shipment += '<td colspan="3">' + details.shipper.email + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>'
-                                }
+                                // shipment += '<td><strong>Email</strong></td>';
+                                // if (details.shipper.email) {
+                                //     shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+                                // }
+                                // else {
+                                //     shipment += '<td colspan="3"></td>'
+                                // }
                                 shipment += '<td><strong> Retail User Name</strong></td>';
 
                                 shipment += '<td>' + details.retail_user.name + '</td>';
