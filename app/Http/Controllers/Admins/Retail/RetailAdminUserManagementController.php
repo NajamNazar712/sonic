@@ -161,7 +161,8 @@ class RetailAdminUserManagementController extends Controller
         $hub_name = City::find($request->hub)->name;
         $hub_code = substr($hub_name, 0, 3);
         $hub_code = strtoupper($hub_code);
-        $code = 'FR-' . $hub_code . '-' . str_pad($franchise->id, 3, 0, STR_PAD_LEFT);
+        $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
+        $code = 'FR-' . $hub_code . '-' . str_pad($hub_count, 3, 0, STR_PAD_LEFT);
 
         $franchise->code = $code;
         $franchise->save();
@@ -335,7 +336,8 @@ class RetailAdminUserManagementController extends Controller
         $hub_name = City::find($request->hub)->name;
         $hub_code = substr($hub_name, 0, 3);
         $hub_code = strtoupper($hub_code);
-        $code = 'TC-' . $hub_code. '-' . str_pad($trax_center->id, 3, 0, STR_PAD_LEFT);
+        $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
+        $code = 'TC-' . $hub_code. '-' . str_pad($hub_count, 3, 0, STR_PAD_LEFT);
 
         $trax_center->code = $code;
         $trax_center->save();

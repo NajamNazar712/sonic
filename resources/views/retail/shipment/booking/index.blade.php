@@ -170,13 +170,13 @@
 {{--                                    </div>--}}
                                     <div class="col pt-5">
                                         <div class="form-group">
-                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control decimal" placeholder="Charges" disabled>
+                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="gst" id="gst" class="form-control decimal" placeholder="GST" disabled>
+                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="total_charges" id="total_charges" class="form-control decimal" placeholder="Total Charges" disabled>
+                                            <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
                                         </div>
                                         <div class="form-group text-center">
                                             <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
@@ -415,7 +415,7 @@
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
-                'digits': 2
+                'digits': 2,
             });
 
             $('#booking_form input.volumetric_weight').checkboxpicker().bind('change', function() {
@@ -456,6 +456,8 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
+                'groupSeparator': ',',
+                'autoGroup': true,
                 dropdownParent:$('#booking_form')
             });
 
@@ -466,7 +468,9 @@
             $('.amount').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
-                'allowPlus': false
+                'allowPlus': false,
+                'groupSeparator': ',',
+                'autoGroup': true,
             });
 
             $('.decimal').inputmask({
@@ -476,7 +480,9 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.01,
-                'max': 10000000
+                'max': 10000000,
+                'groupSeparator': ',',
+                'autoGroup': true,
             });
             $('.fuel_decimal').inputmask({
                 'alias': 'decimal',
@@ -485,7 +491,9 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.00,
-                'max': 10000000
+                'max': 10000000,
+                'groupSeparator': ',',
+                'autoGroup': true,
             });
 
             $('#insurance_offered').select2({
@@ -699,9 +707,9 @@
                     city_id = $('#domestic_destination').val();
                 }
                 if(city_id != '' && $('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
-                    var weight_charges = parseFloat($('#weight_charges').val());
+                    var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
                     // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
-                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val());
+                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val().replace(/,/g, ''));
 
                     // var total_charges_without_gst = weight_charges + cash_handling_charges + fuel_surcharge;
                     var total_charges_without_gst = weight_charges + fuel_surcharge;

@@ -194,7 +194,7 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 17 && $receiving_sheet_id != null){
+        if($complaint_id == 23 && $receiving_sheet_id != null){
             $description_text = $request->description ;
             $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
         }

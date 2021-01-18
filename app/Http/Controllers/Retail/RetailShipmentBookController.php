@@ -135,7 +135,7 @@ class RetailShipmentBookController extends Controller
     public function index(){
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
-        $shipping_modes = RetailShippingMode::all();
+        $shipping_modes = RetailShippingMode::where('id','!=', 3)->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
@@ -175,6 +175,9 @@ class RetailShipmentBookController extends Controller
             $shipping_mode_id = 1;
         }
         $same_day_timing_id = NULL;
+
+        $request->weight_charges = str_replace(',', '', $request->input('weight_charges'));
+        $request->fuel_surcharge = str_replace(',', '', $request->input('fuel_surcharge'));
 
         $city = City::find($consignee_city_id);
         $gst = $city->zone->gst;
@@ -311,7 +314,7 @@ class RetailShipmentBookController extends Controller
 
 
         $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('shipping_mode_id', $request->shipping_mode)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
         if($cash_deposit->exists()){
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
@@ -322,7 +325,6 @@ class RetailShipmentBookController extends Controller
         }
         else{
             $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->shipping_mode_id = $request->shipping_mode;
             $cash_deposit->category = Auth::user()->category;
             $cash_deposit->retail_user_id = Auth::id();
             $cash_deposit->total_cn = 1;
@@ -333,6 +335,7 @@ class RetailShipmentBookController extends Controller
         $cash_deposit_shipment = new RetailCashDepositShipment();
         $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
         $cash_deposit_shipment->shipment_id = $shipment_id;
+        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
         $cash_deposit_shipment->save();
 
 
@@ -356,9 +359,9 @@ class RetailShipmentBookController extends Controller
             $total_charges = $gst + $total_charges_without_gst;
             $details = array();
 
-            $details['total_charges_without_gst'] = $total_charges_without_gst;
-            $details['gst'] = $gst;
-            $details['total_charges'] = $total_charges;
+            $details['total_charges_without_gst'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
+            $details['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
+            $details['total_charges'] = number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN));
             return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
         }
     }
@@ -559,7 +562,7 @@ class RetailShipmentBookController extends Controller
                         </tr>
                           <tr>
                             <td colspan="3" class="color primary border"><strong>Airway Bill Number</strong></td>
-                            <td colspan="2" class="border text-center align-middle pl-1 pr-1 twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
                           </tr>
@@ -604,9 +607,9 @@ class RetailShipmentBookController extends Controller
                               <tr>
                                 <td colspan="3" class="border twice-bottom twice-left">' . $shipment->consignee_city->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->estimated_weight . '</td>
-                                <td colspan="2" class="border twice-bottom">' . $fuel_and_gst . '</td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->total_charges . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){
@@ -622,7 +625,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="3" class="color border twice-bottom">'. $item->product->product_name . '</td>
                                 <td colspan="5" class="color border twice-bottom text-center mr-3"><strong>Insurance: Do you required coverage</strong> '. $insurance . '</td>
                                 <td colspan="2" class="color primary border twice-bottom"><strong>Declared Value</strong></td>
-                                <td colspan="2" class="color border twice-bottom twice-right">' . $item->price . '</td>
+                                <td colspan="2" class="color border twice-bottom twice-right">' . number_format(ROUND($item->price, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                             </tr>';
                     }
 
@@ -893,7 +896,7 @@ class RetailShipmentBookController extends Controller
                             <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                           </tr>
                           <tr>
-                            <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
+                            <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور / شپر  سے رابطہ کریں۔</em></td>
                           </tr>
                         </tbody>
                     </table>
@@ -1070,7 +1073,6 @@ class RetailShipmentBookController extends Controller
     }
 
     public function print_air_waybill(Request $request) {
-        dd('hello');
         $user_type = NULL;
         $user_id = NULL;
 
