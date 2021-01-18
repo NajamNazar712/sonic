@@ -598,18 +598,20 @@ class RetailShipmentBookController extends Controller
                     $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
                     $slip .= '
                               <tr>
-                                <td colspan="3" class="color primary border twice-left"><strong>Destination</strong></td>
+                                <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="2" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="2" class="color primary"><strong>Service Charges</strong></td>
                                 <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
-                                <td colspan="3" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                                <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
-                                <td colspan="3" class="border twice-bottom twice-left">' . $shipment->consignee_city->name . '</td>
+                                <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){
@@ -653,7 +655,7 @@ class RetailShipmentBookController extends Controller
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Date</strong></td>
-                                <td colspan="4" class="color border twice-bottom twice-right">' . Carbon::now() . '</td>
+                                <td colspan="4" class="color border twice-bottom twice-right">' . $shipment->created_at . '</td>
                             </tr>
                             </tbody>
                             </table>
