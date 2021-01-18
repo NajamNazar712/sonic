@@ -1778,6 +1778,12 @@ class ShipperShipmentBookController extends Controller
             'payment_mode_id' => 'Payment Mode ID',
             'charges_mode_id' => 'Charges Mode ID',
             'pieces_quantity' => 'Pieces',
+
+            'shipper_reference_number_1' => 'Shipper Reference Number 1',
+            'shipper_reference_number_2' => 'Shipper Reference Number 2',
+            'shipper_reference_number_3' => 'Shipper Reference Number 3',
+            'shipper_reference_number_4' => 'Shipper Reference Number 4',
+            'shipper_reference_number_5' => 'Shipper Reference Number 5',
         ];
 
         $messages = [
@@ -3238,7 +3244,13 @@ class ShipperShipmentBookController extends Controller
             'try_and_buy_charges' => 'Try and Buy Charges',
             'amount' => 'Collection Amount',
             'payment_mode_id' => 'Payment Mode ID',
-            'charges_mode_id' => 'Charges Mode ID'
+            'charges_mode_id' => 'Charges Mode ID',
+
+            'shipper_reference_number_1' => 'Shipper Reference Number 1',
+            'shipper_reference_number_2' => 'Shipper Reference Number 2',
+            'shipper_reference_number_3' => 'Shipper Reference Number 3',
+            'shipper_reference_number_4' => 'Shipper Reference Number 4',
+            'shipper_reference_number_5' => 'Shipper Reference Number 5',
         ];
 
         $messages = [
