@@ -597,33 +597,58 @@
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
-                                shipment += '<tr>';
-                                shipment += '<td><strong>Phone No(s).</strong></td>';
+                                if(details.shipment_type == 1){
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Phone No(s).</strong></td>';
 
-                                if (!details.shipper.phone_number_2) {
-                                    shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    if (!details.shipper.phone_number_2) {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                    }
+
+                                    shipment += '<td><strong>Email</strong></td>';
+                                    if (details.shipper.email) {
+                                        shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td colspan="3"></td>'
+                                    }
+                                    shipment += '<td><strong>Sales Person</strong></td>';
+
+                                    if (details.shipper.sales_person != null) {
+                                        shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td colspan="3"></td>'
+                                    }
+
+                                    shipment += '</tr>';
                                 }
-                                else {
-                                    shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                else{
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Phone No(s).</strong></td>';
+
+                                    if (!details.shipper.phone_number_2) {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                    }
+                                    
+                                    shipment += '<td><strong> Retail User Name</strong></td>';
+
+                                    shipment += '<td>' + details.retail_user.name + '</td>';
+
+                                    shipment += '<td><strong> Branch</strong></td>';
+
+                                    shipment += '<td colspan="3">' + details.retail_user.code + '</td>';
+
+
+                                    shipment += '</tr>';
                                 }
 
-                                shipment += '<td><strong>Email</strong></td>';
-                                if (details.shipper.email) {
-                                    shipment += '<td colspan="3">' + details.shipper.email + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>'
-                                }
-                                shipment += '<td><strong>Sales Person</strong></td>';
-
-                                if (details.shipper.sales_person != null) {
-                                    shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>'
-                                }
-
-                                shipment += '</tr>';
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
