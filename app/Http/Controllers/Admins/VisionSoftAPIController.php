@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementDetail;
@@ -1197,5 +1198,53 @@ class VisionSoftAPIController extends Controller
             $new_error->error = 'API Error';
             $new_error->save();
         }
+    }
+    //16
+    static public function adjustment(){
+        $date = Carbon::yesterday();
+        $today = Carbon::today();
+        $adjustments = AdjustmentLog::join('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->join('cities as c', 'c.id', '=', 's.consignee_city_id')
+            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city')
+            ->whereDate('adjustment_logs.created_at', $date)
+            ->get();
+
+        if(count($adjustments) > 0){
+            foreach ($adjustments as $adjustment) {
+                try{
+                    $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+                    $response = $client->post('Adjustment', [
+                        'form_params' => [
+                            'pin_code' => 6,
+                            'pin_kp' => 'A',
+                            'pin_loginid' => 'aeiouyh',
+                            'pin_password' => 'meaumaur',
+                            'pin_tr_date' => $today->format('m/d/Y'),
+                            'pin_tracking_number' => $adjustment->tracking_number,
+                            'pin_account_id' => $adjustment->account_id,
+                            'pin_amount' => $adjustment->amount,
+                            'pin_destination' => $adjustment->city
+                        ]
+                    ]);
+                    $status_code = $response->getStatusCode();
+                    if ($status_code != 200) {
+                        $response = $response->getBody()->getContents();
+                        $new_error = new VisionSoftError();
+                        $new_error->api_id = 16;
+                        $new_error->status_code = $status_code;
+                        $new_error->error = $response;
+                        $new_error->save();
+                    }
+                }
+                catch(RequestException $e){
+                    $new_error = new VisionSoftError();
+                    $new_error->api_id = 16;
+                    $new_error->error = 'API Error';
+                    $new_error->save();
+                }
+            }
+        }
+
     }
 }

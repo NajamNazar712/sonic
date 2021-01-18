@@ -164,21 +164,29 @@ class AdminCommissionController extends Controller
     }
 
     public function set_commission_submit(Request $request){
+
        // $user_ids = $ids;
 
-       $user_ids =explode(',' , $request->user_ids);
-       $users='';
+       $user_ids = explode(',' , $request->user_ids);
+        if(count($user_ids) == 0){
+            return redirect(route('admin.accounts.active'))->with('error', 'No users selected!');
+        }
+
+        if(!$request->has('user_id')){
+            return redirect()->back()->with('error', 'No sales person/poc/kam selected!');
+        }
      //  $status = 0;
         $users = User::whereIn('id', $user_ids)->select('id', 'name','status')->get();
-        $users_for_status = User::whereIn('id', $user_ids)->select('id', 'name','status')->first();
-        $status= $users_for_status->status;
+        $status= $users[0]->status;
 
         // $users = User::whereIn('id', $user_ids)->select('id', 'name')->get();
+        $users_count = count($request->user_id);
         foreach($users as $user){
           $shipper_id = $user->id;
           $status = $user->status;
             $total_commission = $request->total_commission;
-            $users_count = count($request->user_id);
+
+
 
             $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
             if($sales_commission->exists()){

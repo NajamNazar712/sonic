@@ -398,13 +398,12 @@ class AdminMonthClosingController extends Controller
                         DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status', 'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status', 'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address', 'shipments.shipper_status_id')
             ->whereIn('shipments.shipper_status_id', $month_closing_status)
             ->where(function($query) {
                 $query->whereNull('mc.status_id')
                     ->orWhereNotIn('mc.status_id', [2, 3]);
             })
-            ->where('sj.created_at', '<', $date)
             ->groupBy('shipments.id');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {

@@ -3995,6 +3995,8 @@
                                         </thead>
                                         <tfoot>
                                         <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                        <input type="hidden" value="0" name="edit_commission" id="edit_commission">
+
                                         <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
                                         </tfoot>
                                     </table>
@@ -4533,6 +4535,7 @@
                     $('#external_person_name').val('');
                     $('#external_person_name').attr('disabled', true);
                     $('#user_commission').val('');
+                    $('#edit_commission').val(1);
 
                 }else{
                     var error = 'Selected Commission value exceeds!';

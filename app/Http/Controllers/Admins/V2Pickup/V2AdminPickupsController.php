@@ -2398,7 +2398,8 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pickup_route_index(){
-        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
+       // $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
+        $users = User::select(['id','name'])->get();
         $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
         $riders = Rider::where('status', 1)->select(['id','name'])->get();
         return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
