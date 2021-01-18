@@ -32,14 +32,14 @@ class RetailCashCollectionController extends Controller
             ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
             ->leftjoin('retail_franchises as rf', 'rf.user_id', '=', 'ru.id')
             ->leftjoin('retail_trax_centers as rc', 'rc.user_id', '=', 'ru.id')
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as time', 'retail_pickup_notes.shipments as count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status'])
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status'])
            ->whereIn('retail_pickup_notes.status', [1,2,3])
            ->where('retail_pickup_notes.pncc_status', '=', 0);
 
         $datatable = Datatables::of($deliveries)
-            ->editColumn('count', function($deliveries) {
-                if ($deliveries->count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->count . '</button>';
+            ->addColumn('count', function($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
                 }
                 else {
                     return 0;
@@ -53,11 +53,12 @@ class RetailCashCollectionController extends Controller
 //                    return 0;
 //                }
 //            })
-            ->editColumn('time', function ($user) {
-                if($user->time == null) {
+            ->addColumn('time', function ($user) {
+                if($user->assigned_at == null) {
                     return '-';
+                }else{
+                    return $user->assigned_at;
                 }
-
             })
             ->editColumn('store', function ($user) {
                if($user->category == 1){

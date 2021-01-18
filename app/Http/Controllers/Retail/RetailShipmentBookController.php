@@ -77,6 +77,7 @@ class RetailShipmentBookController extends Controller
         $shipment->try_and_buy_fees = $try_and_buy_charges;
         $shipment->pieces = $pieces;
         $shipment->business_category_id = $business_category_id;
+        $shipment->shipment_type = 2;
 
         $shipment->save();
 

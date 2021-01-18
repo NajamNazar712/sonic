@@ -4037,8 +4037,10 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if($result->sdn_type == 1){
+                    $dropdown .= $details_button;
+                }
 
-                $dropdown .= $details_button;
 
                 if (session('role_id') == 1 || in_array(251, session('permissions'))) {
                     if(session('department_id') == 6) {
