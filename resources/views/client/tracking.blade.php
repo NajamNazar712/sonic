@@ -724,7 +724,7 @@
                 dropdownParent:$('#add_request_form')
             }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
-                if (this.value && this.value == 17 && lost_flag === true) {
+                if (this.value && this.value == 23 && lost_flag === true) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_id').val();
                     $.ajax({

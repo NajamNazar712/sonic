@@ -93,14 +93,6 @@ class RetailTrackingController extends Controller
                         $sales_person_name = null;
                     }
 
-//                    $details['shipper']['name'] = $shipper->name;
-//                    $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-//                    $details['shipper']['city'] = $shipper->city->name;
-//                    $details['shipper']['phone_number_1'] = $shipper->phone;
-//                    $details['shipper']['phone_number_2'] = $shipper->phone2;
-//                    $details['shipper']['email'] = $shipper->email;
-//                    $details['shipper']['sales_person'] = $sales_person_name;
-
                     $pickup = $shipment->pickup_address;
 
                     $details['pickup']['person_of_contact'] = $pickup->poc;
@@ -118,23 +110,21 @@ class RetailTrackingController extends Controller
                             $franchise = RetailFranchise::find($retail_user->category_id);
                             $details['retail_user']['name'] = $franchise->name;
                             $details['retail_user']['code'] = 'Franchise';
-                            $details['shipper']['city'] = City::find($franchise->default_hub)->name;
+                            $details['shipper']['city'] = $franchise->pickup_address->city->name;
                         }
                         else{
                             $trax_center  = RetailTraxCenter::find($retail_user->category_id);
                             $details['retail_user']['name'] = $trax_center->name;
                             $details['retail_user']['code'] = 'Trax Center';
-                            $details['shipper']['city'] = City::find($trax_center->default_hub)->name;
+                            $details['shipper']['city'] = $trax_center->pickup_address->city->name;
                         }
 
                         $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
 
                         $details['shipper']['name'] = $shipper->shipper_name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-//
                         $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
                         $details['shipper']['sales_person'] = $sales_person_name;
-
 
                     }
                     else{
@@ -275,8 +265,8 @@ class RetailTrackingController extends Controller
                         $journey_details['user'] = $user;
                         $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
                         $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
-                        $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
-                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
+//                        $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
+//                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
                         $details['tracking_history'][] = $journey_details;
                     }

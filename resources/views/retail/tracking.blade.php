@@ -934,11 +934,11 @@
                                     {name: 'status', class: 'align-middle status'},
                                     {name: 'reason', class: 'align-middle reason'},
                                     {name: 'remarks', class: 'align-middle remarks'},
-                                    {name: 'user', class: 'align-middle user'},
+                                    // {name: 'user', class: 'align-middle user'},
                                     {name: 'city', class: 'align-middle city'},
                                     {name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                                    {name: 'ip', class: 'align-middle ip'},
-                                    {name: 'rider', class: 'align-middle rider'}
+                                    // {name: 'ip', class: 'align-middle ip'},
+                                    // {name: 'rider', class: 'align-middle rider'}
                                 ]
                             });
 
