@@ -47,7 +47,7 @@ class RetailCashDepositController extends Controller
                 }
             })
             ->editColumn('total_cash', function ($data) {
-                return number_format($data->total_cash);
+                return number_format(ROUND($data->total_cash, 0, PHP_ROUND_HALF_DOWN));
             })
             ->addColumn('booking_code', function ($data) {
                 return str_pad($data->employee_id, 6, '0', STR_PAD_LEFT);
@@ -238,7 +238,7 @@ class RetailCashDepositController extends Controller
                                                 <td style="border-bottom: none !important;">' . $cash_deposit->shipping_mode->name . '</td>
                                                 <td>' . $cash_deposit_shipment->shipment->tracking_number . '</td>
                                                 <td>1</td>
-                                                <td>' . $cash_deposit_shipment->shipment->amount . '</td>
+                                                <td>' . number_format(ROUND($cash_deposit_shipment->shipment->amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                             </tr>';
                                     }
 
@@ -247,14 +247,14 @@ class RetailCashDepositController extends Controller
                                                 <td><b>Total</b></td>
                                                 <td></td>
                                                 <td><b>' . $cash_deposit->total_cn . '</b></td>
-                                                <td><b>' . $cash_deposit->total_cash . '</b></td>
+                                                <td><b>' . number_format(ROUND($cash_deposit->total_cash, 0, PHP_ROUND_HALF_DOWN)) . '</b></td>
                                             </tr>';
 
             $html .= '
                                         </tbody>
                                     </table>
                                     <div class="m-1">
-                                        <p><b>IT IS CERTIFIED THAT THE MENTIONED CASH COLLECTION OF PKR _____________________ HAS BEEN MADE.</b></p>
+                                        <p><b>IT IS CERTIFIED THAT THE MENTIONED CASH COLLECTION OF PKR ' . number_format(ROUND($cash_deposit->total_cash, 0, PHP_ROUND_HALF_DOWN)) . ' HAS BEEN MADE.</b></p>
                                     </div>
                             </div>';
 
@@ -267,7 +267,7 @@ class RetailCashDepositController extends Controller
                                         <p>Collection Staff Signature___________________________________________________</p>
                                     </div>
                                     <div class="row justify-content-end p-2">
-                                        <p>Staff Signature_________________________________________________</p>
+                                        <p>Cashier Signature_________________________________________________</p>
                                     </div>
                                     <div class="row justify-content-end p-2">
                                         <p>Cashier Name__________________________________________________</p>
