@@ -426,12 +426,12 @@
 
             $('body').on('click', '.approve', function (e) {
                 var id = $(this).data('target-id');
-                var name = table.row($(this).parents('tr')).data().name;
+                var rider_name = table.row($(this).parents('tr')).data().rider_name;
                 var cnic = table.row($(this).parents('tr')).data().cnic;
                 var phone_no = table.row($(this).parents('tr')).data().phone_no;
                 var pin = table.row($(this).parents('tr')).data().pin;
                 var city_id = table.row($(this).parents('tr')).data().city_id;
-                $('#rider_name').val(name);
+                $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
                 $('#rider_phone').val(phone_no);
                 $('#rider_request_id').val(id);
