@@ -15,8 +15,8 @@ class CreatePickupNoteStationDepositNotesTable extends Migration
     {
         Schema::create('pickup_note_station_deposit_notes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('station_deposit_note_id');
-            $table->integer('retail_pickup_note_id');
+            $table->integer('station_deposit_note_id')->index();
+            $table->integer('retail_pickup_note_id')->index();
             $table->timestamps();
         });
     }
