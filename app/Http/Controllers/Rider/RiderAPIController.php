@@ -1952,15 +1952,13 @@ class RiderAPIController extends Controller {
         if ($from_date == null && $pickup_request_id == null && $pickup_note_id == null) {
             return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
         } else {
+
             $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
                 ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
                 ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
-                ->join('riders as r', 'pn.rider_id', 'r.id')
                 ->join('users as u', 'pr.shipper_id', 'u.id')
-                ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
-                ->join('cities as c', 'usi.city_id', 'c.id')
-                ->select('v2_rider_pickups.id', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id')
-                ->where('r.id', '=', $rider_id);
+                ->select('v2_rider_pickups.id', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', 'v2_rider_pickups.pickup_type', 'u.name as shipper')
+                ->where('pn.rider_id', '=',$rider_id );
 
             if ($from_date != null) {
                 $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at', $from_date);
@@ -2002,7 +2000,7 @@ class RiderAPIController extends Controller {
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
                 ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
-                ->where('delivery_notes.status', '=', 1)
+                ->where('delivery_notes.pending_status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
             if ($from_date != null) {

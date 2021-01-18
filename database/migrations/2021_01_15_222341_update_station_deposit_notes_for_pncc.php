@@ -14,7 +14,7 @@ class UpdateStationDepositNotesForPncc extends Migration
     public function up()
     {
         Schema::table('station_deposit_notes', function (Blueprint $table) {
-            $table->integer('sdn_type')->default(1);
+            $table->integer('sdn_type')->default(1)->index();
         });
     }
 
