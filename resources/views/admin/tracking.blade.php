@@ -593,7 +593,7 @@
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
-                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td colspan="3"><strong>City</strong></td>';
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
