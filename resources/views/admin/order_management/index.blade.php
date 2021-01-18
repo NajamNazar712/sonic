@@ -472,7 +472,7 @@
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
                 console.log(value);
-                if (this.value && this.value == 17 && lost_flag === true) {
+                if (this.value && this.value == 23 && lost_flag === true) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_ids').val();
                     $.ajax({
@@ -892,7 +892,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.shipper_status_id != 17) {
+                    if (data.shipper_status_id != 23) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
