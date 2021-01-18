@@ -314,7 +314,7 @@ class RetailShipmentBookController extends Controller
 
 
         $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('shipping_mode_id', $request->shipping_mode)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
         if($cash_deposit->exists()){
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
@@ -325,7 +325,6 @@ class RetailShipmentBookController extends Controller
         }
         else{
             $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->shipping_mode_id = $request->shipping_mode;
             $cash_deposit->category = Auth::user()->category;
             $cash_deposit->retail_user_id = Auth::id();
             $cash_deposit->total_cn = 1;
@@ -336,6 +335,7 @@ class RetailShipmentBookController extends Controller
         $cash_deposit_shipment = new RetailCashDepositShipment();
         $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
         $cash_deposit_shipment->shipment_id = $shipment_id;
+        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
         $cash_deposit_shipment->save();
 
 

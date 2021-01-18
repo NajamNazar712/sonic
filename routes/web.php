@@ -970,8 +970,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
 
             Route::prefix('retail')->name('retail.')->group(function() {
-                Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
-                Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
+                Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
+                Route::get('{id}/ajax','Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
             });
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){

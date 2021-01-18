@@ -189,4 +189,33 @@ class RetailCompletedDeliveries extends Controller
             }
         }
     }
+
+    public function sdn_details(Request $request, $id)
+    {
+        return view('admin.retail.sdn.details')->with('sdn_id', $id);
+    }
+
+    public function sdn_details_ajax(Request $request, $id)
+    {
+        $deliveries = StationDepositNote::
+        join('pickup_note_station_deposit_notes as dnsdn', 'dnsdn.station_deposit_note_id', '=', 'station_deposit_notes.id')
+            ->join('retail_pickup_notes', 'retail_pickup_notes.id', '=', 'dnsdn.retail_pickup_note_id')
+            ->join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'retail_pickup_notes.rider_id', '=', 'riders.id')
+            ->select(['retail_pickup_notes.id as pncc', 'retail_pickup_notes.id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'retail_pickup_notes.amount', 'retail_pickup_notes.shipments', 'retail_pickup_notes.remarks'])
+            ->where('station_deposit_notes.id', $id);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('station_deposit_notes.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($deliveries)
+            ->editColumn('pncc', function ($deliveries) {
+                return str_pad($deliveries->pncc, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->make(true);
+    }
 }

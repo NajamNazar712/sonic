@@ -111,26 +111,22 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No');
-                            head.push('DNCC No.');
+                            head.push('PNCC No.');
                             head.push('Hub');
                             head.push('Rider');
-                            head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('No. Of Shipments Delivered');
-                            head.push('DNCC Amount');
+                            head.push('PNCC Amount');
                             // head.push('Net Amount');
                             head.push('Remarks');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.dncc);
+                                row.push(values.pncc);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.route);
-                                row.push(values.shipments_count);
-                                row.push(values.delivered_shipments);
-                                row.push(values.received_cod_amount);
+                                row.push(values.shipments);
+                                row.push(values.amount);
                                 // row.push(values.net_amount);
                                 row.push(values.remarks);
 
@@ -166,13 +162,11 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'pncc' ,name: 'delivery_notes.id', class: 'align-middle text-center pncc'},
+                    { data:'pncc' ,name: 'retail_pickup_notes.id', class: 'align-middle text-center pncc'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
+                    { data:'shipments' ,name: 'retail_pickup_notes.shipments', class: 'align-middle shipments'},
+                    { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
                     // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
                     // { data:'net_amount' ,name: 'delivery_notes.net_amount', class: 'align-middle net_amount'},
                     { data:'remarks' ,name: 'delivery_notes.remarks', class: 'align-middle remarks'},

@@ -18,8 +18,8 @@ class UpdateShipperInfoForShipperCheckTable extends Migration
             $table->string('iban')->nullable();
             $table->string('account_number')->nullable();
             $table->string('cheque_image')->nullable();
-            $table->integer('status')->default(1);
-            $table->integer('completed_status')->default(0);
+            $table->integer('status')->default(1)->index();
+            $table->integer('completed_status')->default(0)->index();
         });
     }
 

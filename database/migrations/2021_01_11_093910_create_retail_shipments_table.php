@@ -25,7 +25,7 @@ class CreateRetailShipmentsTable extends Migration
             $table->string('shipper_name');
             $table->string('shipper_cnic');
             $table->string('shipper_address');
-            $table->integer('trax_box_id')->nullable();
+            $table->integer('trax_box_id')->nullable()->index();
             $table->decimal('total_charges');
             $table->decimal('gst_charges');
             $table->decimal('total_amount');
