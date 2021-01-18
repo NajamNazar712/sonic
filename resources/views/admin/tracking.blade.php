@@ -367,7 +367,7 @@
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
                 console.log(value);
-                if (this.value && this.value == 17 && lost_flag === true ) {
+                if (this.value && this.value == 23 && lost_flag === true ) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_id').val();
                     $.ajax({
@@ -593,7 +593,7 @@
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
-                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td colspan="3"><strong>City</strong></td>';
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
@@ -1625,7 +1625,7 @@
                     $('#channel_id').val(case_nature_channel_id);
                     $('#complaint_id').val(case_nature_claim_id);
                     var formData = new FormData($('#add_request_form')[0]);
-                    if (case_nature_claim_id === 17) {
+                    if (case_nature_claim_id === 23) {
                         if ($('#request_id').val() == "" || $('#request_id').val() == null) {
                             nature_flag = false;
                             var error = "Please select receiving sheet!";
