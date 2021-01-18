@@ -43,8 +43,7 @@
                             <thead>
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Product</th>
-                                <th class="border-primary border-darken-1">Total CN</th>
+                                <th class="border-primary border-darken-1">Total CN Number Used</th>
                                 <th class="border-primary border-darken-1">Performa No.</th>
                                 <th class="border-primary border-darken-1">Trax/Franchise</th>
                                 <th class="border-primary border-darken-1">Booking Code</th>
@@ -63,7 +62,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Total CN(s)</h4>
+                    <h4 class="modal-title" id="shipments_modal_title">Total CN Number Used</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -150,8 +149,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Product');
-                            head.push('Total CN Number');
+                            head.push('Total CN Number Used');
                             head.push('Performa No.');
                             head.push('Trax Center/Franchise');
                             head.push('Booking Code');
@@ -161,7 +159,6 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.shipping_mode);
                                 row.push(values.total_shipments);
                                 row.push(values.performa_no);
                                 row.push(values.category);
@@ -206,10 +203,9 @@
                     }
                 },
                 rowId: 'performa_no',
-                order: [[5, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'shipping_mode', name: 'retail_shipping_modes.id', class: 'align-middle text-center shipping_mode'},
                     {data: 'shipments_button', name: 'retail_cash_deposits.total_cn', class: 'align-middle text-center shipments_button'},
                     {data: 'performa_button', name: 'retail_cash_deposits.id', class: 'align-middle text-center performa_button'},
                     {data: 'category', name: 'retail_cash_deposits.category', class: 'align-middle text-center category'},
