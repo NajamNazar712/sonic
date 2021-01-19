@@ -21,6 +21,7 @@ use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
+use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
@@ -561,6 +562,29 @@ class ShipperShipmentBookController extends Controller
                             $order_date->save();
                         }
                     }
+
+
+                if($request->shipper_reference_1 != null || $request->shipper_reference_2 != null || $request->shipper_reference_3 != null || $request->shipper_reference_4 != null || $request->shipper_reference_5 != null){
+                    $shipper_reference = new ShipmentShipperReference();
+                    $shipper_reference->shipment_id = $shipment_id;
+                    if($request->shipper_reference_1 != null) {
+                        $shipper_reference->reference_1 = $request->shipper_reference_1;
+                    }
+                    if($request->shipper_reference_2 != null) {
+                        $shipper_reference->reference_2 = $request->shipper_reference_2;
+                    }
+                    if($request->shipper_reference_3 != null) {
+                        $shipper_reference->reference_3 = $request->shipper_reference_3;
+                    }
+                    if($request->shipper_reference_4 != null) {
+                        $shipper_reference->reference_4 = $request->shipper_reference_4;
+                    }
+                    if($request->shipper_reference_5 != null) {
+                        $shipper_reference->reference_5 = $request->shipper_reference_5;
+                    }
+                    $shipper_reference->save();
+                }
+
                     if ($service_type_id == 1 || $service_type_id == 5) {
                         $product_type_id = $request->input('product_type');
 
@@ -2584,6 +2608,26 @@ class ShipperShipmentBookController extends Controller
                         $order_date->order_date = $request->order_date_formatted;
                         $order_date->save();
                     }
+                }
+                if($request->shipper_reference_1 != null || $request->shipper_reference_2 != null || $request->shipper_reference_3 != null || $request->shipper_reference_4 != null || $request->shipper_reference_5 != null){
+                    $shipper_reference = new ShipmentShipperReference();
+                    $shipper_reference->shipment_id = $shipment_id;
+                    if($request->shipper_reference_1 != null) {
+                        $shipper_reference->reference_1 = $request->shipper_reference_1;
+                    }
+                    if($request->shipper_reference_2 != null) {
+                        $shipper_reference->reference_2 = $request->shipper_reference_2;
+                    }
+                    if($request->shipper_reference_3 != null) {
+                        $shipper_reference->reference_3 = $request->shipper_reference_3;
+                    }
+                    if($request->shipper_reference_4 != null) {
+                        $shipper_reference->reference_4 = $request->shipper_reference_4;
+                    }
+                    if($request->shipper_reference_5 != null) {
+                        $shipper_reference->reference_5 = $request->shipper_reference_5;
+                    }
+                    $shipper_reference->save();
                 }
                 if ($service_type_id == 1 || $service_type_id == 5) {
                     $product_type_id = $request->input('product_type');

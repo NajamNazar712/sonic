@@ -734,23 +734,23 @@ class APIController extends Controller
                 }
             }
 
-            if($request->has('shipper_reference_1') != null || $request->has('shipper_reference_2') != null || $request->has('shipper_reference_3') != null || $request->has('shipper_reference_4') != null || $request->has('shipper_reference_5') != null){
+            if($request->has('shipper_reference_number_1') || $request->has('shipper_reference_number_2') || $request->has('shipper_reference_number_3') || $request->has('shipper_reference_number_4') || $request->has('shipper_reference_number_5')){
                 $shipper_reference = new ShipmentShipperReference();
                 $shipper_reference->shipment_id = $shipment_id;
-                if($request->has('shipper_reference_1') != null) {
-                    $shipper_reference->reference_1 = $request->shipper_reference_1;
+                if($request->has('shipper_reference_number_1')) {
+                    $shipper_reference->reference_1 = $request->shipper_reference_number_1;
                 }
-                if($request->has('shipper_reference_2') != null) {
-                    $shipper_reference->reference_2 = $request->shipper_reference_2;
+                if($request->has('shipper_reference_number_2')) {
+                    $shipper_reference->reference_2 = $request->shipper_reference_number_2;
                 }
-                if($request->has('shipper_reference_3') != null) {
-                    $shipper_reference->reference_3 = $request->shipper_reference_3;
+                if($request->has('shipper_reference_number_3')) {
+                    $shipper_reference->reference_3 = $request->shipper_reference_number_3;
                 }
-                if($request->has('shipper_reference_4') != null) {
-                    $shipper_reference->reference_4 = $request->shipper_reference_4;
+                if($request->has('shipper_reference_number_4')) {
+                    $shipper_reference->reference_4 = $request->shipper_reference_number_4;
                 }
-                if($request->has('shipper_reference_5') != null) {
-                    $shipper_reference->reference_5 = $request->shipper_reference_5;
+                if($request->has('shipper_reference_number_5')) {
+                    $shipper_reference->reference_5 = $request->shipper_reference_number_5;
                 }
                 $shipper_reference->save();
             }

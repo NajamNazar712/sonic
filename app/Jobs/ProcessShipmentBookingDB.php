@@ -207,23 +207,23 @@ class ProcessShipmentBookingDB implements ShouldQueue
             $order_date->save();
         }
 
-        if($this->booking['shipper_reference_1'] != null || $this->booking['shipper_reference_2'] != null || $this->booking['shipper_reference_3'] != null || $this->booking['shipper_reference_4'] != null || $this->booking['shipper_reference_5'] != null){
+        if($this->booking['shipper_reference_number_1'] != null || $this->booking['shipper_reference_number_2'] != null || $this->booking['shipper_reference_number_3'] != null || $this->booking['shipper_reference_number_4'] != null || $this->booking['shipper_reference_number_5'] != null){
             $shipper_reference = new ShipmentShipperReference();
             $shipper_reference->shipment_id = $shipment_id;
-            if($this->booking['shipper_reference_1'] != null) {
-                $shipper_reference->reference_1 = $this->booking['shipper_reference_1'];
+            if($this->booking['shipper_reference_number_1'] != null) {
+                $shipper_reference->reference_1 = $this->booking['shipper_reference_number_1'];
             }
-            if($this->booking['shipper_reference_2'] != null) {
-                $shipper_reference->reference_2 = $this->booking['shipper_reference_2'];
+            if($this->booking['shipper_reference_number_2'] != null) {
+                $shipper_reference->reference_2 = $this->booking['shipper_reference_number_2'];
             }
-            if($this->booking['shipper_reference_3'] != null) {
-                $shipper_reference->reference_3 = $this->booking['shipper_reference_3'];
+            if($this->booking['shipper_reference_number_3'] != null) {
+                $shipper_reference->reference_3 = $this->booking['shipper_reference_number_3'];
             }
-            if($this->booking['shipper_reference_4'] != null) {
-                $shipper_reference->reference_4 = $this->booking['shipper_reference_4'];
+            if($this->booking['shipper_reference_number_4'] != null) {
+                $shipper_reference->reference_4 = $this->booking['shipper_reference_number_4'];
             }
-            if($this->booking['shipper_reference_5'] != null) {
-                $shipper_reference->reference_5 = $this->booking['shipper_reference_5'];
+            if($this->booking['shipper_reference_number_5'] != null) {
+                $shipper_reference->reference_5 = $this->booking['shipper_reference_number_5'];
             }
             $shipper_reference->save();
         }
