@@ -147,6 +147,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Return Pending For');
+                            head.push('Return Confirmed By');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Arrival Date');
@@ -171,6 +172,7 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.return_pending_for);
+                                row.push(values.return_confirmed_by);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.arrival);
