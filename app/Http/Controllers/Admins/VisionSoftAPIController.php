@@ -1206,7 +1206,8 @@ class VisionSoftAPIController extends Controller
         $adjustments = AdjustmentLog::join('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('cities as c', 'c.id', '=', 's.consignee_city_id')
-            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city')
+            ->join('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
+            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city', 'at.name as type')
             ->whereDate('adjustment_logs.created_at', $date)
             ->get();
 
@@ -1223,6 +1224,7 @@ class VisionSoftAPIController extends Controller
                             'pin_tr_date' => $today->format('m/d/Y'),
                             'pin_tracking_number' => $adjustment->tracking_number,
                             'pin_account_id' => $adjustment->account_id,
+                            'pin_adj_type' => $adjustment->type,
                             'pin_amount' => $adjustment->amount,
                             'pin_destination' => $adjustment->city
                         ]
