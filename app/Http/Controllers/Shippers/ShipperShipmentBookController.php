@@ -4267,7 +4267,7 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_2' => ['nullable', 'between:0,190'],
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
-            'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+            'shipper_reference_number_5' => ['nullable', 'between:0,190']
 
         ];
         if($file = $request->file('shipments')) {
