@@ -352,8 +352,11 @@ class RetailShipmentBookController extends Controller
         }
     }
     public function calculate_rates(Request $request){
-        if($request->has('total_charges_without_gst') && $request->has('city_id')){
-            $city = City::find($request->city_id);
+        if($request->has('total_charges_without_gst')){
+            $pickup_address_id = session('pickup_address_id');
+            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+            $pickup_city_id = $user_shipping_info->city_id;
+            $city = City::find($pickup_city_id);
             $total_charges_without_gst = $request->total_charges_without_gst;
             $gst = $city->zone->gst;
             $gst = $gst * $total_charges_without_gst;
