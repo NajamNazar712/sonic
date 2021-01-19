@@ -700,13 +700,7 @@
             });
             var city_id = null;
             $('#calculate_rates').on('click', function () {
-                if(overland){
-                    city_id = $('#domestic_overland_destination').val();
-                }
-                else{
-                    city_id = $('#domestic_destination').val();
-                }
-                if(city_id != '' && $('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
+                if($('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
                     var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
                     // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
                     var fuel_surcharge = parseFloat($('#fuel_surcharge').val().replace(/,/g, ''));
@@ -718,7 +712,6 @@
                         method: 'POST',
                         data: {
                             'total_charges_without_gst': total_charges_without_gst,
-                            'city_id': parseInt(city_id),
                             '_token': '{{ csrf_token() }}'
                         }
                     })

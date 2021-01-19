@@ -308,6 +308,25 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
+
+            $('#damage_claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+            $('#claim_content_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -366,7 +385,6 @@
             }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
-                console.log(value);
                 if (this.value && this.value == 23 && lost_flag === true ) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_id').val();
@@ -406,7 +424,7 @@
                     $('#AddNewRequest').attr('disabled',false);
 
                 }
-                if (this.value && this.value == 15)
+                if (this.value && this.value == 21)
                 {
                     $('#claim_shipment_damage_div').removeClass('d-none');
                 }
@@ -414,7 +432,7 @@
                     $('#claim_shipment_damage_div').addClass('d-none');
                 }
 
-                if (this.value && this.value == 16)
+                if (this.value && this.value == 22)
                 {
                     $('#claim_content_short_div').removeClass('d-none');
                 }
