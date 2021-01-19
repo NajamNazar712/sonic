@@ -179,7 +179,7 @@ class RetailShipmentBookController extends Controller
         $request->weight_charges = str_replace(',', '', $request->input('weight_charges'));
         $request->fuel_surcharge = str_replace(',', '', $request->input('fuel_surcharge'));
 
-        $city = City::find($consignee_city_id);
+        $city = City::find($pickup_city_id);
         $gst = $city->zone->gst;
         $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
         $gst = $gst * $total_charges_without_gst;
