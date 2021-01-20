@@ -3869,7 +3869,8 @@ class AdminFinanceController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers));;
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('done_payments.id');
         }
 
         if ($shipper = $request->get('search_shipper')) {
