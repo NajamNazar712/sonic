@@ -13,6 +13,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
@@ -34,6 +35,8 @@ class RetailShipmentBookController extends Controller
     public function __construct()
     {
         $this->middleware('auth:retail');
+
+        //$this->middleware('auth:retail')->except(['slip']);
 
 //        $this->middleware('Permission');
     }
@@ -407,6 +410,7 @@ class RetailShipmentBookController extends Controller
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $user_name = Auth::user()->name . ' (Retail)';
+
         $print_details = '
             <div class="small mt-1">Printed By: ' . $user_name . '</div>
         ';

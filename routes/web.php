@@ -2615,7 +2615,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
-//            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@bank_info')->name('bank_info');
+            Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
 
