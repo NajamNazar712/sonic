@@ -12,8 +12,8 @@ class UpdateRetailShippingModesForReplaceOvernightOverlandDetainTableSeeder exte
      */
     public function run()
     {
-        RetailShippingMode::where('id', 1)->update(['name'=>'Rush']);
-        RetailShippingMode::where('id', 2)->update(['name'=>'Swift']);
-        RetailShippingMode::where('id', 4)->update(['name'=>'Saver+']);
+        RetailShippingMode::where('id', 1)->update(['name'=>'Saver+']);
+        RetailShippingMode::where('id', 2)->update(['name'=>'Rush']);
+        RetailShippingMode::where('id', 4)->update(['name'=>'Swift']);
     }
 }
