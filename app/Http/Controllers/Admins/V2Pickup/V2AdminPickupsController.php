@@ -2395,7 +2395,18 @@ class V2AdminPickupsController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
                         ;
                 }
-            });
+            })
+            ->editColumn('total_shipment', function($request) {
+                if ($request->total_shipment != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $request->total_shipment . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+
+
+        ;
 
         return $datatable->make(true);
 
