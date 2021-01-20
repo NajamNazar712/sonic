@@ -492,12 +492,18 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
-            function print(id, booking_type_id) {
-                if (booking_type_id != 4) {
-                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+            function print(id, booking_type_id, shipment_type) {
+
+                if(shipment_type == 1){
+                    if (booking_type_id != 4 ) {
+                        var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+                    }
+                    else {
+                        var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                    }
                 }
-                else {
-                    var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                else{
+                    var url = '{!! route('admin.retail.accounts.retail_slip') !!}';
                 }
 
                 $.ajax({
@@ -566,6 +572,7 @@
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
+                                var shipment_type = details.shipment_type;
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
@@ -589,10 +596,10 @@
 
                                     shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
 
-                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
                                 else {
-                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
 
                                 shipment += '</div>';
@@ -615,7 +622,7 @@
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
-                                if(details.shipment_type == 1){
+                                if(shipment_type == 1){
                                     shipment += '<tr>';
                                     shipment += '<td><strong>Phone No(s).</strong></td>';
 
@@ -1194,9 +1201,11 @@
             $('#tracking').on('click', '.print', function () {
                 id = $(this).attr('id');
 
+                shipment_type = $(this).attr('shipment_type');
+
                 booking_type_id = $(this).attr('data-booking-type-id');
 
-                print(id, booking_type_id);
+                print(id, booking_type_id,shipment_type);
             });
 
             $('#tracking').on('click', '.add_request', function () {
