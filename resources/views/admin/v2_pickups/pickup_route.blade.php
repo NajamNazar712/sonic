@@ -633,6 +633,13 @@
                             $('#AssignLocationsView .modal-body').html(html);
                             $('#AssignLocationsView').modal('show');
                         }
+                        else{
+                            var error = "No Route for this Shipper";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
 
                     });
                 }
@@ -847,9 +854,10 @@
 
         });
 
-
-        $('#assign_location').on('hidden.bs.modal', function () {
-            $('#pickup_address').val('').trigger('change');
+        });
+        $('#assign_location').on('hide.bs.modal', function () {
+            //$('#pickup_address').val('').trigger('change');
+            $('#pickup_address').empty().trigger('change');
             $('#users').val('').trigger('change');
             var view_address = $('#view_address').DataTable();
             view_address.clear();
@@ -858,7 +866,6 @@
             selected_rows = [];
             rows_count = 0;
             // $('#return_note_image_view_table tbody').html('');
-        });
         });
     </script>
 
