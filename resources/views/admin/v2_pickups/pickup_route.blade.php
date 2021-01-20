@@ -634,7 +634,7 @@
                             $('#AssignLocationsView').modal('show');
                         }
                         else{
-                            var error = "No Route for this Shipper";
+                            var error = "No Address Found";
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
