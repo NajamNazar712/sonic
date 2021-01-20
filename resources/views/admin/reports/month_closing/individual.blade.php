@@ -49,6 +49,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Responsible Person</th>
                         <th class="border-primary border-darken-1">Tracking ID.</th>
                         <th class="border-primary border-darken-1">Current Status</th>
@@ -190,6 +191,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Category');
                             head.push('Responsible Person');
                             head.push('Tracking No.');
                             head.push('Current Status');
@@ -213,6 +215,7 @@
 
 
                                 row.push(index + 1);
+                                row.push(values.category);
                                 row.push(values.responsible_person);
                                 row.push(values.tracking_number);
                                 row.push(values.current_status);
@@ -267,9 +270,10 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[2, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'category', name: 'mcr.admin', class: 'align-middle category'},
                     {data: 'responsible_person', name: 'rp.name', class: 'align-middle responsible_person'},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},

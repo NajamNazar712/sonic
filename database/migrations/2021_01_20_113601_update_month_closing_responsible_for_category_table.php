@@ -13,7 +13,9 @@ class UpdateMonthClosingResponsibleForCategoryTable extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('month_closing_responsibles', function (Blueprint $table) {
+            $table->integer('admin')->after('month_closing_id')->default(1);
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class UpdateMonthClosingResponsibleForCategoryTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('month_closing_responsibles', function (Blueprint $table) {
+            $table->dropColumn('admin');
+        });
     }
 }

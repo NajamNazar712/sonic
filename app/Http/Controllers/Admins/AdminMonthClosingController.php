@@ -468,9 +468,13 @@ class AdminMonthClosingController extends Controller
 
     }
     public function assign_responsible_submit(Request $request){
-        $responsible_persons = $request->responsible_persons;
+        if($request->has('responsible_persons')){
+            $responsible_persons = $request->responsible_persons;
+        }
+        else{
+            $responsible_persons = $request->rider_responsible_persons;
+        }
         $shipment_ids = explode(',', $request->shipment_ids);
-        dd($request);
         foreach ($shipment_ids as $shipment_id) {
             $month_closing = MonthClosing::where('shipment_id', $shipment_id);
             if(!$month_closing->exists()){
@@ -486,10 +490,19 @@ class AdminMonthClosingController extends Controller
                     if($request->has('deduct_switch')){
                         $individual_flag = TRUE;
                     }
+                    $user_flag = FALSE;
+                    if($request->has('user_switch')){
+                        $user_flag = TRUE;
+                    }
 
                     foreach ($responsible_persons as $person_id){
                         $month_closing_responsible = new MonthClosingResponsible();
                         $month_closing_responsible->month_closing_id = $month_closing_id;
+                        if($user_flag){
+                            $month_closing_responsible->admin = 0;
+                        }else{
+                            $month_closing_responsible->admin = 1;
+                        }
                         $month_closing_responsible->responsible_person_id = $person_id;
                         $month_closing_responsible->added_by = Auth::id();
                         if($individual_flag){

@@ -426,6 +426,7 @@
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
                                 $('#add_responsible_modal').modal('show');
+                                $('#responsible_person_shipment_ids').val(selected_rows);
                             }else{
                                 var error = "No shipments selected!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -754,6 +755,12 @@
                 else{
                     $('#users_div').removeClass('d-none');
                     $('#riders_div').addClass('d-none');
+                }
+                deduct_amount_switch_change = document.querySelector('#deduct_switch');
+                if(deduct_amount_switch_change.checked === true) {
+                    $('#deduct_all_div').slideDown();
+                    $('#deduct_individual_div').slideUp();
+                    $('#deduct_switch').trigger('click');
                 }
             });
 
