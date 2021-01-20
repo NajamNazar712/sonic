@@ -1752,13 +1752,6 @@
 				'min': 0,
 				'max': 1000000000000
 			});
-			$('.shipper_reference').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false,
-				'min': 0,
-				'max': 1000000000000
-			});
 		});
 	</script>
 @endsection
