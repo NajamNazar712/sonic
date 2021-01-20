@@ -334,21 +334,28 @@ class AdminMonthClosingController extends Controller
          $not_updated_shipments = array();
          $untouched = false;
             if(!empty($shipment_ids)){
-
                 foreach ($shipment_ids as $shipment){
                     $parcel = Shipment::find($shipment);
                     if($parcel){
-                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+                        $month_closing = MonthClosing::where('shipment_id', $parcel->id)->where('status_id', 3);
+                        if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
+                            $month_closing->status_id = 4;
+                            $month_closing->save();
 
-                        NotificationsController::send(15, 0, $shipment);
-                        NotificationsController::send(16, 0, $shipment);
+                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+                            ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+                            NotificationsController::send(15, 0, $shipment);
+                            NotificationsController::send(16, 0, $shipment);
+                        }
+                        else{
+                            $not_updated_shipments[] = $shipment;
+                        }
                     }
                     else{
                         $not_updated_shipments[] = $shipment;
                     }
                 }
-
             }
          if(count($not_updated_shipments) > 0){
              $untouched = true;

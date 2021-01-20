@@ -561,11 +561,9 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if(data.month_closing_status_id == 2){
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
+                        table.row(row).select();
                     }
 
                 },
