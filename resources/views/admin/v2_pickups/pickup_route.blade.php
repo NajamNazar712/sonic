@@ -730,7 +730,7 @@
                 dropdownParent:$('#route_location')
             }).bind('select2:select',function(){
                 var address_id = parseInt($(this).val());
-                var address = $(this).text();
+                var address = $(this).find(':selected').text();
                 var user = $( "#users option:selected" ).text();
                 add_row(address_id,address,user);
 
