@@ -470,7 +470,7 @@ class AdminMonthClosingController extends Controller
     public function assign_responsible_submit(Request $request){
         $responsible_persons = $request->responsible_persons;
         $shipment_ids = explode(',', $request->shipment_ids);
-        dd($shipment_ids);
+        dd($request);
         foreach ($shipment_ids as $shipment_id) {
             $month_closing = MonthClosing::where('shipment_id', $shipment_id);
             if(!$month_closing->exists()){
