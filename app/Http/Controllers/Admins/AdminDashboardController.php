@@ -9114,6 +9114,10 @@ class AdminDashboardController extends Controller
         ]);
         if($request->password == $request->confirm_password){
             Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            if(session()->has('first_login') && session('first_login') != 1){
+                session(['first_login' => 1]);
+                Admin::where('id',Auth::id())->update(['first_login' => 1]);
+            }
             return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
         }
         else{
