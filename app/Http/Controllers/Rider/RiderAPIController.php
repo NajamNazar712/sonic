@@ -558,63 +558,62 @@ class RiderAPIController extends Controller {
 
             if (!RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
 
-                if (PickupNoteRequest::join('v2_pickup_notes as pn', 'v2_pickup_note_requests.pickup_note_id', '=', 'pn.id')->where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pn.rider_id', $rider_id)->exists()) {
-                    $pickup_request = PickupRequest::find($request->pickup_request_id);
-                    $pickup_address = $pickup_request->pickup_address;
+                $pickup_request = PickupRequest::find($request->pickup_request_id);
+                $pickup_address = $pickup_request->pickup_address;
 
-                    $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+                $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
-                    $rider_pickup = new RiderPickup();
+                $rider_pickup = new RiderPickup();
 
-                    $rider_pickup->added_at = $added_at;
-                    $rider_pickup->pickup_note_id = $request->pickup_note_id;
-                    $rider_pickup->pickup_request_id = $request->pickup_request_id;
-                    $rider_pickup->pickup_type = 1;
-                    $rider_pickup->start_location_latitude = $request->start_location_latitude;
-                    $rider_pickup->start_location_longitude = $request->start_location_longitude;
-                    $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
-                    $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
+                $rider_pickup->added_at = $added_at;
+                $rider_pickup->pickup_note_id = $request->pickup_note_id;
+                $rider_pickup->pickup_request_id = $request->pickup_request_id;
+                $rider_pickup->pickup_type = 1;
+                $rider_pickup->start_location_latitude = $request->start_location_latitude;
+                $rider_pickup->start_location_longitude = $request->start_location_longitude;
+                $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
+                $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
 
-                    if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
-                        $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+                if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                    $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
-                        $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
+                    $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
 
-                        if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                            $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                            $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
 
-                            $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+                        $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
 
-                            $distance = $this->distance($origin, $destination);
+                        $distance = $this->distance($origin, $destination);
 
-                            $rider_pickup->distance_from_current_to_actual = $distance;
+                        $rider_pickup->distance_from_current_to_actual = $distance;
 
-                            if ($distance > 0.1) {
-                                $this->verify_pickup_address_location($pickup_address->id);
-                            }
-                        } else {
-                            $pickup_address->location_latitude = $request->actual_location_latitude;
-                            $pickup_address->location_longitude = $request->actual_location_longitude;
-
-                            $pickup_address->save();
+                        if ($distance > 0.1) {
+                            $this->verify_pickup_address_location($pickup_address->id);
                         }
                     } else {
-                        $rider_pickup->distance_from_start_to_actual = 0;
+                        $pickup_address->location_latitude = $request->actual_location_latitude;
+                        $pickup_address->location_longitude = $request->actual_location_longitude;
 
-                        if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                            $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                            $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
-                            $rider_pickup->distance_from_current_to_actual = 0;
-                        }
+                        $pickup_address->save();
                     }
+                } else {
+                    $rider_pickup->distance_from_start_to_actual = 0;
 
-                    $rider_pickup->shipments = $request->shipments;
-
-                    $rider_pickup->save();
-
-                    PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                        $rider_pickup->distance_from_current_to_actual = 0;
+                    }
                 }
+
+                $rider_pickup->shipments = $request->shipments;
+
+                $rider_pickup->save();
+
+                PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -647,60 +646,59 @@ class RiderAPIController extends Controller {
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 0)->where('added_at', $added_at)->exists()) {
-                if (PickupNoteRequest::join('v2_pickup_notes as pn', 'v2_pickup_note_requests.pickup_note_id', '=', 'pn.id')->where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pn.rider_id', $rider_id)->exists()) {
-                    $pickup_request = PickupRequest::find($request->pickup_request_id);
-                    $pickup_address = $pickup_request->pickup_address;
+                $pickup_request = PickupRequest::find($request->pickup_request_id);
+                $pickup_address = $pickup_request->pickup_address;
 
-                    $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+                $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
-                    $rider_pickup = new RiderPickup();
+                $rider_pickup = new RiderPickup();
 
-                    $rider_pickup->added_at = $added_at;
-                    $rider_pickup->pickup_note_id = $request->pickup_note_id;
-                    $rider_pickup->pickup_request_id = $request->pickup_request_id;
-                    $rider_pickup->pickup_type = 0;
-                    $rider_pickup->start_location_latitude = $request->start_location_latitude;
-                    $rider_pickup->start_location_longitude = $request->start_location_longitude;
-                    $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
-                    $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
+                $rider_pickup->added_at = $added_at;
+                $rider_pickup->pickup_note_id = $request->pickup_note_id;
+                $rider_pickup->pickup_request_id = $request->pickup_request_id;
+                $rider_pickup->pickup_type = 0;
+                $rider_pickup->start_location_latitude = $request->start_location_latitude;
+                $rider_pickup->start_location_longitude = $request->start_location_longitude;
+                $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
+                $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
 
-                    if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
-                        $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+                if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                    $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
-                        $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
+                    $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
 
-                        if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                            $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                            $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
 
-                            $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+                        $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
 
-                            $rider_pickup->distance_from_current_to_actual = $this->distance($origin, $destination);
-                        }
-                    } else {
-                        $rider_pickup->distance_from_start_to_actual = 0;
-
-                        if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                            $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                            $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
-                            $rider_pickup->distance_from_current_to_actual = 0;
-                        }
+                        $rider_pickup->distance_from_current_to_actual = $this->distance($origin, $destination);
                     }
+                } else {
+                    $rider_pickup->distance_from_start_to_actual = 0;
 
-                    $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
-
-                    $rider_pickup->save();
-
-                    $picture_path = 'rider_pickup/' . $rider_pickup->id . '.png';
-
-                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
-
-                    $rider_pickup->picture_path = $picture_path;
-
-                    $rider_pickup->save();
-
-                    PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                        $rider_pickup->distance_from_current_to_actual = 0;
+                    }
                 }
+
+                $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
+
+                $rider_pickup->save();
+
+                $picture_path = 'rider_pickup/' . $rider_pickup->id . '.png';
+
+                Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+
+                $rider_pickup->picture_path = $picture_path;
+
+                $rider_pickup->save();
+
+                PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -1403,7 +1401,7 @@ class RiderAPIController extends Controller {
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
-                if (V2PickupNoteRequest::join('v2_pickup_notes as pn', 'v2_pickup_note_requests.pickup_note_id', '=', 'pn.id')->where('v2_pickup_note_requests.pickup_note_id', $request->pickup_note_id)->where('v2_pickup_note_requests.pickup_request_id', $request->pickup_request_id)->where('pn.rider_id', $rider_id)->exists()) {
+                if (V2PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V2PickupRequest::find($request->pickup_request_id);
                     $pickup_address = $pickup_request->pickup_address;
 
@@ -1522,7 +1520,7 @@ class RiderAPIController extends Controller {
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 0)->where('added_at', $added_at)->exists()) {
-                if (V2PickupNoteRequest::join('v2_pickup_notes as pn', 'v2_pickup_note_requests.pickup_note_id', '=', 'pn.id')->where('v2_pickup_note_requests.pickup_note_id', $request->pickup_note_id)->where('v2_pickup_note_requests.pickup_request_id', $request->pickup_request_id)->where('pn.rider_id', $rider_id)->exists()) {
+                if (V2PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V2PickupRequest::find($request->pickup_request_id);
 
                     $pickup_address = $pickup_request->pickup_address;
