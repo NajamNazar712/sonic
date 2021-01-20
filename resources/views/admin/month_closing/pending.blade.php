@@ -121,7 +121,12 @@
                  <div class="modal-body text-center">
                      <form id="add_responsible_form" class="form-horizontal mb-1 justify-content-center" method="post" action="{{ route('admin.month_closing.pending.assign') }}" novalidate="novalidate">
                         @csrf
-                         <input type="hidden" name="shipment_id" id="responsible_person_shipment_id">
+                         <input type="hidden" name="shipment_ids" id="responsible_person_shipment_ids">
+                         <div class="form-group">
+                             <label for="user_switch" class="font-medium-2 text-bold-600 mr-1">User(s)</label>
+                             <input type="checkbox" name="user_switch" id="user_switch" class="switchery user_switch" data-color="success" data-size="sm"/>
+                             <label for="user_switch" class="font-medium-2 text-bold-600 mr-1">Rider(s)</label>
+                         </div>
                          <div class="form-group">
                              <select name="responsible_persons[]" id="responsible_persons" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                  @foreach($admins as $admin)
@@ -133,7 +138,6 @@
                              <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct All</label>
                              <input type="checkbox" name="deduct_switch" id="deduct_switch" class="switchery deduct_switch" data-color="success" data-size="sm"/>
                              <label for="deduct_switch" class="font-medium-2 text-bold-600 mr-1">Deduct Individually</label>
-
                          </div>
                          <div id="deduct_all_div">
                              <div class="form-group">
@@ -291,7 +295,12 @@
             });
             $('#responsible_persons').select2({
                 width:'100%',
-                placeholder:"Search Name",
+                placeholder:"Search User",
+                allowClear:true,
+            });
+            $('#responsible_rider').select2({
+                width:'100%',
+                placeholder:"Search Rider",
                 allowClear:true,
             });
             $('#closing_type_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -603,13 +612,10 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if(data.month_closing_status_id == 1){
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
+                        table.row(row).select();
                     }
-
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -770,7 +776,7 @@
                 if(shipment_id){
                     if ($(this).hasClass('assign_responsible')) {
                         $('#add_responsible_modal').modal('show');
-                        $('#responsible_person_shipment_id').val(shipment_id);
+                        $('#responsible_person_shipment_ids').val(shipment_id);
                     }
                     /*else if($(this).hasClass('edit_responsible')){
                         $.ajax({
