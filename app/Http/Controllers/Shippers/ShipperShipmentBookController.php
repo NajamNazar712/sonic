@@ -3472,7 +3472,7 @@ class ShipperShipmentBookController extends Controller
             if (count($spreadsheet[0]) != $column_count){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
-            
+
             unset($spreadsheet[0]);
         }
 
