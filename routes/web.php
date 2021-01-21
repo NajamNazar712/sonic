@@ -2305,6 +2305,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('international_rates')->name('international_rates.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
+            Route::post('/update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
+
+        });
+
 
     });
 
