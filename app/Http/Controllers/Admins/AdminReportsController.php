@@ -3732,7 +3732,7 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="sales_person_performance.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "reports/sales_person_performance".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'sales_person_performance.xlsx']);
 
