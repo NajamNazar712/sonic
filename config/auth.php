@@ -55,6 +55,11 @@ return [
             'driver' => 'token',
             'provider' => 'users'
         ],
+
+        'retail' => [
+            'driver' => 'session',
+            'provider' => 'retails'
+        ],
     ],
 
     /*
@@ -89,6 +94,11 @@ return [
              'driver' => 'eloquent',
              'model' => App\Http\Models\Admin\Admin::class,
          ],
+
+         'retails' => [
+             'driver' => 'eloquent',
+             'model' => App\http\Models\Admin\Retail\RetailUser::class,
+         ],
     ],
 
     /*
@@ -121,6 +131,12 @@ return [
 
         'admins' => [
             'provider' => 'admins',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+
+        'retail' => [
+            'provider' => 'retails',
             'table' => 'password_resets',
             'expire' => 60,
         ],

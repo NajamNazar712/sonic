@@ -17,14 +17,6 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 							<div class="row justify-content-center">
-								<div class="col-3 text-center">
-									<form id="tracking_number_search_form"
-										  class="form" novalidate="novalidate">
-										<div class="form-group">
-											<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-										</div>
-									</form>
-								</div>
 								<div class="col-12">
 									<div class="row">
 										<div class="col-2">
@@ -44,6 +36,14 @@
 													@endforeach
 												</select>
 											</fieldset>
+										</div>
+										<div class="col-3 text-center">
+											<form id="tracking_number_search_form"
+												  class="form" novalidate="novalidate">
+												<div class="form-group">
+													<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+												</div>
+											</form>
 										</div>
 										<div class="col-3">
 											<div class="form-group input-group ml">

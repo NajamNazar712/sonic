@@ -80,7 +80,14 @@ class AdminCRMController extends Controller
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
-        $description = $request->description;
+        $receiving_sheet_id = $request->receiving_sheet_id;
+        if($complaint_id == 23 && $receiving_sheet_id != null){
+            $description_text = $request->description ;
+            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+        }
+        else{
+            $description = $request->description;
+        }
         $flag = false;
         $present_shipments = array();
         if ($request->has('payment_request')) {
@@ -165,7 +172,12 @@ class AdminCRMController extends Controller
                             }
                             else{
                                 if ($nature_id == 4) {
+                                    if ($complaint_id == 21 || $complaint_id == 22) {
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                    }
+                                    else {
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    }
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -570,7 +582,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by')
             ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
@@ -612,6 +624,9 @@ class AdminCRMController extends Controller
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+            })
+            ->editColumn('descr',function($request){
+                return strip_tags($request->description);
             })
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
@@ -920,7 +935,7 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('crm_request_escalation_taggings as cret', 'cret.crm_request_id', '=', 'crm_requests.id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
@@ -990,6 +1005,9 @@ class AdminCRMController extends Controller
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+            })
+            ->editColumn('descr',function($request){
+                return strip_tags($request->description);
             })
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
@@ -1310,7 +1328,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id','crm_requests.description as descr')
             ->where('crm_requests.status_id', 3)
             ->groupBy('crm_requests.id');
 
@@ -1349,6 +1367,9 @@ class AdminCRMController extends Controller
             })
             ->addColumn('id_padded_link', function ($requests) {
                 return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
+            ->editColumn('descr',function($request){
+                return strip_tags($request->description);
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -2413,6 +2434,37 @@ class AdminCRMController extends Controller
 
     public function invoice_image($id){
         $url = Storage::url('crm_claims/claim_invoice_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+
+    public function damage_product_image($id){
+        $url = Storage::url('crm_claims/claim_damage_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function product_packaging_image($id){
+        $url = Storage::url('crm_claims/claim_product_packaging_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function actual_product_image($id){
+        $url = Storage::url('crm_claims/claim_actual_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function missing_product_image($id){
+        $url = Storage::url('crm_claims/claim_missing_product_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function product_packaging_image_for_content_short($id){
+        $url = Storage::url('crm_claims/claim_product_content_short_' . $id . '.png');
+
+        return view('admin.crm.picture')->with(['url' => $url]);
+    }
+    public function actual_product_image_for_content_short($id){
+        $url = Storage::url('crm_claims/claim_actual_content_short_' . $id . '.png');
 
         return view('admin.crm.picture')->with(['url' => $url]);
     }
@@ -4038,5 +4090,25 @@ class AdminCRMController extends Controller
             return response()->json(['status'=> 0,'error'=>"Select Request First"]);
         }
 
+    }
+
+    public function lost_claim(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+        if($shipment){
+            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+                if($shipment->receiving_sheet_shipment){
+                    $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                    return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+            }
+        }
+        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 }

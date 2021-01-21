@@ -881,7 +881,7 @@ class APIController extends Controller
 
     public function shipment_air_waybill(Request $request) {
       $user_id = $request->user_id;
-      Log::info($request);
+
       $rules = [
         'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);

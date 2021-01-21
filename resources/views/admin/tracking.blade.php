@@ -209,6 +209,13 @@
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
+                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                        <fieldset class="form-group">
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">
+
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
@@ -221,6 +228,44 @@
                                             <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
+
+{{--                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="damage_product_picture"><b>Damage Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="damage_product_picture" id="damage_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="product_packaging_picture"><b>Product Packaging Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture" id="product_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="actual_product_picture"><b>Actual Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">--}}
+{{--                                        </fieldset>--}}
+
+{{--                                    </div>--}}
+
+{{--                                    <div class="col-8 text-left d-none" id="claim_content_short_div">--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="missing_product_picture"><b>Missing Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="missing_product_picture" id="missing_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="product_packaging_picture_content_short"><b>Product Packaging Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture_content_short" id="product_packaging_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="actual_product_picture_content_short"><b>Actual Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture_content_short" id="actual_product_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <input class="form-control" name="claim_content_product_cost" id="claim_content_product_cost" value="" placeholder="Enter Actual Missing Product Cost">--}}
+{{--                                        </fieldset>--}}
+{{--                                    </div>--}}
+
                                     <div class="col-8">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
@@ -263,6 +308,25 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
+
+            $('#damage_claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+            $('#claim_content_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -312,13 +376,69 @@
                     $('#request_claims').addClass('d-none');
                 }
             });
+            var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Claim Type",
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
-            }).bind('change', function () {
+            }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
+                var value = $('#case_nature_claim').val();
+                if (this.value && this.value == 23 && lost_flag === true ) {
+                    $('#receiving_sheet_div').removeClass('d-none');
+                    var shipment_id = $('#requested_shipment_id').val();
+                    $.ajax({
+                        url: '{!! route('admin.crm.request.lost.claim') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': shipment_id,
+                        }
+                    }).done(function (data) {
+                        $('#request_id').empty().trigger('change');
+                        $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
+                            width:'100%',
+                            placeholder:"Select Receiving Sheet ID",
+                            allowClear:true,
+                            dropdownParent:$('#add_request_form')
+                        });
+                        if (data.status == 1) {
+                            var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                            $('#request_id').append(newOption).trigger('change');
+
+                        } else {
+                            lost_flag = true;
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#AddNewRequest').attr('disabled',true);
+                        }
+
+                    });
+                }
+                else{
+                    lost_flag = true;
+                    $('#receiving_sheet_div').addClass('d-none');
+                    $('#AddNewRequest').attr('disabled',false);
+
+                }
+                // if (this.value && this.value == 21)
+                // {
+                //     $('#claim_shipment_damage_div').removeClass('d-none');
+                // }
+                // else {
+                //     $('#claim_shipment_damage_div').addClass('d-none');
+                // }
+                //
+                // if (this.value && this.value == 22)
+                // {
+                //     $('#claim_content_short_div').removeClass('d-none');
+                // }
+                // else {
+                //     $('#claim_content_short_div').addClass('d-none');
+                // }
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -372,12 +492,18 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
-            function print(id, booking_type_id) {
-                if (booking_type_id != 4) {
-                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+            function print(id, booking_type_id, shipment_type) {
+
+                if(shipment_type == 1){
+                    if (booking_type_id != 4 ) {
+                        var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+                    }
+                    else {
+                        var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                    }
                 }
-                else {
-                    var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                else{
+                    var url = '{!! route('admin.retail.accounts.retail_slip') !!}';
                 }
 
                 $.ajax({
@@ -446,6 +572,7 @@
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
+                                var shipment_type = details.shipment_type;
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
@@ -469,10 +596,10 @@
 
                                     shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
 
-                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
                                 else {
-                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
 
                                 shipment += '</div>';
@@ -491,37 +618,62 @@
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
-                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td colspan="3"><strong>City</strong></td>';
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
-                                shipment += '<tr>';
-                                shipment += '<td><strong>Phone No(s).</strong></td>';
+                                if(shipment_type == 1){
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Phone No(s).</strong></td>';
 
-                                if (!details.shipper.phone_number_2) {
-                                    shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    if (!details.shipper.phone_number_2) {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                    }
+
+                                    shipment += '<td><strong>Email</strong></td>';
+                                    if (details.shipper.email) {
+                                        shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td colspan="3"></td>'
+                                    }
+                                    shipment += '<td><strong>Sales Person</strong></td>';
+
+                                    if (details.shipper.sales_person != null) {
+                                        shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td colspan="3"></td>'
+                                    }
+
+                                    shipment += '</tr>';
                                 }
-                                else {
-                                    shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                else{
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Phone No(s).</strong></td>';
+
+                                    if (!details.shipper.phone_number_2) {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                    }
+                                    else {
+                                        shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                    }
+                                    
+                                    shipment += '<td><strong> Retail User Name</strong></td>';
+
+                                    shipment += '<td>' + details.retail_user.name + '</td>';
+
+                                    shipment += '<td><strong> Branch</strong></td>';
+
+                                    shipment += '<td colspan="3">' + details.retail_user.code + '</td>';
+
+
+                                    shipment += '</tr>';
                                 }
 
-                                shipment += '<td><strong>Email</strong></td>';
-                                if (details.shipper.email) {
-                                    shipment += '<td colspan="3">' + details.shipper.email + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>'
-                                }
-                                shipment += '<td><strong>Sales Person</strong></td>';
-
-                                if (details.shipper.sales_person != null) {
-                                    shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>'
-                                }
-
-                                shipment += '</tr>';
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -1049,9 +1201,11 @@
             $('#tracking').on('click', '.print', function () {
                 id = $(this).attr('id');
 
+                shipment_type = $(this).attr('shipment_type');
+
                 booking_type_id = $(this).attr('data-booking-type-id');
 
-                print(id, booking_type_id);
+                print(id, booking_type_id,shipment_type);
             });
 
             $('#tracking').on('click', '.add_request', function () {
@@ -1241,349 +1395,404 @@
         $('body').on('change','#add_request_form textarea, #add_feedback_form textarea',function() {
             $(this).val($(this).val().trim());
         });
-        $( "#add_request_form" ).bind('submit', function (e) {
-            e.preventDefault();
-            var case_nature_id = parseInt($('#case_nature_select').val());
-            if(case_nature_id === 1){
-                var nature_flag = true;
-                var case_nature_complaint_id = $('#case_nature_complaints').val();
-                var case_nature_channel_id = $('#complaint_channels').val();
-                var complaint_description = $('#complaint_description').val();
-                if(!case_nature_complaint_id){
-                    nature_flag = false;
-                    var error = "Please select Complaint type!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!case_nature_channel_id){
-                    nature_flag = false;
-                    var error = "Please select Channel!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!complaint_description){
-                    nature_flag = false;
-                    var error = "Please select Description!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(nature_flag){
-                    $('#AddNewRequest').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.crm.request.add') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'shipment_id': $('#requested_shipment_id').val(),
-                            'case_nature_id' : case_nature_id,
-                            'complaint_id' : case_nature_complaint_id,
-                            'channel_id': case_nature_channel_id,
-                            'description' : complaint_description
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status) {
-                                if(data.flag){
-                                    var html = '';
-
-                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                        html += tracking_number + '<br/>';
-                                    });
-
-                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-
-                                    swal({
-                                        title: 'Request / Complaint Already Lodged!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                }else{
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                }
-                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-
-                            $('#AddRequestModal').modal('hide');
-                            $('#AddNewRequest').attr('disabled',false);
-                        });
-                }
-
-            }else if(case_nature_id == 2){
-                var nature_flag = true;
-                var case_nature_complaint_id = $('#case_nature_requests').val();
-                var case_nature_channel_id = $('#request_channels').val();
-                var service_description = $('#service_description').val();
-                if(!case_nature_complaint_id){
-                    nature_flag = false;
-                    var error = "Please select Complaint type!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!case_nature_channel_id){
-                    nature_flag = false;
-                    var error = "Please select Channel!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!service_description){
-                    nature_flag = false;
-                    var error = "Please select Description!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(nature_flag){
-                    $('#AddNewRequest').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.crm.request.add') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'shipment_id': $('#requested_shipment_id').val(),
-                            'case_nature_id' : case_nature_id,
-                            'complaint_id' : case_nature_complaint_id,
-                            'channel_id': case_nature_channel_id,
-                            'description' : service_description
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status) {
-                                if(data.flag){
-                                    var html = '';
-
-                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                        html += tracking_number + '<br/>';
-                                    });
-
-                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-
-                                    swal({
-                                        title: 'Request / Complaint Already Lodged!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                }else{
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                }
-                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-
-
-                            $('#AddRequestModal').modal('hide');
-                            $('#AddNewRequest').attr('disabled',false);
-                        });
-                }
-            }else if(case_nature_id == 3) {
-                var feedback_flag = true;
-                var feedback_channel = $('#feedback_channel_request').val();
-                var feedback_description = $('#feedback_description_request').val();
-                if (!feedback_description) {
-                    feedback_flag = false;
-                    var error = "Please select Description!";
-                    toastr.error(error, 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
-                }
-                if (!feedback_channel) {
-                    feedback_flag = false;
-                    var error = "Please select Channel!";
-                    toastr.error(error, 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
-                }
-                if (feedback_flag) {
-                    $('#AddNewRequest').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.crm.feedback.add') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'channel_id': $('#feedback_channel_request').val(),
-                            'shipment_id': $('#requested_shipment_id').val(),
-                            'description': feedback_description
-                        }
-                    })
-                        .done(function (data) {
-                            if (data.status) {
-                                if(data.flag){
-                                    var html = '';
-
-                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                        html += tracking_number + '<br/>';
-                                    });
-
-                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-
-                                    swal({
-                                        title: 'Request / Complaint Already Lodged!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                }else{
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                }
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-
-                            $('#AddRequestModal').modal('hide');
-                            $('#AddNewRequest').attr('disabled',false);
-                        });
-                }
-            }
-            else if(case_nature_id === 4){
-                var nature_flag = true;
-                var case_nature_claim_id = $('#case_nature_claim').val();
-                var case_nature_channel_id = $('#claim_channel').val();
-                var product_cost = $('#claim_product_cost').val();
-                var check_product_picture = $('#product_picture').val();
-                var check_invoice_picture = $('#invoice_picture').val();
-                $('#shipment_ids').val($('#requested_shipment_id').val());
-                $('#case_nature_id').val(case_nature_id);
-                $('#channel_id').val(case_nature_channel_id);
-                $('#complaint_id').val(case_nature_claim_id);
-                var formData = new FormData($('#add_request_form')[0]);
-                if(!case_nature_claim_id){
-                    nature_flag = false;
-                    var error = "Please select Claim type!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!case_nature_channel_id){
-                    nature_flag = false;
-                    var error = "Please select Channel!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(case_nature_claim_id !== "26"){
-                    if(!check_product_picture){
+        $( "#add_request_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                var case_nature_id = parseInt($('#case_nature_select').val());
+                if (case_nature_id === 1) {
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_complaints').val();
+                    var case_nature_channel_id = $('#complaint_channels').val();
+                    var complaint_description = $('#complaint_description').val();
+                    if (!case_nature_complaint_id) {
                         nature_flag = false;
-                        var error = "Please attach Product Picture!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
-                    if(!product_cost){
+                    if (!case_nature_channel_id) {
                         nature_flag = false;
-                        var error = "Please enter Product Cost!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
-                    if(!check_invoice_picture){
+                    if (!complaint_description) {
                         nature_flag = false;
-                        var error = "Please attach Invoice Picture!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
-                }
-                if(nature_flag){
-                    $('#AddNewRequest').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.crm.request.add') !!}',
-                        method: 'POST',
-                        enctype: 'multipart/form-data',
-                        data: formData,
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                    })
-                        .done(function(data) {
-                            if (data.status) {
-                                if(data.flag){
-                                    var html = '';
+                    if (nature_flag) {
+                        $('#AddNewRequest').attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_id': $('#requested_shipment_id').val(),
+                                'case_nature_id': case_nature_id,
+                                'complaint_id': case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description': complaint_description
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if (data.flag) {
+                                        var html = '';
 
-                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                        html += tracking_number + '<br/>';
+                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
 
-                                    });
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
 
-                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
 
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-
-                                    swal({
-                                        title: 'Request / Complaint Already Lodged!',
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
                                             },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                }else{
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
                                     });
                                 }
-                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
 
-                            $('#AddRequestModal').modal('hide');
-                            $('#AddNewRequest').attr('disabled',false);
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled', false);
+                            });
+                    }
+
+                } else if (case_nature_id == 2) {
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_requests').val();
+                    var case_nature_channel_id = $('#request_channels').val();
+                    var service_description = $('#service_description').val();
+                    if (!case_nature_complaint_id) {
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
                         });
-                }
+                    }
+                    if (!case_nature_channel_id) {
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!service_description) {
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (nature_flag) {
+                        $('#AddNewRequest').attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_id': $('#requested_shipment_id').val(),
+                                'case_nature_id': case_nature_id,
+                                'complaint_id': case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description': service_description
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if (data.flag) {
+                                        var html = '';
 
+                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled', false);
+                            });
+                    }
+                } else if (case_nature_id == 3) {
+                    var feedback_flag = true;
+                    var feedback_channel = $('#feedback_channel_request').val();
+                    var feedback_description = $('#feedback_description_request').val();
+                    if (!feedback_description) {
+                        feedback_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!feedback_channel) {
+                        feedback_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (feedback_flag) {
+                        $('#AddNewRequest').attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.feedback.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'channel_id': $('#feedback_channel_request').val(),
+                                'shipment_id': $('#requested_shipment_id').val(),
+                                'description': feedback_description
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if (data.flag) {
+                                        var html = '';
+
+                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled', false);
+                            });
+                    }
+                } else if (case_nature_id === 4) {
+                    var nature_flag = true;
+                    var case_nature_claim_id = $('#case_nature_claim').val();
+                    var case_nature_channel_id = $('#claim_channel').val();
+                    var product_cost = $('#claim_product_cost').val();
+                    var check_product_picture = $('#product_picture').val();
+                    var check_invoice_picture = $('#invoice_picture').val();
+                    $('#shipment_ids').val($('#requested_shipment_id').val());
+                    $('#case_nature_id').val(case_nature_id);
+                    $('#channel_id').val(case_nature_channel_id);
+                    $('#complaint_id').val(case_nature_claim_id);
+                    var formData = new FormData($('#add_request_form')[0]);
+                    if (case_nature_claim_id === 23) {
+                        if ($('#request_id').val() == "" || $('#request_id').val() == null) {
+                            nature_flag = false;
+                            var error = "Please select receiving sheet!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    if (!case_nature_claim_id) {
+                        nature_flag = false;
+                        var error = "Please select Claim type!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!case_nature_channel_id) {
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (case_nature_claim_id !== "26") {
+                        if (!check_product_picture) {
+                            nature_flag = false;
+                            var error = "Please attach Product Picture!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!product_cost) {
+                            nature_flag = false;
+                            var error = "Please enter Product Cost!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!check_invoice_picture) {
+                            nature_flag = false;
+                            var error = "Please attach Invoice Picture!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    if (nature_flag) {
+                        $('#AddNewRequest').attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.add') !!}',
+                            method: 'POST',
+                            enctype: 'multipart/form-data',
+                            data: formData,
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if (data.flag) {
+                                        var html = '';
+
+                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#request_id').val('').trigger('change');
+                                $('#receiving_sheet_div').addClass('d-none');
+                                $('#AddNewRequest').attr('disabled', false);
+                            });
+                    }
+
+                }
             }
         });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
@@ -1601,6 +1810,8 @@
             $('#case_nature_claim').val('').trigger('change');
             $('#claim_channel').val('').trigger('change');
             $('#claim_product_cost').val('');
+            $('#request_id').val('').trigger('change');
+            $('#receiving_sheet_div').addClass('d-none');
 
         });
 

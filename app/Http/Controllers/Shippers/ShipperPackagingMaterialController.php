@@ -521,7 +521,13 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function packaging_request_cart_index(){
-        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+        if(session('foc_account') == 1){
+            $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
+        }
+        else{
+            $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
+        }
+
         $user_charges = array();
         $standard_charges = array();
         $size_charges = PackagingCharge::where('user_id', session('user_id'));

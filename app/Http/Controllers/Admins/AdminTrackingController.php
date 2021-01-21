@@ -6,6 +6,11 @@ use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -735,13 +740,49 @@ class AdminTrackingController extends Controller
                         $sales_person_name = null;
                     }
 
-                    $details['shipper']['name'] = $shipper->name;
-                    $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                    $details['shipper']['city'] = $shipper->city->name;
-                    $details['shipper']['phone_number_1'] = $shipper->phone;
-                    $details['shipper']['phone_number_2'] = $shipper->phone2;
-                    $details['shipper']['email'] = $shipper->email;
-                    $details['shipper']['sales_person'] = $sales_person_name;
+                    if($shipment->shipment_type == 1){
+                        $details['shipment_type'] = 1;
+                        $details['shipper']['name'] = $shipper->name;
+                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                        $details['shipper']['city'] = $shipper->city->name;
+                        $details['shipper']['phone_number_1'] = $shipper->phone;
+                        $details['shipper']['phone_number_2'] = $shipper->phone2;
+                        $details['shipper']['email'] = $shipper->email;
+                        $details['shipper']['sales_person'] = $sales_person_name;
+                    }
+                    else{
+                        $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                        if($retail_shipment){
+                            $retail_user_id = $retail_shipment->retail_user_id;
+                            $retail_user = RetailUser::find($retail_user_id);
+                            if($retail_user->category == 1){
+                                $franchise = RetailFranchise::find($retail_user->category_id);
+                                $details['retail_user']['name'] = $franchise->name;
+                                $details['retail_user']['code'] = 'Franchise';
+                                $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                            }
+                            else{
+                                $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                                $details['retail_user']['name'] = $trax_center->name;
+                                $details['retail_user']['code'] = 'Trax Center';
+                                $details['shipper']['city'] = $trax_center->pickup_address->city->name;
+                            }
+
+                            $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
+
+                            $details['shipper']['name'] = $shipper->shipper_name;
+                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                            $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
+                            $details['shipper']['sales_person'] = $sales_person_name;
+
+                        }
+                        else{
+                            $details['retail_user']['name'] = null;
+                            $details['retail_user']['code'] = null;
+                            $tracking['invalid'][] = $tracking_number;
+                        }
+                    }
+
 
                     $pickup = $shipment->pickup_address;
 

@@ -2,16 +2,21 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
@@ -3732,7 +3737,7 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="sales_person_performance.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "reports/sales_person_performance".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'sales_person_performance.xlsx']);
 
@@ -5357,7 +5362,11 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
             ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
             ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone')
+            ->leftjoin('adjustment_logs as adjustment', function ($join) {
+                $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->where('adjustment.created_at','=',DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            })
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount')
             ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
             ->editColumn('tagged_to', function ($crm_request){
@@ -6929,6 +6938,60 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
+
+    public function confirmation_shipments_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->where('shipment_status_reason_id','<>', 2)->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->get();
+        return view('admin.reports.confirmation_pending_report')->with(['shipment_status'=>$shipment_status, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents]);
+    }
+
+    public function confirmation_shipments_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sret', function ($join) {
+                $join->on('sret.shipment_id', '=', 'shipments.id')
+                    ->where('sret.id','=',
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sret.status_reason_id')
+            ->select('shipments.id as shipment_id', 'shipments.id as shId', 'shipments.shipper_status_id','shipments.tracking_number','shipments.tracking_number as tracking', 'ss.name as status','ssr.id as reason_id','ssr.name as reason', 'sret.remarks as remarks','sret.created_at as status_date')
+//            ->whereIn('shipments.shipper_status_id', [12, 20, 13, 54, 55, 5, 23])
+            ->where('sret.verification', 1)
+            ->groupBy('shipments.id');
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $shipments = $shipments->where(function ($query) {
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
+            }
+        }
+
+//        if(count($shipments) <2) {
+//
+//        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+            $datatable->whereBetween('sret.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

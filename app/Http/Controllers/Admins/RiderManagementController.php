@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
@@ -118,7 +120,7 @@ class RiderManagementController extends Controller
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $route_types = RouteType::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -593,6 +595,99 @@ class RiderManagementController extends Controller
         }
         else {
             return ['status' => 1, 'error' => 'No Rider found!'];
+        }
+    }
+
+    public function rider_request_index(Request $request)
+    {
+        $rider_type = RiderType::all();
+        $city = City::where('business_category_id', 1)->get();
+        $category = RiderCategory::all();
+        $route = Route::all();
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city]);
+    }
+
+    public function rider_request_list(Request $request)
+    {
+        $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
+            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name')
+            ->where('rider_requests.status', 0);
+
+        if (session('role_id') != 1) {
+            $rider_request = $rider_request->whereIn('c.hub_id', session('hubs'));
+        }
+        return Datatables::of($rider_request)
+            ->editColumn('status', function ($rider_request) {
+                return ($rider_request->status == 0) ? 'Pending' : 'Processed';
+            })
+            ->addColumn("action", function ($rider_request) {
+                if (session('role_id') == 1 || count(array_intersect([426], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(426, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+
+                    }
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function approveRider(Request $request){
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required|numeric',
+            'rider_category'=>'required|numeric',
+            'pin' => 'required|integer|digits:4',
+            'trax_id'=>'required|max:255|string',
+            'rider_request_id' => 'required',
+            'rider_type' => "required|numeric"
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+
+        $rider = Rider::create([
+            'city_id'=>$request->city_id,
+            'name'=>$request->rider_name,
+            'phone'=>$request->phone,
+            'cnic'=>$request->cnic,
+            'address'=>$request->address,
+            'route_id'=>$request->route_id,
+            'rider_category_id'=>$request->rider_category,
+            'status'=>1,
+            'pin'=> bcrypt($request->pin),
+            'created_by' => Auth::id(),
+            'trax_id' => $request->trax_id,
+            'rider_type_id'  => $request->rider_type
+        ]);
+        if($rider){
+            NotificationsController::send(61, $rider->id, $request->pin);
+            $rider_request = RiderRequest::find($request->rider_request_id);
+            if($rider_request){
+                $rider_request->status = 1;
+                $rider_request->save();
+            }
+            return redirect()->back()->with('success','Rider added successfully');
         }
     }
 }

@@ -63,6 +63,8 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
+		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
+        Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
 
 		Route::middleware('RiderAPIToken')->group(function () {
 			Route::prefix('pickup')->name('pickup.')->group(function () {
@@ -87,6 +89,12 @@ Route::name('api.')->group(function () {
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
+            });
+
+
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
+                Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
             });
 
 		});

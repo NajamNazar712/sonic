@@ -221,6 +221,14 @@
                        '<option value="0">No</option>' +
                        '<option value="1">Yes</option>' +
                        '</select>';
+
+                   // var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
+                   //     '<option value="1">Overnight</option>' +
+                   //     '<option value="2">Overland</option>' +
+                   //     '<option value="3">Detain</option>' +
+                   //     '<option value="4">Same-day</option>' +
+                   //     '</select>';
+
                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
                        var column = this;
@@ -233,7 +241,8 @@
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
-                       }else if($(header).is('.gc_area')){
+                       }
+                       else if($(header).is('.gc_area')){
                            $(gc_area_select).appendTo($(search))
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
@@ -256,6 +265,12 @@
                    });
                    $("#status_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select Status",
+                       width:'100%',
+                       containerCssClass: 'select-xs',
+                       dropdownCssClass: 'form-control-sm p-0'
+                   });
+                   $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
+                       placeholder: "Select Shipping Mode Type",
                        width:'100%',
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
