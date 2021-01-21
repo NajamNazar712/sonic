@@ -19,7 +19,41 @@
 
 							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
-
+								<div class="col">
+									<h5 class="form-section mb-2 text-center">Select Template Type</h5>
+									<div class="row justify-content-center mb-2">
+										<fieldset>
+											<div class="custom-control custom-radio col">
+												<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1" checked>
+												<label class="custom-control-label" for="excel_type_1">Overall Template</label>
+											</div>
+										</fieldset>
+										<fieldset>
+											<div class="custom-control custom-radio col">
+												<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_2" value="2">
+												<label class="custom-control-label" for="excel_type_2">Regular Template</label>
+											</div>
+										</fieldset>
+										<fieldset>
+											<div class="custom-control custom-radio col">
+												<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_3" value="3">
+												<label class="custom-control-label" for="excel_type_3">Replacement Template</label>
+											</div>
+										</fieldset>
+										<fieldset>
+											<div class="custom-control custom-radio col">
+												<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_4" value="4">
+												<label class="custom-control-label" for="excel_type_4">Try And Buy Template</label>
+											</div>
+										</fieldset>
+										<fieldset>
+											<div class="custom-control custom-radio col">
+												<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_5" value="5">
+												<label class="custom-control-label" for="excel_type_5">Reverse Pickup Template</label>
+											</div>
+										</fieldset>
+									</div>
+								</div>
 								<div class="row align-items-center justify-content-center">
 									<div class="col">
 										<div class="form-group">
