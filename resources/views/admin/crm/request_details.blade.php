@@ -370,7 +370,7 @@
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
-                                                        </fieldset>r
+                                                        </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group has-icon-left m-0 mb-1">
