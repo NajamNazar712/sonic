@@ -2396,9 +2396,17 @@ class V2AdminPickupsController extends Controller
                         ;
                 }
             })
-            ->editColumn('total_shipment', function($request) {
-                if ($request->total_shipment != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $request->total_shipment . '</button>';
+            ->editColumn('total_shipment', function($data) {
+                if ($data->total_shipment != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $data->total_shipment . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('total_arrived', function($data) {
+                if ($data->total_arrived != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $data->total_arrived . '</button>';
                 }
                 else {
                     return 0;
@@ -2524,6 +2532,59 @@ class V2AdminPickupsController extends Controller
             $retail_pickup_note = $retail_pickup_note->first();
             $retail_pickup_note->status = 3;
             $retail_pickup_note->save();
+        }
+    }
+
+    public function total_shipments(Request $request){
+
+        $note_id = $request->note_id;
+        $note = V2PickupNote::find($note_id);
+        $pickup_note_requests = $note->pickup_note_requests->first();
+        $pickup_request_id = $pickup_note_requests->pickup_request_id;
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
+        $pickup_request_shipments = $pickup_request->pickup_request_shipments;
+
+        if ($pickup_request_shipments->count() != 0) {
+            $bookings = array();
+            foreach ($pickup_request_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                if ($shipment_details->shipper_status_id == 1) {
+                    $bookings[] = $shipment_details->tracking_number;
+                }
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+    }
+
+    public function arrived_shipments(Request $request){
+        $note_id = $request->note_id;
+        $note = V2PickupNote::find($note_id);
+       /* dd($note->pickup_note_requests);*/
+        $pickup_note_requests = $note->pickup_note_requests;
+        dd($pickup_note_requests);
+        $pickup_request_id = $pickup_note_requests->pickup_request_id;
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
+        $pickup_request_shipments = $pickup_request->pickup_request_shipments;
+
+        if ($pickup_request_shipments->count() != 0) {
+            $arrived = array();
+            foreach ($pickup_request_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                if ($shipment_details->shipper_status_id == 1) {
+                    $arrived[] = $shipment_details->tracking_number;
+                }
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'arrived' => $arrived];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'arrived' => FALSE];
         }
     }
 

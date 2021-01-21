@@ -87,6 +87,42 @@
 
         </div>
     </div>
+    <div class="modal fade" id="total_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="total_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="total_shipments_modal_title">Total Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="total_shipments_arrived_modal" data-backdrop="static" role="dialog" aria-labelledby="total_shipments_arrived_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="total_shipments_arrived_modal_title">Arrived Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -357,6 +393,61 @@
 
 
             });*/
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click','#datatable tbody tr td.total_shipment button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var total_shipment = parseInt($(this).parents('tr').attr('total_shipment'));
+                console.log(this,id,total_shipment);
+                $('#total_shipments_modal .modal-body').html('');
+                $('#total_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.rider_receiving.total_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.booked) {
+                                $.each(data.booked, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#total_shipments_modal .modal-body').html(shipments);
+                        }
+                    });
+            });
+
+            $('body').on('click','#datatable tbody tr td.total_arrived button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var total_received = parseInt($(this).parents('tr').attr('id'));
+                $('#total_shipments_arrived_modal .modal-body').html('');
+                $('#total_shipments_arrived_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.rider_receiving.arrived_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.arrived) {
+                                $.each(data.arrived, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#total_shipments_arrived_modal .modal-body').html(shipments);
+                        }
+                    });
+            });
         });
     </script>
 @endsection

@@ -812,6 +812,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_list')->name('list');
             Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
+            Route::post('total_shipments', 'Admins\V2Pickup\V2AdminPickupsController@total_shipments')->name('total_shipments');
+            Route::post('arrived_shipments', 'Admins\V2Pickup\V2AdminPickupsController@arrived_shipments')->name('arrived_shipments');
         });
         // End
         Route::prefix('arrival')->name('arrival.')->group(function () {
