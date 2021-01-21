@@ -183,8 +183,8 @@
                                 row.push(values.id);
                                 row.push(values.date);
                                 row.push(values.rider);
-                                row.push(values.total_shipment);
-                                row.push(values.total_arrived);
+                                row.push(values.total_shipment_count);
+                                row.push(values.total_arrived_count);
                                 row.push(values.rider_picked);
                                 body.push(row);
                             });
@@ -396,8 +396,6 @@
             var route = '{!! route('admin.tracking.index') !!}';
             $('body').on('click','#datatable tbody tr td.total_shipment button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                var total_shipment = parseInt($(this).parents('tr').attr('total_shipment'));
-                console.log(this,id,total_shipment);
                 $('#total_shipments_modal .modal-body').html('');
                 $('#total_shipments_modal').modal('show');
 
