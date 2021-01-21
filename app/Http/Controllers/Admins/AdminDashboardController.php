@@ -9646,7 +9646,7 @@ class AdminDashboardController extends Controller
 
         $user_id = $request->user_id;
         if($user_id != null){
-            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.status',1)->get();
+            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.hidden',0)->get();
             if($addresses)
             {
                 return response()->json(['status'=> 1,'addresses' => $addresses]);
