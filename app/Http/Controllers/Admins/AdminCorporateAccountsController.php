@@ -3685,7 +3685,7 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -6349,7 +6349,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -6411,7 +6411,7 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -9726,7 +9726,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -12249,7 +12249,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -12312,7 +12312,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
