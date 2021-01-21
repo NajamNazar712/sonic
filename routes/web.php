@@ -260,6 +260,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('delivery_and_return')->name('delivery_and_return.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@delivery_and_return_index')->name('index');
         });
+        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@confirmation_shipments_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@confirmation_shipments_list')->name('list');
+        });
     });
 
     Route::prefix('rates')->name('rates.')->group(function (){
@@ -1901,10 +1905,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
-        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
-            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
-        });
+//        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
+//            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
+//            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
+//        });
     });
 
     //Reports end

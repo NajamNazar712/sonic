@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
 @section('title', 'Confirmation Pending Shipments Report')
 
@@ -10,7 +10,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
 
                 <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="col-4">
@@ -136,7 +136,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -211,7 +212,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
+                        url: '{{ route('cod.reports.confirmation_pending_report.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -259,7 +260,7 @@
                 processing: true,
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.confirmation_pending_report.list') }}',
+                    url: '{{ route('cod.reports.confirmation_pending_report.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
