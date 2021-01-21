@@ -23,7 +23,6 @@
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Businees Category</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode(s)</th>
                                     <th class="border-primary border-darken-1">GC Area</th>
                                     <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
