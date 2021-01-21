@@ -633,7 +633,13 @@
                             $('#AssignLocationsView .modal-body').html(html);
                             $('#AssignLocationsView').modal('show');
                         }
-
+                        else{
+                            var error = "No Address Found";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
                     });
                 }
             });
@@ -723,7 +729,7 @@
                 dropdownParent:$('#route_location')
             }).bind('select2:select',function(){
                 var address_id = parseInt($(this).val());
-                var address = $(this).text();
+                var address = $(this).find(':selected').text();
                 var user = $( "#users option:selected" ).text();
                 add_row(address_id,address,user);
 
@@ -761,7 +767,6 @@
                     form.submit();
                 }
             });
-
 
         $( "#editRouteForm" ).validate({
 
@@ -846,20 +851,20 @@
             });
 
         });
-
-
-        $('#assign_location').on('hidden.bs.modal', function () {
-            $('#pickup_address').val('').trigger('change');
-            $('#users').val('').trigger('change');
-            var view_address = $('#view_address').DataTable();
-            view_address.clear();
-            locations = [];
-            view_address.draw();
-            selected_rows = [];
-            rows_count = 0;
-            // $('#return_note_image_view_table tbody').html('');
         });
-        });
+            $('#assign_location').on('hide.bs.modal', function () {
+                //$('#pickup_address').val('').trigger('change');
+                $('#pickup_address').empty().trigger('change');
+                $('#users').val('').trigger('change');
+                var view_address = $('#view_address').DataTable();
+                view_address.clear();
+                locations = [];
+                view_address.draw();
+                selected_rows = [];
+                rows_count = 0;
+                // $('#return_note_image_view_table tbody').html('');
+            });
+
     </script>
 
 @endsection
