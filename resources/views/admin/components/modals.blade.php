@@ -391,9 +391,6 @@
                 @endif
                 <div class="modal-header">
                     <h4 class="modal-title" id="shipment_charges_modal_heading">Change Password<span></span></h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
                 </div>
                 <div class="modal-body password_change_body text-center" id="password_change_body">
                     <form id="password-form" class="form form-horizontal" method="post" action="{{route('admin.update.profile.password.submit')}}">
