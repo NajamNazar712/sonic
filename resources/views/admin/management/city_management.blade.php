@@ -343,31 +343,31 @@
         {{--});--}}
 
 
-        $('body').on('click','#datatable tbody tr td.modes button',function () {
-            var id = parseInt($(this).parents('tr').attr('id'));
-            $('#modes .modal-body').html('');
-            $.ajax({
-                url: '{!! route('admin.management.shippingModes.ajax') !!}',
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}',
-                    'id': id
-                }
-            })
-                .done(function(data) {
-                    if (data.status == 1) {
-                        var modes = '';
-                        console.log(data);
-                        if (data.shipping_mode) {
-                            $.each(data.shipping_mode, function(index, modes) {
-                                modes += 'modes<br>';
-                            });
-                        }
-                        $('#modes.modal-body').html(modes);
-                        $('#modes').modal('show');
-                    }
-                });
-        });
+        {{--$('body').on('click','#datatable tbody tr td.modes button',function () {--}}
+        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+        {{--    $('#modes .modal-body').html('');--}}
+        {{--    $.ajax({--}}
+        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
+        {{--        method: 'POST',--}}
+        {{--        data: {--}}
+        {{--            '_token': '{{ csrf_token() }}',--}}
+        {{--            'id': id--}}
+        {{--        }--}}
+        {{--    })--}}
+        {{--        .done(function(data) {--}}
+        {{--            if (data.status == 1) {--}}
+        {{--                var modes = '';--}}
+        {{--                console.log(data);--}}
+        {{--                if (data.shipping_mode) {--}}
+        {{--                    $.each(data.shipping_mode, function(index, modes) {--}}
+        {{--                        modes += 'modes<br>';--}}
+        {{--                    });--}}
+        {{--                }--}}
+        {{--                $('#modes.modal-body').html(modes);--}}
+        {{--                $('#modes').modal('show');--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--});--}}
 
         $("#addCity").on("show.bs.modal", function(e) {
             var $invoker = $(e.relatedTarget);

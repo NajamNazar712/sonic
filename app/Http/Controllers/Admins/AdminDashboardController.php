@@ -7989,18 +7989,18 @@ class AdminDashboardController extends Controller
             ->editColumn('gc_area', function ($cities) {
                 return ($cities->gc_area == 1)? 'Yes': 'No';
             })
-//            ->filterColumn('modes',function ($query,$keyword){
-//
-//                if ($keyword != '') {
-//                    $query->where('sm.id',$keyword);
-//                }
-//                else {
-//                    $query->whereRaw('false');
-//                }
-//            })
-            ->editColumn('modes', function($modes) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">view</button>';
+            ->filterColumn('modes',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
+//            ->editColumn('modes', function($modes) {
+//                    return '<button class="btn btn-sm btn-outline-info align-middle">view</button>';
+//            })
 //        ->filterColumn('status', function($query, $keyword) {
 //            $keyword = strtolower($keyword);
 //
@@ -9781,26 +9781,26 @@ class AdminDashboardController extends Controller
 
      }
 
-     public function modesAjax(Request $request) {
-        $city_id = $request->id;
-        $shipping_mode_ids = CityDelivery::select('shipping_mode_id')->where('city_id', $city_id);
-
-        if($shipping_mode_ids->exists()){
-            $shipping_modes = $shipping_mode_ids->get();
-            $data = array();
-            foreach($shipping_modes as $id){
-                $shipping_mode = ShippingMode::find($id)->mode;
-//                dd($shipping_mode);
-                $name = $shipping_mode;
-                dd($name);
-                $data[] = $name;
-            }
-            return response()->json(['status' => 1, 'shipping_mode' => $data]);
-        }
-        else {
-            return response()->json(['status' => 0, 'No Shipping mode found!']);
-        }
-     }
+//     public function modesAjax(Request $request) {
+//        $city_id = $request->id;
+//        $shipping_mode_ids = CityDelivery::select('shipping_mode_id')->where('city_id', $city_id);
+//
+//        if($shipping_mode_ids->exists()){
+//            $shipping_modes = $shipping_mode_ids->get();
+//            $data = array();
+//            foreach($shipping_modes as $id){
+//                $shipping_mode = ShippingMode::find($id)->mode;
+////                dd($shipping_mode);
+//                $name = $shipping_mode;
+//                dd($name);
+//                $data[] = $name;
+//            }
+//            return response()->json(['status' => 1, 'shipping_mode' => $data]);
+//        }
+//        else {
+//            return response()->json(['status' => 0, 'No Shipping mode found!']);
+//        }
+//     }
 
 }
 
