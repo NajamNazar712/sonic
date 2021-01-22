@@ -185,8 +185,10 @@
             if ( this.context.length ) {
                 body = [];
                 var params = table.ajax.params();
+                if(params !== undefined){
                     params.start = 0;
                     params.length = -1;
+                }
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.block.ajax') }}',
                     data: params,
