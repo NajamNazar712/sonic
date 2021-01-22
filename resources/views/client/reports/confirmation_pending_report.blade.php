@@ -252,8 +252,19 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Confirmation Pending Shipment Report',
+                        title: 'Confirmation Pending Shipments Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
+                        className: 'btn btn-primary excel',
+                        // action : function(e) {
+                        //     e.preventDefault();
+                        //
+                        //         if (!table.data().count() ) {
+                        //             table.button('.excel').disable();
+                        //         }
+                        //         else{
+                        //             table.button('.excel').enable();
+                        //         }
+                        // }
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
