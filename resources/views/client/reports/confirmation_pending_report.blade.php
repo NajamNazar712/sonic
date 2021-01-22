@@ -53,7 +53,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Returned Confirmation Date</th>
+                        <th class="border-primary border-darken-1">First Returned Confirmation Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Reason</th>
@@ -221,7 +221,7 @@
 
                             head.push('S. No.');
                             head.push('Tracking No.');
-                            head.push('Returned Confirmation Date');
+                            head.push('First Returned Confirmation Date');
                             head.push('Status');
                             head.push('Remarks');
                             head.push('Reason');
