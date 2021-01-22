@@ -879,6 +879,7 @@
                     processing: data_table_loader
                 },
             serverSide: true,
+           deferLoading: 0,
             rowId: 'id',
             order: [[2, 'desc']],
             ajax: {

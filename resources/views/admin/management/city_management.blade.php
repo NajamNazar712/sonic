@@ -23,7 +23,6 @@
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Businees Category</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode Type</th>
                                     <th class="border-primary border-darken-1">GC Area</th>
                                     <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -108,7 +107,6 @@
                             head.push('Hub Code');
                             head.push('Zone');
                             head.push('Business Category');
-                            head.push('Shipping Mode Type');
                             head.push('GC Area');
                             head.push('Attempt Tat');
                             head.push('Status');
@@ -127,7 +125,6 @@
                                 row.push(values.hub_id);
                                 row.push(values.zone);
                                 row.push(values.business_category);
-                                row.push(values.modes);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
                                 row.push(values.status);
@@ -215,7 +212,6 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'modes', name: 'modes', class: 'align-middle modes'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
@@ -246,12 +242,12 @@
                        '<option value="1">Yes</option>' +
                        '</select>';
 
-                   var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
-                       '<option value="1">Overnight</option>' +
-                       '<option value="2">Overland</option>' +
-                       '<option value="3">Detain</option>' +
-                       '<option value="4">Same-day</option>' +
-                       '</select>';
+                   // var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
+                   //     '<option value="1">Overnight</option>' +
+                   //     '<option value="2">Overland</option>' +
+                   //     '<option value="3">Detain</option>' +
+                   //     '<option value="4">Same-day</option>' +
+                   //     '</select>';
 
                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
