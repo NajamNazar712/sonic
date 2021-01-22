@@ -3460,8 +3460,8 @@ class ShipperShipmentBookController extends Controller
                 
             }
             elseif($excel_type == 5){
-                $column_count = 25;
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'shipper_reference_number_1', 21 => 'shipper_reference_number_2', 22 => 'shipper_reference_number_3', 23 => 'shipper_reference_number_4', 24 => 'shipper_reference_number_5'];
+                $column_count = 24;
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'order_date', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'shipper_reference_number_1', 20 => 'shipper_reference_number_2', 21 => 'shipper_reference_number_3', 22 => 'shipper_reference_number_4', 23 => 'shipper_reference_number_5'];
                 $service_type_check_id = 5;
             }
             else{
@@ -3601,16 +3601,18 @@ class ShipperShipmentBookController extends Controller
                     }
 
 //                        dd($errors[$row_id]['amount']);
-                    if($row['delivery_type_id'] == 2){
-                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
-                        if($allowed_delivery_type->exists()){
-                            $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
-                            if(!$allowed_delivery_type->exists()){
+                    if($service_type_check_id != 5){
+                        if($row['delivery_type_id'] == 2){
+                            $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+                            if($allowed_delivery_type->exists()){
+                                $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+                                if(!$allowed_delivery_type->exists()){
+                                    $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
+                                }
+                            }
+                            else{
                                 $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
                             }
-                        }
-                        else{
-                            $errors[$row_id]['delivery_type_id'] = 'Selected Delivery Type is disabled';
                         }
                     }
                     if($row['service_type_id'] != 5){
