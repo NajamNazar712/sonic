@@ -252,7 +252,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Returned Shipment Report',
+                        title: 'Confirmation Pending Shipment Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -262,7 +262,6 @@
                 processing: true,
                 serverSide: true,
                 deferLoading: 0,
-
                 ajax:{
                     url: '{{ route('cod.reports.confirmation_pending_report.list') }}',
                     data: function (d) {
@@ -278,7 +277,7 @@
                     { data:'tracking' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'remarks', name: 'admin_journey.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'sret.remarks', class: 'align-middle remarks'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'}
                 ],
                 rowCallback: function(row, data, index) {
