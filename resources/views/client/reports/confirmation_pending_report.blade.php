@@ -261,6 +261,8 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
+                deferLoading: 0,
+
                 ajax:{
                     url: '{{ route('cod.reports.confirmation_pending_report.list') }}',
                     data: function (d) {
