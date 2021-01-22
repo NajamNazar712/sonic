@@ -3346,7 +3346,7 @@ class ShipperShipmentBookController extends Controller
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
-            'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
+            'delivery_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2,3]);
             })],
@@ -3861,7 +3861,6 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
-
                 return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
             }
         }
