@@ -462,6 +462,12 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
+            $('#add_request_form #request_id').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Receiving Sheet ID",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
             var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -471,7 +477,7 @@
             }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
-                console.log(value);
+                $('#request_id').empty().trigger('change');
                 if (this.value && this.value == 23 && lost_flag === true) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_ids').val();
@@ -483,13 +489,8 @@
                             'shipment_id': shipment_id,
                         }
                     }).done(function (data) {
-                        $('#request_id').empty().trigger('change');
-                        $('#request_id').prepend('<option value="" selected="selected"></option>').select2({
-                            width:'100%',
-                            placeholder:"Select Receiving Sheet ID",
-                            allowClear:true,
-                            dropdownParent:$('#add_request_form')
-                        });
+
+
                         if (data.status == 1) {
                             var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
                             $('#request_id').append(newOption).trigger('change');
