@@ -211,8 +211,11 @@
                     blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
+                    if(params !== undefined){
+                        params.start = 0;
+                        params.length = -1;
+                    }
+
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.reports.confirmation_pending_report.list') }}',
                         data: params,
