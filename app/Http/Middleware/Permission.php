@@ -468,6 +468,7 @@ class Permission
             'reports.petty_cash_expense_summary.index' => 395,
             'reports.app_efficiency.index' => 401,
             'reports.confirmation_pending_report.index' => 430,
+            'reports.last_mile_app.index' => 437,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

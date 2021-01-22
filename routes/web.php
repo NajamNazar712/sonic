@@ -1907,6 +1907,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
         });
+
+        Route::prefix('last_mile_app')->name('last_mile_app.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+        });
     });
 
     //Reports end

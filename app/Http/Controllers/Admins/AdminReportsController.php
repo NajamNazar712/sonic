@@ -3737,7 +3737,7 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="sales_person_performance.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "reports/sales_person_performance".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'sales_person_performance.xlsx']);
 
@@ -7481,6 +7481,70 @@ class AdminReportsController extends Controller
             }
         }
         return $data;
+    }
+
+    public function last_mile_app_index(){
+        $riders = Rider::where('status', 1)->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
+        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities]);
+    }
+    public function last_mile_app_list(Request $request){
+        $deliveries = DeliveryNote::join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
+            ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
+            ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app');
+
+
+        $datatable = Datatables::of($deliveries)
+            ->addColumn('delivery_note', function ($deliveries) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('delivery_note_id_padded', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('total_shipments_link', function($deliveries) {
+                if ($deliveries->total_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->total_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('delivered_shipments_link', function($deliveries) {
+                if ($deliveries->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('delivered_via_app', function($deliveries){
+                if($deliveries->delivered_via_app == 1 ){
+                    return 'Partial';
+                }
+                elseif ($deliveries->delivered_via_app == 2){
+                    return 'Yes';
+                }
+                elseif ($deliveries->delivered_via_app == 0){
+                    return 'No';
+                }
+                else{
+                    return '-';
+                }
+            });
+
+        if ($search_rider = $request->get('search_rider')) {
+            $datatable->where('r.id', $search_rider);
+        }
+        if ($search_city = $request->get('search_city')) {
+            $datatable->where('c.id', $search_city);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('delivery_notes.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
     }
 }
 
