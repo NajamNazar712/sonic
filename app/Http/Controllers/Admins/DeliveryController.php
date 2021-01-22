@@ -1925,6 +1925,9 @@ class DeliveryController extends Controller
                 if($shipment_status->booking_type_id == 5 && ($request->has($status_drop) && $request->status_drop[$shipment] == 12)){
                     continue;
                 }
+                if($request->has($status_drop) && in_array($request->status_drop[$shipment], [14, 30, 36])){
+                    continue;
+                }
                 if(count($open_box_ids) > 0){
                     if(in_array($shipment, $open_box_ids)){
                         $shipment_status->open_box = 1;
