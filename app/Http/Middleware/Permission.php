@@ -903,6 +903,7 @@ class Permission
             'reports.qsr.list' => 8,
             'reports.sales.index' => 8,
             'reports.sales.list' => 8,
+            'reports.confirmation_pending_report.index' => 13,
 
             'crm.request.index' => 10,
 
