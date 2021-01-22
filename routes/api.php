@@ -97,6 +97,13 @@ Route::name('api.')->group(function () {
                 Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
             });
 
+            Route::prefix('return')->name('return.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@return_summary_multiple')->name('return_summary');
+                Route::post('delivered', 'Rider\RiderAPIController@return_shipment_delivered')->name('delivered');
+                Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
+                /*Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');*/
+            });
+
 		});
 
 
