@@ -718,4 +718,11 @@ class AdminInternationalRatesController extends Controller
         $user_information->rejected_reason = $reject_reason;
         $user_information->save();
         return ['success' => 'Rates has been rejected!'];
-    }}
+    }
+
+    public function int_rates_edit($id){
+
+        return view('admin.international.rates_edit');
+    }
+
+}
