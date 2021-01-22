@@ -3539,10 +3539,12 @@ class ShipperShipmentBookController extends Controller
                     })];
                 }
                 $shipping_mode_id = $row['shipping_mode_id'];
-                if($row['delivery_type_id'] == 2){
-                    $rules['delivery_type_id'] = ['required', 'integer','digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function($query) use($shipping_mode_id) {
-                        $query->where('shipping_mode_id', $shipping_mode_id);
-                    })];
+                if($service_type_check_id != 5) {
+                    if ($row['delivery_type_id'] == 2) {
+                        $rules['delivery_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function ($query) use ($shipping_mode_id) {
+                            $query->where('shipping_mode_id', $shipping_mode_id);
+                        })];
+                    }
                 }
 
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
