@@ -1093,7 +1093,7 @@
 
             $('#track_form').bind('submit',function (e) {
                 e.preventDefault();
-
+                selected_rows = [];
                 table.draw();
                 // var tracking_numbers = $('#track_form .tracking_numbers').val();
                 // var booking_from_date = $('#track_form #booking_from_date').val();
