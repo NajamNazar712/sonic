@@ -1557,7 +1557,7 @@ class DeliveryController extends Controller
                     }
                 }
                 else{
-                    $where = array(12, 14);
+                    $where = array(12);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -5807,7 +5807,7 @@ class DeliveryController extends Controller
             $deposit_amount= $sdn->sdn_deposit_amount;
             $adjustment_amount =  $request->adjustment_amount;
 
-            $total =$deposit_amount + $adjustment_amount;
+            $total = $deposit_amount + $adjustment_amount;
             if($dncc_amount == $total){
                 $sdn->adjustment_amount = $request->adjustment_amount;
                 $sdn->adjustment_date = $request->adjustment_date_formatted;
