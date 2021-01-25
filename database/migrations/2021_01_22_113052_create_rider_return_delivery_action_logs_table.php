@@ -19,7 +19,7 @@ class CreateRiderReturnDeliveryActionLogsTable extends Migration
             $table->timestamp('logged_at');
             $table->integer('type_id')->index();
             $table->integer('return_note_id')->index();
-            $table->integer('return_note_shipment_id')->index();
+            $table->integer('shipment_id')->index();
         });
     }
 

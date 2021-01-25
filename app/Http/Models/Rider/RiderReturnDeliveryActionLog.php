@@ -10,8 +10,8 @@ class RiderReturnDeliveryActionLog extends Model
         return $this->belongsTo('App\Http\Models\Admin\ReturnNote', 'return_note_id', 'id');
     }
 
-    public function return_note_shipment_id() {
-        return $this->belongsTo('App\Http\Models\Admin\ReturnNoteShipment', 'return_note_shipment_id', 'id');
+    public function shipment_id() {
+        return $this->belongsTo('App\Http\Models\Shipment', 'shipment_id', 'id');
     }
 
     public function type_id() {
