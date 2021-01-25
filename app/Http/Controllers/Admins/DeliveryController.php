@@ -1535,29 +1535,29 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('status', function ($deliveries) {
-                $flag = true;
-                $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
-                if($restrict_parcels_attempt->exists()){
-                    $restrict_parcels_attempt = $restrict_parcels_attempt->first();
-                    $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
-                    if($attempt_counts >= $restrict_parcels_attempt->attempt_days){
-                        $flag = false;
-                    }
-                }
-                if($flag == true){
-                    if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
-                        $where = array(7, 8, 9, 15, 18, 56);
-                    }else{
-                        if ($deliveries->booking_type_id == 5) {
-                            $where = array(7, 8, 9, 15, 18, 56);
+                if ($deliveries->booking_type_id != 5) {
+                    $flag = true;
+                    $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
+                    if($restrict_parcels_attempt->exists()){
+                        $restrict_parcels_attempt = $restrict_parcels_attempt->first();
+                        $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
+                        if($attempt_counts >= $restrict_parcels_attempt->attempt_days){
+                            $flag = false;
                         }
-                        else {
+                    }
+                    if($flag == true){
+                        if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
+                            $where = array(7, 8, 9, 15, 18, 56);
+                        }else{
                             $where = array(7, 8, 9, 12, 15, 18, 56);
                         }
                     }
+                    else{
+                        $where = array(12);
+                    }
                 }
-                else{
-                    $where = array(12);
+                else {
+                    $where = array(7, 8, 9, 15, 18, 56);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
