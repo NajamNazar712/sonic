@@ -6514,7 +6514,7 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $admin_user_id = $reference_1_id;
                     $admin_user = AdminUserRequest::find($admin_user_id);
-                    $admin = Admin::find($admin_user->request_added_by);
+                    $admin = Admin::find(374);
                     if($admin_user) {
                         if (strpos($subject, '[admin]') !== FALSE) {
                             $subject = str_replace('[admin]', $admin->name, $subject);
@@ -6523,13 +6523,13 @@ class NotificationsController extends Controller
                             $body = str_replace('[admin]', $admin->name, $body);
                         }
                         if (strpos($subject, '[admin_user_name]') !== FALSE) {
-                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
                         }
                         if (strpos($body, '[admin_user_name]') !== FALSE) {
                             $body = str_replace('[admin_user_name]', $admin_user->name, $body);
                         }
                         $to = $admin->email;
-                        self::email($subject, $html, $to);
+                        self::email($subject, $body, $to);
                     }
                 }
                 else if ($id == 201) {
@@ -6537,7 +6537,7 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $admin_user_id = $reference_1_id;
                     $admin_user = AdminUserRequest::find($admin_user_id);
-                    $admin = Admin::find($admin_user->request_added_by);
+                    $admin = Admin::find(5);
                     if($admin_user) {
                         if (strpos($subject, '[admin]') !== FALSE) {
                             $subject = str_replace('[admin]', $admin->name, $subject);
@@ -6546,22 +6546,33 @@ class NotificationsController extends Controller
                             $body = str_replace('[admin]', $admin->name, $body);
                         }
                         if (strpos($subject, '[admin_user_name]') !== FALSE) {
-                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
                         }
                         if (strpos($body, '[admin_user_name]') !== FALSE) {
                             $body = str_replace('[admin_user_name]', $admin_user->name, $body);
                         }
                         $to = $admin->email;
-                        self::email($subject, $html, $to);
+                        self::email($subject, $body, $to);
                     }
                 }
-                else if ($id == 200) {
+                else if ($id == 202) {
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $admin_user_id = $reference_1_id;
                     $admin_user = AdminUserRequest::find($admin_user_id);
-                    $requested_by_admin = Admin::find($admin_user->request_added_by);
                     if($admin_user) {
+                        $requested_by_admin = Admin::find($admin_user->request_added_by);
+                        $trax_id = 'Trax ID: '. $admin_user->trax_id;
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $email = 'Sonic & Email ID: '. $admin_user->email;
+                        $password = 'Sonic Password: '. $admin_user->visible_password;
+
+                        if($admin_user->outlook_email == 1){
+                            $outlook_password = 'Outlook Password: '. $admin_user->visible_outlook_password;
+                        }
+                        else{
+                            $outlook_password = '';
+                        }
                         if (strpos($subject, '[admin]') !== FALSE) {
                             $subject = str_replace('[admin]', $requested_by_admin->name, $subject);
                         }
@@ -6569,13 +6580,31 @@ class NotificationsController extends Controller
                             $body = str_replace('[admin]', $requested_by_admin->name, $body);
                         }
                         if (strpos($subject, '[admin_user_name]') !== FALSE) {
-                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
                         }
                         if (strpos($body, '[admin_user_name]') !== FALSE) {
                             $body = str_replace('[admin_user_name]', $admin_user->name, $body);
                         }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $trax_id, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[email]') !== FALSE) {
+                            $body = str_replace('[email]', $email, $body);
+                        }
+                        if (strpos($body, '[sonic_password]') !== FALSE) {
+                            $body = str_replace('[sonic_password]', $password, $body);
+                        }
+                        if (strpos($body, '[outlook_password]') !== FALSE) {
+                            $body = str_replace('[outlook_password]', $outlook_password, $body);
+                        }
                         $to = $requested_by_admin->email;
-                        self::email($subject, $html, $to);
+
+                        $admin = Admin::find(374);
+                        $cc = $admin->email;
+                        self::email($subject, $body, $to, $cc);
                     }
                 }
             }
