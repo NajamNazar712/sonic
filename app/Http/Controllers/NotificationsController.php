@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
@@ -6506,6 +6507,75 @@ class NotificationsController extends Controller
                         }
                         $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to);
+                    }
+                }
+                else if ($id == 200) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    $admin = Admin::find($admin_user->request_added_by);
+                    if($admin_user) {
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        $to = $admin->email;
+                        self::email($subject, $html, $to);
+                    }
+                }
+                else if ($id == 201) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    $admin = Admin::find($admin_user->request_added_by);
+                    if($admin_user) {
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        $to = $admin->email;
+                        self::email($subject, $html, $to);
+                    }
+                }
+                else if ($id == 200) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    $requested_by_admin = Admin::find($admin_user->request_added_by);
+                    if($admin_user) {
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $requested_by_admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $requested_by_admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        $to = $requested_by_admin->email;
+                        self::email($subject, $html, $to);
                     }
                 }
             }

@@ -73,6 +73,11 @@
                                             <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required">
                                         </div>
                                     </div>
+
+                                    <div class="col text-center">
+                                        <label class="font-weight-bold">Create Outlook Email</label>
+                                        <input type="checkbox" name="outlook_email" id="outlook_email" class="switchery outlook_email" data-size="xs" data-switchery="true">
+                                    </div>
                                     {{--<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
                                             <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID">
@@ -99,8 +104,8 @@
                                         <button type="submit" class="btn btn-primary">Add</button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
