@@ -289,12 +289,12 @@
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
                    });
-                   $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
-                       placeholder: "Select Shipping Mode Type",
-                       width:'100%',
-                       containerCssClass: 'select-xs',
-                       dropdownCssClass: 'form-control-sm p-0'
-                   });
+                   // $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
+                   //     placeholder: "Select Shipping Mode Type",
+                   //     width:'100%',
+                   //     containerCssClass: 'select-xs',
+                   //     dropdownCssClass: 'form-control-sm p-0'
+                   // });
                    $("#gc_area_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select GC Area",
                        width:'100%',
