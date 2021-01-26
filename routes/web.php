@@ -2522,7 +2522,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
         });
         Route::prefix('rates')->name('rates.')->group(function () {
-            Route::prefix('add')->name('add.')->group(function () {
+            /*Route::prefix('add')->name('add.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
             });
@@ -2531,16 +2531,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
-            });
+            });*/
 
             Route::prefix('view')->name('view.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
 
-            Route::prefix('v2_edit')->name('v2_edit.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
-                Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+            Route::prefix('update')->name('update.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
             });
         });
     });
