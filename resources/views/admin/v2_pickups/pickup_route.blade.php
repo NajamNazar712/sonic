@@ -640,6 +640,7 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+
                     });
                 }
             });
@@ -851,19 +852,20 @@
             });
 
         });
+
+        $('#assign_location').on('hide.bs.modal', function () {
+            //$('#pickup_address').val('').trigger('change');
+            $('#pickup_address').empty().trigger('change');
+            $('#users').val('').trigger('change');
+            var view_address = $('#view_address').DataTable();
+            view_address.clear();
+            locations = [];
+            view_address.draw();
+            selected_rows = [];
+            rows_count = 0;
+            // $('#return_note_image_view_table tbody').html('');
         });
-            $('#assign_location').on('hide.bs.modal', function () {
-                //$('#pickup_address').val('').trigger('change');
-                $('#pickup_address').empty().trigger('change');
-                $('#users').val('').trigger('change');
-                var view_address = $('#view_address').DataTable();
-                view_address.clear();
-                locations = [];
-                view_address.draw();
-                selected_rows = [];
-                rows_count = 0;
-                // $('#return_note_image_view_table tbody').html('');
-            });
+    });
 
     </script>
 

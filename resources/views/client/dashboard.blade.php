@@ -1524,7 +1524,7 @@
                     $('#AddNewRequest').attr('disabled',false);
 
                 }
-                if (this.value && this.value == 15)
+                if (this.value && this.value == 21)
                 {
                     $('#claim_shipment_damage_div').removeClass('d-none');
                 }
@@ -1532,7 +1532,7 @@
                     $('#claim_shipment_damage_div').addClass('d-none');
                 }
 
-                if (this.value && this.value == 16)
+                if (this.value && this.value == 22)
                 {
                     $('#claim_content_short_div').removeClass('d-none');
                 }

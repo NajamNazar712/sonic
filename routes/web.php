@@ -260,6 +260,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('delivery_and_return')->name('delivery_and_return.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@delivery_and_return_index')->name('index');
         });
+        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@confirmation_shipments_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@confirmation_shipments_list')->name('list');
+        });
     });
 
     Route::prefix('rates')->name('rates.')->group(function (){
@@ -452,6 +456,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival','Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
+        Route::post('foodpanda_shipments_arrival','Admins\OrderManagementController@foodpanda_shipments_arrival')->name('foodpanda_shipments_arrival');
 
         Route::prefix('self_collection')->name('self_collection.')->group(function () {
             Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
@@ -581,6 +586,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
         Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
+//        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -1901,10 +1907,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
-        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
-            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
-        });
+//        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
+//            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
+//            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
+//        });
     });
 
     //Reports end
@@ -2602,7 +2608,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
-//            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@bank_info')->name('bank_info');
+            Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
 

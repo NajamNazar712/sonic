@@ -229,42 +229,42 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">
-                                        <fieldset class="form-group">
-                                            <label for="damage_product_picture"><b>Damage Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="damage_product_picture" id="damage_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <label for="product_packaging_picture"><b>Product Packaging Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture" id="product_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <label for="actual_product_picture"><b>Actual Product Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">
-                                        </fieldset>
+{{--                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="damage_product_picture"><b>Damage Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="damage_product_picture" id="damage_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="product_packaging_picture"><b>Product Packaging Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture" id="product_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="actual_product_picture"><b>Actual Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">--}}
+{{--                                        </fieldset>--}}
 
-                                    </div>
+{{--                                    </div>--}}
 
-                                    <div class="col-8 text-left d-none" id="claim_content_short_div">
-                                        <fieldset class="form-group">
-                                            <label for="missing_product_picture"><b>Missing Product Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="missing_product_picture" id="missing_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <label for="product_packaging_picture_content_short"><b>Product Packaging Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture_content_short" id="product_packaging_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <label for="actual_product_picture_content_short"><b>Actual Product Picture:</b></label>
-                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture_content_short" id="actual_product_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                        </fieldset>
-                                        <fieldset class="form-group">
-                                            <input class="form-control" name="claim_content_product_cost" id="claim_content_product_cost" value="" placeholder="Enter Actual Missing Product Cost">
-                                        </fieldset>
-                                    </div>
+{{--                                    <div class="col-8 text-left d-none" id="claim_content_short_div">--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="missing_product_picture"><b>Missing Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="missing_product_picture" id="missing_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="product_packaging_picture_content_short"><b>Product Packaging Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="product_packaging_picture_content_short" id="product_packaging_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <label for="actual_product_picture_content_short"><b>Actual Product Picture:</b></label>--}}
+{{--                                            <input class="form-control form-control-sm" type="file" name="actual_product_picture_content_short" id="actual_product_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
+{{--                                        </fieldset>--}}
+{{--                                        <fieldset class="form-group">--}}
+{{--                                            <input class="form-control" name="claim_content_product_cost" id="claim_content_product_cost" value="" placeholder="Enter Actual Missing Product Cost">--}}
+{{--                                        </fieldset>--}}
+{{--                                    </div>--}}
 
                                     <div class="col-8">
                                         <fieldset class="form-group">
@@ -308,6 +308,25 @@
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
+
+            $('#damage_claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+            $('#claim_content_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -366,7 +385,6 @@
             }).bind('select2:select', function () {
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
-                console.log(value);
                 if (this.value && this.value == 23 && lost_flag === true ) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_id').val();
@@ -406,21 +424,21 @@
                     $('#AddNewRequest').attr('disabled',false);
 
                 }
-                if (this.value && this.value == 15)
-                {
-                    $('#claim_shipment_damage_div').removeClass('d-none');
-                }
-                else {
-                    $('#claim_shipment_damage_div').addClass('d-none');
-                }
-
-                if (this.value && this.value == 16)
-                {
-                    $('#claim_content_short_div').removeClass('d-none');
-                }
-                else {
-                    $('#claim_content_short_div').addClass('d-none');
-                }
+                // if (this.value && this.value == 21)
+                // {
+                //     $('#claim_shipment_damage_div').removeClass('d-none');
+                // }
+                // else {
+                //     $('#claim_shipment_damage_div').addClass('d-none');
+                // }
+                //
+                // if (this.value && this.value == 22)
+                // {
+                //     $('#claim_content_short_div').removeClass('d-none');
+                // }
+                // else {
+                //     $('#claim_content_short_div').addClass('d-none');
+                // }
                 if(id === 26){
                     $('#claim_product_cost_div').addClass('d-none');
                     $('#claim_product_picture_div').addClass('d-none');
@@ -474,12 +492,18 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
-            function print(id, booking_type_id) {
-                if (booking_type_id != 4) {
-                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+            function print(id, booking_type_id, shipment_type) {
+
+                if(shipment_type == 1){
+                    if (booking_type_id != 4 ) {
+                        var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+                    }
+                    else {
+                        var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                    }
                 }
-                else {
-                    var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                else{
+                    var url = '{!! route('admin.retail.accounts.retail_slip') !!}';
                 }
 
                 $.ajax({
@@ -548,6 +572,7 @@
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
+                                var shipment_type = details.shipment_type;
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
@@ -571,10 +596,10 @@
 
                                     shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
 
-                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
                                 else {
-                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                    shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                 }
 
                                 shipment += '</div>';
@@ -597,7 +622,7 @@
                                 shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
 
-                                if(details.shipment_type == 1){
+                                if(shipment_type == 1){
                                     shipment += '<tr>';
                                     shipment += '<td><strong>Phone No(s).</strong></td>';
 
@@ -1176,9 +1201,11 @@
             $('#tracking').on('click', '.print', function () {
                 id = $(this).attr('id');
 
+                shipment_type = $(this).attr('shipment_type');
+
                 booking_type_id = $(this).attr('data-booking-type-id');
 
-                print(id, booking_type_id);
+                print(id, booking_type_id,shipment_type);
             });
 
             $('#tracking').on('click', '.add_request', function () {
@@ -1783,6 +1810,8 @@
             $('#case_nature_claim').val('').trigger('change');
             $('#claim_channel').val('').trigger('change');
             $('#claim_product_cost').val('');
+            $('#request_id').val('').trigger('change');
+            $('#receiving_sheet_div').addClass('d-none');
 
         });
 

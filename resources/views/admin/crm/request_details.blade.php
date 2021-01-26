@@ -419,10 +419,10 @@
                                                 </div>
                                             </div>
                                                 <div class="row justify-content-center mt-1">
-                                                <div class="col-3 mr-2">
+                                                <div class="col-4 mr-2">
                                                     <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-4 ml-4">
                                                     <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>
                                                 </div>
                                                     @endif

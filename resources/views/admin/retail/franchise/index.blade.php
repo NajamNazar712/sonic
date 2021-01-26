@@ -265,7 +265,7 @@
                 scrollX: true, scrollY: '500px',
                 // autoWidth: false,
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(361, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(434, session('permissions')))
                     {
                         text: 'Add Franchise',
                         className: 'btn btn-primary add',

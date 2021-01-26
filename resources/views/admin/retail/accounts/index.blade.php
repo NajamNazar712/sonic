@@ -181,7 +181,7 @@
 
                 },
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'retail_shipper_infos.id', class: 'align-middle text_center id'},

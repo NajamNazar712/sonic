@@ -116,7 +116,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.pncc_no);
+                                row.push(values.retail_pickup_note_id);
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.store);
@@ -124,7 +124,7 @@
                                 row.push(values.code);
                                 row.push(values.assignee);
                                 row.push(values.assigned_at);
-                                row.push(values.pncc_amount);
+                                row.push(values.amount);
 
                                 body.push(row);
                             });
