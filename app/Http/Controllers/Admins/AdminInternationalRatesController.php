@@ -721,7 +721,19 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function update_rates_index($id){
-        return view('admin.international.rates_update');
+        if($id){
+            $user = User::find($id);
+            if($user){
+                return view('admin.international.rates_update')->with(['shipper' => $user]);
+            }
+            return redirect()->back()->with('error', 'No User Found!');
+        }
+        return redirect()->back()->with('error', 'No data found!');
+
+    }
+
+    public function update_rates_list(Request $request){
+
     }
 
 }
