@@ -62,7 +62,7 @@
                         </form>
                     </div>
                 </div>
-                y.
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -205,7 +205,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.multiple_iban.list') }}',
+                        url: '{{ route('admin.reports.last_mile_app.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -275,7 +275,7 @@
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
-                    {data: 'total_shipments_link', name: 'delivery_notes.total_shipments', class: 'align-middle text-center total_shipments_link'},
+                    {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'delivered_shipments_link', name: 'delivery_notes.delivered_shipments', class: 'align-middle text-center delivered_shipments_link'},
                     {data: 'delivered_via_app', class: 'align-middle text-center delivered_via_app'}
                 ],

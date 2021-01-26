@@ -7489,7 +7489,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities]);
     }
     public function last_mile_app_list(Request $request){
-        $deliveries = DeliveryNote::join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
+        $deliveries = DB::connection('reports')->table('delivery_notes')->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
             ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app');
