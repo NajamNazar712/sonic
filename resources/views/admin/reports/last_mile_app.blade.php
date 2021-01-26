@@ -254,7 +254,6 @@
                 pagingType: 'full_numbers',
                 autoWidth: false,
                 processing: true,
-                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
