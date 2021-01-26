@@ -6,6 +6,8 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
@@ -2378,7 +2380,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk'];
+                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk', 'aamir.chauhan@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
                     foreach ($to as $individual_to) {
@@ -2888,11 +2890,10 @@ class NotificationsController extends Controller
 //                            if($department_head_email) {
 //                                $cc[] = $department_head_email;
 //                            }
-                            $bcc = array();
-                            $bcc = ['danish.zahid@trax.pk'];
+
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc, $bcc);
+                            self::email($subject, $body, $to, $cc);
 
                         }
                     }
@@ -6471,6 +6472,40 @@ class NotificationsController extends Controller
                     $user_phone = User::find($user_id)->phone;
                     $to = $user_phone;
                     self::sms($body, $to);
+                }
+                else if($id == 115){
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
+                    $body = $notification->body;
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        $to = $shipper_info->shipper_phone_no;
+                        self::sms($body, $to);
+                    }
+                }
+                else if($id == 116){
+                    $tracking_number = $reference_1_id;
+                    $shipper_info_id = $reference_2_id;
+                    $body = $notification->body;
+                    if($tracking_number){
+                        $shipper_info = RetailShipperInfo::find($shipper_info_id);
+
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[shipper]') !== FALSE) {
+                            $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        $to = $shipper_info->shipper_phone_no;
+                        self::sms($body, $to);
+                    }
                 }
             }
         }

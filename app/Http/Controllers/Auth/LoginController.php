@@ -225,6 +225,15 @@ class LoginController extends Controller
         if($user_otp->exists()){
             session(['phone_number_unverified' => TRUE]);
         }
+        $settings = GlobalSettings::where('type', 'foc_account_tag');
+        if ($settings->exists()) {
+            $foc_account_tags = array();
+            $settings = $settings->first();
+            $foc_account_tags = array_map('intval', explode(',', $settings->text));
+            if(in_array($shipper_user_id, $foc_account_tags)){
+                session(['foc_account' => TRUE]);
+            }
+        }
         return redirect()->route('cod.welcome');
     }
 

@@ -2,7 +2,7 @@
 @section('title','Completed Deliveries')
 @section('content')
     <h1 class="mb-1">
-        Completed Deliveries
+        Completed Deliveries COD
     </h1>
 
     <div class="card">

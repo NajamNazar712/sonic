@@ -17,6 +17,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
@@ -1534,29 +1535,29 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('status', function ($deliveries) {
-                $flag = true;
-                $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
-                if($restrict_parcels_attempt->exists()){
-                    $restrict_parcels_attempt = $restrict_parcels_attempt->first();
-                    $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
-                    if($attempt_counts >= $restrict_parcels_attempt->attempt_days){
-                        $flag = false;
-                    }
-                }
-                if($flag == true){
-                    if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
-                        $where = array(7, 8, 9, 15, 18, 56);
-                    }else{
-                        if ($deliveries->booking_type_id == 5) {
-                            $where = array(7, 8, 9, 15, 18, 56);
+                if ($deliveries->booking_type_id != 5) {
+                    $flag = true;
+                    $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
+                    if($restrict_parcels_attempt->exists()){
+                        $restrict_parcels_attempt = $restrict_parcels_attempt->first();
+                        $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
+                        if($attempt_counts >= $restrict_parcels_attempt->attempt_days){
+                            $flag = false;
                         }
-                        else {
+                    }
+                    if($flag == true){
+                        if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
+                            $where = array(7, 8, 9, 15, 18, 56);
+                        }else{
                             $where = array(7, 8, 9, 12, 15, 18, 56);
                         }
                     }
+                    else{
+                        $where = array(12);
+                    }
                 }
-                else{
-                    $where = array(12, 14);
+                else {
+                    $where = array(7, 8, 9, 15, 18, 56);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -1677,6 +1678,9 @@ class DeliveryController extends Controller
         if($selected_status == 0 || $selected_status == null || $selected_status == ''){
             return response()->json(['status'=>0, 'error' => 'Status not selected!']);
         }
+        if(DeliveryNote::where('id', $delivery_note_id)->where('pending_status', 1)->exists()){
+            return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
+        }
         $selected_reason = $request->selected_reason;
 
         if($delivery_note_id != ''){
@@ -1742,17 +1746,17 @@ class DeliveryController extends Controller
                     else if($selected_status == 14)
                     {
                         if ($shipment_details->booking_type_id == 2) {
-                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
+                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                         } elseif ($shipment_details->booking_type_id == 3) {
-                                ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
+                                ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
 
                                 Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
 
                         } elseif ($shipment_details->booking_type_id == 4) {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
 
                             if ($shipment_details->charges_mode_id == 1) {
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 14, 'consignee_status_id' => 14]);
@@ -1764,7 +1768,7 @@ class DeliveryController extends Controller
                             }
 
                         } else {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
 
                             if($shipment_details->packaging_material_request == 1){
@@ -1922,6 +1926,9 @@ class DeliveryController extends Controller
                 $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
                 if($shipment_status->booking_type_id == 5 && ($request->has($status_drop) && $request->status_drop[$shipment] == 12)){
+                    continue;
+                }
+                if($request->has($status_drop) && in_array($request->status_drop[$shipment], [14, 30, 36])){
                     continue;
                 }
                 if(count($open_box_ids) > 0){
@@ -2667,7 +2674,8 @@ class DeliveryController extends Controller
 
                                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                        } else if ($request->status_drop[$shipment] == 20) {
+                                        }
+                                        else if ($request->status_drop[$shipment] == 20) {
                                             $parcel = Shipment::find($shipment);
 
                                             if (!$parcel->packaging_material_request) {
@@ -2708,7 +2716,8 @@ class DeliveryController extends Controller
                                                 }
 
                                             }
-                                        } else if ($request->status_drop[$shipment] == 56) {
+                                        }
+                                        else if ($request->status_drop[$shipment] == 56) {
                                             $parcel = Shipment::find($shipment);
                                             if ($parcel->booking_type_id == 2) {
                                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
@@ -2716,21 +2725,22 @@ class DeliveryController extends Controller
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                             }
 
-                                        } else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
+                                        }
+                                        else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
                                             $parcel = Shipment::where('id', $shipment)->first();
                                             if ($parcel->booking_type_id == 2) {
-                                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
                                                 Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                                             } elseif ($parcel->booking_type_id == 3) {
                                                 if ($parcel->package_type == 0) {
-                                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
                                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
                                                 } else {
-                                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
                                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
@@ -2746,7 +2756,7 @@ class DeliveryController extends Controller
                                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                                 }
                                             } else {
-                                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                             }
@@ -2769,7 +2779,8 @@ class DeliveryController extends Controller
 
                                                 }
                                             }
-                                        } else {
+                                        }
+                                        else {
                                             if ($shipper_status_details->packaging_material_request == 0) {
                                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
@@ -2804,12 +2815,14 @@ class DeliveryController extends Controller
                                             $journey->remarks = $request->remarks[$shipment];
                                             $journey->save();
                                         } else {
+
                                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                         }
 
 
                                     } else {
                                         if ($verification == 1) {
+
                                             if (in_array($shipper_status_details->shipper_status_id, [14, 16, 30, 36, 37])) {
                                                 $parcel = Shipment::find($shipment);
 
@@ -2828,15 +2841,21 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 0);
                                                     }
                                                 }
+//                                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
                                             }
+                                            else{
+                                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                            }
 
-                                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+
                                         }
                                     }
                                 }//main if condition
 
-                            } else {
+                            }
+                            else {
+
                                 $parcel = Shipment::find($shipment);
                                 if ($verification == 1) {
                                     if ($parcel->booking_type_id == 2) {
@@ -2853,17 +2872,21 @@ class DeliveryController extends Controller
                                         AdminFinanceController::done_payment($shipment, 0);
                                     }
 
-                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $parcel->id)->whereNotIn('shipper_status_id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 44, 45, 46, 47, 48])->where('reference_1_id', $delivery_note_id)->latest()->first();
+                                    if(!in_array($shipper_status_details->shipper_status_id, $delivered_status_array)){
+                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $parcel->id)->whereNotIn('shipper_status_id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 44, 45, 46, 47, 48])->where('reference_1_id', $delivery_note_id)->latest()->first();
 
-                                    if ($shipment_journey) {
-                                        $received_or_refused_by = $shipment_journey->received_or_refused_by;
-                                        ShipmentsJourneyController::add($shipment, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification, $received_or_refused_by);
-                                    } else {
-                                        ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                        if ($shipment_journey) {
+                                            $received_or_refused_by = $shipment_journey->received_or_refused_by;
+                                            ShipmentsJourneyController::add($shipment, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification, $received_or_refused_by);
+                                        } else {
+                                            ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                        }
+
                                     }
-                                    // if($parcel->amount == 0){
-                                    //     NotificationsController::send(35, $parcel->id);
-                                    // }
+
+                                     if($parcel->amount == 0){
+                                         NotificationsController::send(35, $parcel->id);
+                                     }
                                     if ($parcel->amount == 0) {
                                         $zero_cod_shipments[] = $parcel->id;
                                     }
@@ -3834,7 +3857,6 @@ class DeliveryController extends Controller
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'delivery_notes.received_cod_amount', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments'])
             ->whereIn('delivery_notes.id', $dncc_ids);
 
@@ -3941,13 +3963,18 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted']);
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($sdn)
+            ->setRowAttr([
+                'data-type' => function ($sdn) {
+                    return $sdn->sdn_type;
+                },
+            ])
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
@@ -4020,8 +4047,10 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
+                $retail_route = route('admin.delivery.sdn.retail.details', ['id' => $result->sdn_id]);
 
                 $details_button = '<button onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
+                $retail_details_button = '<button onclick="window.open(\'' . $retail_route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
                 $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
@@ -4032,8 +4061,13 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if($result->sdn_type == 1){
+                    $dropdown .= $details_button;
+                }
+                else{
+                    $dropdown .= $retail_details_button;
+                }
 
-                $dropdown .= $details_button;
 
                 if (session('role_id') == 1 || in_array(251, session('permissions'))) {
                     if(session('department_id') == 6) {
@@ -4459,17 +4493,36 @@ class DeliveryController extends Controller
     public function sdn_dncc_list(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
-        $dn_list = $sdn_details->delivery_notes_list;
-        if ($dn_list->count() != 0) {
-            $delivery_notes = array();
-            foreach ($dn_list as $notes) {
-                $delivery_notes[] = $notes->delivery_note_id;
+        if($sdn_details && $sdn_details->sdn_type == 2){
+            $dn_list = $sdn_details->pickup_notes_list;
+
+            if ($dn_list->count() != 0) {
+                $pickup_notes = array();
+                foreach ($dn_list as $notes) {
+                    $pickup_notes[] = $notes->retail_pickup_note_id;
+                }
+                return ['status' => 1, 'success' => 'Booked Shipments', 'pickup_notes' => $pickup_notes];
             }
-            return ['status' => 0, 'success' => 'Booked Shipments', 'delivery_notes' => $delivery_notes];
+            else {
+                return ['status' => 0, 'success' => 'No Booked Shipments', 'pickup_notes' => FALSE];
+            }
         }
-        else {
-            return ['status' => 0, 'success' => 'No Booked Shipments', 'delivery_notes' => FALSE];
+        else{
+            $dn_list = $sdn_details->delivery_notes_list;
+
+            if ($dn_list->count() != 0) {
+                $delivery_notes = array();
+                foreach ($dn_list as $notes) {
+                    $delivery_notes[] = $notes->delivery_note_id;
+                }
+                return ['status' => 2, 'success' => 'Booked Shipments', 'delivery_notes' => $delivery_notes];
+            }
+            else {
+                return ['status' => 0, 'success' => 'No Booked Shipments', 'delivery_notes' => FALSE];
+            }
         }
+
+
     }
     public function sdn_dncc_print(Request $request)
     {
@@ -4746,19 +4799,37 @@ class DeliveryController extends Controller
     public function sdn_delivered_shipments(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
-        $dn_list = $sdn_details->delivery_notes_list;
-        if($dn_list->count() != 0){
-            $shipments = array();
-            foreach ($dn_list as $note){
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->where('status', '!=', 10)->select('shipment_id')->get();
-                foreach ($shipment_ids as $id){
-                    $shipments[$note->delivery_note_id][] = Shipment::find($id)->pluck('tracking_number');
+        if($sdn_details && $sdn_details->sdn_type == 2){
+            $dn_list = $sdn_details->pickup_notes_list;
+            if($dn_list->count() != 0){
+                $shipments = array();
+                foreach ($dn_list as $note){
+                    $shipment_ids = RetailPickupNoteShipment::where('retail_pickup_note_id',$note->retail_pickup_note_id)->select('shipment_id')->get();
+                    foreach ($shipment_ids as $id){
+                        $shipments[$note->retail_pickup_note_id][] = Shipment::find($id)->pluck('tracking_number');
+                    }
                 }
-            }
-            return ['status' => 0, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
-        }else{
-            return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
+                return ['status' => 1, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
+            }else{
+                return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
 
+            }
+        }
+        else{
+            $dn_list = $sdn_details->delivery_notes_list;
+            if($dn_list->count() != 0){
+                $shipments = array();
+                foreach ($dn_list as $note){
+                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->where('status', '!=', 10)->select('shipment_id')->get();
+                    foreach ($shipment_ids as $id){
+                        $shipments[$note->delivery_note_id][] = Shipment::find($id)->pluck('tracking_number');
+                    }
+                }
+                return ['status' => 2, 'success' => 'Delivered Shipments', 'shipments' => $shipments];
+            }else{
+                return ['status' => 0, 'success' => 'No Delivered Shipments', 'shipments' => FALSE];
+
+            }
         }
 
     }
@@ -5752,8 +5823,8 @@ class DeliveryController extends Controller
             $deposit_amount= $sdn->sdn_deposit_amount;
             $adjustment_amount =  $request->adjustment_amount;
 
-            $total =$deposit_amount + $adjustment_amount;
-            if($dncc_amount == $total){
+//            $total = $deposit_amount + $adjustment_amount;
+//            if($dncc_amount == $total){
                 $sdn->adjustment_amount = $request->adjustment_amount;
                 $sdn->adjustment_date = $request->adjustment_date_formatted;
                 $sdn->adjustment_ref = $request->adjustment_ref;
@@ -5772,10 +5843,10 @@ class DeliveryController extends Controller
 
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
 
-            }
-            else{
-                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
-            }
+//            }
+//            else{
+//                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
+//            }
 
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);

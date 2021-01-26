@@ -261,11 +261,12 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         $.ajax({
-                                            url: '{!! route('admin.petty_cash.statements.station_operation_approved') !!}',
+                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows
+                                                'statement_ids': selected_rows,
+                                                'action': 'station'
                                             }
                                         }).done(function(data){
                                             if(data.status == 0){
@@ -330,11 +331,12 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         $.ajax({
-                                            url: '{!! route('admin.petty_cash.statements.station_operation_approved') !!}',
+                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows
+                                                'statement_ids': selected_rows,
+                                                'action': 'operation'
                                             }
                                         }).done(function(data){
                                             if(data.status == 0){
@@ -358,6 +360,75 @@
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 table.button('.operation').disable();
+                            }
+                        }
+                    },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(173, session('permissions')))
+                    {
+                        className: 'btn btn-primary finance',
+                        text: 'Finance Approved',
+                        enabled: false,
+
+                        action: function (e, dt, node, config) {
+                            $('input:hidden[name=statement_ids]').val(selected_rows);
+
+                            if(selected_rows.length === 0){
+                                table.button('.finance').disable();
+                                return false;
+                            }
+                            else if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'statement_ids': selected_rows,
+                                                'action': 'finance'
+                                            }
+                                        }).done(function(data){
+                                            if(data.status == 0){
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                table.button('.finance').disable();
+                                                table.draw(true);
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else
+                                            {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+
+                                        });
+                                    }
+                                });
+
+                            }else{
+                                var error = 'Statement ID Not Found, Please Try again!';
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.finance').disable();
                             }
                         }
                     },
@@ -555,6 +626,12 @@
                 }
                 else {
                     selected_rows.splice(index, 1);
+                }
+                if (selected_rows.length > 0) {
+                    table.button('.finance').enable();
+                }
+                else {
+                    table.button('.finance').disable();
                 }
 
                 if (selected_rows.length > 0) {

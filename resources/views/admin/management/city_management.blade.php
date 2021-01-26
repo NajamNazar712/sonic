@@ -37,6 +37,25 @@
                         </div>
                     </div>
 
+                    <div class="modal fade" id="modes" role="dialog" aria-labelledby="shipping_mode_title" aria-hidden="true">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="shipping_mode_title">Shipping Mode(s)</h4>
+
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body text-center">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display: none;">
                         <form id="city_active_form" action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
                             {{csrf_field()}}
@@ -183,6 +202,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
+               rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -221,6 +241,14 @@
                        '<option value="0">No</option>' +
                        '<option value="1">Yes</option>' +
                        '</select>';
+
+                   // var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
+                   //     '<option value="1">Overnight</option>' +
+                   //     '<option value="2">Overland</option>' +
+                   //     '<option value="3">Detain</option>' +
+                   //     '<option value="4">Same-day</option>' +
+                   //     '</select>';
+
                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
                        var column = this;
@@ -233,7 +261,8 @@
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
-                       }else if($(header).is('.gc_area')){
+                       }
+                       else if($(header).is('.gc_area')){
                            $(gc_area_select).appendTo($(search))
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
@@ -260,6 +289,12 @@
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
                    });
+                   // $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
+                   //     placeholder: "Select Shipping Mode Type",
+                   //     width:'100%',
+                   //     containerCssClass: 'select-xs',
+                   //     dropdownCssClass: 'form-control-sm p-0'
+                   // });
                    $("#gc_area_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select GC Area",
                        width:'100%',
@@ -288,6 +323,47 @@
                 radioClass: 'iradio_square-red'
             });
         });
+        {{--$('#datatable tbody').on('click', 'tr td.modes button', function() {--}}
+        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+
+        {{--    $('#modes').modal('show');--}}
+
+        {{--    $.ajax({--}}
+        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
+        {{--        method: 'GET',--}}
+        {{--        data: {--}}
+        {{--            '_token': '{{ csrf_token() }}',--}}
+        {{--            'id': id--}}
+        {{--        }--}}
+        {{--    })--}}
+        {{--});--}}
+
+
+        {{--$('body').on('click','#datatable tbody tr td.modes button',function () {--}}
+        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+        {{--    $('#modes .modal-body').html('');--}}
+        {{--    $.ajax({--}}
+        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
+        {{--        method: 'POST',--}}
+        {{--        data: {--}}
+        {{--            '_token': '{{ csrf_token() }}',--}}
+        {{--            'id': id--}}
+        {{--        }--}}
+        {{--    })--}}
+        {{--        .done(function(data) {--}}
+        {{--            if (data.status == 1) {--}}
+        {{--                var modes = '';--}}
+        {{--                console.log(data);--}}
+        {{--                if (data.shipping_mode) {--}}
+        {{--                    $.each(data.shipping_mode, function(index, modes) {--}}
+        {{--                        modes += 'modes<br>';--}}
+        {{--                    });--}}
+        {{--                }--}}
+        {{--                $('#modes.modal-body').html(modes);--}}
+        {{--                $('#modes').modal('show');--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--});--}}
 
         $("#addCity").on("show.bs.modal", function(e) {
             var $invoker = $(e.relatedTarget);

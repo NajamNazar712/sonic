@@ -3685,7 +3685,7 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -6349,7 +6349,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -6411,7 +6411,7 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -6526,7 +6526,7 @@ class AdminCorporateAccountsController extends Controller
                     return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
                 }
                 else{
-                    return view('admin.accounts.corporate,zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                    return view('admin.accounts.corporate.zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
                 }
 
             } else {
@@ -9726,7 +9726,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -12249,7 +12249,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;
@@ -12312,7 +12312,7 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission->shipper_id = $id;
                         $sales_commission->commission_users_count = $users_count;
                         $sales_commission->commission = $total_commission;
-                        $sales_commission->added_by = Auth::id();
+                        $sales_commission->updated_by = Auth::id();
                         $sales_commission->save();
                         $sales_commission_id = $sales_commission->id;
                         $actual_commission = 0;

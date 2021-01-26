@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StationDepositNote extends Model
 {
     protected $fillable = [
-      'hub_id','dncc_count','sdn_delivered_shipments','sdn_amount','sdn_expense','sdn_net_amount','deposited_by','banks_list_id'
+      'hub_id','dncc_count','sdn_delivered_shipments','sdn_amount','sdn_expense','sdn_net_amount','deposited_by','banks_list_id','sdn_type'
     ];
     protected $table = 'station_deposit_notes';
     public function hub(){
@@ -24,5 +24,8 @@ class StationDepositNote extends Model
     }
     public function deposit_note_slips() {
         return $this->hasMany('App\Http\Models\Admin\StationDepositNoteSlip', 'station_deposit_note_id');
+    }
+    public function pickup_notes_list(){
+        return $this->hasMany('App\Http\Models\Admin\PickupNoteStationDepositNote');
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\ReceivingSheet;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -50,11 +51,14 @@ class ShipperCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr')
             ->where('crm_requests.shipper_id', session('user_id'));
         $datatables = Datatables::of($launched_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('descr',function($request){
+                return strip_tags($request->description);
             })
             ->addColumn('id_padded_link', function ($requests) {
                 return '<u><a href=' . route('cod.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
@@ -189,7 +193,15 @@ class ShipperCRMController extends Controller
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
-        $description = $request->description;
+        $receiving_sheet_id = $request->receiving_sheet_id;
+        if($complaint_id == 23 && $receiving_sheet_id != null){
+            $description_text = $request->description ;
+            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+        }
+        else{
+            $description = $request->description;
+        }
+
         $launched_by = 1;
         if(!$request->case_nature_id){
             return ['status' => 0, 'error' => 'Case nature not selected!'];
@@ -241,9 +253,11 @@ class ShipperCRMController extends Controller
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
+
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
                             }else{
@@ -266,6 +280,7 @@ class ShipperCRMController extends Controller
                 }
             }
         }
+
         else{
             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                 $shipment_ids = explode(',', $request->input('shipment_ids'));
@@ -279,7 +294,9 @@ class ShipperCRMController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
+
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
@@ -305,9 +322,19 @@ class ShipperCRMController extends Controller
                                 $flag = true;
                             }
                         }else{
+
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
-                            }
+                                if($nature_id == 4) {
+                                    if ($complaint_id == 21 || $complaint_id == 22) {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                    } else {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+                                    }
+                                }
+                                else{
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                    }
+                                }
                             else{
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 12, 13])){
@@ -329,11 +356,13 @@ class ShipperCRMController extends Controller
                 return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
             }
-            elseif (!empty($shipment_id)){
+            else if (!empty($shipment_id)){
+//                dd($shipment_id);
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     if($is_shipment){
+//                        dd($is_shipment);
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 12, 13])){
@@ -341,6 +370,7 @@ class ShipperCRMController extends Controller
                                     $flag = true;
                                 }
                                 else{
+                                    dd('hello');
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
                             }
@@ -482,6 +512,26 @@ class ShipperCRMController extends Controller
                 return redirect()->back()->with(['error' => 'Request is already marked as Re-Open']);
             }
         }
+    }
+
+    public function lost_claim(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+        if($shipment){
+//            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+                if($shipment->receiving_sheet_shipment){
+                    $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                    return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+                }
+                else{
+                    return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+                }
+//            }
+//            else{
+//             return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+//            }
+        }
+        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 
 }

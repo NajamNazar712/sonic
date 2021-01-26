@@ -3631,7 +3631,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -5897,7 +5897,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -7978,7 +7978,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
+            ->select(['cities.id as city_id','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7987,19 +7987,15 @@ class AdminDashboardController extends Controller
             ->editColumn('gc_area', function ($cities) {
                 return ($cities->gc_area == 1)? 'Yes': 'No';
             })
-//        ->filterColumn('status', function($query, $keyword) {
-//            $keyword = strtolower($keyword);
-//
-//            if (strpos('active', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 1);
-//            }
-//            else if (strpos('inactive', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 0);
-//            }
-//            else {
-//                $query->whereRaw('false');
-//            }
-//        })
+            ->filterColumn('modes',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('location', function ($result){
                 $location = '<div class="text-center">';
                 if($result->location_latitude != null && $result->location_longitude != null) {
@@ -8089,109 +8085,118 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         $city_id = City::where('id',$id)->first();
-        if($request->postType == 'city'){
-            City::where('id',$id)->update([
-                'name'=>$request->cityName,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=>City::find($request->hubs)->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude,
-                'address' => $request->address
-            ]);
-            CityHistory::create([
-                'city_id'=> $id,
-                'hub' => 0,
-                'hub_id'=> $request->hubs,
-                'zone_id'=> City::find($request->hubs)->zone_id,
-                'pickup'=> ($request->has('pickup'))? 1:0,
-                'status' => $city_id->status,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id(),
-                'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude,
-                'address' => $request->address
-            ]);
-            WalkInCities::where('city_id',$id)->delete();
-            if(!empty($request->walk_in_delivery)) {
-                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
-                    WalkInCities::create([
-                        'city_id' => $id,
-                        'pickup' => ($request->has('pickup')) ? 1 : 0,
-                        'delivery' => $index,
+        if($city_id){
+            if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
+                if($request->postType == 'city'){
+                    City::where('id',$id)->update([
+                        'name'=>$request->cityName,
+                        'hub'=>0,
+                        'hub_id'=>$request->hubs,
+                        'zone_id'=>City::find($request->hubs)->zone_id,
+                        'pickup'=>($request->has('pickup'))? 1:0,
+                        'gc_area'=>($request->has('gc_area'))? 1:0,
+                        'attempt_tat'=>$request->attempt_tat,
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'address' => $request->address
                     ]);
+                    CityHistory::create([
+                        'city_id'=> $id,
+                        'hub' => 0,
+                        'hub_id'=> $request->hubs,
+                        'zone_id'=> City::find($request->hubs)->zone_id,
+                        'pickup'=> ($request->has('pickup'))? 1:0,
+                        'status' => $city_id->status,
+                        'gc_area'=>($request->has('gc_area'))? 1:0,
+                        'attempt_tat'=>$request->attempt_tat,
+                        'updated_by' => Auth::id(),
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'address' => $request->address
+                    ]);
+                    WalkInCities::where('city_id',$id)->delete();
+                    if(!empty($request->walk_in_delivery)) {
+                        foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                            WalkInCities::create([
+                                'city_id' => $id,
+                                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                                'delivery' => $index,
+                            ]);
+                        }
+                    }
+
+                    CityDelivery::where('city_id',$id)->delete();
+
+                    foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
+                        foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                            CityDelivery::create([
+                                'city_id'=>$id,
+                                'booking_type_id'=>$booking_type_id,
+                                'shipping_mode_id'=>$shipping_mode_id,
+                            ]);
+                        }
+                    }
+
+                    return redirect()->back()->with('success','City updated successfully');
+                }
+                elseif($request->postType == 'hub'){
+                    City::where('id',$id)->update([
+                        'name'=>$request->cityName,
+                        'hub'=>1,
+                        'hub_id'=>$id,
+                        'zone_id'=>$request->zone_id,
+                        'pickup'=>($request->has('pickup'))? 1:0,
+                        'gc_area'=>($request->has('gc_area'))? 1:0,
+                        'attempt_tat'=>$request->attempt_tat,
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'address' => $request->address
+                    ]);
+                    CityHistory::create([
+                        'city_id'=> $id,
+                        'hub'=>1,
+                        'hub_id'=>$id,
+                        'zone_id'=>$request->zone_id,
+                        'pickup'=>($request->has('pickup'))? 1:0,
+                        'status' => $city_id->status,
+                        'gc_area'=>($request->has('gc_area'))? 1:0,
+                        'attempt_tat'=>$request->attempt_tat,
+                        'updated_by' => Auth::id(),
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'address' => $request->address
+                    ]);
+                    WalkInCities::where('city_id',$id)->delete();
+                    if(!empty($request->walk_in_delivery)) {
+                        foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                            WalkInCities::create([
+                                'city_id' => $id,
+                                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                                'delivery' => $index,
+                            ]);
+                        }
+                    }
+
+                    CityDelivery::where('city_id',$id)->delete();
+
+                    foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
+                        foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                            CityDelivery::create([
+                                'city_id'=>$id,
+                                'booking_type_id'=>$booking_type_id,
+                                'shipping_mode_id'=>$shipping_mode_id,
+                            ]);
+                        }
+                    }
+
+                    return redirect()->back()->with('success','Hub/city updated successfully');
                 }
             }
-
-            CityDelivery::where('city_id',$id)->delete();
-
-            foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
-                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
-                    CityDelivery::create([
-                        'city_id'=>$id,
-                        'booking_type_id'=>$booking_type_id,
-                        'shipping_mode_id'=>$shipping_mode_id,
-                    ]);
-                }
+            else{
+                return redirect()->back()->with('error', 'Please select atleast one shipping mode!');
             }
-
-            return redirect()->back()->with('success','City updated successfully');
-        }elseif($request->postType == 'hub'){
-            City::where('id',$id)->update([
-                'name'=>$request->cityName,
-                'hub'=>1,
-                'hub_id'=>$id,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude,
-                'address' => $request->address
-            ]);
-            CityHistory::create([
-                'city_id'=> $id,
-                'hub'=>1,
-                'hub_id'=>$id,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status' => $city_id->status,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'updated_by' => Auth::id(),
-                'location_latitude' => $request->latitude,
-                'location_longitude' => $request->longitude,
-                'address' => $request->address
-            ]);
-            WalkInCities::where('city_id',$id)->delete();
-            if(!empty($request->walk_in_delivery)) {
-                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
-                    WalkInCities::create([
-                        'city_id' => $id,
-                        'pickup' => ($request->has('pickup')) ? 1 : 0,
-                        'delivery' => $index,
-                    ]);
-                }
-            }
-
-            CityDelivery::where('city_id',$id)->delete();
-
-            foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
-                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
-                    CityDelivery::create([
-                        'city_id'=>$id,
-                        'booking_type_id'=>$booking_type_id,
-                        'shipping_mode_id'=>$shipping_mode_id,
-                    ]);
-                }
-            }
-
-            return redirect()->back()->with('success','Hub/city updated successfully');
         }
+
     }
     //update city end
     public function addCityHub(Request $request){
@@ -9626,7 +9631,7 @@ class AdminDashboardController extends Controller
 
         $user_id = $request->user_id;
         if($user_id != null){
-            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.status',1)->get();
+            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.hidden',0)->get();
             if($addresses)
             {
                 return response()->json(['status'=> 1,'addresses' => $addresses]);
@@ -9757,6 +9762,27 @@ class AdminDashboardController extends Controller
         }
 
      }
+
+//     public function modesAjax(Request $request) {
+//        $city_id = $request->id;
+//        $shipping_mode_ids = CityDelivery::select('shipping_mode_id')->where('city_id', $city_id);
+//
+//        if($shipping_mode_ids->exists()){
+//            $shipping_modes = $shipping_mode_ids->get();
+//            $data = array();
+//            foreach($shipping_modes as $id){
+//                $shipping_mode = ShippingMode::find($id)->mode;
+////                dd($shipping_mode);
+//                $name = $shipping_mode;
+//                dd($name);
+//                $data[] = $name;
+//            }
+//            return response()->json(['status' => 1, 'shipping_mode' => $data]);
+//        }
+//        else {
+//            return response()->json(['status' => 0, 'No Shipping mode found!']);
+//        }
+//     }
 
 }
 

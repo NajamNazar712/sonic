@@ -122,7 +122,7 @@ class AdminFinanceController extends Controller
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
             ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
             ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip','station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref')
-            ->where('station_deposit_notes.status', 1);
+            ->where('station_deposit_notes.status', 1)->where('sdn_type', 1);
 
         if (session('role_id') != 1) {
             $station_deposit_notes = $station_deposit_notes->whereIn('h.id', session('hubs'));
@@ -3877,7 +3877,8 @@ class AdminFinanceController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers));;
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('done_payments.id');
         }
 
         if ($shipper = $request->get('search_shipper')) {

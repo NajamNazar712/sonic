@@ -56,6 +56,32 @@
                                 </div>
                             </div>
                             <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Packaging Material Type</h4>
+
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary add_internal" value="internal" name="packaging_type" id="colorRadio1">
+                                                    <label class="custom-control-label" for="colorRadio1">Internal</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success add_external" value="external" name="packaging_type" id="colorRadio2">
+                                                    <label class="custom-control-label" for="colorRadio2">External</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-danger add_both" value="both" name="packaging_type" id="colorRadio3" checked>
+                                                    <label class="custom-control-label" for="colorRadio3">Both</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
                                 <div class="col-12 form-group">
                                     <label for="packaging_picture">Picture</label>
                                     <input class="form-control form-control-sm" type="file" name="packaging_picture" id="packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
@@ -114,6 +140,31 @@
                                 </div>
                             </div>
                             <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Packaging Material Type</h4>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary edit_internal" value="internal" name="packaging_type" id="colorRadio4">
+                                                    <label class="custom-control-label" for="colorRadio4">Internal</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success edit_external" value="external" name="packaging_type" id="colorRadio5">
+                                                    <label class="custom-control-label" for="colorRadio5">External</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-danger edit_both" value="both" name="packaging_type" id="colorRadio6">
+                                                    <label class="custom-control-label" for="colorRadio6">Both</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
                                 <div class="col-12 form-group" id="picture_div">
 
                                 </div>
@@ -143,6 +194,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -197,6 +250,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -428,6 +482,15 @@
                                 '</div></div>';
                             index_count++;
                         });
+                        $('#edit_material_form input[name="packaging_type"]').attr('checked', false);
+
+                        if(data.type.packaging_type === 1){
+                            $('input.edit_internal').attr('checked', true);
+                        }else if(data.type.packaging_type === 2){
+                            $('input.edit_external').attr('checked', true);
+                        }else{
+                            $('input.edit_both').attr('checked', true);
+                        }
                         $('#EditMaterialModal #type_div').html(html_type);
                         $('#EditMaterialModal #description_div').html(html_description);
                         $('#EditMaterialModal #picture_div').html(html_picture);
