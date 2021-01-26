@@ -952,6 +952,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::get('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_view')->name('sdn.create');
                 Route::post('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_submit')->name('sdn.create.submit');
+
             });
         });
         Route::prefix('sdn')->name('sdn.')->group(function (){
@@ -967,6 +968,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
             Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
+
+            Route::prefix('retail')->name('retail.')->group(function() {
+                Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
+                Route::get('{id}/ajax','Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
+            });
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
             Route::get('','Admins\DeliveryController@misroute_index')->name('index');
@@ -2609,7 +2615,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
-//            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@bank_info')->name('bank_info');
+            Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
 

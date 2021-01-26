@@ -1485,7 +1485,7 @@
                 var id = parseInt($(this).val());
                 var value = $('#case_nature_claim').val();
                 // console.log(value);
-                if (this.value && this.value == 17 && lost_flag === true) {
+                if (this.value && this.value == 23 && lost_flag === true) {
                     $('#receiving_sheet_div').removeClass('d-none');
                     var shipment_id = $('#requested_shipment_ids').val();
                     $.ajax({
@@ -1524,7 +1524,7 @@
                     $('#AddNewRequest').attr('disabled',false);
 
                 }
-                if (this.value && this.value == 15)
+                if (this.value && this.value == 21)
                 {
                     $('#claim_shipment_damage_div').removeClass('d-none');
                 }
@@ -1532,7 +1532,7 @@
                     $('#claim_shipment_damage_div').addClass('d-none');
                 }
 
-                if (this.value && this.value == 16)
+                if (this.value && this.value == 22)
                 {
                     $('#claim_content_short_div').removeClass('d-none');
                 }
@@ -1685,7 +1685,7 @@
                         $('#case_nature_id').val(case_nature_id);
                         $('#complaint_id').val(case_nature_claim_id);
                         var formData = new FormData($('#add_request_form')[0]);
-                        if(case_nature_claim_id === 17){
+                        if(case_nature_claim_id === 23){
                             if($('#request_id').val() == "" || $('#request_id').val() == null){
                                 nature_flag = false;
                                 var error = "Please select receiving sheet!";

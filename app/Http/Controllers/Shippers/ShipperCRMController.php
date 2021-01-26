@@ -194,7 +194,7 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 17 && $receiving_sheet_id != null){
+        if($complaint_id == 23 && $receiving_sheet_id != null){
             $description_text = $request->description ;
             $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
         }
@@ -325,7 +325,7 @@ class ShipperCRMController extends Controller
 
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                                 if($nature_id == 4) {
-                                    if ($complaint_id == 15 || $complaint_id == 16) {
+                                    if ($complaint_id == 21 || $complaint_id == 22) {
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
                                     } else {
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);

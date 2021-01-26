@@ -3737,7 +3737,7 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="sales_person_performance.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "reports/sales_person_performance".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'sales_person_performance.xlsx']);
 
@@ -5364,7 +5364,7 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
             ->leftjoin('adjustment_logs as adjustment', function ($join) {
                 $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where('adjustment.created_at','=',DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id = 4)'));
+                    ->where('adjustment.created_at','=',DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
             })
             ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount')
             ->groupBy('crm_requests.id');
@@ -7277,7 +7277,7 @@ class AdminReportsController extends Controller
                         $data[$mode->id]['avg_rev_chargeable_weight'] = ($chargeable_weight != 0) ? $revenue_wo_gst / $chargeable_weight:0;
                         $data[$mode->id]['collection_amount'] = $cod_collection;
                         $data[$mode->id]['avg_amount_collection'] = ($received != 0) ? $cod_collection / $received : 0;
-                        $data[$mode->id]['revenue_amount_collection'] = ($received != 0) ? $revenue_wo_gst / $cod_collection : 0;
+                        $data[$mode->id]['revenue_amount_collection'] = ($cod_collection != 0) ? $revenue_wo_gst / $cod_collection : 0;
                         $data[$mode->id]['revenue_amount_collection'] = $data[$mode->id]['revenue_amount_collection'] * 100;
                         $serial++;
                     }

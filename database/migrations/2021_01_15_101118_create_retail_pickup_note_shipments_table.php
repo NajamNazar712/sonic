@@ -15,8 +15,8 @@ class CreateRetailPickupNoteShipmentsTable extends Migration
     {
         Schema::create('retail_pickup_note_shipments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('retail_pickup_note_id');
-            $table->integer('shipment_id');
+            $table->integer('retail_pickup_note_id')->index();
+            $table->integer('shipment_id')->index();
             $table->timestamps();
         });
     }

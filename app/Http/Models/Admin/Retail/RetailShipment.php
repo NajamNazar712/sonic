@@ -12,4 +12,7 @@ class RetailShipment extends Model
     public function payment_mode() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailPaymentMode', 'payment_mode_id', 'id');
     }
+    public function shipping_modes() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShippingMode', 'shipping_mode', 'id');
+    }
 }

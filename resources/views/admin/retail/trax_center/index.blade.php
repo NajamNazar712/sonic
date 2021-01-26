@@ -123,13 +123,6 @@
                             <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
                         </div>
                         <div class="form-group">
-                            <select name="hub" id="edit_hub" class="form-control select2" data-rule-required="true" data-msg-required="Default Hub is required">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
                         </div>
                         <div class="form-group">
@@ -197,12 +190,6 @@
             });
 
             $('#add_trax_center_form #hub').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Default Hub',
-                allowClear:true
-            });
-
-            $('#edit_trax_center_form #edit_hub').select2({
                 width: '100%',
                 placeholder: 'Select Default Hub',
                 allowClear:true
@@ -277,7 +264,7 @@
                 scrollX: true, scrollY: '500px',
                 // autoWidth: false,
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(361, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(433, session('permissions')))
                     {
                         text: 'Add Trax Center',
                         className: 'btn btn-primary add',
@@ -431,7 +418,6 @@
                 $('#edit_phone_number').val(phone_no);
                 $('#edit_cnic').val(cnic);
                 $('#edit_email').val(email);
-                $('#edit_hub').val(default_hub_id).trigger('change');
                 $('#edit_lat').val(lat);
                 $('#edit_long').val(long);
 

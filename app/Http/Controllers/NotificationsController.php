@@ -2380,7 +2380,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk'];
+                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk', 'aamir.chauhan@trax.pk'];
                     $to = array_merge($to, $extra_admins);
 
                     foreach ($to as $individual_to) {
@@ -2890,11 +2890,10 @@ class NotificationsController extends Controller
 //                            if($department_head_email) {
 //                                $cc[] = $department_head_email;
 //                            }
-                            $bcc = array();
-                            $bcc = ['danish.zahid@trax.pk'];
+
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc, $bcc);
+                            self::email($subject, $body, $to, $cc);
 
                         }
                     }

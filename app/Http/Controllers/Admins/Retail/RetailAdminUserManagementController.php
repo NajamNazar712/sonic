@@ -90,20 +90,24 @@ class RetailAdminUserManagementController extends Controller
                 }
             })
             ->addColumn('action', function($data) {
-                $dropdown = '<div class="btn-group">
+                if (session('role_id') == 1 || in_array(436, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                if($data->status == 0){
-                    $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                }
-                else{
-                    $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                }
-                $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    if ($data->status == 0) {
+                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
                     </div>
                   </div>
           ';
-                return $dropdown;
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                    }
             });
         return $datatables->make(true);
     }
@@ -145,6 +149,8 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function franchise_add(Request $request){
+        $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
+
         $password = $request->password;
         $franchise = new RetailFranchise();
         $franchise->name = $request->name;
@@ -161,7 +167,7 @@ class RetailAdminUserManagementController extends Controller
         $hub_name = City::find($request->hub)->name;
         $hub_code = substr($hub_name, 0, 3);
         $hub_code = strtoupper($hub_code);
-        $code = 'FR-' . $hub_code . '-' . str_pad($franchise->id, 3, 0, STR_PAD_LEFT);
+        $code = 'FR-' . $hub_code . '-' . str_pad($hub_count, 3, 0, STR_PAD_LEFT);
 
         $franchise->code = $code;
         $franchise->save();
@@ -191,17 +197,11 @@ class RetailAdminUserManagementController extends Controller
             });
         if(!$retail_user->exists()) {
             $franchise = RetailFranchise::find($request->franchise_id);
-            $hub_name = City::find($request->hub)->name;
-            $hub_code = substr($hub_name, 0, 3);
-            $hub_code = strtoupper($hub_code);
-            $code = 'FR-' . $hub_code . '-' . str_pad($franchise->id, 3, 0, STR_PAD_LEFT);
 
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
             $franchise->email = $request->email;
             $franchise->cnic = $request->cnic;
-            $franchise->default_hub = $request->hub;
-            $franchise->code = $code;
             $franchise->location_latitude = $request->lat;
             $franchise->location_longitude = $request->long;
             $franchise->updated_by = Auth::id();
@@ -209,24 +209,13 @@ class RetailAdminUserManagementController extends Controller
 
             $user = RetailUser::find($franchise->user_id);
             if($user){
-            $user->name = $request->name;
-            if($request->password != null){
-                    $user->password = Hash::make($request->password);
-            }
-            $user->save();
+                $user->name = $request->name;
+                if($request->password != null){
+                        $user->password = Hash::make($request->password);
+                }
+                $user->save();
             }
 
-            $pickup_address = UserShippingInfo::find($franchise->pickup_address_id);
-            if($pickup_address){
-                $pickup_address->pickup_address = $franchise->name . ' - ' . $hub_name;
-                $pickup_address->poc = $franchise->name;
-                $pickup_address->phone = $franchise->phone_no;
-                $pickup_address->email = $franchise->email;
-                $pickup_address->city_id = $franchise->default_hub;
-                $pickup_address->location_latitude = $franchise->location_latitude;
-                $pickup_address->location_longitude = $franchise->location_longitude;
-                $pickup_address->save();
-            }
 
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         }
@@ -265,20 +254,24 @@ class RetailAdminUserManagementController extends Controller
                 }
             })
             ->addColumn('action', function($data) {
-                $dropdown = '<div class="btn-group">
+                if (session('role_id') == 1 || in_array(435, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                if($data->status == 0){
-                    $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                }
-                else{
-                    $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                }
-                $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    if ($data->status == 0) {
+                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
                     </div>
                   </div>
           ';
-                return $dropdown;
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
             });
         return $datatables->make(true);
     }
@@ -319,6 +312,8 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function trax_center_add(Request $request){
+        $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
+
         $password = $request->password;
         $trax_center = new RetailTraxCenter();
         $trax_center->name = $request->name;
@@ -335,7 +330,7 @@ class RetailAdminUserManagementController extends Controller
         $hub_name = City::find($request->hub)->name;
         $hub_code = substr($hub_name, 0, 3);
         $hub_code = strtoupper($hub_code);
-        $code = 'TC-' . $hub_code. '-' . str_pad($trax_center->id, 3, 0, STR_PAD_LEFT);
+        $code = 'TC-' . $hub_code. '-' . str_pad($hub_count, 3, 0, STR_PAD_LEFT);
 
         $trax_center->code = $code;
         $trax_center->save();
@@ -364,17 +359,11 @@ class RetailAdminUserManagementController extends Controller
             });
         if(!$retail_user->exists()){
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
-            $hub_name = City::find($request->hub)->name;
-            $hub_code = substr($hub_name, 0, 3);
-            $hub_code = strtoupper($hub_code);
-            $code = 'TC-' . $hub_code . '-' . str_pad($trax_center->id, 3, 0, STR_PAD_LEFT);
 
             $trax_center->name = $request->name;
             $trax_center->phone_no = $request->phone_number;
             $trax_center->email = $request->email;
             $trax_center->cnic = $request->cnic;
-            $trax_center->default_hub = $request->hub;
-            $trax_center->code = $code;
             $trax_center->location_latitude = $request->lat;
             $trax_center->location_longitude = $request->long;
             $trax_center->updated_by = Auth::id();
@@ -387,18 +376,6 @@ class RetailAdminUserManagementController extends Controller
                     $user->password = Hash::make($request->password);
                 }
                 $user->save();
-            }
-
-            $pickup_address = UserShippingInfo::find($trax_center->pickup_address_id);
-            if($pickup_address){
-                $pickup_address->pickup_address = $trax_center->name . ' - ' . $hub_name;
-                $pickup_address->poc = $trax_center->name;
-                $pickup_address->phone = $trax_center->phone_no;
-                $pickup_address->email = $trax_center->email;
-                $pickup_address->city_id = $trax_center->default_hub;
-                $pickup_address->location_latitude = $trax_center->location_latitude;
-                $pickup_address->location_longitude = $trax_center->location_longitude;
-                $pickup_address->save();
             }
 
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');

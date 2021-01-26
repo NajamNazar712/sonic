@@ -120,11 +120,12 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('PNCC & Delivery Note No.');
+                            head.push('PNCC No.');
                             head.push('Hub');
                             head.push('Rider');
                             head.push('Center/Franchise Name');
                             head.push('No. Of Shipments Delivered');
+                            head.push('Center and Franchise Code');
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('Cash Collected By');
@@ -139,12 +140,13 @@
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.store);
-                                row.push(values.count);
+                                row.push(values.shipment_count);
                                 row.push(values.code);
                                 row.push(values.assignee);
-                                row.push(values.time);
-                                row.push(values.created_at);
-                                row.push(values.pncc_amount);
+                                row.push(values.assigned_at);
+                                row.push(values.collected_by);
+                                row.push(values.cash_collected_at);
+                                row.push(values.amount);
 
                                 body.push(row);
                             });
@@ -277,7 +279,7 @@
                         }
                     },{
                         extend: 'excel',
-                        title: 'Pending Cash Collection Retail',
+                        title: 'Completed Deliveries Retail',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
                 select: {
