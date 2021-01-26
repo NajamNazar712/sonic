@@ -2411,8 +2411,6 @@ class RiderAPIController extends Controller {
 
     public function return_shipment_delivered(Request $request)
     {
-        $message = '';
-
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -2421,7 +2419,7 @@ class RiderAPIController extends Controller {
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
-            'receiver_name' => ['nullable', 'string', 'max:255'],
+            'receiver_name' => ['required', 'string', 'max:255'],
             'cnic' => ['nullable', 'max:255'],
             'picture' => ['nullable', 'image']
         ];
@@ -2429,6 +2427,7 @@ class RiderAPIController extends Controller {
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
+        $message = '';
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -2607,16 +2606,16 @@ class RiderAPIController extends Controller {
                         $return_note_data->last_updated_at = Carbon::now();
                         $return_note_data->status_updated_at = Carbon::now();
                         $return_note_data->save();
-
                         $message = 'Shipment is marked as delivered Successfully';
                     }
-                } else {
-                    $message = 'Shipment is marked as delivered already';
                 }
+            }
+            else {
+                $message = 'Shipment is marked as delivered already';
 
             }
         }
-        return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
+        return response()->json(['status' => 0, 'message' =>$message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
     public function return_shipment_undelivered(Request $request)
@@ -2745,7 +2744,8 @@ class RiderAPIController extends Controller {
 
                     $message = 'Shipment is marked as Undelivered Successfully';
                 }
-            } else {
+            }
+            else {
                 $message = 'Shipment is already marked as Undelivered';
             }
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
@@ -2797,11 +2797,8 @@ class RiderAPIController extends Controller {
         if ($from_date == null && $return_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
         } else {
-            $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.shipment_id')
+            $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
-                ->join('rider_return_deliveries as rnd', 'return_notes.id', '=', 'rnd.return_note_id')
-                ->select(['return_notes.id as return_note', 'return_notes.shipments_count as total_shipment'])
-                ->where('return_notes.completion_status', '=', 1)
                 ->where('return_notes.rider_id', '=', $rider_id);
 
             if ($from_date != null) {
@@ -2818,11 +2815,17 @@ class RiderAPIController extends Controller {
                 $rider_return_deliveries = $rider_return_deliveries->where('s.tracking_number', $tracking_no)
                     ->groupBy('return_notes.id');
             }
-
-
+            $rider_return_history = array();
             if ($rider_return_deliveries->exists()) {
                 $rider_return_deliveries = $rider_return_deliveries->get();
-                return response()->json(["status" => 0, "return_deliveries" => $rider_return_deliveries]);
+                foreach($rider_return_deliveries as $rider_return_delivery){
+                    $return_history = array();
+                    $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
+                    $return_history['total_shipments'] = $rider_return_delivery->shipments_count;
+                    $return_history['delivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->count();
+                    $rider_return_history[] = $return_history;
+                }
+                return response()->json(["status" => 0, "return_history" => $rider_return_history]);
             } else {
                 return response()->json(["status" => 1, "message" => "No  return deliveries found!"]);
             }

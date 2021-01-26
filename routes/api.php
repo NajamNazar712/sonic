@@ -102,7 +102,7 @@ Route::name('api.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@return_summary_multiple')->name('return_summary');
                 Route::post('delivered', 'Rider\RiderAPIController@return_shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
-                Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('return_action_log');
+                Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
             });
 
 		});
