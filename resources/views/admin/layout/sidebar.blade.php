@@ -236,7 +236,7 @@
                             </li>
                         @endif
                     </ul>
-                   <ul class="menu-content">
+                   {{--<ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Master Cargo</span></a>
                                 <ul class="menu-content">
@@ -290,7 +290,7 @@
                                 </ul>
                             </li>
                         @endif
-                    </ul>
+                    </ul>--}}
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([386], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Runner</span></a>
@@ -928,9 +928,9 @@
                         @if (session('role_id') == 1 || in_array(401, session('permissions')))
                           <li><a class="menu-item" href="{{ route('admin.reports.app_efficiency.index') }}">App Efficiency Report</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(430, session('permissions')))
-                          <li><a class="menu-item" href="{{ route('admin.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipments Report</a></li>
-                        @endif
+{{--                            @if (session('role_id') == 1 || in_array(430, session('permissions')))--}}
+{{--                          <li><a class="menu-item" href="{{ route('admin.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipments Report</a></li>--}}
+{{--                        @endif--}}
 
                         @if (session('role_id') == 1 || in_array(414, session('permissions')))
                           <li><a class="menu-item" href="{{ route('admin.reports.month_closing.individual.index') }}">Month Closing - Individual</a></li>

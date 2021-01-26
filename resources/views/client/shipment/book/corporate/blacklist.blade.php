@@ -90,6 +90,11 @@
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pieces_quantity]" value="{{$ro['pieces_quantity']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_1]" value="{{$ro['shipper_reference_number_1']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_2]" value="{{$ro['shipper_reference_number_2']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_3]" value="{{$ro['shipper_reference_number_3']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_4]" value="{{$ro['shipper_reference_number_4']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_5]" value="{{$ro['shipper_reference_number_5']}}">
                                                 @else
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
@@ -124,6 +129,11 @@
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pieces_quantity]" value="{{$ro['pieces_quantity']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_1]" value="{{$ro['shipper_reference_number_1']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_2]" value="{{$ro['shipper_reference_number_2']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_3]" value="{{$ro['shipper_reference_number_3']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_4]" value="{{$ro['shipper_reference_number_4']}}">
+                                                    <input type="hidden" name="form[{{$no}}][shipper_reference_number_5]" value="{{$ro['shipper_reference_number_5']}}">
                                                 @endif
                                             </tr>
                                         @endforeach

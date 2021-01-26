@@ -7,6 +7,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
+use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
@@ -107,7 +108,14 @@ class APIController extends Controller
 
       'charges_mode_id' => 'Charges Mode ID',
 
-      'pieces_quantity' => 'Pieces'
+      'pieces_quantity' => 'Pieces',
+
+
+    'shipper_reference_number_1' => 'Shipper Reference Number 1',
+    'shipper_reference_number_2' => 'Shipper Reference Number 2',
+    'shipper_reference_number_3' => 'Shipper Reference Number 3',
+    'shipper_reference_number_4' => 'Shipper Reference Number 4',
+    'shipper_reference_number_5' => 'Shipper Reference Number 5',
     ];
 
     private $messages = [
@@ -341,6 +349,12 @@ class APIController extends Controller
                 'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
                 'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
                 'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+                'shipper_reference_number_1' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_2' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_3' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_4' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
         }
         else {
@@ -391,7 +405,13 @@ class APIController extends Controller
                 'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
                 'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
                 'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+
+                'shipper_reference_number_1' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_2' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_3' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_4' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
         }
 
@@ -704,14 +724,38 @@ class APIController extends Controller
             }
             else{
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-            }			if($request->has('order_date')){
+            }
+            if($request->has('order_date')){
                 if($request->order_date != null){
                     $order_date = new ShipmentOrderDate();
                     $order_date->shipment_id = $shipment_id;
                     $order_date->order_date = $request->order_date;
                     $order_date->save();
                 }
-            }            if ($service_type_id == 1 || $service_type_id == 5) {
+            }
+
+            if($request->has('shipper_reference_number_1') || $request->has('shipper_reference_number_2') || $request->has('shipper_reference_number_3') || $request->has('shipper_reference_number_4') || $request->has('shipper_reference_number_5')){
+                $shipper_reference = new ShipmentShipperReference();
+                $shipper_reference->shipment_id = $shipment_id;
+                if($request->has('shipper_reference_number_1')) {
+                    $shipper_reference->reference_1 = $request->shipper_reference_number_1;
+                }
+                if($request->has('shipper_reference_number_2')) {
+                    $shipper_reference->reference_2 = $request->shipper_reference_number_2;
+                }
+                if($request->has('shipper_reference_number_3')) {
+                    $shipper_reference->reference_3 = $request->shipper_reference_number_3;
+                }
+                if($request->has('shipper_reference_number_4')) {
+                    $shipper_reference->reference_4 = $request->shipper_reference_number_4;
+                }
+                if($request->has('shipper_reference_number_5')) {
+                    $shipper_reference->reference_5 = $request->shipper_reference_number_5;
+                }
+                $shipper_reference->save();
+            }
+
+            if ($service_type_id == 1 || $service_type_id == 5) {
                 $item_product_type_id = $request->input('item_product_type_id');
 
                 if ($request->filled('item_description')) {
