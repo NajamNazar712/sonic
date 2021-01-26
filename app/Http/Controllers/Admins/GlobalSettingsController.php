@@ -3297,21 +3297,41 @@ class GlobalSettingsController extends Controller
     }
 
     public function international_rates_index(){
-        $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge')->first();
-        $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate')->first();
-       return view('admin.settings.international.index')->with(['fuel_surcharge' =>$fuel_surcharge,'exchange_rate' => $exchange_rate]);
+        $fuel_charges = '';
+        $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+        if($fuel_surcharge->exists()){
+            $fuel_surcharge = $fuel_surcharge->first();
+            $fuel_charges = $fuel_surcharge->setting_value;
+        }
+        $exchange_rate_charges = '';
+        $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+        if($exchange_rate->exists()){
+            $exchange_rate = $exchange_rate->first();
+            $exchange_rate_charges = $exchange_rate->setting_value;
+        }
+       return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges]);
     }
 
     public function international_rates_update(Request $request)
     {
-        $fuel_surcharge = $request->fuel_surcharge;
-        $exchange_rate = $request->exchange_rate;
-
-        $fuel_surcharge_rate = GlobalSettings::where('type', 'international_fuel_surcharge')->first();
-        $exchange_rate_value = GlobalSettings::where('type', 'international_exchange_rate')->first();
-
+        $fuel_surcharge_rate = GlobalSettings::where('type', 'international_fuel_surcharge');
+        if($fuel_surcharge_rate->exists()){
+            $fuel_surcharge_rate = $fuel_surcharge_rate->first();
+        }
+        else{
+            $fuel_surcharge_rate = new GlobalSettings();
+            $fuel_surcharge_rate->type = 'international_fuel_surcharge';
+        }
         $fuel_surcharge_rate->setting_value = $request->fuel_surcharge;
         $fuel_surcharge_rate->save();
+        $exchange_rate_value = GlobalSettings::where('type', 'international_exchange_rate');
+        if($exchange_rate_value->exists()){
+            $exchange_rate_value = $exchange_rate_value->first();
+        }
+        else{
+            $exchange_rate_value = new GlobalSettings();
+            $exchange_rate_value->type = 'international_exchange_rate';
+        }
         $exchange_rate_value->setting_value = $request->exchange_rate;
         $exchange_rate_value->save();
 

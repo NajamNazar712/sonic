@@ -720,7 +720,7 @@ class AdminInternationalRatesController extends Controller
         return ['success' => 'Rates has been rejected!'];
     }
 
-    public function int_rates_edit($id){
+    public function v2_int_rates_update($id){
 
         return view('admin.international.rates_edit');
     }

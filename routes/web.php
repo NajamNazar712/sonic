@@ -2536,33 +2536,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('view')->name('view.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
-        });
-    });
-	Route::prefix('international')->name('international.')->group(function(){
-        Route::prefix('tracking_upload')->name('tracking_upload.')->group(function () {
-            Route::get('', 'Admins\AdminInternationalShipmentsController@tracking_upload_index')->name('index');
-            Route::get('list', 'Admins\AdminInternationalShipmentsController@tracking_upload_list')->name('list');
-            Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
-            Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
-            Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
-        });
-        Route::prefix('rates')->name('rates.')->group(function () {
-            Route::prefix('add')->name('add.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
-            });
 
-			Route::prefix('edit')->name('edit.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@int_rates_edit')->name('index');
+            Route::prefix('v2_edit')->name('v2_edit.')->group(function () {
+                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
             });
-
-            Route::prefix('view')->name('view.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
-            });
         });
     });
+
 	Route::prefix('telenor')->name('telenor.')->group(function(){
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@arrival_index')->name('index');

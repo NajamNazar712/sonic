@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Auto Account Disabled Days')
+@section('title', 'International Rates Settings')
 
 @section('content')
     <div class="app-content content">
@@ -22,7 +22,7 @@
                                     <div class="col-3">
                                         <div class="form-group">
                                             <label>Fuel Surcharge</label>
-                                            <input type="text" name="fuel_surcharge" value="{{$fuel_surcharge->setting_value}}" class="select2 form-control" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
+                                            <input type="text" name="fuel_surcharge" value="{{$fuel_surcharge}}" class="form-control decimal" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                         </div>
                                     </div>
                                 </div>
@@ -30,7 +30,7 @@
                                     <div class="col-3">
                                         <div class="form-group">
                                             <label>Exchange Rate</label>
-                                            <input type="text" name="exchange_rate" value="{{$exchange_rate->setting_value}}" class="select2 form-control"  placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required">
+                                            <input type="text" name="exchange_rate" value="{{$exchange_rate}}" class="form-control decimal"  placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required">
                                         </div>
                                     </div>
                                 </div>
@@ -55,20 +55,33 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.auto_account_disabled_days').inputmask({
+            $('#int_rates_settings .decimal').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-
-            $('#settings_form').validate({
+            $('#int_rates_settings').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Rate settings are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+
                 }
             });
         });
