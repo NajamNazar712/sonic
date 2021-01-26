@@ -1678,6 +1678,9 @@ class DeliveryController extends Controller
         if($selected_status == 0 || $selected_status == null || $selected_status == ''){
             return response()->json(['status'=>0, 'error' => 'Status not selected!']);
         }
+        if(DeliveryNote::where('id', $delivery_note_id)->where('pending_status', 1)->exists()){
+            return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
+        }
         $selected_reason = $request->selected_reason;
 
         if($delivery_note_id != ''){
