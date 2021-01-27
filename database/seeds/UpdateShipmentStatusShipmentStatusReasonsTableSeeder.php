@@ -19,7 +19,6 @@ class UpdateShipmentStatusShipmentStatusReasonsTableSeeder extends Seeder
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 57),
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 55),
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 56),
-            array('shipment_status_id' => 12, 'shipment_status_reason_id' => 35),
 
             array('shipment_status_id' => 15, 'shipment_status_reason_id' => 58),
 
