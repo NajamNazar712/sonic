@@ -2598,6 +2598,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
+        Route::post('upload_attachment', 'Admins\LeadManagementController@upload_attachment')->name('upload_attachment');
+        Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
     });
 
 	Route::prefix('retail')->name('retail.')->group(function(){

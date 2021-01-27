@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\http\Models\Admin\Lead\Lead;
+use App\http\Models\Admin\Lead\LeadLog;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
@@ -70,6 +71,13 @@ class WebsiteLead extends Command
                 $new_lead->requested_date = $lead->created_at;
                 $new_lead->message = $lead->message;
                 $new_lead->save();
+
+                $lead_log = new LeadLog();
+                $lead_log->lead_id = $lead->id;
+                $lead_log->prev_status_id = 1;
+                $lead_log->status_id = 1;
+                $lead_log->updated_by = 7;
+                $lead_log->save();
             }
         }
 
