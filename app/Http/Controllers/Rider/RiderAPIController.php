@@ -1705,7 +1705,7 @@ class RiderAPIController extends Controller {
     public function delivery_summary_multiple(Request $request){
         $rider_id = $request->rider_id;
 
-        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0);
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
@@ -1713,6 +1713,10 @@ class RiderAPIController extends Controller {
             $nodes = array();
 
             foreach($delivery_notes as $delivery_note){
+
+                if($delivery_note->shipments_count == $delivery_note->delivered_shipments){
+                    continue;
+                }
                 $information = array();
 
                 $information['delivery_note_id'] = $delivery_note->id;
@@ -2609,13 +2613,12 @@ class RiderAPIController extends Controller {
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 }
-            }
-            else {
+            } else {
                 $message = 'Shipment is marked as delivered already';
 
             }
         }
-        return response()->json(['status' => 0, 'message' =>$message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
+        return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
     public function return_shipment_undelivered(Request $request)
@@ -2666,7 +2669,7 @@ class RiderAPIController extends Controller {
                     $rider_return_delivery->actual_location_latitude = $request->actual_location_latitude;
                     $rider_return_delivery->actual_location_longitude = $request->actual_location_longitude;
                     $rider_return_delivery->rider_status_id = $request->shipper_status_id;
-                    $rider_return_delivery->rider_status_reason_id = $request->status_reason_id ? $request->status_reason_id != null : null;
+                    $rider_return_delivery->rider_status_reason_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
                     $rider_return_delivery->delivered_status = 0;
                     $shipper_phone_number_1 = $pickup_address->phone;
                     $shipper_address = $pickup_address->pickup_address;
@@ -2712,7 +2715,7 @@ class RiderAPIController extends Controller {
                     if (ReturnNote::where('id', $request->return_note_id)->where('completion_status', 0)->exists()) {
 
                         $shipment->shipper_status_id = $request->shipper_status_id;
-                        $shipment->consignee_status_id = $request->status_reason_id;
+                        $shipment->consignee_status_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
                         $shipment->save();
 
                         $remarks = NULL;
@@ -2721,7 +2724,7 @@ class RiderAPIController extends Controller {
                             $remarks = $request->remarks;
                         }
 
-                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->return_note_id, NULL, 0, NULL, $rider_id);
+                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 0, NULL, $rider_id);
                         ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if (!$rider_return_note_status->exists()) {
@@ -2744,8 +2747,7 @@ class RiderAPIController extends Controller {
 
                     $message = 'Shipment is marked as Undelivered Successfully';
                 }
-            }
-            else {
+            } else {
                 $message = 'Shipment is already marked as Undelivered';
             }
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
@@ -2818,7 +2820,7 @@ class RiderAPIController extends Controller {
             $rider_return_history = array();
             if ($rider_return_deliveries->exists()) {
                 $rider_return_deliveries = $rider_return_deliveries->get();
-                foreach($rider_return_deliveries as $rider_return_delivery){
+                foreach ($rider_return_deliveries as $rider_return_delivery) {
                     $return_history = array();
                     $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
                     $return_history['total_shipments'] = $rider_return_delivery->shipments_count;
