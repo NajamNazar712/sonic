@@ -19,14 +19,34 @@
                         </h2>
                         @include('admin.inc.messages')
                     </div>
+                    <div class="card-body">
+                        <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="" method="post">
+                            @csrf
+                            @method('post')
+                            <div class="col form-group">
+                                <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required" disabled value="{{$fuel_surcharge}}">
+                            </div>
+                            <div class="col form-group">
+                                <input type="text" name="exchange_rate" class="form-control exchange_rate" placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required" disabled value="{{$exchange_charges}}">
+                            </div>
+                            <div class="col form-group">
+                                <input type="text" name="margin" class="form-control margin" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required">
+                            </div>
+                            <div class="col form-group">
+                                <input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+                            </div>
 
+                            <div class="form-group ml-1">
+                                <button type="submit" name="submit" class="btn btn-primary search" value="submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-
                                     <th class="border-primary border-darken-1">KG </th>
                                     <th class="border-primary border-darken-1">Zone 1 </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
@@ -61,10 +81,11 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -138,8 +159,8 @@
                 }
             } );*/
 
-            var selected_rows = [];
-            var table = $('#datatable').DataTable({
+
+            /*var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
@@ -211,8 +232,17 @@
 
                     this.api().table().columns.adjust();
                 }
+            });*/
+            $('#update_rates_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value).replace(/,/g, '');
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                }
             });
-
 
         });
 

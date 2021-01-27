@@ -16,13 +16,10 @@ class CreateInternationalUserRatesTable extends Migration
         Schema::create('international_user_rates', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->decimal('fuel_surcharge', 20,2);
-            $table->decimal('exchange_rate', 20,2);
-            $table->decimal('exchange_rate', 20,2);
             $table->decimal('margin', 20,2);
             $table->decimal('gst', 20,2);
             $table->integer('updated_by')->index();
-            $table->timestamp('updated_at');
+            $table->timestamp('rates_updated_at');
             $table->timestamps();
         });
     }

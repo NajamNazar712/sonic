@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\http\Models\International\HistoryInternationalRatesCashHandlingCharges;
 use App\http\Models\International\HistoryInternationalRatesDiscountCharges;
@@ -724,7 +725,25 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
-                return view('admin.international.rates_update')->with(['shipper' => $user]);
+                $fuel_charges = 0;
+                $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+                if($fuel_surcharge->exists()){
+                    $fuel_surcharge = $fuel_surcharge->first();
+                    $fuel_charges = $fuel_surcharge->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $exchange_rate_charges = 0;
+                $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                if($exchange_rate->exists()){
+                    $exchange_rate = $exchange_rate->first();
+                    $exchange_rate_charges = $exchange_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges]);
             }
             return redirect()->back()->with('error', 'No User Found!');
         }
@@ -732,8 +751,8 @@ class AdminInternationalRatesController extends Controller
 
     }
 
-    public function update_rates_list(Request $request){
-
+    public function standard_rates_list(Request $request){
+//        $rates_list =
     }
 
 }
