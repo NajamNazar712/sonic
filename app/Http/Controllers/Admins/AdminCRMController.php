@@ -81,7 +81,8 @@ class AdminCRMController extends Controller
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 23 && $receiving_sheet_id != null){
+//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        if($complaint_id == 23){
             $description_text = $request->description ;
             $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
         }

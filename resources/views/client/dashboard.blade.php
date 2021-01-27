@@ -254,7 +254,8 @@
                                     </div>
                                     <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
-                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">
+{{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
 
                                             </select>
                                         </fieldset>
