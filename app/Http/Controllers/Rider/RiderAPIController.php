@@ -2630,7 +2630,7 @@ class RiderAPIController extends Controller {
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
-            'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
+            'status_reason_id' => ['nullable'],
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image']
         ];
@@ -2666,7 +2666,7 @@ class RiderAPIController extends Controller {
                     $rider_return_delivery->actual_location_latitude = $request->actual_location_latitude;
                     $rider_return_delivery->actual_location_longitude = $request->actual_location_longitude;
                     $rider_return_delivery->rider_status_id = $request->shipper_status_id;
-                    $rider_return_delivery->rider_status_reason_id = $request->status_reason_id;
+                    $rider_return_delivery->rider_status_reason_id = $request->status_reason_id ? $request->status_reason_id != null : null;
                     $rider_return_delivery->delivered_status = 0;
                     $shipper_phone_number_1 = $pickup_address->phone;
                     $shipper_address = $pickup_address->pickup_address;
