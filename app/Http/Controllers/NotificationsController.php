@@ -6,6 +6,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailUser;
@@ -6629,6 +6630,104 @@ class NotificationsController extends Controller
                         $admin = Admin::find(374);
                         $cc = $admin->email;
                         self::email($subject, $body, $to, $cc);
+                    }
+                }
+                else if ($id == 203) {
+                    $date = $reference_2_id;
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $lead_ids = $reference_1_id;
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Contact Person</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Email</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
+                    $html .= '</tr></thead><tbody>';
+                    $serial = 1;
+                    foreach ($lead_ids as $lead_id) {
+                        $lead = Lead::find($lead_id);
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->message . '</td>';
+                        $html .= '</tr>';
+                        $serial++;
+                    }
+                    $html .= '</tbody></table>';
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $body);
+                    }
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $to[] = 'waqas@trax.pk';
+                    $to[] = 'nazneen.arshad@trax.pk';
+
+                    self::email($subject, $body, $to);
+                }
+                else if ($id == 204) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $leads = $reference_1_id;
+                    $sale_person_id = $reference_2_id;
+                    $sale_person = Admin::find($sale_person_id);
+                    if($sale_person){
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Contact Person</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Email</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
+                        $html .= '</tr></thead><tbody>';
+                        $serial = 1;
+                        foreach ($leads as $lead) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->message . '</td>';
+                            $html .= '</tr>';
+                            $serial++;
+                        }
+                        $html .= '</tbody></table>';
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $body);
+                        }
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $sale_person->name, $body);
+                        }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+
+                        $to = array();
+
+                        $to[] = $sale_person->email;
+
+                        self::email($subject, $body, $to);
                     }
                 }
             }

@@ -415,10 +415,10 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([408, 409, 410, 411], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([408, 409, 410, 411, 412], session('permissions'))) !== 0)
 
                 buttons: [
-                    @if (session('role_id') == 1 || in_array(411, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(412, session('permissions')))
                     {
                         text: 'Assign Responsible',
                         className: 'btn btn-primary assign_responsible_multiple',
