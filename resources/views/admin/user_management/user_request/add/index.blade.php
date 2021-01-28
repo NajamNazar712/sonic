@@ -179,17 +179,23 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var hub_ids = $('input[name="hub_ids"]').val();
+                    if(hub_ids>length > 0){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'User is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'User is being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
+                        form.submit();
+                    }
+                    else{
+                        var error = 'Please select at least one Hub';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
             });
             $('#selectAll .hub').each(function() {
