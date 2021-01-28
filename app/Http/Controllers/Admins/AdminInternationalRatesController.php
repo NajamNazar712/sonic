@@ -749,8 +749,16 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
+                $margin = 0;
+                $gst = 0;
+                $international_user_rate = InternationalUserRate::where('user_id', $id);
+                if($international_user_rate->exists()){
+                    $international_user_rate = $international_user_rate->first();
+                    $margin = $international_user_rate->margin;
+                    $gst = $international_user_rate->gst;
+                }
 
-                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges]);
+                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst]);
             }
             return redirect()->back()->with('error', 'No User Found!');
         }

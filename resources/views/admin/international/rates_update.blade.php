@@ -31,10 +31,10 @@
                                 <input type="text" name="exchange_rate" class="form-control exchange_rate" placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required" disabled value="{{$exchange_charges}}">
                             </div>
                             <div class="col form-group">
-                                <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required">
+                                <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
                             </div>
                             <div class="col form-group">
-                                <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+                                <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}">
                             </div>
 
                             <div class="form-group ml-1">
