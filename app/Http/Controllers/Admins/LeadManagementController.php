@@ -96,6 +96,12 @@ class LeadManagementController extends Controller
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $leads = $leads->where('leads.sale_person_id', Auth::id())
+                    ->orWhere('leads.reference_person_id', Auth::id());
+            }
+        }
 
         if($origin = $request->get('search_origin')){
             $leads->where('leads.city_id', '=', $origin);
