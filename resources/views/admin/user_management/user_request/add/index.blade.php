@@ -75,8 +75,8 @@
                                     </div>
 
                                     <div class="col text-center">
-                                        <label class="font-weight-bold">Create Outlook Email</label>
-                                        <input type="checkbox" name="outlook_email" id="outlook_email" class="switchery outlook_email" data-size="xs" data-switchery="true">
+                                        <h4 class="font-weight-bold">Also want to create OUTLOOK ID?</h4>
+                                        <input type="checkbox" name="outlook_email" id="outlook_email" class="switchery outlook_email" data-switchery="true">
                                     </div>
                                     {{--<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <div class="form-group">
