@@ -339,9 +339,7 @@ class AdminMonthClosingController extends Controller
                     if($parcel){
                         $month_closing = MonthClosing::where('shipment_id', $parcel->id)->where('status_id', 3);
                         if($month_closing->exists()){
-                            $month_closing = $month_closing->first();
-                            $month_closing->status_id = 4;
-                            $month_closing->save();
+                            $month_closing->delete();
 
                             Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
                             ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
