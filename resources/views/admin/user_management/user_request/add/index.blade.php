@@ -180,7 +180,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    checked = $("input[type=checkbox]:checked").length;
+                    checked = $(".hub:checked").length;
                     if(checked > 0){
                         $(form).find('button[type=submit]').attr('disabled', 'disabled');
                         swal({
