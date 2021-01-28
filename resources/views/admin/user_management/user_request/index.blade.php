@@ -259,7 +259,7 @@
                     }
                 },{
                         extend: 'excel',
-                        title: 'Users',
+                        title: 'User Requests',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],

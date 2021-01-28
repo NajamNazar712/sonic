@@ -116,6 +116,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+            <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
@@ -123,6 +124,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 
     <script>
@@ -178,9 +180,9 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var hub_ids = $('input[name="hub_ids"]').val();
-                    if(hub_ids>length > 0){
+                    checked = $("input[type=checkbox]:checked").length;
+                    if(checked > 0){
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
                         swal({
                             title: 'Please Wait!',
                             text: 'User is being added!',
