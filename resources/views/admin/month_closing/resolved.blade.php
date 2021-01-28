@@ -429,6 +429,7 @@
                                             UnblockPagePermanently();
                                             selected_rows = [];
                                             shipment_remarks = {};
+                                            table.rows().deselect();
                                             table.button('.close_action').disable();
                                             table.button('.re-attempt').disable();
                                             table.draw(true);
