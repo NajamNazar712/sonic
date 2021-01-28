@@ -40,7 +40,6 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
             ->leftjoin('admins as ac','ac.id','=','admin_user_requests.forwarded_by')
         ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by', 'admin_user_requests.outlook_email')
-            ->where('admin_user_requests.status', '<', 3)
             ->orderBy('admin_user_requests.created_at','desc');
 
             if(session('role_id') != 1 && session('department_id') != 2){
@@ -336,7 +335,7 @@ class AdminUserRequestController extends Controller
 
         $admin->name = $request->input('name');
         $admin->email = $request->input('email');
-        $admin->trax_id = $request->input('trax_id');
+        $admin->trax_id = $admin_user_request->trax_id;
         $admin->phone_number = $request->input('phone_number');
         $admin->cnic = $request->input('cnic');
         /* $admin->department = $request->input('department');*/

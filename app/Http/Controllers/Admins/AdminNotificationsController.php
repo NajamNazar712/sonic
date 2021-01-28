@@ -355,10 +355,10 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['shipper','tracking_number'];
         }
         else if ($id == 200){
-            $details['fields'] = ['admin','admin_user_name'];
+            $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
         }
         else if ($id == 201){
-            $details['fields'] = ['admin','admin_user_name'];
+            $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
         }
         else if ($id == 202){
             $details['fields'] = ['admin','admin_user_name','trax_id','full_name','email','sonic_password','outlook_password'];

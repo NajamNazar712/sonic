@@ -6516,6 +6516,9 @@ class NotificationsController extends Controller
                     $admin_user = AdminUserRequest::find($admin_user_id);
                     $admin = Admin::find(374);
                     if($admin_user) {
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $department = 'Department: '. $admin_user->depart->name;
+                        $designation = 'Designation: '. $admin_user->designation;
                         if (strpos($subject, '[admin]') !== FALSE) {
                             $subject = str_replace('[admin]', $admin->name, $subject);
                         }
@@ -6527,6 +6530,15 @@ class NotificationsController extends Controller
                         }
                         if (strpos($body, '[admin_user_name]') !== FALSE) {
                             $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[department]') !== FALSE) {
+                            $body = str_replace('[department]', $department, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $designation, $body);
                         }
                         $to = $admin->email;
                         self::email($subject, $body, $to);
@@ -6539,6 +6551,9 @@ class NotificationsController extends Controller
                     $admin_user = AdminUserRequest::find($admin_user_id);
                     $admin = Admin::find(5);
                     if($admin_user) {
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $department = 'Department: '. $admin_user->depart->name;
+                        $designation = 'Designation: '. $admin_user->designation;
                         if (strpos($subject, '[admin]') !== FALSE) {
                             $subject = str_replace('[admin]', $admin->name, $subject);
                         }
@@ -6550,6 +6565,15 @@ class NotificationsController extends Controller
                         }
                         if (strpos($body, '[admin_user_name]') !== FALSE) {
                             $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[department]') !== FALSE) {
+                            $body = str_replace('[department]', $department, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $designation, $body);
                         }
                         $to = $admin->email;
                         self::email($subject, $body, $to);
