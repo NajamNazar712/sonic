@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
+use App\Http\Models\HistoryInternationalUserRate;
 use App\http\Models\International\HistoryInternationalRatesCashHandlingCharges;
 use App\http\Models\International\HistoryInternationalRatesDiscountCharges;
 use App\http\Models\International\HistoryInternationalRatesHub;
@@ -26,12 +27,17 @@ use App\Http\Models\InternationalRatesRemark;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\PendingInternationalUserRate;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
+use Yajra\Datatables\Datatables;
+
 class AdminInternationalRatesController extends Controller
 {
     public function __construct() {
@@ -743,6 +749,7 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
+
                 return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges]);
             }
             return redirect()->back()->with('error', 'No User Found!');
@@ -752,7 +759,114 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function standard_rates_list(Request $request){
-//        $rates_list =
+        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+
+        return Datatables::of($rates_list)
+            ->make(true);
+    }
+
+    public function update_rates_submit(Request $request){
+
+        $shipper_id = $request->shipper_id;
+        if(!$shipper_id){
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+
+        $shipper = User::find($shipper_id);
+        if(!$shipper){
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+
+        $international_user_info = InternationalUsersInformation::where('user_id', $shipper_id);
+        if(!$international_user_info->exists()){
+            $intl_user_information = new InternationalUsersInformation();
+            $intl_user_information->user_id = $shipper_id;
+            $intl_user_information->status = 4;
+            $intl_user_information->save();
+        }
+
+        $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
+        if($international_user_rates->exists()){
+            $international_user_rates = $international_user_rates->first();
+            $international_user_rates->margin = $request->margin;
+            $international_user_rates->gst = $request->gst;
+            $international_user_rates->updated_by = Auth::id();
+            $international_user_rates->rates_updated_at = Carbon::now();
+
+        }
+        else{
+            $international_user_rates = new InternationalUserRate();
+            $international_user_rates->user_id = $shipper_id;
+            $international_user_rates->margin = $request->margin;
+            $international_user_rates->gst = $request->gst;
+            $international_user_rates->updated_by = Auth::id();
+            $international_user_rates->rates_updated_at = Carbon::now();
+        }
+        $international_user_rates->save();
+
+
+        if($request->authorize == 1){
+            $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
+            $intl_user_information->status = 1;
+            $intl_user_information->save();
+
+            if($shipper->status != 3){
+                $shipper->status = 2;
+                $shipper->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+            return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+
+        }
+        elseif ($request->approve == 1) {
+            $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
+            $intl_user_information->status = 1;
+            $intl_user_information->save();
+
+            if($previous_rate_status = InternationalUserRate::where('user_id', $shipper_id)->first()){
+                $history_international_user_rate = new HistoryInternationalUserRate();
+                $history_international_user_rate->user_id = $previous_rate_status->user_id;
+                $history_international_user_rate->margin = $previous_rate_status->margin;
+                $history_international_user_rate->gst = $previous_rate_status->gst;
+                $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
+                $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
+                $history_international_user_rate->save();
+            }
+
+
+            InternationalUserRate::where('user_id', $shipper_id)->delete();
+
+
+            if($pending_rate_statuses = PendingInternationalUserRate::where('user_id', $shipper_id)->first()){
+                foreach ($pending_rate_statuses as $rate_status){
+                    $international_user_rates = new InternationalUserRates();
+                    $international_user_rates->user_id = $rate_status->user_id;
+                    $international_user_rates->margin = $rate_status->margin;
+                    $international_user_rates->gst = $rate_status->gst;
+                    $international_user_rates->updated_by = $rate_status->updated_by;
+                    $international_user_rates->rates_updated_at = $rate_status->rates_updated_at;
+                    $international_user_rates->save();
+                }
+            }
+
+
+            PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
+
+
+
+            if($shipper->status != 3){
+                $shipper->status = 2;
+                $shipper->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+            if($shipper->status == 3){
+                return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+            }
+            else {
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+        }
+
     }
 
 }

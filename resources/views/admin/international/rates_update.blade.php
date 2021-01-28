@@ -20,9 +20,10 @@
                         @include('admin.inc.messages')
                     </div>
                     <div class="card-body">
-                        <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="" method="post">
+                        <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="{{ route('admin.international.rates.update.submit') }}" method="post">
                             @csrf
                             @method('post')
+                            <input type="hidden" name="shipper_id" value="{{ $shipper->id }}">
                             <div class="col form-group">
                                 <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required" disabled value="{{$fuel_surcharge}}">
                             </div>
@@ -30,14 +31,14 @@
                                 <input type="text" name="exchange_rate" class="form-control exchange_rate" placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required" disabled value="{{$exchange_charges}}">
                             </div>
                             <div class="col form-group">
-                                <input type="text" name="margin" class="form-control margin" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required">
+                                <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required">
                             </div>
                             <div class="col form-group">
-                                <input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+                                <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
                             </div>
 
                             <div class="form-group ml-1">
-                                <button type="submit" name="submit" class="btn btn-primary search" value="submit">Submit</button>
+                                <button type="submit" name="submit" class="btn btn-primary" value="submit">Submit</button>
                             </div>
                         </form>
                     </div>
@@ -47,7 +48,9 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1">KG </th>
+                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">Range Up</th>
+                                    <th class="border-primary border-darken-1">Range Down</th>
                                     <th class="border-primary border-darken-1">Zone 1 </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
                                     <th class="border-primary border-darken-1">Zone 3 </th>
@@ -89,7 +92,15 @@
 
     <script>
         $(document).ready(function() {
-
+            $('input.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000
+            });
             /*jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -160,13 +171,13 @@
             } );*/
 
 
-            /*var table = $('#datatable').DataTable({
+            var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending Accounts',
+                        title: 'International Rates',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -182,11 +193,12 @@
                 },
                 serverSide: true,
                 rowId: 'id',
-                order: [[2, 'desc']],
-                ajax: '{{ route('admin.accounts.pending.ajax') }}',
+                order: [[1, 'asc']],
+                ajax: '{{ route('admin.international.rates.update.list') }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'weight', name: 'weight', class: 'align-middle weight'},
+                    {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
+                    {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
                     {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
                     {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
                     {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
@@ -232,7 +244,7 @@
 
                     this.api().table().columns.adjust();
                 }
-            });*/
+            });
             $('#update_rates_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -241,6 +253,20 @@
                 },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Rates are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
                 }
             });
 
