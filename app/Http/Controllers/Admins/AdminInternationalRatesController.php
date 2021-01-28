@@ -849,10 +849,7 @@ class AdminInternationalRatesController extends Controller
                 }
             }
 
-
             PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
-
-
 
             if($shipper->status != 3){
                 $shipper->status = 2;
