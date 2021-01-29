@@ -15,6 +15,7 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -6508,6 +6509,39 @@ class NotificationsController extends Controller
                         }
                         $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to);
+                    }
+                }
+                else if ($id == 117) {
+                    $date = str_replace('00:00:00', '', Carbon::today());
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $claim_id = $reference_1_id;
+                    $status_id = $reference_2_id;
+                    $claim = CrmRequest::find($claim_id);
+                    $to = array();
+                    if($claim){
+                        if($claim->case_nature_id == 4){
+                            if($claim->shipment_id != null){
+                                $user = $claim->shipment->user;
+                                $to[] = $user->email;
+                                $status = CrmRequestStatus::find($status_id);
+                                if (strpos($subject, '[date]') !== FALSE) {
+                                    $subject = str_replace('[date]', $date, $subject);
+                                }
+                                if (strpos($subject, '[date]') !== FALSE) {
+                                    $subject = str_replace('[date]', $date, $body);
+                                }
+                                if (strpos($subject, '[status]') !== FALSE) {
+                                    $subject = str_replace('[status]', $status->name, $subject);
+                                }
+                                if (strpos($subject, '[status]') !== FALSE) {
+                                    $subject = str_replace('[status]', $status->name, $body);
+                                }
+
+//                                $to = $admin->email;
+                                self::email($subject, $body, $to);
+                            }
+                        }
                     }
                 }
                 else if ($id == 200) {

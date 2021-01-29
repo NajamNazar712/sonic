@@ -1858,7 +1858,7 @@ class AdminCRMController extends Controller
                             self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
                         }
                     }
-
+                    NotificationsController::send(117, $crm_request, 2);
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -1896,6 +1896,7 @@ class AdminCRMController extends Controller
                         'agent_id' => Auth::id()
                     ]);
 
+                    NotificationsController::send(117, $crm_request, 4);
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
@@ -1985,6 +1986,7 @@ class AdminCRMController extends Controller
                         'status_id' => 7,
                         'agent_id' => Auth::id()
                     ]);
+                    NotificationsController::send(117, $crm_request, 7);
                 }
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->req_id,
