@@ -2837,21 +2837,23 @@ class RiderAPIController extends Controller {
     }
 
     public function scan_pickup_summary(Request $request) {
-        $tracking_no = $request->rider_id;
-        $rules = [
-            'tracking_no' => ['required'],
-        ];
-
-        $pickup_note = V2PickupNote::join('v2_pickup_note_request as pnr', 'v2_pickup_notes.id', '=', 'pnr.pickup_note_id')
-            ->join('shipments as s', 'pnr.shipment_id', '=', 's.id')
-        ->where('s.tracking_number', $rider_id)->where('status', 0);
+        $rider_id = $request->rider_id;
+        $tracking_no = $request->tracking_no;
+        $pickup_note = V2PickupNote::join('v2_pickup_note_requests as pnr', 'v2_pickup_notes.id', '=', 'pnr.pickup_note_id')
+            ->join('v2_pickup_request_shipments as prs','pnr.pickup_request_id','=','prs.pickup_request_id')
+            ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
+        ->where('s.tracking_number', $tracking_no)->get();
+//        $pickup_note_requests = $pickup_note->pickup_note_requests;
+        return response()->json($pickup_note);
 
         if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->latest('id')->first();
 
             $information = array();
 
             $information['pickup_note_id'] = $pickup_note->id;
+
+
+
 
             $information['summary'] = array();
             $information['summary']['pickups'] = 0;

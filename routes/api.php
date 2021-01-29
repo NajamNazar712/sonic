@@ -74,6 +74,7 @@ Route::name('api.')->group(function () {
 				Route::post('action_log', 'Rider\RiderAPIController@pickup_action_log')->name('pickup_action_log');
 				//pickup revamp module
 				Route::get('summary_v2', 'Rider\RiderAPIController@pickup_summary_v2')->name('pickup_summary_v2');
+				Route::post('scan_summary_v2', 'Rider\RiderAPIController@scan_pickup_summary')->name('scan_summary_v2');
                 Route::post('pick_v2', 'Rider\RiderAPIController@pickup_pick_v2')->name('pickup_pick_v2');
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
