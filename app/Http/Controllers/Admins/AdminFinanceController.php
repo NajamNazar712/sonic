@@ -3880,6 +3880,9 @@ class AdminFinanceController extends Controller
                 ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
                 ->groupby('done_payments.id');
         }
+        if ($payment_ids = $request->get('search_payment_ids')) {
+            $datatables->whereIn('done_payments.id', explode(',', $payment_ids));
+        }
 
         if ($shipper = $request->get('search_shipper')) {
             $datatables->where('u.id', '=', $shipper);
