@@ -26,7 +26,7 @@
                             <input type="hidden" name="shipper_id" value="{{ $shipper->id }}">
 
                             <div class="col form-group">
-                                <label><strong>Exchange RateFuel Surcharge</strong></label>
+                                <label><strong>Fuel Surcharge</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required" disabled value="{{$fuel_surcharge}}">
                                     <div class="input-group-append">
