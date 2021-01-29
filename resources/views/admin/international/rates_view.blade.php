@@ -20,7 +20,7 @@
                         @include('admin.inc.messages')
                     </div>
                     <div class="card-body">
-                        <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="{{ route('admin.international.rates.update.submit') }}" method="post">
+                        <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="#" method="post">
                             @csrf
                             @method('post')
                             <input type="hidden" name="shipper_id" value="{{ $shipper->id }}">
@@ -46,7 +46,7 @@
                             <div class="col form-group">
                                 <label><strong>Margin</strong></label>
                                 <div class="input-group">
-                                    <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}" disabled>
                                     <div class="input-group-append">
                                         <span class="input-group-text">%</span>
                                     </div>
@@ -61,23 +61,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 form-group text-center">
-{{--                                <button type="submit" name="submit" class="btn btn-primary" value="submit">Submit</button>--}}
 
-                                <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
-                                <input type="hidden" name="authorize" id="authorize">
-                                <input type="hidden" name="approve" id="approve">
-                                @if($user_information != null)
-                                    @if ($user_information->status == 4 && (session('role_id') == 1 || in_array(8, session('permissions'))))
-                                        <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
-                                        <button id="AuthorizeaccountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
-                                    @endif
-                                    @if ($user_information->status == 2 && (session('role_id') == 1 || in_array(140, session('permissions'))))
-                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
-                                        <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
-                                    @endif
-                                @endif
-                            </div>
 
                         </form>
                     </div>
@@ -284,14 +268,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-            $('#accountActiveSubmit').on('click',function(){
-                $('#authorize').val(1);
-            });
-            $('#accountApproveActiveSubmit').on('click',function(){
-                $('#approve').val(1);
-                // console.log('ddd');
-            });
             $('#update_rates_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -304,15 +280,9 @@
                 submitHandler: function(form) {
 
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var msg = "";
-                    if($('#authorize').val() == 1 || $('#approve').val() == 1){
-                        msg = "Rates are being approved!"
-                    }else{
-                        msg = 'Rates are being updated!';
-                    }
                     swal({
                         title: 'Please Wait!',
-                        text: msg,
+                        text: 'Rates are being updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
