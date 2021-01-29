@@ -1994,6 +1994,11 @@ class AdminCRMController extends Controller
                         NotificationsController::send(117, $crm_request->id, 7);
                     }
                 }
+                else{
+                    if($crm_request->case_nature_id == 4){
+                        NotificationsController::send(117, $crm_request->id, 4);
+                    }
+                }
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->req_id,
                     'status_id' => 4,
