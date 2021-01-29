@@ -6525,14 +6525,20 @@ class NotificationsController extends Controller
                         if (strpos($subject, '[date]') !== FALSE) {
                             $subject = str_replace('[date]', $date, $subject);
                         }
-                        if (strpos($subject, '[date]') !== FALSE) {
-                            $subject = str_replace('[date]', $date, $body);
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+                        if (strpos($subject, '[id]') !== FALSE) {
+                            $subject = str_replace('[id]',  str_pad($claim->id, 6, '0', STR_PAD_LEFT), $subject);
+                        }
+                        if (strpos($body, '[id]') !== FALSE) {
+                            $body = str_replace('[id]', str_pad($claim->id, 6, '0', STR_PAD_LEFT), $body);
                         }
                         if (strpos($subject, '[status]') !== FALSE) {
                             $subject = str_replace('[status]', $status->name, $subject);
                         }
-                        if (strpos($subject, '[status]') !== FALSE) {
-                            $subject = str_replace('[status]', $status->name, $body);
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status->name, $body);
                         }
 
                         $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
