@@ -1859,7 +1859,7 @@ class AdminCRMController extends Controller
                         }
                     }
                     if($crm_request->case_nature_id == 4){
-                        NotificationsController::send(117, $crm_request, 2);
+                        NotificationsController::send(117, $crm_request->id, 6);
                     }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
@@ -1899,7 +1899,7 @@ class AdminCRMController extends Controller
                     ]);
 
                     if($crm_request->case_nature_id == 4) {
-                        NotificationsController::send(117, $crm_request, 4);
+                        NotificationsController::send(117, $crm_request->id, 4);
                     }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
@@ -1991,7 +1991,12 @@ class AdminCRMController extends Controller
                         'agent_id' => Auth::id()
                     ]);
                     if($crm_request->case_nature_id == 4){
-                        NotificationsController::send(117, $crm_request, 7);
+                        NotificationsController::send(117, $crm_request->id, 7);
+                    }
+                }
+                else{
+                    if($crm_request->case_nature_id == 4){
+                        NotificationsController::send(117, $crm_request->id, 4);
                     }
                 }
                 CrmRequestStatusHistory::create([
@@ -2014,20 +2019,24 @@ class AdminCRMController extends Controller
     public function close(Request $request){
         $crm_requests = $request->crm_request_ids;
         if($crm_requests){
-            foreach ($crm_requests as $crm_request){
-                CrmRequest::where('id', $crm_request)->update([
+            foreach ($crm_requests as $crm_request_id){
+                CrmRequest::where('id', $crm_request_id)->update([
                     'status_id' => 4
                 ]);
                 CrmRequestStatusHistory::create([
-                    'crm_request_id' => $crm_request,
+                    'crm_request_id' => $crm_request_id,
                     'status_id' => 3,
                     'agent_id' => Auth::id()
                 ]);
                 CrmRequestStatusHistory::create([
-                    'crm_request_id' => $crm_request,
+                    'crm_request_id' => $crm_request_id,
                     'status_id' => 4,
                     'agent_id' => Auth::id()
                 ]);
+                $crm_request = CrmRequest::find($crm_request_id);
+                if($crm_request->case_nature_id == 4){
+                    NotificationsController::send(117, $crm_request->id, 4);
+                }
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
@@ -2398,6 +2407,10 @@ class AdminCRMController extends Controller
                                 }
                             }
 
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 6);
+                            }
+
                         }
                         elseif ($request->valid == 0){
                             CrmRequest::where('id', $crm_request->id)->update([
@@ -2413,6 +2426,10 @@ class AdminCRMController extends Controller
                                 'status_id' => 4,
                                 'agent_id' => Auth::id()
                             ]);
+
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 7);
+                            }
 
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
                         }
