@@ -50,6 +50,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Auth;
 
@@ -1767,9 +1768,26 @@ class V2AdminPickupsController extends Controller
             })
             ->editColumn('picture_path', function ($rider_pickup) {
                 if ($rider_pickup->pickup_type == 0) {
-                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    $image = '';
+                    if($rider_pickup->picture_path != null){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($rider_pickup->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                        return $image;
+                    }
                 } else {
-                    return '';
+                    return '-';
+                }
+            })
+            ->editColumn('signature_via_app', function ($rider_pickup) {
+                if ($rider_pickup->pickup_type == 1) {
+                    $image = '';
+                    if($rider_pickup->picture_path != null){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm signature" data-link="' . asset(Storage::url($rider_pickup->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                        return $image;
+                    }
+                } else {
+                    return '-';
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
