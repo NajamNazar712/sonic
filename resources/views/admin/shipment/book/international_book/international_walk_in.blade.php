@@ -516,6 +516,9 @@
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
+                $('#actual_weight').val('');
+                $('#charges_per_kg').val('');
+                $('#span').remove();
             });
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
