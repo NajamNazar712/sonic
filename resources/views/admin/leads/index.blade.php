@@ -804,7 +804,6 @@
                     closeOnEsc: false,
                     dangerMode: true
                 }).then(function(confirm) {
-                    $('#salesTagSubmit').attr('disabled', true);
                     if (confirm) {
                         if (assign) {
                             $('#SalesTagModal').modal('hide');
