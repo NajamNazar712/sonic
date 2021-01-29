@@ -106,6 +106,26 @@
     </div>
     <!--Shipments popup -->
 
+    <!--Signature popup -->
+    <div class="modal fade" id="signature_modal" data-backdrop="static" role="dialog" aria-labelledby="signature_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Signature</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -308,7 +328,7 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
-                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle last_updated_at', orderable: false, searchable: false},
+                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle signature_via_app', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -490,6 +510,16 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click','tr td.signature_via_app button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#signature_modal .modal-body').html(image);
+
+                $('#signature_modal').modal('show');
             });
 
         });

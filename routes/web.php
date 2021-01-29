@@ -1054,9 +1054,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
-        Route::prefix('signature')->name('signature.')->group(function () {
-            Route::get('{path}', 'Admins\DeliveryController@signature_view')->name('index');
-        });
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');

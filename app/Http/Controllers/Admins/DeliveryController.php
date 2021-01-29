@@ -5024,7 +5024,10 @@ class DeliveryController extends Controller
             ->addColumn('signature_via_app', function($shipment){
                 $image = '';
                 if($shipment->picture_path != null){
-                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.delivery.signature.index', [$shipment->rider_delivery_id]).' target="_blank"><i class="la la-image"></i> View</a></button></div>';
+//                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.delivery.signature.index', [$shipment->rider_delivery_id]).' target="_blank"><i class="la la-image"></i> View</a></button></div>';
+
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm signature" data-link="' . asset(Storage::url($shipment->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
                     return $image;
                 }
                 else{
@@ -6086,10 +6089,5 @@ class DeliveryController extends Controller
 //            }
 //        }
 
-    }
-    public function signature_view($id){
-        $rider_delivery = RiderDelivery::find($id);
-        $url = Storage::url($rider_delivery->picture_path);
-        return view('admin.view_image')->with(['url' => $url]);
     }
 }
