@@ -1002,6 +1002,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('signature')->name('signature.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@signature_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@signature_list')->name('list');
+
+        });
+
         //Lost Module Start
         Route::prefix('lost')->name('lost.')->group(function (){
             Route::get('','Admins\LostShipmentsController@lost_shipments_index')->name('index');

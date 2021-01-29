@@ -394,6 +394,9 @@
                                     @if (session('role_id') == 1 || in_array(125, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.history.index') }}">History</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(125, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.delivery.signature.index') }}">Signature</a></li>
+                                    @endif
                                     @if (session('role_id') == 1 || in_array(32, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.sameday.index')}}">Same-Day</a></li>
                                     @endif

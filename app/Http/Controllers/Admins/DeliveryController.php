@@ -5029,6 +5029,53 @@ class DeliveryController extends Controller
         return $datatable->make(true);
 
     }
+
+    public function signature_index(){
+        return view('admin.delivery.signature.index');
+    }
+
+    public function signature_list(Request $request){
+        $deliveries = RiderDelivery::join('Shipments as s', 'rider_deliveries.shipment_id', '=', 's.id')
+            ->join('delivery_notes as dn', 'dn.id', '=', 'rider_deliveries.delivery_note_id')
+            ->select(['s.tracking_number', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'rider_deliveries.delivery_note_id as delivery_note_id','dn.pending_status'])
+            ->where('rider_deliveries.delivered_status', '1');
+
+
+
+        $datatable = Datatables::of($deliveries)
+            ->editColumn('delivery_note', function ($deliveries) {
+                $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+                if($deliveries->pending_status == 1){
+                    $link .= "<br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                }
+                return $link;
+            })
+            ->editColumn('tracking_number', function ($deliveries) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$deliveries->tracking_number' class='tracking' target='_blank'>$deliveries->tracking_number</a></u>";
+            })
+            ->editColumn('picture_path', function($deliveries){
+                if ($deliveries->delivered_status == 1) {
+                    $image = '';
+                    if($deliveries->picture_path != null){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                        return $image;
+                    }
+                } else {
+                    return '-';
+                }
+            });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
+            $datatable->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
+        }
+        return $datatable->make(true);
+
+    }
+
     public function history_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
