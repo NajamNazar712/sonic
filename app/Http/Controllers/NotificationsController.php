@@ -6538,7 +6538,8 @@ class NotificationsController extends Controller
                                     $subject = str_replace('[status]', $status->name, $body);
                                 }
 
-//                                $to = $admin->email;
+                                $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
+                                $to = $sale_person->sales_person->email;
                                 self::email($subject, $body, $to);
                             }
                         }
