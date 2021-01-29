@@ -18,6 +18,8 @@ use App\Http\Models\InternationalRatesInsuranceCharges;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -513,106 +515,101 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function calculate_international_weight($user_id, $box_id, $weight){
-        $rate_status = InternationalRatesStatus::where('user_id', $user_id)->where('box_id', $box_id)->where('status', 1);
+    static public function calculate_international_weight($user_id, $margin, $weight){
 
-        if($rate_status->exists()){
-            $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
-            if($weight_charge->exists()){
-                $weight_charge = $weight_charge->first();
+        $weight_charge = InternationalStandardDhlRate::where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+        if($weight_charge->exists()){
+            $weight_charge = $weight_charge->first();
 
-                $today = Carbon::today();
+            $today = Carbon::today();
 
-                $discount_charge = InternationalRatesDiscountCharges::where('user_id', $user_id)->where('box_id', $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                if ($discount_charge->exists()) {
-                    $discount_charge = $discount_charge->first();
+            if ($margin > 0) {
+                $discount = $margin;
+            }
+            else {
+                $discount = 0;
+            }
+            if ($weight_charge->weight_addition == 0) {
+                $charges = $weight_charge->local_charges;
 
-                    $discount = $discount_charge->weight;
+                if (strpos($discount, '%') !== FALSE) {
+                    $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
                 }
                 else {
-                    $discount = 0;
+                    $discount = floatval($discount);
                 }
-                if ($weight_charge->weight_addition == 0) {
-                    $charges = $weight_charge->local_charges;
 
-                    if (strpos($discount, '%') !== FALSE) {
-                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
-                    }
-                    else {
-                        $discount = floatval($discount);
-                    }
+                $result = array();
 
-                    $result = array();
-
-                    if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                    }
-                    else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
-                    }
-
-                    if ($weight > 1) {
-                        $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
-                    }
-                    else {
-                        $result['chargeable_weight'] = $weight;
-                    }
-
-                    return $result;
+                if ($charges < $discount) {
+                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
                 else {
-                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                    $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                }
 
-                    $charges = ($weight_charge->local_charges * $multiplier);
+                if ($weight > 1) {
+                    $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
+                }
+                else {
+                    $result['chargeable_weight'] = $weight;
+                }
 
-                    $result = array();
+                return $result;
+            }
+            else {
+                $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
-                    $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
+                $charges = ($weight_charge->local_charges * $multiplier);
 
-                    $previous = TRUE;
+                $result = array();
 
-                    while ($previous) {
-                        $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
 
-                        if ($weight_charge->exists()) {
-                            $weight_charge = $weight_charge->first();
+                $previous = TRUE;
 
-                            if ($weight_charge->weight_addition == 0) {
-                                $charges += $weight_charge->local_charges;
+                while ($previous) {
+                    $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
 
-                                $previous = FALSE;
-                            }
-                            else {
-                                $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                    if ($weight_charge->exists()) {
+                        $weight_charge = $weight_charge->first();
 
-                                $charges += ($weight_charge->local_charges * $multiplier);
+                        if ($weight_charge->weight_addition == 0) {
+                            $charges += $weight_charge->local_charges;
 
-                            }
-                        }
-                        else {
                             $previous = FALSE;
                         }
-                    }
+                        else {
+                            $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
-                    if (strpos($discount, '%') !== FALSE) {
-                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                            $charges += ($weight_charge->local_charges * $multiplier);
+
+                        }
                     }
                     else {
-                        $discount = floatval($discount);
+                        $previous = FALSE;
                     }
-
-                    if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                    }
-                    else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
-                    }
-
-                    return $result;
                 }
 
+                if (strpos($discount, '%') !== FALSE) {
+                    $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                }
+                else {
+                    $discount = floatval($discount);
+                }
+
+                if ($charges < $discount) {
+                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                }
+                else {
+                    $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                }
+
+                return $result;
             }
+
         }
+
 
     }
     static public function weight($id) {
@@ -621,9 +618,11 @@ class ShipmentChargesController extends Controller
             $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
-            $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
-            if($box_id != null){
-                $result = self::calculate_international_weight($shipment->user_id,$box_id, $shipment->actual_weight);
+            $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
+            if($international_rate->exists()){
+                $international_rate = $international_rate->first();
+                $margin = $international_rate->margin;
+                $result = self::calculate_international_weight($margin, $shipment->actual_weight, $shipment->pickup_address->city->zone_id);
             }
             else{
                 $result = false;

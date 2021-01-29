@@ -23,10 +23,11 @@
                         <form id="update_rates_form" class="row mb-1" novalidate="novalidate" action="{{ route('admin.international.rates.update.submit') }}" method="post">
                             @csrf
                             @method('post')
-                            <input type="hidden" name="shipper_id" value="{{ $shipper->id }}">
+
+                            <input type="hidden" id="shipper_id" name="shipper_id" value="{{ $shipper->id }}">
 
                             <div class="col form-group">
-                                <label><strong>Exchange RateFuel Surcharge</strong></label>
+                                <label><strong>Fuel Surcharge</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required" disabled value="{{$fuel_surcharge}}">
                                     <div class="input-group-append">
@@ -112,7 +113,23 @@
             </div>
         </div>
     </section>
-
+    <div class="modal fade text-left" id="RejectRatesModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RejectRatesModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Write a reason to reject rates!</h4>
+                </div>
+                <div class="modal-body">
+                    <textarea id="reject_reason" class="form-control"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="RejectRatesSubmit">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -131,6 +148,7 @@
 
     <script>
         $(document).ready(function() {
+
             $('input.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -284,7 +302,39 @@
                     this.api().table().columns.adjust();
                 }
             });
-
+            var auth_reject = 0;
+            $('#accountRejectActiveSubmit').click(function() {
+                $('#RejectRatesModal').modal('show');
+                auth_reject = 0;
+            });
+            $('#AuthorizeaccountRejectActiveSubmit').click(function() {
+                $('#RejectRatesModal').modal('show');
+                auth_reject = 1;
+            });
+            $('#RejectRatesSubmit').on('click',function () {
+                var shipper = $('#shipper_id').val();
+                var reject_reason = document.getElementById('reject_reason').value;
+                if(reject_reason){
+                    $.ajax({
+                        url: '{!! route('admin.international.rates.update.reject') !!}',
+                        method: 'POST',
+                        data: {
+                            'rejected_reason': reject_reason,
+                            'shipper_id':shipper,
+                            'authorization':auth_reject,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            $('#RejectRatesModal').modal('hide');
+                            window.setTimeout(function () {window.location.reload()}, 3000);
+                        });
+                }else{
+                    var error = "You have not selected any reason!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
             $('#accountActiveSubmit').on('click',function(){
                 $('#authorize').val(1);
             });
@@ -299,7 +349,7 @@
                     return $.trim(value).replace(/,/g, '');
                 },
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
 

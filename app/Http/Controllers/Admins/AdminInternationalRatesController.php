@@ -922,8 +922,6 @@ class AdminInternationalRatesController extends Controller
             if($new_rate_flag == false){
                 PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
 
-
-
                 $international_user_rates = new PendingInternationalUserRate();
                 $international_user_rates->user_id = $shipper_id;
                 $international_user_rates->margin = $request->margin;
