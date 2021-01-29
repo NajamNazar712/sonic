@@ -91,6 +91,17 @@ class AdminFinanceController extends Controller
         return $amount_in_words;
     }
 
+    static private function international_gst($zone_id) {
+        $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
+        if($gst_charges->exists()){
+            $gst_charges = $gst_charges->first();
+            return $gst_charges->setting_value / 100;
+        }
+        else{
+            return 0.13;
+        }
+    }
+
     static private function gst($zone_id) {
         $zone = Zone::find($zone_id);
 
