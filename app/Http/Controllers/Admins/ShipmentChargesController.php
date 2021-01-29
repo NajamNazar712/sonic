@@ -50,6 +50,7 @@ use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ShipmentChargesController extends Controller
 {
@@ -516,7 +517,7 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function calculate_international_weight($user_id, $margin, $weight, $zone){
+    static public function calculate_international_weight($margin, $weight, $zone){
 
         $weight_charge = InternationalStandardDhlRate::where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
         if($weight_charge->exists()){
@@ -636,7 +637,7 @@ class ShipmentChargesController extends Controller
             if($international_rate->exists()){
                 $international_rate = $international_rate->first();
                 $margin = $international_rate->margin;
-                $zone_id = $shipment->pickup_address->city->zone_id;
+                $zone_id = $shipment->consignee_city->zone_id;
                 $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                 if($international_zone){
                     $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
