@@ -395,6 +395,9 @@
                                     @if (session('role_id') == 1 || in_array(125, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.history.index') }}">History</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(125, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.delivery.signature.index') }}">Signature</a></li>
+                                    @endif
                                     @if (session('role_id') == 1 || in_array(32, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.sameday.index')}}">Same-Day</a></li>
                                     @endif
@@ -750,7 +753,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356, 401, 430], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356, 401, 430, 437], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -938,12 +941,15 @@
                         @if (session('role_id') == 1 || in_array(415, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.month_closing.pivot.index') }}">Month Closing - Pivot</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(437, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.last_mile_app.index') }}">Last Mile App</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394, 417, 418, 425,431,432], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394, 417, 418, 425,431,432, 438], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367, 388], session('permissions'))) !== 0)
@@ -1342,6 +1348,13 @@
                                             </ul>
                                         </li>
                                     @endif
+                                </ul>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(438, session('permissions')))
+                            <li class=" nav-item"><a href="#"><span class="menu-title">International</span></a>
+                                <ul class="menu-content">
+                                    <li class=" nav-item"><a href="{{route('admin.settings.international_rates.index')}}"><span class="menu-title">Rate Setting</span></a> </li>
                                 </ul>
                             </li>
                         @endif

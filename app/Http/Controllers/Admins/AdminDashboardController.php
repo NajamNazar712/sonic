@@ -7428,12 +7428,16 @@ class AdminDashboardController extends Controller
                     if(session('role_id') == 1 || in_array(365, session('permissions'))){
                         $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
                     }
                     else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
                     $dropdown .= '
@@ -7718,11 +7722,16 @@ class AdminDashboardController extends Controller
                 }
                 if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
 
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                    }else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }
+                    else{
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
 
@@ -8675,7 +8684,6 @@ class AdminDashboardController extends Controller
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8683,7 +8691,18 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -8696,7 +8715,7 @@ class AdminDashboardController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
+            'trax_id' => $trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8720,7 +8739,6 @@ class AdminDashboardController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
-            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8750,7 +8768,6 @@ class AdminDashboardController extends Controller
         $rider->route_id = $request->route_id;
 
         $rider->rider_category_id = $request->rider_category;
-        $rider->trax_id = $request->trax_id;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
@@ -9108,6 +9125,10 @@ class AdminDashboardController extends Controller
         ]);
         if($request->password == $request->confirm_password){
             Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            if(session()->has('first_login') && session('first_login') != 1){
+                session(['first_login' => 1]);
+                Admin::where('id',Auth::id())->update(['first_login' => 1]);
+            }
             return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
         }
         else{
