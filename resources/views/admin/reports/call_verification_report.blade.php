@@ -246,7 +246,7 @@
                 order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_no' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_no'},
+                    { data:'tracking_no' ,name: 's.tracking_number', class: 'align-middle text-center tracking_no'},
                     { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
                     { data:'status' ,name: 'ss.name', class: 'align-middle status'},
                     { data:'status_verified_by' ,name: 'ad.name', class: 'align-middle status_verified_by'},
