@@ -367,7 +367,7 @@ class LeadManagementController extends Controller
                 $lead->sale_person_updated_at = Carbon::now();
                 $lead->save();
             }
-            NotificationsController::send(203, $leads, $sale_person);
+            NotificationsController::send(204, $leads, $sale_person);
             return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);
         }
         else{
