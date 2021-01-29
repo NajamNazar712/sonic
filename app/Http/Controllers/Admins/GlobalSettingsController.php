@@ -3309,7 +3309,13 @@ class GlobalSettingsController extends Controller
             $exchange_rate = $exchange_rate->first();
             $exchange_rate_charges = $exchange_rate->setting_value;
         }
-       return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges]);
+        $gst = '';
+        $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
+        if($gst_charges->exists()){
+            $gst_charges = $gst_charges->first();
+            $gst = $gst_charges->setting_value;
+        }
+       return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges, 'gst' => $gst]);
     }
 
     public function international_rates_update(Request $request)
@@ -3334,6 +3340,17 @@ class GlobalSettingsController extends Controller
         }
         $exchange_rate_value->setting_value = $request->exchange_rate;
         $exchange_rate_value->save();
+
+        $gst = GlobalSettings::where('type', 'international_gst_rate');
+        if($gst->exists()){
+            $gst = $gst->first();
+        }
+        else{
+            $gst = new GlobalSettings();
+            $gst->type = 'international_gst_rate';
+        }
+        $gst->setting_value = $request->gst;
+        $gst->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
 

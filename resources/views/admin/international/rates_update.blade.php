@@ -34,7 +34,7 @@
                                 <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
                             </div>
                             <div class="col form-group">
-                                <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}">
+                                <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}" disabled>
                             </div>
 
                             <div class="form-group ml-1">

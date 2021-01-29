@@ -17,7 +17,6 @@ class CreateHistoryInternationalUserRatesTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->index();
             $table->decimal('margin', 20,2);
-            $table->decimal('gst', 20,2);
             $table->integer('updated_by')->index();
             $table->timestamp('rates_updated_at');
             $table->timestamps();

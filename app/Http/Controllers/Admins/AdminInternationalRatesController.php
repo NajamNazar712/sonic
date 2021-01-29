@@ -749,13 +749,20 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
-                $margin = 0;
                 $gst = 0;
+                $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+                if($gst_rate->exists()){
+                    $gst_rate = $gst_rate->first();
+                    $gst = $gst_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $margin = 0;
                 $international_user_rate = InternationalUserRate::where('user_id', $id);
                 if($international_user_rate->exists()){
                     $international_user_rate = $international_user_rate->first();
                     $margin = $international_user_rate->margin;
-                    $gst = $international_user_rate->gst;
                 }
 
                 return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst]);
@@ -797,7 +804,6 @@ class AdminInternationalRatesController extends Controller
         if($international_user_rates->exists()){
             $international_user_rates = $international_user_rates->first();
             $international_user_rates->margin = $request->margin;
-            $international_user_rates->gst = $request->gst;
             $international_user_rates->updated_by = Auth::id();
             $international_user_rates->rates_updated_at = Carbon::now();
 
@@ -806,7 +812,6 @@ class AdminInternationalRatesController extends Controller
             $international_user_rates = new InternationalUserRate();
             $international_user_rates->user_id = $shipper_id;
             $international_user_rates->margin = $request->margin;
-            $international_user_rates->gst = $request->gst;
             $international_user_rates->updated_by = Auth::id();
             $international_user_rates->rates_updated_at = Carbon::now();
         }
@@ -835,7 +840,6 @@ class AdminInternationalRatesController extends Controller
                 $history_international_user_rate = new HistoryInternationalUserRate();
                 $history_international_user_rate->user_id = $previous_rate_status->user_id;
                 $history_international_user_rate->margin = $previous_rate_status->margin;
-                $history_international_user_rate->gst = $previous_rate_status->gst;
                 $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
                 $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
                 $history_international_user_rate->save();
@@ -850,7 +854,6 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates = new InternationalUserRates();
                     $international_user_rates->user_id = $rate_status->user_id;
                     $international_user_rates->margin = $rate_status->margin;
-                    $international_user_rates->gst = $rate_status->gst;
                     $international_user_rates->updated_by = $rate_status->updated_by;
                     $international_user_rates->rates_updated_at = $rate_status->rates_updated_at;
                     $international_user_rates->save();

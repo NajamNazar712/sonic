@@ -19,18 +19,39 @@
                             <form method="post" id="int_rates_settings" class="form-horizontal text-center" action="{{ route('admin.settings.international_rates.update') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <div class="row justify-content-center">
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <label>Fuel Surcharge</label>
-                                            <input type="text" name="fuel_surcharge" value="{{$fuel_surcharge}}" class="form-control decimal" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
+
+                                    <div class="col-3 form-group">
+                                        <label><strong>Fuel Surcharge in %</strong></label>
+
+                                        <div class="input-group">
+                                            <input type="text" name="fuel_surcharge" class="form-control decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required" value="{{$fuel_surcharge}}">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-3 form-group">
+                                        <label><strong>Exchange Rate</strong></label>
+                                        <div class="input-group">
+                                            <input type="text" name="exchange_rate" value="{{$exchange_rate}}" class="form-control amount"  placeholder="Exchange Rate*" data-rule-required="true" data-msg-required="Exchange Rate is required">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">PKR</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <label>Exchange Rate</label>
-                                            <input type="text" name="exchange_rate" value="{{$exchange_rate}}" class="form-control decimal"  placeholder="Exchange Rate" data-rule-required="true" data-msg-required="Exchange Rate is required">
+                                    <div class="col-3 form-group">
+                                        <label><strong>GST in %</strong></label>
+                                        <div class="input-group">
+                                            <input type="text" name="gst" value="{{$gst}}" class="form-control decimal"  placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -60,15 +81,28 @@
     <script>
         $(document).ready(function() {
             $('#int_rates_settings .decimal').inputmask({
-                'alias': 'integer',
+                'alias': 'decimal',
                 'allowMinus': false,
-                'allowPlus': false
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 10000.00
+            });
+            $('#int_rates_settings .amount').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 10000000.00
             });
             $('#int_rates_settings').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
