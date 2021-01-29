@@ -6205,9 +6205,9 @@ class AdminReportsController extends Controller
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr){
-                $image = '<div class="text-center">';
+                $image = '';
                 if($dvr->business_card_image != null){
-                    $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.business_card', [$dvr->business_card_image ]).' target="_blank">View</a></button>';
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.business_card', [$dvr->business_card_image ]).' target="_blank">View</a></button></div>';
                     return $image;
                 }
                 else{
@@ -6215,9 +6215,9 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('l_photo', function ($dvr){
-                $image = '<div class="text-center">';
+                $image = '';
                 if($dvr->location_image != null){
-                    $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.location_photo', [$dvr->location_image ]).' target="_blank">View</a></button>';
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.location_photo', [$dvr->location_image ]).' target="_blank">View</a></button></div>';
                     return $image;
                 }
                 else{
