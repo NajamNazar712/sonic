@@ -6520,29 +6520,25 @@ class NotificationsController extends Controller
                     $claim = CrmRequest::find($claim_id);
                     $to = array();
                     if($claim){
-                        if($claim->case_nature_id == 4){
-                            if($claim->shipment_id != null){
-                                $user = $claim->shipment->user;
-                                $to[] = $user->email;
-                                $status = CrmRequestStatus::find($status_id);
-                                if (strpos($subject, '[date]') !== FALSE) {
-                                    $subject = str_replace('[date]', $date, $subject);
-                                }
-                                if (strpos($subject, '[date]') !== FALSE) {
-                                    $subject = str_replace('[date]', $date, $body);
-                                }
-                                if (strpos($subject, '[status]') !== FALSE) {
-                                    $subject = str_replace('[status]', $status->name, $subject);
-                                }
-                                if (strpos($subject, '[status]') !== FALSE) {
-                                    $subject = str_replace('[status]', $status->name, $body);
-                                }
-
-                                $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
-                                $to = $sale_person->sales_person->email;
-                                self::email($subject, $body, $to);
-                            }
+                        $user = $claim->shipment->user;
+                        $status = CrmRequestStatus::find($status_id);
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
                         }
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $body);
+                        }
+                        if (strpos($subject, '[status]') !== FALSE) {
+                            $subject = str_replace('[status]', $status->name, $subject);
+                        }
+                        if (strpos($subject, '[status]') !== FALSE) {
+                            $subject = str_replace('[status]', $status->name, $body);
+                        }
+
+                        $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
+                        $to[] = $user->email;
+                        $to[] = $sale_person->sales_person->email;
+                        self::email($subject, $body, $to);
                     }
                 }
                 else if ($id == 200) {

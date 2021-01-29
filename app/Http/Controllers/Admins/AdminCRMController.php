@@ -1859,7 +1859,7 @@ class AdminCRMController extends Controller
                         }
                     }
                     if($crm_request->case_nature_id == 4){
-                        NotificationsController::send(117, $crm_request, 2);
+                        NotificationsController::send(117, $crm_request->id, 6);
                     }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
@@ -1899,7 +1899,7 @@ class AdminCRMController extends Controller
                     ]);
 
                     if($crm_request->case_nature_id == 4) {
-                        NotificationsController::send(117, $crm_request, 4);
+                        NotificationsController::send(117, $crm_request->id, 4);
                     }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
@@ -1991,7 +1991,7 @@ class AdminCRMController extends Controller
                         'agent_id' => Auth::id()
                     ]);
                     if($crm_request->case_nature_id == 4){
-                        NotificationsController::send(117, $crm_request, 7);
+                        NotificationsController::send(117, $crm_request->id, 7);
                     }
                 }
                 CrmRequestStatusHistory::create([
@@ -2398,6 +2398,10 @@ class AdminCRMController extends Controller
                                 }
                             }
 
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 6);
+                            }
+
                         }
                         elseif ($request->valid == 0){
                             CrmRequest::where('id', $crm_request->id)->update([
@@ -2413,6 +2417,10 @@ class AdminCRMController extends Controller
                                 'status_id' => 4,
                                 'agent_id' => Auth::id()
                             ]);
+
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 7);
+                            }
 
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
                         }
