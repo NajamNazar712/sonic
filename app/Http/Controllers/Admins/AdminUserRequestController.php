@@ -141,7 +141,7 @@ class AdminUserRequestController extends Controller
     }
 
     public function user_request_add_index() {
-        if(session('role_id') == 1 || session('department_id') == 10){
+        if(session('role_id') == 1){
             $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
                 ->join('admin_departments as ad','ad.id','=','ar.department_id')
                 ->where('admins.id',Auth::id())
@@ -190,7 +190,7 @@ class AdminUserRequestController extends Controller
     }
 
     public function verify_index($id) {
-        if(session('role_id') == 1) {
+        if(session('role_id') == 1 || session('department_id') == 10) {
             $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
             $hubs = City::where('hub', 1)->get();
             $user = AdminUserRequest::find($id);
