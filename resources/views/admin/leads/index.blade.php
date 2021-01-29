@@ -804,9 +804,10 @@
                     closeOnEsc: false,
                     dangerMode: true
                 }).then(function(confirm) {
+                    $('#salesTagSubmit').attr('disabled', true);
                     if (confirm) {
                         if (assign) {
-                            swal.close();
+                            $('#SalesTagModal').modal('hide');
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Lead is being Tagged!',
@@ -815,6 +816,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
+
                             $.ajax({
                                 url: '{!! route('admin.leads.tag_sale_person') !!}',
                                 method: 'POST',
@@ -841,12 +843,11 @@
 
                                     table.rows().deselect();
                                     $('#saletag').val('').trigger('change');
-                                    $('#SalesTagModal').modal('hide');
                                     table.draw(true);
                                     table.button('.bulk_tagging').disable();
 
+                                    swal.close();
                                 });
-                            swal.close();
                         } else {
                             var error = "Lead Not Selected!";
                             toastr.error(error, 'Error!', {
@@ -869,7 +870,6 @@
                 var tag = parseInt($('#saletag1').val());
                 var refer_person = parseInt($('#reference_person').val());
                 if(tag && refer_person){
-                    swal.close();
                     swal({
                         title: 'Please Wait!',
                         text: 'Lead is being forwarded!',
@@ -899,9 +899,9 @@
                             $('#reference_person').val('').trigger('change');
                             $('#ForwardLeadModal').modal('hide');
                             forward_lead_id = null;
+                            swal.close();
                             table.draw(true);
                         });
-                    swal.close();
                 }else{
                     if(!tag){
                         var error = "Sales Person Not Selected!";
@@ -912,7 +912,6 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
-
             });
 
             $('body').on('click','#datatable .lead_log',function(){
