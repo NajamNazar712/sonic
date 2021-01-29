@@ -91,7 +91,7 @@ class AdminFinanceController extends Controller
         return $amount_in_words;
     }
 
-    static private function international_gst($zone_id) {
+    static private function international_gst() {
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
         if($gst_charges->exists()){
             $gst_charges = $gst_charges->first();
@@ -1890,8 +1890,12 @@ class AdminFinanceController extends Controller
             $pending_payment = $pending_payment->first();
 
             $previous_gst = $pending_payment->gst;
-
-            $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+            if($shipment->business_category_id == 1){
+                $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+            }
+            else{
+                $new_gst = ROUND(($new_weight_charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+            }
 
             $adjustment_amount += $previous_gst - $new_gst;
 
@@ -1903,7 +1907,12 @@ class AdminFinanceController extends Controller
 
                 $previous_gst = $done_payment->gst;
 
-                $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                if($shipment->business_category_id == 1){
+                    $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                }
+                else{
+                    $new_gst = ROUND(($new_weight_charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                }
 
                 $adjustment_amount += $previous_gst - $new_gst;
 
@@ -2133,15 +2142,24 @@ class AdminFinanceController extends Controller
         if (!$shipment->packaging_material_request) {
             if ($type == 0) {
                 $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
-                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                if($shipment->business_category_id == 1){
+                    $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                }
+                else{
+                    $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                }
 
                 $payable = $amount - ($charges + $gst);
             }
             else {
                 $amount = 0;
                 $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
-                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
-
+                if($shipment->business_category_id == 1){
+                    $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                }
+                else{
+                    $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                }
                 $payable = 0 - ($charges + $gst);
             }
         }
@@ -2357,7 +2375,14 @@ class AdminFinanceController extends Controller
             $charges = $shipment->return_charges - $shipment->cash_handling_charges;
 
         }
-        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+
+        if($shipment->business_category_id == 1){
+            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+        }
+        else{
+            $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+        }
+
         $charges = $charges - $amount;
 
         $pending_invoice_shipment = new PendingInvoiceShipment();

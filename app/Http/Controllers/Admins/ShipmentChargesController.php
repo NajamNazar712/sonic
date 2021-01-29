@@ -535,7 +535,7 @@ class ShipmentChargesController extends Controller
                 $charges = $weight_charge[$zone_id];
 
                 $discount = (100 - $margin) / 100;
-                $discount = $discount * $charges;
+                $charges = $discount * $charges;
 
 
                 $result = array();
@@ -547,15 +547,11 @@ class ShipmentChargesController extends Controller
                     $exchange_rate_charges = $exchange_rate->setting_value;
                 }
 
-                if ($charges < $discount) {
-                    $charges = $charges * $exchange_rate_charges;
-                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                }
-                else {
-                    $charges = $charges - $discount;
-                    $charges = $charges * $exchange_rate_charges;
-                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                }
+
+                $charges = $charges * $exchange_rate_charges;
+                $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+
+
 
                 if ($weight > 1) {
                     $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
@@ -601,7 +597,7 @@ class ShipmentChargesController extends Controller
                 }
 
                 $discount = (100 - $margin) / 100;
-                $discount = $discount * $charges;
+                $charges = $discount * $charges;
 
                 $exchange_rate_charges = 0;
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
@@ -610,22 +606,15 @@ class ShipmentChargesController extends Controller
                     $exchange_rate_charges = $exchange_rate->setting_value;
                 }
 
-                if ($charges < $discount) {
-                    $charges = $charges * $exchange_rate_charges;
-                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                }
-                else {
-                    $charges = $charges - $discount;
-                    $charges = $charges * $exchange_rate_charges;
-                    $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                }
+
+                $charges = $charges * $exchange_rate_charges;
+                $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                
 
                 return $result;
             }
 
         }
-
-
     }
     static public function weight($id) {
         $shipment = Shipment::find($id);
