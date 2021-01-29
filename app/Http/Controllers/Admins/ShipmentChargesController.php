@@ -522,7 +522,6 @@ class ShipmentChargesController extends Controller
         $weight_charge = InternationalStandardDhlRate::where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
         if($weight_charge->exists()){
             $weight_charge = $weight_charge->first();
-
             $today = Carbon::today();
 
             if ($margin > 0) {
@@ -532,7 +531,8 @@ class ShipmentChargesController extends Controller
                 $discount = 0;
             }
             if ($weight_charge->weight_addition == 0) {
-                $charges = $weight_charge->zone_.$zone;
+                $zone_id = 'zone_'.$zone;
+                $charges = $weight_charge[$zone_id];
 
                 $discount = (100 - $margin) / 100;
                 $discount = $discount * $charges;
@@ -568,8 +568,8 @@ class ShipmentChargesController extends Controller
             }
             else {
                 $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
-
-                $charges = ($weight_charge->zone_.$zone * $multiplier);
+                $zone_id = 'zone_'.$zone;
+                $charges = ($weight_charge[$zone_id] * $multiplier);
 
                 $result = array();
 
@@ -584,14 +584,14 @@ class ShipmentChargesController extends Controller
                         $weight_charge = $weight_charge->first();
 
                         if ($weight_charge->weight_addition == 0) {
-                            $charges += $weight_charge->zone_.$zone;
+                            $charges += $weight_charge[$zone_id];
 
                             $previous = FALSE;
                         }
                         else {
                             $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
-                            $charges += ($weight_charge->zone_.$zone * $multiplier);
+                            $charges += ($weight_charge[$zone_id] * $multiplier);
 
                         }
                     }
