@@ -1241,13 +1241,18 @@
                                                 html += tracking_number + '<br/>';
                                             });
 
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                            if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                             content = document.createElement('div');
                                             content.innerHTML = html;
 
                                             swal({
-                                                title: 'Request / Complaint Already Lodged!',
+                                                title: 'Request / Complaint Cannot Be Lodged!',
                                                 content: content,
                                                 icon: 'warning',
                                                 buttons: {
@@ -1350,13 +1355,18 @@
                                                 html += tracking_number + '<br/>';
                                             });
 
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                            if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                             content = document.createElement('div');
                                             content.innerHTML = html;
 
                                             swal({
-                                                title: 'Request / Complaint Already Lodged!',
+                                                title: 'Request / Complaint Cannot Be Lodged!',
                                                 content: content,
                                                 icon: 'warning',
                                                 buttons: {
@@ -1448,13 +1458,18 @@
                                                 html += tracking_number + '<br/>';
                                             });
 
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                            if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                             content = document.createElement('div');
                                             content.innerHTML = html;
 
                                             swal({
-                                                title: 'Request / Complaint Already Lodged!',
+                                                title: 'Request / Complaint Cannot Be Lodged!',
                                                 content: content,
                                                 icon: 'warning',
                                                 buttons: {
@@ -1595,13 +1610,18 @@
                                                     html += tracking_number + '<br/>';
                                                 });
 
-                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                                if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
 
                                                 swal({
-                                                    title: 'Request / Complaint Already Lodged!',
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
