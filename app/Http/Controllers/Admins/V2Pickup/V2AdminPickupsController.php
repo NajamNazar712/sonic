@@ -824,6 +824,9 @@ class V2AdminPickupsController extends Controller
                             if($shipment->business_category_id == 1) {
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
                             }
+                            else{
+                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            }
                         }
                     }
 
