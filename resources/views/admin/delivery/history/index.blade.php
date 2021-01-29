@@ -328,7 +328,7 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
-                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle signature_via_app', orderable: false, searchable: false},
+                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle signature_via_app text-center', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
