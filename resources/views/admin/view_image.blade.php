@@ -3,6 +3,6 @@
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
 @endphp
-<div class="col-10">
-    <img class="" src="{{asset($url)}}" alt="" title="" style="max-width: 100%"/>
+<div style="width: 300px">
+    <img class="" src="{{asset($url)}}" alt="" title="" style="width: 100%"/>
 </div>
