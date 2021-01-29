@@ -390,12 +390,13 @@
                     </div>
                 @endif
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipment_charges_modal_heading">Change Password<span></span></h4>
+                    <h4 class="modal-title" id="shipment_charges_modal_heading">Change Your Password<span></span></h4>
                 </div>
                 <div class="modal-body password_change_body text-center" id="password_change_body">
                     <form id="password-form" class="form form-horizontal" method="post" action="{{route('admin.update.profile.password.submit')}}">
                         @csrf
                         <div class="form-body">
+                            <p>You have to change your password to make your sonic account more secure.</p>
                             <div class="form-group col">
                                 <label for="password">Enter Password:<span class="danger">*</span>
                                 </label>

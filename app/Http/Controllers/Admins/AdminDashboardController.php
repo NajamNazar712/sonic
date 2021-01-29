@@ -8684,7 +8684,6 @@ class AdminDashboardController extends Controller
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8692,7 +8691,18 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -8705,7 +8715,7 @@ class AdminDashboardController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
+            'trax_id' => $trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8729,7 +8739,6 @@ class AdminDashboardController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
-            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8759,7 +8768,6 @@ class AdminDashboardController extends Controller
         $rider->route_id = $request->route_id;
 
         $rider->rider_category_id = $request->rider_category;
-        $rider->trax_id = $request->trax_id;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;

@@ -17,37 +17,37 @@
                             <tbody class="list">
                             <tr>
                                 <th scope="row">Lead ID</th>
-                                <td class="name">
+                                <td>
                                     <h5 class="mb-0">{{str_pad($lead->id, 3, '0', STR_PAD_LEFT)}}</h5>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Contact Person</th>
-                                <td class="name">
+                                <td>
                                     <h5 class="mb-0">{{$lead->contact_person}}</h5>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Phone No</th>
-                                <td class="name" id="status">
+                                <td id="status">
                                     <h5 class="mb-0">{{$lead->phone_number}}</h5>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Email Address</th>
-                                <td class="name">
+                                <td>
                                     <h5 class="mb-0">{{$lead->email_address}}</h5>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Requested Date/Time</th>
-                                <td class="name">
+                                <td>
                                     <h5 class="mb-0">{{$lead->requested_date}}</h5>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">Sale Person Tagged</th>
-                                <td class="name">
+                                <td>
                                     @if($lead->sale_person_id != null)
                                         <h5 class="mb-0">{{$lead->sales_person->name}}</h5>
                                     @else
@@ -57,12 +57,37 @@
                             </tr>
                             <tr>
                                 <th scope="row">Lead Status</th>
-                                <td class="name">
+                                <td>
                                     <h5 class="mb-0">{{$lead->status->name}}</h5>
                                 </td>
                             </tr>
+                            @if($lead->attachment != null)
+                                <tr>
+                                    <th scope="row">Attachment</th>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-info align-middle" href="{{route('admin.leads.view_attachment', ['id' => $lead->id])}}" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>
+                                    </td>
+                                </tr>
+                            @endif
                             </tbody>
                         </table>
+                        <div class="col mt-2 border">
+                            <form id="attachment_upload_form" class="form-horizontal" method="post" action="{{route('admin.leads.upload_attachment')}}" enctype="multipart/form-data">
+                                @csrf
+                                <div class="col text-center mt-2">
+                                    <h4><b>Upload Attachment</b></h4>
+                                </div>
+                                <div class="col form-group">
+                                    <input type="hidden" name="lead_id" value="{{$lead->id}}">
+                                    <input class="form-control form-control-sm" type="file" name="upload_attachment" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                <div class="col">
+                                    <div class="form-group text-center">
+                                        <button type="submit" name="update" id="attachment_upload_form_submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     <div class="col-7">
                         <div class="content-body chat-application">
@@ -265,6 +290,28 @@
                 }
             });
             updateScroll();
+
+            $('#attachment_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Uploading Attachment!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
         });
     </script>
 @endsection

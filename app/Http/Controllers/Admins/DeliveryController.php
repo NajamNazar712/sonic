@@ -74,6 +74,8 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
+use function foo\func;
+
 class DeliveryController extends Controller
 {
 
@@ -3760,7 +3762,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone', 'delivery_notes.status'])
+            ->leftjoin('rider_deliveries as rd','rd.delivery_note_id','=','delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone', 'delivery_notes.status', 'rd.id as rider_delivery_id', 'rd.picture_path as picture_path'])
             ->where('delivery_notes.cash_collection_status', 1)
             ->where('delivery_notes.dncc_status', 0);
 
@@ -3818,6 +3821,16 @@ class DeliveryController extends Controller
                     $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
+                }
+            })
+            ->addColumn('signature_via_app', function($shipment){
+                $image = '';
+                if($shipment->picture_path != null){
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.delivery.signature.index', [$shipment->rider_delivery_id]).' target="_blank"><i class="la la-image"></i> View</a></button></div>';
+                    return $image;
+                }
+                else{
+                    return '-';
                 }
             });
         if ($tracking_number = $request->get('search_tracking')) {
@@ -4923,7 +4936,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app'])
+            ->leftjoin('rider_deliveries as rd','rd.delivery_note_id','=','delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id','rd.delivered_status as delivered_status','rd.picture_path as picture_path'])
         ->groupBy('delivery_notes.id');
 
         if (session('role_id') != 1) {
@@ -5015,20 +5029,20 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-        ->editColumn('updated_via_app', function($shipment){
-                if($shipment->updated_via_app == 1 ){
-                    return 'Partial';
-                }
-                elseif ($shipment->updated_via_app == 2){
-                    return 'Yes';
-                }
-                elseif ($shipment->updated_via_app == 0){
-                    return 'No';
-                }
-                else{
-                    return '-';
-                }
-            });
+            ->editColumn('updated_via_app', function($shipment){
+                    if($shipment->updated_via_app == 1 ){
+                        return 'Partial';
+                    }
+                    elseif ($shipment->updated_via_app == 2){
+                        return 'Yes';
+                    }
+                    elseif ($shipment->updated_via_app == 0){
+                        return 'No';
+                    }
+                    else{
+                        return '-';
+                    }
+                });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
@@ -5037,6 +5051,53 @@ class DeliveryController extends Controller
         return $datatable->make(true);
 
     }
+
+    public function signature_index(){
+        return view('admin.delivery.signature.index');
+    }
+
+    public function signature_list(Request $request){
+        $deliveries = RiderDelivery::join('Shipments as s', 'rider_deliveries.shipment_id', '=', 's.id')
+            ->join('delivery_notes as dn', 'dn.id', '=', 'rider_deliveries.delivery_note_id')
+            ->select(['s.tracking_number', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'rider_deliveries.delivery_note_id as delivery_note_id','dn.pending_status'])
+            ->where('rider_deliveries.delivered_status', '1');
+
+
+
+        $datatable = Datatables::of($deliveries)
+            ->editColumn('delivery_note', function ($deliveries) {
+                $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+                if($deliveries->pending_status == 1){
+                    $link .= "<br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                }
+                return $link;
+            })
+            ->editColumn('tracking_number', function ($deliveries) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$deliveries->tracking_number' class='tracking' target='_blank'>$deliveries->tracking_number</a></u>";
+            })
+            ->editColumn('picture_path', function($deliveries){
+                if ($deliveries->delivered_status == 1) {
+                    $image = '';
+                    if($deliveries->picture_path != null){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                        return $image;
+                    }
+                } else {
+                    return '-';
+                }
+            });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
+            $datatable->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
+        }
+        return $datatable->make(true);
+
+    }
+
     public function history_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
@@ -6083,7 +6144,6 @@ class DeliveryController extends Controller
 //                return response()->json(['status' => 1, 'error' => 'Shipments Status Id is invalid']);
 //            }
 //        }
-
 
     }
 }
