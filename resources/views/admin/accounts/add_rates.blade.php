@@ -2936,7 +2936,7 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','#detain_weight_close',function () {
+        $('body').on('click','.detain_weight_close',function () {
             $(this).parent().parent().remove();
         });
         $('body').on('click','.detain_row_delete',function () {
