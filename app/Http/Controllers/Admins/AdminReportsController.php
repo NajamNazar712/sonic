@@ -3855,6 +3855,11 @@ class AdminReportsController extends Controller
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
         }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
         return $datatable->make(true);
 
     }
