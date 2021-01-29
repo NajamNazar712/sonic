@@ -773,14 +773,12 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
+                $user_information = NULL;
+                $intl_user_information = InternationalUsersInformation::where('user_id', $user->id);
+                if($intl_user_information->exists()){
+                    $user_information = $intl_user_information->first();
+                }
 
-                $user_information = InternationalUsersInformation::where('user_id', $user->id);
-                if($user_information->exists()){
-                    $user_information = $user_information->first();
-                }
-                else{
-                    $user_information = NULL;
-                }
                 $fuel_charges = 0;
                 $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
                 if($fuel_surcharge->exists()){
@@ -809,7 +807,7 @@ class AdminInternationalRatesController extends Controller
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
                 $margin = 0;
-                if($user_information != NULL){
+                if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                         $international_user_rate = InternationalUserRate::where('user_id', $id);
                         if($international_user_rate->exists()){
@@ -885,9 +883,9 @@ class AdminInternationalRatesController extends Controller
 
 
             if($pending_rate_statuses = PendingInternationalUserRate::where('user_id', $shipper_id)->first()){
-                    $international_user_rates = new InternationalUserRates();
+                    $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $pending_rate_statuses->user_id;
-                    $international_user_rates->margin = $pending_rate_statuses->margin;
+                    $international_user_rates->margin = $request->margin;
                     $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
                     $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
                     $international_user_rates->save();
@@ -923,24 +921,34 @@ class AdminInternationalRatesController extends Controller
             $international_user_info->save();
             if($new_rate_flag == false){
                 PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
-            }
-            $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
-            if($international_user_rates->exists()){
-                $international_user_rates = $international_user_rates->first();
-                $international_user_rates->margin = $request->margin;
-                $international_user_rates->updated_by = Auth::id();
-                $international_user_rates->rates_updated_at = Carbon::now();
 
-            }
-            else{
-                $international_user_rates = new InternationalUserRate();
+
+
+                $international_user_rates = new PendingInternationalUserRate();
                 $international_user_rates->user_id = $shipper_id;
                 $international_user_rates->margin = $request->margin;
                 $international_user_rates->updated_by = Auth::id();
                 $international_user_rates->rates_updated_at = Carbon::now();
+                $international_user_rates->save();
             }
-            $international_user_rates->save();
+            else{
+                $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
+                if($international_user_rates->exists()){
+                    $international_user_rates = $international_user_rates->first();
+                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->updated_by = Auth::id();
+                    $international_user_rates->rates_updated_at = Carbon::now();
 
+                }
+                else{
+                    $international_user_rates = new InternationalUserRate();
+                    $international_user_rates->user_id = $shipper_id;
+                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->updated_by = Auth::id();
+                    $international_user_rates->rates_updated_at = Carbon::now();
+                }
+                $international_user_rates->save();
+            }
 
             return redirect()->back()->with('success', 'Rates updated successfully!');
         }
