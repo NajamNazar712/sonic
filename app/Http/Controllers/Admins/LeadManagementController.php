@@ -46,10 +46,10 @@ class LeadManagementController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
+                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
             }
         }
 
@@ -106,8 +106,7 @@ class LeadManagementController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $leads = $leads->where('leads.sale_person_id', Auth::id())
-                    ->orWhere('leads.reference_person_id', Auth::id());
+                $leads = $leads->where('leads.sale_person_id', Auth::id());
             }
         }
 
@@ -214,10 +213,10 @@ class LeadManagementController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
-                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id())->orWhere('leads.reference_person_id', Auth::id());
+                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
             }
         }
 
