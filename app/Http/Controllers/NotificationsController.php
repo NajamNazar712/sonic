@@ -6633,7 +6633,7 @@ class NotificationsController extends Controller
                     }
                 }
                 else if ($id == 203) {
-                    $date = $reference_2_id;
+                    $date = str_replace('00:00:00', '', $reference_2_id);
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $lead_ids = $reference_1_id;
@@ -6680,6 +6680,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 }
                 else if ($id == 204) {
+                    $date = str_replace('00:00:00', '', Carbon::today());
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $leads = $reference_1_id;

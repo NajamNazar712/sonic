@@ -806,6 +806,14 @@
                 }).then(function(confirm) {
                     if (confirm) {
                         if (assign) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Lead is being Tagged!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
                             $.ajax({
                                 url: '{!! route('admin.leads.tag_sale_person') !!}',
                                 method: 'POST',
@@ -837,6 +845,7 @@
                                     table.button('.bulk_tagging').disable();
 
                                 });
+                            swal.close();
                         } else {
                             var error = "Lead Not Selected!";
                             toastr.error(error, 'Error!', {
@@ -859,6 +868,14 @@
                 var tag = parseInt($('#saletag1').val());
                 var refer_person = parseInt($('#reference_person').val());
                 if(tag && refer_person){
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Lead is being forwarded!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     $.ajax({
                         url: '{!! route('admin.leads.tag_sale_person') !!}',
                         method: 'POST',
@@ -882,6 +899,7 @@
                             forward_lead_id = null;
                             table.draw(true);
                         });
+                    swal.close();
                 }else{
                     if(!tag){
                         var error = "Sales Person Not Selected!";
