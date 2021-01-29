@@ -806,6 +806,7 @@
                 }).then(function(confirm) {
                     if (confirm) {
                         if (assign) {
+                            swal.close();
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Lead is being Tagged!',
@@ -868,6 +869,7 @@
                 var tag = parseInt($('#saletag1').val());
                 var refer_person = parseInt($('#reference_person').val());
                 if(tag && refer_person){
+                    swal.close();
                     swal({
                         title: 'Please Wait!',
                         text: 'Lead is being forwarded!',
