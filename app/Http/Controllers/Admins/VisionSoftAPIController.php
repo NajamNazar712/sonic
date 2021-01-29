@@ -1064,6 +1064,13 @@ class VisionSoftAPIController extends Controller
                                     $amount = $petty_cash_statement_detail->amount;
                                 }
 
+                                if ($petty_cash_statement->shipment_id) {
+                                    $tracking_number = $petty_cash_statement->shipment->tracking_number;
+                                }
+                                else {
+                                    $tracking_number = '';
+                                }
+
                                 $response = $client->post('DailyExp', [
                                     'form_params' => [
                                         'pin_code' => 6,
@@ -1079,7 +1086,7 @@ class VisionSoftAPIController extends Controller
                                         'pin_details' => $petty_cash_statement_detail->expense_details,
                                         'pin_stmt_id' => $petty_cash_statement_detail->id,
                                         'pin_stmt_ref_no' => $petty_cash_statement_detail->reference_no,
-                                        'pin_tracking_number' => $petty_cash_statement->shipment->tracking_number,
+                                        'pin_tracking_number' => $tracking_number,
                                         'pin_creation_date' => Carbon::parse($petty_cash_statement->created_at)->format('m/d/Y'),
                                         'pin_period_from_date' => Carbon::parse($petty_cash_statement->from)->format('m/d/Y'),
                                         'pin_period_to_date' => Carbon::parse($petty_cash_statement->to)->format('m/d/Y'),
