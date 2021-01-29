@@ -719,7 +719,7 @@ class V2AdminPickupsController extends Controller
                             $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
                             $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
 
-                            if($request->delivery_type == 1){
+                            if($shipment->walk_in_delivery_type_id == 1){
                                 $check_actual_weight = $check->door_actual_weight;
                             }
                             else{
@@ -1095,7 +1095,7 @@ class V2AdminPickupsController extends Controller
                             $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
                             $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
 
-                            if($request->delivery_type == 1){
+                            if($shipment->walk_in_delivery_type_id == 1){
                                 $check_actual_weight = $check->door_actual_weight;
                             }
                             else{
