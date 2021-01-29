@@ -552,8 +552,8 @@ class ShipmentChargesController extends Controller
                     $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
                 else {
-                    $charges = $charges * $exchange_rate_charges;
                     $charges = $charges - $discount;
+                    $charges = $charges * $exchange_rate_charges;
                     $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
 
@@ -615,8 +615,8 @@ class ShipmentChargesController extends Controller
                     $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
                 else {
-                    $charges = $charges * $exchange_rate_charges;
                     $charges = $charges - $discount;
+                    $charges = $charges * $exchange_rate_charges;
                     $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
 
