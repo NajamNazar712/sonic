@@ -56,7 +56,7 @@
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">Updated via App</th>
                         <th class="border-primary border-darken-1">Last Updated At</th>
-                        <th class="border-primary border-darken-1">Shipper Signature Via App</th>
+                        <th class="border-primary border-darken-1">Consignee Signature Via App</th>
                     </tr>
                     </thead>
                 </table>
