@@ -23,7 +23,6 @@
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Businees Category</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode Type</th>
                                     <th class="border-primary border-darken-1">GC Area</th>
                                     <th class="border-primary border-darken-1">Attempt Tat</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -35,6 +34,25 @@
                                 </tr>
                                 </thead>
                             </table>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="modes" role="dialog" aria-labelledby="shipping_mode_title" aria-hidden="true">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="shipping_mode_title">Shipping Mode(s)</h4>
+
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body text-center">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -89,7 +107,6 @@
                             head.push('Hub Code');
                             head.push('Zone');
                             head.push('Business Category');
-                            head.push('Shipping Mode Type');
                             head.push('GC Area');
                             head.push('Attempt Tat');
                             head.push('Status');
@@ -108,7 +125,6 @@
                                 row.push(values.hub_id);
                                 row.push(values.zone);
                                 row.push(values.business_category);
-                                row.push(values.modes);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
                                 row.push(values.status);
@@ -186,6 +202,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
+               rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -195,7 +212,6 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'modes', name: 'modes', class: 'align-middle modes'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
@@ -226,12 +242,12 @@
                        '<option value="1">Yes</option>' +
                        '</select>';
 
-                   var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
-                       '<option value="1">Overnight</option>' +
-                       '<option value="2">Overland</option>' +
-                       '<option value="3">Detain</option>' +
-                       '<option value="4">Same-day</option>' +
-                       '</select>';
+                   // var shipping_mode_type = '<select name="shipping_mode_type" id="shipping_mode_type" class="select2 form-control">' +
+                   //     '<option value="1">Overnight</option>' +
+                   //     '<option value="2">Overland</option>' +
+                   //     '<option value="3">Detain</option>' +
+                   //     '<option value="4">Same-day</option>' +
+                   //     '</select>';
 
                    var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
                    this.api().columns().every(function(column_id) {
@@ -246,12 +262,7 @@
                                    column.search($(this).val(), false, false, true).draw();
                                } ).wrap(td);
                        }
-                       else if($(header).is('.modes')){
-                           $(shipping_mode_type).appendTo($(search))
-                               .on( 'change', function () {
-                                   column.search($(this).val(), false, false, true).draw();
-                               } ).wrap(td);
-                       }else if($(header).is('.gc_area')){
+                       else if($(header).is('.gc_area')){
                            $(gc_area_select).appendTo($(search))
                                .on( 'change', function () {
                                    column.search($(this).val(), false, false, true).draw();
@@ -278,12 +289,12 @@
                        containerCssClass: 'select-xs',
                        dropdownCssClass: 'form-control-sm p-0'
                    });
-                   $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
-                       placeholder: "Select Shipping Mode Type",
-                       width:'100%',
-                       containerCssClass: 'select-xs',
-                       dropdownCssClass: 'form-control-sm p-0'
-                   });
+                   // $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
+                   //     placeholder: "Select Shipping Mode Type",
+                   //     width:'100%',
+                   //     containerCssClass: 'select-xs',
+                   //     dropdownCssClass: 'form-control-sm p-0'
+                   // });
                    $("#gc_area_select").prepend('<option value="" selected></option>').select2({
                        placeholder: "Select GC Area",
                        width:'100%',
@@ -312,6 +323,47 @@
                 radioClass: 'iradio_square-red'
             });
         });
+        {{--$('#datatable tbody').on('click', 'tr td.modes button', function() {--}}
+        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+
+        {{--    $('#modes').modal('show');--}}
+
+        {{--    $.ajax({--}}
+        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
+        {{--        method: 'GET',--}}
+        {{--        data: {--}}
+        {{--            '_token': '{{ csrf_token() }}',--}}
+        {{--            'id': id--}}
+        {{--        }--}}
+        {{--    })--}}
+        {{--});--}}
+
+
+        {{--$('body').on('click','#datatable tbody tr td.modes button',function () {--}}
+        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+        {{--    $('#modes .modal-body').html('');--}}
+        {{--    $.ajax({--}}
+        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
+        {{--        method: 'POST',--}}
+        {{--        data: {--}}
+        {{--            '_token': '{{ csrf_token() }}',--}}
+        {{--            'id': id--}}
+        {{--        }--}}
+        {{--    })--}}
+        {{--        .done(function(data) {--}}
+        {{--            if (data.status == 1) {--}}
+        {{--                var modes = '';--}}
+        {{--                console.log(data);--}}
+        {{--                if (data.shipping_mode) {--}}
+        {{--                    $.each(data.shipping_mode, function(index, modes) {--}}
+        {{--                        modes += 'modes<br>';--}}
+        {{--                    });--}}
+        {{--                }--}}
+        {{--                $('#modes.modal-body').html(modes);--}}
+        {{--                $('#modes').modal('show');--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--});--}}
 
         $("#addCity").on("show.bs.modal", function(e) {
             var $invoker = $(e.relatedTarget);

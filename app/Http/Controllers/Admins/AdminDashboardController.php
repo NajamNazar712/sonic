@@ -3631,7 +3631,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -5897,7 +5897,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -7428,12 +7428,16 @@ class AdminDashboardController extends Controller
                     if(session('role_id') == 1 || in_array(365, session('permissions'))){
                         $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
                     }
                     else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
                     $dropdown .= '
@@ -7718,11 +7722,16 @@ class AdminDashboardController extends Controller
                 }
                 if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
 
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                    }else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }
+                    else{
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
 
@@ -7978,9 +7987,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->join('city_deliveries as cd', 'cities.id','=', 'cd.city_id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'cd.shipping_mode_id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'sm.mode as modes']);
+            ->select(['cities.id as city_id','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7998,19 +8005,6 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-//        ->filterColumn('status', function($query, $keyword) {
-//            $keyword = strtolower($keyword);
-//
-//            if (strpos('active', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 1);
-//            }
-//            else if (strpos('inactive', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 0);
-//            }
-//            else {
-//                $query->whereRaw('false');
-//            }
-//        })
             ->addColumn('location', function ($result){
                 $location = '<div class="text-center">';
                 if($result->location_latitude != null && $result->location_longitude != null) {
@@ -9789,6 +9783,27 @@ class AdminDashboardController extends Controller
         }
 
      }
+
+//     public function modesAjax(Request $request) {
+//        $city_id = $request->id;
+//        $shipping_mode_ids = CityDelivery::select('shipping_mode_id')->where('city_id', $city_id);
+//
+//        if($shipping_mode_ids->exists()){
+//            $shipping_modes = $shipping_mode_ids->get();
+//            $data = array();
+//            foreach($shipping_modes as $id){
+//                $shipping_mode = ShippingMode::find($id)->mode;
+////                dd($shipping_mode);
+//                $name = $shipping_mode;
+//                dd($name);
+//                $data[] = $name;
+//            }
+//            return response()->json(['status' => 1, 'shipping_mode' => $data]);
+//        }
+//        else {
+//            return response()->json(['status' => 0, 'No Shipping mode found!']);
+//        }
+//     }
 
 }
 

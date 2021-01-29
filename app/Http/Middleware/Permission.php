@@ -260,6 +260,8 @@ class Permission
             'delivery.replacement.logs.list' => 208,
             'delivery.fake_status.log.index' => 262,
             'delivery.fake_status.log.list' => 262,
+            'delivery.cash_collection.retail.index' => 423,
+            'delivery.completed.retail.index' => 424,
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
 

@@ -353,8 +353,10 @@
             if ( this.context.length ) {
                 body = [];
                 var params = table.ajax.params();
-                params.start = 0;
-                params.length = -1;
+                if(params !== undefined){
+                    params.start = 0;
+                    params.length = -1;
+                }
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.active.ajax') }}',
                     method: 'post',
@@ -879,6 +881,7 @@
                     processing: data_table_loader
                 },
             serverSide: true,
+           deferLoading: 0,
             rowId: 'id',
             order: [[2, 'desc']],
             ajax: {

@@ -4121,7 +4121,7 @@ class AdminCRMController extends Controller
 
         $shipment = Shipment::find($request->shipment_id);
         if($shipment){
-            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+//            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
                 if($shipment->receiving_sheet_shipment){
                     $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
                     return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
@@ -4129,10 +4129,10 @@ class AdminCRMController extends Controller
                 else{
                     return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
                 }
-            }
-            else{
-                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
-            }
+//            }
+//            else{
+//                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+//            }
         }
         return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
