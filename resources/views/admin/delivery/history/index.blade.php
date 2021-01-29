@@ -56,7 +56,6 @@
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">Updated via App</th>
                         <th class="border-primary border-darken-1">Last Updated At</th>
-                        <th class="border-primary border-darken-1">Consignee Signature Via App</th>
                     </tr>
                     </thead>
                 </table>
@@ -249,7 +248,6 @@
                             head.push('DNCC Amount');
                             head.push('Updated via App');
                             head.push('Last Updated At');
-                            head.push('Shipper Signature Via App');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -272,7 +270,6 @@
                                 row.push(values.amount);
                                 row.push(values.updated_via_app);
                                 row.push(values.last_updated_at);
-                                row.push(values.signature_via_app);
 
                                 body.push(row);
                             });
@@ -328,7 +325,6 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
-                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle signature_via_app text-center', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
