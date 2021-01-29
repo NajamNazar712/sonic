@@ -609,7 +609,7 @@ class ShipmentChargesController extends Controller
 
                 $charges = $charges * $exchange_rate_charges;
                 $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                
+
 
                 return $result;
             }
