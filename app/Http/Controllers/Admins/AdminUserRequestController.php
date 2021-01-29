@@ -141,17 +141,21 @@ class AdminUserRequestController extends Controller
     }
 
     public function user_request_add_index() {
-        $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
-             ->join('admin_departments as ad','ad.id','=','ar.department_id')
-            ->where('admins.id',Auth::id())
-            ->select('ad.id','ad.name')->get();
+        if(session('role_id') == 1 || session('department_id') == 10){
+            $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+                ->join('admin_departments as ad','ad.id','=','ar.department_id')
+                ->where('admins.id',Auth::id())
+                ->select('ad.id','ad.name')->get();
 
-        if(session('role_id') == 1){
-            $departments = AdminDepartment::where('id', '!=', 1)->get();
+            if(session('role_id') == 1){
+                $departments = AdminDepartment::where('id', '!=', 1)->get();
+            }
+            $hubs = City::where('hub', 1)->get();
+            return view('admin.user_management.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
         }
-
-        $hubs = City::where('hub', 1)->get();
-        return view('admin.user_management.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
+        else{
+            return view('admin.access_denied');
+        }
     }
     public function user_add_store(Request $request) {
         if($request->has('outlook_email')){
@@ -186,14 +190,17 @@ class AdminUserRequestController extends Controller
     }
 
     public function verify_index($id) {
+        if(session('role_id') == 1) {
+            $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
+            $hubs = City::where('hub', 1)->get();
+            $user = AdminUserRequest::find($id);
+            $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
 
-        $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
-        $hubs = City::where('hub', 1)->get();
-        $user = AdminUserRequest::find($id);
-        $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
-
-          return view('admin.user_management.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
-
+              return view('admin.user_management.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        }
+        else{
+            return view('admin.access_denied');
+        }
     }
 
     public function verify_store(Request $request, $id) {
