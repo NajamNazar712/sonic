@@ -6079,6 +6079,6 @@ class DeliveryController extends Controller
     public function signature_view($id){
         $rider_delivery = RiderDelivery::find($id);
         $url = Storage::url($rider_delivery->picture_path);
-        return view('admin.image_view')->with(['url' => $url]);
+        return view('admin.view_image')->with(['url' => $url]);
     }
 }

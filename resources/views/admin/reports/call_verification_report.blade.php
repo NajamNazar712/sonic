@@ -165,7 +165,6 @@
                     }
                 }
             });
-
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -175,7 +174,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('min', $('#search_date_to').pickadate('picker').get('select'));
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
