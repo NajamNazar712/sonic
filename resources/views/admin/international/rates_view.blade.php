@@ -124,64 +124,51 @@
                 'min': 0.00,
                 'max': 1000000
             });
-            /*jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.accounts.pending.ajax') }}',
+                        url: '{{ route('admin.international.rates.update.list', ['id' => $shipper->id]) }}',
                         data: params,
                         success: function (result) {
                             head = [];
 
                             head.push('S.No');
-                            head.push('Account ID');
-                            head.push('Account Type');
-                            head.push('Company Name');
-                            head.push('Contact Person');
-                            head.push('City');
-                            head.push('Product Type');
-                            head.push('Request Date');
-                            head.push('Status');
-                            head.push('Sales Person Tagged');
-                            head.push('POC Tagged');
-                            head.push('KAM Tagged');
-                            head.push('REF Tagged');
-                            head.push('Rate Status');
-                            head.push('Rates Status Remarks');
-                            head.push('Rates Added By');
-                            head.push('Rates Approved By');
-                            head.push('Documents Uploaded At');
-                            head.push('Documents Approved At');
-                            head.push('Documents Status');
-                            head.push('Documents Rejection Reason');
+                            head.push('Range Up');
+                            head.push('Range Down');
+                            head.push('Zone 1');
+                            head.push('Zone 2');
+                            head.push('Zone 3');
+                            head.push('Zone 4');
+                            head.push('Zone 5');
+                            head.push('Zone 6');
+                            head.push('Zone 7');
+                            head.push('Zone 8');
+                            head.push('Zone 9');
+                            head.push('Zone 10');
+                            head.push('Zone 11');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.id_padded);
-                                row.push(values.account_type);
-                                row.push(values.name);
-                                row.push(values.poc);
-                                row.push(values.city);
-                                row.push(values.product_type);
-                                row.push(values.created_at);
-                                row.push(values.status);
-                                row.push(values.admin_tag_id);
-                                row.push(values.tagged_poc);
-                                row.push(values.kam);
-                                row.push(values.ref);
-                                row.push(values.rate_status);
-                                row.push(values.rejected_reason);
-                                row.push(values.rates_added_by);
-                                row.push(values.rates_authorized_by);
-                                row.push(values.documents_uploaded_at);
-                                row.push(values.documents_approved_at);
-                                row.push(values.documents_status);
-                                row.push(values.documents_rejection_reason);
+                                row.push(values.range_up);
+                                row.push(values.range_down);
+                                row.push(values.zone_1);
+                                row.push(values.zone_2);
+                                row.push(values.zone_3);
+                                row.push(values.zone_4);
+                                row.push(values.zone_5);
+                                row.push(values.zone_6);
+                                row.push(values.zone_7);
+                                row.push(values.zone_8);
+                                row.push(values.zone_9);
+                                row.push(values.zone_10);
+                                row.push(values.zone_11);
 
                                 body.push(row);
                             });
@@ -191,8 +178,7 @@
 
                     return {body: body, header: head};
                 }
-            } );*/
-
+            } );
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -217,7 +203,7 @@
                 serverSide: true,
                 rowId: 'id',
                 order: [[1, 'asc']],
-                ajax: '{{ route('admin.international.rates.update.list') }}',
+                ajax: '{{ route('admin.international.rates.update.list', ['id' => $shipper->id]) }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
