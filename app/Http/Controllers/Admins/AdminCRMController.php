@@ -81,14 +81,17 @@ class AdminCRMController extends Controller
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 23 && $receiving_sheet_id != null){
+//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        if($complaint_id == 23){
             $description_text = $request->description ;
-            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            $description = $description_text;
         }
         else{
             $description = $request->description;
         }
         $flag = false;
+        $cannot_change = false;
         $present_shipments = array();
         if ($request->has('payment_request')) {
             if($request->payment_request == 1){
@@ -149,6 +152,7 @@ class AdminCRMController extends Controller
                                             if(in_array($complaint_id, [11, 12, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
                                                 $flag = true;
+                                                $cannot_change = true;
                                             }
                                             else{
                                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -187,6 +191,7 @@ class AdminCRMController extends Controller
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
                                             $flag = true;
+                                            $cannot_change = true;
                                         }
                                         else{
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -205,7 +210,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => 'No shipments selected!'];
                 }
@@ -224,6 +229,7 @@ class AdminCRMController extends Controller
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
                                         $flag = true;
+                                        $cannot_change = true;
                                     }
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -252,6 +258,7 @@ class AdminCRMController extends Controller
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
+                                    $cannot_change = true;
                                 }
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -272,7 +279,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => $request->shipment_id];
                 }
