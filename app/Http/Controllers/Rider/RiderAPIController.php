@@ -2587,7 +2587,9 @@ class RiderAPIController extends Controller {
                             $return_note_data->status = 3;
                             $return_note_data->save();
                         }*/
-                        ReturnNote::where('id', $request->return_note_id)->update(['completion_status' => 1, 'status' => 3]);
+//                        ReturnNote::where('id', $request->return_note_id)->update(['completion_status' => 1, 'status' => 3]);
+                        $return_note_data = ReturnNote::find($request->return_note_id);
+                        return response()->json([$return_note_data]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if ($rider_return_note_status->exists()) {
                             $rider_return_note_status = $rider_return_note_status->first();
@@ -2609,12 +2611,15 @@ class RiderAPIController extends Controller {
                         $count = count($delivered_shipment_ids);*/
                         $retrn_shipment_ids = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
                         $count = count($retrn_shipment_ids);
-
+                        if ($return_note_data->exists()) {
+                        $return_note_data = $return_note_data->first();
                         $return_note_data->shipments_count = $count;
                         $return_note_data->last_updated_at = Carbon::now();
                         $return_note_data->status_updated_at = Carbon::now();
-//                        $return_note_data->status = 3;
+                        $return_note_data->status = 3;
                         $return_note_data->save();
+                    }
+
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 }
