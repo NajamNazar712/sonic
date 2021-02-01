@@ -1467,6 +1467,7 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->save();
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ];
                 NotificationsController::send(81, $sale_persons, Auth::id());
+                NotificationsController::send(119, $sale_persons, Auth::id());
 
 
             }
@@ -1514,6 +1515,7 @@ class AdminDashboardController extends Controller
             }
 
             NotificationsController::send(81,$sale_persons ,Auth::id());
+            NotificationsController::send(119,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{
