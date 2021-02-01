@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Start Point</th>
                                     <th class="border-primary border-darken-1">End Point</th>
                                     <th class="border-primary border-darken-1">Junction</th>
@@ -473,6 +474,7 @@
                     {data: 'id',orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'code', name: 'routes.code', class: 'align-middle code'},
+                    {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'start', name: 'routes.start', class: 'align-middle start'},
                     {data: 'end', name: 'routes.end', class: 'align-middle end'},
                     {data: 'junction', name: 'routes.junction', class: 'align-middle junction'},

@@ -2511,7 +2511,8 @@ class V2AdminPickupsController extends Controller
 
     public function pickup_route_list(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at'])->where('routes.route_type_id',1);
+            ->join('riders','riders.route_id','=','routes.id')
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','riders.name as rider'])->where('routes.route_type_id',1);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));

@@ -8395,7 +8395,8 @@ class AdminDashboardController extends Controller
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
             ->leftjoin('route_types as rt','rt.id','=','routes.route_type_id')
-            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type']);
+            ->leftjoin('riders','riders.route_id','=','routes.id')
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type','riders.name as rider']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
