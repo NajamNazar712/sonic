@@ -725,9 +725,9 @@ otherwise it will be rejected</li>
                     }
 
                     $intl_charges = '<div class="row"><div class="col-12"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Charges</strong></thead></table></div></div>';
-                    $intl_charges .= '<div class="row"><div class="col-12"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Fuel Surcharge</th><th>Exchange Rate</th><th>Margin</th><th>GST</th></tr></thead><tbody>';
+                    $intl_charges .= '<div class="row"><div class="col-12"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Fuel Surcharge</th><th>Exchange Rate</th><th>GST</th></tr></thead><tbody>';
 
-                    $intl_charges .= '<tr><td>' . $fuel_charges . '</td><td>' . $exchange_rate_charges . '</td><td>' . $international_rate_status->margin . '</td><td>' . $gst . '</td></tr>';
+                    $intl_charges .= '<tr><td>' . $fuel_charges . '</td><td>' . $exchange_rate_charges . '</td><td>' . $gst . '</td></tr>';
 
                     $intl_charges .= '</tbody></table></div></div>';
                     $intl_box .= $intl_charges;
@@ -737,10 +737,10 @@ otherwise it will be rejected</li>
                     $intl_weight_charges_details = '';
                     if(count($intl_weight_charges) > 0){
                         $intl_weight_charges_details .= '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                        $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th></tr></thead><tbody>';
+                        $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th></tr></thead><tbody>';
 
                         foreach ($intl_weight_charges as $weight_charge) {
-                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->zone_1 . '</td><td>' . $weight_charge->zone_2 . '</td><td>' . $weight_charge->zone_3 . '</td><td>' . $weight_charge->zone_4 . '</td><td>' . $weight_charge->zone_5 . '</td><td>' . $weight_charge->zone_6 . '</td><td>' . $weight_charge->zone_7 . '</td><td>' . $weight_charge->zone_8 . '</td><td>' . $weight_charge->zone_9 . '</td><td>' . $weight_charge->zone_10 . '</td><td>' . $weight_charge->zone_11 . '</td></tr>';
+                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_1) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_2) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_3) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_4) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_5) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_6) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_7) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_8) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_9) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_10) . '</td><td>' . (((100 - $international_rate_status->margin) / 100) * $weight_charge->zone_11) . '</td></tr>';
                         }
                         $intl_weight_charges_details .= '</tbody></table>';
                         $intl_box .= $intl_weight_charges_details;
