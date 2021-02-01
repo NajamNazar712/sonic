@@ -2589,7 +2589,6 @@ class RiderAPIController extends Controller {
                         }*/
 //                        ReturnNote::where('id', $request->return_note_id)->update(['completion_status' => 1, 'status' => 3]);
                         $return_note_data = ReturnNote::find($request->return_note_id);
-                        return response()->json([$return_note_data]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if ($rider_return_note_status->exists()) {
                             $rider_return_note_status = $rider_return_note_status->first();
