@@ -2836,72 +2836,51 @@ class RiderAPIController extends Controller {
 
     }
 
-    public function scan_pickup_summary(Request $request) {
+    public function scan_pickup_summary(Request $request)
+    {
         $rider_id = $request->rider_id;
         $tracking_no = $request->tracking_no;
-        $pickup_note = V2PickupNote::join('v2_pickup_note_requests as pnr', 'v2_pickup_notes.id', '=', 'pnr.pickup_note_id')
+
+        $pickup_requests = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
+            ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
+            ->where('s.tracking_number', $tracking_no)
+            ->where('status_id', 1)
+            ->where('v2_pickup_requests.current_rider_id', '!=', $rider_id);
+
+        /*$pickup_note = V2PickupNote::join('v2_pickup_note_requests as pnr', 'v2_pickup_notes.id', '=', 'pnr.pickup_note_id')
             ->join('v2_pickup_request_shipments as prs','pnr.pickup_request_id','=','prs.pickup_request_id')
             ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
-        ->where('s.tracking_number', $tracking_no)
-        ->where('.');
+        ->where('s.tracking_number', $tracking_no);*/
 
-        if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->first();
-            $pickup_note = V2PickupNote::where('id', $pickup_note->pickup_note_id)
-                ->where('status', 0)->latest('id')->first();
+        if ($pickup_requests->exists()) {
+            $pickup_requests = $pickup_requests->first();
+            $pickup_note_requests = V2PickupNoteRequest::where('pickup_request_id', $pickup_requests->pickup_request_id)->where('status', 0)->first();
+            $pickup_note = V2PickupNote::where('id', $pickup_note_requests->pickup_note_id)->first();
             $information = array();
-
-            $information['pickup_note_id'] = $pickup_note->pickup_note_id;
-            $information['summary'] = array();
-            $information['summary']['pickups'] = 0;
-
-            $information['summary']['received']['pickups'] = 0;
-
+            $information['pickup_note_id'] = $pickup_note->id;
             $rider = Rider::find($rider_id);
             $city = City::find($rider->city_id);
 
             if ($city->location_latitude && $city->location_longitude) {
-                $starting_location = $city->location_latitude. ',' . $city->location_longitude;
-                $pickup_note_requests = $pickup_note->pickup_note_requests;
+                $starting_location = $city->location_latitude . ',' . $city->location_longitude;
+//                $pickup_note_requests = $pickup_note->pickup_note_requests;
                 $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
             }
-
-            $pickup_note->fresh();
-
-            $pickup_note_requests = $pickup_note->pickup_note_requests->sortBy('ordering');
-            $information['pickups'] = array();
-
-            foreach ($pickup_note_requests as $pickup_note_request) {
-                $information['summary']['pickups']++;
-
-                $pickup_request = $pickup_note_request->pickup_request;
-
-                $pickup_address = $pickup_request->pickup_address;
-
-                $pickup = array();
-
-                $pickup['pickup_request_id'] = $pickup_request->id;
-                $pickup['status'] = $pickup_note_request->status;
-                $pickup['ordering'] = $pickup_note_request->ordering;
-                $pickup['shipments'] = $pickup_request->booked;
-
-                if ($pickup_note_request->status) {
-                    $information['summary']['received']['pickups']++;
-                }
-
-                $pickup['shipper_name'] = $pickup_address->user->name;
-                $pickup['person_of_contact'] = $pickup_address->poc;
-                $pickup['phone_number'] = $pickup_address->phone;
-                $pickup['address'] = $pickup_address->pickup_address;
-                $pickup['location_latitude'] = $pickup_address->location_latitude;
-                $pickup['location_longitude'] = $pickup_address->location_longitude;
-
-                $information['pickups'][] = $pickup;
-            }
+            $pickup_note_requests = $pickup_note_requests->sortBy('ordering');
+            $pickup = array();
+            $pickup_address = $pickup_requests->pickup_address;
+            $pickup['pickup_request_id'] = $pickup_requests->pickup_request_id;
+            $pickup['shipments'] = $pickup_requests->booked;
+            $pickup['shipper_name'] = $pickup_address->user->name;
+            $pickup['person_of_contact'] = $pickup_address->poc;
+            $pickup['phone_number'] = $pickup_address->phone;
+            $pickup['address'] = $pickup_address->pickup_address;
+            $pickup['location_latitude'] = $pickup_address->location_latitude;
+            $pickup['location_longitude'] = $pickup_address->location_longitude;
+            $information['pickups'][] = $pickup;
 
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
-        }
-        else {
+        } else {
             return response()->json(['status' => 0, 'message' => 'No Pickup(s) Assigned']);
         }
     }
