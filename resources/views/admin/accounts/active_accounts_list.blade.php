@@ -762,9 +762,6 @@
                                                selected_rows = [];
 
                                                table.rows().deselect();
-                                               $('#poc').val('').trigger('change');
-                                               $('#kam').val('').trigger('change');
-                                               $('#ref').val('').trigger('change');
                                                $('#SalesTierTypeTagModal').modal('hide');
                                                table.draw(true);
                                                table.button('.tag').disable();
@@ -1588,6 +1585,11 @@
                     });
                     form.submit();
             }
+        });
+        $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
+            $('#SalesTierTypeTagModal #poc').val('').trigger('change');
+            $('#SalesTierTypeTagModal #kam').val('').trigger('change');
+            $('#SalesTierTypeTagModal #ref').val('').trigger('change');
         });
 
     });
