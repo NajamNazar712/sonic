@@ -2609,6 +2609,7 @@ class RiderAPIController extends Controller {
                         $return_note_data->shipments_count = $count;
                         $return_note_data->last_updated_at = Carbon::now();
                         $return_note_data->status_updated_at = Carbon::now();
+                        $return_note_data->status = 3;
                         $return_note_data->save();
                         $message = 'Shipment is marked as delivered Successfully';
                     }
