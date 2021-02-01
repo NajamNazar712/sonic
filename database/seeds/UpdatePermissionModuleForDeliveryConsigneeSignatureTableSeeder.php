@@ -12,7 +12,7 @@ class UpdatePermissionModuleForDeliveryConsigneeSignatureTableSeeder extends See
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 441, 'name' => 'Delivery Consignee Signature - View', 'module_id' => '6')
+            array('id' => 441, 'name' => 'Delivery Consignee Signature - view', 'module_id' => '6')
         ));
     }
 }
