@@ -2842,19 +2842,16 @@ class RiderAPIController extends Controller {
         $pickup_note = V2PickupNote::join('v2_pickup_note_requests as pnr', 'v2_pickup_notes.id', '=', 'pnr.pickup_note_id')
             ->join('v2_pickup_request_shipments as prs','pnr.pickup_request_id','=','prs.pickup_request_id')
             ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
-        ->where('s.tracking_number', $tracking_no)->get();
-//        $pickup_note_requests = $pickup_note->pickup_note_requests;
-        return response()->json($pickup_note);
+        ->where('s.tracking_number', $tracking_no)
+        ->where('.');
 
         if ($pickup_note->exists()) {
-
+            $pickup_note = $pickup_note->first();
+            $pickup_note = V2PickupNote::where('id', $pickup_note->pickup_note_id)
+                ->where('status', 0)->latest('id')->first();
             $information = array();
 
-            $information['pickup_note_id'] = $pickup_note->id;
-
-
-
-
+            $information['pickup_note_id'] = $pickup_note->pickup_note_id;
             $information['summary'] = array();
             $information['summary']['pickups'] = 0;
 
@@ -2865,16 +2862,13 @@ class RiderAPIController extends Controller {
 
             if ($city->location_latitude && $city->location_longitude) {
                 $starting_location = $city->location_latitude. ',' . $city->location_longitude;
-
                 $pickup_note_requests = $pickup_note->pickup_note_requests;
-
                 $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
             }
 
             $pickup_note->fresh();
 
             $pickup_note_requests = $pickup_note->pickup_note_requests->sortBy('ordering');
-
             $information['pickups'] = array();
 
             foreach ($pickup_note_requests as $pickup_note_request) {
