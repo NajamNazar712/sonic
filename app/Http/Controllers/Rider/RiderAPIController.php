@@ -2583,11 +2583,11 @@ class RiderAPIController extends Controller {
                         }
                         $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
 
-                        if ($updated_shipments_count == 0) {
+                        /*if ($updated_shipments_count == 0) {
                             $return_note_data->status = 3;
                             $return_note_data->save();
-                        }
-                        ReturnNote::where('id', $request->return_note_id)->update(['completion_status' => 1]);
+                        }*/
+                        ReturnNote::where('id', $request->return_note_id)->update(['completion_status' => 1, 'status' => 3]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if ($rider_return_note_status->exists()) {
                             $rider_return_note_status = $rider_return_note_status->first();
