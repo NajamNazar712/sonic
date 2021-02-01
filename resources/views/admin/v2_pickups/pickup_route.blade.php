@@ -399,6 +399,7 @@
                             head.push('S.No');
                             head.push('City Name');
                             head.push('Route Code');
+                            head.push('Rider Name');
                             head.push('Start Point');
                             head.push('End Point');
                             head.push('Junction');
@@ -413,6 +414,7 @@
                                 row.push(index + 1);
                                 row.push(values.city);
                                 row.push(values.code);
+                                row.push(values.rider);
                                 row.push(values.start);
                                 row.push(values.end);
                                 row.push(values.junction);
