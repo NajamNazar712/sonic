@@ -2246,7 +2246,7 @@ class RiderAPIController extends Controller {
     {
         $rider_id = $request->rider_id;
 
-        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('completion_status', 0);
+        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($return_notes->exists()) {
             $return_notes = $return_notes->get();
@@ -2753,7 +2753,8 @@ class RiderAPIController extends Controller {
         } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
-                ->where('return_notes.rider_id', '=', $rider_id);
+                ->where('return_notes.rider_id', $rider_id)
+                ->where('return_notes.status', 3);
 
             if ($from_date != null) {
                 $rider_return_deliveries = $rider_return_deliveries->whereDate('return_notes.created_at', $from_date)
