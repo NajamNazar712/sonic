@@ -2544,7 +2544,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
             Route::prefix('update')->name('update.')->group(function () {
-                Route::get('list', 'Admins\AdminInternationalRatesController@standard_rates_list')->name('list');
+                Route::get('list/{id}', 'Admins\AdminInternationalRatesController@standard_rates_list')->name('list');
                 Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');

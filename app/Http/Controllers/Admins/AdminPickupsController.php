@@ -2990,7 +2990,13 @@ class AdminPickupsController extends Controller
         else{
             return false;
         }
-        $rider = Rider::where('route_id',$route->route_id)->select('id')->first();
+        $rider = Rider::where('route_id',$route->route_id)->select('id');
+        if(!$rider->exists()){
+            return false;
+        }
+        else{
+            $rider = $rider->first();
+        }
         $rider_id = $rider->id;
         $pickup_request = V2PickupRequest::find($pickup_request_id);
         $pickup_address_id = $pickup_request->pickup_address_id;

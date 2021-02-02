@@ -5057,7 +5057,7 @@ class DeliveryController extends Controller
     }
 
     public function signature_list(Request $request){
-        $deliveries = RiderDelivery::join('Shipments as s', 'rider_deliveries.shipment_id', '=', 's.id')
+        $deliveries = RiderDelivery::join('shipments as s', 'rider_deliveries.shipment_id', '=', 's.id')
             ->join('delivery_notes as dn', 'dn.id', '=', 'rider_deliveries.delivery_note_id')
             ->select(['s.tracking_number', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'rider_deliveries.delivery_note_id as delivery_note_id','dn.pending_status'])
             ->where('rider_deliveries.delivered_status', '1');

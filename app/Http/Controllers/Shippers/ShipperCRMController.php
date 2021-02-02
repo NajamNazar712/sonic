@@ -194,9 +194,11 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 23 && $receiving_sheet_id != null){
+//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        if($complaint_id == 23){
             $description_text = $request->description ;
-            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            $description = $description_text;
         }
         else{
             $description = $request->description;
@@ -208,6 +210,7 @@ class ShipperCRMController extends Controller
         }
         $present_shipments = array();
         $flag = false;
+        $cannot_change = false;
         if(session('user_type') == 2){
             $launched_by = 2;
         }
@@ -307,6 +310,7 @@ class ShipperCRMController extends Controller
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
                                             $flag = true;
+                                            $cannot_change = true;
                                         }
                                         else{
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
@@ -340,6 +344,7 @@ class ShipperCRMController extends Controller
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
                                         $flag = true;
+                                        $cannot_change = true;
                                     }
                                     else{
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
@@ -353,7 +358,7 @@ class ShipperCRMController extends Controller
                     }
 
                 }
-                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
             }
             else if (!empty($shipment_id)){
@@ -368,9 +373,9 @@ class ShipperCRMController extends Controller
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
+                                    $cannot_change = true;
                                 }
                                 else{
-                                    dd('hello');
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
                             }
@@ -386,6 +391,7 @@ class ShipperCRMController extends Controller
                             if(in_array($complaint_id, [11, 12, 13])){
                                 $present_shipments[] = $shipment->tracking_number;
                                 $flag = true;
+                                $cannot_change = true;
                             }
                             else{
                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
@@ -396,7 +402,7 @@ class ShipperCRMController extends Controller
                         }
                     }
                 }
-                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
             }
             else{
                 return ['status' => 0, 'error' => 'No shipments selected!'];

@@ -16,12 +16,16 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
+use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
@@ -701,13 +705,40 @@ class V2AdminPickupsController extends Controller
                     }
 
                     if ($request->volumetric_weight == "on") {
-                        $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                        $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
                         $shipment->length = $request->length;
                         $shipment->breadth = $request->breadth;
                         $shipment->height = $request->height;
                     } else {
-                        $shipment->actual_weight = $request->weight;
+                        $actual_weight = $request->weight;
                     }
+                    if($shipment->booking_type_id == 4){
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
+                        if($international_shipment->exists()){
+                            $city = City::find($shipment->consignee_city_id);
+                            $hub_id = $city->hub_id;
+                            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
+                            $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+
+                            if($shipment->walk_in_delivery_type_id == 1){
+                                $check_actual_weight = $check->door_actual_weight;
+                            }
+                            else{
+                                $check_actual_weight = $check->hub_actual_weight;
+                            }
+                            if ($actual_weight < $check_actual_weight) {
+                                $actual_weight = $check_actual_weight;
+                            }
+                        }
+                        else{
+                            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
+                            if ($actual_weight < $check['actual_weight']) {
+                                $actual_weight = $check['actual_weight'];
+                            }
+                        }
+                    }
+                    
+                    $shipment->actual_weight = $actual_weight;
 
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                         $receiving_sheet_shipment->status = 1;
@@ -1053,13 +1084,39 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     if (empty($request->weight)) {
-                        $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                        $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
                         $shipment->length = $request->length;
                         $shipment->breadth = $request->breadth;
                         $shipment->height = $request->height;
                     } else {
-                        $shipment->actual_weight = $request->weight;
+                        $actual_weight = $request->weight;
                     }
+                    if($shipment->booking_type_id == 4){
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
+                        if($international_shipment->exists()){
+                            $city = City::find($shipment->consignee_city_id);
+                            $hub_id = $city->hub_id;
+                            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
+                            $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+
+                            if($shipment->walk_in_delivery_type_id == 1){
+                                $check_actual_weight = $check->door_actual_weight;
+                            }
+                            else{
+                                $check_actual_weight = $check->hub_actual_weight;
+                            }
+                            if ($actual_weight < $check_actual_weight) {
+                                $actual_weight = $check_actual_weight;
+                            }
+                        }
+                        else{
+                            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
+                            if ($actual_weight < $check['actual_weight']) {
+                                $actual_weight = $check['actual_weight'];
+                            }
+                        }
+                    }
+                    $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
                     $details = array();

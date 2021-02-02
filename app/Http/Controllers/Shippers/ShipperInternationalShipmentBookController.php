@@ -15,6 +15,7 @@ use App\Http\Models\InternationalShipment;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\http\Models\ShipmentOrderDate;
+use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -183,6 +184,26 @@ class ShipperInternationalShipmentBookController extends Controller
                 $order_date->save();
             }
         }
+        if($request->shipper_reference_1 != null || $request->shipper_reference_2 != null || $request->shipper_reference_3 != null || $request->shipper_reference_4 != null || $request->shipper_reference_5 != null){
+            $shipper_reference = new ShipmentShipperReference();
+            $shipper_reference->shipment_id = $shipment_id;
+            if($request->shipper_reference_1 != null) {
+                $shipper_reference->reference_1 = $request->shipper_reference_1;
+            }
+            if($request->shipper_reference_2 != null) {
+                $shipper_reference->reference_2 = $request->shipper_reference_2;
+            }
+            if($request->shipper_reference_3 != null) {
+                $shipper_reference->reference_3 = $request->shipper_reference_3;
+            }
+            if($request->shipper_reference_4 != null) {
+                $shipper_reference->reference_4 = $request->shipper_reference_4;
+            }
+            if($request->shipper_reference_5 != null) {
+                $shipper_reference->reference_5 = $request->shipper_reference_5;
+            }
+            $shipper_reference->save();
+        }
         $product_type_id = $request->input('product_type');
 
         if ($request->filled('item_description')) {
@@ -287,6 +308,12 @@ class ShipperInternationalShipmentBookController extends Controller
             'payment_mode_id' => 'Payment Mode ID',
             'charges_mode_id' => 'Charges Mode ID',
             'pieces_quantity' => 'Pieces',
+
+            'shipper_reference_number_1' => 'Shipper Reference Number 1',
+            'shipper_reference_number_2' => 'Shipper Reference Number 2',
+            'shipper_reference_number_3' => 'Shipper Reference Number 3',
+            'shipper_reference_number_4' => 'Shipper Reference Number 4',
+            'shipper_reference_number_5' => 'Shipper Reference Number 5',
         ];
 
         $messages = [
@@ -337,7 +364,13 @@ class ShipperInternationalShipmentBookController extends Controller
             'payment_mode_id' => ['required', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+
+            'shipper_reference_number_1' => ['nullable', 'between:0,190'],
+            'shipper_reference_number_2' => ['nullable', 'between:0,190'],
+            'shipper_reference_number_3' => ['nullable', 'between:0,190'],
+            'shipper_reference_number_4' => ['nullable', 'between:0,190'],
+            'shipper_reference_number_5' => ['nullable', 'between:0,190']
 
         ];
         if($file = $request->file('shipments')) {
@@ -347,8 +380,8 @@ class ShipperInternationalShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-            if (count($spreadsheet[0]) == 22){
-                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'postal_code', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity'];
+            if (count($spreadsheet[0]) == 27){
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'postal_code', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'amount', 19 => 'payment_mode_id', 20 => 'charges_mode_id', 21 => 'pieces_quantity', 22 => 'shipper_reference_number_1', 23 => 'shipper_reference_number_2', 24 => 'shipper_reference_number_3', 25 => 'shipper_reference_number_4', 26 => 'shipper_reference_number_5'];
             }
             else{
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');

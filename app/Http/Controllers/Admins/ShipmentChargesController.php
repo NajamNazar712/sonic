@@ -534,7 +534,7 @@ class ShipmentChargesController extends Controller
                 $zone_id = 'zone_'.$zone;
                 $charges = $weight_charge[$zone_id];
 
-                $discount = (100 - $margin) / 100;
+                $discount = (100 + $margin) / 100;
                 $charges = $discount * $charges;
 
 
@@ -596,7 +596,7 @@ class ShipmentChargesController extends Controller
                     }
                 }
 
-                $discount = (100 - $margin) / 100;
+                $discount = (100 + $margin) / 100;
                 $charges = $discount * $charges;
 
                 $exchange_rate_charges = 0;

@@ -370,6 +370,27 @@
                                     </div>
                                 </div>
 
+                                <div id="shipper_references" class="col">
+                                    <h4 class="form-section mb-2 text-center">Shipper References (Optional)</h4>
+                                    <div class="row">
+                                        <div class="form-group col">
+                                            <input name="shipper_reference_1" class="form-control shipper_reference" placeholder="Shipper Reference 1" data-rule-maxlength="190" data-msg-maxlength="Shipper Reference 1 can be maximum 190 characters">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input name="shipper_reference_2" class="form-control shipper_reference" placeholder="Shipper Reference 2" data-rule-maxlength="190" data-msg-maxlength="Shipper Reference 2 can be maximum 190 characters">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input name="shipper_reference_3" class="form-control shipper_reference" placeholder="Shipper Reference 3" data-rule-maxlength="190" data-msg-maxlength="Shipper Reference 3 can be maximum 190 characters">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input name="shipper_reference_4" class="form-control shipper_reference" placeholder="Shipper Reference 4" data-rule-maxlength="190" data-msg-maxlength="Shipper Reference 4 can be maximum 190 characters">
+                                        </div>
+                                        <div class="form-group col">
+                                            <input name="shipper_reference_5" class="form-control shipper_reference" placeholder="Shipper Reference 5" data-rule-maxlength="190" data-msg-maxlength="Shipper Reference 5 can be maximum 190 characters">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row mt-2">
                                     <div class="col">
                                         <div class="form-group text-center">

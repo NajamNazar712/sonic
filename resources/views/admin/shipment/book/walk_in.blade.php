@@ -391,10 +391,10 @@
                     }
                 }).done(function (data) {
                         if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
-                            if(shipment_pickup == 0){
+                            // if(shipment_pickup == 0){
                                 $('#sub_book').prop('disabled', true);
                                 $('#sub_book_print').prop('disabled', true);
-                            }
+                            // }
 
                         }
                         if(data.status === 1){
@@ -512,6 +512,9 @@
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
+                $('#actual_weight').val('');
+                $('#charges_per_kg').val('');
+                $('#span').remove();
             });
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({

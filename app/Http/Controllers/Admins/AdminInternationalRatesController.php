@@ -832,10 +832,120 @@ class AdminInternationalRatesController extends Controller
 
     }
 
-    public function standard_rates_list(Request $request){
+    public function standard_rates_list(Request $request, $id){
+
+        $margin = 0;
+        $intl_user_information = InternationalUsersInformation::where('user_id', $id);
+        if($intl_user_information->exists()){
+            $user_information = $intl_user_information->first();
+            if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
+                $international_user_rate = InternationalUserRate::where('user_id', $id);
+                if($international_user_rate->exists()){
+                    $international_user_rate = $international_user_rate->first();
+                    $margin = $international_user_rate->margin;
+                }
+            }
+            else{
+                $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
+                if($international_user_rate->exists()){
+                    $international_user_rate = $international_user_rate->first();
+                    $margin = $international_user_rate->margin;
+                }
+            }
+        }
+
         $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
 
         return Datatables::of($rates_list)
+            ->editColumn('zone_1', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_1, 2);
+                }
+                else{
+                    return $rate->zone_1;
+                }
+            })
+            ->editColumn('zone_2', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_2, 2);
+                }
+                else{
+                    return $rate->zone_2;
+                }
+            })
+            ->editColumn('zone_3', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_3, 2);
+                }
+                else{
+                    return $rate->zone_3;
+                }
+            })
+            ->editColumn('zone_4', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_4, 2);
+                }
+                else{
+                    return $rate->zone_4;
+                }
+            })
+            ->editColumn('zone_5', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_5, 2);
+                }
+                else{
+                    return $rate->zone_5;
+                }
+            })
+            ->editColumn('zone_6', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_6, 2);
+                }
+                else{
+                    return $rate->zone_6;
+                }
+            })
+            ->editColumn('zone_7', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_7, 2);
+                }
+                else{
+                    return $rate->zone_7;
+                }
+            })
+            ->editColumn('zone_8', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_8, 2);
+                }
+                else{
+                    return $rate->zone_8;
+                }
+            })
+            ->editColumn('zone_9', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_9, 2);
+                }
+                else{
+                    return $rate->zone_9;
+                }
+            })
+            ->editColumn('zone_10', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_10, 2);
+                }
+                else{
+                    return $rate->zone_10;
+                }
+            })
+            ->editColumn('zone_11', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_11, 2);
+                }
+                else{
+                    return $rate->zone_11;
+                }
+            })
+
             ->make(true);
     }
 
