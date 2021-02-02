@@ -871,8 +871,17 @@ class AdminFinanceController extends Controller
                             $dropdown .= $resolve_button;
                         }
                     }
-                    if (session('role_id') == 1 || in_array(56, session('permissions'))) {
-                        $dropdown .= $adjust_in_payment_button;
+
+                    $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                    $now = Carbon::now()->startOfDay();
+
+                    $difference = $updated_at->diffInDays($now);
+
+                    if ($difference <= 2) {
+                        if (session('role_id') == 1 || in_array(56, session('permissions'))) {
+                            $dropdown .= $adjust_in_payment_button;
+                        }
                     }
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
@@ -1335,7 +1344,7 @@ class AdminFinanceController extends Controller
                 if($journey){
                        $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                       if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
+                       if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                         $delivery_note_shipment->status = 8;
 
@@ -1486,7 +1495,7 @@ class AdminFinanceController extends Controller
                  if($journey){
                         $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                        if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
+                        if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                             $delivery_note_shipment->status = 8;
 
