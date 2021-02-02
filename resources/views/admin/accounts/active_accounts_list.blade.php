@@ -13,7 +13,7 @@
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
-                            <div id="search_form" class="row p-1 mb-2 justify-content-center">
+                            <div id="search_form" class="row p-1 mb-2">
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
@@ -37,10 +37,15 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                           @foreach($shippers as $shipper)
+                                            @foreach($shippers as $shipper)
                                                 <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                             @endforeach
                                         </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="email" name="search_email" id="search_email" class="form-control cnic" placeholder="Email">
                                     </fieldset>
                                 </div>
                                 <div class="col-2">
@@ -895,6 +900,7 @@
                    d.search_cnic = $('#search_cnic').val();
                    d.search_shipper = $('#search_shipper').val();
                    d.search_iban = $('#search_iban').val();
+                   d.search_email = $('#search_email').val();
                }
            },
             columns: [

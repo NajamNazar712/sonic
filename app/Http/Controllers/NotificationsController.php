@@ -4177,14 +4177,20 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 56) {
+                    $date = Carbon::now();
+                    $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
+
                     $negative = DB::connection('reports')->table('pending_payment_shipments')->leftjoin('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
                         ->leftjoin('users as u', 'u.id', '=', 's.user_id')
                         ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->leftjoin('cities as c', 'c.id', '=', 'usi.city_id')
-                        ->select('u.id as account_id', 'u.name as name', 'c.name as origin', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'))
-                        ->groupBy('u.id')->having('sum_payable', '<', 0)->get();
+                        ->select('u.id as account_id', 'u.name as name', 'c.name as origin', DB::raw('SUM(pending_payment_shipments.payable) as sum_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date .  "') as shipment_exist"))
+                        ->havingRaw('shipment_exist is null')
+                        ->groupBy('u.id')->having('sum_payable', '<', 0)
+                        ->get();
 
                     if (count($negative) > 0) {
+
                         $filtered_data = array();
                         $shipper_sales_person = SalePersonTag::all()->where('admin_id', $reference_1_id)->where('status', 0)->groupBy('admin_id');
                         if (count($shipper_sales_person) > 0) {
