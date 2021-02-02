@@ -6772,23 +6772,17 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $sales_person = $reference_1_id;
                     $admin_id = $reference_2_id;
-                    $user = Admin::find($admin_id);
-                    $tagged_by = $user->name;
-                    $to = array();
                     foreach ($sales_person as $index => $person) {
                         $shipper = User::find($index);
-
                         if (strpos($body, '[shipper_name]') !== FALSE) {
                             $body = str_replace('[shipper_name]', $shipper->name, $body);
                         }
-//                        if (strpos($body, '[new_sale_person]') !== FALSE) {
-//                            $body = str_replace('[new_sale_person]', $person['new_sale_person']->name, $body);
-//                        }
-                        if ($person['new_sale_person']->phone) {
-                            $to[] = $person['new_sale_person']->phone;
+                        if (strpos($body, '[new_sale_person]') !== FALSE) {
+                            $body = str_replace('[new_sale_person]', $person['new_sale_person']->name, $body);
                         }
+                        $to = $person['new_sale_person']->phone_number;
+                        self::sms($body,$to);
                     }
-                    self::sms($body, $to);
                 }
 
             }
