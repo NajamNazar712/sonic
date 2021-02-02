@@ -21,9 +21,9 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif
-                            @if(session('user_type') == 1 && session('international_rates') == 1)
-                            <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
+                            @if(session('international_rates') == 1)
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
                             @endif
                         @endif
                         </ul>
@@ -110,6 +110,10 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
+
+                            @if (session('user_type') == 1 || in_array(13, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment Report</a></li>
+                            @endif
 
                         @if (in_array(session('user_id'), [405, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>

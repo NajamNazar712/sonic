@@ -42,8 +42,19 @@ class AdminMonthClosingReportsController extends Controller
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
             ->join('month_closing_responsibles as mcr', 'mcr.month_closing_id', '=', 'month_closings.id')
-            ->join('admins as rp', 'rp.id', '=', 'mcr.responsible_person_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address','rp.name as responsible_person')
+            ->leftJoin('admins as rp', function ($join) {
+                $join->on('rp.id', '=', 'mcr.responsible_person_id')
+                    ->where('mcr.admin','=',
+                        DB::raw(1));
+            })
+            ->leftJoin('riders as r', function ($join) {
+                $join->on('r.id', '=', 'mcr.responsible_person_id')
+                    ->where('mcr.admin','=',
+                        DB::raw(0));
+            })
+//            ->leftjoin('admins as rp', 'rp.id', '=', 'mcr.responsible_person_id')
+//            ->leftjoin('riders as r', 'r.id', '=', 'mcr.responsible_person_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address', 'mcr.admin as admin_check','rp.name as responsible_person','r.name as rider_responsible_person')
             ->whereIn('month_closings.status_id', [2,3]);
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -65,6 +76,22 @@ class AdminMonthClosingReportsController extends Controller
                     return '-';
                 }
 
+            })
+            ->addColumn('category', function($shipments){
+                if($shipments->admin_check == 1){
+                    return 'Admin';
+                }
+                else{
+                    return 'Rider';
+                }
+            })
+            ->editColumn('responsible_person', function ($shipments) {
+                if($shipments->admin_check == 1){
+                    return $shipments->responsible_person;
+                }
+                else{
+                    return $shipments->rider_responsible_person;
+                }
             })
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
@@ -99,8 +126,17 @@ class AdminMonthClosingReportsController extends Controller
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
             ->join('month_closing_responsibles as mcr', 'mcr.month_closing_id', '=', 'month_closings.id')
-            ->join('admins as rp', 'rp.id', '=', 'mcr.responsible_person_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address','rp.name as responsible_person', 'rp.id as responsible_person_id', DB::raw('(SELECT COUNT(mr.id) FROM month_closing_responsibles AS mr WHERE mr.responsible_person_id = mcr.responsible_person_id) AS shipment_count'))
+            ->leftJoin('admins as rp', function ($join) {
+                $join->on('rp.id', '=', 'mcr.responsible_person_id')
+                    ->where('mcr.admin','=',
+                        DB::raw(1));
+            })
+            ->leftJoin('riders as r', function ($join) {
+                $join->on('r.id', '=', 'mcr.responsible_person_id')
+                    ->where('mcr.admin','=',
+                        DB::raw(0));
+            })
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address', 'mcr.admin as admin_check','rp.name as responsible_person','r.name as rider_responsible_person', 'rp.id as responsible_person_id', 'r.id as rider_responsible_person_id', DB::raw('(SELECT COUNT(mr.id) FROM month_closing_responsibles AS mr WHERE mr.responsible_person_id = mcr.responsible_person_id) AS shipment_count'))
             ->whereIn('month_closings.status_id', [2,3])
             ->groupBy('mcr.responsible_person_id');
 
@@ -117,6 +153,22 @@ class AdminMonthClosingReportsController extends Controller
                     return '-';
                 }
 
+            })
+            ->addColumn('category', function($shipments){
+                if($shipments->admin_check == 1){
+                    return 'Admin';
+                }
+                else{
+                    return 'Rider';
+                }
+            })
+            ->editColumn('responsible_person', function ($shipments) {
+                if($shipments->admin_check == 1){
+                    return $shipments->responsible_person;
+                }
+                else{
+                    return $shipments->rider_responsible_person;
+                }
             })
             ->addColumn('shipment_count_btn', function ($shipments) {
                 if($shipments->shipment_count > 0){

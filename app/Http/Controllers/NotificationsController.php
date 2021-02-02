@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailUser;
@@ -13,6 +15,7 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -2890,11 +2893,10 @@ class NotificationsController extends Controller
 //                            if($department_head_email) {
 //                                $cc[] = $department_head_email;
 //                            }
-                            $bcc = array();
-                            $bcc = ['danish.zahid@trax.pk'];
+
 
                             $to = $shipper->email;
-                            self::email($subject, $body, $to, $cc, $bcc);
+                            self::email($subject, $body, $to, $cc);
 
                         }
                     }
@@ -4241,7 +4243,7 @@ class NotificationsController extends Controller
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
-//                                $to[] = 'sarosh.tariq@trax.pk';
+                                $to[] = 'sarosh.tariq@trax.pk';
                                 if ($check == true) {
                                     self::email($subject, $body, $to, $cc);
                                 }
@@ -5434,6 +5436,7 @@ class NotificationsController extends Controller
                         $to[] = 'talha.motiwala@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
+                        $to[] = 'jahanzaib.qamar@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
@@ -6506,6 +6509,263 @@ class NotificationsController extends Controller
                         }
                         $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to);
+                    }
+                }
+                else if ($id == 117) {
+                    $date = str_replace('00:00:00', '', Carbon::today());
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $claim_id = $reference_1_id;
+                    $status_id = $reference_2_id;
+                    $claim = CrmRequest::find($claim_id);
+                    $to = array();
+                    if($claim){
+                        $user = $claim->shipment->user;
+                        $status = CrmRequestStatus::find($status_id);
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+                        if (strpos($subject, '[id]') !== FALSE) {
+                            $subject = str_replace('[id]',  str_pad($claim->id, 6, '0', STR_PAD_LEFT), $subject);
+                        }
+                        if (strpos($body, '[id]') !== FALSE) {
+                            $body = str_replace('[id]', str_pad($claim->id, 6, '0', STR_PAD_LEFT), $body);
+                        }
+                        if (strpos($subject, '[status]') !== FALSE) {
+                            $subject = str_replace('[status]', $status->name, $subject);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status->name, $body);
+                        }
+
+                        $sale_person = SalePersonTag::where('user_id', $user->id)->where('status', 0)->first();
+                        $to[] = $user->email;
+                        $to[] = $sale_person->sales_person->email;
+                        self::email($subject, $body, $to);
+                    }
+                }
+                else if ($id == 200) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    $admin = Admin::find(374);
+                    if($admin_user) {
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $department = 'Department: '. $admin_user->depart->name;
+                        $designation = 'Designation: '. $admin_user->designation;
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[department]') !== FALSE) {
+                            $body = str_replace('[department]', $department, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $designation, $body);
+                        }
+                        $to = $admin->email;
+                        self::email($subject, $body, $to);
+                    }
+                }
+                else if ($id == 201) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    $admin = Admin::find(5);
+                    if($admin_user) {
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $department = 'Department: '. $admin_user->depart->name;
+                        $designation = 'Designation: '. $admin_user->designation;
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[department]') !== FALSE) {
+                            $body = str_replace('[department]', $department, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $designation, $body);
+                        }
+                        $to = $admin->email;
+                        self::email($subject, $body, $to);
+                    }
+                }
+                else if ($id == 202) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $admin_user_id = $reference_1_id;
+                    $admin_user = AdminUserRequest::find($admin_user_id);
+                    if($admin_user) {
+                        $requested_by_admin = Admin::find($admin_user->request_added_by);
+                        $trax_id = 'Trax ID: '. $admin_user->trax_id;
+                        $full_name = 'Full Name: '. $admin_user->name;
+                        $email = 'Sonic & Email ID: '. $admin_user->email;
+                        $password = 'Sonic Password: '. $admin_user->visible_password;
+
+                        if($admin_user->outlook_email == 1){
+                            $outlook_password = 'Outlook Password: '. $admin_user->visible_outlook_password;
+                        }
+                        else{
+                            $outlook_password = '';
+                        }
+                        if (strpos($subject, '[admin]') !== FALSE) {
+                            $subject = str_replace('[admin]', $requested_by_admin->name, $subject);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $requested_by_admin->name, $body);
+                        }
+                        if (strpos($subject, '[admin_user_name]') !== FALSE) {
+                            $subject = str_replace('[admin_user_name]', $admin_user->name, $subject);
+                        }
+                        if (strpos($body, '[admin_user_name]') !== FALSE) {
+                            $body = str_replace('[admin_user_name]', $admin_user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $trax_id, $body);
+                        }
+                        if (strpos($body, '[full_name]') !== FALSE) {
+                            $body = str_replace('[full_name]', $full_name, $body);
+                        }
+                        if (strpos($body, '[email]') !== FALSE) {
+                            $body = str_replace('[email]', $email, $body);
+                        }
+                        if (strpos($body, '[sonic_password]') !== FALSE) {
+                            $body = str_replace('[sonic_password]', $password, $body);
+                        }
+                        if (strpos($body, '[outlook_password]') !== FALSE) {
+                            $body = str_replace('[outlook_password]', $outlook_password, $body);
+                        }
+                        $to = $requested_by_admin->email;
+
+                        $admin = Admin::find(374);
+                        $cc = $admin->email;
+                        self::email($subject, $body, $to, $cc);
+                    }
+                }
+                else if ($id == 203) {
+                    $date = str_replace('00:00:00', '', $reference_2_id);
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $lead_ids = $reference_1_id;
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Contact Person</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Email</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
+                    $html .= '</tr></thead><tbody>';
+                    $serial = 1;
+                    foreach ($lead_ids as $lead_id) {
+                        $lead = Lead::find($lead_id);
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->message . '</td>';
+                        $html .= '</tr>';
+                        $serial++;
+                    }
+                    $html .= '</tbody></table>';
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $body);
+                    }
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $to[] = 'waqas@trax.pk';
+                    $to[] = 'nazneen.arshad@trax.pk';
+
+                    self::email($subject, $body, $to);
+                }
+                else if ($id == 204) {
+                    $date = str_replace('00:00:00', '', Carbon::today());
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $leads = $reference_1_id;
+                    $sale_person_id = $reference_2_id;
+                    $sale_person = Admin::find($sale_person_id);
+                    if($sale_person){
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Contact Person</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Hub</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Email</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
+                        $html .= '</tr></thead><tbody>';
+                        $serial = 1;
+                        foreach ($leads as $lead) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->message . '</td>';
+                            $html .= '</tr>';
+                            $serial++;
+                        }
+                        $html .= '</tbody></table>';
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $body);
+                        }
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $sale_person->name, $body);
+                        }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+
+                        $to = array();
+
+                        $to[] = $sale_person->email;
+
+                        self::email($subject, $body, $to);
                     }
                 }
             }

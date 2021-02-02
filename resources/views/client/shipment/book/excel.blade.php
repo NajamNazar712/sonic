@@ -19,8 +19,7 @@
 
 							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
-
-								<div class="row align-items-center justify-content-center">
+								<div class="row align-items-center justify-content-center mb-2">
 									<div class="col">
 										<div class="form-group">
 											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
@@ -28,26 +27,82 @@
 									</div>
 
 									<div class="col">
+										<div class="row p-1 border-primary">
+											<div class="col-12">
+												<h5 class="form-section text-center">Template Type</h5>
+											</div>
+											<div class="col-12">
+												<div class="row justify-content-center">
+													<fieldset>
+														<div class="custom-control custom-radio col">
+															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
+															<label class="custom-control-label" for="excel_type_1">Overall</label>
+														</div>
+													</fieldset>
+													<fieldset>
+														<div class="custom-control custom-radio col">
+															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_2" value="2" checked>
+															<label class="custom-control-label" for="excel_type_2">Regular</label>
+														</div>
+													</fieldset>
+													<fieldset>
+														<div class="custom-control custom-radio col">
+															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_3" value="3">
+															<label class="custom-control-label" for="excel_type_3">Replacement</label>
+														</div>
+													</fieldset>
+													<fieldset>
+														<div class="custom-control custom-radio col">
+															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_4" value="4">
+															<label class="custom-control-label" for="excel_type_4">Try And Buy</label>
+														</div>
+													</fieldset>
+													<fieldset>
+														<div class="custom-control custom-radio col">
+															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_5" value="5">
+															<label class="custom-control-label" for="excel_type_5">Reverse Pickup</label>
+														</div>
+													</fieldset>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-auto">
 										<div class="form-group text-left">
 											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
 										</div>
 									</div>
 
-									<div class="col ml-auto">
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Overall Template</a>
-										</div>
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Regular Template</a>
-										</div>
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Replacement Template</a>
-										</div>
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Try And Buy Template</a>
-										</div>
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Reverse Pickup Template</a>
+									<div class="col-12">
+										<h5 class="form-section mt-2 mb-2 text-center">Template Download</h5>
+
+										<div class="row">
+											<div class="col">
+												<div class="form-group text-right">
+													<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+												</div>
+											</div>
+											<div class="col">
+												<div class="form-group text-right">
+												<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
+												</div>
+											</div>
+											<div class="col">
+												<div class="form-group text-right">
+													<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
+												</div>
+											</div>
+											<div class="col">
+												<div class="form-group text-right">
+													<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
+												</div>
+											</div>
+											<div class="col">
+												<div class="form-group text-right">
+													<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>

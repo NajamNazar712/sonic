@@ -57,6 +57,7 @@
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Shipper Signature Via App</th>
                     </tr>
                     </thead>
                 </table>
@@ -195,6 +196,7 @@
                             head.push('Cash Collected By');
                             head.push('Cash Collection Date');
                             head.push('DNCC Amount');
+                            head.push('Shipper Signature Via App');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -214,6 +216,7 @@
                                 row.push(values.cash_collected);
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
+                                row.push(values.signature_via_app);
 
                                 body.push(row);
                             });
@@ -397,6 +400,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'signature_via_app' ,name: 'signature_via_app', class: 'align-middle signature_via_app', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
