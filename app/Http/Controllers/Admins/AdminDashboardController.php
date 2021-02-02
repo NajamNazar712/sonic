@@ -7188,7 +7188,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as poc','poc.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.email'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7216,6 +7216,9 @@ class AdminDashboardController extends Controller
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
+        }
+        if($search_email = $request->get('search_email')){
+            $users = $users->where('users.email',$search_email);
         }
 
         return Datatables::of($users)
@@ -7475,7 +7478,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as p','p.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7501,6 +7504,10 @@ class AdminDashboardController extends Controller
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
+        }
+
+        if($search_email = $request->get('search_email')){
+            $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {

@@ -44,15 +44,6 @@
                                 </div>
                             </div>
                             <div class="col form-group">
-                                <label><strong>Margin</strong></label>
-                                <div class="input-group">
-                                    <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}" disabled>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col form-group">
                                 <label><strong>GST</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}" disabled>
