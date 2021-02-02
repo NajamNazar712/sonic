@@ -2512,7 +2512,7 @@ class RiderAPIController extends Controller {
                             $rider_return_delivery->save();
                         }
 
-                        if (ReturnNote::where('id', $request->return_note_id)->where('completion_status', 0)->exists()) {
+                        if (ReturnNote::where('id', $request->return_note_id)->exists()) {
                             $shipment->shipper_status_id = 25;
                             $shipment->consignee_status_id = 25;
                             $shipment->save();
@@ -2649,7 +2649,7 @@ class RiderAPIController extends Controller {
                     $rider_return_delivery->picture_path = $picture_path;
                     $rider_return_delivery->save();
 
-                    if (ReturnNote::where('id', $request->return_note_id)->where('completion_status', 0)->exists()) {
+                    if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
                         $shipment->shipper_status_id = $request->shipper_status_id;
                         $shipment->consignee_status_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
