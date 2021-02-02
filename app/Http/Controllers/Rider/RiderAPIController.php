@@ -2536,6 +2536,7 @@ class RiderAPIController extends Controller {
 
                         if ($updated_shipments_count == 0) {
                             $return_note_data->status = 3;
+                            $return_note_data->updated_at = Carbon::now();
                             $return_note_data->save();
                         }
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
@@ -2544,14 +2545,6 @@ class RiderAPIController extends Controller {
                             $rider_return_note_status->status = 2;
                             $rider_return_note_status->save();
                         }
-                        $retrn_shipment_ids = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-                        $count = count($retrn_shipment_ids);
-                        if ($return_note_data) {
-                            $return_note_data->shipments_count = $count;
-                            $return_note_data->updated_at = Carbon::now();
-                            $return_note_data->save();
-                        }
-
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 }
@@ -2687,16 +2680,9 @@ class RiderAPIController extends Controller {
 
                     if ($updated_shipments_count == 0) {
                         $return_note_data->status = 3;
-                        $return_note_data->save();
-                    }
-                    $retrn_shipment_ids = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-                    $count = count($retrn_shipment_ids);
-                    if ($return_note_data) {
-                        $return_note_data->shipments_count = $count;
                         $return_note_data->updated_at = Carbon::now();
                         $return_note_data->save();
                     }
-
                     $message = 'Shipment is marked as Undelivered Successfully';
                 }
             } else {
