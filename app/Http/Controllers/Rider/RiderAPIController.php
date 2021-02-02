@@ -2806,8 +2806,12 @@ class RiderAPIController extends Controller {
 
         if ($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->first();
-            $pickup_note_requests = V2PickupNoteRequest::where('pickup_request_id', $pickup_requests->pickup_request_id)->where('status', 0)->first();
+
+
+            $pickup_note_requests = V2PickupNoteRequest::where('pickup_request_id', $pickup_requests->pickup_request_id)->first();
             $pickup_note = V2PickupNote::where('id', $pickup_note_requests->pickup_note_id)->first();
+
+
             $information = array();
             $information['pickup_note_id'] = $pickup_note->id;
             $rider = Rider::find($rider_id);
