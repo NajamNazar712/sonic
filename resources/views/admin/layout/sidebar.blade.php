@@ -478,12 +478,12 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                                <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
-                            <ul class="menu-content">
-                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
-                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
-                            </ul>
-
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
+                                <ul class="menu-content">
+                                    <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
+                                    <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                                </ul>
+                            </li>
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
