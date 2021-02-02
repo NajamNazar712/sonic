@@ -46,7 +46,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $date = Carbon::today();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
-        $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->select('c.name','c.id')->get();
+        $cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->select('name','id')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
@@ -64,9 +64,10 @@ class ShipperInternationalShipmentBookController extends Controller
             $air_waybill = null;
         }
 //        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
+//        $cities = City::where('business_category_id', 2)->where('status', 1)->whereNotNull('c.zone_id')->orderBy('c.name')->select('name','id')->get();
 
-        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'countries' => $countries]);
+//        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
     }
 
     public function store(Request $request) {
@@ -265,7 +266,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->pluck('c.name');
+        $cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -551,7 +552,7 @@ class ShipperInternationalShipmentBookController extends Controller
                         $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                     }
 
-                    $international_rate_hub = InternationalRatesHub::join('cities as c', 'c.hub_id', '=', 'international_rates_hubs.hub_id')->where('user_id', $user_id)->where('c.id', $consignee_city->id);
+                    $international_rate_hub = City::where('id', $consignee_city->id);
                     if(!$international_rate_hub->exists()){
                         $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is unavailable';
                     }
@@ -663,7 +664,7 @@ class ShipperInternationalShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 0)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->groupBy('c.id')->orderBy('c.name')->get();
+                $cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->get();
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
                 })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');

@@ -586,7 +586,7 @@
                     <h4 class="modal-title" id="">Write a reason to reject rates!</h4>
                 </div>
                 <div class="modal-body">
-                    <textarea id="reject_reason" onkeyup="textAreaAdjust(this)" style="width:100%;overflow:hidden"></textarea>
+                    <textarea id="reject_reason" class="form-control" onkeyup="textAreaAdjust(this)" style="width:100%;overflow:hidden"></textarea>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn" data-dismiss="modal">No</button>

@@ -351,8 +351,23 @@ class AdminNotificationsController extends Controller
         else if ($id == 115){
             $details['fields'] = ['shipper','tracking_number'];
         }
-        else if ($id == 115){
+        else if ($id == 116){
             $details['fields'] = ['shipper','tracking_number'];
+        }
+        else if ($id == 117){
+            $details['fields'] = ['data','status'];
+        }
+        else if ($id == 118){
+            $details['fields'] = ['product','sku_id'];
+        }
+        else if ($id == 200){
+            $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
+        }
+        else if ($id == 201){
+            $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
+        }
+        else if ($id == 202){
+            $details['fields'] = ['admin','admin_user_name','trax_id','full_name','email','sonic_password','outlook_password'];
         }
 
 		return $details;
