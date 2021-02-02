@@ -2246,7 +2246,7 @@ class RiderAPIController extends Controller {
     {
         $rider_id = $request->rider_id;
 
-        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0);
+        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipment_count', '!=', 0);
 
         if ($return_notes->exists()) {
             $return_notes = $return_notes->get();
