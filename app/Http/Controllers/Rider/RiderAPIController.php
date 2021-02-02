@@ -2748,9 +2748,9 @@ class RiderAPIController extends Controller {
         $return_note_id = $request->get('return_note_id');
         $tracking_no = $request->get('tracking_no');
 
-        /*if ($from_date == null && $return_note_id == null && $tracking_no == null) {
+        if ($from_date == null && $return_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
-        } else {*/
+        } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
                 ->where('return_notes.rider_id', $rider_id)
@@ -2787,7 +2787,7 @@ class RiderAPIController extends Controller {
         }
 
 
-//    }
+    }
 
     public function scan_pickup_summary(Request $request)
     {
