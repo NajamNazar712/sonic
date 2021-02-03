@@ -2808,10 +2808,10 @@ class RiderAPIController extends Controller {
 
         if ($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->first();
-            $pickup_note_requests = V2PickupNoteRequest::where('pickup_request_id', $pickup_requests->pickup_request_id)->first();
+            $pickup_note_requests = $pickup_requests->pickup_note_request;
             $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_requests->pickup_request_id)->where('attempt_date', '>', $today);
 
-            if (!$pickup_note_requests->exists()) {
+            if (!$pickup_note_requests) {
                 $pickup_note = V2PickupNote::where('rider_id', $rider_id)
                     ->where('status', 0);
                 if ($pickup_note->exists()) {
@@ -2871,7 +2871,8 @@ class RiderAPIController extends Controller {
                 $pickup_request_attempt->attempt_date = Carbon::now();
 //                $pickup_request_attempt->assigned_by = Auth::id();
                 $pickup_request_attempt->save();
-            } else {
+            }
+            else {
                 if ($pickup_requests_update->current_rider_id == $rider_id) {
                     pass;
                 } else {
