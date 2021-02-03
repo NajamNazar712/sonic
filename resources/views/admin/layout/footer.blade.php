@@ -57,6 +57,42 @@
                 $.app.menu.hide();
             }
         });
+        @if(Session::has('first_login') && session('first_login') != 1)
+            $('#FirstLoginPasswordChangeModal').modal('show');
+
+            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
+
+        $( "#password-form" ).validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                var new_password = $('#new_password').val();
+                var confirm_password = $('#confirm_password').val();
+                if(new_password === confirm_password){
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Password is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+                else{
+                    var error = "The password and confirmation password do not match";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            }
+        });
+        @endif
     });
 </script>
   @yield('js')

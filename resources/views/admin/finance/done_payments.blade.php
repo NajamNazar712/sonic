@@ -16,10 +16,10 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-							<div class="row justify-content-center">
+							<div class="row justify-content-center mb-1">
 								<div class="col-12">
 									<div class="row">
-										<div class="col-2">
+										<div class="col-3">
 											<fieldset class="form-group">
 												<select name="search_shipper" id="search_shipper" class="form-control select2">
 													@foreach($shippers as $shipper)
@@ -28,7 +28,7 @@
 												</select>
 											</fieldset>
 										</div>
-										<div class="col-2">
+										<div class="col-3">
 											<fieldset class="form-group">
 												<select name="search_shipper_status" id="search_shipper_status" class="form-control select2">
 													@foreach($shipper_status as $id => $status)
@@ -42,6 +42,14 @@
 												  class="form" novalidate="novalidate">
 												<div class="form-group">
 													<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+												</div>
+											</form>
+										</div>
+										<div class="col-3 text-center">
+											<form id="done_payment_id_form"
+												  class="form" novalidate="novalidate">
+												<div class="form-group">
+													<input type="text" name="done_payment_ids" class="done_payment_ids" placeholder="Payment ID(s)*" data-tags-input-name="done_payment_ids" data-rule-required="true" data-msg-required="Payment ID(s) is required">
 												</div>
 											</form>
 										</div>
@@ -89,9 +97,9 @@
 												<input type="text" name="search_date_status_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_status_to" placeholder="Status Date To">
 											</div>
 										</div>
-										<div class="col-2 text-right">
+										<div class="col mb-1 text-center">
 											<button type="button" id="search_filter_btn"
-													class="btn btn-outline-primary w-100"><i
+													class="btn btn-outline-primary w-25"><i
 														class="la la-search"></i> Search
 											</button>
 										</div>
@@ -692,6 +700,7 @@
                         d.search_date_from = $('input[name="search_date_status_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_status_to_formatted"]').val();
 						d.tracking_numbers = $('#tracking_number_search_form .tracking_numbers').val();
+						d.search_payment_ids = $('#done_payment_id_form .done_payment_ids').val();
 					}
 				},
 				rowId: 'id',
@@ -831,12 +840,32 @@
 
 				length = $('#tracking_number_search_form #tracking_number').val().length;
 
-				if (length == 0 || length >= 12) {
+				if (length == 0 || length >= 6) {
+					table.draw();
+				}
+			});
+
+			$('#done_payment_id_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#done_payment_id_form #done_payment_ids').val().length;
+
+				if (length == 0 || length >= 6) {
 					table.draw();
 				}
 			});
 
 			$('#tracking_number_search_form #tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			}).bind('input', function() {
+				if (this.value.length == 0 || this.value.length >= 6) {
+					table.draw();
+				}
+			});
+
+			$('#done_payment_id_form #done_payment_ids').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
@@ -1116,6 +1145,35 @@
 
 					if (!regex.test(str)) {
 						select[0].selectize.setTextboxValue('');
+					}
+				},
+				create: function(input) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+						return {
+							value: input,
+							text: input
+						}
+					}
+					else {
+						return false;
+					}
+				},
+			});
+
+			var payment_select = $('#done_payment_id_form .done_payment_ids').selectize({
+				placeholder: 'Payment ID(s)',
+				delimiter: ',',
+				createOnBlur: true,
+				persist: false,
+				plugins: ['remove_button'],
+				onDropdownOpen: function(dropdown) {
+					dropdown.remove();
+				},
+				onType: function(str) {
+					var regex = /^[0-9,]+$/;
+
+					if (!regex.test(str)) {
+						payment_select[0].selectize.setTextboxValue('');
 					}
 				},
 				create: function(input) {

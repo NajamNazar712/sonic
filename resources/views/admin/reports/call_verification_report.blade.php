@@ -22,6 +22,28 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                            </div>
+                        </div>
                         <div class="col-2">
                             <div class="form-group">
                                 <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
@@ -130,6 +152,32 @@
                 e.preventDefault();
                 table.draw();
             });
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -191,12 +239,14 @@
                     url: '{{ route('admin.reports.call_verification.list') }}',
                     data: function (d) {
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_no' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_no'},
+                    { data:'tracking_no' ,name: 's.tracking_number', class: 'align-middle text-center tracking_no'},
                     { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
                     { data:'status' ,name: 'ss.name', class: 'align-middle status'},
                     { data:'status_verified_by' ,name: 'ad.name', class: 'align-middle status_verified_by'},

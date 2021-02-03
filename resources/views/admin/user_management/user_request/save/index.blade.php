@@ -53,6 +53,14 @@
                                         </div>
                                     </div>
 
+                                    @if($user->outlook_email == 1)
+                                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                            <label for="tarx_id" class="font-weight-bold">Outlook Password</label>
+                                            <div class="form-group">
+                                                <input type="password" name="visible_outlook_password" id="visible_outlook_password" class="form-control" placeholder="Outlook Password*" data-rule-required="true" data-msg-required="Outlook Password is required" >
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="department" class="font-weight-bold">Department</label>
                                         <div class="form-group">
@@ -86,12 +94,6 @@
                                         <label for="designation" class="font-weight-bold">Designation</label>
                                         <div class="form-group">
                                             <input type="text" name="designation" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $user->designation }}" >
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <label for="hub" class="font-weight-bold">Trax Id</label>
-                                        <div class="form-group">
-                                            <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax ID*" data-rule-required="true" data-msg-required="Trax ID  is required" value="{{ $user->trax_id }}" data-rule-remote="{{ route('admin.user_management.user_requests.trax_id', ['id' => $user->id]) }}"  data-msg-remote="Id must be unique">
                                         </div>
                                     </div>
 

@@ -11,6 +11,7 @@ use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalRatesCashHandlingCharges;
 use App\Http\Models\InternationalRatesDiscountCharges;
 use App\Http\Models\InternationalRatesHub;
@@ -18,6 +19,8 @@ use App\Http\Models\InternationalRatesInsuranceCharges;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -47,6 +50,7 @@ use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ShipmentChargesController extends Controller
 {
@@ -513,107 +517,104 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function calculate_international_weight($user_id, $box_id, $weight){
-        $rate_status = InternationalRatesStatus::where('user_id', $user_id)->where('box_id', $box_id)->where('status', 1);
+    static public function calculate_international_weight($margin, $weight, $zone){
 
-        if($rate_status->exists()){
-            $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
-            if($weight_charge->exists()){
-                $weight_charge = $weight_charge->first();
+        $weight_charge = InternationalStandardDhlRate::where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+        if($weight_charge->exists()){
+            $weight_charge = $weight_charge->first();
+            $today = Carbon::today();
 
-                $today = Carbon::today();
+            if ($margin > 0) {
+                $discount = $margin;
+            }
+            else {
+                $discount = 0;
+            }
+            if ($weight_charge->weight_addition == 0) {
+                $zone_id = 'zone_'.$zone;
+                $charges = $weight_charge[$zone_id];
 
-                $discount_charge = InternationalRatesDiscountCharges::where('user_id', $user_id)->where('box_id', $box_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-                if ($discount_charge->exists()) {
-                    $discount_charge = $discount_charge->first();
+                $discount = (100 + $margin) / 100;
+                $charges = $discount * $charges;
 
-                    $discount = $discount_charge->weight;
+
+                $result = array();
+
+                $exchange_rate_charges = 0;
+                $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                if($exchange_rate->exists()){
+                    $exchange_rate = $exchange_rate->first();
+                    $exchange_rate_charges = $exchange_rate->setting_value;
+                }
+
+
+                $charges = $charges * $exchange_rate_charges;
+                $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+
+
+
+                if ($weight > 1) {
+                    $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
                 }
                 else {
-                    $discount = 0;
+                    $result['chargeable_weight'] = $weight;
                 }
-                if ($weight_charge->weight_addition == 0) {
-                    $charges = $weight_charge->local_charges;
 
-                    if (strpos($discount, '%') !== FALSE) {
-                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
-                    }
-                    else {
-                        $discount = floatval($discount);
-                    }
+                return $result;
+            }
+            else {
+                $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                $zone_id = 'zone_'.$zone;
+                $charges = ($weight_charge[$zone_id] * $multiplier);
 
-                    $result = array();
+                $result = array();
 
-                    if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                    }
-                    else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
-                    }
+                $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
 
-                    if ($weight > 1) {
-                        $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
-                    }
-                    else {
-                        $result['chargeable_weight'] = $weight;
-                    }
+                $previous = TRUE;
 
-                    return $result;
-                }
-                else {
-                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                while ($previous) {
+                    $weight_charge = InternationalStandardDhlRate::where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
 
-                    $charges = ($weight_charge->local_charges * $multiplier);
+                    if ($weight_charge->exists()) {
+                        $weight_charge = $weight_charge->first();
 
-                    $result = array();
+                        if ($weight_charge->weight_addition == 0) {
+                            $charges += $weight_charge[$zone_id];
 
-                    $result['chargeable_weight'] = (CEIL(($weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1)) * 2) / 2);
-
-                    $previous = TRUE;
-
-                    while ($previous) {
-                        $weight_charge = InternationalRatesWeightCharges::where('user_id', $user_id)->where('box_id', $box_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
-
-                        if ($weight_charge->exists()) {
-                            $weight_charge = $weight_charge->first();
-
-                            if ($weight_charge->weight_addition == 0) {
-                                $charges += $weight_charge->local_charges;
-
-                                $previous = FALSE;
-                            }
-                            else {
-                                $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
-
-                                $charges += ($weight_charge->local_charges * $multiplier);
-
-                            }
-                        }
-                        else {
                             $previous = FALSE;
                         }
-                    }
+                        else {
+                            $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
-                    if (strpos($discount, '%') !== FALSE) {
-                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                            $charges += ($weight_charge[$zone_id] * $multiplier);
+
+                        }
                     }
                     else {
-                        $discount = floatval($discount);
+                        $previous = FALSE;
                     }
-
-                    if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
-                    }
-                    else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
-                    }
-
-                    return $result;
                 }
 
-            }
-        }
+                $discount = (100 + $margin) / 100;
+                $charges = $discount * $charges;
 
+                $exchange_rate_charges = 0;
+                $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                if($exchange_rate->exists()){
+                    $exchange_rate = $exchange_rate->first();
+                    $exchange_rate_charges = $exchange_rate->setting_value;
+                }
+
+
+                $charges = $charges * $exchange_rate_charges;
+                $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+
+
+                return $result;
+            }
+
+        }
     }
     static public function weight($id) {
         $shipment = Shipment::find($id);
@@ -621,9 +622,18 @@ class ShipmentChargesController extends Controller
             $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
-            $box_id = self::international_box_id($shipment->user_id, $shipment->consignee_city_id);
-            if($box_id != null){
-                $result = self::calculate_international_weight($shipment->user_id,$box_id, $shipment->actual_weight);
+            $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
+            if($international_rate->exists()){
+                $international_rate = $international_rate->first();
+                $margin = $international_rate->margin;
+                $zone_id = $shipment->consignee_city->zone_id;
+                $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+                if($international_zone){
+                    $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
+                }
+                else{
+                    $result = false;
+                }
             }
             else{
                 $result = false;
@@ -2131,5 +2141,24 @@ class ShipmentChargesController extends Controller
             $box_id = $international_rate_hub->box_id;
         }
         return $box_id;
+    }
+
+    static public function international_fuel_surcharge($id) {
+        $shipment = Shipment::find($id);
+
+        $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+        if($fuel_surcharge->exists()){
+            $fuel_surcharge = $fuel_surcharge->first();
+            $fuel_charge = $fuel_surcharge->setting_value;
+            $result = array();
+
+            $result['fuel_surcharge'] = ROUND((($fuel_charge / 100) * $shipment->weight_charges), 2, PHP_ROUND_HALF_DOWN);
+            if ($result) {
+                $shipment->fuel_surcharge = $result['fuel_surcharge'];
+
+                $shipment->save();
+            }
+        }
+
     }
 }

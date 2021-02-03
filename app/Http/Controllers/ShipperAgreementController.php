@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
@@ -25,6 +26,8 @@ use App\Http\Models\InternationalRatesInsuranceCharges;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
@@ -376,7 +379,7 @@ otherwise it will be rejected</li>
 
             $international_rates = FALSE;
             $rate_status = FALSE;
-            if(InternationalRatesStatus::where('user_id', $id)->exists()){
+            if(InternationalUserRate::where('user_id', $id)->exists()){
                 $international_rates = TRUE;
             }
 
@@ -692,100 +695,64 @@ otherwise it will be rejected</li>
 
             if($international_rates){
                 $international_rate_boxes = '';
-                $international_rate_statuses = InternationalRatesStatus::where('user_id', $id)->get();
-                if(count($international_rate_statuses) > 0){
-                    $international_rate_hubs = InternationalRatesHub::all()->where('user_id', $shipper_id)->groupBy('box_id');
+                $international_rate_status = InternationalUserRate::where('user_id', $id)->first();
+                if($international_rate_status){
 
                     $intl_box = '';
-                    foreach ($international_rate_statuses as $index => $rate_status){
-                        $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
-                        <tr><td><strong>International Rate(s) '. $rate_status->box_id .'</strong></td></tr></thead></table>';
-                        $rate_hubs = '';
-                        if(count($international_rate_hubs) > 0){
-                            foreach ($international_rate_hubs[$rate_status->box_id] as $pos => $rate_hub){
 
-                                if($rate_hub->box_id == $rate_status->box_id){
-                                    if($pos !== 0){
-                                        $rate_hubs .= ', ';
-                                        $rate_hubs .= City::find($rate_hub->hub_id)->name;
-                                    }
-                                    else{
-                                        $rate_hubs .= City::find($rate_hub->hub_id)->name;
-                                    }
+                    $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
+                    <tr><td><strong>International Rate(s)</strong></td></tr></thead></table>';
 
-                                }
-
-                            }
-                            $intl_box .= '<div class="row mb-0"><div class="col-12"><table class="table table-sm table-bordered mb-0 mt-0">
-                                <tbody><tr><td class="color primary" ><strong>Hub(s)</strong></td><td>' . $rate_hubs . '</td></tr></tbody>
-                              </table></div></div>';
-                            $intl_box .= '</div></div>';
-                        }
-
-                        $intl_weight_charges = InternationalRatesWeightCharges::where('user_id', $shipper_id)->where('box_id', $rate_status->box_id)->get();
-                        $intl_weight_charges_details = '';
-                        if(count($intl_weight_charges) > 0){
-                            $intl_weight_charges_details .= '<div class="row"><div class="col-6"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                            $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Local Charges</th></tr></thead><tbody>';
-
-                            foreach ($intl_weight_charges as $weight_charge) {
-                                $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_charges . '</td></tr>';
-                            }
-                            $intl_weight_charges_details .= '</tbody></table>';
-                            $intl_box .= $intl_weight_charges_details;
-                        }
-
-                        $intl_cash_handling_details = '';
-                        $intl_cash_handling = InternationalRatesCashHandlingCharges::where('user_id', $id)->where('box_id', $rate_status->box_id)->get();
-
-                        if(count($intl_cash_handling) > 0){
-                            $intl_cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
-                            $intl_cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
-                            foreach ($intl_cash_handling as $cash){
-                                $intl_cash_handling_details .= '<tr><td>' . $cash->range_up . '</td><td>' . $cash->range_down . '</td><td>' . $cash->charges . '</td></tr>';
-                            }
-                            $intl_cash_handling_details .= '</tbody></table></div></div>';
-                            $intl_box .= $intl_cash_handling_details;
-                        }
-
-                        $intl_insurance_details = '';
-                        $intl_insurance_charges = InternationalRatesInsuranceCharges::where('user_id', $id)->where('box_id', $rate_status->box_id)->get();
-
-                        if(count($intl_insurance_charges) > 0){
-                            $intl_insurance_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Insurance Charges </strong></thead></table></div></div>';
-                            $intl_insurance_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
-                            foreach ($intl_insurance_charges as $insurance){
-                                $intl_insurance_details .= '<tr><td>' . $insurance->range_up . '</td><td>' . $insurance->range_down . '</td><td>' . $insurance->charges . '</td></tr>';
-                            }
-                            $intl_insurance_details .= '</tbody></table></div></div>';
-                            $intl_box .= $intl_insurance_details;
-                        }
-
-                        $intl_return_charges_details = '';
-
-                        $intl_return_charges = InternationalRatesReturnCharges::where('user_id', $id)->where('box_id', $rate_status->box_id)->first();
-
-                        if($intl_return_charges){
-                            $intl_return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
-
-                            $intl_return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th></tr></thead><tbody>';
-
-                            $intl_return_charges_details .= '<tr><td>' . $intl_return_charges->local . '</td></tr>';
-
-                            $intl_return_charges_details .= '</tbody></table></div></div>';
-                            $intl_box .= $intl_return_charges_details;
-
-                        }
-
-//                        $intl_box .= '<div class="new-page"></div>';
+                    $fuel_charges = 0;
+                    $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+                    if($fuel_surcharge->exists()){
+                        $fuel_surcharge = $fuel_surcharge->first();
+                        $fuel_charges = $fuel_surcharge->setting_value;
                     }
+
+                    $exchange_rate_charges = 0;
+                    $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                    if($exchange_rate->exists()){
+                        $exchange_rate = $exchange_rate->first();
+                        $exchange_rate_charges = $exchange_rate->setting_value;
+                    }
+
+                    $gst = 0;
+                    $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+                    if($gst_rate->exists()){
+                        $gst_rate = $gst_rate->first();
+                        $gst = $gst_rate->setting_value;
+                    }
+
+                    $intl_charges = '<div class="row"><div class="col-12"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Charges</strong></thead></table></div></div>';
+                    $intl_charges .= '<div class="row"><div class="col-12"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Fuel Surcharge</th><th>Exchange Rate</th><th>GST</th></tr></thead><tbody>';
+
+                    $intl_charges .= '<tr><td>' . $fuel_charges . '</td><td>' . $exchange_rate_charges . '</td><td>' . $gst . '</td></tr>';
+
+                    $intl_charges .= '</tbody></table></div></div>';
+                    $intl_box .= $intl_charges;
+
+
+                    $intl_weight_charges = InternationalStandardDhlRate::all();
+                    $intl_weight_charges_details = '';
+                    if(count($intl_weight_charges) > 0){
+                        $intl_weight_charges_details .= '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
+                        $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th></tr></thead><tbody>';
+
+                        foreach ($intl_weight_charges as $weight_charge) {
+                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_1) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_2) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_3) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_4) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_5) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_6) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_7) . '</td><td>' . (((100   + $international_rate_status->margin) / 100) * $weight_charge->zone_8) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_9) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_10) . '</td><td>' . (((100 + $international_rate_status->margin) / 100) * $weight_charge->zone_11) . '</td></tr>';
+                        }
+                        $intl_weight_charges_details .= '</tbody></table>';
+                        $intl_box .= $intl_weight_charges_details;
+                    }
+
+
                     $international_rate_boxes .= $intl_box;
                     $html .= $international_rate_boxes;
 
                     $html .= '<div class="new-page"></div>';
                 }
             }
-
 
 
         $html .=$claim_policy;

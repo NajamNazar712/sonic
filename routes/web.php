@@ -818,6 +818,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_list')->name('list');
             Route::post('check_pickup', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_check_pickup')->name('check_pickup');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
+            Route::post('total_shipments', 'Admins\V2Pickup\V2AdminPickupsController@total_shipments')->name('total_shipments');
+            Route::post('arrived_shipments', 'Admins\V2Pickup\V2AdminPickupsController@arrived_shipments')->name('arrived_shipments');
         });
         // End
         Route::prefix('arrival')->name('arrival.')->group(function () {
@@ -1006,6 +1008,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('signature')->name('signature.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@signature_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@signature_list')->name('list');
+
+        });
+
         //Lost Module Start
         Route::prefix('lost')->name('lost.')->group(function (){
             Route::get('','Admins\LostShipmentsController@lost_shipments_index')->name('index');
@@ -1058,7 +1066,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
-
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
@@ -1911,6 +1918,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
 //            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
 //        });
+
+        Route::prefix('last_mile_app')->name('last_mile_app.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+        });
     });
 
     //Reports end
@@ -2311,6 +2323,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('international_rates')->name('international_rates.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
+
+        });
+
 
     });
 
@@ -2522,47 +2540,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
         });
         Route::prefix('rates')->name('rates.')->group(function () {
-            Route::prefix('add')->name('add.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
-            });
-
-			Route::prefix('edit')->name('edit.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
-                Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
-            });
-
             Route::prefix('view')->name('view.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
-        });
-    });
-	Route::prefix('international')->name('international.')->group(function(){
-        Route::prefix('tracking_upload')->name('tracking_upload.')->group(function () {
-            Route::get('', 'Admins\AdminInternationalShipmentsController@tracking_upload_index')->name('index');
-            Route::get('list', 'Admins\AdminInternationalShipmentsController@tracking_upload_list')->name('list');
-            Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
-            Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
-            Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
-        });
-        Route::prefix('rates')->name('rates.')->group(function () {
-            Route::prefix('add')->name('add.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@add_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@add_rates_submit')->name('submit');
-            });
-
-			Route::prefix('edit')->name('edit.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@edit_rates_index')->name('index');
-                Route::post('submit','Admins\AdminInternationalRatesController@edit_rates_submit')->name('submit');
+            Route::prefix('update')->name('update.')->group(function () {
+                Route::get('list/{id}', 'Admins\AdminInternationalRatesController@standard_rates_list')->name('list');
+                Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
+                Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
             });
-
-            Route::prefix('view')->name('view.')->group(function () {
-                Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
-            });
         });
     });
+
 	Route::prefix('telenor')->name('telenor.')->group(function(){
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@arrival_index')->name('index');
@@ -2597,6 +2586,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
+        Route::post('upload_attachment', 'Admins\LeadManagementController@upload_attachment')->name('upload_attachment');
+        Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
     });
 
 	Route::prefix('retail')->name('retail.')->group(function(){

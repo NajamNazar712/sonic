@@ -262,6 +262,8 @@ class Permission
             'delivery.fake_status.log.list' => 262,
             'delivery.cash_collection.retail.index' => 423,
             'delivery.completed.retail.index' => 424,
+            'delivery.signature.index' => 441,
+            'delivery.signature.list' => 441,
 
 
             'return.index' => 44,
@@ -470,6 +472,7 @@ class Permission
             'reports.petty_cash_expense_summary.index' => 395,
             'reports.app_efficiency.index' => 401,
             'reports.confirmation_pending_report.index' => 430,
+            'reports.last_mile_app.index' => 437,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -829,11 +832,7 @@ class Permission
 //            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
-            'leads.view_remarks' => 416,
-            
-			'retail.accounts.index' => 428,
-            'retail.franchise.index' => 432,
-            'retail.trax_center.index' => 431,
+            'leads.view_remarks' => 416
         ],
 
         'shipper' => [
@@ -903,12 +902,16 @@ class Permission
             'reports.qsr.list' => 8,
             'reports.sales.index' => 8,
             'reports.sales.list' => 8,
-            'reports.confirmation_pending_report.index' => 13,
 
             'crm.request.index' => 10,
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
+
+
+            'retail.pending_cash_collection.index' => 423,
+            'retail.completed.index' => 424,
+			'retail.accounts.index' => 428,
         ]
     ];
 

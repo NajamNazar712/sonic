@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class LeadManagementController extends Controller
@@ -42,6 +43,14 @@ class LeadManagementController extends Controller
             $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
             $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
             $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
+            }
         }
 
         $ratio_leads = $leads['total'];
@@ -90,10 +99,15 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city');
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 'leads.sale_person_updated_at');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
+        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $leads = $leads->where('leads.sale_person_id', Auth::id());
+            }
         }
 
         if($origin = $request->get('search_origin')){
@@ -101,6 +115,24 @@ class LeadManagementController extends Controller
         }
         if($sale_person = $request->get('search_sale_person')){
             $leads->where('leads.sale_person_id', '=', $sale_person);
+        }
+        if($statistics = $request->get('search_statistics')){
+            if($statistics == 1){
+                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            }
+            elseif($statistics == 2){
+                $search_statuses = [5, 6, 7, 8];
+            }
+            elseif($statistics == 3){
+                $search_statuses = [9];
+            }
+            elseif($statistics == 4){
+                $search_statuses = [9];
+            }
+            else{
+                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            }
+            $leads->whereIn('leads.status_id', $search_statuses);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -133,7 +165,7 @@ class LeadManagementController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                if(session('role_id') == 1 || in_array(419, session('permissions')) || $lead->status_id != 12)
+                if((session('role_id') == 1 || in_array(419, session('permissions'))) && $lead->status_id != 12)
                 {
                     $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
                 }
@@ -145,8 +177,8 @@ class LeadManagementController extends Controller
                     $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
                 }
 
-                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
-                $dropdown .= '<button type="button"  class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
+//                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
                 return $dropdown;
             })->make(true);
@@ -178,6 +210,14 @@ class LeadManagementController extends Controller
             $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
             $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
             $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
+            }
         }
 
         $ratio_leads = $leads['total'];
@@ -273,7 +313,12 @@ class LeadManagementController extends Controller
                     $detail['reference_person'] = '-';
                 }
                 $detail['status'] = $log->status->name;
-                $detail['updated_by'] = $log->admin->name;
+                if($log->updated_by == 7){
+                    $detail['updated_by'] = 'Trax.pk';
+                }
+                else{
+                    $detail['updated_by'] = $log->admin->name;
+                }
                 $detail['updated_at'] = Carbon::parse($log->updated_at)->toDateTimeString();
 
                 $details[] = $detail;
@@ -334,12 +379,37 @@ class LeadManagementController extends Controller
                     $lead->reference_person_id = $reference_person;
                 }
                 $lead->updated_by = Auth::id();
+                $lead->sale_person_updated_at = Carbon::now();
                 $lead->save();
             }
+            NotificationsController::send(204, $leads, $sale_person);
             return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Lead(s) Does\'nt exist!']);
         }
     }
+    public function upload_attachment(Request $request){
+        if ($request->hasFile('upload_attachment')) {
+            $lead = Lead::find($request->lead_id);
+            $filename = 'lead_attachment_' . $lead->id . '.png';
+
+            $file = $request->file('upload_attachment');
+
+            Storage::disk('public')->putFileAs('leads\attachment', $file, $filename);
+
+            $lead->attachment = $filename;
+            $lead->save();
+            return redirect()->back()->with('success', 'Image Uploaded Successfully');
+        }
+        else{
+            return redirect()->back()->with('error', 'Incomplete Information!');
+        }
+    }
+    public function view_attachment($id){
+        $lead = Lead::find($id);
+        $file = $lead->attachment;
+    $url = Storage::url('leads/attachment/'. $file);
+    return view('admin.leads.attachment_view')->with(['url' => $url]);
+}
 }
