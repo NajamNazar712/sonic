@@ -524,7 +524,70 @@ class RegisterController extends Controller
                     <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
                 </div>';
         $body = $html;
-        $to = $newUser->email;
+        $to = array();
+        $to[] = $newUser->email;
+        $admins_sales = Admin::where('role_id', 4)->where('status', 1);
+        if ($admins_sales->exists()) {
+            $to = array_merge($to, $admins_sales->pluck('email')->toArray());
+        }
+
+        $north_rsm_id = 302;
+        $central_rsm_id = 407;
+        $south_rsm_id = 428;
+
+//        $north_rsm = Admin::find($north_rsm_id);
+//        $central_rsm = Admin::find($central_rsm_id);
+//        $south_rsm = Admin::find($south_rsm_id);
+
+        $city_id = $shipper->city_id;
+        $hub_id = City::find($city_id)->hub_id;
+
+        $north_admin_hubs = AdminHub::where('admin_id',$north_rsm_id);
+        $central_admin_hubs = AdminHub::where('admin_id',$central_rsm_id);
+        $south_admin_hubs = AdminHub::where('admin_id',$south_rsm_id);
+
+
+//        if($north_rsm->default_hub_id != null){
+//            if($north_rsm->default_hub_id == $hub_id){
+//                $rsm = Admin::where('id',$north_rsm_id);
+//                $to = array_merge($to, $rsm->pluck('email')->toArray());
+//            }
+//        }
+//        if($central_rsm->default_hub_id != null){
+//            if($central_rsm->default_hub_id == $hub_id){
+//                $rsm = Admin::where('id',$central_rsm_id);
+//                $to = array_merge($to, $rsm->pluck('email')->toArray());
+//            }
+//        }
+//        if($south_rsm->default_hub_id != null){
+//            if($south_rsm->default_hub_id == $hub_id){
+//                $rsm = Admin::where('id',$south_rsm_id);
+//                $to = array_merge($to, $rsm->pluck('email')->toArray());
+//            }
+//        }
+
+        if($north_admin_hubs->exists()){
+            $north_admin_hub_id = $north_admin_hubs->pluck('hub_id')->toArray();
+            if(in_array($hub_id,$north_admin_hub_id)){
+                $rsm = Admin::where('id',$north_rsm_id);
+                $to = array_merge($to, $rsm->pluck('email')->toArray());
+            }
+        }
+        if($central_admin_hubs->exists()){
+            $central_admin_hub_id = $central_admin_hubs->pluck('hub_id')->toArray();
+            if(in_array($hub_id,$central_admin_hub_id)){
+                $rsm = Admin::where('id',$central_rsm_id);
+                $to = array_merge($to, $rsm->pluck('email')->toArray());
+            }
+        }
+        if($south_admin_hubs->exists()){
+            $south_admin_hub_id = $south_admin_hubs->pluck('hub_id')->toArray();
+            if(in_array($hub_id,$south_admin_hub_id)){
+                $rsm = Admin::where('id',$south_rsm_id);
+                $to = array_merge($to, $rsm->pluck('email')->toArray());
+            }
+        }
+
         $mail = Mail::to($to);
 
         $mail->send(new Notifications($subject, $body, null));
