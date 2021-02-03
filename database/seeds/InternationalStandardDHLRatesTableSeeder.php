@@ -50,7 +50,5 @@ class InternationalStandardDHLRatesTableSeeder extends Seeder
 
         }
 
-
-
     }
 }
