@@ -873,7 +873,7 @@
                         method: 'POST',
                         data: {
                             'comment': comment,
-                            'crm_request_ids[]': selected_rows,
+                            'crm_request_ids': selected_rows,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
