@@ -1214,12 +1214,24 @@ class VisionSoftAPIController extends Controller
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('cities as c', 'c.id', '=', 's.consignee_city_id')
             ->join('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
-            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city', 'at.name as type')
+            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city', 'at.name as type', 's.id as shipment_id')
             ->whereDate('adjustment_logs.created_at', $date)
             ->get();
 
         if(count($adjustments) > 0){
             foreach ($adjustments as $adjustment) {
+                $status_date = '';
+
+                if ($adjustment->type == 1) {
+                    $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->where('shipper_status_id', 20)->where('verification', 1);
+
+                    if ($journey->exists()) {
+                        $journey = $journey->latest('id')->first();
+
+                        $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
+                    }
+                }
+
                 try{
                     $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
                     $response = $client->post('Adjustment', [
@@ -1233,7 +1245,8 @@ class VisionSoftAPIController extends Controller
                             'pin_account_id' => $adjustment->account_id,
                             'pin_adj_type' => $adjustment->type,
                             'pin_amount' => $adjustment->amount,
-                            'pin_destination' => $adjustment->city
+                            'pin_destination' => $adjustment->city,
+                            'pin_status_date' => $status_date
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
