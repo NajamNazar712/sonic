@@ -215,7 +215,7 @@ class VisionSoftAPIController extends Controller
     }
     //5
     static public function arrival_revenue(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
@@ -337,7 +337,7 @@ class VisionSoftAPIController extends Controller
     }
     //6
     static public function cod_payable(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
             ->join('shipments_journey as sj', function($join) use($date){
@@ -431,7 +431,7 @@ class VisionSoftAPIController extends Controller
     }
     //8
     static public function del_ret_revenue(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
@@ -733,7 +733,7 @@ class VisionSoftAPIController extends Controller
     }
     //10
     static public function cod_payment(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $payments = DonePaymentCalculation::join('done_payments as dp', 'dp.id', '=', 'done_payment_calculations.done_payment_id')
             ->join('users as u', 'u.id', '=', 'dp.user_id')
@@ -809,7 +809,7 @@ class VisionSoftAPIController extends Controller
     }
     //11
     static public function cod_payment_clear(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $payments_clear = VisionSoftCodPaymentClear::whereDate('vision_soft_cod_payment_clears.created_at', $date)->get();
         if(count($payments_clear) > 0){
@@ -905,7 +905,7 @@ class VisionSoftAPIController extends Controller
     }
     //13
     static public function bank_deposits(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $station_deposit_notes = StationDepositNote::whereDate('updated_at', $date)->where('status', '=', 2);
         if($station_deposit_notes->exists()){
@@ -1037,7 +1037,7 @@ class VisionSoftAPIController extends Controller
     }
     //14
     static public function daily_exp(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
         $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereNotNull('finance_approved_by')->whereDate('finance_approved_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
@@ -1122,7 +1122,7 @@ class VisionSoftAPIController extends Controller
     }
     //15
     static public function cod_receivable(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
             ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
@@ -1208,7 +1208,7 @@ class VisionSoftAPIController extends Controller
     }
     //16
     static public function adjustment(){
-        $date = Carbon::now()->subDays(3);
+        $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $adjustments = AdjustmentLog::join('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
