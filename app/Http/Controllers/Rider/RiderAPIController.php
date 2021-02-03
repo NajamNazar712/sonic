@@ -2790,7 +2790,7 @@ class RiderAPIController extends Controller {
 
     }
 
-    public function scan_pickup_summary(Request $request)
+    public function scan_shipment(Request $request)
     {
         $arrival_cut_off_time = '8';
         $rider_id = $request->rider_id;
