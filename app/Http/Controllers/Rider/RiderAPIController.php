@@ -2978,7 +2978,7 @@ class RiderAPIController extends Controller {
                 $pickup['address'] = $pickup_address->pickup_address;
                 $pickup['location_latitude'] = $pickup_address->location_latitude;
                 $pickup['location_longitude'] = $pickup_address->location_longitude;
-                return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'shipment_detail' => $pickup]);
+                return response()->json(['status' => 0, 'shipment_detail' => $pickup]);
             }
         }
         else{
