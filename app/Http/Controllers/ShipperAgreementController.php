@@ -702,7 +702,8 @@ otherwise it will be rejected</li>
 
                     $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
                     <tr><td><strong>International Rate(s)</strong></td></tr></thead></table>';
-
+                    $user_margin = 0;
+                    $user_margin = (float)$international_rate_status->margin;
                     $fuel_charges = 0;
                     $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
                     if($fuel_surcharge->exists()){
@@ -742,17 +743,17 @@ otherwise it will be rejected</li>
                         $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th></tr></thead><tbody>';
 
                         foreach ($intl_weight_charges as $weight_charge) {
-                            $zone_1_charges = self::calculate_charges($weight_charge->zone_1, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_2_charges = self::calculate_charges($weight_charge->zone_2, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_3_charges = self::calculate_charges($weight_charge->zone_3, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_4_charges = self::calculate_charges($weight_charge->zone_4, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_5_charges = self::calculate_charges($weight_charge->zone_5, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_6_charges = self::calculate_charges($weight_charge->zone_6, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_7_charges = self::calculate_charges($weight_charge->zone_7, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_8_charges = self::calculate_charges($weight_charge->zone_8, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_9_charges = self::calculate_charges($weight_charge->zone_9, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_10_charges = self::calculate_charges($weight_charge->zone_10, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
-                            $zone_11_charges = self::calculate_charges($weight_charge->zone_11, $fuel_surcharge_flat, $exchange_rate_charges, $exchange_rate_charges, $gst_flat);
+                            $zone_1_charges = self::international_charges_calculate($weight_charge->zone_1, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_2_charges = self::international_charges_calculate($weight_charge->zone_2, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_3_charges = self::international_charges_calculate($weight_charge->zone_3, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_4_charges = self::international_charges_calculate($weight_charge->zone_4, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_5_charges = self::international_charges_calculate($weight_charge->zone_5, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_6_charges = self::international_charges_calculate($weight_charge->zone_6, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_7_charges = self::international_charges_calculate($weight_charge->zone_7, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_8_charges = self::international_charges_calculate($weight_charge->zone_8, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_9_charges = self::international_charges_calculate($weight_charge->zone_9, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_10_charges = self::international_charges_calculate($weight_charge->zone_10, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
+                            $zone_11_charges = self::international_charges_calculate($weight_charge->zone_11, $fuel_surcharge_flat, $exchange_rate_charges, $user_margin, $gst_flat);
 
                             $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $zone_1_charges . '</td><td>' . $zone_2_charges . '</td><td>' . $zone_3_charges . '</td><td>' . $zone_4_charges . '</td><td>' . $zone_5_charges . '</td><td>' . $zone_6_charges . '</td><td>' . $zone_7_charges . '</td><td>' . $zone_8_charges . '</td><td>' . $zone_9_charges . '</td><td>' . $zone_10_charges . '</td><td>' . $zone_11_charges . '</td></tr>';
                         }
@@ -828,12 +829,14 @@ otherwise it will be rejected</li>
         return $html;
     }
 
-    static public function calculate_charges($zone_charge, $fsc, $er, $margin, $gst){
+    static public function international_charges_calculate($zone_charge, $fsc, $er, $margin, $gst){
+        $zone_charge = (float)$zone_charge;
         $overall_charges = 0;
-        $overall_charges = ($zone_charge * $fsc) + $zone_charge;
+        $overall_charges = $zone_charge * $fsc;
+        $overall_charges = $overall_charges + $zone_charge;
         $margin_charges = ((100 + $margin) / 100) * $overall_charges;
-        $charges_wo_gst = $margin_charges ;
-        $charges_w_gst = ($charges_wo_gst * $gst) + $charges_wo_gst;
+        $charges_w_gst = ($margin_charges * $gst);
+        $charges_w_gst = $charges_w_gst + $margin_charges;
         $final_charges = $charges_w_gst * $er;
         return round($final_charges, 2);
 
