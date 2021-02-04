@@ -1346,6 +1346,13 @@
                                 </ul>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(438, session('permissions')))
+                            <li class=" nav-item"><a href="#"><span class="menu-title">International</span></a>
+                                <ul class="menu-content">
+                                    <li class=" nav-item"><a href="{{route('admin.settings.international_rates.index')}}"><span class="menu-title">Rate Setting</span></a> </li>
+                                </ul>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
