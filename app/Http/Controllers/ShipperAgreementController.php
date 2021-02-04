@@ -835,7 +835,7 @@ otherwise it will be rejected</li>
         $charges_wo_gst = $overall_charges + $margin_charges;
         $charges_w_gst = ($charges_wo_gst * $gst) + $charges_wo_gst;
         $final_charges = $charges_w_gst * $er;
-        return $final_charges;
+        return round($final_charges, 2);
 
     }
 
