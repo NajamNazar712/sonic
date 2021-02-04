@@ -2811,7 +2811,28 @@ class RiderAPIController extends Controller {
             $pickup_note_requests = $pickup_requests->pickup_note_request;
             $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_requests->pickup_request_id)->where('attempt_date', '>', $today);
 
-            if (!$pickup_note_requests) {
+            if ($pickup_note_requests) {
+                $pickup_note = V2PickupNote::where('rider_id', $rider_id)
+                    ->where('status', 0);
+                if($pickup_note -> exists()){
+                    $pickup_note = $pickup_note->latest('id')->first();
+                    $pickup_note->pickups = $pickup_note->pickups + 1;
+                    $pickup_note->save();
+
+                    $pickup_note_requests->pickup_note_id = $pickup_note->id;
+                    $pickup_note_requests->save();
+                }
+                else{
+                    $pickup_note = new V2PickupNote();
+                    $pickup_note->rider_id = $rider_id;
+                    $pickup_note->pickups = 1;
+                    $pickup_note->save();
+
+                    $pickup_note_requests->pickup_note_id = $pickup_note->id;
+                    $pickup_note_requests->save();
+                }
+
+            } else {
                 $pickup_note = V2PickupNote::where('rider_id', $rider_id)
                     ->where('status', 0);
                 if ($pickup_note->exists()) {
@@ -2836,29 +2857,14 @@ class RiderAPIController extends Controller {
                     $pickup_note_request->pickup_request_id = $pickup_requests->pickup_request_id;
                     $pickup_note_request->save();
                 }
-
-            } else {
-                $pickup_note = V2PickupNote::where('rider_id', $rider_id)
-                    ->where('status', 0);
-                if($pickup_note -> exists()){
-                    $pickup_note = $pickup_note->latest('id')->first();
-                    $pickup_note->pickups = $pickup_note->pickups + 1;
-                    $pickup_note->save();
-                }
-                if (!$pickup_note->exists()) {
-                    $pickup_note = new V2PickupNote();
-                    $pickup_note->rider_id = $rider_id;
-                    $pickup_note->pickups = 1;
-                    $pickup_note->save();
-                }
-
-                $pickup_note_requests->pickup_note_id = $pickup_note->id;
-                $pickup_note_requests->save();
-
             }
             $pickup_requests_update = V2PickupRequest::find($pickup_requests->pickup_request_id);
+            $pickup_requests_update->current_rider_id = $rider_id;
+            $pickup_requests_update->save();
+           /* $pickup_note = V2PickupNote::where('rider_id', $pickup_requests_update->current_rider_id)
+                ->where('status', 0);*/
 
-            if (!$existing_pickup_request_attempt->exists()) {
+            /*if (!$existing_pickup_request_attempt->exists()) {
                 $pickup_requests_update->rider_status = 2;
                 $pickup_requests_update->attempts = $pickup_requests_update->attempts + 1;
                 $pickup_requests_update->current_rider_id = $rider_id;
@@ -2902,7 +2908,7 @@ class RiderAPIController extends Controller {
                     }
 
                 }
-            }
+            }*/
             $information = array();
             $information['pickup_note_id'] = $pickup_note->id;
             $rider = Rider::find($rider_id);
