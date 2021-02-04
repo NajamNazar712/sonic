@@ -56,12 +56,12 @@ class ShipperReportsController extends Controller
                 ->leftJoin('pending_payment_shipments as pps', function ($join) use($connection) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
                         ->where('pps.id','=',
-                            DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
                 })
                 ->leftJoin('done_payment_shipments as dps', function ($join) use($connection) {
                     $join->on('dps.shipment_id', '=', 'shipments.id')
                         ->where('dps.id','=',
-                            DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
                 })
                 ->leftjoin('shipment_items as si', function ($join) use($connection) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
@@ -72,11 +72,11 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipments_journey as dr', function ($join) use($connection) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
                         ->where('dr.id', '=',
-                            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37)  and shipments_journey.verification = 1)'));
+                            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37) and shipments_journey.verification = 1)'));
                 })
                 ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
                 ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id')
-                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5')
+                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
                 if(session('user_type') == 2){
@@ -106,7 +106,7 @@ class ShipperReportsController extends Controller
                     return number_format($shipment->weight_charges, 2);
                 })
                 ->editColumn('cash_handling_charges', function($shipment){
-                    if($shipment->current_status == 20 || $shipment->current_status == 21 || $shipment->current_status == 22 || $shipment->current_status == 23 || $shipment->current_status == 23 || $shipment->current_status == 25){
+                    if ($shipment->dr_status_id == 20) {
                         return "-";
                     }
                     else{
