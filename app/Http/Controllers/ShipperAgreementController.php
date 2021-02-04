@@ -832,7 +832,7 @@ otherwise it will be rejected</li>
         $overall_charges = 0;
         $overall_charges = ($zone_charge * $fsc) + $zone_charge;
         $margin_charges = ((100 + $margin) / 100) * $overall_charges;
-        $charges_wo_gst = $overall_charges + $margin_charges;
+        $charges_wo_gst = $margin_charges ;
         $charges_w_gst = ($charges_wo_gst * $gst) + $charges_wo_gst;
         $final_charges = $charges_w_gst * $er;
         return round($final_charges, 2);
