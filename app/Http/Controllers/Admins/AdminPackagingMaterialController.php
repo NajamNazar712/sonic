@@ -467,53 +467,65 @@ class AdminPackagingMaterialController extends Controller
         $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
 
         if($request_details != null){
+            if($request_details->shipment_id == null){
 
-            $total_charges = $request_details->amount;
+                $total_charges = $request_details->amount;
 
-            $city_id = $request_details->city_id;
-            $city_hub = City::where('id', $city_id)->first();
-            $hub_id = $city_hub->hub_id;
+                $city_id = $request_details->city_id;
+                $city_hub = City::where('id', $city_id)->first();
+                $hub_id = $city_hub->hub_id;
 
-            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
+                $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
 
-            if (!$fulfilment_hub->exists()) {
-                return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
-            } else {
-                $fulfilment_hub = $fulfilment_hub->latest('id')->first();
-            }
+                if (!$fulfilment_hub->exists()) {
+                    return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
+                } else {
+                    $fulfilment_hub = $fulfilment_hub->latest('id')->first();
+                }
 
-            $warehouse_id = $fulfilment_hub->warehouse_id;
+                $warehouse_id = $fulfilment_hub->warehouse_id;
 
-            $warehouse = Warehouse::where('id', $warehouse_id)->first();
+                $warehouse = Warehouse::where('id', $warehouse_id)->first();
 
-            $warehouse_hub_id = $warehouse->hub_id;
+                $warehouse_hub_id = $warehouse->hub_id;
 
-            $user_id = $request_details->user_id;
+                $user_id = $request_details->user_id;
 
-            $setting = GlobalSettings::where('type', 'packaging_material')->first();
-            $wms_user_id = $setting->setting_value;
-            $user_shipping_info = UserShippingInfo::where(['user_id' => $wms_user_id, 'city_id' => $warehouse_hub_id]);
+                $setting = GlobalSettings::where('type', 'packaging_material')->first();
+                $wms_user_id = $setting->setting_value;
+                $user_shipping_info = UserShippingInfo::where(['user_id' => $wms_user_id, 'city_id' => $warehouse_hub_id]);
 
-            if($user_shipping_info->exists()){
-                $trax_address = $user_shipping_info->latest('id')->first();
-            }
-            else{
-                return response()->json(['status' => 0, 'error'=>'Marco Warehouse does\'nt exists for requested hub!']);
-            }
-//            return response()->json(['status' => 0, 'error'=>$trax_address->id]);
+                if($user_shipping_info->exists()){
+                    $trax_address = $user_shipping_info->latest('id')->first();
+                }
+                else{
+                    return response()->json(['status' => 0, 'error'=>'Marco Warehouse does\'nt exists for requested hub!']);
+                }
+    //            return response()->json(['status' => 0, 'error'=>$trax_address->id]);
 
-            $product_ids = array();
-            $invalid_product_ids = array();
-            $total_quantity = 0;
-            $invalid_products = '';
-            foreach ($request_details->items as $item){
-                $product_ids[] = $item->wms_product_id;
-                $total_quantity = $total_quantity + $item->quantity;
+                $product_ids = array();
+                $invalid_product_ids = array();
+                $total_quantity = 0;
+                $invalid_products = '';
+                foreach ($request_details->items as $item){
+                    $product_ids[] = $item->wms_product_id;
+                    $total_quantity = $total_quantity + $item->quantity;
 
-                $check_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id);
-                if($check_current_stock->exists()){
-                    $check_current_stock = $check_current_stock->first();
-                    if($check_current_stock->stock < $item->quantity){
+                    $check_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id);
+                    if($check_current_stock->exists()){
+                        $check_current_stock = $check_current_stock->first();
+                        if($check_current_stock->stock < $item->quantity){
+                            $product = WmsProduct::find($item->wms_product_id);
+                            $invalid_product_ids[] = $item->wms_product_id;
+                            if($invalid_products == ''){
+                                $invalid_products = $product->name;
+                            }
+                            else{
+                                $invalid_products = $invalid_products. ' ' .$product->name;
+                            }
+                        }
+                    }
+                    else{
                         $product = WmsProduct::find($item->wms_product_id);
                         $invalid_product_ids[] = $item->wms_product_id;
                         if($invalid_products == ''){
@@ -524,128 +536,121 @@ class AdminPackagingMaterialController extends Controller
                         }
                     }
                 }
+
+                if(count($invalid_product_ids) > 0){
+                    return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
+                }
+
+                $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
+                $shipment_consignee_name = "Packaging Material to $shipper_details->name";
+
+                if($request_details->packaging_payment_mode_id == 1) {
+                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, null, 1, 1, null, $total_charges, 1, 1, 1);
+                }
                 else{
+                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, null, 1, 1, null, 0, 1, 1, 1, $total_charges);
+                }
+
+                $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request_details->city_id);
+
+
+                $details = '';
+                $serial = 1;
+                foreach ($request_details->items as $item){
                     $product = WmsProduct::find($item->wms_product_id);
-                    $invalid_product_ids[] = $item->wms_product_id;
-                    if($invalid_products == ''){
-                        $invalid_products = $product->name;
+                    if($details == ''){
+                        $details = $serial . '.) ' . $product->name . '-' . $item->quantity . '</br>';
                     }
                     else{
-                        $invalid_products = $invalid_products. ' ' .$product->name;
+                        $details .= ', '.$serial . '.) ' . $product->name . '-' . $item->quantity . '</br>';
                     }
+                        $shipment_product = new WmsShipmentProduct();
+                        $shipment_product->shipment_id = $shipment->id;
+                        $shipment_product->product_id = $product->id;
+                        $shipment_product->quantity = $item->quantity;
+                        $shipment_product->courier_id = 1;
+                        $shipment_product->save();
+
+                        $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
+                        if($existing_pending_picking){
+                            $new_quantity = $existing_pending_picking->quantity + $item->quantity;
+                            $existing_pending_picking->quantity = $new_quantity;
+                            $existing_pending_picking->save();
+
+                            $pending_picking_shipment = new WmsPendingPickingShipments();
+                            $pending_picking_shipment->picking_id = $existing_pending_picking->id;
+                            $pending_picking_shipment->shipment_id = $shipment->id;
+                            $pending_picking_shipment->courier_id = 1;
+                            $pending_picking_shipment->save();
+                        }
+                        else{
+                            $pending_picking = new WmsPendingPicking();
+                            $pending_picking->product_id = $product->id;
+                            $pending_picking->quantity = $item->quantity;
+                            $pending_picking->save();
+
+                            $pending_picking_shipment = new WmsPendingPickingShipments();
+                            $pending_picking_shipment->picking_id = $pending_picking->id;
+                            $pending_picking_shipment->shipment_id = $shipment->id;
+                            $pending_picking_shipment->courier_id = 1;
+                            $pending_picking_shipment->save();
+                        }
+                        $serial++;
+                        $current_stock = WmsCurrentStock::where('product_id', $product->id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id)->first();
+                        $new_available_stock = $current_stock->stock - $item->quantity;
+                        $current_stock->stock = $new_available_stock;
+                        $current_stock->save();
+
+
+                    $serial++;
                 }
-            }
 
-            if(count($invalid_product_ids) > 0){
-                return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
-            }
+                $shipment_item = new ShipmentItem();
+                $shipment_item->shipment_id = $shipment->id;
+                $shipment_item->product_type_id = 24;
+                $shipment_item->description = $details;
+                $shipment_item->quantity = 1;
+                $shipment_item->price = null;
+                $shipment_item->insurance = null;
+                $shipment_item->type = 0;
+                $shipment_item->save();
 
-            $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
-            $shipment_consignee_name = "Packaging Material to $shipper_details->name";
+                $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
+                $order_process = new WmsOrderProcess();
+                $order_process->shipment_id = $shipment->id;
+                $order_process->sku_count = count($product_ids);
+                $order_process->courier_id = 1;
+                $order_process->quantity = $total_quantity;
+                $order_process->packing_charges = 0;
+                if($labeling_charges){
+                    $order_process->labelling_charges = $labeling_charges->charges;
+                }
+                $order_process->save();
 
-            if($request_details->packaging_payment_mode_id == 1) {
-                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, null, 1, 1, null, $total_charges, 1, 1, 1);
+                PackagingMaterialRequest::where('id', $request_details->id)->update([
+                    'tracking_number' => $new_tracking_number,
+                    'shipment_id' => $shipment->id
+                ]);
+
+
+                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
+
+                ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $total_charges);
+
+                $request_details->status_id = 2;
+                $request_details->save();
+
+                $packaging_request_history = new PackagingMaterialRequestHistory();
+                $packaging_request_history->packaging_material_request_id = $request_id;
+                $packaging_request_history->status = 2;
+                $packaging_request_history->updated_by = Auth::id();
+                $packaging_request_history->save();
+
+                return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been confirmed successfully!"]);
             }
             else{
-                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, null, 1, 1, null, 0, 1, 1, 1, $total_charges);
+                return response()->json(['status' => 0, 'error'=>"Packaging Material Request already marked as confirmed!"]);
             }
-
-            $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request_details->city_id);
-
-
-            $details = '';
-            $serial = 1;
-            foreach ($request_details->items as $item){
-                $product = WmsProduct::find($item->wms_product_id);
-                if($details == ''){
-                    $details = $serial . '.) ' . $product->name . '-' . $item->quantity . '</br>';
-                }
-                else{
-                    $details .= ', '.$serial . '.) ' . $product->name . '-' . $item->quantity . '</br>';
-                }
-                    $shipment_product = new WmsShipmentProduct();
-                    $shipment_product->shipment_id = $shipment->id;
-                    $shipment_product->product_id = $product->id;
-                    $shipment_product->quantity = $item->quantity;
-                    $shipment_product->courier_id = 1;
-                    $shipment_product->save();
-
-                    $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
-                    if($existing_pending_picking){
-                        $new_quantity = $existing_pending_picking->quantity + $item->quantity;
-                        $existing_pending_picking->quantity = $new_quantity;
-                        $existing_pending_picking->save();
-
-                        $pending_picking_shipment = new WmsPendingPickingShipments();
-                        $pending_picking_shipment->picking_id = $existing_pending_picking->id;
-                        $pending_picking_shipment->shipment_id = $shipment->id;
-                        $pending_picking_shipment->courier_id = 1;
-                        $pending_picking_shipment->save();
-                    }
-                    else{
-                        $pending_picking = new WmsPendingPicking();
-                        $pending_picking->product_id = $product->id;
-                        $pending_picking->quantity = $item->quantity;
-                        $pending_picking->save();
-
-                        $pending_picking_shipment = new WmsPendingPickingShipments();
-                        $pending_picking_shipment->picking_id = $pending_picking->id;
-                        $pending_picking_shipment->shipment_id = $shipment->id;
-                        $pending_picking_shipment->courier_id = 1;
-                        $pending_picking_shipment->save();
-                    }
-                    $serial++;
-                    $current_stock = WmsCurrentStock::where('product_id', $product->id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id)->first();
-                    $new_available_stock = $current_stock->stock - $item->quantity;
-                    $current_stock->stock = $new_available_stock;
-                    $current_stock->save();
-
-
-                $serial++;
-            }
-            
-            $shipment_item = new ShipmentItem();
-            $shipment_item->shipment_id = $shipment->id;
-            $shipment_item->product_type_id = 24;
-            $shipment_item->description = $details;
-            $shipment_item->quantity = 1;
-            $shipment_item->price = null;
-            $shipment_item->insurance = null;
-            $shipment_item->type = 0;
-            $shipment_item->save();
-
-            $labeling_charges = WmsLabellingCharge::where('user_id', $user_id)->first();
-            $order_process = new WmsOrderProcess();
-            $order_process->shipment_id = $shipment->id;
-            $order_process->sku_count = count($product_ids);
-            $order_process->courier_id = 1;
-            $order_process->quantity = $total_quantity;
-            $order_process->packing_charges = 0;
-            if($labeling_charges){
-                $order_process->labelling_charges = $labeling_charges->charges;
-            }
-            $order_process->save();
-
-            PackagingMaterialRequest::where('id', $request_details->id)->update([
-                'tracking_number' => $new_tracking_number,
-                'shipment_id' => $shipment->id
-            ]);
-
-
-            ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
-
-            ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $total_charges);
-
-            $request_details->status_id = 2;
-            $request_details->save();
-
-            $packaging_request_history = new PackagingMaterialRequestHistory();
-            $packaging_request_history->packaging_material_request_id = $request_id;
-            $packaging_request_history->status = 2;
-            $packaging_request_history->updated_by = Auth::id();
-            $packaging_request_history->save();
-
-            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been confirmed successfully!"]);
         }
         else{
             return response()->json(['status' => 0, 'error'=>"Packaging Material Request does\'nt exists!"]);
