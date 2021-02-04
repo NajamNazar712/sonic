@@ -405,6 +405,7 @@ class V2AdminPickupsController extends Controller
 
             foreach ($allowed_pickup_requests as $pickup_request_id) {
                 if(!V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('pickup_request_id', $pickup_request_id)->exists()){
+                    V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->where('status', 0)->delete();
                     $pickup_note_request = new V2PickupNoteRequest();
 
                     $pickup_note_request->pickup_note_id = $pickup_note_id;
