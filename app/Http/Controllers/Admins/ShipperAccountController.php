@@ -25,10 +25,9 @@ class ShipperAccountController extends Controller
             $active_users = User::where('status', 3)->where('created_at', '<', $date)->pluck('id')->toArray();
 
             if(count($active_users) > 0){
-//                $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
-//                $result = array_diff($active_users,$shipments);
-                $result = array(165,169);
-
+                $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
+                $result = array_diff($active_users,$shipments);
+               // $result = array(165,169);
 
                 if (count($result) > 0)
                 {

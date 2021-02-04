@@ -65,6 +65,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
+use App\Http\Models\Admin\AdminHub;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -4263,22 +4264,9 @@ class NotificationsController extends Controller
                     $shipper = User::find($reference_1_id);
                     $shipments = Shipment::where('user_id', $shipper->id);
                     $complain_date = CrmRequest::where('shipper_id',$shipper->id)->whereIn('status_id',[1,2]);
-                    $resolution_date = CrmRequest::where('shipper_id',$shipper->id)->where('status_id',3);
+                    $resolution_date = CrmRequest::where('shipper_id',$shipper->id)->whereIn('status_id',[3,4]);
                     if ($shipper) {
-//                        if (strpos($subject, '[account_id]') !== FALSE) {
-//                            $subject = str_replace('[account_id]', $shipper->id, $subject);
-//                        }
 //
-//                        if (strpos($body, '[account_id]') !== FALSE) {
-//                            $body = str_replace('[account_id]', $shipper->id, $body);
-//                        }
-//                        if (strpos($subject, '[shipper_name]') !== FALSE) {
-//                            $subject = str_replace('[shipper_name]', $shipper->name, $subject);
-//                        }
-//
-//                        if (strpos($body, '[shipper_name]') !== FALSE) {
-//                            $body = str_replace('[shipper_name]', $shipper->name, $body);
-//                        }
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account ID</th>
@@ -4322,7 +4310,7 @@ class NotificationsController extends Controller
                         }
                         if($resolution_date->exists()){
                             $crm = $complain_date->latest()->first();
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm->updated_at. '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm->created_at. '</td>';
                         }
                         else{
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
@@ -4331,7 +4319,6 @@ class NotificationsController extends Controller
                         $html .= '</tr>';
                         $html .= '</tbody></table>';
 
-
                         if (strpos($body, '[preview]') !== FALSE) {
                             $body = str_replace('[preview]', $html, $body);
                         }
@@ -4339,6 +4326,9 @@ class NotificationsController extends Controller
                         $to = array();
                         $cc = array();
                         $sale_person_email = '';
+                        $north_rsm_id = 302;
+                        $central_rsm_id = 407;
+                        $south_rsm_id = 428;
                         $sale_person_id = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->select('admin_id')->first();
                         if ($sale_person_id) {
                             $sale_person_email = Admin::find($sale_person_id->admin_id)->email;
@@ -4354,6 +4344,35 @@ class NotificationsController extends Controller
                         }
 
                         $to[] = $shipper->email;
+
+                        $city_id = $shipper->city_id;
+                        $hub_id = City::find($city_id)->hub_id;
+
+                        $north_admin_hubs = AdminHub::where('admin_id',$north_rsm_id);
+                        $central_admin_hubs = AdminHub::where('admin_id',$central_rsm_id);
+                        $south_admin_hubs = AdminHub::where('admin_id',$south_rsm_id);
+
+                        if($north_admin_hubs->exists()){
+                            $north_admin_hub_id = $north_admin_hubs->pluck('hub_id')->toArray();
+                            if(in_array($hub_id,$north_admin_hub_id)){
+                                $rsm = Admin::where('id',$north_rsm_id);
+                                $to = array_merge($to, $rsm->pluck('email')->toArray());
+                            }
+                        }
+                        if($central_admin_hubs->exists()){
+                            $central_admin_hub_id = $central_admin_hubs->pluck('hub_id')->toArray();
+                            if(in_array($hub_id,$central_admin_hub_id)){
+                                $rsm = Admin::where('id',$central_rsm_id);
+                                $to = array_merge($to, $rsm->pluck('email')->toArray());
+                            }
+                        }
+                        if($south_admin_hubs->exists()){
+                            $south_admin_hub_id = $south_admin_hubs->pluck('hub_id')->toArray();
+                            if(in_array($hub_id,$south_admin_hub_id)){
+                                $rsm = Admin::where('id',$south_rsm_id);
+                                $to = array_merge($to, $rsm->pluck('email')->toArray());
+                            }
+                        }
 
                         self::email($subject, $body, $to, $cc);
                     }
