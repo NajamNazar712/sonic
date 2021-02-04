@@ -340,9 +340,9 @@ class VisionSoftAPIController extends Controller
         $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
-            ->join('shipments_journey as sj', function($join) {
+            ->join('shipments_journey as sj', function($join) use ($date) {
                 $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1)'));
+                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and date(shipments_journey.created_at) = "' . $date . '")'));
             })
             ->select('users.id as account_id', 'users.name as account_name', DB::raw('(select sum(s.amount)) as amount'))
             ->whereDate('sj.created_at', $date)
@@ -434,9 +434,9 @@ class VisionSoftAPIController extends Controller
         $today = Carbon::now()->subDays(3);
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('shipments_journey as sj', function($join) {
+            ->join('shipments_journey as sj', function($join) use ($date) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1)'));
+                    ->where('sj.id', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and date(shipments_journey.created_at) = "' . $date . '")'));
             })
             ->leftJoin('pending_payment_shipments as pps', function ($join) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
@@ -1126,9 +1126,9 @@ class VisionSoftAPIController extends Controller
         $today = Carbon::now()->subDays(3);
         $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
             ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
-            ->join('shipments_journey as sj', function($join) use($date){
+            ->join('shipments_journey as sj', function($join) use($date) {
                 $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1)'));
+                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and date(shipments_journey.created_at) = "' . $date . '")'));
             })
             ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
             ->whereDate('sj.created_at', $date)

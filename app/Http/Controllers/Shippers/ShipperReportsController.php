@@ -69,14 +69,31 @@ class ShipperReportsController extends Controller
                             DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
-                ->leftJoin('shipments_journey as dr', function ($join) use($connection) {
+                ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
+                ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
+
+
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+
+            $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+            });
+
+            $sales->whereBetween('dr.created_at', [$from, $to]);
+        }
+        else {
+            $sales->leftJoin('shipments_journey as dr', function ($join) use($connection) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
                         ->where('dr.id', '=',
                             DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37) and shipments_journey.verification = 1)'));
-                })
-                ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
-                ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id')
-                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id')
+                });
+        }
+
+        $sales->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
                 if(session('user_type') == 2){
@@ -151,11 +168,7 @@ class ShipperReportsController extends Controller
                 $datatable->whereBetween('sj.created_at', [$from,$to]);
             }
 
-            if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
-                $from = $request->get('dr_search_date_from');
-                $to = $request->get('dr_search_date_to');
-                $datatable->whereBetween('dr.created_at', [$from, $to]);
-            }
+
             return $datatable->make(true);
     }
     public function summary_data(Request $request){
