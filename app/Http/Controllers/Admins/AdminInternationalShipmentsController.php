@@ -56,6 +56,7 @@ class AdminInternationalShipmentsController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid / not ready for update.',
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function($query){
