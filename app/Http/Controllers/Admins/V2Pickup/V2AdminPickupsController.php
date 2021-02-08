@@ -852,9 +852,9 @@ class V2AdminPickupsController extends Controller
                             ShipmentChargesController::walkin_weight($shipment_id);
                         }else{
                             ShipmentChargesController::weight($shipment_id);
-                            ShipmentChargesController::cash_handling($shipment_id);
-                            ShipmentChargesController::insurance($shipment_id);
                             if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
                             }
                             else{
@@ -1427,9 +1427,9 @@ class V2AdminPickupsController extends Controller
                             ShipmentChargesController::walkin_weight($shipment_id);
                         }else{
                             ShipmentChargesController::weight($shipment_id);
-                            ShipmentChargesController::cash_handling($shipment_id);
-                            ShipmentChargesController::insurance($shipment_id);
                             if($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
                             }
                             else{
