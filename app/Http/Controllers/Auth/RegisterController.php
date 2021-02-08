@@ -21,6 +21,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
+use App\Territory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -630,6 +631,12 @@ class RegisterController extends Controller
                 return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
             }
         }
+    }
+
+    public function territory(Request $request){
+        $city_id = $request->id;
+        $territory = Territory::where('city_id',$city_id);
+
     }
 
 }

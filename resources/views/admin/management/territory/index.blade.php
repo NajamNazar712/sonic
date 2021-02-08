@@ -18,11 +18,13 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Territory</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -96,72 +98,73 @@
                         window.location = '{{ route('admin.management.territory.add') }}';
                     }
 
-                },{
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'select_all',
-                    action : function(e) {
-                        e.preventDefault();
-
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.select();
-
-                                id = parseInt(row.id());
-
-                                var index = $.inArray(id, selected_rows);
-
-                                if (index === -1) {
-                                    selected_rows.push(id);
-                                }
-
-                                table.button('.pickup').enable();
-                            }
-                        });
-                    }
-                }, {
-                    extend: 'selectNone',
-                    text: 'Select None',
-                    className: 'select_none',
-                    action : function(e) {
-                        e.preventDefault();
-
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.deselect();
-
-                                id = parseInt(row.id());
-
-                                var index = $.inArray(id, selected_rows);
-
-                                if (index !== -1) {
-                                    selected_rows.splice(index, 1);
-                                }
-
-                                if (selected_rows.length == 0) {
-                                    table.button('.pickup').disable();
-                                }
-                            }
-                        });
-                    }
-                },
+                 },
+                    // {
+                //     extend: 'selectAll',
+                //     text: 'Select All',
+                //     className: 'select_all',
+                //     action : function(e) {
+                //         e.preventDefault();
+                //
+                //         table.rows().nodes().each(function(index) {
+                //             var row = table.row(index);
+                //
+                //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                //                 row.select();
+                //
+                //                 id = parseInt(row.id());
+                //
+                //                 var index = $.inArray(id, selected_rows);
+                //
+                //                 if (index === -1) {
+                //                     selected_rows.push(id);
+                //                 }
+                //
+                //                 table.button('.pickup').enable();
+                //             }
+                //         });
+                //     }
+                // }, {
+                //     extend: 'selectNone',
+                //     text: 'Select None',
+                //     className: 'select_none',
+                //     action : function(e) {
+                //         e.preventDefault();
+                //
+                //         table.rows().nodes().each(function(index) {
+                //             var row = table.row(index);
+                //
+                //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                //                 row.deselect();
+                //
+                //                 id = parseInt(row.id());
+                //
+                //                 var index = $.inArray(id, selected_rows);
+                //
+                //                 if (index !== -1) {
+                //                     selected_rows.splice(index, 1);
+                //                 }
+                //
+                //                 if (selected_rows.length == 0) {
+                //                     table.button('.pickup').disable();
+                //                 }
+                //             }
+                //         });
+                //     }
+                // },
                     {
                         extend: 'excel',
                         title: 'Territory List',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
-                scrollX: true, scrollY: '500px',
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
+                scrollX: false, scrollY: '500px',
+                // select: {
+                //     info: false,
+                //     style: 'multi',
+                //     selector: 'td.select-checkbox',
+                //     className: 'selected bg-primary bg-lighten-5 primary'
+                // },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -172,20 +175,22 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.territory.list') }}',
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[5, 'asc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'area', name: 'territories.area', class: 'align-middle area'},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
+                    {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
+                    {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
 
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
 
                 },
@@ -224,76 +229,6 @@
                     var link = '{{ route('admin.management.territory.edit', ["id" => 0]) }}';
 
                     window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-                }
-
-            });
-
-
-
-            var hub_ids = [];
-            $("#saletag").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Sales Person",
-                width:'100%',
-                dropdownParent:$('#SalesTagModal')
-            });
-
-            $("#saletag1").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Sales Person",
-                width:'100%',
-                dropdownParent:$('#SalesTagModal1')
-            });
-
-            $("#poc").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select POC",
-                width:'100%',
-                dropdownParent:$('#SalesTierTypeTagModal')
-            });
-            $("#kam").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select KAM",
-                width:'100%',
-                dropdownParent:$('#SalesTierTypeTagModal')
-            });
-            $("#ref").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select REFFERAL",
-                width:'100%',
-                dropdownParent:$('#SalesTierTypeTagModal')
-            });
-
-
-            $('#SalesTagModal').on('shown.bs.modal',function (e) {
-                var $invoker = $(e.relatedTarget);
-                var shipper_id = $invoker.data('target-id');
-                $('#shipper_id').val(shipper_id);
-            });
-            $('#salesTagSubmit').on('click',function () {
-                var shipper = $('#shipper_id').val();
-                var tag = parseInt($('#saletag').val());
-                if(tag){
-                    $.ajax({
-                        url: '{!! route('admin.accounts.tag.submit') !!}',
-                        method: 'POST',
-                        data: {
-                            'admin_id': tag,
-                            'shipper_id':shipper,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if(data.status){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                            }
-                            $('#saletag').val('').trigger('change');
-                            $('#SalesTagModal').modal('hide');
-                            table.draw(true);
-                        });
-                }else{
-                    var error = "Sales Person Not Selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
             });

@@ -300,6 +300,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="territory">Territory:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="territory" id="territory" class="select2 form-control required" style="width: 100%"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -850,6 +860,35 @@
                             @if($lead->sale_person_id != null)
                                 $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
                             @endif
+                        @endif
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+                $.ajax({
+                    url: '{!! route('cod.territory') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if (data.status == 0) {
+                        $('#sale_person').empty();
+
+                        $.each(data.sale_persons, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            $('#sale_person').append(newOption);
+                        });
+                        $('#sale_person').val('').trigger('change');
+
+                        @if($lead != null)
+                        @if($lead->sale_person_id != null)
+                        $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
+                        @endif
                         @endif
                     } else {
                         toastr.error(data.error, 'Error!', {

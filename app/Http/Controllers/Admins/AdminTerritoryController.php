@@ -22,7 +22,7 @@ class AdminTerritoryController extends Controller
 
     public function list(){
         $territory = Territory::leftjoin('cities as c','c.id','=','territories.city_id')
-            ->select(['c.name as city','territories.id as id','territories.area as area','territories.name as name']);
+            ->select(['c.name as city','territories.id as id','territories.area as area','territories.name as name','territories.created_at as created_at','territories.updated_at as updated_at']);
 
         $datatable = Datatables::of($territory)
         ->addColumn('action', function($data) {
