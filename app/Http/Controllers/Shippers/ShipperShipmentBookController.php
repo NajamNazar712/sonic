@@ -265,6 +265,9 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
+        if(session('user_id') == 4249){
+            return redirect()->to(route('cod.orders.index'));
+        }
         // $time = Carbon::today()->addHour(15);
         // $current_time = Carbon::now();
         $date = Carbon::today();
@@ -1713,6 +1716,9 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
+        if(session('user_id') == 4249){
+            return redirect()->to(route('cod.orders.index'));
+        }
         $booking_types = BookingType::whereNotIn('id',[4])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
