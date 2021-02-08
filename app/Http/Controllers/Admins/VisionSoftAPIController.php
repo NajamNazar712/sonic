@@ -1231,6 +1231,15 @@ class VisionSoftAPIController extends Controller
                         $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
                     }
                 }
+                else if ($adjustment->type == 12) {
+                    $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20])->where('verification', 1);
+
+                    if ($journey->exists()) {
+                        $journey = $journey->latest('id')->first();
+
+                        $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
+                    }
+                }
 
                 try{
                     $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);

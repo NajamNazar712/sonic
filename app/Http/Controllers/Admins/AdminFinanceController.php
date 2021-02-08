@@ -1908,7 +1908,7 @@ class AdminFinanceController extends Controller
 
             $adjustment_amount += $previous_gst - $new_gst;
 
-            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 6, $new_weight_charges);
+            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
@@ -1925,7 +1925,7 @@ class AdminFinanceController extends Controller
 
                 $adjustment_amount += $previous_gst - $new_gst;
 
-                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 6, $new_weight_charges);
+                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
             }
         }
 
