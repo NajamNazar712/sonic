@@ -60,7 +60,7 @@ class AdminInternationalShipmentsController extends Controller
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function($query){
-                $query->whereIn('shipper_status_id', [3,4,5,6,7,8,9,10,11,12,13,15,18,51,54,55,56]);
+                $query->whereIn('shipper_status_id', [2,3,4,5,6,7,8,9,10,11,12,13,15,18,51,54,55,56]);
             })],
             'international_tracking_number' => ['required'],
             'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
