@@ -3,9 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\Admins\DailyPickupSalesReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use DB;
 
 class DailyPickupSalesRMEmail extends Command
 {
@@ -41,7 +43,11 @@ class DailyPickupSalesRMEmail extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $response = AdminReportsController::daily_pickup_sales_report_create(NULL, $date . ' 00:00:00', NULL, FALSE);
-        NotificationsController::send(26,$date,$response);
+        $reagional_managers = DB::connection('reports')->table('admins')->whereIn('role_id', [31,44])->where('status', 1)->select('id', 'name')->get();
+        if(count($reagional_managers) > 0){
+            foreach ($reagional_managers as $reagional_manager){
+                $response = DailyPickupSalesReportController::daily_pickup_sales_report_rm( $date . ' 00:00:00', $reagional_manager->id);
+            }
+        }
     }
 }

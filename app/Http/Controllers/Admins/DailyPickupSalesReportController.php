@@ -1090,6 +1090,9 @@ class DailyPickupSalesReportController extends Controller
 
 }
 
+    static public function daily_pickup_sales_report_rm($date, $sale_person_id){
+
+    }
 
 
 
