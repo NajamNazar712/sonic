@@ -557,6 +557,7 @@ class Permission
 
 
             'management.city_list' => 205,
+            'management.territory.index' => 443,
 
             'notifications.index' => 100,
             'notifications.list' => 100,

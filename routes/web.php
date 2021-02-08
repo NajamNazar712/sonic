@@ -686,6 +686,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
         });
+
+        Route::prefix('territory')->name('territory.')->group(function () {
+            Route::get('', 'Admins\AdminTerritoryController@index')->name('index');
+            Route::get('/list', 'Admins\AdminTerritoryController@list')->name('list');
+            Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
+            Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
+            Route::get('/{id}', 'Admins\AdminTerritoryController@edit')->name('edit');
+            Route::post('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
+
+        });
+
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
