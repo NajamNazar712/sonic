@@ -1908,7 +1908,7 @@ class AdminFinanceController extends Controller
 
             $adjustment_amount += $previous_gst - $new_gst;
 
-            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
+            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 6, $new_weight_charges);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
@@ -1925,7 +1925,7 @@ class AdminFinanceController extends Controller
 
                 $adjustment_amount += $previous_gst - $new_gst;
 
-                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
+                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 6, $new_weight_charges);
             }
         }
 
@@ -4135,6 +4135,8 @@ class AdminFinanceController extends Controller
                             $payment_clear->save();
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
                             $done_payment->status = 1;
 
                             $done_payment->save();
@@ -4167,6 +4169,8 @@ class AdminFinanceController extends Controller
                             $payment_clear->save();
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
                             $done_payment->status = 2;
 
                             $done_payment->save();
