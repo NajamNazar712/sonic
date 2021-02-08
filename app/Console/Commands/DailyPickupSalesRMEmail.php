@@ -47,6 +47,7 @@ class DailyPickupSalesRMEmail extends Command
         if(count($reagional_managers) > 0){
             foreach ($reagional_managers as $reagional_manager){
                 $response = DailyPickupSalesReportController::daily_pickup_sales_report_rm( $date . ' 00:00:00', $reagional_manager->id);
+                NotificationsController::send(121,$reagional_manager->id,$response);
             }
         }
     }

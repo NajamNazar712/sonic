@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\DailyPickupSalesReportController;
+use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -49,8 +50,8 @@ class DailyPickupSalesIndividualEmail extends Command
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = DailyPickupSalesReportController::daily_pickup_sales_report_individual( $date . ' 00:00:00', $sales_person->id);
+                NotificationsController::send(120, $date, $response);
             }
         }
-//        NotificationsController::send(26,$date,$response);
     }
 }
