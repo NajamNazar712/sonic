@@ -799,6 +799,10 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.qa.index') }}">Quality Assurance</a>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(71, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.weight_qc.index') }}">Weight QC</a>
+                            </li>
+                        @endif
                         @if (session('role_id') == 1 || in_array(72, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.reports.customer_retention.index')}}">Customer
                                     Retention Rate</a></li>
