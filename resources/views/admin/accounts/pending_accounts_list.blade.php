@@ -784,6 +784,28 @@
             }
         });
         $('#search_filter_btn').on('click',function () {
+            table.rows().nodes().each(function(index) {
+                var row = table.row(index);
+
+                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                    row.deselect();
+
+                    id = parseInt(row.id());
+
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index !== -1) {
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length == 0) {
+                        table.button('.assign_rider').disable();
+                        table.button('.tag').disable();
+
+                        hub_ids.splice(index, 1);
+                    }
+                }
+            });
             table.draw();
         });
        $('body').on('click','button.active_account',function () {
