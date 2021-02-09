@@ -530,61 +530,17 @@ class RegisterController extends Controller
         if ($admins_sales->exists()) {
             $to = array_merge($to, $admins_sales->pluck('email')->toArray());
         }
-
-        $north_rsm_id = 302;
-        $central_rsm_id = 407;
-        $south_rsm_id = 428;
-
-//        $north_rsm = Admin::find($north_rsm_id);
-//        $central_rsm = Admin::find($central_rsm_id);
-//        $south_rsm = Admin::find($south_rsm_id);
-
+        
         $city_id = $shipper->city_id;
         $hub_id = City::find($city_id)->hub_id;
-
-        $north_admin_hubs = AdminHub::where('admin_id',$north_rsm_id);
-        $central_admin_hubs = AdminHub::where('admin_id',$central_rsm_id);
-        $south_admin_hubs = AdminHub::where('admin_id',$south_rsm_id);
-
-
-//        if($north_rsm->default_hub_id != null){
-//            if($north_rsm->default_hub_id == $hub_id){
-//                $rsm = Admin::where('id',$north_rsm_id);
-//                $to = array_merge($to, $rsm->pluck('email')->toArray());
-//            }
-//        }
-//        if($central_rsm->default_hub_id != null){
-//            if($central_rsm->default_hub_id == $hub_id){
-//                $rsm = Admin::where('id',$central_rsm_id);
-//                $to = array_merge($to, $rsm->pluck('email')->toArray());
-//            }
-//        }
-//        if($south_rsm->default_hub_id != null){
-//            if($south_rsm->default_hub_id == $hub_id){
-//                $rsm = Admin::where('id',$south_rsm_id);
-//                $to = array_merge($to, $rsm->pluck('email')->toArray());
-//            }
-//        }
-
-        if($north_admin_hubs->exists()){
-            $north_admin_hub_id = $north_admin_hubs->pluck('hub_id')->toArray();
-            if(in_array($hub_id,$north_admin_hub_id)){
-                $rsm = Admin::where('id',$north_rsm_id);
-                $to = array_merge($to, $rsm->pluck('email')->toArray());
-            }
-        }
-        if($central_admin_hubs->exists()){
-            $central_admin_hub_id = $central_admin_hubs->pluck('hub_id')->toArray();
-            if(in_array($hub_id,$central_admin_hub_id)){
-                $rsm = Admin::where('id',$central_rsm_id);
-                $to = array_merge($to, $rsm->pluck('email')->toArray());
-            }
-        }
-        if($south_admin_hubs->exists()){
-            $south_admin_hub_id = $south_admin_hubs->pluck('hub_id')->toArray();
-            if(in_array($hub_id,$south_admin_hub_id)){
-                $rsm = Admin::where('id',$south_rsm_id);
-                $to = array_merge($to, $rsm->pluck('email')->toArray());
+        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+        foreach($managers as $rms => $index){
+            $admin_hubs = AdminHub::where('admin_id',$index);
+            if($admin_hubs->exists()){
+                $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
+                if(in_array($hub_id , $admin_hubs)) {
+                    $to[] = $rms;
+                }
             }
         }
 
