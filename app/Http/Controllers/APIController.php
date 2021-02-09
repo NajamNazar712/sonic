@@ -297,12 +297,7 @@ class APIController extends Controller
 
     public function shipment_book(Request $request) {
         $user_id = $request->user_id;
-        if($user_id == 4249){
-            return response()->json([
-                'status' => 1,
-                'message' => 'Please contact admin!.'
-            ]);
-        }
+
         $user_type = User::where('id',$user_id)->first();
         if($user_type['account_type_id'] == 1) {
             $rules = [
