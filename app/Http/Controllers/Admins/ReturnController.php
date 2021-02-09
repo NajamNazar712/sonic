@@ -1585,7 +1585,7 @@ class ReturnController extends Controller
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','bt.booking_type as service_type'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','bt.booking_type as service_type', 'dns.status as shipment_status'])
             ->where('return_notes.id',$id);
 
         if (session('role_id') != 1) {
@@ -1594,8 +1594,12 @@ class ReturnController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
-
+                if ($deliveries->shipment_status == 0){
+                    return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
+                }
+                else{
+                    return "";
+                }
             })
             ->filterColumn('service_type',function ($query,$keyword){
 
