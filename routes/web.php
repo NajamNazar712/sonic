@@ -159,6 +159,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
+
+    });
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
+        Route::post('order_track', 'Shippers\ShipperTrackingController@order_track')->name('track');
     });
     Route::prefix('packaging')->name('packaging.')->group(function (){
         Route::prefix('requests')->name('requests.')->group(function (){

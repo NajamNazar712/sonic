@@ -22,7 +22,13 @@
           </ul>
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
-              <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.tracking.index') }}" target="_blank">
+                <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.order.index') }}" target="_blank">
+                    <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                        <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Order ID</span>
+                        <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-circle-o-notch m-0"></i></h2>
+                    </div>
+                </a>
+                <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.tracking.index') }}" target="_blank">
                   <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
                       <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
                       <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
