@@ -682,6 +682,7 @@
                                                         table.draw(true);
                                                         table.button('.bulk_tagging').disable();
                                                         table.button('.set_commission').disable();
+                                                        table.button('.tag').disable();
                                                         table.button('.approve_commission').disable();
 
                                                     });

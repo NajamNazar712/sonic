@@ -363,7 +363,7 @@
 
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.order_id + '</div>';
+                                shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + ' - OrderID: '+ details.order_id + '</div>';
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 shipment += '<button class="btn btn-secondary d-sm-inline-block print" id=' + id + '>Print</button>';
                                 shipment += '</div>';
