@@ -7558,17 +7558,17 @@ class AdminReportsController extends Controller
     }
 
     public function weight_qc_list(Request $request){
-        if (session('role_id') != 1) {
-            $stations = DB::connection('reports')->table('cities')->whereIn('hub_id', session('hubs'))->get();
-        }else{
-            $stations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','shipments.estimated_weight','shipments.actual_weight','shipments.length','shipments.breadth','shipments.height']);
+            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','shipments.estimated_weight','shipments.actual_weight','shipments.length','shipments.breadth','shipments.height'])
+        ->whereNotNull('shipments.actual_weight');
+
+        if (session('role_id') != 1) {
+            $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipment) {
@@ -7588,7 +7588,7 @@ class AdminReportsController extends Controller
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('r.id', $search_shipping_mode);
+            $datatable->where('sm.id', $search_shipping_mode);
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
@@ -7596,7 +7596,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from,$to]);
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

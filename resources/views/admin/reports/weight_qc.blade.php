@@ -11,72 +11,65 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
-                    <div class="col-12 ">
-                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                            <div class="col-3">
-                                <fieldset class="form-group">
-                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                        @foreach($shipping_modes as $mode)
-                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <div class="col-3">
-                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
-                                    </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
-                                    </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
-                                </div>
-                            </div>
-
-                            <div class="col-2">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
-                                </div>
-                            </div>
-                        </form>
+                <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="col-3">
+                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $mode)
+                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                        </div>
+                    </div>
+
+                    <div class="col-2 mt-2">
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="d-none" id="table">
+                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Number</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">Shipping Mode</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
+                            <th class="border-primary border-darken-1">Arrival Weight (B)</th>
+                            <th class="border-primary border-darken-1">Difference (A-B)</th>
+                            <th class="border-primary border-darken-1">Weighted As</th>
+                        </tr>
+                        </thead>
+                    </table>
                 </div>
-
-
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
-
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">CN</th>
-                        <th class="border-primary border-darken-1">Shipper Name</th>
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
-                        <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                        <th class="border-primary border-darken-1">Difference (A-B)</th>
-                        <th class="border-primary border-darken-1">Weighted As</th>
-
-                    </tr>
-                    </thead>
-                </table>
-
             </div>
         </div>
     </div>
@@ -85,28 +78,10 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-    <style>
-        .bg-gradient-directional-inprocess {
-            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
-            background-repeat: repeat-x;
-        }
-        .show_active{
-            -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
-            -moz-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
-            box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-        }
-        span.font-13{
-            font-size: 13px;
-        }
-    </style>
 
 @endsection
 @section('js')
@@ -118,6 +93,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -197,7 +173,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-
+                    $('#table').removeClass('d-none');
                     table.draw(true);
                 }
             });
@@ -216,7 +192,7 @@
                             head = [];
 
                             head.push('S. No.');
-                            head.push('CN');
+                            head.push('Tracking Number');
                             head.push('Shipper Name');
                             head.push('Shipping Mode');
                             head.push('Origin');
@@ -252,7 +228,6 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 // scrollX: true, scrollY: '500px',
-                autoWidth:true,
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -265,6 +240,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },
@@ -273,7 +249,7 @@
                 ajax:{
                     url: '{{ route('admin.reports.weight_qc.list') }}',
                     data: function (d) {
-                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.tracking_numbers = $('#search_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
