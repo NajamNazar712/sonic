@@ -2647,12 +2647,12 @@ class V2AdminPickupsController extends Controller
         $note_id = $request->note_id;
         $note = V2PickupNote::find($note_id);
         $pickup_note_requests = $note->pickup_note_requests;
+        $arrived = array();
         if($pickup_note_requests){
             foreach($pickup_note_requests as $note){
                 $pickup_request_id = $note->pickup_request_id;
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 $pickup_request_shipments = $pickup_request->pickup_request_received_shipments;
-                $arrived = array();
                 foreach ($pickup_request_shipments as $all_shipments) {
                     $shipment = $all_shipments->shipment_id;
                     $shipment_details = Shipment::find($shipment);
