@@ -47,6 +47,8 @@ class Permission
             'daily_visit.location_photo' => 264,
 
 
+            'pickups.un_assigned.index' => 17,
+            'pickups.un_assigned.list' => 17,
             'pickups.pending.index' => 17,
             'pickups.pending.list' => 17,
             'pickups.pending.bookings' => 17,
