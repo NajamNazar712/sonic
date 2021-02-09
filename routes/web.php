@@ -1932,6 +1932,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
         });
+        Route::prefix('weight_qc')->name('weight_qc.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@weight_qc_list')->name('list');
+        });
     });
 
     //Reports end

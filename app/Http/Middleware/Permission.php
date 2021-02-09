@@ -475,6 +475,8 @@ class Permission
             'reports.app_efficiency.index' => 401,
             'reports.confirmation_pending_report.index' => 430,
             'reports.last_mile_app.index' => 437,
+            'reports.weight_qc.index' => 444,
+            'reports.weight_qc.list' => 444,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
