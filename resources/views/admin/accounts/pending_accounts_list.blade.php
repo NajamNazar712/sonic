@@ -446,7 +446,8 @@
                                                         $('#SalesTagModal1').modal('hide');
                                                         table.draw(true);
                                                         table.button('.assign_rider').disable();
-                                                        
+                                                        table.button('.tag').disable();
+
 
                                                     });
                                             } else {

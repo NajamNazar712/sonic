@@ -159,6 +159,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
+
+    });
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
+        Route::post('order_track', 'Shippers\ShipperTrackingController@order_track')->name('track');
     });
     Route::prefix('packaging')->name('packaging.')->group(function (){
         Route::prefix('requests')->name('requests.')->group(function (){
@@ -474,7 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
-        Route::post('tag/submit','Admins\AdminDashboardController@v2_pickups')->name('tag.submit');
+        Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
         Route::post('tag/submit/bulk','Admins\AdminDashboardController@tagSubmitBulk')->name('tag.submit.bulk');
         Route::post('set_segment/bulk','Admins\AdminDashboardController@setSegmentBulk')->name('set.segment_bulk');
         Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
