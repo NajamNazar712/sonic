@@ -2883,7 +2883,6 @@ class RiderAPIController extends Controller {
             $today->hour($arrival_cut_off_time)->minute(0)->second(0);
 
             $allowed_pickup_requests = array();
-//            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
                 $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>', $today);
 
                 if (!$existing_pickup_request_attempt->exists()) {
@@ -2991,18 +2990,15 @@ class RiderAPIController extends Controller {
                 $pickup_note_requests = $pickup_note->pickup_note_requests;
                 $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
             }
-            $pickup = array();
             $pickup_address = $pickup_requests->pickup_address;
-            $pickup['pickup_request_id'] = $pickup_requests->pickup_request_id;
-            $pickup['shipments'] = $pickup_requests->booked;
-            $pickup['shipper_name'] = $pickup_address->user->name;
-            $pickup['person_of_contact'] = $pickup_address->poc;
-            $pickup['phone_number'] = $pickup_address->phone;
-            $pickup['address'] = $pickup_address->pickup_address;
-            $pickup['location_latitude'] = $pickup_address->location_latitude;
-            $pickup['location_longitude'] = $pickup_address->location_longitude;
-            $information['pickups'][] = $pickup;
-
+            $information['pickup_request_id'] = $pickup_requests->pickup_request_id;
+            $information['shipments'] = $pickup_requests->booked;
+            $information['shipper_name'] = $pickup_address->user->name;
+            $information['person_of_contact'] = $pickup_address->poc;
+            $information['phone_number'] = $pickup_address->phone;
+            $information['address'] = $pickup_address->pickup_address;
+            $information['location_latitude'] = $pickup_address->location_latitude;
+            $information['location_longitude'] = $pickup_address->location_longitude;
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
         } else {
             return response()->json(['status' => 1, 'message' => 'No Pickup(s) Assigned']);
