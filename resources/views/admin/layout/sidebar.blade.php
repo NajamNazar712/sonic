@@ -327,7 +327,6 @@
             @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126, 262, 441], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
-
                         @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                                 <ul class="menu-content">
@@ -348,20 +347,19 @@
 {{--                                        <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending--}}
 {{--                                                Cash Collection</a></li>--}}
 {{--                                    @endif--}}
-                                        @if (session('role_id') == 1 || in_array(105, session('permissions')))
+                                        @if (session('role_id') == 1 || count(array_intersect([105, 423], session('permissions'))) !== 0)
                                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Pending
                                                     Cash Collection</span></a>
-                                        <ul class="menu-content">
-                                            <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending
-                                                    Cash Collection COD</a>
+                                                <ul class="menu-content">
+                                                    @if (session('role_id') == 1 || in_array(105, session('permissions')))
+                                                        <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">COD</a></li>
+                                                    @endif
+                                                    @if (session('role_id') == 1 || in_array(423, session('permissions')))
+                                                        <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.retail.index') }}">Retail</a></li>
+                                                    @endif
+                                                </ul>
                                             </li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(423, session('permissions')))
-                                            <li>
-                                                <a class="menu-item" href="{{ route('admin.delivery.cash_collection.retail.index') }}">Pending Cash Collection Retail</a>
-                                            </li>
-                                            @endif
-                                        </ul>
+                                        @endif
 
                                    {{-- @if (session('role_id') == 1 || in_array(40, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a>
@@ -478,12 +476,12 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                                <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
-                            <ul class="menu-content">
-                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
-                                <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
-                            </ul>
-
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
+                                <ul class="menu-content">
+                                    <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
+                                    <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                                </ul>
+                            </li>
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)

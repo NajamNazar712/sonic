@@ -218,7 +218,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
-        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+       $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
             $settings = $settings->first();
