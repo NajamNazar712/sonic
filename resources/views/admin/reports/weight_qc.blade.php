@@ -227,7 +227,7 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                // scrollX: true, scrollY: '500px',
+                scrollX: true, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -258,15 +258,15 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle text-center shipping_mode'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle text-center origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
-                    { data:'difference' ,name: 'difference', class: 'align-middle text-center difference'},
-                    { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as'},
+                    { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
+                    { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
