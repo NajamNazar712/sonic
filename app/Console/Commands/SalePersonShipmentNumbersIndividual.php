@@ -2,27 +2,29 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\Admins\DailyPickupSalesReportController;
+use App\Http\Controllers\Admins\SalesPersonNumbersReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use DB;
 
-class DailyPickupSalesIndividualEmail extends Command
+class SalePersonShipmentNumbersIndividual extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:dailypickupsalesreportindividual';
+    protected $signature = 'saleperson:numbersindividual';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send Daily Pickup & Sales Report Email to Sales Persons';
+    protected $description = 'Sale Person Shipment Count Individual';
 
     /**
      * Create a new command instance.
@@ -41,6 +43,7 @@ class DailyPickupSalesIndividualEmail extends Command
      */
     public function handle()
     {
+
         $date = Carbon::yesterday()->format('Y-m-d');
         $sales_persons = DB::connection('reports')->table('admins')->whereExists(function($query) {
             $query->from('admin_roles')
@@ -49,8 +52,8 @@ class DailyPickupSalesIndividualEmail extends Command
         })->select('id', 'name')->get();
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
-                $response = DailyPickupSalesReportController::daily_pickup_sales_report_individual( $date . ' 00:00:00', $sales_person->id);
-                NotificationsController::send(120, $sales_person->id, $response);
+                $response = SalesPersonNumbersReportController::sale_person_numbers_individual($date . ' 00:00:00', $sales_person->id);
+                NotificationsController::send(47, $sales_person->id, $response);
             }
         }
     }

@@ -2,27 +2,26 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\DailyPickupSalesReportController;
+use App\Http\Controllers\Admins\MonthAverateReportsController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
-class DailyPickupSalesIndividualEmail extends Command
+class MonthAverageIndividual extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:dailypickupsalesreportindividual';
+    protected $signature = 'month:averageindividual';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send Daily Pickup & Sales Report Email to Sales Persons';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -49,8 +48,8 @@ class DailyPickupSalesIndividualEmail extends Command
         })->select('id', 'name')->get();
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
-                $response = DailyPickupSalesReportController::daily_pickup_sales_report_individual( $date . ' 00:00:00', $sales_person->id);
-                NotificationsController::send(120, $sales_person->id, $response);
+                $response = MonthAverateReportsController::month_average_individual($date . ' 00:00:00', $sales_person->id);
+                NotificationsController::send(49, $sales_person->id, $response);
             }
         }
     }

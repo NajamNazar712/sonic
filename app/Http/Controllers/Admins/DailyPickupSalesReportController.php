@@ -522,8 +522,7 @@ class DailyPickupSalesReportController extends Controller
         $hubs = array();
         $city = array();
 
-        $assigned_hubs = AdminHub::where('admin_id', $sale_person_id)->pluck('hub_id')->toArray();
-        $hubs = DB::connection('reports')->table('cities')->whereIn('hub_id', $assigned_hubs)->where('pickup', 1)->select('id', 'name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('pickup', 1)->select('id', 'name')->get();
 
         $details = array();
         $shipping_wise_details = array();
