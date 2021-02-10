@@ -2531,8 +2531,15 @@ class AdminReportsController extends Controller
             $file_name = public_path() .'/'.$file_name_without_path ;
         }
         else{
-            $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
-            $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
+            if($search_city != null){
+                $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+                $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+            }
+            else{
+                $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
+                $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
+            }
+
         }
         $writer->save($file_name);
 
@@ -7041,11 +7048,7 @@ class AdminReportsController extends Controller
 //    }
 
     static public function daily_pickup_sales_shipping_mode_wise($date_from,$date_to,$hub = null, $sales_tagging){
-        if(session('role_id') == 1){
-            $sales_tagging = false;
-        }else{
-            $sales_tagging = true;
-        }
+
         $data = array();
         $shipping_modes = ShippingMode::all();
 

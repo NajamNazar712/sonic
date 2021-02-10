@@ -77,7 +77,18 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReceiveDeliveriesReport',
         'App\Console\Commands\WebsiteLead',
         'App\Console\Commands\UserOTPGenerate',
-        'App\Console\Commands\UserOTPVerifiy'
+        'App\Console\Commands\UserOTPVerifiy',
+
+        'App\Console\Commands\DailyPickupSalesIndividualEmail',
+        'App\Console\Commands\DailyPickupSalesRMEmail',
+
+        'App\Console\Commands\SalePersonShipmentNumbersRM',
+        'App\Console\Commands\SalePersonShipmentNumbers',
+
+        'App\Console\Commands\MonthAverageIndividual',
+        'App\Console\Commands\MonthAverageRM',
+
+
     ];
 
     /**
@@ -105,7 +116,10 @@ class Kernel extends ConsoleKernel
 
             $time = $settings->setting_value . ':00';
 
-            $schedule->command('email:dailypickupsalesreport')->dailyAt($time)->runInBackground();
+            $schedule->command('email:dailypickupsalesreport')->dailyAt($time);
+            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($time);
+            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($time);
+
         }
 
         $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
@@ -151,8 +165,16 @@ class Kernel extends ConsoleKernel
 
 //        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
 //        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
-        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
+        $schedule->command('saleperson:numbers')->dailyAt('06:00');
+        $schedule->command('saleperson:numbersindividual')->dailyAt('07:00')->runInBackground();
+        $schedule->command('saleperson:numbersrm')->dailyAt('07:00')->runInBackground();
+
+
+        $schedule->command('month:average')->dailyAt('06:00');
+        $schedule->command('month:averageindividual')->dailyAt('07:00')->runInBackground();
+        $schedule->command('month:averagerm')->dailyAt('07:00')->runInBackground();
+
+
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();

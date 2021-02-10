@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
+use App\Http\Controllers\Admins\MonthAverateReportsController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -41,7 +42,7 @@ class MonthAverageReportEmail extends Command
     public function handle()
     {
         $date = Carbon::today()->format('Y-m-d');
-        $response = AdminReportsEmailController::month_average($date . ' 00:00:00');
+        $response = MonthAverateReportsController::month_average_overall($date . ' 00:00:00');
         NotificationsController::send(49, $date, $response);
     }
 }
