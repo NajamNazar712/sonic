@@ -20,10 +20,11 @@
                                 <tr class="bg-primary white">
 {{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S. No</th>
+                                    <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Area</th>
-                                    <th class="border-primary border-darken-1">Territory</th>
+                                    <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Created At</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
@@ -65,18 +66,16 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Name');
                             head.push('City');
-                            head.push('Area');
-                            head.push('Territory');
+
                             $.each(result.data, function(index, values) {
-                                row = [];
+                            row = [];
 
-
-                                row.push(index + 1);
-                                row.push(values.city);
-                                row.push(values.area);
+                            row.push(index + 1);
                                 row.push(values.name);
-                                body.push(row);
+                                row.push(values.city);
+                            body.push(row);
                             });
                         },
                         async: false
@@ -99,59 +98,6 @@
                     }
 
                  },
-                    // {
-                //     extend: 'selectAll',
-                //     text: 'Select All',
-                //     className: 'select_all',
-                //     action : function(e) {
-                //         e.preventDefault();
-                //
-                //         table.rows().nodes().each(function(index) {
-                //             var row = table.row(index);
-                //
-                //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                //                 row.select();
-                //
-                //                 id = parseInt(row.id());
-                //
-                //                 var index = $.inArray(id, selected_rows);
-                //
-                //                 if (index === -1) {
-                //                     selected_rows.push(id);
-                //                 }
-                //
-                //                 table.button('.pickup').enable();
-                //             }
-                //         });
-                //     }
-                // }, {
-                //     extend: 'selectNone',
-                //     text: 'Select None',
-                //     className: 'select_none',
-                //     action : function(e) {
-                //         e.preventDefault();
-                //
-                //         table.rows().nodes().each(function(index) {
-                //             var row = table.row(index);
-                //
-                //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                //                 row.deselect();
-                //
-                //                 id = parseInt(row.id());
-                //
-                //                 var index = $.inArray(id, selected_rows);
-                //
-                //                 if (index !== -1) {
-                //                     selected_rows.splice(index, 1);
-                //                 }
-                //
-                //                 if (selected_rows.length == 0) {
-                //                     table.button('.pickup').disable();
-                //                 }
-                //             }
-                //         });
-                //     }
-                // },
                     {
                         extend: 'excel',
                         title: 'Territory List',
@@ -159,12 +105,6 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
                 scrollX: false, scrollY: '500px',
-                // select: {
-                //     info: false,
-                //     style: 'multi',
-                //     selector: 'td.select-checkbox',
-                //     className: 'selected bg-primary bg-lighten-5 primary'
-                // },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -175,14 +115,14 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.territory.list') }}',
                 rowId: 'id',
-                order: [[5, 'asc']],
+                order: [[4, 'asc']],
                 columns: [
-                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'city', name: 'c.name', class: 'align-middle city'},
-                    {data: 'area', name: 'territories.area', class: 'align-middle area'},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
+                    {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
                 ],

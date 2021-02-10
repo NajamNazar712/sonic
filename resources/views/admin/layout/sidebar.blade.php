@@ -1108,7 +1108,13 @@
                                                 @endif
 
                                                 @if (session('role_id') == 1 || in_array(443, session('permissions')))
-                                                    <li><a class="menu-item" href="{{route('admin.management.territory.index')}}">Territory</a></li>
+                                                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Territory</span></a>
+                                                        <ul class="menu-content">
+
+                                                    <li><a class="menu-item" href="{{route('admin.management.territory.index')}}">Add Territory</a></li>
+
+                                                    <li><a class="menu-item" href="{{route('admin.management.area.index')}}">Add Area</a></li>
+                                                        </ul>
                                                 @endif
 
                                             </ul>

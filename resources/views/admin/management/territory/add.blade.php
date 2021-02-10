@@ -18,8 +18,8 @@
                             <form id="territory_form" class="form-horizontal" method="POST" action="{{ route('admin.management.territory.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <div class="row">
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="row justify-content-center">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <select name="city_id" class="select2" id="city_id" data-rule-required="true" data-msg-required="City is required">
                                                 @foreach($cities as $city)
@@ -29,13 +29,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <div class="form-group">
-                                            <input type="text" name="area" class="form-control" placeholder="Area*" data-rule-required="true" data-msg-required="Area is required">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <input type="text" name="territory" id="territory" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
                                         </div>
