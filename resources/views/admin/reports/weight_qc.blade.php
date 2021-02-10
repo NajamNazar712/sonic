@@ -149,10 +149,12 @@
                     }
                 }
             });
+            var date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 format:'dd mmmm, yyyy',
+                max: new Date(date_limit),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
