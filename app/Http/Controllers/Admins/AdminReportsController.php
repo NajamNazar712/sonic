@@ -7576,7 +7576,7 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->addColumn('difference', function ($shipment){
-                $difference = $shipment->actual_weight - $shipment->estimated_weight;
+                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
                 return $difference;
             })
             ->addColumn('weighted_as', function ($shipment){

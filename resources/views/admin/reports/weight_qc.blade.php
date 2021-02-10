@@ -232,7 +232,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Shipper Bank History Report',
+                        title: 'Weight QC Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
