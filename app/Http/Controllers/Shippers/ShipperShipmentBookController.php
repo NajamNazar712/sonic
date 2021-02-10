@@ -1713,6 +1713,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
+
         $booking_types = BookingType::whereNotIn('id',[4])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
