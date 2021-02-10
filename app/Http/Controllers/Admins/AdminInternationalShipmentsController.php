@@ -50,24 +50,29 @@ class AdminInternationalShipmentsController extends Controller
         $names = [
             'tracking_number' => 'Tracking Number',
             'international_tracking_number' => 'Tracking Number',
+            'actual_weight' => 'Actual Weight',
         ];
 
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid / not ready for update.',
         ];
         $rules = [
-            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
-            'international_tracking_number' => ['required']
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function($query){
+                $query->whereIn('shipper_status_id', [2,3,4,5,6,7,8,9,10,11,12,13,15,18,49,51,52,54,55,56]);
+            })],
+            'international_tracking_number' => ['required'],
+            'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
         ];
-        $fields = [0 => 'tracking_number', 1 => 'international_tracking_number'];
+        $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight'];
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'International Tracking Number'];
+            $header = ['Tracking Number', 'International Tracking Number', 'Actual Weight'];
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
@@ -149,14 +154,28 @@ class AdminInternationalShipmentsController extends Controller
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
                         $international_tracking_number = trim($row['international_tracking_number']);
-
+                        $international_shipment_weight = $row['actual_weight'];
                         $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id);
                         if($international_shipment->exists()){
                             $international_shipment = $international_shipment->first();
                             $international_shipment->international_tracking_number = $international_tracking_number;
+                            $international_shipment->actual_weight = $international_shipment_weight;
                             $international_shipment->save();
+
+                            if($international_shipment_weight != NULL){
+                                $shipment_details->actual_weight = $international_shipment_weight;
+                                $shipment_details->save();
+
+                                if($shipment_details->packaging_material_request == 0 && $shipment_details->shipment_type == 1){
+                                    if($shipment_details->booking_type_id != 4){
+                                        ShipmentChargesController::weight($shipment_id);
+                                        ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                                    }
+                                }
+
+                            }
                         }
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 

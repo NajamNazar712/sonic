@@ -1575,7 +1575,7 @@ class ShipperShipmentBookController extends Controller
                             $logo = $shipment->user->logo;
                             $invoice_id = '(' . ($shipment->order_id != null) ? $shipment->order_id : '' . ')';
                             if($type != 'pdf'){
-                                $shipper_logo = '<img src="' . public_path('storage/shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">';
+                                $shipper_logo = '<img src="' . asset('storage/shippers_logo/'. $logo) . '" width="100" class="d-block mb-1">';
                             }
                             else{
                                 $shipper_logo = '<img src="' . public_path('storage/shippers_logo/' . $logo) . '" width="100" class="d-block mb-1">';
@@ -1584,7 +1584,7 @@ class ShipperShipmentBookController extends Controller
                         <div class="row"><div class="col-3"><h2>Invoice ' . $invoice_id . '</h2></div></div>
                         <div class="row"><div class="col-6 text-center">
                         '. $shipper_logo .'
-    </div><div class="col-6 text-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
                         
                         <div class="row align-items-start justify-content-between p-2">
                             <div class="col-12">
@@ -1713,6 +1713,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
+
         $booking_types = BookingType::whereNotIn('id',[4])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {

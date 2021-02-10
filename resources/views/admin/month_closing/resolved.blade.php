@@ -243,7 +243,7 @@
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([413], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([413, 442], session('permissions'))) !== 0)
 
                 buttons: [
                     @if (session('role_id') == 1 || in_array(413, session('permissions')))
@@ -378,7 +378,7 @@
                     },
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(143, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(442, session('permissions')))
                     {
                         text: 'Re-Attempt',
                         className: 'btn btn-primary re-attempt',

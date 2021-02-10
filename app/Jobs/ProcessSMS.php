@@ -93,6 +93,10 @@ class ProcessSMS implements ShouldQueue
     }
 
     private function telenor($sms) {
+        $sms->status = 1;
+
+        $sms->save();
+
         $base_uri = 'https://telenorcsms.com.pk:27677/corporate_sms2/api/';
 
         $generate_session_id = FALSE;

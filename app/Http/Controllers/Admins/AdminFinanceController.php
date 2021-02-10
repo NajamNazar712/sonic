@@ -882,8 +882,17 @@ class AdminFinanceController extends Controller
                             $dropdown .= $resolve_button;
                         }
                     }
-                    if (session('role_id') == 1 || in_array(56, session('permissions'))) {
-                        $dropdown .= $adjust_in_payment_button;
+
+                    $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                    $now = Carbon::now()->startOfDay();
+
+                    $difference = $updated_at->diffInDays($now);
+
+                    if ($difference <= 2) {
+                        if (session('role_id') == 1 || in_array(56, session('permissions'))) {
+                            $dropdown .= $adjust_in_payment_button;
+                        }
                     }
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
@@ -1346,7 +1355,7 @@ class AdminFinanceController extends Controller
                 if($journey){
                        $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                       if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
+                       if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                         $delivery_note_shipment->status = 8;
 
@@ -1497,7 +1506,7 @@ class AdminFinanceController extends Controller
                  if($journey){
                         $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                        if($difference <= 6 || (session('role_id') == 1 || in_array(346, session('permissions')))){
+                        if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                             $delivery_note_shipment->status = 8;
 
@@ -1899,7 +1908,7 @@ class AdminFinanceController extends Controller
 
             $adjustment_amount += $previous_gst - $new_gst;
 
-            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
+            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
         }else{
             $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
             if($done_payment->exists()){
@@ -1916,7 +1925,7 @@ class AdminFinanceController extends Controller
 
                 $adjustment_amount += $previous_gst - $new_gst;
 
-                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 4, $new_weight_charges);
+                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
             }
         }
 
@@ -4126,6 +4135,8 @@ class AdminFinanceController extends Controller
                             $payment_clear->save();
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
                             $done_payment->status = 1;
 
                             $done_payment->save();
@@ -4158,6 +4169,8 @@ class AdminFinanceController extends Controller
                             $payment_clear->save();
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
                             $done_payment->status = 2;
 
                             $done_payment->save();
