@@ -53,7 +53,7 @@ class SalePersonShipmentNumbersIndividual extends Command
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = SalesPersonNumbersReportController::sale_person_numbers_individual($date . ' 00:00:00', $sales_person->id);
-                NotificationsController::send(47, $sales_person->id, $response);
+                NotificationsController::send(122, $sales_person->id, $response);
             }
         }
     }

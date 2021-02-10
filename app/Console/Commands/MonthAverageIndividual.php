@@ -49,7 +49,7 @@ class MonthAverageIndividual extends Command
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = MonthAverateReportsController::month_average_individual($date . ' 00:00:00', $sales_person->id);
-                NotificationsController::send(49, $sales_person->id, $response);
+                NotificationsController::send(124, $sales_person->id, $response);
             }
         }
     }

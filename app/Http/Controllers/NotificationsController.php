@@ -6852,6 +6852,36 @@ class NotificationsController extends Controller
 
                     $to = array();
 
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }
+                else if ($id == 123) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
                     $rm = Admin::find($reference_1_id)->email;
 
                     if ($rm) {
@@ -6859,7 +6889,37 @@ class NotificationsController extends Controller
                     }
 
                 }
-                else if ($id == 123) {
+                else if ($id == 124) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }
+                else if ($id == 125) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
