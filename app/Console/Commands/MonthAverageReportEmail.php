@@ -22,7 +22,7 @@ class MonthAverageReportEmail extends Command
      *
      * @var string
      */
-    protected $description = 'Average Shipments of Month Day Wise';
+    protected $description = 'Average Shipments of Month Day Wise Overall';
 
     /**
      * Create a new command instance.

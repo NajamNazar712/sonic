@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\MonthAverateReportsController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class MonthAverageIndividual extends Command
 {
@@ -21,7 +22,7 @@ class MonthAverageIndividual extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Average Shipments of Month Day Wise Individual';
 
     /**
      * Create a new command instance.

@@ -6,7 +6,7 @@ use App\Http\Controllers\Admins\DailyPickupSalesReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class DailyPickupSalesRMEmail extends Command
 {

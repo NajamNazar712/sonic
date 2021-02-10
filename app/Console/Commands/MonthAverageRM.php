@@ -22,7 +22,7 @@ class MonthAverageRM extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Average Shipments of Month Day Wise Regional Manager';
 
     /**
      * Create a new command instance.
