@@ -558,6 +558,12 @@ class Permission
 
             'management.city_list' => 205,
             'management.territory.index' => 443,
+            'management.territory.add' => 443,
+            'management.territory.edit' => 443,
+
+            'management.area.index' => 443,
+            'management.area.add' => 443,
+            'management.area.edit' => 443,
 
             'notifications.index' => 100,
             'notifications.list' => 100,

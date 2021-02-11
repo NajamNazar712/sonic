@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Territory</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -80,6 +81,7 @@
                 width:'100%',
                 dropdownParent:$('#TerritoryTag')
             });
+            var territory_ids = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -98,6 +100,7 @@
                             head.push('S.No');
                             head.push('Area');
                             head.push('Territory');
+                            head.push('Created At');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -105,6 +108,7 @@
                                 row.push(index + 1);
                                 row.push(values.area);
                                 row.push(values.territory);
+                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },
@@ -114,7 +118,7 @@
                     return {body: body, header: head};
                 }
             } );
-            var territory_ids = [];
+
             var selected_rows = [];
             var table =  $('.datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -215,17 +219,16 @@
                                 if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                     id = parseInt(row.id());
 
-                                    territory_id = $(row.node()).data('id');
-
+                                    territory_id  = $(row.node()).data('id');
 
                                     var allow = false;
 
-                                    if(selected_rows.length == 0) {
-                                        selected_rows.push(territory_id);
+                                    if(territory_ids.length == 0) {
+                                        territory_ids.push(territory_id);
 
                                         allow = true;
                                     }
-                                    else if(selected_rows[0] == territory_id) {
+                                    else if(territory_ids[0] == territory_id) {
                                         allow = true;
                                     }
 
@@ -237,7 +240,10 @@
                                         if (index === -1) {
                                             selected_rows.push(id);
                                         }
-                                        table.button('.territory_tagging').enable();
+
+                                        table.button('.assign_rider').enable();
+                                        table.button('.territory_tag').enable();
+                                        table.button('.tag').enable();
 
                                     }
                                 }
@@ -304,12 +310,13 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.area.list') }}',
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[4, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
+                    {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -379,6 +386,7 @@
             $('#TerritoryTag').on('hide.bs.modal', function (e) {
                 $('#territory').val('').trigger('change');
             });
+
 
 
         });

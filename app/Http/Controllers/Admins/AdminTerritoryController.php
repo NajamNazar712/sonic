@@ -50,7 +50,7 @@ class AdminTerritoryController extends Controller
         return $datatable->make(true);
     }
     public function add(){
-        $cities = City::select('id','name')->where('status',1)->get();
+        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
         return view('admin.management.territory.add')->with(['cities' => $cities]);
     }
 
@@ -68,7 +68,7 @@ class AdminTerritoryController extends Controller
     }
 
     public function edit($id){
-        $cities = City::select('id','name')->where('status',1)->get();
+        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
         $territory = Territory::find($id);
         return view('admin.management.territory.edit')->with(['cities' => $cities,'territory'=>$territory]);
     }
@@ -92,7 +92,7 @@ class AdminTerritoryController extends Controller
     }
     public function area_list(){
          $areas = AreaTerritory::join('territories as t','t.id','=','area_territories.territory_id')
-             ->select(['area_territories.id as id','t.name as territory','area_territories.name as area']);
+             ->select(['area_territories.id as id','t.name as territory','area_territories.name as area','area_territories.created_at as created_at']);
 
         $datatable = Datatables::of($areas)
         ->addColumn('action', function($data) {

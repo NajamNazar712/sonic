@@ -123,7 +123,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.territory.list') }}',
                 rowId: 'id',
-                order: [[4, 'asc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
