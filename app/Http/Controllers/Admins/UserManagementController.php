@@ -139,6 +139,26 @@ class UserManagementController extends Controller
         }
     }
 
+    public function user_trax_id(Request $request) {
+        if ($request->filled('trax_id')) {
+            $trax_id = Admin::where('trax_id', $request->input('trax_id'));
+
+            if ($request->has('id')) {
+                $trax_id = $trax_id->where('id', '!=', $request->input('id'));
+            }
+
+            if (!$trax_id->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'false';
+        }
+    }
+
     public function user_status(Request $request) {
         $admin = Admin::find($request->id);
 

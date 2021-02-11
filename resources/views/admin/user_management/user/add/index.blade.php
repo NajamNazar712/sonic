@@ -76,7 +76,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id">
+											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" data-rule-remote="{{ route('admin.user_management.users.trax_id') }}" data-msg-remote="Trax ID unique">
 										</div>
 									</div>
 
