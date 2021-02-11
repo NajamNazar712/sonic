@@ -68,6 +68,10 @@
                             head.push('S.No');
                             head.push('Name');
                             head.push('City');
+                            head.push('Created By');
+                            head.push('Created At');
+                            head.push('Updated By');
+                            head.push('Updated At');
 
                             $.each(result.data, function(index, values) {
                             row = [];
@@ -75,6 +79,10 @@
                             row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.city);
+                                row.push(values.created_by);
+                                row.push(values.created_at);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
                             body.push(row);
                             });
                         },
