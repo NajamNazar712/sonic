@@ -108,6 +108,18 @@ class RiderAPIController extends Controller {
         'image' => ':attribute must be an Image.'
     ];
 
+    static public function retail_pickup_assign($pickup_request_id, $rider_id){
+        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 1);
+        if($retail_pickup_note->exists()){
+            $retail_pickup_note = $retail_pickup_note->first();
+            $retail_pickup_note->rider_id = $rider_id;
+            $retail_pickup_note->assigned_by = Auth::id();
+            $retail_pickup_note->assigned_at = Carbon::now();
+            $retail_pickup_note->status = 2;
+            $retail_pickup_note->save();
+        }
+    }
+
     private function distance($origin, $destination) {
         return $this->vincenty_distance($origin, $destination);
     }
