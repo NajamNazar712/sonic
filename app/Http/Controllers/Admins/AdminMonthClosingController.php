@@ -138,7 +138,7 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->join('shipments_journey as sj', function ($join) {
+            ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -184,7 +184,7 @@ class AdminMonthClosingController extends Controller
                     $sub_query->where('sj.created_at', '<', $date);
                 })
                     ->orWhere(function ($sub_query) use ($date) {
-                        $sub_query->where('sj.created_at', '<', $date);
+                        $sub_query->where('shipments.created_at', '<', $date);
                     });
             });
         }
