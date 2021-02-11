@@ -484,7 +484,7 @@ class AdminWalkInBookShipmentController extends Controller
                     } else {
                         $check_zone = $check['chargeable_weight_charges_class_3'];
                     }
-                    if($request->pickup == false){
+                    if($request->pickup == 'false'){
                         if ($request->actual_weight < $check['actual_weight']) {
                             return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                         }
@@ -501,7 +501,7 @@ class AdminWalkInBookShipmentController extends Controller
                 }
             }
             else{
-                if($request->pickup == false){
+                if($request->pickup == 'false'){
                     if ($request->actual_weight < $check['actual_weight']) {
                         return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $check['actual_weight']]);
                     }
@@ -1345,7 +1345,7 @@ class AdminWalkInBookShipmentController extends Controller
                 $actual_weight = $check->hub_actual_weight;
                 $chargeable_weight = $check->hub_chargeable_weight;
             }
-            if($request->pickup == false){
+            if($request->pickup == 'false'){
                 if ($request->actual_weight < $actual_weight) {
                     return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater than or equal to ' . $actual_weight]);
                 }

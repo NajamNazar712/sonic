@@ -134,6 +134,11 @@
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
+                        <th class="border-primary border-darken-1">Shipper Reference 1</th>
+                        <th class="border-primary border-darken-1">Shipper Reference 2</th>
+                        <th class="border-primary border-darken-1">Shipper Reference 3</th>
+                        <th class="border-primary border-darken-1">Shipper Reference 4</th>
+                        <th class="border-primary border-darken-1">Shipper Reference 5</th>
                     </tr>
                     </thead>
                 </table>
@@ -384,6 +389,11 @@
                             head.push('Cash Handling Charges');
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
+                            head.push('Shipper Reference 1');
+                            head.push('Shipper Reference 2');
+                            head.push('Shipper Reference 3');
+                            head.push('Shipper Reference 4');
+                            head.push('Shipper Reference 5');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -413,6 +423,11 @@
                                 row.push(values.cash_handling_charges);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
+                                row.push(values.reference_1);
+                                row.push(values.reference_2);
+                                row.push(values.reference_3);
+                                row.push(values.reference_4);
+                                row.push(values.reference_5);
 
                                 body.push(row);
                             });
@@ -481,7 +496,12 @@
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
-                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'}
+                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                    { data: 'reference_1' ,name: 'ssr.reference_1', class: 'align-middle reference_1'},
+                    { data: 'reference_2' ,name: 'ssr.reference_2', class: 'align-middle reference_2'},
+                    { data: 'reference_3' ,name: 'ssr.reference_3', class: 'align-middle reference_3'},
+                    { data: 'reference_4' ,name: 'ssr.reference_4', class: 'align-middle reference_4'},
+                    { data: 'reference_5' ,name: 'ssr.reference_5', class: 'align-middle reference_5'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

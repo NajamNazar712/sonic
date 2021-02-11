@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
@@ -133,7 +134,6 @@ class RiderManagementController extends Controller
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -158,6 +158,18 @@ class RiderManagementController extends Controller
         }else{
             $route_id = $request->route_id;
         }
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
         Rider::where('route_id', $request->route_id)->update(['route_id' => NULL]);
         $rider = Rider::create([
             'city_id'=>$request->city_id,
@@ -171,7 +183,7 @@ class RiderManagementController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
+            'trax_id' => $trax_id,
             'rider_type_id' => $type
         ]);
         if($rider){
@@ -209,7 +221,6 @@ class RiderManagementController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required',
-            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -231,7 +242,6 @@ class RiderManagementController extends Controller
 
 
         $rider->rider_category_id = $request->rider_category;
-        $rider->trax_id = $request->trax_id;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
@@ -360,11 +370,13 @@ class RiderManagementController extends Controller
 
         if($action == 'block'){
             $rider->blacklist = 1;
+            $rider->status = 0;
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
             $rider->blacklist = 0;
+            $rider->status = 1;
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
@@ -655,7 +667,6 @@ class RiderManagementController extends Controller
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
-            'trax_id'=>'required|max:255|string',
             'rider_request_id' => 'required',
             'rider_type' => "required|numeric"
         ];
@@ -664,6 +675,18 @@ class RiderManagementController extends Controller
         if ($validate->fails()) {
             return redirect()->back()
                 ->withErrors($validate);
+        }
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
         }
 
         $rider = Rider::create([
@@ -677,7 +700,7 @@ class RiderManagementController extends Controller
             'status'=>1,
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
+            'trax_id' => $trax_id,
             'rider_type_id'  => $request->rider_type
         ]);
         if($rider){

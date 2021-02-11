@@ -96,6 +96,7 @@
 										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Reason</th>
 										<th class="border-primary border-darken-1">Picture</th>
+										<th class="border-primary border-darken-1">Shipper Signature Via App</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
 										<th class="border-primary border-darken-1">Pickup Request ID</th>
 									</tr>
@@ -126,6 +127,45 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="picture_modal" data-backdrop="static" role="dialog" aria-labelledby="picture_modal" aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="picture_modal_title">Picture</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="signature_modal" data-backdrop="static" role="dialog" aria-labelledby="signature_modal" aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="signature_modal_title">Signature</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 @endsection
 
 @section('css')
@@ -217,7 +257,8 @@
 				{data: 'distance_from_current_to_actual', name: 'v2_rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
 				{data: 'shipments', name: 'v2_rider_pickups.shipments', class: 'align-middle shipments'},
 				{data: 'reason', name: 'v2_rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
-				{data: 'picture_path', name: 'v2_rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
+				{data: 'picture_path', name: 'v2_rider_pickups.picture_path', class: 'align-middle picture_path text-center', orderable: false, searchable: false},
+				{data: 'signature_via_app', name: 'v2_rider_pickups.signature_via_app', class: 'align-middle signature_via_app text-center', orderable: false, searchable: false},
 				{data: 'pickup_note_id', name: 'v2_rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
 				{data: 'pickup_request_id', name: 'v2_rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
 			],
@@ -304,6 +345,26 @@
 			
 
 			var route = '{!! route('admin.tracking.index') !!}';
+
+			$('#datatable tbody').on('click','tr td.picture_path button',function () {
+				var link = $(this).attr('data-link');
+
+				var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+				$('#picture_modal .modal-body').html(image);
+
+				$('#picture_modal').modal('show');
+			});
+
+			$('#datatable tbody').on('click','tr td.signature_via_app button',function () {
+				var link = $(this).attr('data-link');
+
+				var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+				$('#signature_modal .modal-body').html(image);
+
+				$('#signature_modal').modal('show');
+			});
 
 	
 		});

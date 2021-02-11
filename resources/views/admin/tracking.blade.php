@@ -211,7 +211,8 @@
                                     </div>
                                     <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
-                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">
+{{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
+                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
 
                                             </select>
                                         </fieldset>
@@ -413,7 +414,7 @@
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                            $('#AddNewRequest').attr('disabled',true);
+                            // $('#AddNewRequest').attr('disabled',true);
                         }
 
                     });
@@ -1454,13 +1455,18 @@
                                             html += tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                        if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
 
                                         swal({
-                                            title: 'Request / Complaint Already Lodged!',
+                                            title: 'Request / Complaint Cannot Be Lodged!',
                                             content: content,
                                             icon: 'warning',
                                             buttons: {
@@ -1546,13 +1552,18 @@
                                             html += tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                        if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
 
                                         swal({
-                                            title: 'Request / Complaint Already Lodged!',
+                                            title: 'Request / Complaint Cannot Be Lodged!',
                                             content: content,
                                             icon: 'warning',
                                             buttons: {
@@ -1627,13 +1638,18 @@
                                             html += tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                        if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
 
                                         swal({
-                                            title: 'Request / Complaint Already Lodged!',
+                                            title: 'Request / Complaint Cannot Be Lodged!',
                                             content: content,
                                             icon: 'warning',
                                             buttons: {
@@ -1750,13 +1766,18 @@
 
                                         });
 
-                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+                                        if (!data.cannot_change) {
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                        }
+                                        else {
+                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                        }
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
 
                                         swal({
-                                            title: 'Request / Complaint Already Lodged!',
+                                            title: 'Request / Complaint Cannot Be Lodged!',
                                             content: content,
                                             icon: 'warning',
                                             buttons: {

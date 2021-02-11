@@ -420,7 +420,43 @@ class OrderManagementController extends Controller
             }
             return ['status' => 0, 'success' => 'Shipment(s) arrived successfully'];
         }
-        return ['status' => 1, 'success' => 'Shipment(s) not found!'];
+        return ['status' => 1, 'error' => 'Shipment(s) not found!'];
+
+    }
+
+    public function foodpanda_shipments_arrival(Request $request){
+        $shipments = Shipment::where('user_id', 4201)->where('shipper_status_id', 1);
+
+        if ($shipments->exists()) {
+            $shipments = $shipments->get();
+
+            foreach ($shipments as $shipment) {
+                V2AdminPickupsController::cancel($shipment->id);
+
+                $status_id = 2;
+
+                ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+
+                if ($shipment->pickup_address->city_id != $shipment->consignee_city_id) {
+                    $status_id = 4;
+
+                    ShipmentsJourneyController::add($shipment->id, $status_id, $status_id, NULL, NULL, NULL, 57);
+                }
+
+                $shipment->shipper_status_id = $status_id;
+                $shipment->consignee_status_id = $status_id;
+                $shipment->actual_weight = 0.5;
+
+                $shipment->save();
+
+                ShipmentChargesController::weight($shipment->id);
+                ShipmentChargesController::cash_handling($shipment->id);
+                ShipmentChargesController::insurance($shipment->id);
+                ShipmentChargesController::fuel_surcharge($shipment->id);
+            }
+            return ['status' => 0, 'success' => 'Shipment(s) arrived successfully'];
+        }
+        return ['status' => 1, 'error' => 'Shipment(s) not found!'];
 
     }
 

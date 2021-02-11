@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -181,7 +182,22 @@ class UserManagementController extends Controller
         $admin->default_hub_id = $request->input('default_hub');
         $admin->password = bcrypt($request->input('password'));
         $admin->designation = $request->input('designation');
-        $admin->trax_id = $request->input('trax_id');
+
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
+
+        $admin->trax_id = $trax_id;
 
         $admin->save();
 
@@ -256,7 +272,6 @@ class UserManagementController extends Controller
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
             $admin->designation = $request->input('designation');
-            $admin->trax_id = $request->input('trax_id');
 
             if ($request->filled('password')) {
                 $admin->password = bcrypt($request->input('password'));

@@ -89,6 +89,11 @@
                                     <th>Charges Mode ID</th>
                                 @endif
                                 <th>Pieces</th>
+                                <th>Shipper Reference 1</th>
+                                <th>Shipper Reference 2</th>
+                                <th>Shipper Reference 3</th>
+                                <th>Shipper Reference 4</th>
+                                <th>Shipper Reference 5</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -398,6 +403,31 @@
                                     <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['pieces_quantity']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][pieces_quantity]', $ro['pieces_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['shipper_reference_number_1']))
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_1]', $ro['shipper_reference_number_1'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_1']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_1]', $ro['shipper_reference_number_1'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['shipper_reference_number_2']))
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_2]', $ro['shipper_reference_number_2'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_2']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_2]', $ro['shipper_reference_number_2'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['shipper_reference_number_3']))
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_3]', $ro['shipper_reference_number_3'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_3']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_3]', $ro['shipper_reference_number_3'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['shipper_reference_number_4']))
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_4]', $ro['shipper_reference_number_4'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_4']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_4]', $ro['shipper_reference_number_4'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['shipper_reference_number_5']))
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_5']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
 
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>

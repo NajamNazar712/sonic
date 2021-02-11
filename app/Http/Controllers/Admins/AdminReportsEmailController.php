@@ -1104,7 +1104,7 @@ class AdminReportsEmailController extends Controller
     }
 
     static public function outstanding_shipments($start_date, $end_date){
-        $shipments = DB::connection('reports')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+        $shipments = DB::connection('mysql')->table('delivery_note_shipments')->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('delivery_notes as delivery_note', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_note.id')
             ->join('riders as rider', 'delivery_note.rider_id', '=', 'rider.id')

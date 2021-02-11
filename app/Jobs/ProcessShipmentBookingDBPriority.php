@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\http\Models\ShipmentOrderDate;
+use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\User;
 use App\http\Models\SubstituteUserShipment;
 use Illuminate\Bus\Queueable;
@@ -204,6 +205,27 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $order_date->shipment_id = $shipment_id;
             $order_date->order_date = $this->booking['order_date'];
             $order_date->save();
+        }
+
+        if($this->booking['shipper_reference_number_1'] != null || $this->booking['shipper_reference_number_2'] != null || $this->booking['shipper_reference_number_3'] != null || $this->booking['shipper_reference_number_4'] != null || $this->booking['shipper_reference_number_5'] != null){
+            $shipper_reference = new ShipmentShipperReference();
+            $shipper_reference->shipment_id = $shipment_id;
+            if($this->booking['shipper_reference_number_1'] != null) {
+                $shipper_reference->reference_1 = $this->booking['shipper_reference_number_1'];
+            }
+            if($this->booking['shipper_reference_number_2'] != null) {
+                $shipper_reference->reference_2 = $this->booking['shipper_reference_number_2'];
+            }
+            if($this->booking['shipper_reference_number_3'] != null) {
+                $shipper_reference->reference_3 = $this->booking['shipper_reference_number_3'];
+            }
+            if($this->booking['shipper_reference_number_4'] != null) {
+                $shipper_reference->reference_4 = $this->booking['shipper_reference_number_4'];
+            }
+            if($this->booking['shipper_reference_number_5'] != null) {
+                $shipper_reference->reference_5 = $this->booking['shipper_reference_number_5'];
+            }
+            $shipper_reference->save();
         }
 
         if ($service_type_id == 1 || $service_type_id == 5) {

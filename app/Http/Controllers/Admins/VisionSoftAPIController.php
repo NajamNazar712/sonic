@@ -215,8 +215,8 @@ class VisionSoftAPIController extends Controller
     }
     //5
     static public function arrival_revenue(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipments_journey as sj', function($join) use($date){
@@ -337,8 +337,8 @@ class VisionSoftAPIController extends Controller
     }
     //6
     static public function cod_payable(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
             ->join('shipments_journey as sj', function($join) use($date){
                 $join->on('sj.shipment_id', '=', 's.id')
@@ -431,8 +431,8 @@ class VisionSoftAPIController extends Controller
     }
     //8
     static public function del_ret_revenue(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $shipments = Shipment::join('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipments_journey as sj', function($join) use($date){
@@ -733,8 +733,8 @@ class VisionSoftAPIController extends Controller
     }
     //10
     static public function cod_payment(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $payments = DonePaymentCalculation::join('done_payments as dp', 'dp.id', '=', 'done_payment_calculations.done_payment_id')
             ->join('users as u', 'u.id', '=', 'dp.user_id')
             ->join('cities as c', 'c.id', '=', 'u.city_id')
@@ -809,8 +809,8 @@ class VisionSoftAPIController extends Controller
     }
     //11
     static public function cod_payment_clear(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $payments_clear = VisionSoftCodPaymentClear::whereDate('vision_soft_cod_payment_clears.created_at', $date)->get();
         if(count($payments_clear) > 0){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
@@ -905,8 +905,8 @@ class VisionSoftAPIController extends Controller
     }
     //13
     static public function bank_deposits(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $station_deposit_notes = StationDepositNote::whereDate('updated_at', $date)->where('status', '=', 2);
         if($station_deposit_notes->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
@@ -1037,8 +1037,8 @@ class VisionSoftAPIController extends Controller
     }
     //14
     static public function daily_exp(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
         $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereNotNull('finance_approved_by')->whereDate('finance_approved_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
         if($petty_cash_statements->exists()){
@@ -1064,6 +1064,13 @@ class VisionSoftAPIController extends Controller
                                     $amount = $petty_cash_statement_detail->amount;
                                 }
 
+                                if ($petty_cash_statement->shipment_id) {
+                                    $tracking_number = $petty_cash_statement->shipment->tracking_number;
+                                }
+                                else {
+                                    $tracking_number = '';
+                                }
+
                                 $response = $client->post('DailyExp', [
                                     'form_params' => [
                                         'pin_code' => 6,
@@ -1079,7 +1086,7 @@ class VisionSoftAPIController extends Controller
                                         'pin_details' => $petty_cash_statement_detail->expense_details,
                                         'pin_stmt_id' => $petty_cash_statement_detail->id,
                                         'pin_stmt_ref_no' => $petty_cash_statement_detail->reference_no,
-                                        'pin_tracking_number' => $petty_cash_statement->shipment->tracking_number,
+                                        'pin_tracking_number' => $tracking_number,
                                         'pin_creation_date' => Carbon::parse($petty_cash_statement->created_at)->format('m/d/Y'),
                                         'pin_period_from_date' => Carbon::parse($petty_cash_statement->from)->format('m/d/Y'),
                                         'pin_period_to_date' => Carbon::parse($petty_cash_statement->to)->format('m/d/Y'),
@@ -1115,8 +1122,8 @@ class VisionSoftAPIController extends Controller
     }
     //15
     static public function cod_receivable(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
             ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
             ->join('shipments_journey as sj', function($join) use($date){
@@ -1201,8 +1208,8 @@ class VisionSoftAPIController extends Controller
     }
     //16
     static public function adjustment(){
-        $date = Carbon::yesterday();
-        $today = Carbon::today();
+        $date = Carbon::now()->subDay(3);
+        $today = Carbon::now()->subDay(3);
         $adjustments = AdjustmentLog::join('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('cities as c', 'c.id', '=', 's.consignee_city_id')

@@ -240,6 +240,7 @@
                 }
             } );
             var selected_rows = [];
+            var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([413], session('permissions'))) !== 0)
@@ -289,6 +290,7 @@
                                             table.rows().deselect();
                                             selected_rows = [];
                                             table.button('.close_action').disable();
+                                            table.button('.re-attempt').disable();
                                             table.draw(true);
                                             if(data.status == 1) {
 
@@ -375,6 +377,72 @@
                         }
                     },
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(143, session('permissions')))
+                    {
+                        text: 'Re-Attempt',
+                        className: 'btn btn-primary re-attempt',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipment status to Re-Attempt!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function (index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
+                                        $.ajax({
+                                            url:"{{route('admin.month_closing.reattempt')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
+                                            }
+                                        }).done(function (data) {
+                                            UnblockPagePermanently();
+                                            selected_rows = [];
+                                            shipment_remarks = {};
+                                            table.rows().deselect();
+                                            table.button('.close_action').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.draw(true);
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    },
+                    @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -396,6 +464,7 @@
                                     }
 
                                     table.button('.close_action').enable();
+                                    table.button('.re-attempt').enable();
 
                                 }
                             });
@@ -424,6 +493,7 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.close_action').disable();
+                                        table.button('.re-attempt').disable();
                                     }
                                 }
                             });
@@ -484,7 +554,7 @@
                     {data: 'claim_type', name: 'crn.type', class: 'align-middle claim_type'},
                     {data: 'closing_type', name: 'mct.name', class: 'align-middle closing_type'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'remarks', name: 'mc.remarks', class: 'align-middle remarks'},
+                    {data: 'shipment_remarks', name: 'mc.remarks', class: 'align-middle remarks'},
                     {data: 'closing_status', name: 'mcs.name', class: 'align-middle closing_status'},
 
                 ],
@@ -492,11 +562,9 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if(data.month_closing_status_id == 2){
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
+                        table.row(row).select();
                     }
 
                 },
@@ -598,10 +666,12 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.close_action').enable();
+                    table.button('.re-attempt').enable();
 
                 }
                 else {
                     table.button('.close_action').disable();
+                    table.button('.re-attempt').disable();
                 }
 
             });

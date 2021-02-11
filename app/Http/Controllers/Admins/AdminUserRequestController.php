@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admins;
 
 use App\AdminUserRequestHub;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -37,7 +39,8 @@ class AdminUserRequestController extends Controller
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')
             ->leftjoin('admins as as','as.id','=','admin_user_requests.verified_by_hr')
             ->leftjoin('admins as ac','ac.id','=','admin_user_requests.forwarded_by')
-        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by')->orderBy('admin_user_requests.created_at','desc');
+        ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by', 'admin_user_requests.outlook_email')
+            ->orderBy('admin_user_requests.created_at','desc');
 
             if(session('role_id') != 1 && session('department_id') != 2){
                 $users->whereIn('admin_user_requests.status',[0,1]);
@@ -100,6 +103,16 @@ class AdminUserRequestController extends Controller
                     return '-';
                 }
             })
+            ->editColumn('outlook_email', function ($user) {
+                if($user->outlook_email == 0){
+                    return 'No';
+                }
+                else if($user->outlook_email == 1){
+                    return 'Yes';
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn('action', function($user) {
                 $verify = '<button type="button" class="dropdown-item verify"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Verify Info</div></button>';
                 $add_role = '<button type="button" class="dropdown-item addrole"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-user-plus"></i></div><div class="col-9 offset-1">Add Role</div></button>';
@@ -118,9 +131,6 @@ class AdminUserRequestController extends Controller
                     if (session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
                     }
-                    if (session('role_id') == 1 && $user->status == 2) {
-                        $dropdown .= $forwarded_by;
-                    }
                     if ((session('role_id') == 1 && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
                         $dropdown .= $view_details;
                     }
@@ -132,18 +142,23 @@ class AdminUserRequestController extends Controller
 
     public function user_request_add_index() {
         $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
-             ->join('admin_departments as ad','ad.id','=','ar.department_id')
+            ->join('admin_departments as ad','ad.id','=','ar.department_id')
             ->where('admins.id',Auth::id())
             ->select('ad.id','ad.name')->get();
 
         if(session('role_id') == 1){
-            $departments = AdminDepartment::all();
+            $departments = AdminDepartment::where('id', '!=', 1)->get();
         }
-
         $hubs = City::where('hub', 1)->get();
         return view('admin.user_management.user_request.add.index')->with(['departments' => $departments, 'hubs' => $hubs]);
     }
     public function user_add_store(Request $request) {
+        if($request->has('outlook_email')){
+            $outlook_email = 1;
+        }
+        else{
+            $outlook_email = 0;
+        }
         $admin = new AdminUserRequest();
 
         $admin->name = $request->input('name');
@@ -151,6 +166,7 @@ class AdminUserRequestController extends Controller
         $admin->designation = $request->input('designation');
         $admin->request_added_by = Auth::id();
         $admin->request_created_at = Carbon::now();
+        $admin->outlook_email = $outlook_email;
         $admin->save();
 
         if ($request->has('hub_ids')) {
@@ -163,37 +179,56 @@ class AdminUserRequestController extends Controller
             }
         }
 
+        NotificationsController::send(200, $admin->id);
+
         return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been added!']);
     }
 
     public function verify_index($id) {
+        if(session('role_id') == 1 || session('department_id') == 10) {
+            $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
+            $hubs = City::where('hub', 1)->get();
+            $user = AdminUserRequest::find($id);
+            $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
 
-        $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
-        $hubs = City::where('hub', 1)->get();
-        $user = AdminUserRequest::find($id);
-        $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
-
-          return view('admin.user_management.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
-
+              return view('admin.user_management.user_request.verify.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        }
+        else{
+            return view('admin.access_denied');
+        }
     }
 
     public function verify_store(Request $request, $id) {
 
-            $admin = AdminUserRequest::find($id);
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-            $admin->name = $request->input('name');
-            $admin->trax_id = $request->input('trax_id');
-            $admin->email = $request->input('email');
-            $admin->phone_number = $request->input('phone_number');
-            $admin->cnic = $request->input('cnic');
-            $admin->department = $request->input('department');
-            $admin->designation = $request->input('designation');
-            $admin->default_hub_id = $request->input('default_hub');
-            $admin->verified_by_hr = Auth::id();
-            $admin->verified_by_hr_at = Carbon::now();
-            $admin->password = bcrypt($request->input('password'));
-            $admin->status = 1;
-            $admin->save();
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
+
+        $admin = AdminUserRequest::find($id);
+
+        $admin->name = $request->input('name');
+        $admin->trax_id = $trax_id;
+        $admin->email = $request->input('email');
+        $admin->phone_number = $request->input('phone_number');
+        $admin->cnic = $request->input('cnic');
+        $admin->department = $request->input('department');
+        $admin->designation = $request->input('designation');
+        $admin->default_hub_id = $request->input('default_hub');
+        $admin->verified_by_hr = Auth::id();
+        $admin->verified_by_hr_at = Carbon::now();
+        $admin->password = bcrypt($request->input('password'));
+        $admin->visible_password = $request->input('password');
+        $admin->status = 1;
+        $admin->save();
 
         if ($request->has('hub_ids')) {
             $current_hub_ids = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
@@ -215,6 +250,7 @@ class AdminUserRequestController extends Controller
         else {
             AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
         }
+        NotificationsController::send(201, $admin->id);
             return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been verified!']);
     }
 
@@ -258,25 +294,28 @@ class AdminUserRequestController extends Controller
     }
 
     public function user_save_index($id) {
-        if (session('role_id') != 1) {
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+        if(session('role_id') == 1) {
+            if(session('role_id') != 1) {
+                $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+            }
+            else{
+                $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            }
+            $departments = AdminDepartment::select('id','name')->get();
+            $hubs = City::where('hub', 1)->get();
+            $user = AdminUserRequest::find($id);
+            $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
+
+            return view('admin.user_management.user_request.save.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user,'roles'=> $roles ,'user_hubs' => $user_hubs]);
         }
         else{
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            return view('admin.access_denied');
         }
-        $departments = AdminDepartment::select('id','name')->get();
-        $hubs = City::where('hub', 1)->get();
-        $user = AdminUserRequest::find($id);
-        $user_hubs = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
-
-        return view('admin.user_management.user_request.save.index')->with(['departments' => $departments, 'hubs' => $hubs, 'user' => $user,'roles'=> $roles ,'user_hubs' => $user_hubs]);
-
     }
     public function user_save(Request $request, $id) {
 
         $admin_user_request = AdminUserRequest::find($id);
         $admin_user_request->name = $request->input('name');
-        $admin_user_request->trax_id = $request->input('trax_id');
         $admin_user_request->email = $request->input('email');
         $admin_user_request->phone_number = $request->input('phone_number');
         $admin_user_request->cnic = $request->input('cnic');
@@ -286,68 +325,71 @@ class AdminUserRequestController extends Controller
         $admin_user_request->verified_by_hr = Auth::id();
         $admin_user_request->verified_by_hr_at = Carbon::now();
         $admin_user_request->password = bcrypt($request->input('password'));
-        $admin_user_request->status = 2;
+        $admin_user_request->visible_password = $request->input('password');
+        if($admin_user_request->outlook_email == 1){
+            $admin_user_request->visible_outlook_password = $request->input('visible_outlook_password');
+        }
+
+        $admin_user_request->forwarded_by = Auth::id();
+        $admin_user_request->forwarded_at = Carbon::now();
+        $admin_user_request->status = 3;
+//        $admin_user_request->status = 2;
         $admin_user_request->save();
 
 
-        if( $admin_user_request->status == 2) {
+        $admin = new Admin();
 
-            $admin = new Admin();
-
-            $admin->name = $request->input('name');
-            $admin->email = $request->input('email');
-            $admin->trax_id = $request->input('trax_id');
-            $admin->phone_number = $request->input('phone_number');
-            $admin->cnic = $request->input('cnic');
-            /* $admin->department = $request->input('department');*/
-            $admin->designation = $request->input('designation');
-            $admin->default_hub_id = $request->input('default_hub');
-            $admin->password = $admin_user_request->password;
-            $admin->created_at = Carbon::now();
-            $admin->updated_at = $admin->created_at;
-            if ($request->has('api_token')) {
-                $admin->api_token = $request->input('api_token');
-            }
-            if ($request->has('role_id')) {
-                $admin->role_id = $request->input('role_id');
-            }
-            $admin->status = 1;
-            $admin->save();
-            $admin_ids = $admin->id;
-
-
-            if ($request->has('hub_ids')) {
-                $current_hub_ids = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
-
-                $delete_hub_ids = array_diff($current_hub_ids, $request->input('hub_ids'));
-                $new_hub_ids = array_diff($request->input('hub_ids'), $current_hub_ids);
-
-                AdminUserRequestHub::where('admin_user_requests_id', $id)->whereIn('hubs_id', $delete_hub_ids)->delete();
-
-                foreach ($new_hub_ids as $hub_id) {
-                    $admin_hub = new AdminUserRequestHub();
-                    $admin_hub->admin_user_requests_id = $id;
-                    $admin_hub->hubs_id = $hub_id;
-
-                    $admin_hub->save();
-
-                }
-                $new_hub_ids = $request->input('hub_ids');
-                foreach ($new_hub_ids as $hub_id) {
-                    $save_hub_id = new AdminHub();
-                    $save_hub_id->admin_id = $admin_ids;
-                    $save_hub_id->hub_id = $hub_id;
-                    $save_hub_id->save();
-                }
-            } else {
-                AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
-            }
-
-            return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been Saved!']);
+        $admin->name = $request->input('name');
+        $admin->email = $request->input('email');
+        $admin->trax_id = $admin_user_request->trax_id;
+        $admin->phone_number = $request->input('phone_number');
+        $admin->cnic = $request->input('cnic');
+        /* $admin->department = $request->input('department');*/
+        $admin->designation = $request->input('designation');
+        $admin->default_hub_id = $request->input('default_hub');
+        $admin->password = $admin_user_request->password;
+        $admin->created_at = Carbon::now();
+        $admin->updated_at = $admin->created_at;
+        if ($request->has('api_token')) {
+            $admin->api_token = $request->input('api_token');
         }
-        else {
-            return redirect()->route('admin.access_denied');
-         }
+        if ($request->has('role_id')) {
+            $admin->role_id = $request->input('role_id');
+        }
+        $admin->status = 1;
+        $admin->save();
+        $admin_ids = $admin->id;
+
+
+        if ($request->has('hub_ids')) {
+            $current_hub_ids = AdminUserRequestHub::where('admin_user_requests_id', $id)->pluck('hubs_id')->toArray();
+
+            $delete_hub_ids = array_diff($current_hub_ids, $request->input('hub_ids'));
+            $new_hub_ids = array_diff($request->input('hub_ids'), $current_hub_ids);
+
+            AdminUserRequestHub::where('admin_user_requests_id', $id)->whereIn('hubs_id', $delete_hub_ids)->delete();
+
+            foreach ($new_hub_ids as $hub_id) {
+                $admin_hub = new AdminUserRequestHub();
+                $admin_hub->admin_user_requests_id = $id;
+                $admin_hub->hubs_id = $hub_id;
+
+                $admin_hub->save();
+
+            }
+            $new_hub_ids = $request->input('hub_ids');
+            foreach ($new_hub_ids as $hub_id) {
+                $save_hub_id = new AdminHub();
+                $save_hub_id->admin_id = $admin_ids;
+                $save_hub_id->hub_id = $hub_id;
+                $save_hub_id->save();
+            }
+        } else {
+            AdminUserRequestHub::where('admin_user_requests_id', $id)->delete();
+        }
+        NotificationsController::send(202, $admin_user_request->id);
+
+        return redirect()->route('admin.user_management.user_requests.index')->with(['success' => 'User: ' . $request->input('name') . ' has been Saved!']);
     }
 
   public function forward(Request $request){

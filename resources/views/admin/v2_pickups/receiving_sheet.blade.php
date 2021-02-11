@@ -87,6 +87,42 @@
 
         </div>
     </div>
+    <div class="modal fade" id="total_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="total_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="total_shipments_modal_title">Total Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="total_shipments_arrived_modal" data-backdrop="static" role="dialog" aria-labelledby="total_shipments_arrived_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="total_shipments_arrived_modal_title">Arrived Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -147,8 +183,8 @@
                                 row.push(values.id);
                                 row.push(values.date);
                                 row.push(values.rider);
-                                row.push(values.total_shipment);
-                                row.push(values.total_arrived);
+                                row.push(values.total_shipment_count);
+                                row.push(values.total_arrived_count);
                                 row.push(values.rider_picked);
                                 body.push(row);
                             });
@@ -225,8 +261,8 @@
                     {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id'},
                     {data: 'date', name: 'v2_pickup_notes.created_at', class: 'align-middle text_center date'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text_center rider'},
-                    {data: 'total_shipment', name: 'total_shipment', class: 'text_center align-middle total_shipment'},
-                    {data: 'total_arrived', name: 'total_arrived', class: 'text_center align-middle total_arrived'},
+                    {data: 'total_shipment', name: 'total_shipment', class: 'text_center text-center total_shipment'},
+                    {data: 'total_arrived', name: 'total_arrived', class: 'text_center text-center total_arrived'},
                     {data: 'rider_picked', name: 'rider_picked', class: 'align-middle rider_picked'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -357,6 +393,59 @@
 
 
             });*/
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click','#datatable tbody tr td.total_shipment button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#total_shipments_modal .modal-body').html('');
+                $('#total_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.rider_receiving.total_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.booked) {
+                                $.each(data.booked, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#total_shipments_modal .modal-body').html(shipments);
+                        }
+                    });
+            });
+
+            $('body').on('click','#datatable tbody tr td.total_arrived button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var total_received = parseInt($(this).parents('tr').attr('id'));
+                $('#total_shipments_arrived_modal .modal-body').html('');
+                $('#total_shipments_arrived_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.rider_receiving.arrived_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.arrived) {
+                                $.each(data.arrived, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#total_shipments_arrived_modal .modal-body').html(shipments);
+                        }
+                    });
+            });
         });
     </script>
 @endsection

@@ -830,7 +830,11 @@ class ReturnController extends Controller
                     ->where('crm.case_nature_id', 1);
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
+            ->leftjoin('admins as cb', function ($join) {
+                $join->on('cb.id', '=', 'shipments_journey.admin_id')
+                    ->where('shipments_journey.shipper_status_id', 20);
+            })
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -886,6 +890,14 @@ class ReturnController extends Controller
                 }
                 else {
                     return $shipment->shipper;
+                }
+            })
+            ->editColumn('return_confirmed_by',function($shipment){
+                if($shipment->return_confirmed_by == null && $shipment->shipper_id != null){
+                    return 'Shipper';
+                }
+                else if($shipment->return_confirmed_by != null && $shipment->shipper_id == null ){
+                    return  $shipment->return_confirmed_by;
                 }
             })
             ->filterColumn('u.name', function ($query, $keyword) {
@@ -1573,7 +1585,7 @@ class ReturnController extends Controller
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','bt.booking_type as service_type'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','bt.booking_type as service_type', 'dns.status as shipment_status'])
             ->where('return_notes.id',$id);
 
         if (session('role_id') != 1) {
@@ -1582,8 +1594,12 @@ class ReturnController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
-
+                if ($deliveries->shipment_status == 0){
+                    return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
+                }
+                else{
+                    return "";
+                }
             })
             ->filterColumn('service_type',function ($query,$keyword){
 
@@ -1628,6 +1644,14 @@ class ReturnController extends Controller
                 }
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>$shipper_status]);
                 ShipmentsJourneyController::add($parcel->id, $shipper_status, NULL, NULL, NULL, NULL, Auth::id(),$request->return_note_id);
+
+                $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                $return_note_data = ReturnNote::find($request->return_note_id);
+                    if($updated_shipments == 0){
+                        $return_note_data->status = 3;
+                        $return_note_data->updated_at = Carbon::now();
+                        $return_note_data->save();
+                    }
 
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{

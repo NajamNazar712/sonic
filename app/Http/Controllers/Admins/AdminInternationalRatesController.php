@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
+use App\Http\Models\HistoryInternationalUserRate;
 use App\http\Models\International\HistoryInternationalRatesCashHandlingCharges;
 use App\http\Models\International\HistoryInternationalRatesDiscountCharges;
 use App\http\Models\International\HistoryInternationalRatesHub;
@@ -25,12 +27,17 @@ use App\Http\Models\InternationalRatesRemark;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\PendingInternationalUserRate;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
+use Yajra\Datatables\Datatables;
+
 class AdminInternationalRatesController extends Controller
 {
     public function __construct() {
@@ -685,22 +692,64 @@ class AdminInternationalRatesController extends Controller
 	public function view_rates_index($id){
         $shipper_id = $id;
         if($shipper_id){
-            $intl_user = InternationalUsersInformation::where('user_id', $shipper_id);
-            if($intl_user->exists()){
-                $user = User::find($shipper_id);
-                $intl_rate_status = InternationalRatesStatus::where('user_id', $shipper_id)->get();
-                $intl_hubs = InternationalRatesHub::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $weight_charges = InternationalRatesWeightCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $cash_charges = InternationalRatesCashHandlingCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $insurance_charges = InternationalRatesInsuranceCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $return_charges = InternationalRatesReturnCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $discount_charges = InternationalRatesDiscountCharges::all()->where('user_id', $shipper_id)->groupBy('box_id');
-                $rate_remarks = InternationalRatesRemark::where('user_id', $shipper_id)->orderBy('created_at','desc')->get();
-                $cities = City::where('business_category_id', 2)->select('id', 'name')->get();
+                $shipper = User::find($shipper_id);
+                if(!$shipper){
+                    return redirect()->back()->with('error', 'No User Found!');
+                }
+                $user_information = InternationalUsersInformation::where('user_id', $shipper_id);
+                if($user_information->exists()){
+                    $user_information = $user_information->first();
+                }
+                else{
+                    $user_information = NULL;
+                }
+                $fuel_charges = 0;
+                $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+                if($fuel_surcharge->exists()){
+                    $fuel_surcharge = $fuel_surcharge->first();
+                    $fuel_charges = $fuel_surcharge->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $exchange_rate_charges = 0;
+                $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                if($exchange_rate->exists()){
+                    $exchange_rate = $exchange_rate->first();
+                    $exchange_rate_charges = $exchange_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $gst = 0;
+                $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+                if($gst_rate->exists()){
+                    $gst_rate = $gst_rate->first();
+                    $gst = $gst_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $margin = 0;
+                if($user_information != NULL){
+                    if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
+                        $international_user_rate = InternationalUserRate::where('user_id', $id);
+                        if($international_user_rate->exists()){
+                            $international_user_rate = $international_user_rate->first();
+                            $margin = $international_user_rate->margin;
+                        }
+                    }
+                    else{
+                        $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
+                        if($international_user_rate->exists()){
+                            $international_user_rate = $international_user_rate->first();
+                            $margin = $international_user_rate->margin;
+                        }
+                    }
+                }
 
-                return view('admin.international.rates.view_rates')->with(['cities' => $cities, 'shipper' => $user, 'rate_statuses' => $intl_rate_status, 'hubs' => $intl_hubs, 'weight_charges' => $weight_charges, 'cash_handling_charges' => $cash_charges, 'insurance_charges' => $insurance_charges, 'return_charges' => $return_charges, 'discount_charges' => $discount_charges,'rate_remarks' => $rate_remarks]);
-            }
-            return redirect()->back()->with('error', 'No User Found!');
+                return view('admin.international.rates_view')->with(['shipper' => $shipper, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst, 'user_information' => $user_information]);
+
         }
         return redirect()->back()->with('error', 'No data found!');
     }
@@ -718,4 +767,300 @@ class AdminInternationalRatesController extends Controller
         $user_information->rejected_reason = $reject_reason;
         $user_information->save();
         return ['success' => 'Rates has been rejected!'];
-    }}
+    }
+
+    public function update_rates_index($id){
+        if($id){
+            $user = User::find($id);
+            if($user){
+                $user_information = NULL;
+                $intl_user_information = InternationalUsersInformation::where('user_id', $user->id);
+                if($intl_user_information->exists()){
+                    $user_information = $intl_user_information->first();
+                }
+
+                $fuel_charges = 0;
+                $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
+                if($fuel_surcharge->exists()){
+                    $fuel_surcharge = $fuel_surcharge->first();
+                    $fuel_charges = $fuel_surcharge->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $exchange_rate_charges = 0;
+                $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
+                if($exchange_rate->exists()){
+                    $exchange_rate = $exchange_rate->first();
+                    $exchange_rate_charges = $exchange_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $gst = 0;
+                $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+                if($gst_rate->exists()){
+                    $gst_rate = $gst_rate->first();
+                    $gst = $gst_rate->setting_value;
+                }
+                else{
+                    return redirect()->back()->with(['error' => 'Rate settings not set!']);
+                }
+                $margin = 0;
+                if($user_information){
+                    if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
+                        $international_user_rate = InternationalUserRate::where('user_id', $id);
+                        if($international_user_rate->exists()){
+                            $international_user_rate = $international_user_rate->first();
+                            $margin = $international_user_rate->margin;
+                        }
+                    }
+                    else{
+                        $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
+                        if($international_user_rate->exists()){
+                            $international_user_rate = $international_user_rate->first();
+                            $margin = $international_user_rate->margin;
+                        }
+                    }
+                }
+
+                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst, 'user_information' => $user_information]);
+            }
+            return redirect()->back()->with('error', 'No User Found!');
+        }
+        return redirect()->back()->with('error', 'No data found!');
+
+    }
+
+    public function standard_rates_list(Request $request, $id){
+
+        $margin = 0;
+        $intl_user_information = InternationalUsersInformation::where('user_id', $id);
+        if($intl_user_information->exists()){
+            $user_information = $intl_user_information->first();
+            if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
+                $international_user_rate = InternationalUserRate::where('user_id', $id);
+                if($international_user_rate->exists()){
+                    $international_user_rate = $international_user_rate->first();
+                    $margin = $international_user_rate->margin;
+                }
+            }
+            else{
+                $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
+                if($international_user_rate->exists()){
+                    $international_user_rate = $international_user_rate->first();
+                    $margin = $international_user_rate->margin;
+                }
+            }
+        }
+
+        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+
+        return Datatables::of($rates_list)
+            ->editColumn('zone_1', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_1, 2);
+                }
+                else{
+                    return $rate->zone_1;
+                }
+            })
+            ->editColumn('zone_2', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_2, 2);
+                }
+                else{
+                    return $rate->zone_2;
+                }
+            })
+            ->editColumn('zone_3', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_3, 2);
+                }
+                else{
+                    return $rate->zone_3;
+                }
+            })
+            ->editColumn('zone_4', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_4, 2);
+                }
+                else{
+                    return $rate->zone_4;
+                }
+            })
+            ->editColumn('zone_5', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_5, 2);
+                }
+                else{
+                    return $rate->zone_5;
+                }
+            })
+            ->editColumn('zone_6', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_6, 2);
+                }
+                else{
+                    return $rate->zone_6;
+                }
+            })
+            ->editColumn('zone_7', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_7, 2);
+                }
+                else{
+                    return $rate->zone_7;
+                }
+            })
+            ->editColumn('zone_8', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_8, 2);
+                }
+                else{
+                    return $rate->zone_8;
+                }
+            })
+            ->editColumn('zone_9', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_9, 2);
+                }
+                else{
+                    return $rate->zone_9;
+                }
+            })
+            ->editColumn('zone_10', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_10, 2);
+                }
+                else{
+                    return $rate->zone_10;
+                }
+            })
+            ->editColumn('zone_11', function ($rate) use ($margin){
+                if($margin > 0){
+                    return round($zone = ((100 + $margin) / 100) * $rate->zone_11, 2);
+                }
+                else{
+                    return $rate->zone_11;
+                }
+            })
+
+            ->make(true);
+    }
+
+    public function update_rates_submit(Request $request){
+
+        $shipper_id = $request->shipper_id;
+        if(!$shipper_id){
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+
+        $shipper = User::find($shipper_id);
+        if(!$shipper){
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+
+        if($request->authorize == 1){
+            $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
+            $intl_user_information->status = 1;
+            $intl_user_information->save();
+
+            if($shipper->status != 3){
+                $shipper->status = 2;
+                $shipper->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+            return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+
+        }
+        else if ($request->approve == 1) {
+            $intl_user_information = InternationalUsersInformation::where('user_id', $shipper_id)->first();
+            $intl_user_information->status = 1;
+            $intl_user_information->save();
+
+            if($previous_rate_status = InternationalUserRate::where('user_id', $shipper_id)->first()){
+                $history_international_user_rate = new HistoryInternationalUserRate();
+                $history_international_user_rate->user_id = $previous_rate_status->user_id;
+                $history_international_user_rate->margin = $previous_rate_status->margin;
+                $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
+                $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
+                $history_international_user_rate->save();
+            }
+
+
+            InternationalUserRate::where('user_id', $shipper_id)->delete();
+
+
+            if($pending_rate_statuses = PendingInternationalUserRate::where('user_id', $shipper_id)->first()){
+                    $international_user_rates = new InternationalUserRate();
+                    $international_user_rates->user_id = $pending_rate_statuses->user_id;
+                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
+                    $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
+                    $international_user_rates->save();
+            }
+
+            PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
+
+            if($shipper->status != 3){
+                $shipper->status = 2;
+                $shipper->save();
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+            if($shipper->status == 3){
+                return redirect()->route('admin.accounts.active')->with('success', 'Rates approved successfully!');
+            }
+            else {
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates approved successfully!');
+            }
+        }
+        else{
+            $new_rate_flag = false;
+            $international_user_info = InternationalUsersInformation::where('user_id', $shipper_id);
+            if(!$international_user_info->exists()){
+                $international_user_info = new InternationalUsersInformation();
+                $international_user_info->user_id = $shipper_id;
+                $international_user_info->status = 4;
+                $new_rate_flag = true;
+            }
+            else{
+                $international_user_info = $international_user_info->first();
+                $international_user_info->status = 2;
+            }
+            $international_user_info->save();
+            if($new_rate_flag == false){
+                PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
+
+                $international_user_rates = new PendingInternationalUserRate();
+                $international_user_rates->user_id = $shipper_id;
+                $international_user_rates->margin = $request->margin;
+                $international_user_rates->updated_by = Auth::id();
+                $international_user_rates->rates_updated_at = Carbon::now();
+                $international_user_rates->save();
+            }
+            else{
+                $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
+                if($international_user_rates->exists()){
+                    $international_user_rates = $international_user_rates->first();
+                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->updated_by = Auth::id();
+                    $international_user_rates->rates_updated_at = Carbon::now();
+
+                }
+                else{
+                    $international_user_rates = new InternationalUserRate();
+                    $international_user_rates->user_id = $shipper_id;
+                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->updated_by = Auth::id();
+                    $international_user_rates->rates_updated_at = Carbon::now();
+                }
+                $international_user_rates->save();
+            }
+
+            return redirect()->back()->with('success', 'Rates updated successfully!');
+        }
+
+    }
+
+}

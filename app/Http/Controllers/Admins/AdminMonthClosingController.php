@@ -15,6 +15,7 @@ use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
+use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -333,21 +334,28 @@ class AdminMonthClosingController extends Controller
          $not_updated_shipments = array();
          $untouched = false;
             if(!empty($shipment_ids)){
-
                 foreach ($shipment_ids as $shipment){
                     $parcel = Shipment::find($shipment);
                     if($parcel){
-                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+                        $month_closing = MonthClosing::where('shipment_id', $parcel->id)->where('status_id', 3);
+                        if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
+                            MonthClosingResponsible::where('month_closing_id', $month_closing->id)->delete();
+                            $month_closing->delete();
 
-                        NotificationsController::send(15, 0, $shipment);
-                        NotificationsController::send(16, 0, $shipment);
+                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+                            ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+                            NotificationsController::send(15, 0, $shipment);
+                            NotificationsController::send(16, 0, $shipment);
+                        }
+                        else{
+                            $not_updated_shipments[] = $shipment;
+                        }
                     }
                     else{
                         $not_updated_shipments[] = $shipment;
                     }
                 }
-
             }
          if(count($not_updated_shipments) > 0){
              $untouched = true;
@@ -360,7 +368,8 @@ class AdminMonthClosingController extends Controller
     public function pending_index(){
         $closing_types = MonthClosingType::all();
         $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->with(['role.department'])->get();
-        return view('admin.month_closing.pending')->with(['admins' => $admins, 'closing_types' => $closing_types]);
+        $riders = Rider::where('status',1)->get();
+        return view('admin.month_closing.pending')->with(['admins' => $admins, 'riders' => $riders, 'closing_types' => $closing_types]);
     }
 
     public function pending_list(Request $request){
@@ -466,37 +475,54 @@ class AdminMonthClosingController extends Controller
 
     }
     public function assign_responsible_submit(Request $request){
-        $responsible_persons = $request->responsible_persons;
-        if(count($responsible_persons) > 0){
-            $month_closing = new MonthClosing();
-            $month_closing->shipment_id = $request->shipment_id;
-            $month_closing->status_id = 1;
-            $month_closing->added_by = Auth::id();
-            $month_closing->remarks = $request->remarks;
-            $month_closing->save();
-            $month_closing_id = $month_closing->id;
-            $individual_flag = FALSE;
-            if($request->has('deduct_switch')){
-                $individual_flag = TRUE;
-            }
-
-            foreach ($responsible_persons as $person_id){
-                $month_closing_responsible = new MonthClosingResponsible();
-                $month_closing_responsible->month_closing_id = $month_closing_id;
-                $month_closing_responsible->responsible_person_id = $person_id;
-                $month_closing_responsible->added_by = Auth::id();
-                if($individual_flag){
-                    $month_closing_responsible->amount = $request->deduct_amount_individual[$person_id];
-                }else{
-                    $month_closing_responsible->amount = $request->deduct_amount;
-                }
-                $month_closing_responsible->save();
-            }
-
-            return redirect()->back()->with('success', 'Responsible Person(s) updated successfully!');
-
+        if($request->has('responsible_persons')){
+            $responsible_persons = $request->responsible_persons;
         }
-        return redirect()->back()->with('error', 'No responsible persons selected!');
+        else{
+            $responsible_persons = $request->rider_responsible_persons;
+        }
+        $shipment_ids = explode(',', $request->shipment_ids);
+        foreach ($shipment_ids as $shipment_id) {
+            $month_closing = MonthClosing::where('shipment_id', $shipment_id);
+            if(!$month_closing->exists()){
+                if(count($responsible_persons) > 0){
+                    $month_closing = new MonthClosing();
+                    $month_closing->shipment_id = $shipment_id;
+                    $month_closing->status_id = 1;
+                    $month_closing->added_by = Auth::id();
+                    $month_closing->remarks = $request->remarks;
+                    $month_closing->save();
+                    $month_closing_id = $month_closing->id;
+                    $individual_flag = FALSE;
+                    if($request->has('deduct_switch')){
+                        $individual_flag = TRUE;
+                    }
+                    $user_flag = FALSE;
+                    if($request->has('user_switch')){
+                        $user_flag = TRUE;
+                    }
+
+                    foreach ($responsible_persons as $person_id){
+                        $month_closing_responsible = new MonthClosingResponsible();
+                        $month_closing_responsible->month_closing_id = $month_closing_id;
+                        if($user_flag){
+                            $month_closing_responsible->admin = 0;
+                        }else{
+                            $month_closing_responsible->admin = 1;
+                        }
+                        $month_closing_responsible->responsible_person_id = $person_id;
+                        $month_closing_responsible->added_by = Auth::id();
+                        if($individual_flag){
+                            $month_closing_responsible->amount = $request->deduct_amount_individual[$person_id];
+                        }else{
+                            $month_closing_responsible->amount = $request->deduct_amount;
+                        }
+                        $month_closing_responsible->save();
+                    }
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Responsible Person(s) updated successfully!');
     }
 
     public function closing_status_submit(Request $request){

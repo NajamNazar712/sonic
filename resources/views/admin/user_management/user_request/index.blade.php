@@ -125,6 +125,7 @@
                                     <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Email</th>
+                                    <th class="border-primary border-darken-1">Outlook Email Required (Yes/No)</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Department</th>
@@ -200,6 +201,7 @@
                             head.push('Trax Id');
                             head.push('Name');
                             head.push('Email');
+                            head.push('OutLook Email Required (Yes/No)');
                             head.push('Phone Number');
                             head.push('CNIC');
                             head.push('Department');
@@ -220,6 +222,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.email);
+                                row.push(values.outlook_email);
                                 row.push(values.phone_number);
                                 row.push(values.cnic);
                                 row.push(values.department);
@@ -256,7 +259,7 @@
                     }
                 },{
                         extend: 'excel',
-                        title: 'Users',
+                        title: 'User Requests',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
@@ -273,13 +276,14 @@
                 serverSide: true,
                 ajax: '{{ route('admin.user_management.user_requests.list') }}',
                 rowId: 'id',
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     //{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'admin_user_requests.trax_id', class: 'align-middle trax_id'},
                     {data: 'name', name: 'admin_user_requests.name', class: 'align-middle name'},
                     {data: 'email', name: 'admin_user_requests.email', class: 'align-middle email'},
+                    {data: 'outlook_email', name: 'admin_user_requests.outlook_email', class: 'align-middle outlook_email'},
                     {data: 'phone_number', name: 'admin_user_requests.phone_number', class: 'align-middle phone_number'},
                     {data: 'cnic', name: 'admin_user_requests.cnic', class: 'align-middle cnic'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},

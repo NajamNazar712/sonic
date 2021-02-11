@@ -37,6 +37,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Return Pending for</th>
+                        <th class="border-primary border-darken-1">Return Confirmed By</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -147,6 +148,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Return Pending For');
+                            head.push('Return Confirmed By');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Arrival Date');
@@ -171,6 +173,7 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.return_pending_for);
+                                row.push(values.return_confirmed_by);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.arrival);
@@ -230,6 +233,7 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
+                    {data: 'return_confirmed_by', name: 'cb.name', class: 'align-middle return_confirmed_by', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},

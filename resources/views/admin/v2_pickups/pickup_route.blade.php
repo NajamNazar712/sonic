@@ -769,7 +769,6 @@
                 }
             });
 
-
         $( "#editRouteForm" ).validate({
 
             errorClass:"danger",
@@ -854,7 +853,6 @@
 
         });
 
-        });
         $('#assign_location').on('hide.bs.modal', function () {
             //$('#pickup_address').val('').trigger('change');
             $('#pickup_address').empty().trigger('change');
@@ -867,6 +865,8 @@
             rows_count = 0;
             // $('#return_note_image_view_table tbody').html('');
         });
+    });
+
     </script>
 
 @endsection

@@ -3631,7 +3631,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -5897,7 +5897,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
                     $sales_commission->commission = $total_commission;
-                    $sales_commission->added_by = Auth::id();
+                    $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
@@ -7186,7 +7186,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as poc','poc.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7428,12 +7428,16 @@ class AdminDashboardController extends Controller
                     if(session('role_id') == 1 || in_array(365, session('permissions'))){
                         $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
                     }
                     else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
                     $dropdown .= '
@@ -7469,7 +7473,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as p','p.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.address as address'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7718,11 +7722,16 @@ class AdminDashboardController extends Controller
                 }
                 if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
 
-                    if(!InternationalUsersInformation::where('user_id', $result->id)->exists()){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.add.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                    }else{
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.edit.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    }
+                    else{
+                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                        }
+                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        }
                     }
 
 
@@ -7978,9 +7987,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->join('city_deliveries as cd', 'cities.id','=', 'cd.city_id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'cd.shipping_mode_id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'sm.mode as modes']);
+            ->select(['cities.id as city_id','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -7998,19 +8005,6 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-//        ->filterColumn('status', function($query, $keyword) {
-//            $keyword = strtolower($keyword);
-//
-//            if (strpos('active', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 1);
-//            }
-//            else if (strpos('inactive', $keyword) !== FALSE) {
-//                $query->where('cities.status', '=', 0);
-//            }
-//            else {
-//                $query->whereRaw('false');
-//            }
-//        })
             ->addColumn('location', function ($result){
                 $location = '<div class="text-center">';
                 if($result->location_latitude != null && $result->location_longitude != null) {
@@ -8690,7 +8684,6 @@ class AdminDashboardController extends Controller
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'trax_id'=>'required|max:255|string',
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -8698,7 +8691,18 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. $trax_id;
+        }
+        else{
+            $trax_id = null;
+        }
         $rider = Rider::create([
             'city_id'=>$request->city_id,
             'name'=>$request->rider_name,
@@ -8711,7 +8715,7 @@ class AdminDashboardController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
-            'trax_id' => $request->trax_id,
+            'trax_id' => $trax_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -8735,7 +8739,6 @@ class AdminDashboardController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
-            'trax_id'=>'required|string',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -8765,7 +8768,6 @@ class AdminDashboardController extends Controller
         $rider->route_id = $request->route_id;
 
         $rider->rider_category_id = $request->rider_category;
-        $rider->trax_id = $request->trax_id;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
@@ -9123,6 +9125,10 @@ class AdminDashboardController extends Controller
         ]);
         if($request->password == $request->confirm_password){
             Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            if(session()->has('first_login') && session('first_login') != 1){
+                session(['first_login' => 1]);
+                Admin::where('id',Auth::id())->update(['first_login' => 1]);
+            }
             return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
         }
         else{
@@ -9646,7 +9652,7 @@ class AdminDashboardController extends Controller
 
         $user_id = $request->user_id;
         if($user_id != null){
-            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.status',1)->get();
+            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.hidden',0)->get();
             if($addresses)
             {
                 return response()->json(['status'=> 1,'addresses' => $addresses]);
@@ -9691,12 +9697,11 @@ class AdminDashboardController extends Controller
         $kam = $request->kam;
         $ref = $request->ref;
         $shipper_ids = $request->shipper_ids;
-
-        if($kam == null  || $poc == null  || $ref == null){
-            return response()->json(['status'=>0,'error'=>"All fields are mandatory!"]);
-        }
-        else{
-            if($shipper_ids) {
+         if($kam == null && $poc == null && $ref == null){
+             return response()->json(['status'=>0,'error'=>"One field is mandatory!"]);
+         }
+         else{
+         if($shipper_ids) {
                 foreach ($shipper_ids as $shipper_id) {
                     $sale_tier =  SaleTierTag::where('user_id',$shipper_id);
                     if($sale_tier->exists()){
@@ -9777,6 +9782,27 @@ class AdminDashboardController extends Controller
         }
 
      }
+
+//     public function modesAjax(Request $request) {
+//        $city_id = $request->id;
+//        $shipping_mode_ids = CityDelivery::select('shipping_mode_id')->where('city_id', $city_id);
+//
+//        if($shipping_mode_ids->exists()){
+//            $shipping_modes = $shipping_mode_ids->get();
+//            $data = array();
+//            foreach($shipping_modes as $id){
+//                $shipping_mode = ShippingMode::find($id)->mode;
+////                dd($shipping_mode);
+//                $name = $shipping_mode;
+//                dd($name);
+//                $data[] = $name;
+//            }
+//            return response()->json(['status' => 1, 'shipping_mode' => $data]);
+//        }
+//        else {
+//            return response()->json(['status' => 0, 'No Shipping mode found!']);
+//        }
+//     }
 
 }
 

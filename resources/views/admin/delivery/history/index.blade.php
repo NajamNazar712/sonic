@@ -105,6 +105,26 @@
     </div>
     <!--Shipments popup -->
 
+    <!--Signature popup -->
+    <div class="modal fade" id="signature_modal" data-backdrop="static" role="dialog" aria-labelledby="signature_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Signature</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -486,6 +506,16 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click','tr td.signature_via_app button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#signature_modal .modal-body').html(image);
+
+                $('#signature_modal').modal('show');
             });
 
         });

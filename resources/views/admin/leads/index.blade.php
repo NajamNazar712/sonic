@@ -17,6 +17,7 @@
                             <div class="card-body">
                                 <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
                                     <div class="row justify-content-center">
+                                        <input type="hidden" name="search_statistics_div" id="search_statistics_div" value="">
                                         <div class="form-group col">
                                             <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}" data-rule-required="true" data-msg-required="This field is required">
                                         </div>
@@ -47,7 +48,7 @@
                     </div>
                 </div>
                 <div class="row justify-content-center">
-                        <div class="col-3">
+                        <div class="col-3" id="total_leads_div">
                             <div class="card bg-gradient-directional-booked_shipments pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -64,7 +65,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3" id="in_process_div">
                             <div class="card bg-gradient-directional-in_transit pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -81,7 +82,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3" id="matured_leads_div">
                             <div class="card bg-gradient-directional-return_delivered pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -100,7 +101,7 @@
                         </div>
                     </div>
                 <div class="row justify-content-center">
-                        <div class="col-3">
+                        <div class="col-3" id="pending_for_activation_div">
                             <div class="card bg-gradient-directional-pending_shipments pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -110,14 +111,14 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="pending_for_activation">{{$leads['pending_for_activation']}}</h3>
-                                                <span>Request(s) pending for Activation</span>
+                                                <span>Request(s) Pending for Activation</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3" id="lead_time_ratio_div">
                             <div class="card bg-gradient-directional-destination pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -149,6 +150,7 @@
                         <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
+                        <th class="border-primary border-darken-1">Sale Person Tagged At</th>
                         <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
@@ -528,6 +530,7 @@
                             head.push('Message');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
+                            head.push('Sale Person Tagged At');
                             head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Aging');
@@ -546,6 +549,7 @@
                                 row.push(values.message);
                                 row.push(values.requested_date);
                                 row.push(values.sale_person);
+                                row.push(values.sale_person_updated_at);
                                 row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.aging);
@@ -659,6 +663,7 @@
                     data: function (d) {
                         d.search_origin = $('#search_origin').val();
                         d.search_sale_person = $('#search_sale_person').val();
+                        d.search_statistics = $('#search_statistics_div').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -676,6 +681,7 @@
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
+                    {data: 'sale_person_updated_at', name:'leads.sale_person_updated_at', class: 'align-middle sale_person_updated_at'},
                     {data: 'reference_person', name:'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
@@ -800,6 +806,16 @@
                 }).then(function(confirm) {
                     if (confirm) {
                         if (assign) {
+                            $('#SalesTagModal').modal('hide');
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Lead is being Tagged!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
                             $.ajax({
                                 url: '{!! route('admin.leads.tag_sale_person') !!}',
                                 method: 'POST',
@@ -826,10 +842,10 @@
 
                                     table.rows().deselect();
                                     $('#saletag').val('').trigger('change');
-                                    $('#SalesTagModal').modal('hide');
                                     table.draw(true);
                                     table.button('.bulk_tagging').disable();
 
+                                    swal.close();
                                 });
                         } else {
                             var error = "Lead Not Selected!";
@@ -853,6 +869,14 @@
                 var tag = parseInt($('#saletag1').val());
                 var refer_person = parseInt($('#reference_person').val());
                 if(tag && refer_person){
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Lead is being forwarded!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     $.ajax({
                         url: '{!! route('admin.leads.tag_sale_person') !!}',
                         method: 'POST',
@@ -874,6 +898,7 @@
                             $('#reference_person').val('').trigger('change');
                             $('#ForwardLeadModal').modal('hide');
                             forward_lead_id = null;
+                            swal.close();
                             table.draw(true);
                         });
                 }else{
@@ -886,7 +911,6 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
-
             });
 
             $('body').on('click','#datatable .lead_log',function(){
@@ -927,12 +951,12 @@
                 });
             });
 
-            $('body').on('click','#datatable .view_remarks',function(){
-                var lead_id = parseInt($(this).parents('tr').attr('id'));
-                var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';
+            {{--$('body').on('click','#datatable .view_remarks',function(){--}}
+            {{--    var lead_id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--    var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';--}}
 
-                window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;
-            });
+            {{--    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;--}}
+            {{--});--}}
 
             $("#update_lead_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Status",
@@ -1060,8 +1084,25 @@
                             $('#ratio').text(data.leads.ratio);
                         }
                     });
+                    $('#search_statistics_div').val(null);
                     table.draw();
                 }
+            });
+            $('#total_leads_div').on('click', function(){
+                $('#search_statistics_div').val(1);
+                table.draw();
+            });
+            $('#in_process_div').on('click', function(){
+                $('#search_statistics_div').val(2);
+                table.draw();
+            });
+            $('#matured_leads_div').on('click', function(){
+                $('#search_statistics_div').val(3);
+                table.draw();
+            });
+            $('#pending_for_activation_div').on('click', function(){
+                $('#search_statistics_div').val(4);
+                table.draw();
             });
         });
 

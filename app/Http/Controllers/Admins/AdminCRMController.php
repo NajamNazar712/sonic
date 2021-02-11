@@ -81,14 +81,17 @@ class AdminCRMController extends Controller
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
-        if($complaint_id == 23 && $receiving_sheet_id != null){
+//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        if($complaint_id == 23){
             $description_text = $request->description ;
-            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            $description = $description_text;
         }
         else{
             $description = $request->description;
         }
         $flag = false;
+        $cannot_change = false;
         $present_shipments = array();
         if ($request->has('payment_request')) {
             if($request->payment_request == 1){
@@ -149,6 +152,7 @@ class AdminCRMController extends Controller
                                             if(in_array($complaint_id, [11, 12, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
                                                 $flag = true;
+                                                $cannot_change = true;
                                             }
                                             else{
                                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -187,6 +191,7 @@ class AdminCRMController extends Controller
                                         if(in_array($complaint_id, [11, 12, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
                                             $flag = true;
+                                            $cannot_change = true;
                                         }
                                         else{
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -205,7 +210,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => 'No shipments selected!'];
                 }
@@ -224,6 +229,7 @@ class AdminCRMController extends Controller
                                     if(in_array($complaint_id, [11, 12, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
                                         $flag = true;
+                                        $cannot_change = true;
                                     }
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -252,6 +258,7 @@ class AdminCRMController extends Controller
                                 if(in_array($complaint_id, [11, 12, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
+                                    $cannot_change = true;
                                 }
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -272,7 +279,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => $request->shipment_id];
                 }
@@ -1858,7 +1865,9 @@ class AdminCRMController extends Controller
                             self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
                         }
                     }
-
+                    if($crm_request->case_nature_id == 4){
+                        NotificationsController::send(117, $crm_request->id, 6);
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
@@ -1896,6 +1905,9 @@ class AdminCRMController extends Controller
                         'agent_id' => Auth::id()
                     ]);
 
+                    if($crm_request->case_nature_id == 4) {
+                        NotificationsController::send(117, $crm_request->id, 4);
+                    }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
@@ -1985,6 +1997,14 @@ class AdminCRMController extends Controller
                         'status_id' => 7,
                         'agent_id' => Auth::id()
                     ]);
+                    if($crm_request->case_nature_id == 4){
+                        NotificationsController::send(117, $crm_request->id, 7);
+                    }
+                }
+                else{
+                    if($crm_request->case_nature_id == 4){
+                        NotificationsController::send(117, $crm_request->id, 4);
+                    }
                 }
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->req_id,
@@ -2006,20 +2026,24 @@ class AdminCRMController extends Controller
     public function close(Request $request){
         $crm_requests = $request->crm_request_ids;
         if($crm_requests){
-            foreach ($crm_requests as $crm_request){
-                CrmRequest::where('id', $crm_request)->update([
+            foreach ($crm_requests as $crm_request_id){
+                CrmRequest::where('id', $crm_request_id)->update([
                     'status_id' => 4
                 ]);
                 CrmRequestStatusHistory::create([
-                    'crm_request_id' => $crm_request,
+                    'crm_request_id' => $crm_request_id,
                     'status_id' => 3,
                     'agent_id' => Auth::id()
                 ]);
                 CrmRequestStatusHistory::create([
-                    'crm_request_id' => $crm_request,
+                    'crm_request_id' => $crm_request_id,
                     'status_id' => 4,
                     'agent_id' => Auth::id()
                 ]);
+                $crm_request = CrmRequest::find($crm_request_id);
+                if($crm_request->case_nature_id == 4){
+                    NotificationsController::send(117, $crm_request->id, 4);
+                }
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
@@ -2390,6 +2414,10 @@ class AdminCRMController extends Controller
                                 }
                             }
 
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 6);
+                            }
+
                         }
                         elseif ($request->valid == 0){
                             CrmRequest::where('id', $crm_request->id)->update([
@@ -2405,6 +2433,10 @@ class AdminCRMController extends Controller
                                 'status_id' => 4,
                                 'agent_id' => Auth::id()
                             ]);
+
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 7);
+                            }
 
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
                         }
@@ -4096,7 +4128,7 @@ class AdminCRMController extends Controller
 
         $shipment = Shipment::find($request->shipment_id);
         if($shipment){
-            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
+//            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
                 if($shipment->receiving_sheet_shipment){
                     $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
                     return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
@@ -4104,10 +4136,10 @@ class AdminCRMController extends Controller
                 else{
                     return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
                 }
-            }
-            else{
-                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
-            }
+//            }
+//            else{
+//                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
+//            }
         }
         return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
