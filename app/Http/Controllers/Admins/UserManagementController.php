@@ -183,18 +183,22 @@ class UserManagementController extends Controller
         $admin->password = bcrypt($request->input('password'));
         $admin->designation = $request->input('designation');
 
-
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
-        if($global_setting->exists()){
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax'. $trax_id;
+        if($request->trax_id != null){
+            $trax_id = $request->trax_id;
         }
         else{
-            $trax_id = null;
+            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+            if($global_setting->exists()){
+                $global_setting = $global_setting->first();
+                $trax_id = $global_setting->setting_value + 1;
+                $global_setting->setting_value = $trax_id;
+                $global_setting->save();
+                $trax_id = 'Trax'. $trax_id;
+            }
+            else{
+                $trax_id = null;
+            }
         }
 
         $admin->trax_id = $trax_id;
@@ -271,6 +275,7 @@ class UserManagementController extends Controller
             $admin->role_id = $request->input('role_id');
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
+            $admin->trax_id = $request->trax_id;
             $admin->designation = $request->input('designation');
 
             if ($request->filled('password')) {
