@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
@@ -21,7 +22,6 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
-use App\Territory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -400,6 +400,7 @@ class RegisterController extends Controller
         $first = TRUE;
 
         foreach ($data['pickup_address'] as $index => $pickup_address) {
+
             if ($first) {
                 UserShippingInfo::create([
                     'user_id' => $newUser->id,
@@ -408,6 +409,7 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
+                    'territory_id' => $data['territory_id'][$index],
                     'default_address' => TRUE
                 ]);
 
@@ -420,7 +422,8 @@ class RegisterController extends Controller
                     'poc' => $data['shipping_poc'][$index],
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
-                    'city_id' => $data['shipping_city'][$index]
+                    'city_id' => $data['shipping_city'][$index],
+                    'territory_id' => $data['territory_id'][$index]
                 ]);
             }
         }
@@ -633,10 +636,18 @@ class RegisterController extends Controller
         }
     }
 
-    public function territory(Request $request){
+    public function territory(Request $request)
+    {
         $city_id = $request->id;
-        $territory = Territory::where('city_id',$city_id);
-
+        if ($city_id) {
+            $territory = Territory::where('city_id', $city_id);
+            if ($territory->exists()) {
+                $territory = $territory->get();
+                return response()->json(['status' => 0, 'territory' => $territory]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'error' => "No Territory found for the selected city"]);
+        }
     }
 
 }

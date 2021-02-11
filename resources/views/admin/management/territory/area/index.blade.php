@@ -376,6 +376,9 @@
 
                 }
             });
+            $('#TerritoryTag').on('hide.bs.modal', function (e) {
+                $('#territory').val('').trigger('change');
+            });
 
 
         });

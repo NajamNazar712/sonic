@@ -150,7 +150,6 @@ class AdminTerritoryController extends Controller
 
       return redirect()->route('admin.management.area.index')->with(['success' => 'Area: ' . $area . ' has been edited!']);
 
-
     }
 
     public function area_tag(Request $request){

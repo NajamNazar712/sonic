@@ -506,6 +506,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+        Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
         //my route
         Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 

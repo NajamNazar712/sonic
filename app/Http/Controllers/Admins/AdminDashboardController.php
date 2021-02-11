@@ -15,6 +15,7 @@ use App\http\Models\Admin\Lead\Lead;
 use App\http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
@@ -7837,11 +7838,11 @@ class AdminDashboardController extends Controller
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
-
         $segments = Segment::all();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments,'territories' => $territories]);
     }
 
     public function updateProfile(Request $request)
@@ -7939,7 +7940,8 @@ class AdminDashboardController extends Controller
     public function getPickups(Request $request)
     {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
+            ->leftjoin('territories as t','t.id','=','user_shipping_infos.territory_id')
+            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor','t.name as territory'])
             ->where('user_id',$request->user_id)
             ->where('hidden', 0);
 
@@ -9814,6 +9816,22 @@ class AdminDashboardController extends Controller
 //            return response()->json(['status' => 0, 'No Shipping mode found!']);
 //        }
 //     }
+
+    public function add_territory(Request $request){
+        $territory = $request->territory;
+        $pickup_ids = $request->pickup_ids;
+        if($pickup_ids){
+            $user_shipping_infos = UserShippingInfo::where('id',$pickup_ids)->get();
+            foreach($user_shipping_infos as $user){
+                $user->territory_id =$territory;
+                $user->save();
+            }
+            return redirect()->back()->with('success', 'Territory is added.');
+        }
+        else{
+            return redirect()->back()->with('error', 'Territory not added.');
+        }
+    }
 
 }
 

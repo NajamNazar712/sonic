@@ -303,10 +303,10 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="territory">Territory:
-                                                            <span class="danger">*</span>
+{{--                                                            <span class="danger">*</span>--}}
                                                         </label>
                                                         <div>
-                                                            <select name="territory" id="territory" class="select2 form-control required" style="width: 100%"></select>
+                                                            <select name="territory_id" id="territory" class="select2 form-control" style="width: 100%"></select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -833,6 +833,8 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
+
+
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            width: '100%',
            placeholder:'Select City',
@@ -877,27 +879,23 @@
                     }
                 }).done(function (data) {
                     if (data.status == 0) {
-                        $('#sale_person').empty();
-
-                        $.each(data.sale_persons, function (key, value) {
+                        $('#territory').empty();
+                        $.each(data.territory, function (key, value) {
                             var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                            $('#sale_person').append(newOption);
+                            $('#territory').append(newOption);
                         });
-                        $('#sale_person').val('').trigger('change');
-
-                        @if($lead != null)
-                        @if($lead->sale_person_id != null)
-                        $('#sale_person').val({{$lead->sale_person_id}}).trigger('change');
-                        @endif
-                        @endif
+                        $('#territory').val('').trigger('change');
+                        
                     } else {
-                        toastr.error(data.error, 'Error!', {
+                        var error = 'No Territory found for the selected city';
+                        toastr.error(error, 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
                     }
                 });
             }
+
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             });
@@ -987,6 +985,10 @@
         });
         $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Segment',
+        });
+        $('select[name="territory_id"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Territory',
+
         });
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
