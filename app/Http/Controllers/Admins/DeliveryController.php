@@ -2899,9 +2899,6 @@ class DeliveryController extends Controller
 
                                     }
 
-                                     if($parcel->amount == 0){
-                                         NotificationsController::send(35, $parcel->id);
-                                     }
                                     if ($parcel->amount == 0) {
                                         $zero_cod_shipments[] = $parcel->id;
                                     }

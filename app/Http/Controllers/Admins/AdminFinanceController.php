@@ -1271,7 +1271,7 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0,3);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0,14);
                 }
                 else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
@@ -1279,7 +1279,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,3);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,14);
                     }
                 }
             }

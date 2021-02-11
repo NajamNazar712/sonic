@@ -1222,7 +1222,7 @@ class VisionSoftAPIController extends Controller
             foreach ($adjustments as $adjustment) {
                 $status_date = '';
 
-                if ($adjustment->type == 1) {
+                if (in_array($adjustment->type, [1, 13])) {
                     $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->where('shipper_status_id', 20)->where('verification', 1);
 
                     if ($journey->exists()) {
@@ -1231,7 +1231,16 @@ class VisionSoftAPIController extends Controller
                         $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
                     }
                 }
-                else if ($adjustment->type == 12) {
+                else if (in_array($adjustment->type, [2, 14])) {
+                    $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1);
+
+                    if ($journey->exists()) {
+                        $journey = $journey->latest('id')->first();
+
+                        $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
+                    }
+                }
+                else if (in_array($adjustment->type, [5, 12])) {
                     $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20])->where('verification', 1);
 
                     if ($journey->exists()) {
