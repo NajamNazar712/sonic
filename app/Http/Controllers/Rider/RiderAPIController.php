@@ -2410,7 +2410,7 @@ class RiderAPIController extends Controller {
             }
             return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
         }
-        return response()->json(['status' => 1, 'message' => 'No Return Delivery Note Assigned']);
+        return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
     }
 
     public function return_shipment_delivered(Request $request)
