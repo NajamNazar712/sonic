@@ -1680,7 +1680,7 @@ class DailyPickupSalesReportController extends Controller
                     })
                     ->whereBetween('shipments.created_at',[$date_from,$date_to])
                     ->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id','!=',1690)
-                    ->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->where('shipments')->get()->count();
+                    ->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->get()->count();
 
 
                 $received = DB::connection('reports')->table('shipments')
