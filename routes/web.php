@@ -833,6 +833,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_index_v2')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_list_v2')->name('list');
         });
+        Route::prefix('un_assigned')->name('un_assigned.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@unassigned_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@unassigned_list')->name('list');
+        });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pending_list')->name('list');
@@ -1952,6 +1956,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+        });
+        Route::prefix('weight_qc')->name('weight_qc.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@weight_qc_list')->name('list');
         });
     });
 

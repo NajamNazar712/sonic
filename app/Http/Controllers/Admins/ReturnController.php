@@ -1641,6 +1641,14 @@ class ReturnController extends Controller
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>$shipper_status]);
                 ShipmentsJourneyController::add($parcel->id, $shipper_status, NULL, NULL, NULL, NULL, Auth::id(),$request->return_note_id);
 
+                $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                $return_note_data = ReturnNote::find($request->return_note_id);
+                    if($updated_shipments == 0){
+                        $return_note_data->status = 3;
+                        $return_note_data->updated_at = Carbon::now();
+                        $return_note_data->save();
+                    }
+
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{
                 return ['status' => 1, 'error' => 'Something went wrong'];

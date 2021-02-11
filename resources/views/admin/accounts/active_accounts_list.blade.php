@@ -62,6 +62,7 @@
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
+                                        <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
@@ -416,6 +417,7 @@
                         head.push('Account Type');
                         head.push('Company Name');
                         head.push('Contact Person');
+                        head.push('Address');
                         head.push('City');
                         head.push('Product Type');
                         head.push('Status');
@@ -448,6 +450,7 @@
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
+                            row.push(values.address);
                             row.push(values.city);
                             row.push(values.product_type);
                             row.push(values.status);
@@ -807,9 +810,6 @@
                                                selected_rows = [];
 
                                                table.rows().deselect();
-                                               $('#poc').val('').trigger('change');
-                                               $('#kam').val('').trigger('change');
-                                               $('#ref').val('').trigger('change');
                                                $('#SalesTierTypeTagModal').modal('hide');
                                                table.draw(true);
                                                table.button('.tag').disable();
@@ -974,6 +974,7 @@
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                {data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -1113,6 +1114,30 @@
         var hub_ids = [];
 
         $('#search_filter_btn').on('click',function () {
+            table.rows().nodes().each(function(index) {
+                var row = table.row(index);
+
+                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                    row.deselect();
+
+                    id = parseInt(row.id());
+
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index !== -1) {
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length == 0) {
+                        table.button('.bulk_tagging').disable();
+                        table.button('.set_commission').disable();
+                        table.button('.approve_commission').disable();
+                        table.button('.set_segment').disable();
+                        table.button('.tag').disable();
+                        hub_ids.splice(index, 1);
+                    }
+                }
+            });
             table.draw();
         });
         $('body').on('change','.blacklist_reason',function() {
@@ -1672,6 +1697,11 @@
                     });
                     form.submit();
             }
+        });
+        $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
+            $('#SalesTierTypeTagModal #poc').val('').trigger('change');
+            $('#SalesTierTypeTagModal #kam').val('').trigger('change');
+            $('#SalesTierTypeTagModal #ref').val('').trigger('change');
         });
 
         $('.close').on('click',function(){

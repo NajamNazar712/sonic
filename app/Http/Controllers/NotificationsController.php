@@ -65,6 +65,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
+use App\Http\Models\Admin\AdminHub;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -2383,12 +2384,10 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $extra_admins = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'waqas.shaikh@trax.pk', 'adeel.ali@trax.pk', 'aftab.ahmad@trax.pk', 'anum.khan@trax.pk', 'malik.asad@trax.pk', 'mohsin.raza@trax.pk', 'hussain.samnani@trax.pk', 'muhammad.faraz@trax.pk', 'shassan.ali@trax.pk', 'danial.khan@trax.pk', 'nayyer.zia@trax.pk', 'ibtisam.awan@trax.pk', 'bilal.baig@trax.pk', 'faizan.afandi@trax.pk', 'nabeel.ahmed@trax.pk', 'ahsan.nadeem@trax.pk', 'hamza.abid@trax.pk', 'shahzeb.joseph@trax.pk', 'faizan.kalam@trax.pk', 'faran.shafiq@trax.pk', 'shahid.jamal@trax.pk', 'syed.anam@trax.pk', 'salman.afzal@trax.pk', 'haroon.iqbal@trax.pk', 'hassan@trax.pk', 'rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'Shamroze.riaz@trax.pk', 'muhammad.waqas@trax.pk','fawwad.haider@trax.pk', 'aamir.chauhan@trax.pk'];
-                    $to = array_merge($to, $extra_admins);
+                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk'];
 
-                    foreach ($to as $individual_to) {
-                        self::email($subject, $body, $individual_to);
-                    }
+                    self::email($subject, $body, $to);
+
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
@@ -4261,20 +4260,65 @@ class NotificationsController extends Controller
 
                 } else if ($id == 57) {
                     $shipper = User::find($reference_1_id);
+                    $shipments = Shipment::where('user_id', $shipper->id);
+                    $complain_date = CrmRequest::where('shipper_id',$shipper->id)->whereIn('status_id',[1,2]);
+                    $resolution_date = CrmRequest::where('shipper_id',$shipper->id)->whereIn('status_id',[3,4]);
                     if ($shipper) {
-                        if (strpos($subject, '[account_id]') !== FALSE) {
-                            $subject = str_replace('[account_id]', $shipper->id, $subject);
+//
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account ID</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date of Registration</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">POC</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Contact</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Address</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Email ID</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Booking Date</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Pickup Date</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Complaint Date</th>
+                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Complaint Resolution Date</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->created_at . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->poc . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->phone . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->address . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->email. '</td>';
+                        if($shipments->exists()){
+                            $shipment = $shipments->latest()->first();
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->created_at. '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_date. '</td>';
+                        }
+                        else{
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                        }
+                        if($complain_date->exists()){
+                            $crm = $complain_date->latest()->first();
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm->created_at. '</td>';
+                        }
+                        else{
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                        }
+                        if($resolution_date->exists()){
+                            $crm = $complain_date->latest()->first();
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm->created_at. '</td>';
+                        }
+                        else{
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
                         }
 
-                        if (strpos($body, '[account_id]') !== FALSE) {
-                            $body = str_replace('[account_id]', $shipper->id, $body);
-                        }
-                        if (strpos($subject, '[shipper_name]') !== FALSE) {
-                            $subject = str_replace('[shipper_name]', $shipper->name, $subject);
-                        }
+                        $html .= '</tr>';
+                        $html .= '</tbody></table>';
 
-                        if (strpos($body, '[shipper_name]') !== FALSE) {
-                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
                         }
 
                         $to = array();
@@ -4295,6 +4339,20 @@ class NotificationsController extends Controller
                         }
 
                         $to[] = $shipper->email;
+
+                        $city_id = $shipper->city_id;
+                        $hub_id = City::find($city_id)->hub_id;
+
+                        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+                        foreach($managers as $rms => $index){
+                          $admin_hubs = AdminHub::where('admin_id',$index);
+                          if($admin_hubs->exists()){
+                             $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
+                             if(in_array($hub_id , $admin_hubs)) {
+                                 $to[] = $rms;
+                             }
+                          }
+                        }
 
                         self::email($subject, $body, $to, $cc);
                     }
@@ -6774,7 +6832,7 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to);
                     }
                 }
-                else if($id == 119){
+				else if($id == 119){
                     $body = $notification->body;
                     $sales_person = $reference_1_id;
                     $admin_id = $reference_2_id;
@@ -6799,7 +6857,187 @@ class NotificationsController extends Controller
                         self::sms($body,$to);
                     }
                 }
+                else if ($id == 120) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
 
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }
+                else if ($id == 121) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $rm = Admin::find($reference_1_id)->email;
+
+                    if ($rm) {
+                        self::email($subject, $body, $rm);
+                    }
+
+                }
+                else if ($id == 122) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }
+                else if ($id == 123) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $rm = Admin::find($reference_1_id)->email;
+
+                    if ($rm) {
+                        self::email($subject, $body, $rm);
+                    }
+
+                }
+                else if ($id == 124) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }
+                else if ($id == 125) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $rm = Admin::find($reference_1_id)->email;
+
+                    if ($rm) {
+                        self::email($subject, $body, $rm);
+                    }
+
+                }
             }
         }
     }

@@ -95,6 +95,14 @@ Route::name('api.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
                 Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
+                Route::post('return', 'Rider\RiderAPIController@return_history')->name('return');
+            });
+
+            Route::prefix('return')->name('return.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@return_summary_multiple')->name('return_summary');
+                Route::post('delivered', 'Rider\RiderAPIController@return_shipment_delivered')->name('delivered');
+                Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
+                Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
             });
 
 		});

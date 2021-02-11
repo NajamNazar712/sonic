@@ -527,7 +527,26 @@ class RegisterController extends Controller
                     <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
                 </div>';
         $body = $html;
-        $to = $newUser->email;
+        $to = array();
+        $to[] = $newUser->email;
+        $admins_sales = Admin::where('role_id', 4)->where('status', 1);
+        if ($admins_sales->exists()) {
+            $to = array_merge($to, $admins_sales->pluck('email')->toArray());
+        }
+        
+        $city_id = $shipper->city_id;
+        $hub_id = City::find($city_id)->hub_id;
+        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+        foreach($managers as $rms => $index){
+            $admin_hubs = AdminHub::where('admin_id',$index);
+            if($admin_hubs->exists()){
+                $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
+                if(in_array($hub_id , $admin_hubs)) {
+                    $to[] = $rms;
+                }
+            }
+        }
+
         $mail = Mail::to($to);
 
         $mail->send(new Notifications($subject, $body, null));
