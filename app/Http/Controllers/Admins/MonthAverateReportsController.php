@@ -359,7 +359,7 @@ class MonthAverateReportsController extends Controller
 
         $assigned_hubs = AdminHub::where('admin_id', $rm_id)->pluck('hub_id')->toArray();
         $hubs = DB::connection('reports')->table('cities')->whereIn('hub_id', $assigned_hubs)->where('pickup', 1)->pluck('id')->toArray();
-        dd($hubs);
+
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
             ->leftjoin('shipments as s', 's.id', '=', 'sj.shipment_id')
             ->select('cities.id as origin_id', 'cities.name as origin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))
@@ -401,20 +401,10 @@ class MonthAverateReportsController extends Controller
         $total_avg_revenue_per_day_count = 0;
         $total_avg_shipment_count = 0;
         $total_month_speed_count = 0;
-        MonthAverage::truncate();
+
         foreach ($months_average as $month_average) {
             $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Avg Revenue/Day' => round($avg_revenue_per_day[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
-            $month_average_entry = new MonthAverage();
-            $month_average_entry->origin_id = $month_average->origin_id;
-            $month_average_entry->shipments = $month_average->shipment_count;
-            $month_average_entry->revenue = round($revenue[$month_average->origin_id], 2);
-            $month_average_entry->avg_revenue = round($avg_revenue[$month_average->origin_id], 2);
-            $month_average_entry->avg_shipments = round($avg_shipment[$month_average->origin_id], 2);
-            $month_average_entry->avg_revenue_per_day = round($avg_revenue_per_day[$month_average->origin_id], 2);
-            $month_average_entry->month_speed = round($month_speed[$month_average->origin_id], 2);
-            $month_average_entry->save();
             $serial++;
-
 
             $total_shipments_count = $total_shipments_count + $month_average->shipment_count;
             $total_revenue_count = $total_revenue_count + $revenue[$month_average->origin_id];

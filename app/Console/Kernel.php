@@ -83,7 +83,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\DailyPickupSalesRMEmail',
 
         'App\Console\Commands\SalePersonShipmentNumbersRM',
-        'App\Console\Commands\SalePersonShipmentNumbers',
+        'App\Console\Commands\SalePersonShipmentNumbersIndividual',
 
         'App\Console\Commands\MonthAverageIndividual',
         'App\Console\Commands\MonthAverageRM',
