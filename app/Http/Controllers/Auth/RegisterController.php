@@ -370,7 +370,8 @@ class RegisterController extends Controller
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
             'lead_id' => $lead_id,
-            'api_token' => uniqid(base64_encode(str_random(60)))
+            'api_token' => uniqid(base64_encode(str_random(60))),
+            'territory_id' =>  $data['territory_id']
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
@@ -409,7 +410,6 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
-                    'territory_id' => $data['territory_id'][$index],
                     'default_address' => TRUE
                 ]);
 
@@ -423,7 +423,6 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
-                    'territory_id' => $data['territory_id'][$index]
                 ]);
             }
         }

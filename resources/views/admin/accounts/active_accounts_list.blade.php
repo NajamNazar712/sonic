@@ -72,6 +72,7 @@
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
@@ -308,6 +309,39 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="TerritoryTag" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TerritoryTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Territory</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="set_territory" action="{{route('admin.accounts.add_territory')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <div class="form-group text-center">
+                                <input type="text" hidden name="user_ids" class="user_ids">
+                                <select name="territory" id="territory" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                                    @foreach($territories as $territory)
+                                        <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="territoryTagSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -342,6 +376,11 @@
             'rightAlign': false,
             'min': 0,
             'max': 200
+        });
+        $("#territory").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Territory",
+            width:'100%',
+            dropdownParent:$('#TerritoryTag')
         });
 
         $('#search_admins').select2({
@@ -387,6 +426,7 @@
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
+                        head.push('Territory');
                         head.push('Rates Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Approved By');
@@ -418,6 +458,7 @@
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.updated_by);
+                            row.push(values.territory);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.approved_by);
@@ -684,6 +725,7 @@
                                                         table.button('.set_commission').disable();
                                                         table.button('.tag').disable();
                                                         table.button('.approve_commission').disable();
+                                                        table.button('.territory_tag').disable();
 
                                                     });
                                             } else {
@@ -774,6 +816,7 @@
                                                table.button('.bulk_tagging').disable();
                                                table.button('.set_commission').disable();
                                                table.button('.approve_commission').disable();
+                                               table.button('.territory_tag').disable();
 
 
                                            });
@@ -788,6 +831,24 @@
                    }
                },
                     @endif
+
+                   @if (session('role_id') == 1 || in_array(445, session('permissions')))
+               {
+                   text: 'Tag Territory',
+                   className: 'btn btn-primary territory_tag',
+                   enabled:false,
+                   action: function (e, dt, node, config) {
+                       if(selected_rows != ''){
+                           $('.user_ids').val(selected_rows);
+                           $('#TerritoryTag').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                   }
+               },
+               @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -828,6 +889,7 @@
                                         table.button('.approve_commission').enable();
                                         table.button('.set_segment').enable();
                                         table.button('.tag').enable();
+                                        table.button('.territory_tag').enable();
                                     }
                                 }
                             });
@@ -859,6 +921,7 @@
                                         table.button('.approve_commission').disable();
                                         table.button('.set_segment').disable();
                                         table.button('.tag').disable();
+                                        table.button('.territory_tag').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -921,6 +984,7 @@
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
+                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
@@ -1504,6 +1568,7 @@
                     table.button('.set_commission').enable();
                     table.button('.tag').enable();
                     table.button('.approve_commission').enable();
+                    table.button('.territory_tag').enable();
 
                 }
                 else {
@@ -1511,6 +1576,7 @@
                     table.button('.tag').disable();
                     table.button('.set_commission').disable();
                     table.button('.approve_commission').disable();
+                    table.button('.territory_tag').disable();
                 }
         });
         $('#payment_cycle_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -1540,6 +1606,21 @@
                     'min': 1,
                     'max': 29
                 });
+            }
+        });
+
+        $( "#set_territory" ).validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                form.submit();
+
             }
         });
 
@@ -1592,6 +1673,10 @@
                     form.submit();
             }
         });
+
+        $('.close').on('click',function(){
+               $('#territory').val('').trigger('change');
+        })
 
     });
 

@@ -151,12 +151,11 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
 
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S.No</th>
                                     <th class="border-primary border-darken-1">Pickup Address ID</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Person of Contact</th>
-                                    <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -701,39 +700,7 @@
         </div>
     </div>
     {{--Add Email Modal--}}
-
-    <div class="modal fade text-left" id="TerritoryTag" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TerritoryTagModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Territory</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <form id="set_territory" action="{{route('admin.accounts.add_territory')}}" method="post">
-                            @csrf
-                            @method('post')
-                            <div class="form-group text-center">
-                                <input type="text" hidden name="pickup_ids" class="pickup_ids">
-                                <select name="territory" id="territory" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
-                                    @foreach($territories as $territory)
-                                        <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mt-2" style="text-align: center">
-                                <button type="submit" class="btn btn-success" id="territoryTagSubmit">Submit</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
 @endsection
 
@@ -892,106 +859,12 @@
             $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
             $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-
-            $("#territory").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Territory",
-                width:'100%',
-                dropdownParent:$('#TerritoryTag')
-            });
+            
             
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: 'Set Territory',
-                    className: 'btn btn-primary territory_tagging',
-                    enabled:false,
-                    action: function (e, dt, node, config) {
-                        if (selected_rows != '') {
-                            console.log(selected_rows);
-                            $('.pickup_ids').val(selected_rows);
-                            $('#TerritoryTag').modal('show');
-                        }
-                    }
-                },
-                    {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
-                                    id = parseInt(row.id());
-
-                                    territory_id = $(row.node()).data('id');
-
-
-                                    var allow = false;
-
-                                    if(selected_rows.length == 0) {
-                                        selected_rows.push(territory_id);
-
-                                        allow = true;
-                                    }
-                                    else if(selected_rows[0] == territory_id) {
-                                        allow = true;
-                                    }
-
-                                    if (allow) {
-                                        row.select();
-
-                                        var index = $.inArray(id, selected_rows);
-
-                                        if (index === -1) {
-                                            selected_rows.push(id);
-                                        }
-                                        table.button('.territory_tagging').enable();
-
-                                    }
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.territory_tagging').disable();
-
-                                        territory_ids.splice(index, 1);
-                                    }
-                                }
-                            });
-                        }
-                    }],
+                dom: 'ltipr',
                 scrollX: false, scrollY: '500px',
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
@@ -1004,12 +877,10 @@
                 rowId: 'id',
                 order : [1,'desc'],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
-                    {data: 'territory', name: 't.name'},
                     {data: 'vendor', name: 'vendor'},
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
@@ -1020,7 +891,7 @@
 
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1036,7 +907,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')  || $(header).is('.select-checkbox')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
@@ -1081,20 +952,7 @@
                 }
             });
 
-            $( "#set_territory" ).validate({
-                errorClass:"danger",
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-
-                    form.submit();
-
-                }
-            });
+           
             $( "#bank-form" ).validate({
                 errorClass:"danger",
                 normalizer: function(value) {
@@ -1195,28 +1053,6 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             })
-
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-                var index = $.inArray(id, selected_rows);
-              
-
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.territory_tagging').enable();
-                }
-                else {
-                    table.button('.territory_tagging').disable();
-
-                }
-            });
-
 
         });
     </script>

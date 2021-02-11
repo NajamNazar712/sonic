@@ -487,6 +487,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
+        Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -506,7 +507,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
-        Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
+
         //my route
         Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 

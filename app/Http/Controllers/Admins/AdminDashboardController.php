@@ -1382,7 +1382,8 @@ class AdminDashboardController extends Controller
         $products = Product::select('id','product_name')->get();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         $corporate_rate_types = CorporateRateType::all();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
         $shippers = User::whereIn('status', [3, 4])->get();
@@ -1391,7 +1392,8 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
 
     }
     public function blockAccountsList(){
@@ -7189,7 +7191,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as poc','poc.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.email'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('territories as t','t.id','=','users.territory_id')
+            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.email','t.name as territory'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7479,7 +7482,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as p','p.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('territories as t','t.id','=','users.territory_id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email','t.name as territory'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7940,8 +7944,7 @@ class AdminDashboardController extends Controller
     public function getPickups(Request $request)
     {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->leftjoin('territories as t','t.id','=','user_shipping_infos.territory_id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor','t.name as territory'])
+            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
             ->where('user_id',$request->user_id)
             ->where('hidden', 0);
 
@@ -9819,15 +9822,16 @@ class AdminDashboardController extends Controller
 
     public function add_territory(Request $request){
         $territory = $request->territory;
-        $pickup_ids = $request->pickup_ids;
-        if($pickup_ids){
-            $user_shipping_infos = UserShippingInfo::where('id',$pickup_ids)->get();
-            foreach($user_shipping_infos as $user){
-                $user->territory_id =$territory;
+        $user_ids = $request->user_ids;
+        if($user_ids){
+            $user_ids = explode(',', $user_ids);
+            foreach($user_ids as $id){
+                $user = User::find($id);
+                $user->territory_id = $territory;
                 $user->save();
             }
             return redirect()->back()->with('success', 'Territory is added.');
-        }
+            }
         else{
             return redirect()->back()->with('error', 'Territory not added.');
         }
