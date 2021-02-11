@@ -108,18 +108,6 @@ class RiderAPIController extends Controller {
         'image' => ':attribute must be an Image.'
     ];
 
-    static public function retail_pickup_assign($pickup_request_id, $rider_id){
-        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 1);
-        if($retail_pickup_note->exists()){
-            $retail_pickup_note = $retail_pickup_note->first();
-            $retail_pickup_note->rider_id = $rider_id;
-            $retail_pickup_note->assigned_by = Auth::id();
-            $retail_pickup_note->assigned_at = Carbon::now();
-            $retail_pickup_note->status = 2;
-            $retail_pickup_note->save();
-        }
-    }
-
     private function distance($origin, $destination) {
         return $this->vincenty_distance($origin, $destination);
     }
@@ -1104,16 +1092,16 @@ class RiderAPIController extends Controller {
 
                                 $shipment->received_amount = $shipment->amount;
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2]);
-                                ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                             } else if ($shipment->booking_type_id == 3) {
                                 $shipment->shipper_status_id = 36;
                                 $shipment->consignee_status_id = 36;
 
                                 $shipment->received_amount = $shipment->amount;
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 3]);
-                                ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                             } else if ($shipment->booking_type_id == 4) {
-                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
 
                                 if ($shipment->charges_mode_id == 1) {
                                     $shipment->shipper_status_id = 14;
@@ -1133,7 +1121,7 @@ class RiderAPIController extends Controller {
                                 $shipment->consignee_status_id = 14;
                                 $shipment->received_amount = $shipment->amount;
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6]);
-                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 0, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
 
                                 /*if($shipment->packaging_material_request == 1){
                                     self::delivery_packaging_material_update($shipment->tracking_number);
@@ -1648,73 +1636,73 @@ class RiderAPIController extends Controller {
     }
 
     public function pickup_check_tracking_number(Request $request) {
-      $rules = [
-        'tracking_number' => ['required']
-      ];
+        $rules = [
+            'tracking_number' => ['required']
+        ];
 
-      $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
-      $validate->setAttributeNames($this->names);
+        $validate->setAttributeNames($this->names);
 
-      if ($validate->fails()) {
-          return response()->json(['status' => 1, 'message' => 'Tracking Number Required']);
-      }
-      else {
-        $tracking_number = NULL;
-        $items = NULL;
-        $pieces = NULL;
-
-        $shipment = Shipment::where('tracking_number', $request->tracking_number);
-
-        if ($shipment->exists()) {
-            $shipment = $shipment->first();
-
-            $tracking_number = $shipment->tracking_number;
-
-            if ($shipment->booking_type_id == 3) {
-                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
-            }
-            else if ($shipment->pieces > 1) {
-                $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-            }
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Tracking Number Required']);
         }
         else {
-            $shipment_item = ShipmentItem::find($request->tracking_number);
+            $tracking_number = NULL;
+            $items = NULL;
+            $pieces = NULL;
 
-            if ($shipment_item) {
-                $shipment = Shipment::find('tracking_number', $shipment_item->shipment_id);
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
 
                 $tracking_number = $shipment->tracking_number;
 
-                $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
-            }
-            else {
-                $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
-
-                if ($shipment_piece->exists()) {
-                    $shipment_piece = $shipment_piece->first();
-
-                    $shipment = Shipment::find('tracking_number', $shipment_piece->shipment_id);
-
-                    $tracking_number = $shipment->tracking_number;
-
+                if ($shipment->booking_type_id == 3) {
+                    $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                }
+                else if ($shipment->pieces > 1) {
                     $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                 }
             }
-        }
+            else {
+                $shipment_item = ShipmentItem::find($request->tracking_number);
 
-        if ($tracking_number) {
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
-                return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $tracking_number, 'items' => $items, 'pieces' => $pieces]);
+                if ($shipment_item) {
+                    $shipment = Shipment::find('tracking_number', $shipment_item->shipment_id);
+
+                    $tracking_number = $shipment->tracking_number;
+
+                    $items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                }
+                else {
+                    $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
+
+                    if ($shipment_piece->exists()) {
+                        $shipment_piece = $shipment_piece->first();
+
+                        $shipment = Shipment::find('tracking_number', $shipment_piece->shipment_id);
+
+                        $tracking_number = $shipment->tracking_number;
+
+                        $pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+                    }
+                }
+            }
+
+            if ($tracking_number) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
+                    return response()->json(['status' => 0, 'message' => 'Shipment Found', 'tracking_number' => $tracking_number, 'items' => $items, 'pieces' => $pieces]);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment is already Picked!']);
+                }
             }
             else {
-                return response()->json(['status' => 1, 'message' => 'Shipment is already Picked!']);
+                return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number!']);
             }
         }
-        else {
-            return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number!']);
-        }
-      }
     }
 
     public function delivery_summary_multiple(Request $request){
@@ -2254,14 +2242,14 @@ class RiderAPIController extends Controller {
             });
             return response()->json(['status' => 0, 'message' => 'Return Note Is Assigned', 'information' => $information]);
         }
-        return response()->json(['status' => 0, 'message' => 'No Return Note Assigned']);
+        return response()->json(['status' => 1, 'message' => 'No Return Note Assigned']);
     }
 
     public function return_summary_multiple(Request $request)
     {
         $rider_id = $request->rider_id;
 
-        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('completion_status', 0);
+        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
 
         if ($return_notes->exists()) {
             $return_notes = $return_notes->get();
@@ -2527,7 +2515,7 @@ class RiderAPIController extends Controller {
                             $rider_return_delivery->save();
                         }
 
-                        if (ReturnNote::where('id', $request->return_note_id)->where('completion_status', 0)->exists()) {
+                        if (ReturnNote::where('id', $request->return_note_id)->exists()) {
                             $shipment->shipper_status_id = 25;
                             $shipment->consignee_status_id = 25;
                             $shipment->save();
@@ -2551,6 +2539,7 @@ class RiderAPIController extends Controller {
 
                         if ($updated_shipments_count == 0) {
                             $return_note_data->status = 3;
+                            $return_note_data->updated_at = Carbon::now();
                             $return_note_data->save();
                         }
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
@@ -2559,14 +2548,6 @@ class RiderAPIController extends Controller {
                             $rider_return_note_status->status = 2;
                             $rider_return_note_status->save();
                         }
-                        $retrn_shipment_ids = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-                        $count = count($retrn_shipment_ids);
-                        if ($return_note_data) {
-                            $return_note_data->shipments_count = $count;
-                            $return_note_data->updated_at = Carbon::now();
-                            $return_note_data->save();
-                        }
-
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 }
@@ -2664,7 +2645,7 @@ class RiderAPIController extends Controller {
                     $rider_return_delivery->picture_path = $picture_path;
                     $rider_return_delivery->save();
 
-                    if (ReturnNote::where('id', $request->return_note_id)->where('completion_status', 0)->exists()) {
+                    if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
                         $shipment->shipper_status_id = $request->shipper_status_id;
                         $shipment->consignee_status_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
@@ -2702,16 +2683,9 @@ class RiderAPIController extends Controller {
 
                     if ($updated_shipments_count == 0) {
                         $return_note_data->status = 3;
-                        $return_note_data->save();
-                    }
-                    $retrn_shipment_ids = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-                    $count = count($retrn_shipment_ids);
-                    if ($return_note_data) {
-                        $return_note_data->shipments_count = $count;
                         $return_note_data->updated_at = Carbon::now();
                         $return_note_data->save();
                     }
-
                     $message = 'Shipment is marked as Undelivered Successfully';
                 }
             } else {
@@ -2769,7 +2743,7 @@ class RiderAPIController extends Controller {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
                 ->where('return_notes.rider_id', $rider_id)
-                ->where('return_notes.status', 3);
+                ->whereIn('return_notes.status', [1,3]);
 
             if ($from_date != null) {
                 $rider_return_deliveries = $rider_return_deliveries->whereDate('return_notes.created_at', $from_date)
@@ -2797,13 +2771,12 @@ class RiderAPIController extends Controller {
                 }
                 return response()->json(["status" => 0, "return_history" => $rider_return_history]);
             } else {
-                return response()->json(["status" => 1, "message" => "No  return deliveries found!"]);
+                return response()->json(["status" => 1, "message" => "No return deliveries found!"]);
             }
         }
 
 
     }
-
     public function scan_shipment_detail(Request $request){
         $rider_id = $request->rider_id;
         $tracking_no = $request->tracking_no;
