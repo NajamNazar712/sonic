@@ -240,7 +240,7 @@
                     {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
-                    {data: 'action', name: 'action', class: 'align-middle action'},
+                    {orderable: false,data: 'action', name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
 
