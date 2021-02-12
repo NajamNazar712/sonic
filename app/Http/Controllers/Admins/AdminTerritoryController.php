@@ -19,7 +19,8 @@ class AdminTerritoryController extends Controller
     }
 
     public function index(){
-        return view('admin.management.territory.index');
+        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
+        return view('admin.management.territory.index')->with(['cities' => $cities]);
     }
 
     public function list(){
@@ -49,10 +50,10 @@ class AdminTerritoryController extends Controller
             });
         return $datatable->make(true);
     }
-    public function add(){
-        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
-        return view('admin.management.territory.add')->with(['cities' => $cities]);
-    }
+//    public function add(){
+//        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
+//        return view('admin.management.territory.add');
+//    }
 
     public function store(Request $request){
         $city = $request->city_id;
@@ -68,12 +69,24 @@ class AdminTerritoryController extends Controller
     }
 
     public function edit($id){
-        $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
-        $territory = Territory::find($id);
-        return view('admin.management.territory.edit')->with(['cities' => $cities,'territory'=>$territory]);
+        $cities = City::where('status',1)->where('business_category_id',1)->get();
+        return view('admin.management.territory.index')->with(['cities' => $cities]);
+    }
+
+    public function edit_territory_ajax(Request $request){
+        $id = $request->id;
+        if($id){
+            $territory = Territory::find($id);
+            $name = $territory->name;
+            $city_id = $territory->city_id;
+            $data = (['city_id' => $city_id,'name' => $name]);
+            return response()->json(['details' => $data]);
+        }
+
     }
 
     public function update(Request $request ,$id){
+       
         $city = $request->city_id;
         $territory_name = $request->territory;
 
@@ -88,6 +101,7 @@ class AdminTerritoryController extends Controller
 
     public function area_index(){
         $territories = Territory::select('id','name')->get();
+        
         return view('admin.management.territory.area.index')->with(['territories' => $territories]);
     }
     public function area_list(){
@@ -133,13 +147,20 @@ class AdminTerritoryController extends Controller
         return redirect()->route('admin.management.area.index')->with(['success' => 'Area: ' . $area_name . ' has been added!']);
     }
 
-    public function area_edit($id){
-        $territories = Territory::select('id','name')->get();
-        $area = AreaTerritory::find($id);
-        return view('admin.management.territory.area.edit')->with(['territories' => $territories,'area' => $area]);
+    public function area_edit(Request $request){
+        $id = $request->id;
+        if($id){
+            $area = AreaTerritory::find($id);
+            $name = $area->name;
+            $territory_id = $area->territory_id;
+            $data = (['territory_id' => $territory_id,'name' => $name]);
+            return response()->json(['details' => $data]);
+        }
+
     }
 
     public function area_update(Request $request,$id){
+    
       $territory = $request->territory;
       $area = $request->area;
 

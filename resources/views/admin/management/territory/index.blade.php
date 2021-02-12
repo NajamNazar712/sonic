@@ -37,6 +37,103 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="AddTerritory" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTerritory"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Add Territory</h4>
+                    <button type="button" class="close add_modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="territory_form" class="form-horizontal" method="POST" action="{{ route('admin.management.territory.store') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <select name="city_id" class="select2" id="city_id" data-rule-required="true" data-msg-required="City is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="text" name="territory" id="territory_name" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group text-center mt-2">
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+        <div class="modal fade text-left" id="EditTerritory" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTerritory"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="">Edit Territory</h4>
+                        <button type="button" class="close edit_modal" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="edit_territory_form" class="form-horizontal" method="POST" action="#" novalidate="novalidate">
+                            {{csrf_field()}}
+                            @method('PUT')
+                            <div class="row justify-content-center">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="city_id" class="select2" id="edit_city_id" data-rule-required="true" data-msg-required="City is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <input type="text" name="territory" id="edit_territory" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row justify-content-center">
+                                <div class="col">
+                                    <div class="form-group text-center mt-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 
 @section('js')
@@ -44,11 +141,21 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
 
+            $('.add_modal').on('click',function(){
+                $('#city_id').val('').trigger('change');
+                $('#territory_name').val('').trigger('change');
+            });
+            $('#city_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'City*',
+                dropdownParent: $("#AddTerritory")
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -102,7 +209,8 @@
                     className: 'btn btn-primary',
                     enabled: true,
                     action: function (e, dt, node, config) {
-                        window.location = '{{ route('admin.management.territory.add') }}';
+
+                        $('#AddTerritory').modal('show');
                     }
 
                  },
@@ -169,18 +277,6 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                console.log(id);
-
-                if ($(this).hasClass('edit')) {
-                    var link = '{{ route('admin.management.territory.edit', ["id" => 0]) }}';
-
-                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-                }
-
-            });
-
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -204,6 +300,71 @@
                 }
             });
 
+            $('#edit_territory_form #edit_city_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'City*',
+                dropdownParent: $("#EditTerritory")
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var territory_id = table.row( $(this).parents('tr') ).data().id;
+                console.log(territory_id);
+                if ($(this).hasClass('edit')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.territory.edit') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': territory_id
+                        }
+                    }).done(function(data){
+
+                        if(data.details.length != 0 ){
+
+                            var city_id = data.details.city_id;
+                            var name = data.details.name;
+
+                            $('#edit_territory_form #edit_city_id').val(city_id).trigger('change');
+                            $('#edit_territory_form #edit_territory').val(name);
+
+                            $('#EditTerritory').modal('show');
+                            var route = '{!! route('admin.management.territory.update', ':id') !!}';
+                            console.log(route);
+                            route = route.replace(':id', territory_id);
+                            console.log(route);
+                            $("#edit_territory_form").attr('action', route);
+
+                        }
+
+                    });
+
+                }
+            });
+
+            $('#territory_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'User is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
 
         });
 
