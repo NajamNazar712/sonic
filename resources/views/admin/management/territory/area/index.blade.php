@@ -43,7 +43,7 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        <select name="territory" id=tag_territory" class="form-control select2">
+                        <select name="territory" id="tag_territory" class="form-control select2">
                             @foreach($territories as $territory)
                                 <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
@@ -72,7 +72,7 @@
                         {{ csrf_field() }}
 
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
                                     <select name="territory" class="select2" id="add_territory" data-rule-required="true" data-msg-required="Territory is required">
                                         @foreach($territories as $territory)
@@ -84,9 +84,9 @@
                         </div>
 
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
-                                    <input type="text" name="area" id="area" class="form-control" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
+                                    <input type="text" name="area" id="area" class="form-control text-center" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
                                 </div>
                             </div>
                         </div>
@@ -120,7 +120,7 @@
                         {{ csrf_field() }}
                         @method('PUT')
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
                                     <select name="territory" class="select2" id="edit_territory" data-rule-required="true" data-msg-required="Territory is required">
                                         @foreach($territories as $territory)
@@ -132,9 +132,9 @@
                         </div>
 
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
-                                    <input type="text" name="area" id="edit_area" class="form-control" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
+                                    <input type="text" name="area" id="edit_area" class="form-control text-center" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
                                 </div>
                             </div>
                         </div>
@@ -192,7 +192,7 @@
                 dropdownParent:$('#EditArea')
             });
 
-            $("#tag_territory").prepend('<option value="" selected></option>').select2({
+            $("#TerritoryTag #tag_territory").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Territory",
                 width:'100%',
                 dropdownParent:$('#TerritoryTag')
@@ -248,7 +248,8 @@
 
                             $('#TerritoryTag').modal('show');
                             $('#territoryTagSubmit').on('click', function () {
-                                var territory = parseInt($('#territory').val());
+                                var territory = parseInt($('#tag_territory').val());
+                                console.log(territory);
                                 swal({
                                     text: 'Are you sure, you want to Tag?',
                                     icon: 'info',

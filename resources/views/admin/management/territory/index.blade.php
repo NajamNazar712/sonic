@@ -52,7 +52,7 @@
                         {{ csrf_field() }}
 
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
                                     <select name="city_id" class="select2" id="city_id" data-rule-required="true" data-msg-required="City is required">
                                         @foreach($cities as $city)
@@ -64,9 +64,9 @@
                         </div>
 
                         <div class="row justify-content-center">
-                            <div class="col">
+                            <div class="col text-center">
                                 <div class="form-group">
-                                    <input type="text" name="territory" id="territory_name" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
+                                    <input type="text" name="territory" id="territory_name" class="form-control text-center" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,7 @@
                             {{csrf_field()}}
                             @method('PUT')
                             <div class="row justify-content-center">
-                                <div class="col">
+                                <div class="col text-center">
                                     <div class="form-group">
                                         <select name="city_id" class="select2" id="edit_city_id" data-rule-required="true" data-msg-required="City is required">
                                             @foreach($cities as $city)
@@ -113,9 +113,9 @@
                             </div>
 
                             <div class="row justify-content-center">
-                                <div class="col">
+                                <div class="col text-center">
                                     <div class="form-group">
-                                        <input type="text" name="territory" id="edit_territory" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
+                                        <input type="text" name="territory" id="edit_territory" class="form-control text-center" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required">
                                     </div>
                                 </div>
                             </div>

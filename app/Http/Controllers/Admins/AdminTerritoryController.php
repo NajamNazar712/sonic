@@ -163,6 +163,7 @@ class AdminTerritoryController extends Controller
     }
 
     public function area_tag(Request $request){
+
         $territory_id =$request->territory;
         $areas = $request->areas;
         if($areas){
