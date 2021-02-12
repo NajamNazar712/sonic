@@ -297,6 +297,7 @@ class APIController extends Controller
 
     public function shipment_book(Request $request) {
         $user_id = $request->user_id;
+
         $user_type = User::where('id',$user_id)->first();
         if($user_type['account_type_id'] == 1) {
             $rules = [
