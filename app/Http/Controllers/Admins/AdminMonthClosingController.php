@@ -138,7 +138,7 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->join('shipments_journey as sj', function ($join) {
+            ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -169,10 +169,24 @@ class AdminMonthClosingController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $shipments->whereBetween('sj.created_at', [$from,$to]);
+            $shipments = $shipments->where(function ($query) use ($from, $to) {
+                $query->where(function ($sub_query) use ($from,$to) {
+                    $sub_query->whereBetween('sj.created_at', [$from,$to]);
+                })
+                    ->orWhere(function ($sub_query) use ($from,$to) {
+                        $sub_query->whereBetween('shipments.created_at', [$from,$to]);
+                    });
+            });
         }
         else{
-            $shipments->where('sj.created_at', '<', $date);
+            $shipments = $shipments->where(function ($query) use ($date) {
+                $query->where(function ($sub_query) use ($date) {
+                    $sub_query->where('sj.created_at', '<', $date);
+                })
+                    ->orWhere(function ($sub_query) use ($date) {
+                        $sub_query->where('shipments.created_at', '<', $date);
+                    });
+            });
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
