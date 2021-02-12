@@ -207,7 +207,7 @@ class AdminUserRequestController extends Controller
             $trax_id = $global_setting->setting_value + 1;
             $global_setting->setting_value = $trax_id;
             $global_setting->save();
-            $trax_id = 'Trax'. $trax_id;
+            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
         }
         else{
             $trax_id = null;

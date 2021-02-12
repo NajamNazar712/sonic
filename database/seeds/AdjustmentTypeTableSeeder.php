@@ -28,6 +28,9 @@ class AdjustmentTypeTableSeeder extends Seeder
             array('id' => 9, 'name' => 'Manual Adjustment - Short Content', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 10, 'name' => 'Manual Adjustment - Shipment Lost', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 11, 'name' => 'Manual Adjustment - Charges Wave Off', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 12, 'name' => 'Adjustment for Weight Change', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 13, 'name' => 'Adjusted from Month Closing (Return Confirm)', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 14, 'name' => 'Adjusted from Month Closing (Delivered)', 'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }

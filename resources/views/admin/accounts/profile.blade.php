@@ -765,24 +765,12 @@
                 width: '100%',
             }).bind('change', function() {
 
-                if (this.value == 1) {
-                    $('#generation_div').removeClass('d-none');
-                    $('#generation_date').removeClass('d-none');
-                    $('#generation_date').addClass('required');
-                    $('#generation_date').empty().trigger('change');
-                    $('#generation_date').select2({data: weekly, placeholder: 'Select Date'});
-                }
-                else if (this.value == 3) {
-                    $('#generation_div').removeClass('d-none');
-                    $('#generation_date').removeClass('d-none');
-                    $('#generation_date').addClass('required');
-                    $('#generation_date').empty().trigger('change');
-                    $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
-                } else if (this.value == 2) {
-                    $('#generation_div').addClass('d-none');
-                    $('#generation_date').addClass('d-none');
-                    $('#generation_date').removeClass('required');
-                }
+                $('#generation_div').removeClass('d-none');
+                $('#generation_date').removeClass('d-none');
+                $('#generation_date').addClass('required');
+                $('#generation_date').empty().trigger('change');
+                $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
+
             });
             $('#invoicing_cycle').val(cycle).trigger('change');
             // $('#generation_date').select2({
@@ -793,23 +781,14 @@
                 var gdate = parseInt('{!! $user_bank_default->generation_date !!}');
                 html = '<div class="form-group row"><div class="form-group col-md-9"><label>Generation Date</label><span class="danger">*</span><select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required"><option value=""></option></select></div></div>';
                 $('#generation_div').html(html);
-                if(id === 1){
-                    $('#generation_div').removeClass('d-none');
-                    $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
-                        data:weekly,
-                        width:'100%',
-                        placeholder:'Select Date',
-                    });
-                }else if(id === 3){
+
                     $('#generation_div').removeClass('d-none');
                     $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
                         data:monthly,
                         width:'100%',
                         placeholder:'Select Date',
                     });
-                }else if(id === 2){
-                    $('#generation_div').addClass('d-none');
-                }
+
                 $('#generation_date').val(gdate).trigger('change');
             }
 

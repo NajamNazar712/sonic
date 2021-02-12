@@ -1357,6 +1357,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
+            Route::get('trax_id', 'Admins\UserManagementController@user_trax_id')->name('trax_id');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
             Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
