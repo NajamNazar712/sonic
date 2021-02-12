@@ -65,6 +65,7 @@
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
@@ -73,7 +74,6 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
-                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
@@ -326,6 +326,7 @@
                         head.push('Contact Person');
                         head.push('Address');
                         head.push('City');
+                        head.push('Territory');
                         head.push('Product Type');
                         head.push('Request Date');
                         head.push('Status');
@@ -334,7 +335,6 @@
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         head.push('Rate Status');
-                        head.push('Territory');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
@@ -353,6 +353,7 @@
                             row.push(values.poc);
                             row.push(values.address);
                             row.push(values.city);
+                            row.push(values.territory);
                             row.push(values.product_type);
                             row.push(values.created_at);
                             row.push(values.status);
@@ -361,7 +362,6 @@
                             row.push(values.kam);
                             row.push(values.ref);
                             row.push(values.rate_status);
-                            row.push(values.territory);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
                             row.push(values.rates_authorized_by);
@@ -733,6 +733,7 @@
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 {data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -741,7 +742,6 @@
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
-                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
                 {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},

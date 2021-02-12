@@ -204,7 +204,16 @@
                             });
                         }
                     }
-                },
+                }
+                    ,{
+                        text: 'Add Area',
+                        className: 'btn btn-primary',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            window.location = '{{ route('admin.management.area.add') }}';
+                        }
+
+                    },
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -277,15 +286,7 @@
                                 }
                             });
                         }
-                    },{
-                    text: 'Add Area',
-                    className: 'btn btn-primary',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        window.location = '{{ route('admin.management.area.add') }}';
-                    }
-
-                },
+                    },
                     {
                         extend: 'excel',
                         title: 'Area List',

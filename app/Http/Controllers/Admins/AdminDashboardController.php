@@ -77,6 +77,7 @@ use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use App\RouteLocations;
 use App\Http\Models\RouteType;
+use App\TerritoryTagHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -9827,6 +9828,11 @@ class AdminDashboardController extends Controller
                 $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
+
+                $history = new TerritoryTagHistory();
+                $history->user_id = $id;
+                $history->admin_id = Auth::id();
+                $history->save();
             }
             return redirect()->back()->with('success', 'Territory is added.');
             }

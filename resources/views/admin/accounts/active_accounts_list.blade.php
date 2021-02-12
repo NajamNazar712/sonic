@@ -9,7 +9,10 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    @include('admin.inc.messages')
+                    <div class="card-header">
+                        @include('admin.inc.messages')
+                    </div>
+    
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
@@ -64,6 +67,7 @@
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
@@ -73,7 +77,6 @@
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
-                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
@@ -419,6 +422,7 @@
                         head.push('Contact Person');
                         head.push('Address');
                         head.push('City');
+                        head.push('Territory');
                         head.push('Product Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
@@ -428,7 +432,6 @@
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
-                        head.push('Territory');
                         head.push('Rates Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Approved By');
@@ -452,6 +455,7 @@
                             row.push(values.poc);
                             row.push(values.address);
                             row.push(values.city);
+                            row.push(values.territory);
                             row.push(values.product_type);
                             row.push(values.status);
                             row.push(values.admin_tag_id);
@@ -461,7 +465,6 @@
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.updated_by);
-                            row.push(values.territory);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.approved_by);
@@ -976,6 +979,7 @@
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 {data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
@@ -985,7 +989,6 @@
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
-                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
