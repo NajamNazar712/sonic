@@ -47,6 +47,8 @@ class Permission
             'daily_visit.location_photo' => 264,
 
 
+            'pickups.un_assigned.index' => 17,
+            'pickups.un_assigned.list' => 17,
             'pickups.pending.index' => 17,
             'pickups.pending.list' => 17,
             'pickups.pending.bookings' => 17,
@@ -473,6 +475,8 @@ class Permission
             'reports.app_efficiency.index' => 401,
             'reports.confirmation_pending_report.index' => 430,
             'reports.last_mile_app.index' => 437,
+            'reports.weight_qc.index' => 444,
+            'reports.weight_qc.list' => 444,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -557,6 +561,11 @@ class Permission
 
 
             'management.city_list' => 205,
+            'management.territory.index' => 443,
+
+
+            'management.area.index' => 443,
+
 
             'notifications.index' => 100,
             'notifications.list' => 100,

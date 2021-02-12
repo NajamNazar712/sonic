@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
@@ -339,13 +340,20 @@ class RegisterController extends Controller
      * @return \App\User
      */
     protected function create(array $data)
-    {
+    {      
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
         else{
             $lead_id = null;
         }
+        if(array_key_exists('territory_id', $data)){
+            $territory_id = $data['territory_id'];
+        }
+        else{
+            $territory_id = null;
+        }
+
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -369,7 +377,8 @@ class RegisterController extends Controller
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
             'lead_id' => $lead_id,
-            'api_token' => uniqid(base64_encode(str_random(60)))
+            'api_token' => uniqid(base64_encode(str_random(60))),
+            'territory_id' =>  $territory_id
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
@@ -399,6 +408,7 @@ class RegisterController extends Controller
         $first = TRUE;
 
         foreach ($data['pickup_address'] as $index => $pickup_address) {
+
             if ($first) {
                 UserShippingInfo::create([
                     'user_id' => $newUser->id,
@@ -419,7 +429,7 @@ class RegisterController extends Controller
                     'poc' => $data['shipping_poc'][$index],
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
-                    'city_id' => $data['shipping_city'][$index]
+                    'city_id' => $data['shipping_city'][$index],
                 ]);
             }
         }
@@ -524,7 +534,26 @@ class RegisterController extends Controller
                     <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
                 </div>';
         $body = $html;
-        $to = $newUser->email;
+        $to = array();
+        $to[] = $newUser->email;
+        $admins_sales = Admin::where('role_id', 4)->where('status', 1);
+        if ($admins_sales->exists()) {
+            $to = array_merge($to, $admins_sales->pluck('email')->toArray());
+        }
+        
+        $city_id = $shipper->city_id;
+        $hub_id = City::find($city_id)->hub_id;
+        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+        foreach($managers as $rms => $index){
+            $admin_hubs = AdminHub::where('admin_id',$index);
+            if($admin_hubs->exists()){
+                $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
+                if(in_array($hub_id , $admin_hubs)) {
+                    $to[] = $rms;
+                }
+            }
+        }
+
         $mail = Mail::to($to);
 
         $mail->send(new Notifications($subject, $body, null));
@@ -629,6 +658,20 @@ class RegisterController extends Controller
                 $sale_person_admin = City::find($id)->name;
                 return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
             }
+        }
+    }
+
+    public function territory(Request $request)
+    {
+        $city_id = $request->id;
+        if ($city_id) {
+            $territory = Territory::where('city_id', $city_id);
+            if ($territory->exists()) {
+                $territory = $territory->get();
+                return response()->json(['status' => 0, 'territory' => $territory]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'error' => "No Territory found for the selected city"]);
         }
     }
 

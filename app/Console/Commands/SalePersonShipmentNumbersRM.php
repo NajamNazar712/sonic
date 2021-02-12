@@ -6,22 +6,23 @@ use App\Http\Controllers\Admins\SalesPersonNumbersReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
-class SalePersonShipmentNumbers extends Command
+class SalePersonShipmentNumbersRM extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'saleperson:numbers';
+    protected $signature = 'saleperson:numbersrm';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sale Person Shipment Count Day Wise';
+    protected $description = 'Sale Person Shipment Count to Regional Managers';
 
     /**
      * Create a new command instance.
@@ -41,7 +42,12 @@ class SalePersonShipmentNumbers extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $response = SalesPersonNumbersReportController::sale_person_numbers_overall($date . ' 00:00:00');
-        NotificationsController::send(47, $date, $response);
+        $reagional_managers = DB::connection('reports')->table('admins')->whereIn('role_id', [31,44])->where('status', 1)->select('id', 'name')->get();
+        if(count($reagional_managers) > 0){
+            foreach ($reagional_managers as $reagional_manager){
+                $response = SalesPersonNumbersReportController::sale_person_numbers_rm($date . ' 00:00:00', $reagional_manager->id);
+                NotificationsController::send(123, $reagional_manager->id, $response);
+            }
+        }
     }
 }
