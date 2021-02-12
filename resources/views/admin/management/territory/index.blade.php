@@ -348,7 +348,33 @@
                     return $.trim(value);
                 },
                 errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'User is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+
+            $('#edit_territory_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function (form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');

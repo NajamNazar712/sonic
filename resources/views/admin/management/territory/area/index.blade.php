@@ -43,7 +43,7 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        <select name="territory" id="territory" class="form-control select2">
+                        <select name="territory" id=tag_territory" class="form-control select2">
                             @foreach($territories as $territory)
                                 <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
@@ -116,7 +116,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit_area_form" class="form-horizontal" method="POST" action="#" novalidate="novalidate">
+                    <form id="edit_area_form" class="form-horizontal " method="POST" action="#" novalidate="novalidate">
                         {{ csrf_field() }}
                         @method('PUT')
                         <div class="row justify-content-center">
@@ -191,6 +191,13 @@
                 width:'100%',
                 dropdownParent:$('#EditArea')
             });
+
+            $("#tag_territory").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Territory",
+                width:'100%',
+                dropdownParent:$('#TerritoryTag')
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -359,9 +366,7 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.assign_rider').enable();
-                                        table.button('.territory_tag').enable();
-                                        table.button('.tag').enable();
+                                        table.button('.territory_tagging').enable();
 
                                     }
                                 }
@@ -534,7 +539,33 @@
                         return $.trim(value);
                     },
                     errorPlacement: function (error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                        error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'User is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
+
+
+                $('#edit_area_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function (value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
                     },
                     submitHandler: function (form) {
                         $(form).find('button[type=submit]').attr('disabled', 'disabled');
