@@ -43,7 +43,7 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        <select name="territory" id="territory" class="form-control select2">
+                        <select name="territory" id=tag_territory" class="form-control select2">
                             @foreach($territories as $territory)
                                 <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
@@ -57,6 +57,103 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="AddArea" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddArea" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Add Area</h4>
+                    <button type="button" class="close close_add_modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="territory_form" class="form-horizontal" method="POST" action="{{ route('admin.management.area.store') }}" novalidate="novalidate">
+                        {{ csrf_field() }}
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <select name="territory" class="select2" id="add_territory" data-rule-required="true" data-msg-required="Territory is required">
+                                        @foreach($territories as $territory)
+                                            <option value="{{ $territory->id }}">{{ $territory->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="text" name="area" id="area" class="form-control" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group text-center mt-2">
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="EditArea" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditArea" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Edit Area</h4>
+                    <button type="button" class="close close_add_modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit_area_form" class="form-horizontal " method="POST" action="#" novalidate="novalidate">
+                        {{ csrf_field() }}
+                        @method('PUT')
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <select name="territory" class="select2" id="edit_territory" data-rule-required="true" data-msg-required="Territory is required">
+                                        @foreach($territories as $territory)
+                                            <option value="{{ $territory->id }}">{{ $territory->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="text" name="area" id="edit_area" class="form-control" placeholder="Area Name*" data-rule-required="true" data-msg-required="Area Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <div class="form-group text-center mt-2">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 
@@ -71,16 +168,36 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
 
-            $("#territory").prepend('<option value="" selected></option>').select2({
+            $('#AddArea .close_add_modal').on('click', function (e) {
+                $('#territory_form #add_territory').val('').trigger('change');
+                $('#territory_form #area').val('').trigger('change');
+
+            });
+
+            $('#territory_form #add_territory').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Territory*' ,
+                dropdownParent: $('#AddArea')
+            });
+
+            $("#edit_area_form #edit_territory").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Territory",
+                width:'100%',
+                dropdownParent:$('#EditArea')
+            });
+
+            $("#tag_territory").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Territory",
                 width:'100%',
                 dropdownParent:$('#TerritoryTag')
             });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -210,7 +327,7 @@
                         className: 'btn btn-primary',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            window.location = '{{ route('admin.management.area.add') }}';
+                            $('#AddArea').modal('show');
                         }
 
                     },
@@ -249,9 +366,7 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.assign_rider').enable();
-                                        table.button('.territory_tag').enable();
-                                        table.button('.tag').enable();
+                                        table.button('.territory_tagging').enable();
 
                                     }
                                 }
@@ -353,16 +468,8 @@
             });
             var territory_ids = [];
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
 
-                if ($(this).hasClass('edit')) {
-                    var link = '{{ route('admin.management.area.edit', ["id" => 0]) }}';
 
-                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-                }
-
-            });
 
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
@@ -384,13 +491,98 @@
 
                 }
             });
+
+            
             $('#TerritoryTag').on('hide.bs.modal', function (e) {
                 $('#territory').val('').trigger('change');
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var area_id = table.row( $(this).parents('tr') ).data().id;
+                console.log(area_id);
+                if ($(this).hasClass('edit')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.area.edit') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': area_id
+                        }
+                    }).done(function(data){
+
+                        if(data.details.length != 0 ){
+
+                            var territory_id = data.details.territory_id;
+                            var name = data.details.name;
+
+                            $('#edit_area_form #edit_territory').val(territory_id).trigger('change');
+                            $('#edit_area_form #edit_area').val(name);
+
+                            $('#EditArea').modal('show');
+                            var route = '{!! route('admin.management.area.update', ':id') !!}';
+                            console.log(route);
+                            route = route.replace(':id', area_id);
+                            console.log(route);
+                            $("#edit_area_form").attr('action', route);
+
+                        }
+
+                    });
+
+                }
+            });
+
+                $('#territory_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function (value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'User is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
 
 
-        });
+                $('#edit_area_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function (value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'User is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
+            });
 
     </script>
 @endsection
