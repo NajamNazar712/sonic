@@ -41,7 +41,7 @@ class MonthAverageIndividual extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday()->format('Y-m-d');
+        $date = Carbon::today()->format('Y-m-d');
 
         $sales_persons = DB::connection('reports')->table('admins')->whereExists(function($query) {
             $query->from('admin_roles')

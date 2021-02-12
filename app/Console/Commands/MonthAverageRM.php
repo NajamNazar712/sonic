@@ -41,7 +41,7 @@ class MonthAverageRM extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday()->format('Y-m-d');
+        $date = Carbon::today()->format('Y-m-d');
         $regional_managers = DB::connection('reports')->table('admins')->whereIn('role_id', [31,44])->where('status', 1)->select('id', 'name')->get();
         if(count($regional_managers) > 0){
             foreach ($regional_managers as $regional_manager){
