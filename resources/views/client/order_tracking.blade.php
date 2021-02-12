@@ -352,7 +352,7 @@
                         }
 
                         if (data.disallowed !== undefined) {
-                            var message = 'Following Order ID doesn\'t belong to you: ' + data.disallowed.join(', ');
+                            var message = 'Following Order ID doesn\'t belong to you: '/* + data.disallowed.join(', ')*/;
 
                             toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
