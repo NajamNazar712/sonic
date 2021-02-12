@@ -1527,6 +1527,7 @@ class RiderAPIController extends Controller
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_request_not_pick_reasons,id'],
+            'rider_remarks' => ['nullable'],
             'picture' => ['required', 'image']
         ];
 
@@ -1551,6 +1552,7 @@ class RiderAPIController extends Controller
                     $pickup_request->save();
                     $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
                     $pickup_request_attempt->reason_id = $request->reason_id;
+                    $pickup_request_attempt->rider_remarks = $request->rider_remarks;
                     $pickup_request_attempt->save();
 
                     $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
@@ -1590,6 +1592,7 @@ class RiderAPIController extends Controller
                     }
 
                     $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
+                    $rider_pickup->rider_remarks = $request->rider_remarks;
 
                     $rider_pickup->save();
 

@@ -95,6 +95,7 @@
 										<th class="border-primary border-darken-1">Distance (Current to Actual)</th>
 										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Reason</th>
+										<th class="border-primary border-darken-1">Remarks</th>
 										<th class="border-primary border-darken-1">Picture</th>
 										<th class="border-primary border-darken-1">Shipper Signature Via App</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
@@ -257,6 +258,7 @@
 				{data: 'distance_from_current_to_actual', name: 'v2_rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
 				{data: 'shipments', name: 'v2_rider_pickups.shipments', class: 'align-middle shipments'},
 				{data: 'reason', name: 'v2_rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
+				{data: 'rider_remarks', name: 'v2_rider_pickups.rider_remarks', class: 'align-middle rider_remarks'},
 				{data: 'picture_path', name: 'v2_rider_pickups.picture_path', class: 'align-middle picture_path text-center', orderable: false, searchable: false},
 				{data: 'signature_via_app', name: 'v2_rider_pickups.signature_via_app', class: 'align-middle signature_via_app text-center', orderable: false, searchable: false},
 				{data: 'pickup_note_id', name: 'v2_rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
