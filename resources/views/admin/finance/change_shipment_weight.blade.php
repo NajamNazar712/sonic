@@ -17,12 +17,43 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
+							<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+								{{ csrf_field() }}
+
+								<div class="row align-items-center justify-content-center">
+									<div class="col-2">
+										<h3 class="heading"><strong>For Bulk Shipment</strong></h3>
+									</div>
+									<div class="col-4">
+										<div class="form-group">
+											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+										</div>
+									</div>
+
+									<div class="col-1">
+										<div class="form-group">
+											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+										</div>
+									</div>
+
+									<div class="col-2">
+										<div class="form-group">
+											<a href="{{ asset('file/Change Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+										</div>
+									</div>
+								</div>
+							</form>
+
+
+							<form id="search_form" class="row mb-1 justify-content-center mt-2" novalidate="novalidate">
+								<div class="col-2">
+									<h3 class="heading"><strong>Individual Shipment</strong></h3>
+								</div>
+								<div class="col-3 form-group">
 									<input type="text" name="tracking_numbers" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 								</div>
 
-								<div class="form-group ml-1">
+								<div class="col-2 form-group">
 									<button type="submit" name="search" class="btn btn-primary search" value="Search">Search</button>
 								</div>
 							</form>
@@ -102,7 +133,7 @@
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
 					$(form).find('button.search').prop('disabled', true);
@@ -274,6 +305,33 @@
 					$('input[name="weight"]').removeClass('d-none');
 				}
 			});
+
+			$('#shipment_weight_excel_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+					swal({
+						title: 'Please Wait!',
+						text: 'Your Payment(s) are being updated!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit();
+				}
+			});
+
+
 		});
 	</script>
 @endsection

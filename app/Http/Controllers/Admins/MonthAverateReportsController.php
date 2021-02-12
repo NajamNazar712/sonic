@@ -152,7 +152,7 @@ class MonthAverateReportsController extends Controller
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+        header('Content-Disposition: attachment;filename="month_average_report.xlsx"');
         header('Cache-Control: max-age=0');
         $date_file_name = Carbon::parse($date)->format('Y_m_d');
         $time_string = Carbon::now()->toTimeString();
@@ -231,85 +231,87 @@ class MonthAverateReportsController extends Controller
             ->whereBetween('sj.created_at', [$new_date_from, $new_date_to])
             ->groupBy('cities.id')
             ->get();
-
-        foreach ($months_average as $month_average) {
-            $revenue[$month_average->origin_id] = $month_average->weight_charges + $month_average->cash_handling_charges + $month_average->insurance_charges + $month_average->return_charges + $month_average->fuel_surcharge + $month_average->replacement_charges + $month_average->try_and_buy_charges + $month_average->packaging_material_charges + $month_average->intercept_charges + $month_average->nsa_osa_charges;
-            if ($month_average->shipment_count != 0) {
-                $avg_revenue[$month_average->origin_id] = $revenue[$month_average->origin_id] / $month_average->shipment_count;
-            } else {
-                $avg_revenue[$month_average->origin_id] = 0;
+        if(count($months_average) > 0){
+            foreach ($months_average as $month_average) {
+                $revenue[$month_average->origin_id] = $month_average->weight_charges + $month_average->cash_handling_charges + $month_average->insurance_charges + $month_average->return_charges + $month_average->fuel_surcharge + $month_average->replacement_charges + $month_average->try_and_buy_charges + $month_average->packaging_material_charges + $month_average->intercept_charges + $month_average->nsa_osa_charges;
+                if ($month_average->shipment_count != 0) {
+                    $avg_revenue[$month_average->origin_id] = $revenue[$month_average->origin_id] / $month_average->shipment_count;
+                } else {
+                    $avg_revenue[$month_average->origin_id] = 0;
+                }
+                if ($weekdays_count != 0) {
+                    $avg_shipment[$month_average->origin_id] = $month_average->shipment_count / $weekdays_count;
+                } else {
+                    $avg_shipment[$month_average->origin_id] = 0;
+                }
+                if ($weekdays_count != 0) {
+                    $avg_revenue_per_day[$month_average->origin_id] = $revenue[$month_average->origin_id] / $weekdays_count;
+                } else {
+                    $avg_revenue_per_day[$month_average->origin_id] = 0;
+                }
+                $month_speed[$month_average->origin_id] = $avg_shipment[$month_average->origin_id] * $total_month_weekdays_count;
+                $total_shipments = $total_shipments + $month_average->shipment_count;
             }
-            if ($weekdays_count != 0) {
-                $avg_shipment[$month_average->origin_id] = $month_average->shipment_count / $weekdays_count;
-            } else {
-                $avg_shipment[$month_average->origin_id] = 0;
-            }
-            if ($weekdays_count != 0) {
-                $avg_revenue_per_day[$month_average->origin_id] = $revenue[$month_average->origin_id] / $weekdays_count;
-            } else {
-                $avg_revenue_per_day[$month_average->origin_id] = 0;
-            }
-            $month_speed[$month_average->origin_id] = $avg_shipment[$month_average->origin_id] * $total_month_weekdays_count;
-            $total_shipments = $total_shipments + $month_average->shipment_count;
-        }
 
-        $month_average_array['header'] = ['S. No.', 'Origin', 'Total Parcel', 'Revenue', 'Avg Revenue/Parcel', 'Avg Shipments/Day', 'Avg Revenue/Day', 'Month Speed'];
-        $serial = 1;
+            $month_average_array['header'] = ['S. No.', 'Origin', 'Total Parcel', 'Revenue', 'Avg Revenue/Parcel', 'Avg Shipments/Day', 'Avg Revenue/Day', 'Month Speed'];
+            $serial = 1;
 
-        $total_shipments_count = 0;
-        $total_revenue_count = 0;
-        $total_avg_revenue_count = 0;
-        $total_avg_revenue_per_day_count = 0;
-        $total_avg_shipment_count = 0;
-        $total_month_speed_count = 0;
-
-        foreach ($months_average as $month_average) {
-            $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Avg Revenue/Day' => round($avg_revenue_per_day[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
-
-            $serial++;
-
-
-            $total_shipments_count = $total_shipments_count + $month_average->shipment_count;
-            $total_revenue_count = $total_revenue_count + $revenue[$month_average->origin_id];
-            $total_avg_shipment_count = $total_avg_shipment_count + $avg_shipment[$month_average->origin_id];
-            $total_avg_revenue_per_day_count = $total_avg_revenue_per_day_count + $avg_revenue_per_day[$month_average->origin_id];
-            $total_month_speed_count = $total_month_speed_count + $month_speed[$month_average->origin_id];
-        }
-        if($total_shipments_count != 0){
-            $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
-        }
-        else{
+            $total_shipments_count = 0;
+            $total_revenue_count = 0;
             $total_avg_revenue_count = 0;
+            $total_avg_revenue_per_day_count = 0;
+            $total_avg_shipment_count = 0;
+            $total_month_speed_count = 0;
+
+            foreach ($months_average as $month_average) {
+                $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Avg Revenue/Day' => round($avg_revenue_per_day[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
+
+                $serial++;
+
+
+                $total_shipments_count = $total_shipments_count + $month_average->shipment_count;
+                $total_revenue_count = $total_revenue_count + $revenue[$month_average->origin_id];
+                $total_avg_shipment_count = $total_avg_shipment_count + $avg_shipment[$month_average->origin_id];
+                $total_avg_revenue_per_day_count = $total_avg_revenue_per_day_count + $avg_revenue_per_day[$month_average->origin_id];
+                $total_month_speed_count = $total_month_speed_count + $month_speed[$month_average->origin_id];
+            }
+            if($total_shipments_count != 0){
+                $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
+            }
+            else{
+                $total_avg_revenue_count = 0;
+            }
+
+            $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Avg Revenue/Day' => '', 'Month Speed' => ''];
+            $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Avg Revenue/Day' => round($total_avg_revenue_per_day_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            $sheet->fromArray($month_average_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:H2")->applyFromArray($cell_st);
+            $sheet->setTitle('Sale Person Numbers');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="month_average_report.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($date)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/month_average_report_" . $sale_person_id .'_' .$date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/month_average_report_" . $sale_person_id .'_' . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
         }
 
-        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Avg Revenue/Day' => '', 'Month Speed' => ''];
-        $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Avg Revenue/Day' => round($total_avg_revenue_per_day_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
-        $cell_st = [
-            'font' => ['bold' => true],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-        ];
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->getDefaultColumnDimension()->setWidth(20);
-
-        $sheet->fromArray($month_average_array, NULL, 'A2', true);
-        $sheet->getStyle("A2:H2")->applyFromArray($cell_st);
-        $sheet->setTitle('Sale Person Numbers');
-        $writer = new Xlsx($spreadsheet);
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
-        header('Cache-Control: max-age=0');
-        $date_file_name = Carbon::parse($date)->format('Y_m_d');
-        $time_string = Carbon::now()->toTimeString();
-        $time_string = Carbon::parse($time_string)->format('h_i_s');
-
-        $file_name_without_path = "reports/month_average_report_" . $sale_person_id .'_' .$date_file_name . ".xlsx";
-        $file_name = public_path() . "/reports/month_average_report_" . $sale_person_id .'_' . $date_file_name . ".xlsx";
-        $writer->save($file_name);
-
-        return url('/') . '/' . $file_name_without_path;
     }
 
     static public function month_average_rm($date, $rm_id)
@@ -435,7 +437,7 @@ class MonthAverateReportsController extends Controller
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+        header('Content-Disposition: attachment;filename="month_average_report.xlsx"');
         header('Cache-Control: max-age=0');
         $date_file_name = Carbon::parse($date)->format('Y_m_d');
         $time_string = Carbon::now()->toTimeString();
