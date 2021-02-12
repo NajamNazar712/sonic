@@ -1591,7 +1591,7 @@ class RiderAPIController extends Controller
                     }
 
                     $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
-                    $rider_pickup->rider_remarks = $request->rider_remarks;
+                    $rider_pickup->rider_remarks = str_replace("\"", "", $request->rider_remarks);
 
                     $rider_pickup->save();
 
