@@ -23,6 +23,9 @@
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Created At</th>
+                                    <th class="border-primary border-darken-1">Created By</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -217,6 +220,9 @@
                             head.push('Area');
                             head.push('Territory');
                             head.push('Created At');
+                            head.push('Created By');
+                            head.push('Updated At');
+                            head.push('Updated At');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -225,6 +231,9 @@
                                 row.push(values.area);
                                 row.push(values.territory);
                                 row.push(values.created_at);
+                                row.push(values.created_by);
+                                row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
@@ -433,7 +442,10 @@
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
                     {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
-                    {data: 'action', name: 'action', class: 'align-middle action'},
+                    {data: 'created_by', name: 'a.created_by', class: 'align-middle created_by'},
+                    {data: 'updated_at', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'ad.updated_at', class: 'align-middle created_by'},
+                    {data: 'action', orderable: false, name: 'action', class: 'align-middle action',},
                 ],
                 rowCallback: function(row, data, index) {
 

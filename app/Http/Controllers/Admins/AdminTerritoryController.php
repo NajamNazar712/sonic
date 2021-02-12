@@ -99,7 +99,9 @@ class AdminTerritoryController extends Controller
     }
     public function area_list(){
          $areas = AreaTerritory::join('territories as t','t.id','=','area_territories.territory_id')
-             ->select(['area_territories.id as id','t.name as territory','area_territories.name as area','area_territories.created_at as created_at']);
+             ->leftjoin('admins as a','a.id','=','area_territories.created_by')
+             ->leftjoin('admins as ad','ad.id','=','area_territories.updated_by')
+             ->select(['area_territories.id as id','t.name as territory','area_territories.name as area','area_territories.created_at as created_at','a.name as created_by','ad.name as updated_by','area_territories.updated_at as updated_at']);
 
         $datatable = Datatables::of($areas)
         ->addColumn('action', function($data) {
@@ -131,6 +133,7 @@ class AdminTerritoryController extends Controller
         $area = new AreaTerritory();
         $area->territory_id = $territory;
         $area->name = $area_name;
+        $area->created_by = Auth::id();
         $area->save();
 
         return redirect()->route('admin.management.area.index')->with(['success' => 'Area: ' . $area_name . ' has been added!']);
@@ -156,6 +159,7 @@ class AdminTerritoryController extends Controller
       $area_territory = AreaTerritory::find($id);
       $area_territory->territory_id = $territory;
       $area_territory->name = $area;
+      $area_territory->updated_by = Auth::id();
       $area_territory->save();
 
       return redirect()->route('admin.management.area.index')->with(['success' => 'Area: ' . $area . ' has been edited!']);
