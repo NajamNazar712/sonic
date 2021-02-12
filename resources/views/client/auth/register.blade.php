@@ -887,7 +887,7 @@
                         $('#territory').val('').trigger('change');
                         
                     } else {
-                        $('#territory').val('').trigger('change');
+                        $('#territory').empty();
                         var error = 'No Territory found for the selected city';
                         toastr.error(error, 'Error!', {
                             positionClass: 'toast-top-center',
