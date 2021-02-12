@@ -108,6 +108,8 @@ Route::name('api.')->group(function () {
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
             });
 
+            Route::post('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
+
 		});
 
 
