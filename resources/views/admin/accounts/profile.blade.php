@@ -151,6 +151,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
 
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S.No</th>
                                     <th class="border-primary border-darken-1">Pickup Address ID</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
@@ -699,6 +700,7 @@
         </div>
     </div>
     {{--Add Email Modal--}}
+    
 
 @endsection
 
@@ -857,9 +859,14 @@
             $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
             $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-
+            
+            
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
+                scrollX: false, scrollY: '500px',
+                pageLength: 50,
+                pagingType: 'full_numbers',
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -870,7 +877,7 @@
                 rowId: 'id',
                 order : [1,'desc'],
                 columns: [
-                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
@@ -881,6 +888,7 @@
                     {data: 'status', name: 'status',class:'status',orderable: false}
                 ],
                 rowCallback: function(row, data, index) {
+
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -943,6 +951,8 @@
 
                 }
             });
+
+           
             $( "#bank-form" ).validate({
                 errorClass:"danger",
                 normalizer: function(value) {
@@ -1042,7 +1052,7 @@
                     var error = "No Email Address selected, Please select at-least one email address!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-            });
+            })
 
         });
     </script>

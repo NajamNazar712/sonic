@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
@@ -369,7 +370,8 @@ class RegisterController extends Controller
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
             'lead_id' => $lead_id,
-            'api_token' => uniqid(base64_encode(str_random(60)))
+            'api_token' => uniqid(base64_encode(str_random(60))),
+            'territory_id' =>  $data['territory_id']
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
@@ -399,6 +401,7 @@ class RegisterController extends Controller
         $first = TRUE;
 
         foreach ($data['pickup_address'] as $index => $pickup_address) {
+
             if ($first) {
                 UserShippingInfo::create([
                     'user_id' => $newUser->id,
@@ -419,7 +422,7 @@ class RegisterController extends Controller
                     'poc' => $data['shipping_poc'][$index],
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
-                    'city_id' => $data['shipping_city'][$index]
+                    'city_id' => $data['shipping_city'][$index],
                 ]);
             }
         }
@@ -648,6 +651,20 @@ class RegisterController extends Controller
                 $sale_person_admin = City::find($id)->name;
                 return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
             }
+        }
+    }
+
+    public function territory(Request $request)
+    {
+        $city_id = $request->id;
+        if ($city_id) {
+            $territory = Territory::where('city_id', $city_id);
+            if ($territory->exists()) {
+                $territory = $territory->get();
+                return response()->json(['status' => 0, 'territory' => $territory]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'error' => "No Territory found for the selected city"]);
         }
     }
 

@@ -37,6 +37,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
+    Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -486,6 +487,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
+        Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -505,6 +507,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+
         //my route
         Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 
@@ -686,6 +689,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
         });
+
+        Route::prefix('territory')->name('territory.')->group(function () {
+            Route::get('', 'Admins\AdminTerritoryController@index')->name('index');
+            Route::get('/list', 'Admins\AdminTerritoryController@list')->name('list');
+            Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
+            Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
+            Route::get('/{id}', 'Admins\AdminTerritoryController@edit')->name('edit');
+            Route::post('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
+            
+        });
+        Route::prefix('area')->name('area.')->group(function () {
+            Route::get('', 'Admins\AdminTerritoryController@area_index')->name('index');
+            Route::get('/list', 'Admins\AdminTerritoryController@area_list')->name('list');
+            Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
+            Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
+            Route::get('/{id}', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::post('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
+            Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
+
+        });
+
+
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {

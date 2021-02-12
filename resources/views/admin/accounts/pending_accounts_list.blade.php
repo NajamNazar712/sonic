@@ -65,6 +65,7 @@
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
@@ -234,6 +235,39 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="TerritoryTag" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TerritoryTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Territory</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="set_territory" action="{{route('admin.accounts.add_territory')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <div class="form-group text-center">
+                                <input type="text" hidden name="user_ids" class="user_ids">
+                                <select name="territory" id="territory" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                                    @foreach($territories as $territory)
+                                        <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="territoryTagSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -247,6 +281,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script>
@@ -263,6 +298,12 @@
             allowClear:true,
             dropdownParent:$('#search_form')
         });
+        $("#territory").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Territory",
+            width:'100%',
+            dropdownParent:$('#TerritoryTag')
+        });
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -285,6 +326,7 @@
                         head.push('Contact Person');
                         head.push('Address');
                         head.push('City');
+                        head.push('Territory');
                         head.push('Product Type');
                         head.push('Request Date');
                         head.push('Status');
@@ -311,6 +353,7 @@
                             row.push(values.poc);
                             row.push(values.address);
                             row.push(values.city);
+                            row.push(values.territory);
                             row.push(values.product_type);
                             row.push(values.created_at);
                             row.push(values.status);
@@ -553,6 +596,23 @@
                         }
                     },
                     @endif
+                    @if (session('role_id') == 1 || in_array(445, session('permissions')))
+                {
+                    text: 'Tag Territory',
+                    className: 'btn btn-primary territory_tag',
+                    enabled:false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+                            $('.user_ids').val(selected_rows);
+                            $('#TerritoryTag').modal('show');
+
+                        }else{
+                            var error = "Atleast Select One Shipper";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                },
+                @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -589,6 +649,7 @@
                                         }
 
                                         table.button('.assign_rider').enable();
+                                        table.button('.territory_tag').enable();
                                         table.button('.tag').enable();
 
                                     }
@@ -619,6 +680,7 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.assign_rider').disable();
                                         table.button('.tag').disable();
+                                        table.button('.territory_tag').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
@@ -671,6 +733,7 @@
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 {data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -1078,10 +1141,12 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign_rider').enable();
+                    table.button('.territory_tag').enable();
                     table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign_rider').disable();
+                    table.button('.territory_tag').disable();
                     table.button('.tag').disable();
                 }
         });
@@ -1137,6 +1202,25 @@
             $('#SalesTierTypeTagModal #kam').val('').trigger('change');
             $('#SalesTierTypeTagModal #ref').val('').trigger('change');
         });
+
+        $( "#set_territory" ).validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                form.submit();
+
+            }
+        });
+
+        $('.close').on('click',function(){
+            $('#territory').val('').trigger('change');
+        })
 
     });
 
