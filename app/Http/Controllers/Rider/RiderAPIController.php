@@ -2985,6 +2985,43 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function rider_wallet(Request $request)
+    {
+        $rules = [
+//            'delivery_note_ids' => ['required', 'array', 'min:1', 'exists:delivery_notes,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+//            $delivery_note_ids = $request->delivery_note_ids;
+            $rider_id = $request->rider_id;
+
+            $delivery_notes = DeliveryNote::
+            join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+                ->select(['delivery_notes.id as delivery_note_id'])
+                ->where('delivery_notes.cash_collection_status', 0)
+                ->where('delivery_notes.status', '!=', 4)
+                ->where('delivery_notes.rider_id', $rider_id);
+            /*->whereIn('delivery_notes.id', $delivery_note_ids);*/
+
+            if ($delivery_notes->exists()) {
+                $delivery_notes = $delivery_notes->get();
+                $deliveries_note = array();
+                foreach ($delivery_notes as $delivery_note) {
+                    array_push($deliveries_note, $delivery_note->delivery_note_id);
+                }
+                return response()->json(['status' => 0, 'delivery_notes' => $deliveries_note]);
+            } else {
+                return response()->json(['status' => 0, 'message' => "No Delivery Note Found"]);
+            }
+        }
+    }
+
 
 
     /*public function delivery_packaging_material_update($tracking_number){
