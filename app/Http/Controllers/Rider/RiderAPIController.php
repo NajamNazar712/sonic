@@ -1552,7 +1552,6 @@ class RiderAPIController extends Controller
                     $pickup_request->save();
                     $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
                     $pickup_request_attempt->reason_id = $request->reason_id;
-                    $pickup_request_attempt->rider_remarks = $request->rider_remarks;
                     $pickup_request_attempt->save();
 
                     $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
