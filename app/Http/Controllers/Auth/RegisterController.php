@@ -340,13 +340,20 @@ class RegisterController extends Controller
      * @return \App\User
      */
     protected function create(array $data)
-    {
+    {      
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
         else{
             $lead_id = null;
         }
+        if(array_key_exists('territory_id', $data)){
+            $territory_id = $data['territory_id'];
+        }
+        else{
+            $territory_id = null;
+        }
+
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -371,7 +378,7 @@ class RegisterController extends Controller
             'segment_id' => $data['segments'],
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
-            'territory_id' =>  $data['territory_id']
+            'territory_id' =>  $territory_id
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);

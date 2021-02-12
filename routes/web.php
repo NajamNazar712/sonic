@@ -695,8 +695,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\AdminTerritoryController@list')->name('list');
             Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
-            Route::get('/{id}', 'Admins\AdminTerritoryController@edit')->name('edit');
-            Route::post('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
+            Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
             
         });
         Route::prefix('area')->name('area.')->group(function () {
@@ -704,8 +704,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\AdminTerritoryController@area_list')->name('list');
             Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
-            Route::get('/{id}', 'Admins\AdminTerritoryController@area_edit')->name('edit');
-            Route::post('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
+            Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
         });
