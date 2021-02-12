@@ -81,7 +81,6 @@
                 width:'100%',
                 dropdownParent:$('#TerritoryTag')
             });
-            var territory_ids = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -351,6 +350,7 @@
                     this.api().table().columns.adjust();
                 }
             });
+            var territory_ids = [];
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
