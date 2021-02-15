@@ -1073,9 +1073,9 @@ class AdminMasterCargoController extends Controller
 
         $mapping = JunctionMapping::where(['origin_id' => $origin_details['id'], 'destination_id' => $destination_details['id']])->first();
         if($mapping){
-            $details['junction_1'] = $mapping->junction_1;
-            $details['junction_2'] = $mapping->junction_2;
-            $details['receiver'] = $mapping->receiver;
+            $details['junction_1'] = $mapping['junction_1'];
+            $details['junction_2'] = $mapping['junction_2'];
+            $details['receiver'] = $mapping['receiver'];
         }
         $details['actual_weight'] = 0;
 
