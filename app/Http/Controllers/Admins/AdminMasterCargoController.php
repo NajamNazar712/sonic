@@ -2401,7 +2401,7 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if($request->has('tracking_number') || $request->has('bag_number')){
+        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
                 ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
             if ($tracking_number = $request->get('tracking_number')) {
@@ -2496,7 +2496,7 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if($request->has('tracking_number') || $request->has('bag_number')){
+        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
                 ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
             if ($tracking_number = $request->get('tracking_number')) {
