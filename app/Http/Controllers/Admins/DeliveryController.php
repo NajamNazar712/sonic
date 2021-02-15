@@ -944,7 +944,7 @@ class DeliveryController extends Controller
             ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'delivery_notes.total_cod_amount as amount', 'bt.booking_type as service_type'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -6072,16 +6072,21 @@ class DeliveryController extends Controller
         $shipment = Shipment::find($shipment_id);
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
-//                    if($delivery_note->hub_id == $shipment->consignee_city->hub_id){
+
                         $total_shipments = $delivery_note->shipments_count;
                         $total_shipments++;
                         $cod_amount = $delivery_note->total_cod_amount;
-                        $cod_amount = $cod_amount + $shipment->amount;
+                        $total_cod_amount = $cod_amount + $shipment->amount;
                         $delivery_note->shipments_count = $total_shipments;
-                        $delivery_note->total_cod_amount = $cod_amount;
+                        $delivery_note->total_cod_amount = $total_cod_amount;
                         $delivery_note->save();
 
-                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('delivery_note_id','desc')->first();
+                        if($delivery_note->ordering == 1){
+                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                        }
+                        else{
+                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->first();
+                        }
                         if($serial != null){
                             $serial++;
                         }
