@@ -267,13 +267,13 @@
                                         <li><a class="menu-item" href="{{ route('admin.master_cargo.in_transit.index') }}">In Transit</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(31, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.receive.quick.index') }}">Quick Receive</a></li>
-                                    @endif
+{{--                                    @if (session('role_id') == 1 || in_array(31, session('permissions')))--}}
+{{--                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.receive.quick.index') }}">Quick Receive</a></li>--}}
+{{--                                    @endif--}}
 
-                                    @if (session('role_id') == 1 || in_array(124, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.receive.quick.list.index') }}">Quick Receive List</a></li>
-                                    @endif
+{{--                                    @if (session('role_id') == 1 || in_array(124, session('permissions')))--}}
+{{--                                        <li><a class="menu-item" href="{{ route('admin.master_cargo.receive.quick.list.index') }}">Quick Receive List</a></li>--}}
+{{--                                    @endif--}}
 
                                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.in_transit.index') }}">Pending Bags for Receiving</a></li>
