@@ -6394,7 +6394,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $to = ['ammar.mir@trax.pk'];
+                    $to = ['uzair.anees@trax.pk'];
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
@@ -6406,7 +6406,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $to = ['ammar.mir@trax.pk'];
+                    $to = ['uzair.anees@trax.pk'];
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
