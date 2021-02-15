@@ -1935,7 +1935,7 @@ class AdminReportsEmailController extends Controller
         }
 
         $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
-        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
 
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -1973,7 +1973,7 @@ class AdminReportsEmailController extends Controller
                 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereDate('sj.created_at', '<=',  $date_to)
+            ->whereBetween('sj.created_at', [$date_from,$date_to])
             ->whereIn('shipments.shipper_status_id', $status)->get();
 
 
@@ -2050,7 +2050,7 @@ class AdminReportsEmailController extends Controller
         }
 
         $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
-        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
 
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -2060,7 +2060,7 @@ class AdminReportsEmailController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
-            ->whereDate('delivery_notes.created_at', '<=',  $date_to)
+            ->whereBetween('delivery_notes.created_at', [$date_from, $date_to])
             ->where('delivery_notes.status', 0)
             ->orderBy('delivery_notes.created_at', 'desc')->get();
 
