@@ -1935,7 +1935,7 @@ class AdminReportsEmailController extends Controller
         }
 
         $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
-        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateString();
 
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -2050,7 +2050,7 @@ class AdminReportsEmailController extends Controller
         }
 
         $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
-        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
+        $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateString();
 
         $serial = 0;
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
