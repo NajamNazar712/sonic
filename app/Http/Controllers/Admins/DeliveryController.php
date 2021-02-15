@@ -6040,7 +6040,7 @@ class DeliveryController extends Controller
                           $delivery = $delivery->first();
                           $count = $delivery->shipments_count;
                           $cod = $delivery->total_cod_amount;
-                          $count-=1;
+                          $count = $count - 1;
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                               $cod = $cod - $parcel->amount;
                           }
@@ -6083,6 +6083,7 @@ class DeliveryController extends Controller
 
                         if($delivery_note->ordering == 1){
                             $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                            $serial = $serial->ordering;
                         }
                         else{
                             $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->first();
