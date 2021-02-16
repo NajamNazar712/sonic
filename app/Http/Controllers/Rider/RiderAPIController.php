@@ -1208,8 +1208,8 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'audio' => ['required', 'file'],
-//            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
+            'picture' => ['required', 'image'],
+            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
         ];
         $message = '';
 
@@ -1281,8 +1281,8 @@ class RiderAPIController extends Controller
                     }
                     $rider_delivery->save();
 
-                    $picture_path = 'rider_delivery/' . $rider_delivery->id . '.3gp';
-                    Storage::disk('public')->put($picture_path, file_get_contents($request->audio));
+                    $picture_path = 'rider_delivery/' . $rider_delivery->id . '.png';
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                     $rider_delivery->picture_path = $picture_path;
                     $rider_delivery->save();
 
