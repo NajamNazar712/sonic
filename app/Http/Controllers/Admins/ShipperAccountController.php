@@ -26,8 +26,8 @@ class ShipperAccountController extends Controller
 
             if(count($active_users) > 0){
                 $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
-                $result = array_diff($active_users,$shipments);
 
+                $result = array_diff($active_users,$shipments);
                 if (count($result) > 0)
                 {
                     foreach ($result as $status) {

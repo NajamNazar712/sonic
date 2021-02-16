@@ -27,7 +27,12 @@ Route::name('api.')->group(function () {
 			Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
 			Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
 			Route::get('status', 'APIController@shipment_status')->name('status');
-			Route::get('track', 'APIController@shipment_track')->name('track');
+
+            Route::prefix('track')->name('track.')->group(function() {
+                Route::get('', 'APIController@shipment_track')->name('track');
+                Route::get('order_id', 'APIController@shipment_track_order_id')->name('order_id');
+            });
+
 			Route::get('charges', 'APIController@shipment_charges')->name('charges');
 			Route::get('payment_status', 'APIController@shipment_payment_status')->name('payment_status');
 			Route::get('payments', 'APIController@shipment_payments')->name('payments');
@@ -79,6 +84,9 @@ Route::name('api.')->group(function () {
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
 
                 Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
+
+                Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
+                Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
 	        });
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
@@ -104,6 +112,8 @@ Route::name('api.')->group(function () {
                 Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
             });
+
+            Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
 
 		});
 

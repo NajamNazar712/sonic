@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\AdminReportsEmailController;
+use App\Http\Controllers\Admins\SalesPersonNumbersReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -41,7 +41,7 @@ class SalePersonShipmentNumbers extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $response = AdminReportsEmailController::sale_person_numbers($date . ' 00:00:00');
+        $response = SalesPersonNumbersReportController::sale_person_numbers_overall($date . ' 00:00:00');
         NotificationsController::send(47, $date, $response);
     }
 }

@@ -37,6 +37,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
+    Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -159,6 +160,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
+
+    });
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
+        Route::post('order_track', 'Shippers\ShipperTrackingController@order_track')->name('track');
     });
     Route::prefix('packaging')->name('packaging.')->group(function (){
         Route::prefix('requests')->name('requests.')->group(function (){
@@ -481,6 +487,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit','Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
+        Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -500,6 +507,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/{approve}/{reason}/approve/documents','Admins\AdminDashboardController@approveDocuments')->name('documents.approve');
         Route::post('//documents/upload','Admins\AdminDashboardController@uploadDocuments')->name('documents.upload');
         Route::post('/documents/confirm', 'Admins\AdminDashboardController@userDocumentsConfirm')->name('documents.confirm');
+
         //my route
         Route::post('/documents/edit', 'Admins\AdminDashboardController@userDocumentsEdit')->name('documents.edit');
 
@@ -681,6 +689,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
         });
+
+        Route::prefix('territory')->name('territory.')->group(function () {
+            Route::get('', 'Admins\AdminTerritoryController@index')->name('index');
+            Route::get('/list', 'Admins\AdminTerritoryController@list')->name('list');
+            Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
+            Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
+            Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
+            
+        });
+        Route::prefix('area')->name('area.')->group(function () {
+            Route::get('', 'Admins\AdminTerritoryController@area_index')->name('index');
+            Route::get('/list', 'Admins\AdminTerritoryController@area_list')->name('list');
+            Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
+            Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
+            Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
+            Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
+
+        });
+
+
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
@@ -802,6 +832,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('action_log')->name('action_log.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_index_v2')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_list_v2')->name('list');
+        });
+        Route::prefix('un_assigned')->name('un_assigned.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@unassigned_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@unassigned_list')->name('list');
         });
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pending_index')->name('index');
@@ -1452,6 +1486,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@change_shipment_weight_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_weight_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
+            Route::post('excel_store', 'Admins\AdminFinanceController@change_shipment_weight_excel_store')->name('excel_store');
+
         });
 
         Route::prefix('add_shipment_adjustment')->name('add_shipment_adjustment.')->group(function () {
@@ -1923,6 +1959,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+        });
+        Route::prefix('weight_qc')->name('weight_qc.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@weight_qc_list')->name('list');
         });
     });
 

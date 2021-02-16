@@ -15,6 +15,7 @@ use App\http\Models\Admin\Lead\Lead;
 use App\http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\AverageShipmentCycle;
@@ -76,6 +77,7 @@ use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use App\RouteLocations;
 use App\Http\Models\RouteType;
+use App\TerritoryTagHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -1381,7 +1383,8 @@ class AdminDashboardController extends Controller
         $products = Product::select('id','product_name')->get();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         $corporate_rate_types = CorporateRateType::all();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
         $shippers = User::whereIn('status', [3, 4])->get();
@@ -1390,7 +1393,8 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
 
     }
     public function blockAccountsList(){
@@ -1467,6 +1471,7 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->save();
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ];
                 NotificationsController::send(81, $sale_persons, Auth::id());
+                NotificationsController::send(119, $sale_persons, Auth::id());
 
 
             }
@@ -1514,6 +1519,7 @@ class AdminDashboardController extends Controller
             }
 
             NotificationsController::send(81,$sale_persons ,Auth::id());
+            NotificationsController::send(119,$sale_persons ,Auth::id());
             return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
         }
         else{
@@ -7186,8 +7192,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as poc','poc.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address'])->whereIn('users.status',[3,4])->where('blacklist',0);
-
+            ->leftjoin('territories as t','t.id','=','users.territory_id')
+			->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory'])->whereIn('users.status',[3,4])->where('blacklist',0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -7214,6 +7220,9 @@ class AdminDashboardController extends Controller
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
+        }
+        if($search_email = $request->get('search_email')){
+            $users = $users->where('users.email',$search_email);
         }
 
         return Datatables::of($users)
@@ -7473,7 +7482,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as p','p.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.address as address'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+			->leftjoin('territories as t','t.id','=','users.territory_id')
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email','t.name as territory','users.address as address'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -7499,6 +7509,10 @@ class AdminDashboardController extends Controller
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
+        }
+
+        if($search_email = $request->get('search_email')){
+            $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -7828,11 +7842,11 @@ class AdminDashboardController extends Controller
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
-
         $segments = Segment::all();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments]);
+        $territories = Territory::select('id','name')->get();
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments,'territories' => $territories]);
     }
 
     public function updateProfile(Request $request)
@@ -8395,7 +8409,8 @@ class AdminDashboardController extends Controller
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
             ->leftjoin('route_types as rt','rt.id','=','routes.route_type_id')
-            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type']);
+            ->leftjoin('riders','riders.route_id','=','routes.id')
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type','riders.name as rider']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -9803,6 +9818,28 @@ class AdminDashboardController extends Controller
 //            return response()->json(['status' => 0, 'No Shipping mode found!']);
 //        }
 //     }
+
+    public function add_territory(Request $request){
+        $territory = $request->territory;
+        $user_ids = $request->user_ids;
+        if($user_ids){
+            $user_ids = explode(',', $user_ids);
+            foreach($user_ids as $id){
+                $user = User::find($id);
+                $user->territory_id = $territory;
+                $user->save();
+
+                $history = new TerritoryTagHistory();
+                $history->user_id = $id;
+                $history->admin_id = Auth::id();
+                $history->save();
+            }
+            return redirect()->back()->with('success', 'Territory is added.');
+            }
+        else{
+            return redirect()->back()->with('error', 'Territory not added.');
+        }
+    }
 
 }
 

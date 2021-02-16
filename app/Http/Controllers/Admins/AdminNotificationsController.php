@@ -283,9 +283,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 56){
             $details['fields'] = ['account_id', 'shipper_name','preview', 'sale_person'];
         }
-		else if ($id == 57){
-            $details['fields'] = ['account_id', 'shipper_name'];
-        }
+//		else if ($id == 57){
+//            $details['fields'] = ['account_id', 'shipper_name'];
+//        }
         else if ($id == 58){
             $details['fields'] = ['shipper_name'];
         }
@@ -368,6 +368,27 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 202){
             $details['fields'] = ['admin','admin_user_name','trax_id','full_name','email','sonic_password','outlook_password'];
+        }
+		else if ($id == 119){
+            $details['fields'] = ['shipper_name','new_sale_person'];
+        }
+		else if ($id == 120){
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 121){
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 122){
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 123){
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 124){
+            $details['fields'] = ['date', 'link'];
+        }
+        else if ($id == 125){
+            $details['fields'] = ['date', 'link'];
         }
 
 		return $details;
