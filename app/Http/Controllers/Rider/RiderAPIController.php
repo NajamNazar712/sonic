@@ -1208,7 +1208,8 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'picture' => ['required', 'image']
+            'picture' => ['required', 'image'],
+            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
         ];
         $message = '';
 
@@ -1284,6 +1285,14 @@ class RiderAPIController extends Controller
                     Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                     $rider_delivery->picture_path = $picture_path;
                     $rider_delivery->save();
+
+                    if ($request->has('audio')) {
+                        $extension=$request->file('audio')->getClientOriginalExtension();
+                        $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        $rider_delivery->audio_path = $audio_path;
+                        $rider_delivery->save();
+                    }
 
                     if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
@@ -1528,7 +1537,8 @@ class RiderAPIController extends Controller
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_request_not_pick_reasons,id'],
             'rider_remarks' => ['nullable'],
-            'picture' => ['required', 'image']
+            'picture' => ['required', 'image'],
+            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1602,6 +1612,14 @@ class RiderAPIController extends Controller
                     $rider_pickup->picture_path = $picture_path;
 
                     $rider_pickup->save();
+
+                    if ($request->has('audio')) {
+                        $extension=$request->file('audio')->getClientOriginalExtension();
+                        $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        $rider_pickup->audio_path = $audio_path;
+                        $rider_pickup->save();
+                    }
 
                     V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('status', 0)->count();
