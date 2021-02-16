@@ -855,7 +855,7 @@ class AdminTrackingController extends Controller
                         }
 
                         if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if ($journey->shipper_status_id == 3) {
+                            if ($journey->shipper_status_id == 3 || $journey->shipper_status_id == 21) {
                                 $bag = Bag::where('id', $journey->reference_1_id);
                                 if($bag->exists()){
                                     $bag = $bag->first();
