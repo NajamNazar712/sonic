@@ -23,6 +23,7 @@ use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2RiderPickupShipment;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -7529,14 +7530,16 @@ class AdminReportsController extends Controller
 
     public function last_mile_app_index(){
         $riders = Rider::where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
-        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities]);
+        $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
+        $hubs = City::where('status', 1)->where('hub', 1)->where('business_category_id', 1)->get();
+        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
     }
     public function last_mile_app_list(Request $request){
-        $deliveries = DB::connection('reports')->table('delivery_notes')->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
+        $deliveries = DB::connection('reports')->table('delivery_notes')
+            ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app');
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app', 'c.name as city');
 
 
         $datatable = Datatables::of($deliveries)
@@ -7562,26 +7565,31 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->editColumn('delivered_via_app', function($deliveries){
-                if($deliveries->delivered_via_app == 1 ){
-                    return 'Partial';
+            ->addColumn('update_via_app', function($deliveries){
+                if ($deliveries->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
                 }
-                elseif ($deliveries->delivered_via_app == 2){
-                    return 'Yes';
+                else {
+                    return 0;
                 }
-                elseif ($deliveries->delivered_via_app == 0){
-                    return 'No';
+            })
+            ->addColumn('update_via_dbf', function($deliveries){
+                if ($deliveries->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
                 }
-                else{
-                    return '-';
+                else {
+                    return 0;
                 }
             });
 
         if ($search_rider = $request->get('search_rider')) {
             $datatable->where('r.id', $search_rider);
         }
-        if ($search_city = $request->get('search_city')) {
-            $datatable->where('c.id', $search_city);
+        if ($search_zone = $request->get('search_zone')) {
+            $datatable->where('c.zone_id', $search_zone);
+        }
+        if ($search_hub = $request->get('search_hub')) {
+            $datatable->where('c.id', $search_hub);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

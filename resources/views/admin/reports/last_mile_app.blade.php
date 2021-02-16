@@ -16,15 +16,6 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="search_city" id="search_city" class="form-control select2">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <div class="col-4 mt-1">
-                                <fieldset class="form-group">
                                     <select name="search_rider" id="search_rider" class="form-control select2">
                                         @foreach($riders as $rider)
                                             <option value="{{$rider->id}}">{{$rider->name}}</option>
@@ -32,47 +23,130 @@
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group">
+                                    <select name="search_hub" id="search_hub" class="form-control select2">
+                                        @foreach($hubs as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group">
+                                    <select name="search_zone" id="search_zone" class="form-control select2">
+                                        @foreach($zones as $zone)
+                                            <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
 
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
                                     </div>
-                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                                    <input type="text" name="search_date_from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_from" placeholder="Date (From)">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                                    <input type="text" name="search_date_to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_to" placeholder="Date (To)">
                                 </div>
                             </div>
 
                             <div class="col-2 mt-1">
                                 <div class="form-group">
-                                    <button type="button" id="search_filter_btn" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button type="button" id="search_filter_btn"
+                                            class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                        Search
+                                    </button>
                                 </div>
                             </div>
                         </form>
                     </div>
+                    <div class="col-12 justify-content-center mt-2" id="report_data">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card pull-up">
+                                    <div class="card-content border rounded">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-grid font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-right">
+                                                    <h3 id="total_shipments">0</h3>
+                                                    <span>Total Shipment(s)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-gradient-directional-primary pull-up">
+                                    <div class="card-content" id="app_shipments">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-white text-right">
+                                                    <h3 class="text-white" id="app_shipments">0</h3>
+                                                    <span>Updated Via App</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-gradient-directional-info pull-up">
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-layers text-white font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-white text-right">
+                                                    <h3 class="text-white" id="dbf_shipments">0</h3>
+                                                    <span class="font-13">Update Via DBF</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Delivery Note#</th>
+                        <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
-                        <th class="border-primary border-darken-1">Delivered</th>
-                        <th class="border-primary border-darken-1">Delivered Via App</th>
+                        <th class="border-primary border-darken-1">Update Via App</th>
+                        <th class="border-primary border-darken-1">Update Via DBF</th>
                     </tr>
                     </thead>
                 </table>
@@ -161,8 +235,13 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search City',
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -212,6 +291,7 @@
 
                             head.push('S. No');
                             head.push('Delivery Note#');
+                            head.push('City');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
@@ -222,6 +302,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
+                                row.push(values.City);
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
@@ -262,7 +343,8 @@
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
                         d.search_rider = $('#search_rider').val();
-                        d.search_city = $('#search_city').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.search_hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -272,6 +354,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    {data: 'city', name: 'delivery_notes.id', class: 'align-middle text-center city'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
