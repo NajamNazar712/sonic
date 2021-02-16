@@ -2815,7 +2815,8 @@ class AdminReportsController extends Controller
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes]);
+        $couriers = DB::connection('reports')->table('wms_couriers')->get(['id','name']);
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes,'couriers' => $couriers]);
     }
     public function completed_delivery_notes_list(Request $request){
         $deliveries = DB::connection('reports')->table('delivery_notes')->
@@ -2917,6 +2918,9 @@ class AdminReportsController extends Controller
             $datatable->where('oc.id', '=', $hub);
         }
         if ($mode = $request->get('search_shipping_mode')) {
+            $datatable->where('shipments.booking_type_id', '=', $mode);
+        }
+        if ($mode = $request->get('courier_id')) {
             $datatable->where('shipments.booking_type_id', '=', $mode);
         }
         if($submission_date = $request->get('search_submission')){

@@ -138,6 +138,15 @@
                         </div>
 
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="courier_id" id="courier_id" class="form-control select2">
+                                @foreach($couriers as $courier)
+                                    <option value="{{$courier->id}}">{{$courier->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -289,6 +298,11 @@
         $(document).ready(function () {
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#courier_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Courier Type',
                 width:'100%',
                 allowClear:true
             });
