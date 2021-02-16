@@ -182,7 +182,7 @@
                                 row.push(values.account_no);
                                 row.push(values.user_name);
                                 row.push(values.ntn_number);
-                                row.push(values.total_charges - values.gst);
+                                row.push(values.w_o_gst);
                                 row.push(values.gst);
                                 row.push(values.total_charges);
                                 // row.push(values.created_at);
