@@ -1209,7 +1209,7 @@ class RiderAPIController extends Controller
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image'],
-            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
+            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac,3gp', 'max:2048']
         ];
         $message = '';
 
