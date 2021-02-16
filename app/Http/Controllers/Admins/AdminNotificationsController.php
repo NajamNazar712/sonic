@@ -82,9 +82,18 @@ class AdminNotificationsController extends Controller
     public function send_custom_email(Request $request) {
         if ($request->get('receiver') == 1) {
             $emails = Admin::all()->pluck('email')->toArray();
+
         }
         else {
-            $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            if ($request->get('shipper_status') == 1) {
+                $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            }
+            else if ($request->get('shipper_status') == 2){
+                $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            }
+            else{
+                $emails = User::where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            }
         }
 
         if (!empty($emails)) {

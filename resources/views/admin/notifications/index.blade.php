@@ -54,6 +54,15 @@
 														</select>
 													</div>
 
+													<div class="form-group d-none" id="shipper_div">
+														<select name="shipper_status" class="select2 shipper_status" data-rule-required="true" data-msg-required="Select one">
+															<option value="" selected="selected"></option>
+															<option value="1">Enabled Shippers</option>
+															<option value="2">Disabled Shippers</option>
+															<option value="3">All</option>
+														</select>
+													</div>
+
 													<div class="form-group">
 														<label>Subject</label>
 														<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required">
@@ -137,6 +146,11 @@
 	<script>
 		$(document).ready(function() {
 			@if (session('role_id') == 1 || in_array(103, session('permissions')))
+				$('#send_custom_email .shipper_status').select2({
+					width: '100%',
+					placeholder: 'Status*'
+				});
+
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
 					placeholder: 'Receiver*'
@@ -144,10 +158,18 @@
 					if ($(this).hasClass('danger')) {
 						$(this).valid();
 					}
+					if(this.value == 2){
+						$('#shipper_div').removeClass('d-none');
+					}
+					else{
+						$('#shipper_div').addClass('d-none');
+					}
 				});
-
 				autosize($('#send_custom_email .body')[0]);
 			@endif
+
+				var reciever = $('#send_custom_email .receiver').val();
+				console.log(reciever);
 
 			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				autosize($('#edit .body')[0]);
@@ -424,6 +446,16 @@
 					}
 				});
 			@endif
+
+			$('#send_custom_email').on('hide.bs.modal', function (e) {
+
+				$('.shipper_status').val('').trigger('change');
+				$('#shipper_div').addClass('d-none');
+				$('.receiver').val('').trigger('change');
+				$('.subject').val('').trigger('change');
+				$('.body').val('').trigger('change');
+
+			});
 		});
 	</script>
 @endsection
