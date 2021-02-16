@@ -3638,8 +3638,7 @@ class DeliveryController extends Controller
 
     public function pending_cash_collection_list(Request $request)
     {
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
@@ -3720,10 +3719,14 @@ class DeliveryController extends Controller
                 }
                 return '';
             });
-        if ($tracking_number = $request->get('search_tracking')) {
+        if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+            ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
         }
         return $datatable->make(true);
     }
