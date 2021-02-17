@@ -1539,7 +1539,8 @@ class RiderAPIController extends Controller
             'reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_request_not_pick_reasons,id'],
             'rider_remarks' => ['nullable'],
             'picture' => ['required', 'image'],
-            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
+//            'audio' => ['nullable', 'file', 'mimes:audio/mpeg,mpga,mp3,wav,aac', 'max:2048']
+            'audio' => ['nullable', 'file']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2601,7 +2602,8 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['nullable'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'picture' => ['required', 'image']
+            'picture' => ['required', 'image'],
+            'audio' => ['nullable', 'file']
         ];
         $message = '';
 
@@ -2672,6 +2674,14 @@ class RiderAPIController extends Controller
                     Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                     $rider_return_delivery->picture_path = $picture_path;
                     $rider_return_delivery->save();
+
+                    if ($request->has('audio')) {
+                        $extension=$request->file('audio')->getClientOriginalExtension();
+                        $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        $rider_return_delivery->audio_path = $audio_path;
+                        $rider_return_delivery->save();
+                    }
 
                     if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
