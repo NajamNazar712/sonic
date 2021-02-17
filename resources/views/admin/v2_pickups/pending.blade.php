@@ -78,6 +78,7 @@
                                     <th class="border-primary border-darken-1">Trax Reason</th>
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
                                     <th class="border-primary border-darken-1">Shipper Remark(s)</th>
+                                    <th class="border-primary border-darken-1">Rider Remark(s)</th>
                                     <th class="border-primary border-darken-1">Rider Status</th>
                                     <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
@@ -279,6 +280,7 @@
                         head.push('Trax Reason');
                         head.push('Trax Remark(s)');
                         head.push('Shipper Remark(s)');
+                        head.push('Rider Remark(s)');
                         head.push('Rider Status');
                         head.push('Assigned Date');
                         head.push('Attempt Date');
@@ -307,6 +309,7 @@
                             row.push(values.trax_reason);
                             row.push(values.trax_remarks);
                             row.push(values.shipper_remarks);
+                            row.push(values.rider_remarks);
                             row.push(values.rider_status);
                             row.push(values.assigned_date);
                             row.push(values.attempted_date);
@@ -470,6 +473,7 @@
                 {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},
                 {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
                 {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
+                {data: 'rider_remarks', name: 'vpr.rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
@@ -497,7 +501,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action')) {
+                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))

@@ -30,6 +30,7 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
+
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
@@ -258,6 +259,242 @@ class ShipperTrackingController extends Controller
     	}
 
     	return $tracking;
+    }
+
+    public function order_index(){
+
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        return view('client.order_tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+    }
+
+    public function order_track(Request $request) {
+
+        $order_id = $request->order_id;
+        $tracking = array();
+            $shipment = Shipment::where('order_id', $order_id)->where('user_id',session('user_id'));
+
+            if ($shipment->exists()) {
+                $shipments = $shipment->get();
+
+                foreach($shipments as $shipment){
+                    $sub_shipment = true;
+                    if(session('user_type') == 2){
+                        if(session('restriction') == 1){
+                            $sub_check = SubstituteUserShipment::where('substitute_user_id', Auth::id())->where('shipment_id', $shipment->id);
+                            if(!$sub_check->exists()){
+                                $sub_shipment = false;
+                            }
+                        }
+                    }
+                    if($sub_shipment == true){
+                        $track_check = false;
+                        if(count(session('sister_users')) > 0){
+                            foreach (session('sister_users') as $user_id){
+                                if($user_id == $shipment->user_id){
+                                    $track_check = true;
+                                }
+
+                                if (session('user_id') == $shipment->user_id) {
+                                    $track_check = true;
+                                }
+                            }
+                        }else{
+                            if (session('user_id') == $shipment->user_id) {
+                                $track_check = true;
+                            }
+                        }
+
+
+                        if ($track_check == true) {
+                            $details = array();
+
+                            $details['order_id'] = $order_id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+
+                            $shipper = $shipment->user;
+
+                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                            $details['shipper']['city'] = $shipper->city->name;
+                            $details['shipper']['phone_number_1'] = $shipper->phone;
+                            $details['shipper']['phone_number_2'] = $shipper->phone2;
+                            $details['shipper']['email'] = $shipper->email;
+
+                            $pickup = $shipment->pickup_address;
+
+
+                            $details['pickup']['person_of_contact'] = $pickup->poc;
+                            $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['phone_number'] = $pickup->phone;
+                            $details['pickup']['email'] = $pickup->email;
+                            $details['pickup']['origin'] = $pickup->city->name;
+                            $details['pickup']['address'] = $pickup->pickup_address;
+
+                            $details['consignee']['name'] = $shipment->consignee_name;
+                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                            $details['consignee']['destination'] = $shipment->consignee_city->name;
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                            $details['consignee']['email'] = $shipment->consignee_email;
+                            foreach ($shipment->items as $item) {
+                                $item_details = array();
+
+                                $item_details['product_type'] = $item->product->product_name;
+                                $item_details['description'] = $item->description;
+                                $item_details['quantity'] = $item->quantity;
+
+                                $details['order_information']['items'][] = $item_details;
+                            }
+
+                            $details['order_information']['order_id'] = $shipment->order_id;
+                            if($shipment->order_date){
+                                $details['order_information']['order_date'] = $shipment->order_date->order_date;
+                            }
+                            else{
+                                $details['order_information']['order_date'] = NULL;
+                            }
+
+                            $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+
+                            $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
+
+                            if ($shipment->booking_type_id != 4) {
+                                $details['order_information']['amount'] = $shipment->amount;
+                            }
+                            else {
+                                if ($shipment->charges_mode_id == 1) {
+                                    $details['order_information']['amount'] = 0;
+                                }
+                                else {
+                                    $details['order_information']['amount'] = $shipment->amount;
+                                }
+                            }
+
+                            $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
+
+                            $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
+
+                            if ($shipment->charges_mode_id) {
+                                $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
+                            }
+
+                            $details['order_information']['instructions'] = $shipment->special_instructions;
+                            $details['order_information']['pieces'] = $shipment->pieces;
+                            $details['order_information']['business_category'] = $shipment->business_category->name;
+
+                            foreach ($shipment->shipment_journey as $journey) {
+                                if ($journey->verification) {
+                                    $journey_details = array();
+
+                                    $journey_details['date_time'] = $journey->created_at->toDateTimeString();
+                                    $journey_details['status'] = $journey->shipment_status_shipper->name;
+                                    if(in_array($journey->shipper_status_id, [1])){
+                                        if($shipment->booked_by == 1){
+                                            $journey_details['status'] .= ' (Main User)';
+                                        }
+                                        else if($shipment->booked_by == 2){
+                                            if($journey->reference_1_id != NULL){
+                                                $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                                $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                            }
+                                            else{
+                                                $journey_details['status'] .= ' (Substitute User)';
+                                            }
+                                        }
+                                    }
+                                    if(in_array($journey->shipper_status_id, [52])){
+                                        if($journey->reference_1_id != NULL){
+                                            $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                            if($sub_user){
+                                                $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                            }else{
+                                                if($journey->user_id != null){
+                                                    $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            if($journey->user_id != null){
+                                                $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                            }else{
+                                                $journey_details['status'] .= ' (Substitute User)';
+                                            }
+                                        }
+                                    }
+
+                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                        $return_note = ReturnNote::find($journey->reference_1_id);
+                                        if($return_note && $return_note->actual_date != null){
+                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                        }
+                                    }
+
+                                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                                    if(in_array($journey->shipper_status_id, [20,52,54])){
+                                        $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                                    }else{
+                                        $journey_details['status_remarks'] = '';
+                                    }
+
+
+                                    $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+//                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+
+                                    $details['tracking_history'][] = $journey_details;
+                                }
+
+                            }
+
+                            $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+                            if ($shipment_payment_journey) {
+                                foreach ($shipment_payment_journey as $journey) {
+                                    $journey_details = array();
+
+                                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                    $journey_details['status'] = $journey->status->name;
+                                    $journey_details['user'] = $journey->admin->name;
+                                    $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
+
+                                    $details['payment_history'][] = $journey_details;
+                                }
+                            }
+                            $user_id = null;
+                            $substitute_user_id = null;
+                            if (session('user_type') == 1) {
+                                $user_type = 2;
+                                $user_id = Auth::id();
+                            }
+                            else {
+                                $user_type = 3;
+                                $substitute_user_id = Auth::id();
+                            }
+
+                            ShipmentScanningJourneyController::add($shipment->id, 9, $user_type, null, $user_id, $substitute_user_id);
+
+                            $tracking['shipments'][$shipment->id] = $details;
+                        }
+                        else {
+                            $tracking['disallowed'][] = $order_id;
+                        }
+                    }
+                    else{
+                        $tracking['disallowed'][] = $order_id;
+                    }
+                }
+
+            }
+            else {
+                $tracking['invalid'][] = $order_id;
+            }
+
+
+        return $tracking;
     }
 
 }

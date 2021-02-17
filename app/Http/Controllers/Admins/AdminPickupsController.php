@@ -90,6 +90,7 @@ class AdminPickupsController extends Controller
                       $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
                       $pickup_request_id = $pickup_request->id;
                       if(!V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->exists()){
+                          $pickup_request->refresh();
                           $bookings = $pickup_request->booked + 1;
 
                           $pickup_request->booked = $bookings;
