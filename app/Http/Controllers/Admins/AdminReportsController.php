@@ -7562,8 +7562,8 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->addColumn('shipments_rider_updated', function($deliveries) {
-                if ($deliveries->shipments_rider_updated != 0) {
+            ->editColumn('shipments_rider_updated', function($deliveries) {
+                if ($deliveries->shipments_rider_updated != null) {
                     return $deliveries->shipments_rider_updated;
                 }
                 else {
@@ -7579,7 +7579,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('update_via_dbf', function($deliveries){
-                if ($deliveries->shipments_rider_updated != 0) {
+                if ($deliveries->shipments_rider_updated != $deliveries->shipments_rider_updated) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . ($deliveries->total_shipments - $deliveries->shipments_rider_updated) . '</button>';
                 }
                 else {
@@ -7656,21 +7656,21 @@ class AdminReportsController extends Controller
 	public function last_mile_app_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
 
-        $shipments = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
+        $shipments = Shipment::join('rider_deliveries', function ($join) {
+            $join->on('shipments.id', '=', 'rider_deliveries.shipment_id')
+                ->where('rider_deliveries.id', '=',
+                    DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = rider_deliveries.shipment_id)'));
+            })
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'rider_deliveries.shipment_id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rider_deliveries.shipment_id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
             })
-            ->join('rider_deliveries as rd', function ($join) {
-                $join->on('rd.shipment_id', '=', 'rider_deliveries.shipment_id')
-                    ->where('rd.shipment_id', '=',
-                        DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = rider_deliveries.shipment_id)'));
-            })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status')
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status')
             ->where('rider_deliveries.delivery_note_id', $delivery_note_id);
+
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
