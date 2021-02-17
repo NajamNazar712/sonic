@@ -2947,44 +2947,48 @@ class DeliveryController extends Controller
                             }
                         }
                     }
-                    if($shipper_status_id == 14){
-                        if($parcel->packaging_material_request == 1){
-                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->where('status_id', 3)->first();
-                            if($packaging_material_shipment != null){
-                                $packaging_material_shipment->status_id = 4;
-                                $packaging_material_shipment->save();
+                    if($verification == 1){
+                        if($shipper_status_id == 14){
 
-                                $packaging_request_history = new PackagingMaterialRequestHistory();
-                                $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
-                                $packaging_request_history->status = 4;
-                                $packaging_request_history->updated_by = Auth::id();
-                                $packaging_request_history->save();
-                            }
-                            $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $parcel->tracking_number);
-                            if($warehouse_stock_request->exists()){
-                                $warehouse_stock_request = $warehouse_stock_request->first();
-                                $warehouse_stock_request->status_id = 4;
-                                $warehouse_stock_request->save();
+                            $packaging_shipment = Shipment::find($shipment);
+                            if($packaging_shipment->packaging_material_request == 1){
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $packaging_shipment->tracking_number)->where('status_id', 3)->first();
+                                if($packaging_material_shipment != null){
+                                    $packaging_material_shipment->status_id = 4;
+                                    $packaging_material_shipment->save();
 
-                                $warehouse_stock_request_history = new WarehouseStockRequestHistory();
-                                $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
-                                $warehouse_stock_request_history->status = 4;
-                                $warehouse_stock_request_history->updated_by = Auth::id();
-                                $warehouse_stock_request_history->save();
-                                foreach ($warehouse_stock_request->stock_request_details as $detail){
-                                    if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
-                                        $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
-                                        $receiver_stock->stock += $detail->quantity;
-                                        $receiver_stock->save();
-                                    }else{
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 4;
+                                    $packaging_request_history->updated_by = Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                                $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $packaging_shipment->tracking_number);
+                                if($warehouse_stock_request->exists()){
+                                    $warehouse_stock_request = $warehouse_stock_request->first();
+                                    $warehouse_stock_request->status_id = 4;
+                                    $warehouse_stock_request->save();
 
-                                        $receiver_stock = new WarehouseStock();
-                                        $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
-                                        $receiver_stock->type_id = $detail->type_id;
-                                        $receiver_stock->type_size_id = $detail->size_id;
-                                        $receiver_stock->stock = $detail->quantity;
-                                        $receiver_stock->save();
+                                    $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+                                    $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+                                    $warehouse_stock_request_history->status = 4;
+                                    $warehouse_stock_request_history->updated_by = Auth::id();
+                                    $warehouse_stock_request_history->save();
+                                    foreach ($warehouse_stock_request->stock_request_details as $detail){
+                                        if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
+                                            $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
+                                            $receiver_stock->stock += $detail->quantity;
+                                            $receiver_stock->save();
+                                        }else{
 
+                                            $receiver_stock = new WarehouseStock();
+                                            $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                                            $receiver_stock->type_id = $detail->type_id;
+                                            $receiver_stock->type_size_id = $detail->size_id;
+                                            $receiver_stock->stock = $detail->quantity;
+                                            $receiver_stock->save();
+
+                                        }
                                     }
                                 }
                             }
