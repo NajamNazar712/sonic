@@ -5960,13 +5960,19 @@ class DeliveryController extends Controller
     static public function reassign_rider(Request $request){
         $rider_id = $request->rider;
         $delivery_note_id = $request->delivery_note_id;
-        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id)->first();
+        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id);
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
-            if($delivery_note->hub_id == $rider->hub_id){
-                $delivery_note->rider_id = $rider_id;
-                $delivery_note->save();
-                return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
+            if($rider->exists()){
+                $rider = $rider->first();
+                if($delivery_note->hub_id == $rider->hub_id){
+                    $delivery_note->rider_id = $rider_id;
+                    $delivery_note->save();
+                    return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Rider must be of same hub']);
+                }
             }
             else{
                 return response()->json(['status' => 1, 'error' => 'Rider must be of same hub']);
