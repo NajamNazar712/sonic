@@ -4,6 +4,7 @@ use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
@@ -14,6 +15,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -7535,11 +7537,11 @@ class AdminReportsController extends Controller
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
     }
     public function last_mile_app_list(Request $request){
+
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app', 'c.name as city');
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`'));
 
 
         $datatable = Datatables::of($deliveries)
@@ -7557,25 +7559,25 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->editColumn('delivered_shipments_link', function($deliveries) {
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+            ->editColumn('shipments_rider_updated', function($deliveries) {
+                if ($deliveries->shipments_rider_updated != 0) {
+                    return $deliveries->shipments_rider_updated;
                 }
                 else {
                     return 0;
                 }
             })
             ->addColumn('update_via_app', function($deliveries){
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+                if ($deliveries->shipments_rider_updated != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_rider_updated . '</button>';
                 }
                 else {
                     return 0;
                 }
             })
             ->addColumn('update_via_dbf', function($deliveries){
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+                if ($deliveries->shipments_rider_updated != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . ($deliveries->total_shipments - $deliveries->shipments_rider_updated) . '</button>';
                 }
                 else {
                     return 0;
@@ -7598,5 +7600,81 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
+    public function last_mile_app_shipments_list(Request $request){
+        $delivery_note_id = $request->delivery_note_id;
+
+        $shipments = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
+            ->leftjoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'rider_deliveries.shipment_id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rider_deliveries.shipment_id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
+            })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status');
+        $datatables = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('status', function ($shipments){
+                if(in_array($shipments->current_status_id, [14, 30, 36, 37])){
+                    return 'Delivered';
+                }
+                else{
+                    return 'Undelivered';
+                }
+            })
+            ->addColumn('pod', function($shipments){
+
+                if($shipments->delivered_status == 1) {
+                    $image = '';
+                    if($shipments->picture_path != null){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                        return $image;
+                    }
+                    else{
+                        return '-';
+                    }
+                } else {
+                    return '-';
+                }
+            });
+        return $datatables->make(true);
+
+    }
+
+
+    public function last_mile_dbf_shipments_list(Request $request){
+        $delivery_note_id = $request->delivery_note_id;
+
+        $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and verification = 1 and rider_id is null)'));
+            })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by');
+        $datatables = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('status', function ($shipments){
+                if(in_array($shipments->current_status_id, [14, 30, 36, 37])){
+                    return 'Delivered';
+                }
+                else{
+                    return 'Undelivered';
+                }
+            });
+        return $datatables->make(true);
+
+    }
+
 }
 
