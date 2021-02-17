@@ -2903,10 +2903,10 @@ class DeliveryController extends Controller
                             }
                         }
                     }
-                    if($verification == 1){
-                        if($shipper_status_id == 14){
 
-                            $packaging_shipment = Shipment::find($shipment);
+                    if($verification == 1){
+                        $packaging_shipment = Shipment::find($shipment);
+                        if($packaging_shipment->shipper_status_id == 14){
                             if($packaging_shipment->packaging_material_request == 1){
                                 $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $packaging_shipment->tracking_number)->where('status_id', 3)->first();
                                 if($packaging_material_shipment != null){
