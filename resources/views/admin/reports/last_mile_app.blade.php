@@ -16,15 +16,6 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="search_city" id="search_city" class="form-control select2">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <div class="col-4 mt-1">
-                                <fieldset class="form-group">
                                     <select name="search_rider" id="search_rider" class="form-control select2">
                                         @foreach($riders as $rider)
                                             <option value="{{$rider->id}}">{{$rider->name}}</option>
@@ -32,47 +23,130 @@
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group">
+                                    <select name="search_hub" id="search_hub" class="form-control select2">
+                                        @foreach($hubs as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group">
+                                    <select name="search_zone" id="search_zone" class="form-control select2">
+                                        @foreach($zones as $zone)
+                                            <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
 
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
                                     </div>
-                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                                    <input type="text" name="search_date_from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_from" placeholder="Date (From)">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                                    <input type="text" name="search_date_to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_to" placeholder="Date (To)">
                                 </div>
                             </div>
 
                             <div class="col-2 mt-1">
                                 <div class="form-group">
-                                    <button type="button" id="search_filter_btn" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button type="button" id="search_filter_btn"
+                                            class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                        Search
+                                    </button>
                                 </div>
                             </div>
                         </form>
                     </div>
+                    <div class="col-12 justify-content-center mt-2" id="report_data">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card pull-up">
+                                    <div class="card-content border rounded">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-grid font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-right">
+                                                    <h3 id="total_shipments">0</h3>
+                                                    <span>Total Shipment(s)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-gradient-directional-primary pull-up">
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-white text-right">
+                                                    <h3 class="text-white" id="app_shipments">0</h3>
+                                                    <span>Updated Via App</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-gradient-directional-info pull-up">
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <div class="media d-flex">
+                                                <div class="align-self-center">
+                                                    <i class="icon-layers text-white font-large-2 float-left"></i>
+                                                </div>
+                                                <div class="media-body text-white text-right">
+                                                    <h3 class="text-white" id="dbf_shipments">0</h3>
+                                                    <span class="font-13">Update Via DBF</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Delivery Note#</th>
+                        <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
-                        <th class="border-primary border-darken-1">Delivered</th>
-                        <th class="border-primary border-darken-1">Delivered Via App</th>
+                        <th class="border-primary border-darken-1">Update Via App</th>
+                        <th class="border-primary border-darken-1">Update Via DBF</th>
                     </tr>
                     </thead>
                 </table>
@@ -121,6 +195,72 @@
     </div>
     <!--Delivered Shipments Popup -->
 
+    <div class="modal fade" id="app_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="app_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="app_shipments_modal_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <input type="hidden" name="delivery_note_id" id="app_delivery_note_id">
+                    <table class="table table-bordered datatable" id="app_shipments_datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Number</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Status Update Time</th>
+                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Status Reason</th>
+                            <th class="border-primary border-darken-1">Received By/Refused By</th>
+                            <th class="border-primary border-darken-1">POD</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dbf_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="dbf_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="dbf_shipments_modal_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <input type="hidden" name="delivery_note_id" id="dbf_delivery_note_id">
+                    <table class="table table-bordered datatable" id="dbf_shipments_datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Number</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Status Update Time</th>
+                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Status Reason</th>
+                            <th class="border-primary border-darken-1">Received By/Refused By</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -161,8 +301,13 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search City',
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -212,6 +357,7 @@
 
                             head.push('S. No');
                             head.push('Delivery Note#');
+                            head.push('City');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
@@ -222,11 +368,12 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
+                                row.push(values.City);
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
-                                row.push(values.delivered_shipments);
-                                row.push(values.delivered_via_app);
+                                row.push(values.update_via_app);
+                                row.push(values.update_via_dbf);
 
                                 body.push(row);
                             });
@@ -238,10 +385,12 @@
                     return {body: body, header: head};
                 }
             });
+            var total_shipments = 0;
+            var app_shipments = 0;
+            var dbf_shipments = 0;
 
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '500px',
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tpr',
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -252,7 +401,7 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
-                autoWidth: false,
+                autoWidth: true,
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -262,7 +411,8 @@
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
                         d.search_rider = $('#search_rider').val();
-                        d.search_city = $('#search_city').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.search_hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -272,15 +422,31 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    {data: 'city', name: 'delivery_notes.id', class: 'align-middle text-center city'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
-                    {data: 'delivered_shipments_link', name: 'delivery_notes.delivered_shipments', class: 'align-middle text-center delivered_shipments_link'},
-                    {data: 'delivered_via_app', class: 'align-middle text-center delivered_via_app'}
+                    {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    if(index == 0){
+                        total_shipments = data.total_shipments;
+                        app_shipments = data.shipments_rider_updated;
+                        dbf_shipments = data.total_shipments - data.shipments_rider_updated;
+                    }
+                    else{
+                        total_shipments += data.total_shipments;
+                        app_shipments += data.shipments_rider_updated;
+                        dbf_shipments += (data.total_shipments - data.shipments_rider_updated);
+                    }
+                    if(index == (info.length - 1)){
+                        $('#total_shipments').text(total_shipments);
+                        $('#app_shipments').text(app_shipments);
+                        $('#dbf_shipments').text(dbf_shipments);
+                    }
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
@@ -320,33 +486,116 @@
                     });
 
             });
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+            $('#datatable tbody').on('click','tr td.update_via_app button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#delivered_shipments_modal .modal-body').html('');
-                $('#delivered_shipments_modal').modal('show');
 
-                $.ajax({
-                    url: '{!! route('admin.reports.completed_delivery_notes.shipments.delivered') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var html = '';
+                if(id){
+                    $('#app_delivery_note_id').val(id);
+                    $('#app_shipments_modal').modal('show');
 
-                            if (data.shipments) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#delivered_shipments_modal .modal-body').html(html);
-                        }
-                    });
+                }
 
             });
+            var app_table = $('#app_shipments_datatable').DataTable({
+                dom: 't',
+                // scrollX: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Shipments',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
+                "autoWidth": true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                ajax: {
+                    url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
+                    data: function (d) {
+                        d.delivery_note_id = $('#app_delivery_note_id').val();
+                    }
+                },
+                rowId: 'shipment_id',
+                // order: [[1, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                    { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
+                    { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                    { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
+                    { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                    { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = app_table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('#datatable tbody').on('click','tr td.update_via_dbf button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $('#dbf_delivery_note_id').val(id);
+                    $('#dbf_shipments_modal').modal('show');
+
+                }
+
+            });
+            var dbf_table = $('#dbf_shipments_datatable').DataTable({
+                dom: 't',
+                // scrollX: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Shipments',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
+                "autoWidth": true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                ajax: {
+                    url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
+                    data: function (d) {
+                        d.delivery_note_id = $('#app_delivery_note_id').val();
+                    }
+                },
+                rowId: 'shipment_id',
+                // order: [[1, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                    { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
+                    { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                    { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
+                    { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = dbf_table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
+
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.print') !!}',
