@@ -634,7 +634,7 @@
 
             var route = '{!! route('admin.tracking.index') !!}';
 
-            $('#app_shipments_datatable tbody').on('click','tr td.pod button',function () {
+            $('body').on('click','#app_shipments_datatable tbody tr td.pod button',function () {
                 var link = $(this).attr('data-link');
                 console.log('here');
                 console.log(link);
