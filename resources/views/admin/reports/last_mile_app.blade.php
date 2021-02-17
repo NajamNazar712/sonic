@@ -636,7 +636,8 @@
 
             $('#app_shipments_datatable tbody').on('click','tr td.pod button',function () {
                 var link = $(this).attr('data-link');
-
+                console.log('here');
+                console.log(link);
                 var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
 
                 $('#picture_modal .modal-body').html(image);
