@@ -427,7 +427,7 @@
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -486,6 +486,8 @@
                     });
 
             });
+
+            var app_table;
             $('#datatable tbody').on('click','tr td.update_via_app button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -493,63 +495,56 @@
                     $('#app_delivery_note_id').val(id);
                     $('#app_shipments_modal').modal('show');
 
+
+                    app_table = $('#app_shipments_datatable').DataTable({
+                        dom: 't',
+                        // scrollX: true,
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                title: 'Shipments',
+                                text:'<i class="la la-file-excel-o"></i> Excel',
+                            },
+                        ],
+                        "autoWidth": true,
+                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: 50,
+                        pagingType: 'full_numbers',
+                        processing: true,
+                        language: {
+                            processing: data_table_loader
+                        },
+                        ajax: {
+                            url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
+                            data: function (d) {
+                                d.delivery_note_id = $('#app_delivery_note_id').val();
+                            }
+                        },
+                        rowId: 'shipment_id',
+                        // order: [[1, 'desc']],
+                        columns: [
+                            {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                            { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                            { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
+                            { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                            { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                            { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
+                            { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                            { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+
+                        ],
+                        rowCallback: function(row, data, index) {
+                            var info = app_table.page.info();
+                            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                        },
+                        initComplete: function() {
+                            this.api().table().columns.adjust();
+                        }
+                    });
                 }
 
             });
-            var app_table = $('#app_shipments_datatable').DataTable({
-                dom: 't',
-                // scrollX: true,
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Shipments',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
-                ],
-                "autoWidth": true,
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                ajax: {
-                    url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
-                    data: function (d) {
-                        d.delivery_note_id = $('#app_delivery_note_id').val();
-                    }
-                },
-                rowId: 'shipment_id',
-                // order: [[1, 'desc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
-                    { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
-                    { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
-                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
-                    { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
-                    { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
 
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = app_table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });
-            $('#datatable tbody').on('click','tr td.update_via_dbf button',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                if(id){
-                    $('#dbf_delivery_note_id').val(id);
-                    $('#dbf_shipments_modal').modal('show');
-
-                }
-
-            });
             var dbf_table = $('#dbf_shipments_datatable').DataTable({
                 dom: 't',
                 // scrollX: true,
@@ -571,7 +566,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
                     data: function (d) {
-                        d.delivery_note_id = $('#app_delivery_note_id').val();
+                        d.delivery_note_id = $('#dbf_delivery_note_id').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -594,6 +589,29 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('#datatable tbody').on('click','tr td.update_via_dbf button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $('#dbf_delivery_note_id').val(id);
+                    $('#dbf_shipments_modal').modal('show');
+                    dbf_table.draw();
+                }
+
+            });
+
+
+            $('#app_shipments_modal').on('hidden.bs.modal', function () {
+                $('#app_delivery_note_id').val('');
+                app_table.clear();
+                app_table.destroy();
+            });
+
+            $('#dbf_shipments_modal').on('hidden.bs.modal', function () {
+                $('#dbf_delivery_note_id').val('');
+                dbf_table.clear();
+                dbf_table.destroy();
+            });
+
 
 
             function print(id) {

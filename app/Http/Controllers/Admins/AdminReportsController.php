@@ -7699,7 +7699,6 @@ class AdminReportsController extends Controller
 
     }
 
-
     public function last_mile_dbf_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
 
