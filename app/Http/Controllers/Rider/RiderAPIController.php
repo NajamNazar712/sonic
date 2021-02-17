@@ -2797,7 +2797,7 @@ class RiderAPIController extends Controller {
             ->where('s.tracking_number', $tracking_no)
             ->where('v2_pickup_requests.status_id', 1)
             ->where('prs.status', 0)
-            ->orWhereNull('v2_pickup_requests.current_rider_id')->get();
+            ->orWhereNull('v2_pickup_requests.current_rider_id');
 
         if ($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->first();
@@ -2805,7 +2805,7 @@ class RiderAPIController extends Controller {
             if($pickup_requests->current_rider_id == $rider_id){
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
             }
-            elseif ($shipment_status != 1 && $shipment_status != 17 ){
+            elseif ($shipment_status != 1 && $shipment_status != 17){
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
             }
             else{
