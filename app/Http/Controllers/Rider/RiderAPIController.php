@@ -2797,6 +2797,7 @@ class RiderAPIController extends Controller {
             ->where('s.tracking_number', $tracking_no)
             ->where('v2_pickup_requests.status_id', 1)
             ->where('prs.status', 0)
+            ->whereIn('s.shipper_status_id',[1,17])
             ->orWhereNull('v2_pickup_requests.current_rider_id');
 
         if ($pickup_requests->exists()) {
@@ -2836,6 +2837,7 @@ class RiderAPIController extends Controller {
             ->where('v2_pickup_requests.status_id', 1)
             ->where('prs.status', 0)
             ->where('v2_pickup_requests.current_rider_id', '!=', $rider_id)
+            ->whereIn('s.shipper_status_id',[1,17])
             ->orWhereNull('v2_pickup_requests.current_rider_id');
 
         if ($pickup_requests->exists()) {
