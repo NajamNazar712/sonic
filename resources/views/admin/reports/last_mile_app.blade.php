@@ -75,6 +75,16 @@
                         <th class="border-primary border-darken-1">Delivered Via App</th>
                     </tr>
                     </thead>
+
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Total:</th>
+                            <th id="total_shipment_count">{{$total_shipments}}</th>
+                            <th id="total_delivered_count">{{$delivered_shipments}}</th>
+                            <th></th>
+                        </tr>
+                        <tfoot>
+
                 </table>
             </div>
         </div>
@@ -160,8 +170,21 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
-            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+//             setTimeout(function() {
+//             $.ajax({
+//                   /* the route pointing to the post function */
+//                   url: '/postajax',
+//                   type: 'POST',
+//                   /* send the csrf-token and the input to the controller */
+//                   data: {_token: CSRF_TOKEN, message:$(".getinfo").val()},
+//                   dataType: 'JSON',
+//                   /* remind that 'data' is the response of the AjaxController */
+//                   success: function (data) { 
+//                       $(".writeinfo").append(data.msg); 
+//                   }
+//               }); 
+// }, 5000);
+             $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search City',
                 width:'100%',
                 allowClear:true
@@ -230,6 +253,7 @@
 
                                 body.push(row);
                             });
+
                         },
                         async: false
                     });
@@ -281,16 +305,51 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // console.log(table.rows);
                 },
+                stateLoaded: function (settings, data) {
+    console.log( 'Saved filter was');
+  },
+                // drawCallback: function (settings) {
+                //     $(".reasonDrop").prepend('<option value="" ></option>').select2({
+                //         placeholder: "Select a Reason",
+                //         width:'100%'
+                //     });
+                //     $(".statusDrop").prepend('<option value="" ></option>').select2({
+                //         placeholder: "Select a Status",
+                //         width:'100%'
+                //     });
+                //     var api = new $.fn.dataTable.Api( settings );
+                //     var data = api.rows().data();
+                //     // $.each(data,function (key,value) {
+
+                //     //     if(shipment_status.length !== 0){
+                //     //         $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
+                //     //     }else{
+                //     //         $('select[name="status_drop['+value.shId+']"]').val(value.current_status_id).trigger('change');
+                //     //     }
+                //     //     if(shipment_reason.length !== 0){
+                //     //         $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
+                //     //     }else{
+                //     //         var reasonId = $('select[name="reason_drop['+value.shId+']"]').attr('reasonId');
+                //     //         $('select[name="reason_drop['+value.shId+']"]').val(reasonId).trigger('change');
+
+                //     //     }
+                //     // });
+                //     console.log(data);
+                // },
                 initComplete: function() {
                     this.api().table().columns.adjust();
+                    // console.log(this.api().table());
                 }
             });
+            
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+                
             });
-
+    
             var route = '{!! route('admin.tracking.index') !!}';
 
             $('#datatable tbody').on('click','tr td.total_shipments_link button',function () {
@@ -320,6 +379,10 @@
                     });
 
             });
+
+
+
+
             $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#delivered_shipments_modal .modal-body').html('');
@@ -381,6 +444,9 @@
                 print(delivery_note_id);
             });
         });
+       
+        
 
+        
     </script>
 @endsection
