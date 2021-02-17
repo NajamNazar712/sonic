@@ -94,6 +94,7 @@ class Permission
             'v2_pickups.action_log.index' => 272,
             'v2_pickups.rider_receiving.index' => 366,
             'v2_pickups.pickup_route.index' => 406,
+            'v2_pickups.rider_tracking.index' => 446,
 
 
             'cargo.pending.index' => 25,

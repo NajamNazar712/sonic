@@ -899,6 +899,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
         });
 
+        // Rider Tracking
+        Route::prefix('rider_tracking')->name('rider_tracking.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_index')->name('index');
+        });
+
     });
 
     Route::prefix('delivery')->name('delivery.')->group(function(){
