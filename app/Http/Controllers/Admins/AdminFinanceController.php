@@ -5770,10 +5770,13 @@ class AdminFinanceController extends Controller
 
         $invoice_number_serial_number = 1;
 
-        foreach ($origins as $origin) {
-            $html .= '
+        $html .= '
                 <div>
                   <div class="p-1">
+        ';
+
+        foreach ($origins as $origin) {
+            $html .= '
                     <div class="row align-items-start justify-content-between summary">
                         <div class="col-6">
                             <table class="table table-sm table-bordered border">
@@ -5977,6 +5980,8 @@ class AdminFinanceController extends Controller
                       </tbody>
                     </table>
             ';
+
+            $invoice_number_serial_number++;
         }
 
         $html .= '
