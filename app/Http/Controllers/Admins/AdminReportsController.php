@@ -7662,6 +7662,11 @@ class AdminReportsController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rider_deliveries.shipment_id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
             })
+            ->join('rider_deliveries as rd', function ($join) {
+                $join->on('rd.shipment_id', '=', 'rider_deliveries.shipment_id')
+                    ->where('rd.shipment_id', '=',
+                        DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = rider_deliveries.shipment_id)'));
+            })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status')

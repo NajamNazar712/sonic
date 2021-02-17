@@ -81,7 +81,7 @@
                     <div class="col-12 justify-content-center mt-2" id="report_data">
                         <div class="row">
                             <div class="col">
-                                <div class="card pull-up">
+                                <div class="card">
                                     <div class="card-content border rounded">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -98,7 +98,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-primary pull-up">
+                                <div class="card bg-gradient-directional-primary">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -115,7 +115,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-info pull-up">
+                                <div class="card bg-gradient-directional-info">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
