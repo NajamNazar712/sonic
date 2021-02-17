@@ -634,7 +634,7 @@
 
             var route = '{!! route('admin.tracking.index') !!}';
 
-            $('#app_shipments_datatable tbody').on('click','tr td.picture_path button',function () {
+            $('#app_shipments_datatable tbody').on('click','tr td.pod button',function () {
                 var link = $(this).attr('data-link');
 
                 var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
