@@ -137,7 +137,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
+                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique" id="seal_number">
                                                         </div>
                                                     </div>
 
@@ -237,7 +237,17 @@
 
     <script>
         $(document).ready(function() {
-
+            $.validator.addMethod(
+                "seal_number",
+                function(value,element){
+                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+                "Invalid Seal Number"
+            );
             $('#add_shipment_pieces_form input.scan_piece').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -522,12 +532,12 @@
                             'allowPlus': false
                         });
 
-                        $('#cargo_consignment form input.seal_number').on('change', function(){
-                            var seal = this.value;
-                            if(seal.length != 12 && seal.length != 13 && seal.length != 6){
-                                this.value = '';
-                            }
-                        });
+                        // $('#cargo_consignment form input.seal_number').on('change', function(){
+                        //     var seal = this.value;
+                        //     if(seal.length != 12 && seal.length != 13 && seal.length != 6){
+                        //         this.value = '';
+                        //     }
+                        // });
 
                         $('#cargo_consignment form input.actual_weight').inputmask({
                             'alias': 'decimal',

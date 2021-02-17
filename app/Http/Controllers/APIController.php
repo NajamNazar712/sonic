@@ -297,6 +297,7 @@ class APIController extends Controller
 
     public function shipment_book(Request $request) {
         $user_id = $request->user_id;
+
         $user_type = User::where('id',$user_id)->first();
         if($user_type['account_type_id'] == 1) {
             $rules = [
@@ -1010,7 +1011,7 @@ class APIController extends Controller
         $tracking_number = $request->tracking_number;
         $type = $request->type;
 
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+        $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $tracking_number)->first();
 
         if ($type == 0) {
           $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
@@ -1058,7 +1059,7 @@ class APIController extends Controller
         $tracking_number = $request->tracking_number;
         $type = $request->type;
 
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+        $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $tracking_number)->first();
 
         $details = array();
 
@@ -2345,5 +2346,122 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
             }
         }
+    }
+
+    public function shipment_track_order_id(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'type' => ['required', 'boolean']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $order_id = $request->order_id;
+        $type = $request->type;
+
+        $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+
+        $details = array();
+
+        foreach($shipments as $shipment) {
+          $detail = array();
+
+          $detail['tracking_number'] = $shipment->tracking_number;
+
+          $detail['order_id'] = $shipment->order_id;
+
+          $shipper = $shipment->user;
+
+          $detail['shipper']['name'] = $shipper->name;
+
+          $pickup = $shipment->pickup_address;
+
+          $detail['pickup']['origin'] = $pickup->city->name;
+
+          if ($type == 0) {
+            $detail['shipper']['account_number'] = $shipper->id;
+            $detail['shipper']['phone_number_1'] = $shipper->phone;
+            $detail['shipper']['phone_number_2'] = $shipper->phone2;
+            $detail['shipper']['email'] = $shipper->email;
+            $detail['shipper']['city'] = $shipper->city->name;
+
+            $detail['pickup']['person_of_contact'] = $pickup->poc;
+            $detail['pickup']['phone_number'] = $pickup->phone;
+            $detail['pickup']['email'] = $pickup->email;
+            $detail['pickup']['address'] = $pickup->pickup_address;
+          }
+
+          $detail['consignee']['name'] = $shipment->consignee_name;
+          $detail['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+          $detail['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+          $detail['consignee']['destination'] = $shipment->consignee_city->name;
+          $detail['consignee']['address'] = $shipment->consignee_address;
+
+          foreach ($shipment->items as $item) {
+            $item_details = array();
+
+            $item_details['order_id'] = $shipment->order_id;
+            $item_details['product_type'] = $item->product->product_name;
+            $item_details['description'] = $item->description;
+            $item_details['quantity'] = $item->quantity;
+
+            $detail['order_information']['items'][] = $item_details;
+          }
+
+          if ($type == 0) {
+            $detail['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+            $detail['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+            $detail['order_information']['amount'] = $shipment->amount;
+            $detail['order_information']['instructions'] = $shipment->special_instructions;
+          }
+
+          if ($type == 0) {
+            foreach ($shipment->shipment_journey as $journey) {
+              if ($journey->verification) {
+                $journey_details = array();
+
+                $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                $detail['tracking_history'][] = $journey_details;
+              }
+            }
+          }
+          else {
+            foreach ($shipment->shipment_journey as $journey) {
+              if ($journey->consignee_status_id != NULL) {
+                if ($journey->verification) {
+                  $journey_details = array();
+
+                  $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                  $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                  $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                  $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                  $detail['tracking_history'][] = $journey_details;
+                }
+              }
+            }
+          }
+
+          $details[] = $detail;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Tracking of Shipment - Order ID #' . $order_id, 'details' => $details]);
+      }
     }
 }

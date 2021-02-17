@@ -139,6 +139,26 @@ class UserManagementController extends Controller
         }
     }
 
+    public function user_trax_id(Request $request) {
+        if ($request->filled('trax_id')) {
+            $trax_id = Admin::where('trax_id', $request->input('trax_id'));
+
+            if ($request->has('id')) {
+                $trax_id = $trax_id->where('id', '!=', $request->input('id'));
+            }
+
+            if (!$trax_id->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'false';
+        }
+    }
+
     public function user_status(Request $request) {
         $admin = Admin::find($request->id);
 
@@ -183,18 +203,22 @@ class UserManagementController extends Controller
         $admin->password = bcrypt($request->input('password'));
         $admin->designation = $request->input('designation');
 
-
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
-        if($global_setting->exists()){
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax'. $trax_id;
+        if($request->trax_id != null){
+            $trax_id = $request->trax_id;
         }
         else{
-            $trax_id = null;
+            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+            if($global_setting->exists()){
+                $global_setting = $global_setting->first();
+                $trax_id = $global_setting->setting_value + 1;
+                $global_setting->setting_value = $trax_id;
+                $global_setting->save();
+                $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+            }
+            else{
+                $trax_id = null;
+            }
         }
 
         $admin->trax_id = $trax_id;
@@ -271,6 +295,7 @@ class UserManagementController extends Controller
             $admin->role_id = $request->input('role_id');
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
+            $admin->trax_id = $request->trax_id;
             $admin->designation = $request->input('designation');
 
             if ($request->filled('password')) {
