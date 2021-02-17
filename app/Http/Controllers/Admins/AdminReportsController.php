@@ -7571,7 +7571,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('update_via_app', function($deliveries){
-                if ($deliveries->shipments_rider_updated != 0 && $deliveries->total_shipments != 0) {
+                if ($deliveries->shipments_rider_updated != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_rider_updated . '</button>';
                 }
                 else {
