@@ -7659,12 +7659,12 @@ class AdminReportsController extends Controller
         $shipments = Shipment::join('rider_deliveries', function ($join) {
             $join->on('shipments.id', '=', 'rider_deliveries.shipment_id')
                 ->where('rider_deliveries.id', '=',
-                    DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = rider_deliveries.shipment_id)'));
+                    DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = shipments.id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
             })
             ->leftjoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'rider_deliveries.shipment_id')
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rider_deliveries.shipment_id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
