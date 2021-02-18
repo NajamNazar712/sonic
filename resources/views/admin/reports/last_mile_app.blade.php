@@ -459,16 +459,12 @@
                         dbf_shipments = (data.total_shipments - data.shipments_rider_updated);
                     }
                     else{
-                        // console.log(data.total_shipments);
-                        // console.log(data.shipments_rider_updated);
                         total_shipments += data.total_shipments;
                         app_shipments += data.shipments_rider_updated;
                         dbf_shipments += (data.total_shipments - data.shipments_rider_updated);
-                        aa = (data.total_shipments - data.shipments_rider_updated);
-                        console.log(aa);
 
                     }
-                    if(index == (info.length - 1)){
+                    if(index == (info.end - 1)){
                         $('#total_shipments').text(total_shipments);
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
