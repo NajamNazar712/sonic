@@ -275,7 +275,12 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if(session('user_id') == 5982){
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        else{
+            $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -1719,7 +1724,12 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        if(session('user_id') == 5982){
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        else{
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -2428,7 +2438,12 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if(session('user_id') == 5982){
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        else{
+            $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -3181,7 +3196,12 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        if(session('user_id') == 5982){
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
+        else{
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::all();
         $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
