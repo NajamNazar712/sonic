@@ -7579,8 +7579,9 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('update_via_dbf', function($deliveries){
-                if ($deliveries->shipments_rider_updated != 0 || $deliveries->total_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . ($deliveries->total_shipments - $deliveries->shipments_rider_updated) . '</button>';
+                $count = $deliveries->total_shipments - $deliveries->shipments_rider_updated;
+                if ($count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>';
                 }
                 else {
                     return 0;
@@ -7686,19 +7687,17 @@ class AdminReportsController extends Controller
             })
             ->addColumn('pod', function($shipments){
 
-                if($shipments->delivered_status == 1) {
-                    $image = '';
-                    if($shipments->picture_path != null){
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
 
-                        return $image;
-                    }
-                    else{
-                        return '-';
-                    }
-                } else {
+                $image = '';
+                if($shipments->picture_path != null){
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                    return $image;
+                }
+                else{
                     return '-';
                 }
+
             });
         return $datatables->make(true);
 
