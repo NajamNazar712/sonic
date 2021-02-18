@@ -7706,9 +7706,9 @@ class AdminReportsController extends Controller
 
     public function last_mile_dbf_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
+        $shipment_ids = RiderDelivery::where('delivery_note_id', $delivery_note_id)->pluck('shipment_id')->toArray();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-            ->join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                     ->where('shipments_journey.id', '=',
@@ -7717,8 +7717,8 @@ class AdminReportsController extends Controller
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
-//            ->whereExists('shipments_journey.shipment_id')
-            ->where('dn.id', $delivery_note_id);
+            ->whereNotIn('delivery_note_shipments.shipment_id', $shipment_ids)
+            ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
