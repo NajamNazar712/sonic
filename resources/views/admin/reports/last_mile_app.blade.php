@@ -445,7 +445,7 @@
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
                                 row.push(values.shipments_rider_updated);
-                                row.push(values.total_shipments - values.shipments_rider_updated);
+                                row.push(values.shipments_dbf_updated);
 
                                 body.push(row);
                             });
@@ -510,12 +510,12 @@
 
                         total_shipments = data.total_shipments;
                         app_shipments = data.shipments_rider_updated;
-                        dbf_shipments = (data.total_shipments - data.shipments_rider_updated);
+                        dbf_shipments = data.shipments_dbf_updated;
                     }
                     else{
                         total_shipments += data.total_shipments;
                         app_shipments += data.shipments_rider_updated;
-                        dbf_shipments += (data.total_shipments - data.shipments_rider_updated);
+                        dbf_shipments += data.shipments_dbf_updated;
 
                     }
                     if(index == (info.end - 1)){

@@ -7544,7 +7544,7 @@ class AdminReportsController extends Controller
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`'));
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `shipments_journey` AS `sj` where `sj`.`reference_1_id` = `delivery_notes`.`id` AND `sj`.`shipper_status_id` != 5 AND `sj`.`verification` = 1) AS `shipments_dbf_updated`'));
 
 
         $datatable = Datatables::of($deliveries)
@@ -7579,7 +7579,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('update_via_dbf', function($deliveries){
-                $count = $deliveries->total_shipments - $deliveries->shipments_rider_updated;
+                $count = $deliveries->shipments_dbf_updated;
                 if ($count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>';
                 }
