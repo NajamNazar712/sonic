@@ -7579,7 +7579,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('update_via_dbf', function($deliveries){
-                if ($deliveries->shipments_rider_updated != $deliveries->shipments_rider_updated) {
+                if ($deliveries->shipments_rider_updated != 0 || $deliveries->total_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . ($deliveries->total_shipments - $deliveries->shipments_rider_updated) . '</button>';
                 }
                 else {
@@ -7708,7 +7708,8 @@ class AdminReportsController extends Controller
         $delivery_note_id = $request->delivery_note_id;
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-            ->leftjoin('shipments_journey', function ($join) {
+            ->join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and verification = 1 and rider_id is null)'));
@@ -7716,7 +7717,8 @@ class AdminReportsController extends Controller
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
-            ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
+//            ->whereExists('shipments_journey.shipment_id')
+            ->where('dn.id', $delivery_note_id);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
