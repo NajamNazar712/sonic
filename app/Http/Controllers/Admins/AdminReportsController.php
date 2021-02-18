@@ -7597,19 +7597,8 @@ class AdminReportsController extends Controller
     {
         $riders = Rider::where('status', 1)->get();
         $cities = City::where('status', 1)->where('business_category_id', 1)->get();
-        $deliveries = DB::connection('reports')->table('delivery_notes')->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
-            ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app')->get();
-        $total_shipments = 0;
-        $delivered_shipments = 0;
-        foreach ($deliveries as  $delivery) {
-            # code...
-            // dd($delivery->total_shipments);
-            $total_shipments += $delivery->total_shipments;
-            $delivered_shipments += $delivery->delivered_shipments;
-        }
-        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities, 'total_shipments' => $total_shipments, 'delivered_shipments' => $delivered_shipments]);
+        
+        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities]);
     }
     public function last_mile_app_list(Request $request)
     {

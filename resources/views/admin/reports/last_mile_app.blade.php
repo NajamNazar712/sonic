@@ -76,14 +76,7 @@
                     </tr>
                     </thead>
 
-                    <tfoot>
-                        <tr>
-                            <th colspan="4">Total:</th>
-                            <th id="total_shipment_count">{{$total_shipments}}</th>
-                            <th id="total_delivered_count">{{$delivered_shipments}}</th>
-                            <th></th>
-                        </tr>
-                        <tfoot>
+                   
 
                 </table>
             </div>
@@ -159,6 +152,8 @@
 
 @endsection
 @section('js')
+
+    <script src="https://cdn.datatables.net/plug-ins/1.10.22/api/sum().js" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
@@ -240,6 +235,8 @@
                             head.push('Total Shipment');
                             head.push('Delivered');
                             head.push('Delivered Via App');
+                            var total_shipments_count = 0;
+                            var total_delivered_shipments_count = 0;
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -250,10 +247,21 @@
                                 row.push(values.total_shipments);
                                 row.push(values.delivered_shipments);
                                 row.push(values.delivered_via_app);
-
                                 body.push(row);
+                                total_shipments_count+=values.total_shipments
+                                total_delivered_shipments_count+=values.delivered_shipments
+                                
                             });
+                            footer = [];
 
+                            footer.push('-');
+                            footer.push('Total');
+                            footer.push('-');
+                            footer.push('-');
+                            footer.push(total_shipments_count.toFixed(2));
+                            footer.push(total_delivered_shipments_count.toFixed(2));
+                            footer.push('');
+                            body.push(footer);
                         },
                         async: false
                     });
@@ -263,7 +271,20 @@
                 }
             });
 
+            // var total_delivered_count = 0;
+            // var total_shipment_count = 0;
+            // <tfoot>
+            //             <tr>
+            //                 <th colspan="4">Total:</th>
+            //                 <th id="total_shipment_count"></th>
+            //                 <th id="total_delivered_count"></th>
+            //                 <th></th>
+            //             </tr>
+            //             <tfoot>
+                $('#datatable').append("<tfoot><tr><th colspan='4'>Total:</th><th class='total_shipment_count'></th><th class='total_delivered_count'></th><th></th></tr></tfoot>");
+
             var table = $('#datatable').DataTable({
+                
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -289,6 +310,7 @@
                         d.search_city = $('#search_city').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+           
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -305,45 +327,33 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    // console.log(table.rows);
+
+                    var api = this.api();
+                    var total_delivered_count = 0;
+                    var total_shipment_count = 0;
+                    api.rows( {page:'current'} ).every( function () {
+    
+                    total_delivered_count+=this.data().delivered_shipments;
+                    total_shipment_count+=this.data().total_shipments;
+    
+                } );    
+                console.log(total_delivered_count);
+                console.log(total_shipment_count);
+                setTimeout(function(){
+                    document.getElementsByClassName('total_shipment_count')[1].innerHTML=total_delivered_count
+                    document.getElementsByClassName('total_delivered_count')[1].innerHTML=total_shipment_count
+                }, 1000);
+                // document.getElementsByClassName('total_shipment_count')[1]
                 },
+                drawCallback: function () {
+                    
+    },
                 stateLoaded: function (settings, data) {
-    console.log( 'Saved filter was');
   },
-                // drawCallback: function (settings) {
-                //     $(".reasonDrop").prepend('<option value="" ></option>').select2({
-                //         placeholder: "Select a Reason",
-                //         width:'100%'
-                //     });
-                //     $(".statusDrop").prepend('<option value="" ></option>').select2({
-                //         placeholder: "Select a Status",
-                //         width:'100%'
-                //     });
-                //     var api = new $.fn.dataTable.Api( settings );
-                //     var data = api.rows().data();
-                //     // $.each(data,function (key,value) {
-
-                //     //     if(shipment_status.length !== 0){
-                //     //         $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
-                //     //     }else{
-                //     //         $('select[name="status_drop['+value.shId+']"]').val(value.current_status_id).trigger('change');
-                //     //     }
-                //     //     if(shipment_reason.length !== 0){
-                //     //         $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
-                //     //     }else{
-                //     //         var reasonId = $('select[name="reason_drop['+value.shId+']"]').attr('reasonId');
-                //     //         $('select[name="reason_drop['+value.shId+']"]').val(reasonId).trigger('change');
-
-                //     //     }
-                //     // });
-                //     console.log(data);
-                // },
-                initComplete: function() {
+          initComplete: function() {
                     this.api().table().columns.adjust();
-                    // console.log(this.api().table());
                 }
             });
-            
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
@@ -445,6 +455,7 @@
             });
         });
        
+        
         
 
         
