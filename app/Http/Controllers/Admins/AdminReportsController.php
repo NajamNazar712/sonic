@@ -7678,7 +7678,7 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->addColumn('status', function ($shipments){
-                if(in_array($shipments->shipper_status_id, [14, 30, 36, 37])){
+                if($shipments->delivered_status == 1){
                     return 'Delivered';
                 }
                 else{
