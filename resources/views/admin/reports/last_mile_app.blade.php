@@ -381,8 +381,8 @@
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
-                            head.push('Delivered');
-                            head.push('Delivered Via App');
+                            head.push('Update Via App');
+                            head.push('Update Via DBF');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -392,8 +392,8 @@
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
-                                row.push(values.update_via_app);
-                                row.push(values.update_via_dbf);
+                                row.push(values.shipments_rider_updated);
+                                row.push(values.total_shipments - values.shipments_rider_updated);
 
                                 body.push(row);
                             });
@@ -474,6 +474,9 @@
             });
 
             $('#search_filter_btn').on('click',function () {
+                $('#total_shipments').text(0);
+                $('#app_shipments').text(0);
+                $('#dbf_shipments').text(0);
                 table.draw();
             });
 
