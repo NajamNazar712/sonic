@@ -7602,6 +7602,11 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $datatable->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
+        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+            $ufrom = $request->get('search_update_date_from');
+            $uto = $request->get('search_update_date_to');
+            $datatable->whereBetween('delivery_notes.status_update_at', [$ufrom,$uto]);
+        }
         return $datatable->make(true);
     }
 
