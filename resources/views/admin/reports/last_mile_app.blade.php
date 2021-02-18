@@ -340,8 +340,8 @@
                 console.log(total_delivered_count);
                 console.log(total_shipment_count);
                 setTimeout(function(){
-                    document.getElementsByClassName('total_shipment_count')[1].innerHTML=total_delivered_count
-                    document.getElementsByClassName('total_delivered_count')[1].innerHTML=total_shipment_count
+                    document.getElementsByClassName('total_shipment_count')[1].innerHTML=total_shipment_count
+                    document.getElementsByClassName('total_delivered_count')[1].innerHTML=total_delivered_count
                 }, 1000);
                 // document.getElementsByClassName('total_shipment_count')[1]
                 },
