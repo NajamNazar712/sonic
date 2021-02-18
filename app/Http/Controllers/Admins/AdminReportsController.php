@@ -2815,20 +2815,23 @@ class AdminReportsController extends Controller
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes]);
+        $couriers = DB::connection('reports')->table('rider_categories')->get(['id','name']);
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes,'couriers' => $couriers]);
     }
     public function completed_delivery_notes_list(Request $request){
+
         $deliveries = DB::connection('reports')->table('delivery_notes')->
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->leftjoin('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments','shipments.id', '=', 'dns.shipment_id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('rider_categories', 'rider_categories.id', '=', 'riders.rider_category_id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
             ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','riders.cnic as cni'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','riders.cnic as cni','rider_categories.name as category'])
             ->where('delivery_notes.status',1)->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -2918,6 +2921,9 @@ class AdminReportsController extends Controller
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('shipments.booking_type_id', '=', $mode);
+        }
+        if ($courier_id = $request->get('courier_id')) {
+            $datatable->where('rider_categories.id', '=', $courier_id);
         }
         if($submission_date = $request->get('search_submission')){
             $datatable->whereDate('delivery_notes.updated_at',$submission_date);

@@ -32,6 +32,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -140,6 +141,7 @@
                             head.push('Status');
                             head.push('Created By');
                             head.push('Updated By');
+                            head.push('Updated At');
 
 
                             $.each(result.data, function(index, values) {
@@ -159,6 +161,7 @@
                                 row.push(values.status);
                                 row.push(values.created_by);
                                 row.push(values.updated_by);
+                                row.push(values.updated_at);
                                 body.push(row);
                             });
                         },
@@ -294,6 +297,7 @@
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'riders.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

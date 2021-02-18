@@ -88,6 +88,12 @@
                                                         <h5 class="mb-0">{{strip_tags($crm_details->description)}}</h5>
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <th scope="row">Insurance</th>
+                                                    <td class="name">
+                                                        <h5 class="mb-0">{{$insurance}}</h5>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
