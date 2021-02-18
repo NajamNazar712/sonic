@@ -959,6 +959,8 @@ class AdminMasterCargoController extends Controller
 
             if (in_array($bag->status_id, [1, 3, 5, 6])) {
                 $hub_id = $bag->origin_hub_id;
+                $junction_hub_1_id = $bag->junction_hub_1_id;
+                $junction_hub_2_id = $bag->junction_hub_2_id;
                 $destination_hub_id = $bag->destination_hub_id;
 
                 $allowed = FALSE;
@@ -966,7 +968,7 @@ class AdminMasterCargoController extends Controller
                 if (session('role_id') == 1) {
                     $allowed = TRUE;
                 }
-                else if (in_array($hub_id, session('hubs'))) {
+                else if (in_array($hub_id, session('hubs')) || in_array($junction_hub_1_id, session('hubs')) || in_array($junction_hub_2_id, session('hubs'))) {
                     $allowed = TRUE;
                 }
 
