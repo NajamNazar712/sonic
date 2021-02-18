@@ -2632,7 +2632,7 @@ class AdminMasterCargoController extends Controller
 
             if ($bag) {
                 if (session('role_id') == 1 || (in_array($bag->destination_hub->hub_id, session('hubs')))) {
-                    if (in_array($bag->status_id, [3, 4, 5, 6, 7])) {
+                    if (in_array($bag->status_id, [3, 4, 5, 6])) {
                         return redirect()->route('admin.master_cargo.bag.receive.index')->with('bag_number', $bag->id);
                     }
                     else {
