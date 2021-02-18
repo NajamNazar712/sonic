@@ -453,6 +453,8 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     if(index == 0){
+                        console.log(data.total_shipments);
+                        console.log(data.shipments_rider_updated);
                         total_shipments = data.total_shipments;
                         app_shipments = data.shipments_rider_updated;
                         dbf_shipments = (data.total_shipments - data.shipments_rider_updated);
@@ -477,7 +479,7 @@
                 $('#total_shipments').text(0);
                 $('#app_shipments').text(0);
                 $('#dbf_shipments').text(0);
-                table.draw();
+                table.draw(true);
             });
 
             var route = '{!! route('admin.tracking.index') !!}';
