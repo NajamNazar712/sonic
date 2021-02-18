@@ -133,7 +133,10 @@
 
     <script>
         let markers = [];
+        let latlngs = [];
         var bounds = new google.maps.LatLngBounds();
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer();
         let map;
         let center = new google.maps.LatLng(24.865720, 67.077394);
         var currentId = 0;
@@ -162,20 +165,24 @@
                     clearMarkerFromMap();
                 },
                 success: function (response) {
-
                     $.each(response,function (i,v) {
                         latlng = new google.maps.LatLng(v['latitude'], v['longitude']);
                         makeMarker(latlng,v['name']);
                     });
-                    if(response != '') SetMapBound();
+                    if(response != '') {
+                        if(latlng.length != 0)
+                        {
+                            console.log(latlngs.splice(1,latlngs.length-2));
+                            ShowRoute(latlngs[0],latlngs[latlngs.length-1],latlngs.splice(1,latlngs.length-2));
+                        }
+                        SetMapBound();
 
+                    }
                 }
             })
         });
 
         function initMap() {
-            // const directionsService = new google.maps.DirectionsService();
-            // const directionsRenderer = new google.maps.DirectionsRenderer();
             var myMapOptions = {
                 zoom: 15,
                 center: center,
@@ -186,6 +193,7 @@
             };
 
             map = new google.maps.Map(document.getElementById('googleMap'), myMapOptions);
+            directionsRenderer.setMap(map);
         }
 
         function makeMarker(location,label) {
@@ -199,6 +207,7 @@
                 animation: google.maps.Animation.DROP
             });
             bounds.extend(location);
+            latlngs[id] = location;
             markers[id] = marker;
         }
     
@@ -207,6 +216,7 @@
             setMarkersOnMap(null);
             map.panTo(center);
             markers = [];
+            latlngs = [];
             currentId = 0;
         }
 
@@ -220,32 +230,31 @@
             map.fitBounds(bounds);
         }
 
-
-        // directionsRenderer.setMap(map); // Existing map object displays directions
-        // // Create route from existing points used for markers
-        // const route = {
-        //     origin: dakota,
-        //     destination: frick,
-        //     travelMode: 'DRIVING'
-        // }
-        //
-        // directionsService.route(route,
-        //     function(response, status) { // anonymous function to capture directions
-        //         if (status !== 'OK') {
-        //             window.alert('Directions request failed due to ' + status);
-        //             return;
-        //         } else {
-        //             directionsRenderer.setDirections(response); // Add route to the map
-        //             var directionsData = response.routes[0].legs[0]; // Get data about the mapped route
-        //             if (!directionsData) {
-        //                 window.alert('Directions request failed');
-        //                 return;
-        //             }
-        //             else {
-        //                 document.getElementById('msg').innerHTML += " Driving distance is " + directionsData.distance.text + " (" + directionsData.duration.text + ").";
-        //             }
-        //         }
-        //     });
+        function ShowRoute(start,end,waypoints_array){
+            let waypoints = [];
+            $.each(waypoints_array,function(i,v){
+                waypoints.push({
+                    location: v,
+                    stopover: true,
+                });
+            });
+                directionsService.route(
+                    {
+                        origin: start,
+                        destination: end,
+                        waypoints: waypoints,
+                        optimizeWaypoints: true,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                    },
+                    (response, status) => {
+                        if (status === "OK" && response) {
+                            directionsRenderer.setDirections(response);
+                        } else {
+                            console.log("Directions request failed due to " + status);
+                        }
+                    }
+                );
+        }
         initMap();
     </script>
 @endsection
