@@ -2061,40 +2061,59 @@ class AdminMasterCargoController extends Controller
         return redirect()->route('admin.master_cargo.in_transit.index')->with('success', 'Master Cargo No# ' . $cargo_consignment_id . ' has been Received');
     }
 
-    public function master_cargo_quick_receive_index(){
-        return view('admin.master_cargo.quick_receive');
+    public function master_cargo_bag_quick_receive_index(){
+        return view('admin.master_cargo.bag.quick_receive');
     }
 
-    public function master_cargo_quick_receive_bag_details(Request $request) {
-        $bag = Bag::where('seal_number', $request->bag_number);
+    public function master_cargo_bag_quick_receive_bag_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
-        if ($bag->exists()) {
-            $bag = $bag->first();
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
 
-            if ($bag->status_id != 2) {
-                return ['status' => 1, 'error' => 'Given Bag\'s has already been modified!'];
+            if ($shipment->shipper_status_id != 3) {
+                return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
-            $cargo_consignment_bag = MasterCargoBag::where('bag_id', $bag->id);
+            $bag_shipment = BagShipment::where('shipment_id', $shipment->id);
 
-            if ($cargo_consignment_bag->exists()) {
-                $cargo_consignment_bag = $cargo_consignment_bag->where('status', 0);
+            if ($bag_shipment->exists()) {
+                $bag_shipment = $bag_shipment->where('status', 0);
 
-                if ($cargo_consignment_bag->exists()) {
-                    $cargo_consignment_bag = $cargo_consignment_bag->latest()->first();
-                    $cargo_consignment = $cargo_consignment_bag->master_cargo;
+                if ($bag_shipment->exists()) {
+                    $bag_shipment = $bag_shipment->latest()->first();
+                    $bag = $bag_shipment->bag;
+                    if($bag->status_id != 4){
+                        return ['status' => 1, 'error' => 'Given Tracking Number Bag is not received yet or already modified'];
+                    }
                     if(session('role_id') != 1){
-                        if (!in_array($cargo_consignment->destination_hub->hub_id, session('hubs'))) {
-                            return ['status' => 1, 'error' => 'Cargo Bag doesn\'t belong to your assigned hub(s)!'];
+                        if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
+                            return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
+                        }
+                    }
+                    if(!$request->has('pieces_confirm')){
+                        if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                            $details = array();
+                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                            $details['id'] = $shipment->id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['pieces_count'] = $shipment->pieces;
+                            $details['pieces_tracking_numbers'] = $shipment_pieces;
+                            return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         }
                     }
                     $details = array();
 
-                    $details['id'] = $bag->id;
+                    $details['id'] = $shipment->id;
+                    $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = $bag->seal_number;
-                    $details['origin'] = $bag->origin_hub->name;
-                    $details['destination'] = $bag->destination_hub->name;
-                    $details['shipping_mode'] = $bag->shipping_mode->mode;
-                    $details['actual_weight'] = $bag->actual_weight;
+                    $details['origin'] = $shipment->pickup_address->city->name;
+                    $details['destination'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['consignee'] = $shipment->consignee_name;
+                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                    $details['amount'] = number_format($shipment->amount);
+                    $details['service_type'] = $shipment->booking_type->booking_type;
 
                     return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
@@ -2103,173 +2122,116 @@ class AdminMasterCargoController extends Controller
                 }
             }
             else {
-                return ['status' => 1, 'error' => 'Given Bag Number\'s is not in any Master Cargo'];
+                return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
             }
         }
         else {
-            return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
+            return ['status' => 1, 'error' => 'Invalid Tracking Number'];
         }
     }
 
-    public function master_cargo_quick_receive_store(Request $request){
-        $bag_ids = array_unique(explode(',', $request->bag_ids));
+    public function master_cargo_bag_quick_receive_store(Request $request){
+        $shipment_ids = array_unique(explode(',', $request->shipment_ids));
+        $bag_ids = array();
+        foreach ($shipment_ids as $shipment_id) {
+            $bag_shipment = BagShipment::where('shipment_id', $shipment_id)->where('status', 0);
 
-        $cargo_consignment_excel = new MasterCargoExcel();
-        $cargo_consignment_excel->bags = count($bag_ids);
-        $cargo_consignment_excel->created_by = Auth::id();
-        $cargo_consignment_excel->save();
+            if ($bag_shipment->exists()) {
+                $bag_shipment = $bag_shipment->first();
 
-        $cargo_consignment_ids = array();
-        $valid_bag_ids = array();
-        foreach ($bag_ids as $bag_id) {
-            $cargo_consignment_bag = MasterCargoBag::where('bag_id', $bag_id)->where('status', 0);
+                $bag_shipment->status = 1;
 
-            if ($cargo_consignment_bag->exists()) {
-                $cargo_consignment_bag = $cargo_consignment_bag->first();
+                $bag_shipment->save();
 
-                $cargo_consignment_bag->status = 1;
+                $shipment = Shipment::find($shipment_id);
+                $bag = $bag_shipment->bag;
 
-                $cargo_consignment_bag->save();
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
 
-                $bag = Bag::find($bag_id);
-                $cargo_consignment = $cargo_consignment_bag->master_cargo;
-                $bag->status_id = 4;
-                $bag->save();
-
-                if(!in_array($cargo_consignment->id, $cargo_consignment_ids)){
-                    $cargo_consignment_ids[] = $cargo_consignment->id;
+                if ($bag->type == 1) {
+                    if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+                        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                        $shipper_status_id = 15;
+                        $consignee_status_id = 15;
+                    }
+                    else {
+                        $shipper_status_id = 4;
+                        $consignee_status_id = 4;
+                    }
                 }
-                $valid_bag_ids[$cargo_consignment->id][] = $bag_id;
+                else {
+                    if ($shipment->booking_type_id == 1) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $shipper_status_id = 27;
+                        $consignee_status_id = 27;
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $shipper_status_id = 33;
+                        $consignee_status_id = 33;
+                    }
+                    else if ($shipment->booking_type_id == 4) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                }
 
-                $cargo_consignment_shipment_excel = new MasterCargoBagExcel();
-                $cargo_consignment_shipment_excel->master_cargo_excel_id = $cargo_consignment_excel->id;
-                $cargo_consignment_shipment_excel->master_cargo_id = $cargo_consignment->id;
-                $cargo_consignment_shipment_excel->bag_id = $bag_id;
-                $cargo_consignment_shipment_excel->save();
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
+
+                if(!in_array($bag->id, $bag_ids)){
+                    $bag_ids[] = $bag->id;
+                }
             }
         }
 
-        $all_cargo_consignment_ids = '';
+        $all_bag_ids = '';
+        foreach ($bag_ids as $bag_id){
+            $bag = Bag::find($bag_id);
+            $bag->received_shipments = BagShipment::where('bag_id', $bag_id)->where('status', 1)->count();
 
-        $cargo_consignment_excel_array = array();
-        $cargo_consignment_excel_array['header'] = ['S. No.','Master Cargo ID', 'Bag Number', 'Origin Hub', 'Destination Hub', 'Status'];
-        $cargo_consignment_excel_array[] = ['serial' => '', 'Master Cargo ID' => '', 'Bag Number' => '', 'Origin Hub' => '', 'Destination Hub' => '', 'Status' => ''];
-        $serial = 0;
-        $total_bags = 0;
-        foreach ($cargo_consignment_ids as $cargo_consignment_id){
-            $cargo_consignment = MasterCargo::find($cargo_consignment_id);
-            $cargo_consignment->received_bags = MasterCargoBag::where('master_cargo_id', $cargo_consignment_id)->where('status', 1)->count();
-
-            $short_received = MasterCargoBag::where('master_cargo_id', $cargo_consignment_id)->where('status', 0)->count();
+            $short_received = BagShipment::where('bag_id', $bag_id)->where('status', 0)->count();
 
             if ($short_received > 0) {
-                $cargo_consignment->short_received_bags = $short_received;
-                $status_id = 3;
+                $bag->short_received = $short_received;
+                $status_id = 7;
             }
             else {
-                $status_id = 2;
+                $status_id = 9;
             }
-            $cargo_consignment->status_id = $status_id;
-            if(array_key_exists($cargo_consignment->id, $valid_bag_ids)){
-                foreach ($valid_bag_ids[$cargo_consignment->id] as $valid_bag_id){
-                    $bag = Bag::find($valid_bag_id);
-                    MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, $status_id);
-                }
-            }
-            $cargo_consignment->received_at = Carbon::now();
-            $cargo_consignment->received_by = Auth::id();
-            $cargo_consignment->save();
+            $bag->status_id = $status_id;
+            $bag->received_at = Carbon::now();
+            $bag->receiver_id = Auth::id();
+            $bag->save();
 
             //dispute for short received
-            if($cargo_consignment->status_id == 3){
-                $cargo_short_received_bags = MasterCargoBag::where(['master_cargo_id'=>$cargo_consignment_id,'status'=>0])->select('bag_id')->get();
-                foreach ($cargo_short_received_bags as $cargo_short_received_bag){
-                    $bag_short_received_shipments = array();
-                    $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
-                    $short_received_bag->status_id = 7;
-                    $short_received_bag->save();
-                    $short_received_bag_shipments = $short_received_bag->shipment;
-                    foreach ($short_received_bag_shipments as $short_received_bag_shipment){
-                        $bag_short_received_shipments[] = $short_received_bag_shipment->shipment_id;
-                    }
-                    if(!empty($bag_short_received_shipments)){
-                        DisputeController::add_cargo_short_received($short_received_bag->seal_number,$bag_short_received_shipments, 2);
-                    }
+            if($bag->status_id == 7){
+                $bag_short_received_shipments = BagShipment::where(['bag_id'=>$bag_id,'status'=>0])->pluck('shipment_id')->toArray();
+
+                if(!empty($bag_short_received_shipments)){
+                    DisputeController::add_cargo_short_received($bag->seal_number,$bag_short_received_shipments, 2);
                 }
             }
 
 //        end dispute short received
-//        dispute start for junction
-            $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
-            $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
-
-            if($cargo_consignment->origin_hub_id != $junction_hub_1_id && $cargo_consignment->destination_hub_id != $junction_hub_1_id) {
-                $junction1 = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_1_id])->exists();
-                if(!$junction1){
-                    DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id, 1);
-                }
-            }
-            if($junction_hub_2_id && $cargo_consignment->origin_hub_id != $junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
-                $junction2 = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_2_id])->exists();
-                if(!$junction2){
-                    DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_2_id, 1);
-                }
-            }
-            //dispute end for junction
-
-
-            //dispute end for junction
-            if($all_cargo_consignment_ids == ''){
-                $all_cargo_consignment_ids = $cargo_consignment_id;
+            if($all_bag_ids == ''){
+                $all_bag_ids = $all_bag_ids . $bag->seal_number;
             }
             else{
-                $all_cargo_consignment_ids .= ', ' . $cargo_consignment_id;
+                $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
             }
-
-            foreach ($cargo_consignment->master_bags as $cargo_bag){
-                $serial++;
-                if($cargo_bag->status == 0){
-                    $status = 'Short Received';
-                }else{
-                    $status = 'Received';
-                }
-                $cargo_consignment_excel_array[] = ['serial' => $serial, 'Cargo Consignment ID' => strval(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT)), 'Tracking Number' => strval($cargo_bag->bag->seal_number), 'Origin Hub' => $cargo_consignment->origin_hub->name, 'Destination Hub' => $cargo_consignment->destination_hub->name, 'Status' => $status];
-            }
-            $total_bags = $total_bags + count($cargo_consignment->master_bags);
         }
-
-        $cargo_consignment_excel->bags = $total_bags;
-        $cargo_consignment_excel->save();
-        $cell_st = [
-            'font' => ['bold' => true],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-            'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-        ];
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->getDefaultColumnDimension()->setWidth(20);
-
-        $sheet->fromArray($cargo_consignment_excel_array, NULL, 'A2', true);
-        $sheet->getStyle("C2:C50000")->getNumberFormat()
-            ->setFormatCode(
-                \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
-            );
-        $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
-        $sheet->setTitle('Quick Master Cargo Received');
-        $writer = new Xlsx($spreadsheet);
-
-
-        $file_name_without_path = "/reports/master_cargo_excel_" . $cargo_consignment_excel->id . ".xlsx";
-        $file_name = public_path() . "/reports/master_cargo_excel_" . $cargo_consignment_excel->id . ".xlsx";
-        $writer->save($file_name);
-        Storage::disk('s3')->put( 'cargo_consignment_excels/'.'master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx', file_get_contents($file_name));
-        Storage::disk('public')->delete('reports/master_cargo_excel_'. $cargo_consignment_excel->id .'.xlsx');
-
-
-        $cargo_consignment_excel->cargoes = count($cargo_consignment_ids);
-        $cargo_consignment_excel->excel = 'master_cargo_excel_' . $cargo_consignment_excel->id  . '.xlsx';
-        $cargo_consignment_excel->save();
-        return redirect()->route('admin.master_cargo.receive.quick.list.index')->with('success', 'Selected Bags of Master Cargo No(s)#' . $all_cargo_consignment_ids . ' has been Received');
+        return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
     }
 
     public function master_cargo_quick_receive_list_index(){
