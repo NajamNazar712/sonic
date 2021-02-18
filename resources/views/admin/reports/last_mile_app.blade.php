@@ -455,7 +455,7 @@
                     if(index == 0){
                         total_shipments = data.total_shipments;
                         app_shipments = data.shipments_rider_updated;
-                        dbf_shipments = data.total_shipments - data.shipments_rider_updated;
+                        dbf_shipments = (data.total_shipments - data.shipments_rider_updated);
                     }
                     else{
                         total_shipments += data.total_shipments;
