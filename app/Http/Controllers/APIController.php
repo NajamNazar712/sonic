@@ -527,7 +527,7 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
                 }
 
-                if (!in_array($user_id, [7762, 4758]) {
+                if (!in_array($user_id, [7762, 4758])) {
                   if (!$pickup_consignee_city->pickup) {
                       return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $pickup_consignee_city->city_id]);
                   }
