@@ -205,7 +205,7 @@
                             head.push('S.No');
                             head.push('Delivery Note No.');
                             head.push('Hub');
-                            head.push('Business Caategory');
+                            head.push('Business Category');
                             head.push('Rider');
                             head.push('Route');
                             head.push('No. Of Shipments');
