@@ -350,7 +350,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-<<<<<<< HEAD
 
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Zone',
@@ -359,24 +358,6 @@
             });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Hub',
-=======
-//             setTimeout(function() {
-//             $.ajax({
-//                   /* the route pointing to the post function */
-//                   url: '/postajax',
-//                   type: 'POST',
-//                   /* send the csrf-token and the input to the controller */
-//                   data: {_token: CSRF_TOKEN, message:$(".getinfo").val()},
-//                   dataType: 'JSON',
-//                   /* remind that 'data' is the response of the AjaxController */
-//                   success: function (data) { 
-//                       $(".writeinfo").append(data.msg); 
-//                   }
-//               }); 
-// }, 5000);
-             $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search City',
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                 width:'100%',
                 allowClear:true
             });
@@ -457,18 +438,11 @@
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
-<<<<<<< HEAD
                             head.push('Update Via App');
                             head.push('Update Via DBF');
                             var total_shipments_count = 0;
                             var update_via_app_count = 0;
                             var update_via_dbf_count = 0;
-=======
-                            head.push('Delivered');
-                            head.push('Delivered Via App');
-                            var total_shipments_count = 0;
-                            var total_delivered_shipments_count = 0;
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -478,7 +452,6 @@
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
-<<<<<<< HEAD
                                 row.push(values.shipments_rider_updated);
                                 row.push(values.shipments_dbf_updated);
 
@@ -486,14 +459,6 @@
                                 total_shipments_count+=values.total_shipments
                                 update_via_app_count+=values.shipments_rider_updated
                                 update_via_dbf_count+=values.shipments_dbf_updated
-=======
-                                row.push(values.delivered_shipments);
-                                row.push(values.delivered_via_app);
-                                body.push(row);
-                                total_shipments_count+=values.total_shipments
-                                total_delivered_shipments_count+=values.delivered_shipments
-                                
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                             });
                             footer = [];
 
@@ -501,16 +466,10 @@
                             footer.push('Total');
                             footer.push('-');
                             footer.push('-');
-<<<<<<< HEAD
                             footer.push('-');
                             footer.push(total_shipments_count.toFixed(2));
                             footer.push(update_via_app_count.toFixed(2));
                             footer.push(update_via_dbf_count.toFixed(2));
-=======
-                            footer.push(total_shipments_count.toFixed(2));
-                            footer.push(total_delivered_shipments_count.toFixed(2));
-                            footer.push('');
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                             body.push(footer);
                         },
                         async: false
@@ -524,27 +483,9 @@
             var app_shipments = 0;
             var dbf_shipments = 0;
 
-<<<<<<< HEAD
 
             $('#datatable').append("<tfoot><tr><th colspan='5'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
-=======
-            // var total_delivered_count = 0;
-            // var total_shipment_count = 0;
-            // <tfoot>
-            //             <tr>
-            //                 <th colspan="4">Total:</th>
-            //                 <th id="total_shipment_count"></th>
-            //                 <th id="total_delivered_count"></th>
-            //                 <th></th>
-            //             </tr>
-            //             <tfoot>
-                $('#datatable').append("<tfoot><tr><th colspan='4'>Total:</th><th class='total_shipment_count'></th><th class='total_delivered_count'></th><th></th></tr></tfoot>");
-
-            var table = $('#datatable').DataTable({
-                
-                scrollX: true, scrollY: '500px',
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
@@ -571,12 +512,8 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-<<<<<<< HEAD
                         d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
                         d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
-=======
-           
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -594,7 +531,6 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-<<<<<<< HEAD
                     if(index == 0){
 
                         total_shipments = data.total_shipments;
@@ -635,25 +571,6 @@
                     document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
                     document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
                 }, 1000);
-=======
-
-                    var api = this.api();
-                    var total_delivered_count = 0;
-                    var total_shipment_count = 0;
-                    api.rows( {page:'current'} ).every( function () {
-    
-                    total_delivered_count+=this.data().delivered_shipments;
-                    total_shipment_count+=this.data().total_shipments;
-    
-                } );    
-                console.log(total_delivered_count);
-                console.log(total_shipment_count);
-                setTimeout(function(){
-                    document.getElementsByClassName('total_shipment_count')[1].innerHTML=total_shipment_count
-                    document.getElementsByClassName('total_delivered_count')[1].innerHTML=total_delivered_count
-                }, 1000);
-                // document.getElementsByClassName('total_shipment_count')[1]
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                 },
                 drawCallback: function () {
                     
@@ -666,15 +583,10 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-<<<<<<< HEAD
                 $('#total_shipments').text(0);
                 $('#app_shipments').text(0);
                 $('#dbf_shipments').text(0);
                 table.draw(true);
-=======
-                table.draw();
-                
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
             });
     
             var route = '{!! route('admin.tracking.index') !!}';
@@ -707,15 +619,8 @@
 
             });
 
-<<<<<<< HEAD
             var app_table;
             $('#datatable tbody').on('click','tr td.update_via_app button',function () {
-=======
-
-
-
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if(id){
