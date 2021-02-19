@@ -320,7 +320,7 @@
                         '</select>';
                     var business_drop = '<select name="business_select" id="business_select" class="select2 form-control">' +
                         '<option value="1">Domestic</option>' +
-                        '<option value="2">Imternational</option>' +
+                        '<option value="2">International</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
