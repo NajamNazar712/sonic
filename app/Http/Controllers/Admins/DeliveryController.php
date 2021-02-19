@@ -3849,10 +3849,19 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             });
-        if ($tracking_number = $request->get('search_tracking')) {
+//        if ($tracking_number = $request->get('search_tracking')) {
+//            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+//                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+//                ->where('s.tracking_number', '=', $tracking_number);
+//        }
+        if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+                ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
         }
 
         return $datatable->make(true);
