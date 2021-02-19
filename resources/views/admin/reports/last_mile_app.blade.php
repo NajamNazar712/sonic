@@ -435,6 +435,9 @@
                             head.push('Total Shipment');
                             head.push('Update Via App');
                             head.push('Update Via DBF');
+                            var total_shipments_count = 0;
+                            var update_via_app_count = 0;
+                            var update_via_dbf_count = 0;
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -448,7 +451,21 @@
                                 row.push(values.shipments_dbf_updated);
 
                                 body.push(row);
+                                total_shipments_count+=values.total_shipments
+                                update_via_app_count+=values.shipments_rider_updated
+                                update_via_dbf_count+=values.shipments_dbf_updated
                             });
+                            footer = [];
+
+                            footer.push('-');
+                            footer.push('Total');
+                            footer.push('-');
+                            footer.push('-');
+                            footer.push('-');
+                            footer.push(total_shipments_count.toFixed(2));
+                            footer.push(update_via_app_count.toFixed(2));
+                            footer.push(update_via_dbf_count.toFixed(2));
+                            body.push(footer);
                         },
                         async: false
                     });
@@ -461,6 +478,8 @@
             var app_shipments = 0;
             var dbf_shipments = 0;
 
+
+            $('#datatable').append("<tfoot><tr><th colspan='5'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -524,6 +543,29 @@
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
                     }
+
+                    var api = this.api();
+                    var update_via_app_count = 0;
+                    var update_via_dbf_count = 0;
+                    var total_shipment_count = 0;
+                    api.rows( {page:'current'} ).every( function () {
+                        console.table(this.data());
+                        console.log('updated_via_App ',this.data().update_via_app);
+                        console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
+                        console.log('total_shipments ',this.data().total_shipments);
+                        update_via_app_count+=this.data().update_via_app;
+                        update_via_dbf_count+=this.data().shipments_dbf_updated;
+                    total_shipment_count+=this.data().total_shipments;
+    
+                } );    
+                // console.log(total_delivered_count);
+                // console.log(total_shipment_count);
+
+                setTimeout(function(){
+                    document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
+                    document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
+                    document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
+                }, 1000);
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
