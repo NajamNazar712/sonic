@@ -27,6 +27,7 @@ use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\RiderDeliveryNoteStatus;
+use App\RiderLocationLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -68,6 +69,9 @@ class RiderAPIController extends Controller
         'phone_number' => 'Phone Number',
         'pin' => 'PIN',
 
+        'rider_location_latitude' => 'Rider Location Latitude',
+        'rider_location_longtidue' => 'Rider Location Longitude',
+
         'added_at' => 'Added At',
         'pickup_note_id' => 'Pickup Note ID',
         'pickup_request_id' => 'Pickup Request ID',
@@ -106,7 +110,9 @@ class RiderAPIController extends Controller
         'actual_location_longitude.regex' => ':attribute is Invalid Longitude Coordinates.',
         'start_location_latitude.regex' => ':attribute is Invalid Latitude Coordinates.',
         'start_location_longitude.regex' => ':attribute is Invalid Longitude Coordinates.',
-        'image' => ':attribute must be an Image.'
+        'image' => ':attribute must be an Image.',
+        'rider_location_latitude.regex' => ':attribute is Invalid Latitude Coordinates.',
+        'rider_location_longitude.regex' => ':attribute is Invalid Longitude Coordinates.',
     ];
 
     static public function retail_pickup_assign($pickup_request_id, $rider_id)
@@ -484,6 +490,34 @@ class RiderAPIController extends Controller
                 }
             }
         }
+    }
+
+    public function get_rider_location(Request $request)
+    {
+        $rules = [
+            'rider_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'rider_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $latitude = $request->rider_location_latitude;
+            $longitude = $request->rider_location_longitude;
+
+            $log = RiderLocationLog::create();
+            $log->rider_id = $rider_id;
+            $log->latitude = $latitude;
+            $log->longitude = $longitude;
+            $log->save();
+
+            return response()->json(['status' => 0, 'message' => 'Location Marked Successfully']);
+        }
+
     }
 
     public function pickup_summary(Request $request)

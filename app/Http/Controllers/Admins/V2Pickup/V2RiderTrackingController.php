@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -25,10 +26,63 @@ class V2RiderTrackingController extends Controller
     {
         $rider_id = $request->rider_id;
 
+        // Getting Rider Data
         $data = Rider::where('riders.id',$rider_id)
-            ->leftjoin('route_locations as routes', 'routes.route_id','=','riders.route_id')
-            ->leftjoin('user_shipping_infos as info','info.id','=','routes.pickup_address_id')
-            ->select('riders.name as name','routes.route_id as route_id','routes.pickup_address_id as pickup_id','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
+            ->join('v2_pickup_notes as notes',function ($join){
+                $join->on('riders.id','=','notes.rider_id')->whereDate('notes.created_at', Carbon::today());
+            })
+            ->join('v2_pickup_note_requests as pivot_requests','notes.id','=','pivot_requests.pickup_note_id')
+            ->join('v2_pickup_requests as requests',function ($join){
+                $join->on('requests.id','=','pivot_requests.pickup_request_id');
+//                    ->groupBy('requests.pickup_address_id');
+            })
+            ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
+            ->leftjoin('users','users.id','=','info.user_id')
+            ->leftjoin('rider_location_logs as logs', function($join){
+                $join->on('riders.id','=','logs.rider_id')
+                    ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
+            })
+            ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
+            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','logs.created_at as created_at','logs.latitude as current_latitude','logs.longitude as current_longitude','riders.name as rider_name','users.name as name','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
+            ->get()->groupBy('pickup_id');
+
+        //   Setting Status based on data fetched from v2_rider_pickups table
+        foreach ($data as $group)
+        {
+            if($group->where('checking_id','!=',null)->where('checking_reason','==',null)->count() > 0)
+            {
+                foreach ($group as $d)
+                {
+                    $d->status = 'picked';
+                }
+            }elseif ($group->where('checking_id','!=',null)->where('checking_reason','!=',null)->count() > 0)
+            {
+                foreach ($group as $d)
+                {
+                    $d->status = 'not-picked';
+                }
+            }
+            else{
+                foreach ($group as $d)
+                {
+                    $d->status = 'not-reached';
+                }
+            }
+        }
+        return $data->toArray();
+    }
+
+    public function rider_tracking_by_city(Request $request)
+    {
+        $city_id = $request->city_id;
+
+//        Getting Rider Data
+        $data = Rider::where('riders.city_id',$city_id)
+            ->join('rider_location_logs as logs', function($join){
+                $join->on('riders.id','=','logs.rider_id')
+                    ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
+            })
+            ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude')
             ->get();
         return $data->toArray();
     }
