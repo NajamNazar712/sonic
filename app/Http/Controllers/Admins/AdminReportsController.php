@@ -7605,7 +7605,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
             $ufrom = $request->get('search_update_date_from');
             $uto = $request->get('search_update_date_to');
-            $datatable->whereBetween('delivery_notes.status_update_at', [$ufrom,$uto]);
+            $datatable->whereBetween('delivery_notes.status_updated_at', [$ufrom,$uto]);
         }
         return $datatable->make(true);
     }

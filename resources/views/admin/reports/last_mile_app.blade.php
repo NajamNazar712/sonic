@@ -68,26 +68,26 @@
                                 </div>
                             </div>
 
-                            <div class="col-4 mt-1">
+                            <div class="col-5 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                     </div>
-                                    <input type="text" name="search_date_from"
+                                    <input type="text" name="search_update_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
                                            id="search_update_date_from" placeholder="Update Date (From)">
                                 </div>
                             </div>
-                            <div class="col-4 mt-1">
+                            <div class="col-5 mt-1">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                     </div>
-                                    <input type="text" name="search_date_to"
+                                    <input type="text" name="search_update_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
                                            id="search_update_date_to" placeholder="Update Date (To)">
                                 </div>
@@ -462,10 +462,11 @@
             var dbf_shipments = 0;
 
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tpr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
                         extend: 'excelHtml5',
+                        className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
