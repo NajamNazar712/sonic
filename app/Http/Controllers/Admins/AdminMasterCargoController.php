@@ -2026,10 +2026,6 @@ class AdminMasterCargoController extends Controller
             foreach ($cargo_short_received_bags as $cargo_short_received_bag){
                 $bag_short_received_shipments = array();
                 $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
-                $short_received_bag->status_id = 7;
-                $short_received_bag->received_at = Carbon::now();
-                $short_received_bag->receiver_id = Auth::id();
-                $short_received_bag->save();
                 $short_received_bag_shipments = $short_received_bag->shipment;
                 foreach ($short_received_bag_shipments as $short_received_bag_shipment){
                     $bag_short_received_shipments[] = $short_received_bag_shipment->shipment_id;
@@ -2541,7 +2537,7 @@ class AdminMasterCargoController extends Controller
             ->join('transport_mode_vendors as tmv', 'bags.transport_mode_vendor_id', '=', 'tmv.id')
             ->join('bag_statuses as bs', 'bags.status_id', '=', 'bs.id')
             ->select('bags.id', 'bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'bags.shipments', 'bags.quantity', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'bags.builty_number', 'bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`bag_id` = `bags`.`id`) AS `chargeable_weight`'), 'bags.actual_weight', 'bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'bags.type as bag_type','bags.seal_number', 'mc.id as master_cargo_id', 'mc.received_at as cargo_received_at', 'ra.name as received_by', 'bs.name as status', 'bags.short_received')
-            ->whereIn('bags.status_id', [3, 4, 5, 6]);
+            ->whereIn('bags.status_id', [3, 4, 5, 6, 7]);
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
@@ -2632,7 +2628,7 @@ class AdminMasterCargoController extends Controller
 
             if ($bag) {
                 if (session('role_id') == 1 || (in_array($bag->destination_hub->hub_id, session('hubs')))) {
-                    if (in_array($bag->status_id, [3, 4, 5, 6])) {
+                    if (in_array($bag->status_id, [3, 4, 5, 6, 7])) {
                         return redirect()->route('admin.master_cargo.bag.receive.index')->with('bag_number', $bag->id);
                     }
                     else {
