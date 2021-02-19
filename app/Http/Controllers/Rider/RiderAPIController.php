@@ -1977,12 +1977,13 @@ class RiderAPIController extends Controller
     {
 
         $rider_id = $request->rider_id;
-        $from_date = $request->get('date');
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
         $pickup_request_id = $request->get('pickup_request_id');
         $pickup_note_id = $request->get('pickup_note_id');
 
-        if ($from_date == null && $pickup_request_id == null && $pickup_note_id == null) {
-            return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
+        if (($from_date == null && $to_date == null) && $pickup_request_id == null && $pickup_note_id == null) {
+            return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
 
             $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
@@ -1992,8 +1993,8 @@ class RiderAPIController extends Controller
                 ->select('v2_rider_pickups.id', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', 'v2_rider_pickups.pickup_type', 'u.name as shipper')
                 ->where('pn.rider_id', '=', $rider_id);
 
-            if ($from_date != null) {
-                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at', $from_date);
+            if ($from_date != null && $to_date != null) {
+                $rider_pickups = $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from_date, $to_date]);
             }
             if ($pickup_request_id != null) {
                 $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
@@ -2014,12 +2015,13 @@ class RiderAPIController extends Controller
     public function delivery_history(Request $request)
     {
         $rider_id = $request->rider_id;
-        $from_date = $request->get('date');
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
         $delivery_note_id = $request->get('delivery_note_id');
         $tracking_no = $request->get('tracking_no');
 
-        if ($from_date == null && $delivery_note_id == null && $tracking_no == null) {
-            return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
+        if (($from_date == null && $to_date == null) && $delivery_note_id == null && $tracking_no == null) {
+            return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
             $rider_deliveries = DeliveryNote::
             join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
@@ -2035,8 +2037,8 @@ class RiderAPIController extends Controller
                 ->where('delivery_notes.pending_status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
-            if ($from_date != null) {
-                $rider_deliveries = $rider_deliveries->whereDate('delivery_notes.created_at', $from_date)
+            if ($from_date != null && $to_date != null) {
+                $rider_deliveries = $rider_deliveries->whereBetween('delivery_notes.created_at', [$from_date, $to_date])
                     ->groupBy('delivery_notes.id');
             }
 
@@ -2742,20 +2744,21 @@ class RiderAPIController extends Controller
     public function return_history(Request $request)
     {
         $rider_id = $request->rider_id;
-        $from_date = $request->get('date');
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
         $return_note_id = $request->get('return_note_id');
         $tracking_no = $request->get('tracking_no');
 
-        if ($from_date == null && $return_note_id == null && $tracking_no == null) {
-            return response()->json(["status" => 1, "message" => "Provide at least one parameter"]);
+        if (($from_date == null && $to_date == null ) && $return_note_id == null && $tracking_no == null) {
+            return response()->json(["status" => 1, "message" => "Please Provide parameter(s)"]);
         } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
                 ->where('return_notes.rider_id', $rider_id)
                 ->whereIn('return_notes.status', [1, 3]);
 
-            if ($from_date != null) {
-                $rider_return_deliveries = $rider_return_deliveries->whereDate('return_notes.created_at', $from_date)
+            if ($from_date != null && $to_date != null) {
+                $rider_return_deliveries = $rider_return_deliveries->whereBetween('return_notes.created_at', [$from_date, $to_date])
                     ->groupBy('return_notes.id');
             }
 
@@ -3024,7 +3027,74 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function history_details(Request $request)
+    {
+        $rules = [
+            'delivery_note_id' => ['nullable', 'exists:delivery_notes,id'],
+            'return_note_id' => ['nullable', 'exists:return_notes,id']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if ($request->has('delivery_note_id')) {
+                $delivery_note_shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', 's.id')
+                    ->select('s.tracking_number as tacking_no', 'delivery_note_shipments.status as status')
+                    ->where('delivery_note_id', $request->delivery_note_id);
+
+                if ($delivery_note_shipments->exists()) {
+                    $delivery_note_shipments = $delivery_note_shipments->get();
+                    $data = array();
+                    foreach ($delivery_note_shipments as $delivery_note_shipment) {
+                        $datum = array();
+                        $datum['tracking_no'] = $delivery_note_shipment->tacking_no;
+                        if ($delivery_note_shipment->status == 0) {
+                            $datum['status'] = 'Not Attempt';
+                        } else if ($delivery_note_shipment->status == 1) {
+                            $datum['status'] = 'Undelivered';
+                        } else if ($delivery_note_shipment->status > 1 && !in_array($delivery_note_shipment->status, [8, 10, 11])) {
+                            $datum['status'] = 'Delivered';
+                        }
+                        $data[] = $datum;
+                    }
+                    return response()->json(['status' => 0, 'history_details' => $data]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "No Details Found"]);
+                }
+
+            } else if ($request->has('return_note_id')) {
+                $return_note_shipments = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', 's.id')
+                    ->select('s.tracking_number as tacking_no', 'return_note_shipments.status as status')
+                    ->where('return_note_id', $request->return_note_id);
+
+                if ($return_note_shipments->exists()) {
+                    $return_note_shipments = $return_note_shipments->get();
+                    $data = array();
+                    foreach ($return_note_shipments as $return_note_shipment) {
+                        $datum = array();
+                        $datum['tracking_no'] = $return_note_shipment->tacking_no;
+                        if ($return_note_shipment->status == 0) {
+                            $datum['status'] = 'Not Attempt';
+                        } else if ($return_note_shipment->status == 1) {
+                            $datum['status'] = 'Undelivered';
+                        } else if ($return_note_shipment->status == 2) {
+                            $datum['status'] = 'Delivered';
+                        }
+                        $data[] = $datum;
+                    }
+                    return response()->json(['status' => 0, 'history_details' => $data]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "No Details Found"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "No Parameter Provided"]);
+            }
+        }
+
+    }
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
