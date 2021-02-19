@@ -101,7 +101,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment_data->save();
 
                         ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                        ShipmentsJourneyController::add($shipment, 12,12, 34, NULL, NULL, 50, $note->id, NULL, 0);
+                        ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0);
                         ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
 
                         DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
@@ -127,11 +127,13 @@ class AdminNsaAccountShipmentController extends Controller
         }
     }
 
-    public function arrival_index(){
+    public function arrival_index()
+    {
         return view('admin.telenor.arrival');
     }
 
-    public function arrival_submit(Request $request){
+    public function arrival_submit(Request $request)
+    {
         $names = [
             'tracking_number' => 'Tracking Number',
         ];
@@ -145,7 +147,7 @@ class AdminNsaAccountShipmentController extends Controller
         ];
         $fields = [0 => 'tracking_number'];
 
-        if($file = $request->file('shipments')) {
+        if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
@@ -164,8 +166,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                }
-                else {
+                } else {
                     unset($spreadsheet[0]);
                 }
             }
@@ -201,12 +202,10 @@ class AdminNsaAccountShipmentController extends Controller
                             if (empty($tracking_ids)) {
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
-                            }
-                            else {
+                            } else {
                                 if (in_array($row['tracking_number'], $tracking_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                }
-                                else {
+                                } else {
                                     $tracking_ids[] = $row['tracking_number'];
                                     $tracking_id_row[$row['tracking_number']] = $row_id;
                                 }
@@ -215,34 +214,32 @@ class AdminNsaAccountShipmentController extends Controller
 
                         $settings = GlobalSettings::where('type', 'nsa_accounts');
                         $nsa_accounts = array();
-                        if($settings->exists()){
+                        if ($settings->exists()) {
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
-                        if(count($nsa_accounts) > 0){
+                        if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 1)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
                             }
-                        }
-                        else{
+                        } else {
                             $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
                         }
                     }
                 }
-                if(empty($errors)){
+                if (empty($errors)) {
                     $tracking_numbers = array();
                     $shipment_ids = array();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
 
-                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
+                        $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
 
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
-
                     }
 
                     $nsa_shipments = Shipment::whereIn('id', $shipment_ids);
@@ -286,30 +283,30 @@ class AdminNsaAccountShipmentController extends Controller
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
                     return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as Arrived with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
-                }
-                else{
+                } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);
                     }, array_keys($errors), $errors);
 
                     return redirect()->back()->withErrors($errors);
                 }
-
-            }
-            else {
+            } else {
                 return redirect()->back()->with('error', 'No Shipments in File');
             }
-
         }
     }
 
-    public function delivery_index(){
+    public function delivery_index()
+    {
         return view('admin.telenor.delivery');
     }
 
-    public function delivery_submit(Request $request){
+    public function delivery_submit(Request $request)
+    {
+
         $names = [
             'tracking_number' => 'Tracking Number',
+            'received_refused_by' => 'Received/Refused By',
         ];
 
         $messages = [
@@ -318,30 +315,33 @@ class AdminNsaAccountShipmentController extends Controller
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'received_refused_by' => [],
         ];
-        $fields = [0 => 'tracking_number'];
+        $fields = [0 => 'tracking_number', 1 => 'received_refused_by'];
 
-        if($file = $request->file('shipments')) {
+        if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number'];
+            $header = ['Tracking Number', 'Received/Refused By'];
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
-
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if (!isset($header[$index]) || $header_value != $header[$index]) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = FALSE;
+
                         break;
                     }
                 }
 
+
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                }
-                else {
+                } else {
                     unset($spreadsheet[0]);
                 }
             }
@@ -373,16 +373,15 @@ class AdminNsaAccountShipmentController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                     if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number']))) {
+                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['received_refused_by']))) {
                             if (empty($tracking_ids)) {
+
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
-                            }
-                            else {
+                            } else {
                                 if (in_array($row['tracking_number'], $tracking_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                }
-                                else {
+                                } else {
                                     $tracking_ids[] = $row['tracking_number'];
                                     $tracking_id_row[$row['tracking_number']] = $row_id;
                                 }
@@ -391,34 +390,33 @@ class AdminNsaAccountShipmentController extends Controller
 
                         $settings = GlobalSettings::where('type', 'nsa_accounts');
                         $nsa_accounts = array();
-                        if($settings->exists()){
+                        if ($settings->exists()) {
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
-                        if(count($nsa_accounts) > 0){
+                        if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
-                        }
-                        else{
+                        } else {
                             $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
                         }
                     }
                 }
-                if(empty($errors)){
+                if (empty($errors)) {
                     $tracking_numbers = array();
                     $shipment_ids = array();
+
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
-
-                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
+                        $received_refused_by = trim($row['received_refused_by']);
+                        $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
 
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
-
                     }
 
                     $nsa_shipments = Shipment::whereIn('id', $shipment_ids);
@@ -473,19 +471,37 @@ class AdminNsaAccountShipmentController extends Controller
                                     ]);
                                     $serial++;
                                 }
+                        foreach ($valid_shipments as $index => $shipment) {
+                            $received_refused_by = '';
 
-                                foreach ($valid_shipments as $index => $shipment) {
-                                    $shipment_data = Shipment::find($shipment);
-                                    $shipment_data->shipper_status_id = 14;
-                                    $shipment_data->consignee_status_id = 14;
-                                    $shipment_data->save();
-
-                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment, 14,14, NULL, NULL, NULL, 50, $note->id, NULL, 0);
-                                    ShipmentsJourneyController::add($shipment, 14,14, NULL, NULL, NULL, 50, $note->id, NULL, 1);
-
-                                    DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
+                            $shipment_data = Shipment::find($shipment);
+                            $shipment_data->shipper_status_id = 14;
+                            $shipment_data->consignee_status_id = 14;
+                            $shipment_data->save();
+                            foreach ($rows as $key => $row) {
+                                if ($row['tracking_number'] == $shipment_data->tracking_number) {
+                                    $received_refused_by = $row['received_refused_by'];
                                 }
+                            }
+
+                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 0,$received_refused_by);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1,$received_refused_by);
+                            DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
+                        }
+                        // foreach ($valid_shipments as $index => $shipment) {
+                        //     $shipment_data = Shipment::find($shipment);
+                        //     $shipment_data->shipper_status_id = 14;
+                        //     $shipment_data->consignee_status_id = 14;
+                        //     $shipment_data->save();
+
+                        //     // dd($rows[0]); it has both tracking and received_refused
+                        //     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                        //     ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 0);
+                        //     ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1);
+
+                        //     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
+                        // }   
 
                                 DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
                             }
@@ -496,48 +512,46 @@ class AdminNsaAccountShipmentController extends Controller
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
                     return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as delivered with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
-                }
-                else{
+                } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);
                     }, array_keys($errors), $errors);
 
                     return redirect()->back()->withErrors($errors);
                 }
-
-            }
-            else {
+            } else {
                 return redirect()->back()->with('error', 'No Shipments in File');
             }
-
         }
     }
 
-    public function return_index(){
+    public function return_index()
+    {
         return view('admin.telenor.return');
     }
 
-    public function return_shipment_info(Request $request){
+    public function return_shipment_info(Request $request)
+    {
         $tracking_number = $request->tracking_number;
         $settings = GlobalSettings::where('type', 'nsa_accounts');
         $nsa_accounts = array();
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $nsa_accounts = array_map('intval', explode(',', $settings->text));
         }
         $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', [2, 4])->whereIn('user_id', $nsa_accounts);
-        if($shipment->exists()){
+        if ($shipment->exists()) {
             $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number')->first();
             $data['id'] = $shipment->id;
             $data['tracking_number'] = $shipment->tracking_number;
             return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Shipment can\'t be updated']);
         }
     }
 
-    public function return_submit(Request $request){
+    public function return_submit(Request $request)
+    {
         $shipment_ids = explode(',', $request->shipment_ids);
         $nsa_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', [2, 4]);
         if ($nsa_shipments->exists()) {
@@ -598,7 +612,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment_data->save();
 
                         ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                        ShipmentsJourneyController::add($shipment, 12,12, 34, NULL, NULL, 50, $note->id, NULL, 0);
+                        ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0);
                         ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
 
                         DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
@@ -625,11 +639,13 @@ class AdminNsaAccountShipmentController extends Controller
         return redirect()->back()->with('success', 'Shipment(s) Marked as Return Successfully');
     }
 
-    public function order_id_index(){
+    public function order_id_index()
+    {
         return view('admin.telenor.order_ids');
     }
 
-    public function order_id_submit(Request $request){
+    public function order_id_submit(Request $request)
+    {
         $names = [
             'tracking_number' => 'Tracking Number',
             'order_id' => 'Order ID',
@@ -646,7 +662,7 @@ class AdminNsaAccountShipmentController extends Controller
         ];
         $fields = [0 => 'tracking_number', 1 => 'order_id'];
 
-        if($file = $request->file('shipments')) {
+        if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
@@ -665,8 +681,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                }
-                else {
+                } else {
                     unset($spreadsheet[0]);
                 }
             }
@@ -702,12 +717,10 @@ class AdminNsaAccountShipmentController extends Controller
                             if (empty($tracking_ids)) {
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
-                            }
-                            else {
+                            } else {
                                 if (in_array($row['tracking_number'], $tracking_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                }
-                                else {
+                                } else {
                                     $tracking_ids[] = $row['tracking_number'];
                                     $tracking_id_row[$row['tracking_number']] = $row_id;
                                 }
@@ -716,21 +729,20 @@ class AdminNsaAccountShipmentController extends Controller
 
                         $settings = GlobalSettings::where('type', 'nsa_accounts');
                         $nsa_accounts = array();
-                        if($settings->exists()){
+                        if ($settings->exists()) {
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
-                        if(count($nsa_accounts) > 0){
+                        if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
                             }
-                        }
-                        else{
+                        } else {
                             $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
                         }
                     }
                 }
-                if(empty($errors)){
+                if (empty($errors)) {
                     $tracking_numbers = array();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
@@ -738,34 +750,29 @@ class AdminNsaAccountShipmentController extends Controller
                         $order_id = trim($row['order_id']);
 
 
-                        $shipment_details = Shipment::where('tracking_number',$tracking)->first();
-                        if($shipment_details){
+                        $shipment_details = Shipment::where('tracking_number', $tracking)->first();
+                        if ($shipment_details) {
                             $shipment_details->order_id = $order_id;
                             $shipment_details->save();
                         }
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
-
                     }
                     $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
 
                     return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
-                }
-                else{
+                } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);
                     }, array_keys($errors), $errors);
 
                     return redirect()->back()->withErrors($errors);
                 }
-
-            }
-            else {
+            } else {
                 return redirect()->back()->with('error', 'No Shipments in File');
             }
-
         }
     }
 }
