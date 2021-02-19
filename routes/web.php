@@ -899,6 +899,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
         });
 
+        Route::prefix('rider_tracking')->name('rider_tracking.')->group(function () {
+            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_index')->name('index');
+            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_list')->name('list');
+            Route::post('/ajax', 'Admins\V2Pickup\V2AdminPickupsController@edit_route_ajax')->name('edit_ajax');
+            //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
+        });
+
     });
 
     Route::prefix('delivery')->name('delivery.')->group(function(){

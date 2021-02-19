@@ -44,6 +44,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
@@ -204,6 +205,7 @@
                             head.push('S.No');
                             head.push('Delivery Note No.');
                             head.push('Hub');
+                            head.push('Business Caategory');
                             head.push('Rider');
                             head.push('Route');
                             head.push('No. Of Shipments');
@@ -222,6 +224,7 @@
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
+                                row.push(values.business_category);
                                 row.push(values.rider);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
@@ -275,6 +278,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'business_category' ,name: 'oc.business_category_id', class: 'align-middle business_category'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
@@ -314,6 +318,10 @@
                         '<option value="0">Pending for Update</option>' +
                         '<option value="1">Pending for Verification</option>' +
                         '</select>';
+                    var business_drop = '<select name="business_select" id="business_select" class="select2 form-control">' +
+                        '<option value="1">Domestic</option>' +
+                        '<option value="2">Imternational</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -322,6 +330,11 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.pending_status')){
                             $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.business_category')){
+                            $(business_drop).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -338,6 +351,12 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#business_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Category",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

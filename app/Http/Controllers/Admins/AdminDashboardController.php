@@ -8557,20 +8557,28 @@ class AdminDashboardController extends Controller
             'end'=>$request->end,
             'route_type_id'=>$request->route_type_id,
             'junction'=>$request->junction,
-            'status'=>1
         ]);
 
-        if(Rider::where('route_id','=',$id)->exists()){
-            return redirect()->back()->with('success', 'Details Updated !');
+        $existing_riders = Rider::where('route_id', $id);
+        if($existing_riders->exists()){
+            $existing_riders= $existing_riders->get();
+            foreach ($existing_riders as $existing_rider){
+                $existing_rider->route_id = null;
+                $existing_rider->save();
+            }
         }
-        else{
+
+//        if(Rider::where('route_id','=',$id)->exists()){
+//            return redirect()->back()->with('success', 'Details Updated !');
+//        }
+//        else{
             $rider_id = $request->rider_id;
             $rider = Rider::find($rider_id);
             if($rider){
                 $rider->route_id = $id;
                 $rider->save();
             }
-        }
+//        }
         return redirect()->back()->with('success','Route updated successfully');
     }
     public function routeStatus(Request $request){
@@ -8811,7 +8819,7 @@ class AdminDashboardController extends Controller
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null]);
             if($rider){
                 return redirect()->back()->with('success','Route is now inactive');
             }
