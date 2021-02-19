@@ -7599,7 +7599,6 @@ class AdminReportsController extends Controller
     public function last_mile_app_index()
     {
         $riders = Rider::where('status', 1)->get();
-<<<<<<< HEAD
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $hubs = City::where('status', 1)->where('hub', 1)->where('business_category_id', 1)->get();
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
@@ -7611,18 +7610,6 @@ class AdminReportsController extends Controller
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
             ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))->where('delivery_notes.status', '=', 1)
             ->where('delivery_notes.created_at', '>', $date);
-=======
-        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
-        
-        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'cities' => $cities]);
-    }
-    public function last_mile_app_list(Request $request)
-    {
-        $deliveries = DB::connection('reports')->table('delivery_notes')->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
-            ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', 'rdns.status as delivered_via_app');
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
 
 
         $datatable = Datatables::of($deliveries)
@@ -7639,7 +7626,6 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-<<<<<<< HEAD
             ->editColumn('shipments_rider_updated', function($deliveries) {
                 if ($deliveries->shipments_rider_updated != null) {
                     return $deliveries->shipments_rider_updated;
@@ -7663,24 +7649,6 @@ class AdminReportsController extends Controller
                 }
                 else {
                     return 0;
-=======
-            ->editColumn('delivered_shipments_link', function ($deliveries) {
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->editColumn('delivered_via_app', function ($deliveries) {
-                if ($deliveries->delivered_via_app == 1) {
-                    return 'Partial';
-                } elseif ($deliveries->delivered_via_app == 2) {
-                    return 'Yes';
-                } elseif ($deliveries->delivered_via_app == 0) {
-                    return 'No';
-                } else {
-                    return '-';
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
                 }
             });
 
@@ -7755,7 +7723,6 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
-<<<<<<< HEAD
 
 	public function last_mile_app_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
@@ -7838,6 +7805,3 @@ class AdminReportsController extends Controller
 
     }}
 
-=======
-}
->>>>>>> TO-3234-need-summary-regarding-total-cou_aqib
