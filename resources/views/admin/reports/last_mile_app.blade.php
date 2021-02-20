@@ -239,7 +239,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Updated Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
@@ -273,7 +273,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Updated Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                         </tr>
