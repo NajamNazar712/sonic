@@ -52,7 +52,7 @@
                                     </div>
                                     <input type="text" name="search_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_from" placeholder="Date (From)">
+                                           id="search_date_from" placeholder="Delivery Note Created Date (From)">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
@@ -64,7 +64,32 @@
                                     </div>
                                     <input type="text" name="search_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_to" placeholder="Date (To)">
+                                           id="search_date_to" placeholder="Delivery Note Created Date (To)">
+                                </div>
+                            </div>
+
+                            <div class="col-5 mt-1">
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                    </div>
+                                    <input type="text" name="search_update_date_from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_update_date_from" placeholder="Update Date (From)">
+                                </div>
+                            </div>
+                            <div class="col-5 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                    </div>
+                                    <input type="text" name="search_update_date_to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_update_date_to" placeholder="Update Date (To)">
                                 </div>
                             </div>
 
@@ -81,7 +106,7 @@
                     <div class="col-12 justify-content-center mt-2" id="report_data">
                         <div class="row">
                             <div class="col">
-                                <div class="card pull-up">
+                                <div class="card">
                                     <div class="card-content border rounded">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -98,7 +123,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-primary pull-up">
+                                <div class="card bg-gradient-directional-primary">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -115,7 +140,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-info pull-up">
+                                <div class="card bg-gradient-directional-info">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -261,6 +286,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="picture_modal" data-backdrop="static" role="dialog" aria-labelledby="picture_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="picture_modal_title">Picture</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -342,6 +387,33 @@
                     }
                 }
             });
+
+            $('#search_form #search_update_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_to').pickadate('picker').set('min', $('#search_form #search_update_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_update_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_from').pickadate('picker').set('max', $('#search_form #search_update_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -361,8 +433,8 @@
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
-                            head.push('Delivered');
-                            head.push('Delivered Via App');
+                            head.push('Update Via App');
+                            head.push('Update Via DBF');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -372,8 +444,8 @@
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
-                                row.push(values.update_via_app);
-                                row.push(values.update_via_dbf);
+                                row.push(values.shipments_rider_updated);
+                                row.push(values.shipments_dbf_updated);
 
                                 body.push(row);
                             });
@@ -390,10 +462,11 @@
             var dbf_shipments = 0;
 
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tpr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
                         extend: 'excelHtml5',
+                        className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -415,6 +488,8 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
+                        d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -427,22 +502,24 @@
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     if(index == 0){
+
                         total_shipments = data.total_shipments;
                         app_shipments = data.shipments_rider_updated;
-                        dbf_shipments = data.total_shipments - data.shipments_rider_updated;
+                        dbf_shipments = data.shipments_dbf_updated;
                     }
                     else{
                         total_shipments += data.total_shipments;
                         app_shipments += data.shipments_rider_updated;
-                        dbf_shipments += (data.total_shipments - data.shipments_rider_updated);
+                        dbf_shipments += data.shipments_dbf_updated;
+
                     }
-                    if(index == (info.length - 1)){
+                    if(index == (info.end - 1)){
                         $('#total_shipments').text(total_shipments);
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
@@ -454,7 +531,10 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                $('#total_shipments').text(0);
+                $('#app_shipments').text(0);
+                $('#dbf_shipments').text(0);
+                table.draw(true);
             });
 
             var route = '{!! route('admin.tracking.index') !!}';
@@ -486,6 +566,8 @@
                     });
 
             });
+
+            var app_table;
             $('#datatable tbody').on('click','tr td.update_via_app button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -493,107 +575,137 @@
                     $('#app_delivery_note_id').val(id);
                     $('#app_shipments_modal').modal('show');
 
+
+                    app_table = $('#app_shipments_datatable').DataTable({
+                        dom: 't',
+                        // scrollX: true,
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                title: 'Shipments',
+                                text:'<i class="la la-file-excel-o"></i> Excel',
+                            },
+                        ],
+                        "autoWidth": true,
+                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: 50,
+                        pagingType: 'full_numbers',
+                        processing: true,
+                        language: {
+                            processing: data_table_loader
+                        },
+                        ajax: {
+                            url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
+                            data: function (d) {
+                                d.delivery_note_id = $('#app_delivery_note_id').val();
+                            }
+                        },
+                        rowId: 'shipment_id',
+                        // order: [[1, 'desc']],
+                        columns: [
+                            {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                            { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                            { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
+                            { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                            { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                            { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
+                            { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                            { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+
+                        ],
+                        rowCallback: function(row, data, index) {
+                            var info = app_table.page.info();
+                            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                        },
+                        initComplete: function() {
+                            this.api().table().columns.adjust();
+                        }
+                    });
                 }
 
             });
-            var app_table = $('#app_shipments_datatable').DataTable({
-                dom: 't',
-                // scrollX: true,
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Shipments',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
-                ],
-                "autoWidth": true,
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                ajax: {
-                    url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
-                    data: function (d) {
-                        d.delivery_note_id = $('#app_delivery_note_id').val();
-                    }
-                },
-                rowId: 'shipment_id',
-                // order: [[1, 'desc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
-                    { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
-                    { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
-                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
-                    { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
-                    { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
 
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = app_table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });
+            var dbf_table;
+
             $('#datatable tbody').on('click','tr td.update_via_dbf button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if(id){
                     $('#dbf_delivery_note_id').val(id);
                     $('#dbf_shipments_modal').modal('show');
 
+                    dbf_table = $('#dbf_shipments_datatable').DataTable({
+                        dom: 't',
+                        // scrollX: true,
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                title: 'Shipments',
+                                text:'<i class="la la-file-excel-o"></i> Excel',
+                            },
+                        ],
+                        "autoWidth": true,
+                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: 50,
+                        pagingType: 'full_numbers',
+                        processing: true,
+                        language: {
+                            processing: data_table_loader
+                        },
+                        ajax: {
+                            url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
+                            data: function (d) {
+                                d.delivery_note_id = $('#dbf_delivery_note_id').val();
+                            }
+                        },
+                        rowId: 'shipment_id',
+                        // order: [[1, 'desc']],
+                        columns: [
+                            {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                            { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                            { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
+                            { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                            { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                            { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
+                            { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+
+                        ],
+                        rowCallback: function(row, data, index) {
+                            var info = dbf_table.page.info();
+                            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                        },
+                        initComplete: function() {
+                            this.api().table().columns.adjust();
+                        }
+                    });
                 }
 
             });
-            var dbf_table = $('#dbf_shipments_datatable').DataTable({
-                dom: 't',
-                // scrollX: true,
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Shipments',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
-                ],
-                "autoWidth": true,
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                ajax: {
-                    url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
-                    data: function (d) {
-                        d.delivery_note_id = $('#app_delivery_note_id').val();
-                    }
-                },
-                rowId: 'shipment_id',
-                // order: [[1, 'desc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
-                    { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
-                    { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
-                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
-                    { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
-                    { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
 
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = dbf_table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
+
+            $('#app_shipments_modal').on('hidden.bs.modal', function () {
+                $('#app_delivery_note_id').val('');
+                app_table.clear();
+                app_table.destroy();
             });
+
+            $('#dbf_shipments_modal').on('hidden.bs.modal', function () {
+                $('#dbf_delivery_note_id').val('');
+                dbf_table.clear();
+                dbf_table.destroy();
+            });
+
+            var route = '{!! route('admin.tracking.index') !!}';
+
+            $('body').on('click','#app_shipments_datatable tbody tr td.pod button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#picture_modal .modal-body').html(image);
+
+                $('#picture_modal').modal('show');
+            });
+
 
 
             function print(id) {
