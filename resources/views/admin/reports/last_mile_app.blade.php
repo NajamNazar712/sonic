@@ -276,6 +276,8 @@
                             <th class="border-primary border-darken-1">Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
+                            <th class="border-primary border-darken-1">POD</th>
+
                         </tr>
                         </thead>
                     </table>
@@ -601,7 +603,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[2, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -658,7 +660,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[2, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -667,6 +669,7 @@
                             { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                            { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
 
                         ],
                         rowCallback: function(row, data, index) {

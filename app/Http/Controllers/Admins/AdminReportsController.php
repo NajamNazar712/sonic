@@ -7672,7 +7672,12 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
+            ->leftjoin('rider_deliveries', function ($join) {
+                $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
+                    ->where('rider_deliveries.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
+            })
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path')
             ->where('delivery_note_shipments.update_type', 0)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
         $datatables = Datatables::of($shipments)
@@ -7687,6 +7692,19 @@ class AdminReportsController extends Controller
                 else{
                     return 'Undelivered';
                 }
+            })
+            ->addColumn('pod', function($shipments){
+
+                $image = '';
+                if($shipments->picture_path != null){
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+
+                    return $image;
+                }
+                else{
+                    return '-';
+                }
+
             });
         return $datatables->make(true);
 
