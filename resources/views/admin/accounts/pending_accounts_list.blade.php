@@ -9,11 +9,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-
-                        @include('admin.inc.messages')
-
-                    </div>
+                    @include('admin.inc.messages')
                     @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
                         <div id="search_form" class="row p-1 mb-2">
                             <div class="col-4">

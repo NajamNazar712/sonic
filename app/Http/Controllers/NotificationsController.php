@@ -2172,11 +2172,11 @@ class NotificationsController extends Controller
 
                                 $to = array();
 
-                                $general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
+                                /*$general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
 
                                 if ($general_admins->exists()) {
                                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
-                                }
+                                }*/
 
                                 $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
@@ -2326,11 +2326,11 @@ class NotificationsController extends Controller
 
                                 $to = array();
 
-                                $general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
-
-                                if ($general_admins->exists()) {
-                                    $to = array_merge($to, $general_admins->pluck('email')->toArray());
-                                }
+//                                $general_admins = Admin::whereIn('role_id', [3])->where('status', 1);
+//
+//                                if ($general_admins->exists()) {
+//                                    $to = array_merge($to, $general_admins->pluck('email')->toArray());
+//                                }
 
                                 $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
@@ -2367,6 +2367,8 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
+                    $bcc = array();
+                    $cc = array();
                     /*$admins = Admin::whereIn('role_id', [2, 3, 4, 20, 22, 61, 58, 56, 40, 31])->where('status', 1);
 
                     if ($admins->exists()) {
@@ -2384,9 +2386,10 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $bcc = ['muhammad.waqas@trax.pk'];
+                    self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
@@ -3623,8 +3626,10 @@ class NotificationsController extends Controller
 
                     $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk'];
 
-
-                    self::email($subject, $body, $to);
+                    $cc = array();
+                    $bcc = array();
+                    $bcc = ['muhammad.waqas@trax.pk'];
+                    self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 48) {
 
@@ -3715,6 +3720,7 @@ class NotificationsController extends Controller
 
                     $to = array_merge($to, $extra_admins);
                     $to[] = 'fawwad.haider@trax.pk';
+                    $to[] = 'muhammad.waqas@trax.pk';
                     foreach ($to as $email){
                         self::email($subject, $body, $email);
                     }
@@ -3814,8 +3820,10 @@ class NotificationsController extends Controller
 //                    $to = array_merge($to, $extra_admins);
 
                     $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk'];
-
-                    self::email($subject, $body, $to);
+                    $cc = array();
+                    $bcc = array();
+                    $bcc = ['muhammad.waqas@trax.pk'];
+                    self::email($subject, $body, $to, $cc, $bcc);
 
 //                 $to = array();
 //                 $cc = array();
@@ -5837,7 +5845,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 3, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                         $query->where('hub_id', $hub_id);
                     });
                     if ($to_admins->exists()) {
