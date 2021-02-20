@@ -7665,7 +7665,7 @@ class AdminReportsController extends Controller
         $shipment_ids = RiderDelivery::where('delivery_note_id', $delivery_note_id)->pluck('shipment_id')->toArray();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-            ->join('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and verification = 1 and rider_id is null)'));
