@@ -587,9 +587,9 @@
                             },
                         ],
                         "autoWidth": true,
-                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                        pageLength: 50,
-                        pagingType: 'full_numbers',
+                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: -1,
+                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -644,9 +644,9 @@
                             },
                         ],
                         "autoWidth": true,
-                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                        pageLength: 50,
-                        pagingType: 'full_numbers',
+                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: -1,
+                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
