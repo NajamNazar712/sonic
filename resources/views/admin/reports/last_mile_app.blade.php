@@ -440,7 +440,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
-                                row.push(values.City);
+                                row.push(values.city);
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
@@ -497,7 +497,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    {data: 'city', name: 'delivery_notes.id', class: 'align-middle text-center city'},
+                    {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
