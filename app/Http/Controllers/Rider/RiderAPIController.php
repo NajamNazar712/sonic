@@ -1106,7 +1106,7 @@ class RiderAPIController extends Controller
                                 $shipment->consignee_status_id = 30;
 
                                 $shipment->received_amount = $shipment->amount;
-                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2]);
+                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                 ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                             } else if ($shipment->booking_type_id == 3) {
                                 $shipment->shipper_status_id = 36;

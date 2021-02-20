@@ -543,7 +543,7 @@ class RegisterController extends Controller
         
         $city_id = $shipper->city_id;
         $hub_id = City::find($city_id)->hub_id;
-        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+        $managers = Admin::whereIn('role_id',[31,44])->where('status', 1)->pluck('id','email')->toArray();
         foreach($managers as $rms => $index){
             $admin_hubs = AdminHub::where('admin_id',$index);
             if($admin_hubs->exists()){

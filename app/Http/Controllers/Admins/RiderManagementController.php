@@ -548,15 +548,6 @@ class RiderManagementController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
-                        if ($rider->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
-                        }
-                        else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
-                        }
-                    }
-
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
                     }
