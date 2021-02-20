@@ -7545,7 +7545,7 @@ class AdminReportsController extends Controller
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
             ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))->where('delivery_notes.status', '=', 1)
-            ->where('delivery_notes.created_at', '>', $date);
+            ->whereDate('delivery_notes.created_at', '>', $date);
 
 
         $datatable = Datatables::of($deliveries)
