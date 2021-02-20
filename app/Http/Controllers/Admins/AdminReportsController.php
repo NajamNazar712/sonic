@@ -7540,7 +7540,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
     }
     public function last_mile_app_list(Request $request){
-        $date = Carbon::createFromDate('2021','02','18')->toDateString();
+        $date = Carbon::createFromDate('2021','02','19')->toDateString();
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
