@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Start Point</th>
                                     <th class="border-primary border-darken-1">End Point</th>
                                     <th class="border-primary border-darken-1">Junction</th>
@@ -146,6 +147,7 @@
                             head.push('S.No');
                             head.push('City Name');
                             head.push('Route Code');
+                            head.push('Rider Name');
                             head.push('Start Point');
                             head.push('End Point');
                             head.push('Junction');
@@ -160,6 +162,7 @@
                                 row.push(index + 1);
                                 row.push(values.city);
                                 row.push(values.code);
+                                row.push(values.rider);
                                 row.push(values.start);
                                 row.push(values.end);
                                 row.push(values.junction);
@@ -335,12 +338,13 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.route.ajax') }}',
                 rowId: 'id',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'code', name: 'routes.code', class: 'align-middle code'},
+                    {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'start', name: 'routes.start', class: 'align-middle start'},
                     {data: 'end', name: 'routes.end', class: 'align-middle end'},
                     {data: 'junction', name: 'routes.junction', class: 'align-middle junction'},

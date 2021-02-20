@@ -124,7 +124,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date','v2_pickup_requests.reverse_pickup')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','vpn.pickup_note_id','vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked','vpa.created_at as assigned_date','v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks')
             ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
 
         if (session('role_id') != 1) {
@@ -1791,7 +1791,7 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked);
+            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks');
         if (session('role_id') != 1) {
             $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
         }
@@ -2516,7 +2516,8 @@ class V2AdminPickupsController extends Controller
 
     public function pickup_route_list(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at'])->where('routes.route_type_id',1);
+            ->leftjoin('riders','riders.route_id','=','routes.id')
+            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','riders.name as rider'])->where('routes.route_type_id',1);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -2671,4 +2672,100 @@ class V2AdminPickupsController extends Controller
         }
     }
 
+    public function unassigned_index() {
+        $riders = Rider::where('status',1)->select(['id', 'name']);
+        $pickup_statuses = V2PickupRequestStatus::all();
+        $rider_statuses = V2PickupRequestRiderStatus::all();
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        $not_pick_reasons = V2PickupRequestNotPickReason::all();
+        $riders = $riders->get();
+
+        $legends = V2PickupRequestLegend::whereNotIn('id', [4, 5, 6])->get();
+        $cut_off_time = '17:30:00';
+        $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+        if($setting->exists()){
+            $setting = $setting->first();
+            $cut_off_time = $setting->setting_value;
+        }
+
+        $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
+        if($rider_settings->exists()){
+            $rider_settings = $rider_settings->first();
+            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+        }
+
+        return view('admin.v2_pickups.un_assigned')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
+    }
+
+    public function unassigned_list(Request $request) {
+
+        $today = Carbon::now()->startOfDay();
+        $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
+            ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+            ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
+            //Assigned Date
+
+            ->select('v2_pickup_requests.id','v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link' ,'v2_pickup_requests.received','v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status' , 'v2_pickup_requests.attempts', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor','v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time','v2_pickup_requests.reverse_pickup')
+            ->whereNull('v2_pickup_requests.current_rider_id')
+            ->whereNotIn('v2_pickup_requests.status_id', [2,4]);
+
+        if (session('role_id') != 1) {
+            $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
+        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
+            }
+        }
+        $datatables = Datatables::of($pickup_requests)
+            ->setRowAttr([
+                'class' => function ($pickup_request) use ($today) {
+                    if($pickup_request->reverse_pickup == 1){
+                        return 'reverse_pickup_row';
+                    }
+                    if ($pickup_request->vendor != null) {
+                        return 'vendor_row';
+                    }
+                    else if($pickup_request->try_and_buy == 1){
+                        return 'try_and_buy';
+                    }else if($pickup_request->after_cut_off_time){
+                        return 'after_cut_off_time';
+                    }else if (Carbon::parse($pickup_request->pickup_address_created_at)->startOfDay()->diffInDays($today) <= 6) {
+                        return 'new_pickup';
+                    }
+                }
+            ])
+            ->editColumn('pickup_request_id', function ($pickup_requests) {
+                return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('bookings_link', function($pickup_request) {
+                if ($pickup_request->booked != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->booked . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('action', function($pickup_request) {
+                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+                    return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
+                    </div>
+                  </div>
+          ';
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+    }
 }

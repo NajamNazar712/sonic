@@ -959,6 +959,8 @@ class AdminMasterCargoController extends Controller
 
             if (in_array($bag->status_id, [1, 3, 5, 6])) {
                 $hub_id = $bag->origin_hub_id;
+                $junction_hub_1_id = $bag->junction_hub_1_id;
+                $junction_hub_2_id = $bag->junction_hub_2_id;
                 $destination_hub_id = $bag->destination_hub_id;
 
                 $allowed = FALSE;
@@ -966,7 +968,7 @@ class AdminMasterCargoController extends Controller
                 if (session('role_id') == 1) {
                     $allowed = TRUE;
                 }
-                else if (in_array($hub_id, session('hubs'))) {
+                else if (in_array($hub_id, session('hubs')) || in_array($junction_hub_1_id, session('hubs')) || in_array($junction_hub_2_id, session('hubs'))) {
                     $allowed = TRUE;
                 }
 
@@ -2024,10 +2026,6 @@ class AdminMasterCargoController extends Controller
             foreach ($cargo_short_received_bags as $cargo_short_received_bag){
                 $bag_short_received_shipments = array();
                 $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
-                $short_received_bag->status_id = 7;
-                $short_received_bag->received_at = Carbon::now();
-                $short_received_bag->receiver_id = Auth::id();
-                $short_received_bag->save();
                 $short_received_bag_shipments = $short_received_bag->shipment;
                 foreach ($short_received_bag_shipments as $short_received_bag_shipment){
                     $bag_short_received_shipments[] = $short_received_bag_shipment->shipment_id;
@@ -2401,7 +2399,7 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if($request->has('tracking_number') || $request->has('bag_number')){
+        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
                 ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
             if ($tracking_number = $request->get('tracking_number')) {
@@ -2496,7 +2494,7 @@ class AdminMasterCargoController extends Controller
                 }
             });
 
-        if($request->has('tracking_number') || $request->has('bag_number')){
+        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
                 ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
             if ($tracking_number = $request->get('tracking_number')) {

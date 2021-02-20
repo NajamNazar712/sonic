@@ -300,6 +300,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="territory">Territory:
+{{--                                                            <span class="danger">*</span>--}}
+                                                        </label>
+                                                        <div>
+                                                            <select name="territory_id" id="territory" class="select2 form-control" style="width: 100%"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -823,6 +833,8 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
+
+
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            width: '100%',
            placeholder:'Select City',
@@ -858,7 +870,33 @@
                         });
                     }
                 });
+                $.ajax({
+                    url: '{!! route('cod.territory') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if (data.status == 0) {
+                        $('#territory').empty();
+                        $.each(data.territory, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            $('#territory').append(newOption);
+                        });
+                        $('#territory').val('').trigger('change');
+                        
+                    } else {
+                        $('#territory').empty();
+                        var error = 'No Territory found for the selected city';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
             }
+
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             });
@@ -948,6 +986,10 @@
         });
         $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Segment',
+        });
+        $('select[name="territory_id"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Territory',
+
         });
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
