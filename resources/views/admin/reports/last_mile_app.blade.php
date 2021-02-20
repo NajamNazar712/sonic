@@ -276,8 +276,6 @@
                             <th class="border-primary border-darken-1">Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
-                            <th class="border-primary border-darken-1">POD</th>
-
                         </tr>
                         </thead>
                     </table>
@@ -669,7 +667,6 @@
                             { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                            { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
 
                         ],
                         rowCallback: function(row, data, index) {
