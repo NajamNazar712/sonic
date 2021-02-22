@@ -7544,7 +7544,7 @@ class AdminReportsController extends Controller
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))->where('delivery_notes.status', '=', 1)
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
             ->whereDate('delivery_notes.created_at', '>', $date);
 
 
@@ -7678,6 +7678,7 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
             ->where('delivery_note_shipments.update_type', 0)
+            ->where('delivery_note_shipments.status', '>', 0)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
