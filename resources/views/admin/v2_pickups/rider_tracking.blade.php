@@ -124,7 +124,7 @@
 
 @section('js')
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCV6MaF4JjDpjuYljaUw9NxEY5kf5ipOzc&sensor=false&libraries=geometry,places,drawing"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9sfmrQqtjiWwSd2EZQBZAtd5oU19sDlM&sensor=false&libraries=geometry,places,drawing"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
@@ -153,11 +153,14 @@
             animation: google.maps.Animation.DROP
         }); // Rider marker
 
-        let rider_status = true; // Check if rider location is present
+        let rider_location; // Variable for Rider Location
+        let rider_status = false; // Check if rider location is present
 
         var bounds = new google.maps.LatLngBounds();
         const directionsService = new google.maps.DirectionsService();
-        const directionsRenderer = new google.maps.DirectionsRenderer();
+        const directionsRenderer = new google.maps.DirectionsRenderer({
+            suppressMarkers: true
+        });
 
         let center = new google.maps.LatLng(24.865720, 67.077394); //Starting Center
 
@@ -215,8 +218,8 @@
                     clearMarkerFromMap();
                 },
                 success: function (response) {
+
                     $.each(response,function (i,v) {
-                        console.log(v);
                             latlng = new google.maps.LatLng(v[0]['latitude'], v[0]['longitude']);
                             // Checking Status for Marker Icons
                             if( v[0]['status'] == 'picked') {
@@ -232,7 +235,9 @@
                         //    Checking If Rider Location is available or not
                         if (v[0]['current_latitude'] != null || v[0]['current_longitude'] != null)
                         {
-                            rider_marker.setPosition(new google.maps.LatLng(v[0]['current_latitude'], v[0]['current_longitude']));
+                            rider_location = new google.maps.LatLng(v[0]['current_latitude'], v[0]['current_longitude']);
+                            bounds.extend(rider_location);
+                            rider_marker.setPosition(rider_location);
                             rider_marker.setLabel(v[0]['rider_name']);
                             rider_status = true;
                         }
@@ -240,13 +245,12 @@
                             rider_status = false;
                         }
                     });
-                    setMarkerOnMap()
+                    setMarkerOnMap();
                     if(response != '') {
                         if(latlngs.length != 0)
                         {
-                            ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.splice(0,latlngs.length-2));
+                            ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
                         }
-                        SetMapBound();
 
                     }
                 }
@@ -265,7 +269,6 @@
             };
 
             map = new google.maps.Map(document.getElementById('googleMap'), myMapOptions);
-            directionsRenderer.setMap(map);
             $('#search_city').trigger('change');
         }
 
@@ -290,6 +293,7 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
+            directionsRenderer.setMap(null);
             start_marker.setMap(null);
             rider_marker.setMap(null);
             map.panTo(center);
@@ -297,6 +301,7 @@
             markers = [];
             latlngs = [];
             currentId = 0;
+            rider_status = false;
         }
 
         // Placing marker on map
@@ -326,7 +331,7 @@
             $.each(waypoints_array,function(i,v){
                 waypoints.push({
                     location: v,
-                    stopover: true,
+                    stopover: false,
                 });
             });
                 directionsService.route(
@@ -345,6 +350,8 @@
                         }
                     }
                 );
+
+            directionsRenderer.setMap(map);
         }
 
         initMap();
