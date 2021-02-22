@@ -166,7 +166,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Delivery Note#</th>
-                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
@@ -429,7 +429,7 @@
 
                             head.push('S. No');
                             head.push('Delivery Note#');
-                            head.push('City');
+                            head.push('Hub');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
