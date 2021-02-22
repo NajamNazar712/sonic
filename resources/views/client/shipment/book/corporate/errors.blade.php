@@ -48,33 +48,33 @@
                                             <th>Replacement Item Description</th>
                                             <th>Replacement Item Quantity</th>
                                         @endif
-                                        @if($service_type_check_id == 3 || $service_type_check_id == null)
-                                            <th>Item Product Type ID 1</th>
-                                            <th>Item Description 1</th>
-                                            <th>Item Quantity 1</th>
-                                            <th>Item Insurance 1</th>
-                                            <th>Item Price 1</th>
-                                            <th>Item Product Type ID 2</th>
-                                            <th>Item Description 2</th>
-                                            <th>Item Quantity 2</th>
-                                            <th>Item Insurance 2</th>
-                                            <th>Item Price 2</th>
-                                            <th>Item Product Type ID 3</th>
-                                            <th>Item Description 3</th>
-                                            <th>Item Quantity 3</th>
-                                            <th>Item Insurance 3</th>
-                                            <th>Item Price 3</th>
-                                            <th>Item Product Type ID 4</th>
-                                            <th>Item Description 4</th>
-                                            <th>Item Quantity 4</th>
-                                            <th>Item Insurance 4</th>
-                                            <th>Item Price 4</th>
-                                            <th>Item Product Type ID 5</th>
-                                            <th>Item Description 5</th>
-                                            <th>Item Quantity 5</th>
-                                            <th>Item Insurance 5</th>
-                                            <th>Item Price 5</th>
-                                        @endif
+{{--                                        @if($service_type_check_id == 3 || $service_type_check_id == null)--}}
+{{--                                            <th>Item Product Type ID 1</th>--}}
+{{--                                            <th>Item Description 1</th>--}}
+{{--                                            <th>Item Quantity 1</th>--}}
+{{--                                            <th>Item Insurance 1</th>--}}
+{{--                                            <th>Item Price 1</th>--}}
+{{--                                            <th>Item Product Type ID 2</th>--}}
+{{--                                            <th>Item Description 2</th>--}}
+{{--                                            <th>Item Quantity 2</th>--}}
+{{--                                            <th>Item Insurance 2</th>--}}
+{{--                                            <th>Item Price 2</th>--}}
+{{--                                            <th>Item Product Type ID 3</th>--}}
+{{--                                            <th>Item Description 3</th>--}}
+{{--                                            <th>Item Quantity 3</th>--}}
+{{--                                            <th>Item Insurance 3</th>--}}
+{{--                                            <th>Item Price 3</th>--}}
+{{--                                            <th>Item Product Type ID 4</th>--}}
+{{--                                            <th>Item Description 4</th>--}}
+{{--                                            <th>Item Quantity 4</th>--}}
+{{--                                            <th>Item Insurance 4</th>--}}
+{{--                                            <th>Item Price 4</th>--}}
+{{--                                            <th>Item Product Type ID 5</th>--}}
+{{--                                            <th>Item Description 5</th>--}}
+{{--                                            <th>Item Quantity 5</th>--}}
+{{--                                            <th>Item Insurance 5</th>--}}
+{{--                                            <th>Item Price 5</th>--}}
+{{--                                        @endif--}}
                                         <th>Special Instructions</th>
                                         <th>Estimated Weight (kg)</th>
                                         <th>Mode of Shipment ID</th>
@@ -186,7 +186,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][order_date]', $ro['order_date'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if($service_type_check_id != 3 || $service_type_check_id == null)
+                                            @if($service_type_check_id != 3)
                                                 @if(isset($errors[$no]['item_product_type_id']))
                                                     <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
                                                 @else
@@ -387,7 +387,7 @@
                                                     @else
                                                         <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                                     @endif
-                                                @endif
+                                            @endif
                                             @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                                 @if(isset($errors[$no]['amount']))
                                                     <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
