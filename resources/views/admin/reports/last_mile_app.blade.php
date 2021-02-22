@@ -239,7 +239,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
@@ -273,7 +273,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                         </tr>
@@ -601,7 +601,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[3, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -658,7 +658,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[3, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
