@@ -2082,40 +2082,42 @@ class AdminMasterCargoController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-                    if($bag->status_id != 4){
+                    if($bag->status_id == 4 || $bag->status_id == 7){
+                        if(session('role_id') != 1){
+                            if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
+                                return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
+                            }
+                        }
+                        if(!$request->has('pieces_confirm')){
+                            if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                $details = array();
+                                $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                $details['id'] = $shipment->id;
+                                $details['tracking_number'] = $shipment->tracking_number;
+                                $details['pieces_count'] = $shipment->pieces;
+                                $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                            }
+                        }
+                        $details = array();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['bag_number'] = $bag->seal_number;
+                        $details['origin'] = $shipment->pickup_address->city->name;
+                        $details['destination'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+                        $details['consignee'] = $shipment->consignee_name;
+                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['amount'] = number_format($shipment->amount);
+                        $details['service_type'] = $shipment->booking_type->booking_type;
+
+                        return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                    }
+                    else {
                         return ['status' => 1, 'error' => 'Given Tracking Number Bag is not received yet or already modified'];
                     }
-                    if(session('role_id') != 1){
-                        if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
-                            return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
-                        }
-                    }
-                    if(!$request->has('pieces_confirm')){
-                        if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
-                            $details = array();
-                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-                            $details['id'] = $shipment->id;
-                            $details['tracking_number'] = $shipment->tracking_number;
-                            $details['pieces_count'] = $shipment->pieces;
-                            $details['pieces_tracking_numbers'] = $shipment_pieces;
-                            return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
-                        }
-                    }
-                    $details = array();
-
-                    $details['id'] = $shipment->id;
-                    $details['tracking_number'] = $shipment->tracking_number;
-                    $details['bag_number'] = $bag->seal_number;
-                    $details['origin'] = $shipment->pickup_address->city->name;
-                    $details['destination'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
-                    $details['consignee'] = $shipment->consignee_name;
-                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
-                    $details['amount'] = number_format($shipment->amount);
-                    $details['service_type'] = $shipment->booking_type->booking_type;
-
-                    return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
                 else {
                     return ['status' => 1, 'error' => 'Given Bag Number\'s has already been Received'];
