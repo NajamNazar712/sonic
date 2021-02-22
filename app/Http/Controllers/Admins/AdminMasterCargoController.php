@@ -2008,6 +2008,7 @@ class AdminMasterCargoController extends Controller
             $status_id = 3;
         }
         else {
+            $cargo_consignment->short_received_bags = 0;
             $status_id = 2;
         }
         $cargo_consignment->status_id = $status_id;
@@ -2071,7 +2072,7 @@ class AdminMasterCargoController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if ($shipment->shipper_status_id != 3) {
+            if ($shipment->shipper_status_id != 3 || $shipment->shipper_status_id != 21) {
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
             $bag_shipment = BagShipment::where('shipment_id', $shipment->id);
@@ -2209,6 +2210,7 @@ class AdminMasterCargoController extends Controller
                 $status_id = 7;
             }
             else {
+                $bag->short_received = 0;
                 $status_id = 9;
             }
             $bag->status_id = $status_id;
@@ -2844,6 +2846,7 @@ class AdminMasterCargoController extends Controller
             $bag->status_id = 7;
         }
         else {
+            $bag->short_received = 0;
             $bag->status_id = 9;
         }
 
