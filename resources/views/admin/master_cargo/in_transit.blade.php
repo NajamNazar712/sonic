@@ -303,7 +303,7 @@
 
                             master_cargo_consignment_ids = [];
 
-                            $('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
+                            $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', true);
 
                             if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
                                 $('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
@@ -931,7 +931,7 @@
                                     receive_at_link_table.row.add([0, data.details.master_cargo_number, data.details.origin, data.details.destination, data.details.no_of_bags, data.details.no_of_shipments]).node().id = data.details.id;
                                     receive_at_link_table.draw(false);
 
-                                    master_cargo_consignment_ids.push(data.details.id);
+                                    master_cargo_consignment_ids.push(cargo_number);
 
                                     $.ajax({
                                         url: '{!! route('admin.master_cargo.in_transit.junctions') !!}',
@@ -959,8 +959,7 @@
                                                 $(this).valid();
                                             });
                                         });
-
-                                    $('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
+                                        $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', false);
 
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }

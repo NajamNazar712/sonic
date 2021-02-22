@@ -356,7 +356,7 @@
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data:'phone',name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
-                    {data:'amount',name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
                     {data:'action',name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
@@ -422,7 +422,6 @@
             });
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                console.log(id);
 
                 var index = $.inArray(id, selected_rows);
 

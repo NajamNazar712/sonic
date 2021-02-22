@@ -944,7 +944,7 @@ class DeliveryController extends Controller
             ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'delivery_notes.total_cod_amount as amount', 'bt.booking_type as service_type'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -1773,50 +1773,6 @@ class DeliveryController extends Controller
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
 
-                            if($shipment_details->packaging_material_request == 1){
-
-                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment_details->tracking_number)->where('status_id', 3)->first();
-                                if($packaging_material_shipment != null){
-                                    $packaging_material_shipment->status_id = 4;
-                                    $packaging_material_shipment->save();
-
-                                    $packaging_request_history = new PackagingMaterialRequestHistory();
-                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
-                                    $packaging_request_history->status = 4;
-                                    $packaging_request_history->updated_by = Auth::id();
-                                    $packaging_request_history->save();
-                                }
-                                $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $shipment_details->tracking_number);
-                                if($warehouse_stock_request->exists()){
-                                    $warehouse_stock_request = $warehouse_stock_request->first();
-                                    $warehouse_stock_request->status_id = 4;
-                                    $warehouse_stock_request->save();
-
-                                    $warehouse_stock_request_history = new WarehouseStockRequestHistory();
-                                    $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
-                                    $warehouse_stock_request_history->status = 4;
-                                    $warehouse_stock_request_history->updated_by = Auth::id();
-                                    $warehouse_stock_request_history->save();
-                                    foreach ($warehouse_stock_request->stock_request_details as $detail){
-                                        if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
-                                            $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
-                                            $receiver_stock->stock += $detail->quantity;
-                                            $receiver_stock->save();
-                                        }else{
-
-                                            $receiver_stock = new WarehouseStock();
-                                            $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
-                                            $receiver_stock->type_id = $detail->type_id;
-                                            $receiver_stock->type_size_id = $detail->size_id;
-                                            $receiver_stock->stock = $detail->quantity;
-                                            $receiver_stock->save();
-
-                                        }
-                                    }
-
-
-                                }
-                            }
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){
@@ -2944,6 +2900,53 @@ class DeliveryController extends Controller
                         if ($request->has($status_drop) && $shipper_status_id != null) {
                             if ($shipper_status_details->shipper_status_id != $shipper_status_id) {
                                 $dispute_shipments[] = $shipment;
+                            }
+                        }
+                    }
+
+                    if($verification == 1){
+                        $packaging_shipment = Shipment::find($shipment);
+                        if($packaging_shipment->shipper_status_id == 14){
+                            if($packaging_shipment->packaging_material_request == 1){
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $packaging_shipment->tracking_number)->where('status_id', 3)->first();
+                                if($packaging_material_shipment != null){
+                                    $packaging_material_shipment->status_id = 4;
+                                    $packaging_material_shipment->save();
+
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 4;
+                                    $packaging_request_history->updated_by = Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                                $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $packaging_shipment->tracking_number);
+                                if($warehouse_stock_request->exists()){
+                                    $warehouse_stock_request = $warehouse_stock_request->first();
+                                    $warehouse_stock_request->status_id = 4;
+                                    $warehouse_stock_request->save();
+
+                                    $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+                                    $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+                                    $warehouse_stock_request_history->status = 4;
+                                    $warehouse_stock_request_history->updated_by = Auth::id();
+                                    $warehouse_stock_request_history->save();
+                                    foreach ($warehouse_stock_request->stock_request_details as $detail){
+                                        if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
+                                            $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
+                                            $receiver_stock->stock += $detail->quantity;
+                                            $receiver_stock->save();
+                                        }else{
+
+                                            $receiver_stock = new WarehouseStock();
+                                            $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                                            $receiver_stock->type_id = $detail->type_id;
+                                            $receiver_stock->type_size_id = $detail->size_id;
+                                            $receiver_stock->stock = $detail->quantity;
+                                            $receiver_stock->save();
+
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -5960,13 +5963,19 @@ class DeliveryController extends Controller
     static public function reassign_rider(Request $request){
         $rider_id = $request->rider;
         $delivery_note_id = $request->delivery_note_id;
-        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id)->first();
+        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id')->where('riders.id', $rider_id);
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
-            if($delivery_note->hub_id == $rider->hub_id){
-                $delivery_note->rider_id = $rider_id;
-                $delivery_note->save();
-                return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
+            if($rider->exists()){
+                $rider = $rider->first();
+                if($delivery_note->hub_id == $rider->hub_id){
+                    $delivery_note->rider_id = $rider_id;
+                    $delivery_note->save();
+                    return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Rider must be of same hub']);
+                }
             }
             else{
                 return response()->json(['status' => 1, 'error' => 'Rider must be of same hub']);
@@ -6040,7 +6049,7 @@ class DeliveryController extends Controller
                           $delivery = $delivery->first();
                           $count = $delivery->shipments_count;
                           $cod = $delivery->total_cod_amount;
-                          $count-=1;
+                          $count = $count - 1;
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                               $cod = $cod - $parcel->amount;
                           }
@@ -6072,16 +6081,22 @@ class DeliveryController extends Controller
         $shipment = Shipment::find($shipment_id);
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
-//                    if($delivery_note->hub_id == $shipment->consignee_city->hub_id){
+
                         $total_shipments = $delivery_note->shipments_count;
                         $total_shipments++;
                         $cod_amount = $delivery_note->total_cod_amount;
-                        $cod_amount = $cod_amount + $shipment->amount;
+                        $total_cod_amount = $cod_amount + $shipment->amount;
                         $delivery_note->shipments_count = $total_shipments;
-                        $delivery_note->total_cod_amount = $cod_amount;
+                        $delivery_note->total_cod_amount = $total_cod_amount;
                         $delivery_note->save();
 
-                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('delivery_note_id','desc')->first();
+                        if($delivery_note->ordering == 1){
+                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                            $serial = $serial->ordering;
+                        }
+                        else{
+                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->first();
+                        }
                         if($serial != null){
                             $serial++;
                         }
