@@ -509,7 +509,7 @@ class RiderAPIController extends Controller
             $latitude = $request->rider_location_latitude;
             $longitude = $request->rider_location_longitude;
 
-            $log = RiderLocationLog::create();
+            $log = new RiderLocationLog();
             $log->rider_id = $rider_id;
             $log->latitude = $latitude;
             $log->longitude = $longitude;
