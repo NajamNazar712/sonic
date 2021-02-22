@@ -104,6 +104,11 @@ Route::name('api.')->group(function () {
                 Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
                 Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
                 Route::post('return', 'Rider\RiderAPIController@return_history')->name('return');
+
+                Route::post('pickup_v2', 'Rider\RiderAPIController@pickups_history_v2')->name('pickup_v2');
+                Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
+                Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
+                Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
             });
 
             Route::prefix('return')->name('return.')->group(function () {

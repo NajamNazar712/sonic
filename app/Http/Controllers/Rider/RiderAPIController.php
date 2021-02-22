@@ -1978,11 +1978,10 @@ class RiderAPIController extends Controller
 
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
-        $to_date = $request->get('to_date');
         $pickup_request_id = $request->get('pickup_request_id');
         $pickup_note_id = $request->get('pickup_note_id');
 
-        if (($from_date == null && $to_date == null) && $pickup_request_id == null && $pickup_note_id == null) {
+        if ($from_date == null && $pickup_request_id == null && $pickup_note_id == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
 
@@ -1993,8 +1992,8 @@ class RiderAPIController extends Controller
                 ->select('v2_rider_pickups.id', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', 'v2_rider_pickups.pickup_type', 'u.name as shipper')
                 ->where('pn.rider_id', '=', $rider_id);
 
-            if ($from_date != null && $to_date != null) {
-                $rider_pickups = $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from_date, $to_date]);
+            if ($from_date != null) {
+                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at',$from_date);
             }
             if ($pickup_request_id != null) {
                 $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
@@ -2016,11 +2015,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
-        $to_date = $request->get('to_date');
         $delivery_note_id = $request->get('delivery_note_id');
         $tracking_no = $request->get('tracking_no');
 
-        if (($from_date == null && $to_date == null) && $delivery_note_id == null && $tracking_no == null) {
+        if ($from_date == null && $delivery_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
             $rider_deliveries = DeliveryNote::
@@ -2037,8 +2035,8 @@ class RiderAPIController extends Controller
                 ->where('delivery_notes.pending_status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
-            if ($from_date != null && $to_date != null) {
-                $rider_deliveries = $rider_deliveries->whereBetween('delivery_notes.created_at', [$from_date, $to_date])
+            if ($from_date != null) {
+                $rider_deliveries = $rider_deliveries->whereDate('delivery_notes.created_at', $from_date)
                     ->groupBy('delivery_notes.id');
             }
 
@@ -2745,11 +2743,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
-        $to_date = $request->get('to_date');
         $return_note_id = $request->get('return_note_id');
         $tracking_no = $request->get('tracking_no');
 
-        if (($from_date == null && $to_date == null ) && $return_note_id == null && $tracking_no == null) {
+        if ($from_date == null && $return_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Please Provide parameter(s)"]);
         } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
@@ -2757,8 +2754,8 @@ class RiderAPIController extends Controller
                 ->where('return_notes.rider_id', $rider_id)
                 ->whereIn('return_notes.status', [1, 3]);
 
-            if ($from_date != null && $to_date != null) {
-                $rider_return_deliveries = $rider_return_deliveries->whereBetween('return_notes.created_at', [$from_date, $to_date])
+            if ($from_date != null) {
+                $rider_return_deliveries = $rider_return_deliveries->whereDate('return_notes.created_at', $from_date)
                     ->groupBy('return_notes.id');
             }
 
@@ -3095,6 +3092,147 @@ class RiderAPIController extends Controller
         }
 
     }
+
+    public function pickups_history_v2(Request $request)
+    {
+
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $pickup_request_id = $request->get('pickup_request_id');
+        $pickup_note_id = $request->get('pickup_note_id');
+
+        if (($from_date == null && $to_date == null) && $pickup_request_id == null && $pickup_note_id == null) {
+            return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
+        } else {
+
+            $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+                ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+                ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+                ->join('users as u', 'pr.shipper_id', 'u.id')
+                ->select('v2_rider_pickups.id', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', 'v2_rider_pickups.pickup_type', 'u.name as shipper')
+                ->where('pn.rider_id', '=', $rider_id);
+
+            if ($from_date != null && $to_date != null) {
+                $rider_pickups = $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from_date, $to_date]);
+            }
+            if ($pickup_request_id != null) {
+                $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
+            }
+            if ($pickup_note_id != null) {
+                $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_note_id', $pickup_note_id);
+            }
+
+            if ($rider_pickups->exists()) {
+                $rider_pickups = $rider_pickups->get();
+                return response()->json(["status" => 0, "pickups" => $rider_pickups]);
+            } else {
+                return response()->json(["status" => 1, "message" => "No pickups found!"]);
+            }
+        }
+    }
+
+    public function delivery_history_v2(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $delivery_note_id = $request->get('delivery_note_id');
+        $tracking_no = $request->get('tracking_no');
+
+        if (($from_date == null && $to_date == null) && $delivery_note_id == null && $tracking_no == null) {
+            return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
+        } else {
+            $rider_deliveries = DeliveryNote::
+            join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+                ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+                ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+                ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
+                ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+                ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+                ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
+                ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+                ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
+                ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
+                ->where('delivery_notes.pending_status', '=', 1)
+                ->where('riders.id', '=', $rider_id);
+
+            if ($from_date != null && $to_date != null) {
+                $rider_deliveries = $rider_deliveries->whereBetween('delivery_notes.created_at', [$from_date, $to_date])
+                    ->groupBy('delivery_notes.id');
+            }
+
+            if ($delivery_note_id != null) {
+                $rider_deliveries = $rider_deliveries->where('delivery_notes.id', $delivery_note_id)
+                    ->groupBy('delivery_notes.id');
+            }
+
+            if ($tracking_no != null) {
+                $rider_deliveries = $rider_deliveries->where('shipments.tracking_number', $tracking_no)
+                    ->groupBy('delivery_notes.id');
+            }
+
+
+            if ($rider_deliveries->exists()) {
+                $rider_deliveries = $rider_deliveries->get();
+                return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
+            } else {
+                return response()->json(["status" => 1, "message" => "No deliveries found!"]);
+            }
+        }
+
+
+    }
+
+    public function return_history_v2(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $return_note_id = $request->get('return_note_id');
+        $tracking_no = $request->get('tracking_no');
+
+        if (($from_date == null && $to_date == null) && $return_note_id == null && $tracking_no == null) {
+            return response()->json(["status" => 1, "message" => "Please Provide parameter(s)"]);
+        } else {
+            $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->where('return_notes.rider_id', $rider_id)
+                ->whereIn('return_notes.status', [1, 3]);
+
+            if ($from_date != null && $to_date != null) {
+                $rider_return_deliveries = $rider_return_deliveries->whereBetween('return_notes.created_at', [$from_date, $to_date])
+                    ->groupBy('return_notes.id');
+            }
+
+            if ($return_note_id != null) {
+                $rider_return_deliveries = $rider_return_deliveries->where('return_notes.id', $return_note_id)
+                    ->groupBy('return_notes.id');
+            }
+
+            if ($tracking_no != null) {
+                $rider_return_deliveries = $rider_return_deliveries->where('s.tracking_number', $tracking_no)
+                    ->groupBy('return_notes.id');
+            }
+            $rider_return_history = array();
+            if ($rider_return_deliveries->exists()) {
+                $rider_return_deliveries = $rider_return_deliveries->get();
+                foreach ($rider_return_deliveries as $rider_return_delivery) {
+                    $return_history = array();
+                    $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
+                    $return_history['total_shipments'] = $rider_return_delivery->shipments_count;
+                    $return_history['delivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->count();
+                    $rider_return_history[] = $return_history;
+                }
+                return response()->json(["status" => 0, "return_history" => $rider_return_history]);
+            } else {
+                return response()->json(["status" => 1, "message" => "No return deliveries found!"]);
+            }
+        }
+
+
+    }
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
