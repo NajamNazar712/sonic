@@ -8821,7 +8821,7 @@ class AdminDashboardController extends Controller
         }else if($status == 'riderInactive'){
             $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null]);
             if($rider){
-                return redirect()->back()->with('success','Route is now inactive');
+                return redirect()->back()->with('success','Rider is now inactive');
             }
 
         }
