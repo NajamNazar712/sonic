@@ -40,9 +40,9 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-          $bag = Bag::where('seal_number', $shipment_journey->reference_1_id);
-          if($bag->exists()){
-              $cargo_consignment = $bag->first();
+          $bag = Bag::find($shipment_journey->reference_1_id);
+          if($bag){
+              $cargo_consignment = $bag;
           }
           else{
               $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
@@ -53,9 +53,9 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-          $bag = Bag::where('seal_number', $shipment_journey->reference_1_id);
-          if($bag->exists()){
-              $cargo_consignment = $bag->first();
+          $bag = Bag::find($shipment_journey->reference_1_id);
+          if($bag){
+              $cargo_consignment = $bag;
           }
           else{
               $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
