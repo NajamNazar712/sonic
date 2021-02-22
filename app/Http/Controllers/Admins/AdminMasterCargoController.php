@@ -2072,7 +2072,7 @@ class AdminMasterCargoController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if ($shipment->shipper_status_id != 3 || $shipment->shipper_status_id != 21) {
+            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21) {
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
             $bag_shipment = BagShipment::where('shipment_id', $shipment->id);
