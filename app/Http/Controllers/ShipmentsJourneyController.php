@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\MasterCargo\Bag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -39,14 +40,26 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+          $bag = Bag::find($shipment_journey->reference_1_id);
+          if($bag){
+              $cargo_consignment = $bag;
+          }
+          else{
+              $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+          }
 
         if ($cargo_consignment) {
           $shipment_journey->city_id = $cargo_consignment->origin_hub_id;
         }
       }
       else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+          $bag = Bag::find($shipment_journey->reference_1_id);
+          if($bag){
+              $cargo_consignment = $bag;
+          }
+          else{
+              $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+          }
 
         if ($cargo_consignment) {
           $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
