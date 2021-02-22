@@ -82,6 +82,7 @@ Route::name('api.')->group(function () {
                 Route::post('pick_v2', 'Rider\RiderAPIController@pickup_pick_v2')->name('pickup_pick_v2');
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
+                Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
 
                 Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
 
@@ -94,6 +95,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
                 Route::get('summary/multiple', 'Rider\RiderAPIController@delivery_summary_multiple')->name('delivery_summary_multiple');
+                Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -111,6 +113,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered', 'Rider\RiderAPIController@return_shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
+                Route::post('undelivered_v2', 'Rider\RiderAPIController@return_shipment_undelivered_v2')->name('undelivered_v2');
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
