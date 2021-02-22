@@ -346,7 +346,7 @@
                         $('#tracking').html('');
 
                         if (data.invalid !== undefined) {
-                            var message = 'Invalid Order ID: ' + data.invalid.join(', ');
+                            var message = 'Invalid Order ID or does not belong to you: ' + data.invalid.join(', ');
 
                             toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
