@@ -35,13 +35,14 @@ class RiderManagementController extends Controller
     }
 
     public function permanent_list(Request $request){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
 
@@ -269,9 +270,12 @@ class RiderManagementController extends Controller
             $rider->route_id = $request->route_id;
         }
         if($request->pin != '') {
-            $rider->pin = bcrypt($request->pin);
+            if($rider->dummy_pin != $request->pin) {
+                $rider->pin = bcrypt($request->pin);
+                $rider->dummy_pin = $request->pin;
 
-            NotificationsController::send(61, $rider->id, $request->pin);
+                NotificationsController::send(61, $rider->id, $request->pin);
+            }
         }
 
 
@@ -331,6 +335,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 1){
                     $rider->rider_type_id = 2;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                 }
@@ -348,6 +353,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
                     $rider->rider_type_id = 1;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
@@ -372,12 +378,14 @@ class RiderManagementController extends Controller
         if($action == 'block'){
             $rider->blacklist = 1;
             $rider->status = 0;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
             $rider->blacklist = 0;
             $rider->status = 1;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
@@ -548,15 +556,6 @@ class RiderManagementController extends Controller
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
-
-                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
-                        if ($rider->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
-                        }
-                        else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
-                        }
-                    }
 
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';

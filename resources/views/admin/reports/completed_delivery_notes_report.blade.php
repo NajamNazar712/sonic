@@ -53,9 +53,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
-                                @foreach($admins as $admin)
-                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                            <select name="courier_id" id="courier_id" class="form-control select2">
+                                @foreach($couriers as $courier)
+                                    <option value="{{$courier->id}}">{{$courier->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -79,14 +79,13 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
-                        </div>
+                        <fieldset class="form-group">
+                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
                     </div>
                     <div class="col-4">
 
@@ -139,13 +138,14 @@
 
                     </div>
                     <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="courier_id" id="courier_id" class="form-control select2">
-                                @foreach($couriers as $courier)
-                                    <option value="{{$courier->id}}">{{$courier->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
+                        </div>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -303,7 +303,7 @@
                 allowClear:true
             });
             $('#courier_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Courier Category',
+                placeholder:'Select Rider Category',
                 width:'100%',
                 allowClear:true
             });

@@ -56,7 +56,7 @@
             </div>
             <div class="col">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="pin"  value="{{$rider->pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
+                <input type="text" class="form-control" name="pin"  value="{{$rider->dummy_pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
             </fieldset>
         </div>
         </div>

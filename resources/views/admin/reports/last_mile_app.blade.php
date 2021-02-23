@@ -166,7 +166,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Delivery Note#</th>
-                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
@@ -242,7 +242,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
@@ -276,7 +276,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
-                            <th class="border-primary border-darken-1">Undelivered Status</th>
+                            <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                         </tr>
@@ -434,7 +434,7 @@
 
                             head.push('S. No');
                             head.push('Delivery Note#');
-                            head.push('City');
+                            head.push('Hub');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
@@ -448,7 +448,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
-                                row.push(values.City);
+                                row.push(values.city);
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
@@ -517,11 +517,11 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[2, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    {data: 'city', name: 'delivery_notes.id', class: 'align-middle text-center city'},
+                    {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
@@ -639,9 +639,9 @@
                             },
                         ],
                         "autoWidth": true,
-                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                        pageLength: 50,
-                        pagingType: 'full_numbers',
+                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: -1,
+                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -653,7 +653,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[3, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -696,9 +696,9 @@
                             },
                         ],
                         "autoWidth": true,
-                        lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                        pageLength: 50,
-                        pagingType: 'full_numbers',
+                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                        pageLength: -1,
+                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -710,7 +710,7 @@
                             }
                         },
                         rowId: 'shipment_id',
-                        // order: [[1, 'desc']],
+                        order: [[3, 'desc']],
                         columns: [
                             {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},

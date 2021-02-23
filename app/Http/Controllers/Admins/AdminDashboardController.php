@@ -8755,6 +8755,7 @@ class AdminDashboardController extends Controller
         return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
     }
     public function editRiderDetails(Request $request,$id){
+
         $validations = [
             'city_id'=>'required|numeric',
             'rider_name'=>'required|max:255',
@@ -8797,10 +8798,14 @@ class AdminDashboardController extends Controller
         }else{
             $rider->special_rider = 0;
         }
-        if($request->pin != '') {
-            $rider->pin = bcrypt($request->pin);
 
-            NotificationsController::send(61, $rider->id, $request->pin);
+        if($request->pin != '') {
+            if($rider->dummy_pin != $request->pin) {
+                $rider->pin = bcrypt($request->pin);
+                $rider->dummy_pin = $request->pin;
+
+                NotificationsController::send(61, $rider->id, $request->pin);
+            }
         }
         $rider->updated_by = Auth::id();
         $rider->save();
@@ -8814,14 +8819,14 @@ class AdminDashboardController extends Controller
         $id = $request->cid;
         $status = $request->status;
         if($status == 'riderActive'){
-            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            $rider = Rider::where('id',$id)->update(['status'=>1,'updated_by'=>Auth::id()]);
             if($rider){
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null]);
+            $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null,'updated_by'=>Auth::id()]);
             if($rider){
-                return redirect()->back()->with('success','Route is now inactive');
+                return redirect()->back()->with('success','Rider is now inactive');
             }
 
         }
