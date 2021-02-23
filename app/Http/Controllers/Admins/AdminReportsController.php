@@ -7674,56 +7674,6 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
-    public function weight_qc_index()
-    {
-        $shipping_modes = ShippingMode::all();
-        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
-    }
-
-    public function weight_qc_list(Request $request)
-    {
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height'])
-            ->whereNotNull('shipments.actual_weight');
-
-        if (session('role_id') != 1) {
-            $shipments->whereIn('dc.hub_id', session('hubs'));
-        }
-
-        $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number_link', function ($shipment) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
-            })
-            ->addColumn('difference', function ($shipment) {
-                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
-                return $difference;
-            })
-            ->addColumn('weighted_as', function ($shipment) {
-                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
-                    return 'Volumetric';
-                } else {
-                    return 'Dense';
-                }
-            });
-        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', $search_shipping_mode);
-        }
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('shipments.created_at', [$from, $to]);
-        }
-        return $datatable->make(true);
-    }
-
 	public function last_mile_app_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
 
@@ -7803,5 +7753,56 @@ class AdminReportsController extends Controller
             });
         return $datatables->make(true);
 
-    }}
+    }
+
+    public function weight_qc_index()
+    {
+        $shipping_modes = ShippingMode::all();
+        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
+    }
+
+    public function weight_qc_list(Request $request)
+    {
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height'])
+            ->whereNotNull('shipments.actual_weight');
+
+        if (session('role_id') != 1) {
+            $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->addColumn('difference', function ($shipment) {
+                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
+                return $difference;
+            })
+            ->addColumn('weighted_as', function ($shipment) {
+                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
+                    return 'Volumetric';
+                } else {
+                    return 'Dense';
+                }
+            });
+        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', $search_shipping_mode);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('shipments.created_at', [$from, $to]);
+        }
+        return $datatable->make(true);
+    }
+}
 
