@@ -128,6 +128,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
+        let interval;
 
         let picked_icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; // Icon for picked shipment marker
         let not_picked_icon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'; // Icon for not-picked shipment marker
@@ -250,12 +251,14 @@
                         if(latlngs.length != 0)
                         {
                             ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
-                        }
 
+                        }
+                        interval = setInterval($('#search_rider').trigger('change'),60000);
                     }
                 }
             })
         });
+
 
         // Initializing map
         function initMap() {
@@ -293,6 +296,7 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
+            clearInterval(interval);
             directionsRenderer.setMap(null);
             start_marker.setMap(null);
             rider_marker.setMap(null);
