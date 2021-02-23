@@ -182,7 +182,7 @@
                                 row.push(values.account_no);
                                 row.push(values.user_name);
                                 row.push(values.ntn_number);
-                                row.push(values.total_charges - values.gst);
+                                row.push(values.w_o_gst);
                                 row.push(values.gst);
                                 row.push(values.total_charges);
                                 // row.push(values.created_at);
@@ -227,11 +227,11 @@
                 },
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
-                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
-                    {data: 'ntn_number', name: 'u.ntn_no', class: 'align-middle ntn_number'},
-                    {data: 'w_o_gst', name: 'w_o_gst', class: 'align-middle text-center w_o_gst'},
-                    {data: 'gst', name: 'gst', class: 'align-middle gst'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no', orderable: false, searchable: false},
+                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name', orderable: false, searchable: false},
+                    {data: 'ntn_number', name: 'u.ntn_no', class: 'align-middle ntn_number', orderable: false, searchable: false},
+                    {data: 'w_o_gst', name: 'w_o_gst', class: 'align-middle text-center w_o_gst', orderable: false, searchable: false},
+                    {data: 'gst', name: 'gst', class: 'align-middle gst', orderable: false, searchable: false},
                     {data: 'total_charges', name: 'total_charges', class: 'align-middle total_charges', orderable: false, searchable: false}
                     // {data: 'created_at', name: 'delivery_notes.delivered_shipments', class: 'align-middle undelivered_shipments_link', orderable: false, searchable: false}
                 ],

@@ -32,17 +32,6 @@
                             @endif
 
                             <div class="text-center">
-                                <form id="cargo_type_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <select name="cargo_type" class="select2" id="cargo_type">
-                                            <option value="" selected="selected"></option>
-                                            <option value="0">All</option>
-                                            <option value="1">Normal</option>
-                                            <option value="2">Return</option>
-                                        </select>
-                                    </div>
-                                </form>
-
                                 <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
                                     <div class="form-group">
                                         <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
@@ -343,7 +332,6 @@
                 ajax: {
                     url: '{{ route('admin.master_cargo.in_transit.list') }}',
                     data: function (d) {
-                        d.cargo_type = $('#cargo_type_search_form #cargo_type').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.bag_number = $('#bag_number_search_form #bag_number').val();
                     }
@@ -595,13 +583,6 @@
                             $('#info_modal').modal('show');
                         }
                     });
-            });
-
-            $('#cargo_type_search_form #cargo_type').select2({
-                width: '125px',
-                placeholder: 'Cargo Type'
-            }).bind('change', function() {
-                table.draw();
             });
 
             $('#tracking_number_search_form').bind('submit', function(e) {

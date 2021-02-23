@@ -9,19 +9,8 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row mb-4 m-2 justify-content-center">
 
-
-
-                <div class="row mb-2 justify-content-center">
-
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
                             <input type="text" class="form-control" placeholder="Scan To Select" id="select_dn">
@@ -29,6 +18,28 @@
                                 <i class="ft-search"></i>
                             </div>
                         </fieldset>
+                    </div>
+
+                    <div class="col-9">
+                        <form id="track_form" class="form-inline" novalidate="novalidate">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <input type="text" class="tracking_numbers form-control"  name="tracking_numbers" id="search_tracking">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <input type="text" name="dncc" class="form-control dncc" id="dncc">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <button id="datatable_filter_btn" type="submit" class=" btn btn-outline-primary btn-min-width"><i
+                                                class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
 
@@ -111,6 +122,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -158,6 +170,9 @@
             width: auto !important;
             text-align: left;
         }
+        .selectize-control {
+            width: 300px !important;
+        }
     </style>
 @endsection
 
@@ -166,6 +181,7 @@
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -376,7 +392,9 @@
                 ajax: {
                     url:'{{ route('admin.delivery.completed.list') }}',
                     data:function (d) {
-                        d.search_tracking = $('#search_tracking').val();
+                        //d.search_tracking = $('#search_tracking').val();
+                        d.tracking_numbers = $('#search_tracking').val();
+                        d.dncc = $('#dncc').val();
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -486,6 +504,63 @@
 
             });
 
+            var select = $('#track_form #search_tracking').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
+
+            var select_dncc = $('#track_form #dncc').selectize({
+                placeholder: 'DNCC Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select_dncc[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 2 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
 
 
             function print(id) {
@@ -556,9 +631,9 @@
             });
 
 
-            $('#search_tracking').on('change',function () {
-                table.draw();
-            });
+            // $('#search_tracking').on('change',function () {
+            //     table.draw();
+            // });
             $('#select_dn').on('change',function () {
                 var id = $(this).val();
                 row = table.row('#' + id);
@@ -649,6 +724,15 @@
                         }
                     });
 
+            });
+
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                var tracking_numbers = $('#track_form .tracking_numbers').val();
+                var dncc = $('#track_form .dncc').val();
+                if (tracking_numbers != '' || dncc != '' ) {
+                    table.draw();
+                }
             });
 
         });

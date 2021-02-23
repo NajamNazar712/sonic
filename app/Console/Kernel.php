@@ -109,6 +109,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
         $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
 
+        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
+        $schedule->command('saleperson:numbersindividual')->dailyAt('07:30')->runInBackground();
+        $schedule->command('saleperson:numbersrm')->dailyAt('07:30')->runInBackground();
+
+
+        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
+        $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
+        $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
+
+
+        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
         if ($settings->exists()) {
@@ -165,17 +176,7 @@ class Kernel extends ConsoleKernel
 
 //        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
 //        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('saleperson:numbers')->dailyAt('06:00');
-        $schedule->command('saleperson:numbersindividual')->dailyAt('07:00')->runInBackground();
-        $schedule->command('saleperson:numbersrm')->dailyAt('07:00')->runInBackground();
 
-
-        $schedule->command('month:average')->dailyAt('06:00');
-        $schedule->command('month:averageindividual')->dailyAt('07:00')->runInBackground();
-        $schedule->command('month:averagerm')->dailyAt('07:00')->runInBackground();
-
-
-        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
 
         $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
         $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
