@@ -1934,7 +1934,7 @@ class AdminReportsEmailController extends Controller
             $day_cut_off_time = 12;
         }
 
-        $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
+        $date_from = Carbon::parse($date)->subMonth(2)->addHour($day_cut_off_time)->toDateTimeString();
         $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
 
         $serial = 0;
@@ -2016,7 +2016,7 @@ class AdminReportsEmailController extends Controller
                 $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
                 $sheet->getStyle("A2:R2")->applyFromArray($cell_st);
                 $sheet->getStyle("A3:R3")->applyFromArray($cell_st);
-                $sheet->getStyle("B5:B1000")->getNumberFormat()
+                $sheet->getStyle("B5:B2000")->getNumberFormat()
                     ->setFormatCode(
                         \PHPExcel_Style_NumberFormat::FORMAT_NUMBER
                     );
@@ -2049,7 +2049,7 @@ class AdminReportsEmailController extends Controller
             $day_cut_off_time = 12;
         }
 
-        $date_from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
+        $date_from = Carbon::parse($date)->subMonth(2)->addHour($day_cut_off_time)->toDateTimeString();
         $date_to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
 
         $serial = 0;
