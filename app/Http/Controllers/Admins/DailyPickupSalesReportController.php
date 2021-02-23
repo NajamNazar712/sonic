@@ -1627,7 +1627,7 @@ class DailyPickupSalesReportController extends Controller
                         ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                         ->whereBetween('created_at', [$date_from, $date_to])
                         ->where('shipper_status_id', 2);
-                })->whereIn('user_id', $tagged_shippers)->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
+                })->whereIn('user_id', $tagged_shippers)->where('shipments.packaging_material_request', '=', 0)->where('shipments.shipping_mode_id', $mode->id)->where('shipments.user_id', '!=', 1690)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
 
 
                 $revenue_wo_gst = $shipments_data->revenue_wo_gst;
@@ -1720,7 +1720,7 @@ class DailyPickupSalesReportController extends Controller
                             ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
+                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
 
                     $revenue_wo_gst = $shipments_data->revenue_wo_gst;
                     $actual_weight = $shipments_data->actual_weight;
