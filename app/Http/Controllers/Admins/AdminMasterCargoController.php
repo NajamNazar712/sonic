@@ -2027,10 +2027,6 @@ class AdminMasterCargoController extends Controller
             foreach ($cargo_short_received_bags as $cargo_short_received_bag){
                 $bag_short_received_shipments = array();
                 $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
-                $short_received_bag->status_id = 7;
-                $short_received_bag->received_at = Carbon::now();
-                $short_received_bag->receiver_id = Auth::id();
-                $short_received_bag->save();
                 $short_received_bag_shipments = $short_received_bag->shipment;
                 foreach ($short_received_bag_shipments as $short_received_bag_shipment){
                     $bag_short_received_shipments[] = $short_received_bag_shipment->shipment_id;
@@ -2598,7 +2594,7 @@ class AdminMasterCargoController extends Controller
 
             if ($bag) {
                 if (session('role_id') == 1 || (in_array($bag->destination_hub->hub_id, session('hubs')))) {
-                    if (in_array($bag->status_id, [3, 4, 5, 6])) {
+                    if (in_array($bag->status_id, [3, 4, 5, 6, 7])) {
                         return redirect()->route('admin.master_cargo.bag.receive.index')->with('bag_number', $bag->id);
                     }
                     else {

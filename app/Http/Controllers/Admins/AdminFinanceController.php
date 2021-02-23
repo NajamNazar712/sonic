@@ -5267,6 +5267,10 @@ class AdminFinanceController extends Controller
                                     <td>7930679-5</td>
                                 </tr>
                                 <tr>
+                                    <td class="color primary"><strong>SNTN</strong></td>
+                                    <td>S-7930679-5</td>
+                                </tr>
+                                <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
                                 </tr>
@@ -5812,7 +5816,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color secondary"><strong>STRN</strong></td>
-                                  <td>S' . $shipper->strn_no . '</td>
+                                  <td>' . $shipper->strn_no . '</td>
                                 </tr>
                                </tbody>
                             </table>
@@ -5824,6 +5828,10 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color primary"><strong>NTN</strong></td>
                                     <td>7930679-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>SNTN</strong></td>
+                                    <td>S-7930679-5</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
