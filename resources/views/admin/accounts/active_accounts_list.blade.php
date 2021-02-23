@@ -9,9 +9,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        @include('admin.inc.messages')
-                    </div>
+                    @include('admin.inc.messages')
     
                     <div class="card-content">
                         <div class="card-body card-dashboard">

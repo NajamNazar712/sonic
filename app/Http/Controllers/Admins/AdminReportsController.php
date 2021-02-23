@@ -5483,15 +5483,7 @@ class AdminReportsController extends Controller
                 $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
                     ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
             })
-<<<<<<< HEAD
             ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount')
-=======
-             ->leftjoin('change_shipment_weight_logs',function($join){
-                 $join->on('change_shipment_weight_logs.shipment_id','=','crm_requests.shipment_id')
-                     ->where('change_shipment_weight_logs.created_at','=',DB::raw('(select max(created_at) from change_shipment_weight_logs where change_shipment_weight_logs.shipment_id= crm_requests.shipment_id)'));
-             })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges')
->>>>>>> TO-3207-bulk-delivered---modification-re_aqib
             ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
             ->editColumn('tagged_to', function ($crm_request) {
@@ -7612,12 +7604,12 @@ class AdminReportsController extends Controller
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
     }
     public function last_mile_app_list(Request $request){
-        $date = Carbon::createFromDate('2021','02','18')->toDateString();
+        $date = Carbon::createFromDate('2021','02','19')->toDateString();
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(distinct shipment_id) as id FROM `rider_deliveries` AS `rd` where `rd`.`delivery_note_id` = `delivery_notes`.`id`) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))->where('delivery_notes.status', '=', 1)
-            ->where('delivery_notes.created_at', '>', $date);
+            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
+            ->whereDate('delivery_notes.created_at', '>', $date);
 
 
         $datatable = Datatables::of($deliveries)
@@ -7682,73 +7674,26 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
-    public function weight_qc_index()
-    {
-        $shipping_modes = ShippingMode::all();
-        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
-    }
-
-    public function weight_qc_list(Request $request)
-    {
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height'])
-            ->whereNotNull('shipments.actual_weight');
-
-        if (session('role_id') != 1) {
-            $shipments->whereIn('dc.hub_id', session('hubs'));
-        }
-
-        $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number_link', function ($shipment) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
-            })
-            ->addColumn('difference', function ($shipment) {
-                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
-                return $difference;
-            })
-            ->addColumn('weighted_as', function ($shipment) {
-                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
-                    return 'Volumetric';
-                } else {
-                    return 'Dense';
-                }
-            });
-        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', $search_shipping_mode);
-        }
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('shipments.created_at', [$from, $to]);
-        }
-        return $datatable->make(true);
-    }
-
 	public function last_mile_app_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
 
-        $shipments = Shipment::join('rider_deliveries', function ($join) {
-            $join->on('shipments.id', '=', 'rider_deliveries.shipment_id')
-                ->where('rider_deliveries.id', '=',
-                    DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = shipments.id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
+        $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->join('rider_deliveries', function ($join) {
+                $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
+                    ->where('rider_deliveries.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
             })
             ->leftjoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and rider_id is not null)'));
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status')
-            ->where('rider_deliveries.delivery_note_id', $delivery_note_id);
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.delivered_status')
+            ->where('delivery_note_shipments.update_type', 1)
+            ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
+
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
@@ -7783,18 +7728,18 @@ class AdminReportsController extends Controller
 
     public function last_mile_dbf_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
-        $shipment_ids = RiderDelivery::where('delivery_note_id', $delivery_note_id)->pluck('shipment_id')->toArray();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-            ->join('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and verification = 1 and rider_id is null)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and rider_id is null)'));
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
-            ->whereNotIn('delivery_note_shipments.shipment_id', $shipment_ids)
+            ->where('delivery_note_shipments.update_type', 0)
+            ->where('delivery_note_shipments.status', '>', 0)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
@@ -7811,5 +7756,55 @@ class AdminReportsController extends Controller
             });
         return $datatables->make(true);
 
-    }}
+    }
+
+    public function weight_qc_index(){
+        $shipping_modes = ShippingMode::all();
+        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
+    }
+
+    public function weight_qc_list(Request $request){
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','shipments.estimated_weight','shipments.actual_weight','shipments.length','shipments.breadth','shipments.height'])
+            ->whereNotNull('shipments.actual_weight');
+
+        if (session('role_id') != 1) {
+            $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->addColumn('difference', function ($shipment){
+                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
+                return $difference;
+            })
+            ->addColumn('weighted_as', function ($shipment){
+                if($shipment->length != null && $shipment->breadth != null && $shipment->height != null){
+                    return 'Volumetric';
+                }
+                else{
+                    return 'Dense';
+                }
+            });
+        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', $search_shipping_mode);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
+}
 
