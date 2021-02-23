@@ -2318,7 +2318,12 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                     else {
-                    $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    if($user_id == 5982){
+                        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    }
+                    else{
+                        $cities = City::where('status', 1)->where('id','!=',1244)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    }
                     $booking_types = BookingType::whereNotIn('id', [4])->pluck('booking_type', 'id');
                     $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                         $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
@@ -3873,7 +3878,12 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                if($user_id == 5982){
+                    $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                }
+                else{
+                    $cities = City::where('status', 1)->where('id','!=',1244)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                }
                 $booking_types = BookingType::whereNotIn('id', [3, 4])->pluck('booking_type','id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');

@@ -78,7 +78,7 @@ class RegisterController extends Controller
         $account_type = AccountType::all();
         $products = Product::all();
         $banks = BanksList::all();
-        $city_list = City::where('status',1)->where('business_category_id' ,1)->get();
+        $city_list = City::where('status',1)->where('business_category_id' ,1)->where('id','!=',1244)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
