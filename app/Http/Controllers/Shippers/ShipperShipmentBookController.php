@@ -1725,10 +1725,10 @@ class ShipperShipmentBookController extends Controller
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
         if(session('user_id') == 5982){
-            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         else{
-            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         $products = Product::all();
 
@@ -2116,6 +2116,10 @@ class ShipperShipmentBookController extends Controller
 
                         if (!$consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+                        }
+
+                        if ($consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
                         if (!$consignee_city->zone_id) {
@@ -3200,7 +3204,7 @@ class ShipperShipmentBookController extends Controller
             $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         else{
-            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         $products = Product::all();
         $user = User::find(session('user_id'));
@@ -3661,6 +3665,10 @@ class ShipperShipmentBookController extends Controller
 
                         if (!$consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+                        }
+
+                        if ($consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
                         if (!$consignee_city->zone_id) {
