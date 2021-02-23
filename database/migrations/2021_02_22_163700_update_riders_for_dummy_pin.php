@@ -14,7 +14,7 @@ class UpdateRidersForDummyPin extends Migration
     public function up()
     {
         Schema::table('riders', function (Blueprint $table) {
-            $table->string('pin')->default(5412);
+            $table->string('dummy_pin')->default(5412);
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateRidersForDummyPin extends Migration
     public function down()
     {
         Schema::table('riders', function (Blueprint $table) {
-            $table->dropColumn('pin');
+            $table->dropColumn('dummy_pin');
         });
     }
 }
