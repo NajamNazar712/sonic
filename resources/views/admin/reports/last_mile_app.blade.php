@@ -475,7 +475,6 @@
                             footer.push(total_shipments_count);
                             footer.push(update_via_app_count);
                             footer.push(update_via_dbf_count);
-                            body.push(footer);
                         },
                         async: false
                     });
@@ -498,6 +497,8 @@
                         className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        footer: true
+
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
