@@ -435,6 +435,7 @@
                         data: params,
                         success: function (result) {
                             head = [];
+                            footer = [];
 
                             head.push('S. No');
                             head.push('Delivery Note#');
@@ -464,7 +465,7 @@
                                 update_via_app_count+=values.shipments_rider_updated
                                 update_via_dbf_count+=values.shipments_dbf_updated
                             });
-                            footer = [];
+                            
 
                             footer.push('');
                             footer.push('Total');
@@ -474,6 +475,7 @@
                             footer.push(total_shipments_count);
                             footer.push(update_via_app_count);
                             footer.push(update_via_dbf_count);
+                            body.push(footer);
                         },
                         async: false
                     });
@@ -561,7 +563,7 @@
                         console.log('updated_via_App ',this.data().update_via_app);
                         console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
                         console.log('total_shipments ',this.data().total_shipments);
-                        update_via_app_count+=this.data().update_via_app;
+                        update_via_app_count+=this.data().shipments_rider_updated;
                         update_via_dbf_count+=this.data().shipments_dbf_updated;
                     total_shipment_count+=this.data().total_shipments;
     
