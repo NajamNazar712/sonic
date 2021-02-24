@@ -333,6 +333,10 @@
         span.font-13{
             font-size: 13px;
         }
+        table tfoot tr th, table.dataTable tfoot tr th {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
     </style>
 
 @endsection
@@ -462,21 +466,22 @@
                             });
                             footer = [];
 
-                            footer.push('-');
+                            footer.push('');
                             footer.push('Total');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
-                            footer.push(total_shipments_count.toFixed(2));
-                            footer.push(update_via_app_count.toFixed(2));
-                            footer.push(update_via_dbf_count.toFixed(2));
-                            body.push(footer);
+                            footer.push(total_shipments_count);
+                            footer.push(update_via_app_count;
+                            footer.push(update_via_dbf_count);
+                            
+                        },
                         },
                         async: false
                     });
                     UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return {body: body, header: head, footer: footer};
                 }
             });
             var total_shipments = 0;
