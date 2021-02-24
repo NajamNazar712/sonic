@@ -3052,7 +3052,7 @@ class RiderAPIController extends Controller
                             $datum['status'] = 'Not Attempt';
                         } else if ($delivery_note_shipment->status == 1) {
                             $datum['status'] = 'Undelivered';
-                        } else if ($delivery_note_shipment->status > 1 && !in_array($delivery_note_shipment->status, [8, 10, 11])) {
+                        } else if ($delivery_note_shipment->status > 1) {
                             $datum['status'] = 'Delivered';
                         }
                         $data[] = $datum;
