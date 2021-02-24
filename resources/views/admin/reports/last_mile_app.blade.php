@@ -472,10 +472,8 @@
                             footer.push('-');
                             footer.push('-');
                             footer.push(total_shipments_count);
-                            footer.push(update_via_app_count;
+                            footer.push(update_via_app_count);
                             footer.push(update_via_dbf_count);
-                            
-                        },
                         },
                         async: false
                     });
