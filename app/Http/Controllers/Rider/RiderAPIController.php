@@ -1730,7 +1730,7 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0);
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
