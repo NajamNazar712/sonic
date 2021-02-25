@@ -3038,9 +3038,21 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             if ($request->has('delivery_note_id')) {
-                $delivery_note_shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', 's.id')
-                    ->select('s.tracking_number as tacking_no', 'delivery_note_shipments.status as status')
-                    ->where('delivery_note_id', $request->delivery_note_id);
+                $delivery_note_shipments = Shipment::join('rider_deliveries', function ($join) {
+                    $join->on('shipments.id', '=', 'rider_deliveries.shipment_id')
+                        ->where('rider_deliveries.id', '=',
+                                DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = shipments.id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
+                })
+                    ->leftjoin('shipments_journey', function ($join) {
+                        $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                            ->where('shipments_journey.id', '=',
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and reference_1_id = rider_deliveries.delivery_note_id and verification = 1)'));
+                    })
+                    ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+                    ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+                    ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status')
+                    ->where('rider_deliveries.delivery_note_id', $request->delivery_note_id);
+
 
                 if ($delivery_note_shipments->exists()) {
                     $delivery_note_shipments = $delivery_note_shipments->get();
