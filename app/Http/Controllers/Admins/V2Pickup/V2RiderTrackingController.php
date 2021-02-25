@@ -17,8 +17,8 @@ class V2RiderTrackingController extends Controller
 
     public function rider_tracking_index ()
     {
-        $riders = Rider::all();
-        $cities = City::all();
+        $cities = City::whereIn('hub_id',session('hubs'))->get();
+        $riders = Rider::whereIn('city_id',$cities->pluck('id')->ToArray())->get();
         return view('admin.v2_pickups.rider_tracking',compact(['riders','cities']));
     }
 
@@ -34,7 +34,6 @@ class V2RiderTrackingController extends Controller
             ->join('v2_pickup_note_requests as pivot_requests','notes.id','=','pivot_requests.pickup_note_id')
             ->join('v2_pickup_requests as requests',function ($join){
                 $join->on('requests.id','=','pivot_requests.pickup_request_id');
-//                    ->groupBy('requests.pickup_address_id');
             })
             ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
             ->leftjoin('users','users.id','=','info.user_id')
@@ -75,22 +74,27 @@ class V2RiderTrackingController extends Controller
     public function rider_tracking_by_city(Request $request)
     {
         $city_id = $request->city_id;
+        $city = City::whereIn('hub_id',session('hubs'))->where('id',$city_id)->first();
 
-//        Getting Rider Data
-        $data = Rider::where('riders.city_id',$city_id)
-            ->join('rider_location_logs as logs', function($join){
-                $join->on('riders.id','=','logs.rider_id')
-                    ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
-            })
-            ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.created_at as created_at')
-            ->get();
-        $date = new \DateTime();
-        $date->modify('-5 minutes');
-        $formatted_date = $date->format('Y-m-d H:i:s');
-        $total_riders = $data->count();
-        $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();
-        $total_inactive_riders = $data->where('created_at','<=',$formatted_date)->count();
-        $array = ['total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray()];
-        return $array;
+        if($city)
+        {
+            $data = Rider::where('riders.city_id',$city_id)
+                ->join('rider_location_logs as logs', function($join){
+                    $join->on('riders.id','=','logs.rider_id')
+                        ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
+                })
+                ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.created_at as created_at')
+                ->get();
+            $date = new \DateTime();
+            $date->modify('-5 minutes');
+            $formatted_date = $date->format('Y-m-d H:i:s');
+            $total_riders = $data->count();
+            $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();
+            $total_inactive_riders = $data->where('created_at','<=',$formatted_date)->count();
+            $array = ['city_latitude'=>$city->location_latitude,'city_longitude'=>$city->location_longitude,'total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray()];
+            return $array;
+        }
+
+        return 0;
     }
 }

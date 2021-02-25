@@ -175,7 +175,6 @@
         $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
             placeholder: 'Select Rider',
             width: '100%',
-            allowClear: true
         });
 
         //Initializing City Select Box
@@ -195,17 +194,35 @@
                     clearMarkerFromMap();
                 },
                 success: function (response) {
-                    $.each(response['data'],function (i,v) {
-                        latlng = new google.maps.LatLng(v['latitude'], v['longitude']);
-                        makeMarker(latlng,v['name'],rider_icon);
-                    });
-                    $('#total_riders').html(response['total_riders']);
-                    $('#total_active_riders').html(response['total_active_riders']);
-                    $('#total_inactive_riders').html(response['total_inactive_riders']);
-                    setMarkerOnMap(false)
-                    if(response != '') {
-                        SetMapBound(false);
+                    if(response != 0)
+                    {
+                        if(response['data'].length > 0)
+                        {
+                            $.each(response['data'],function (i,v) {
+                                latlng = new google.maps.LatLng(v['latitude'], v['longitude']);
+                                makeMarker(latlng,v['name'],rider_icon);
+                            });
+
+                            setMarkerOnMap(false);
+                            SetMapBound(false);
+                        }
+                        else{
+                            if(response['city_latitude'] != null && response['city_longitude'] != null) {
+                                map.panTo(new google.maps.LatLng(response['city_latitude'], response['city_longitude']));
+                            }
+                            else{
+                                map.panTo(center);
+                            }
+                            map.setZoom(15);
+                        }
+                        $('#total_riders').html(response['total_riders']);
+                        $('#total_active_riders').html(response['total_active_riders']);
+                        $('#total_inactive_riders').html(response['total_inactive_riders']);
                     }
+                    else{
+                        alert('Invalid City');
+                    }
+
                 }
             })
         });
@@ -256,7 +273,6 @@
                             ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
 
                         }
-                        interval = setInterval($('#search_rider').trigger('change'),60000);
                     }
                 }
             })
@@ -299,7 +315,6 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
-            clearInterval(interval);
             directionsRenderer.setMap(null);
             start_marker.setMap(null);
             rider_marker.setMap(null);

@@ -900,10 +900,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rider_tracking')->name('rider_tracking.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_index')->name('index');
-            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_list')->name('list');
-            Route::post('/ajax', 'Admins\V2Pickup\V2AdminPickupsController@edit_route_ajax')->name('edit_ajax');
-            //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
+            Route::get('', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_index')->name('index');
+            Route::get('by_rider', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_by_rider')->name('by_rider');
             Route::get('by_city', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_by_city')->name('by_city');
         });
 
