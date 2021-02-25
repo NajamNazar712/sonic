@@ -513,6 +513,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
+
                         d.search_rider = $('#search_rider').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
@@ -520,6 +521,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
                         d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
+
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -554,16 +556,20 @@
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
                     }
-
+                   
+             
+                },
+                drawCallback: function () {
                     var api = this.api();
+                    
                     var update_via_app_count = 0;
                     var update_via_dbf_count = 0;
                     var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        console.table(this.data());
-                        console.log('updated_via_App ',this.data().update_via_app);
-                        console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
-                        console.log('total_shipments ',this.data().total_shipments);
+                        // console.table(this.data());
+                        // console.log('updated_via_App ',this.data().update_via_app);
+                        // console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
+                        // console.log('total_shipments ',this.data().total_shipments);
                         update_via_app_count+=this.data().shipments_rider_updated;
                         update_via_dbf_count+=this.data().shipments_dbf_updated;
                     total_shipment_count+=this.data().total_shipments;
@@ -577,8 +583,6 @@
                     document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
                     document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
                 }, 1000);
-                },
-                drawCallback: function () {
                     
     },
                 stateLoaded: function (settings, data) {
