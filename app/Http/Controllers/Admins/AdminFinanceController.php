@@ -5255,10 +5255,6 @@ class AdminFinanceController extends Controller
                                   <td class="color secondary"><strong>STRN</strong></td>
                                   <td>' . $shipper->strn_no . '</td>
                                 </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>PTRN</strong></td>
-                                  <td>' . $shipper->strn_no . '</td>
-                                </tr>
                                </tbody>
                             </table>
                         </div>
@@ -5273,6 +5269,10 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color primary"><strong>SNTN</strong></td>
                                     <td>S-7930679-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>PNTN</strong></td>
+                                    <td>P-7930679-5</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
