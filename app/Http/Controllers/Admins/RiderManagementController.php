@@ -35,19 +35,21 @@ class RiderManagementController extends Controller
     }
 
     public function permanent_list(Request $request){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
         }
+
 
         return Datatables::of($rider)
             ->editColumn('status', function ($rider) {
@@ -268,9 +270,12 @@ class RiderManagementController extends Controller
             $rider->route_id = $request->route_id;
         }
         if($request->pin != '') {
-            $rider->pin = bcrypt($request->pin);
+            if($rider->dummy_pin != $request->pin) {
+                $rider->pin = bcrypt($request->pin);
+                $rider->dummy_pin = $request->pin;
 
-            NotificationsController::send(61, $rider->id, $request->pin);
+                NotificationsController::send(61, $rider->id, $request->pin);
+            }
         }
 
 
@@ -330,6 +335,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 1){
                     $rider->rider_type_id = 2;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                 }
@@ -347,6 +353,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
                     $rider->rider_type_id = 1;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
@@ -371,12 +378,14 @@ class RiderManagementController extends Controller
         if($action == 'block'){
             $rider->blacklist = 1;
             $rider->status = 0;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
             $rider->blacklist = 0;
             $rider->status = 1;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
@@ -419,7 +428,7 @@ class RiderManagementController extends Controller
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
