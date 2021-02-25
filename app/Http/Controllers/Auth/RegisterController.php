@@ -78,7 +78,7 @@ class RegisterController extends Controller
         $account_type = AccountType::all();
         $products = Product::all();
         $banks = BanksList::all();
-        $city_list = City::where('status',1)->where('business_category_id' ,1)->get();
+        $city_list = City::where('status',1)->where('business_category_id' ,1)->where('id','!=',1244)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
@@ -543,7 +543,7 @@ class RegisterController extends Controller
         
         $city_id = $shipper->city_id;
         $hub_id = City::find($city_id)->hub_id;
-        $managers = Admin::whereIn('role_id',[31,44])->pluck('id','email')->toArray();
+        $managers = Admin::whereIn('role_id',[31,44])->where('status', 1)->pluck('id','email')->toArray();
         foreach($managers as $rms => $index){
             $admin_hubs = AdminHub::where('admin_id',$index);
             if($admin_hubs->exists()){

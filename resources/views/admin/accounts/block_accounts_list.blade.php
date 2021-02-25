@@ -7,10 +7,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        @include('admin.inc.messages')
-                    </div>
-                    @if (session('role_id') == 1 || in_array(276, session('permissions')))
+                    @include('admin.inc.messages')
+
+                @if (session('role_id') == 1 || in_array(276, session('permissions')))
                         <div id="search_form" class="row mb-2 justify-content-center">
                             <div class="col-4">
                                 <fieldset class="form-group">

@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Receive Bag')
+@section('title', 'Quick Receive Master Cargo')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Receive Bag
+                    Quick Receive Bag Shipment(s)
                 </h1>
 
                 <div class="card">
@@ -25,11 +25,11 @@
                                 <div class="form-group">
                                     <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
-                                    <div class="d-inline-block ml-1">
-                                        <a href="#" id="camera_scan_initiate" tabindex="-1">
-                                            <i class="ft-camera h1"></i>
-                                        </a>
-                                    </div>
+{{--                                    <div class="d-inline-block ml-1">--}}
+{{--                                        <a href="#" id="camera_scan_initiate" tabindex="-1">--}}
+{{--                                            <i class="ft-camera h1"></i>--}}
+{{--                                        </a>--}}
+{{--                                    </div>--}}
                                 </div>
 
                                 <div class="form-group ml-1">
@@ -37,15 +37,12 @@
                                 </div>
                             </form>
 
-                            <div id="information" class="information text-center">
-                                Bag Number #{{$seal_number}} | Scanned: <span class="scanned">0</span>/<span class="total">{{ $total }}</span>
-                            </div>
-
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Bag Number</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
@@ -53,20 +50,14 @@
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
-                                    <th class="border-primary border-darken-1">Open Box</th>
                                 </tr>
                                 </thead>
                             </table>
 
-                            <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.master_cargo.bag.receive.store') }}" novalidate="novalidate">
+                            <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.master_cargo.bag.receive.quick.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <input type="hidden" name="bag_id" class="bag_id" value="{{ session('bag_number') }}">
-
-                                <input type="hidden" name="short_received" class="short_received">
-
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
-                                <input type="hidden" name="open_box_ids" class="open_box_ids">
 
                                 <div class="form-group ml-1">
                                     <button type="submit" name="receive" class="btn btn-primary receive" value="Confirm" disabled="disabled">Receive</button>
@@ -127,6 +118,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('css')
@@ -147,14 +139,7 @@
             @if(session('errors'))
                 scan_sound(2);
             @endif
-            var bag_id = {{ session('bag_number') }};
-            var seal_number = @json($seal_number);
 
-            $('#add_shipment_pieces_form input.scan_piece').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
             var shipment_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
@@ -167,14 +152,14 @@
                 columns: [
                     {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'bag_number', class: 'align-middle bag_number', orderable: false, searchable: false},
                     {name: 'origin', class: 'align-middle origin', orderable: false, searchable: false},
                     {name: 'destination', class: 'align-middle destination', orderable: false, searchable: false},
                     {name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
                     {name: 'consignee', class: 'align-middle consignee', orderable: false, searchable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'shipping_mode', class: 'align-middle shipping_mode', orderable: false, searchable: false},
-                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false},
-                    {name: 'open_box', class: 'align-middle open_box', orderable: false, searchable: false}
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
@@ -208,11 +193,10 @@
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
                         $.ajax({
-                            url: '{!! route('admin.master_cargo.bag.receive.shipment_details') !!}',
+                            url: '{!! route('admin.master_cargo.bag.receive.quick.bag_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
-                                'bag_id': bag_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -224,9 +208,8 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.details.id+']">';
 
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type, open_box]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -280,8 +263,6 @@
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
-
-                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                     UnblockPagePermanently();
                                 }
                                 else {
@@ -309,79 +290,36 @@
                 var form = this;
 
                 $('#receive_form input.shipment_ids').val(shipment_ids);
-                open_box_ids = [];
-                table.rows().every(function(index) {
-                    var node = $(this.node());
-                    if(node.find('td.open_box input').is(':checked')){
-                        open_box_ids.push(parseInt(node.attr('id')));
+                var html = 'Are you sure, you want to confirm Shipment(s) as received?';
+
+                content = document.createElement('div');
+                content.innerHTML = html;
+
+                swal({
+                    content: content,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        form.submit();
                     }
                 });
-                $('#receive_form input.open_box_ids').val(open_box_ids);
-
-                blockPagePermanently();
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.bag.receive.short_received') !!}',
-                    method: 'POST',
-                    data: {
-                        'bag_id': bag_id,
-                        'shipment_ids': shipment_ids,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            UnblockPagePermanently();
-                            if (data.short_received) {
-                                var html = 'There are shipments that are short received from Bag Number#' + seal_number + ':<br/>';
-
-                                $.each(data.short_received, function(index, tracking_number) {
-                                    html += tracking_number + '<br/>';
-                                });
-
-                                html += 'Are you sure, you want to confirm this Cargo received?';
-
-                                $('#receive_form input.short_received').val(1);
-                            }
-                            else {
-                                var html = 'Are you sure, you want to confirm Bag Number#' + seal_number + ' as received?';
-
-                                $('#receive_form input.short_received').val(0);
-                            }
-
-                            content = document.createElement('div');
-                            content.innerHTML = html;
-
-                            swal({
-                                content: content,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                if (confirm) {
-                                    form.submit();
-                                }
-                            });
-                        }
-                        else {
-                            UnblockPagePermanently();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
             });
 
             $('#camera_scan_initiate').bind('click', function() {
@@ -486,11 +424,10 @@
                     shipment_ids.push(shipment_id);
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     $.ajax({
-                        url: '{!! route('admin.master_cargo.bag.receive.shipment_details') !!}',
+                        url: '{!! route('admin.master_cargo.bag.receive.quick.bag_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
-                            'bag_id': bag_id,
                             'pieces_confirm': 1,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -503,9 +440,8 @@
 
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
-                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.details.id+']">';
 
-                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type, open_box]).node().id = data.details.id;
+                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]).node().id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     scan_sound(1);
