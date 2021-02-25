@@ -150,6 +150,8 @@ class Permission
             'master_cargo.bag.create.store' => 26,
             'master_cargo.bag.history.index' => 124,
             'master_cargo.bag.history.list' => 124,
+            'master_cargo.bag.receive.quick.index' => 31,
+            'master_cargo.bag.receive.quick.store' => 31,
 
             'master_cargo.pending.index' => 25,
             'master_cargo.pending.list' => 25,

@@ -2178,7 +2178,7 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
                                 }*/
 
-                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                                $related_admins = Admin::whereIn('role_id', [9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
                                 });
 
@@ -2332,7 +2332,7 @@ class NotificationsController extends Controller
 //                                    $to = array_merge($to, $general_admins->pluck('email')->toArray());
 //                                }
 
-                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                                $related_admins = Admin::whereIn('role_id', [9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
                                 });
 
@@ -3720,6 +3720,7 @@ class NotificationsController extends Controller
 
                     $to = array_merge($to, $extra_admins);
                     $to[] = 'fawwad.haider@trax.pk';
+                    $to[] = 'muhammad.waqas@trax.pk';
                     foreach ($to as $email){
                         self::email($subject, $body, $email);
                     }
@@ -5844,7 +5845,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                         $query->where('hub_id', $hub_id);
                     });
                     if ($to_admins->exists()) {

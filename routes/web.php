@@ -1289,6 +1289,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipment_details', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_shipment_details')->name('shipment_details');
                 Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_short_received')->name('short_received');
                 Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_store')->name('store');
+
+                Route::prefix('quick')->name('quick.')->group(function () {
+                    Route::get('', 'Admins\AdminMasterCargoController@master_cargo_bag_quick_receive_index')->name('index');
+                    Route::post('bag_details', 'Admins\AdminMasterCargoController@master_cargo_bag_quick_receive_bag_details')->name('bag_details');
+                    Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_quick_receive_store')->name('store');
+                });
             });
         });
         Route::prefix('pending')->name('pending.')->group(function () {
@@ -1960,6 +1966,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+            Route::get('app_shipments_list', 'Admins\AdminReportsController@last_mile_app_shipments_list')->name('app_shipments_list');
+            Route::get('dbf_shipments_list', 'Admins\AdminReportsController@last_mile_dbf_shipments_list')->name('dbf_shipments_list');
+
         });
         Route::prefix('weight_qc')->name('weight_qc.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
