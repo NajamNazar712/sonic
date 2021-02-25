@@ -2188,7 +2188,7 @@ class AdminFinanceController extends Controller
     }
 
     public function add_shipment_adjustment_index() {
-        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11])->get();
+        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11, 15, 16])->get();
         return view('admin.finance.add_shipment_adjustment')->with(['adjustment_types' => $adjustment_types]);
     }
 
