@@ -22,7 +22,7 @@
                                                 <i class="icon-user text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="">{{$riders->count()}}</h3>
+                                                <h3 class="" id="total_riders">{{$riders->count()}}</h3>
                                                 <span>Total Rider(s)</span>
                                             </div>
                                         </div>
@@ -39,7 +39,7 @@
                                                 <i class="icon-user-follow text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="">{{$riders->where('status',1)->count()}}</h3>
+                                                <h3 class="" id="total_active_riders">{{$riders->where('status',1)->count()}}</h3>
                                                 <span>Active Rider(s)</span>
                                             </div>
                                         </div>
@@ -56,7 +56,7 @@
                                                 <i class="icon-user-unfollow text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="">{{$riders->where('status',0)->count()}}</h3>
+                                                <h3 class="" id="total_inactive_riders">{{$riders->where('status',0)->count()}}</h3>
                                                 <span>In-Active Rider(s)</span>
                                             </div>
                                         </div>
@@ -124,7 +124,7 @@
 
 @section('js')
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9sfmrQqtjiWwSd2EZQBZAtd5oU19sDlM&sensor=false&libraries=geometry,places,drawing"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8WQKU9QiB31nw6vi4s_Cqo83TnEHKEY0&sensor=false&libraries=geometry,places,drawing"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
@@ -195,10 +195,13 @@
                     clearMarkerFromMap();
                 },
                 success: function (response) {
-                    $.each(response,function (i,v) {
+                    $.each(response['data'],function (i,v) {
                         latlng = new google.maps.LatLng(v['latitude'], v['longitude']);
                         makeMarker(latlng,v['name'],rider_icon);
                     });
+                    $('#total_riders').html(response['total_riders']);
+                    $('#total_active_riders').html(response['total_active_riders']);
+                    $('#total_inactive_riders').html(response['total_inactive_riders']);
                     setMarkerOnMap(false)
                     if(response != '') {
                         SetMapBound(false);
@@ -219,7 +222,7 @@
                     clearMarkerFromMap();
                 },
                 success: function (response) {
-
+                    console.log(response);
                     $.each(response,function (i,v) {
                             latlng = new google.maps.LatLng(v[0]['latitude'], v[0]['longitude']);
                             // Checking Status for Marker Icons

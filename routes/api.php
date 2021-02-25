@@ -85,7 +85,7 @@ Route::name('api.')->group(function () {
 	        });
 
             Route::prefix('location')->name('location.')->group(function(){
-                Route::get('','Rider\RiderAPIController@get_rider_location')->name('get');
+                Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
             });
 
             Route::prefix('delivery')->name('delivery.')->group(function () {

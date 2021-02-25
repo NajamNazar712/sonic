@@ -82,8 +82,15 @@ class V2RiderTrackingController extends Controller
                 $join->on('riders.id','=','logs.rider_id')
                     ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
             })
-            ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude')
+            ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.created_at as created_at')
             ->get();
-        return $data->toArray();
+        $date = new \DateTime();
+        $date->modify('-5 minutes');
+        $formatted_date = $date->format('Y-m-d H:i:s');
+        $total_riders = $data->count();
+        $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();
+        $total_inactive_riders = $data->where('created_at','<=',$formatted_date)->count();
+        $array = ['total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray()];
+        return $array;
     }
 }
