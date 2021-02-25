@@ -1936,41 +1936,41 @@ class ReturnController extends Controller
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
-                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
-                        if ($packaging_material_shipment != null) {
-                            $request_id = $packaging_material_shipment->id;
-
-                            $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
-
-                            if ($packaging_material_shipment->status_id == 3) {
-                                $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
-
-                                $hub_id = $packaging_material_request->city->hub_id;
-
-                                $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
-
-                                $warehouse_id = $fulfilment_hub->warehouse_id;
-
-                                foreach ($packaging_material_request_details as $detail_add) {
-                                    $type_id = $detail_add->type_id;
-                                    $type_size_id = $detail_add->type_size_id;
-                                    $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
-
-                                    $stock = $stock->first();
-                                    $stock->stock = $stock['stock'] + $detail_add->quantity;
-                                    $stock->save();
-                                }
-                            }
-                            $packaging_material_request->status_id = 5;
-                            $packaging_material_request->save();
-
-
-                            $packaging_request_history = new PackagingMaterialRequestHistory();
-                            $packaging_request_history->packaging_material_request_id = $request_id;
-                            $packaging_request_history->status = 5;
-                            $packaging_request_history->updated_by = Auth::id();
-                            $packaging_request_history->save();
-                        }
+//                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
+//                        if ($packaging_material_shipment != null) {
+//                            $request_id = $packaging_material_shipment->id;
+//
+//                            $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
+//
+//                            if ($packaging_material_shipment->status_id == 3) {
+//                                $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
+//
+//                                $hub_id = $packaging_material_request->city->hub_id;
+//
+//                                $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
+//
+//                                $warehouse_id = $fulfilment_hub->warehouse_id;
+//
+//                                foreach ($packaging_material_request_details as $detail_add) {
+//                                    $type_id = $detail_add->type_id;
+//                                    $type_size_id = $detail_add->type_size_id;
+//                                    $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+//
+//                                    $stock = $stock->first();
+//                                    $stock->stock = $stock['stock'] + $detail_add->quantity;
+//                                    $stock->save();
+//                                }
+//                            }
+//                            $packaging_material_request->status_id = 5;
+//                            $packaging_material_request->save();
+//
+//
+//                            $packaging_request_history = new PackagingMaterialRequestHistory();
+//                            $packaging_request_history->packaging_material_request_id = $request_id;
+//                            $packaging_request_history->status = 5;
+//                            $packaging_request_history->updated_by = Auth::id();
+//                            $packaging_request_history->save();
+//                        }
 
                     } else if ($parcel->booking_type_id == 2) {
                         ShipmentsJourneyController::add($shipment, 31, 31, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
@@ -2053,43 +2053,43 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
-                            if($parcel->packaging_material_request){
-                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
-                                if ($packaging_material_shipment != null) {
-                                    $request_id = $packaging_material_shipment->id;
-
-                                    $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
-
-                                    if ($packaging_material_shipment->status_id == 3) {
-                                        $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
-
-                                        $hub_id = $packaging_material_request->city->hub_id;
-
-                                        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
-
-                                        $warehouse_id = $fulfilment_hub->warehouse_id;
-
-                                        foreach ($packaging_material_request_details as $detail_add) {
-                                            $type_id = $detail_add->type_id;
-                                            $type_size_id = $detail_add->type_size_id;
-                                            $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
-
-                                            $stock = $stock->first();
-                                            $stock->stock = $stock['stock'] + $detail_add->quantity;
-                                            $stock->save();
-                                        }
-                                    }
-                                    $packaging_material_request->status_id = 5;
-                                    $packaging_material_request->save();
-
-
-                                    $packaging_request_history = new PackagingMaterialRequestHistory();
-                                    $packaging_request_history->packaging_material_request_id = $request_id;
-                                    $packaging_request_history->status = 5;
-                                    $packaging_request_history->updated_by = Auth::id();
-                                    $packaging_request_history->save();
-                                }
-                            }
+//                            if($parcel->packaging_material_request){
+//                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
+//                                if ($packaging_material_shipment != null) {
+//                                    $request_id = $packaging_material_shipment->id;
+//
+//                                    $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
+//
+//                                    if ($packaging_material_shipment->status_id == 3) {
+//                                        $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
+//
+//                                        $hub_id = $packaging_material_request->city->hub_id;
+//
+//                                        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
+//
+//                                        $warehouse_id = $fulfilment_hub->warehouse_id;
+//
+//                                        foreach ($packaging_material_request_details as $detail_add) {
+//                                            $type_id = $detail_add->type_id;
+//                                            $type_size_id = $detail_add->type_size_id;
+//                                            $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+//
+//                                            $stock = $stock->first();
+//                                            $stock->stock = $stock['stock'] + $detail_add->quantity;
+//                                            $stock->save();
+//                                        }
+//                                    }
+//                                    $packaging_material_request->status_id = 5;
+//                                    $packaging_material_request->save();
+//
+//
+//                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+//                                    $packaging_request_history->packaging_material_request_id = $request_id;
+//                                    $packaging_request_history->status = 5;
+//                                    $packaging_request_history->updated_by = Auth::id();
+//                                    $packaging_request_history->save();
+//                                }
+//                            }
 
                         }
                         // ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
