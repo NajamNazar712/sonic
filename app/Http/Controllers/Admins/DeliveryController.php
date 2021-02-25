@@ -5144,7 +5144,7 @@ class DeliveryController extends Controller
     public function history_shipments_delivered(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->whereNotIn('status', [8 ,10, 11])->get();
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->whereNotIn('status', [8 ,10, 11])->where('status',6)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
