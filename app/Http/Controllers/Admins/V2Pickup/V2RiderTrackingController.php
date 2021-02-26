@@ -34,6 +34,11 @@ class V2RiderTrackingController extends Controller
     {
         $rider_id = $request->rider_id;
 
+//        $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
+//            ->where('v2_pickup_notes.rider_id',$rider_id)
+//            ->latest('v2_pickup_notes.id')->get();
+//
+//        return $data;
         // Getting Rider Data
         $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
             ->where('v2_pickup_notes.rider_id',$rider_id)
@@ -110,7 +115,7 @@ class V2RiderTrackingController extends Controller
             $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();
             $total_inactive_riders = $data->where('created_at','<=',$formatted_date)->count();
             $data = $data->where('created_at','>=',$formatted_date);
-            $array = ['city_latitude'=>$city->location_latitude,'city_longitude'=>$city->location_longitude,'total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray()];
+            $array = ['city_latitude'=>$city->location_latitude,'city_longitude'=>$city->location_longitude,'total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray(),'data_count'=>$data->count()];
             return $array;
         }
 

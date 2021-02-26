@@ -186,15 +186,24 @@
         });
 
         $('#search_city').on('change',function () {
+            console.log("c");
             let city_id = $(this).val();
-            if(city_id == '')
+            if(city_id == '' && $('#search_rider').val() == '')
             {
+                console.log('c_2');
                 clearMarkerFromMap();
                 ClearRouteFromMap();
                 clearInterval(interval);
                 SetMapCenter(center);
                 return;
             }
+            else if(city_id == '')
+            {
+                console.log('c_3');
+                return;
+            }
+
+            console.log("c_4");
             $('#search_rider').val('');
             $('#search_rider').trigger('change');
             $.ajax({
@@ -209,12 +218,17 @@
                     clearInterval(interval);
                 },
                 success: function (response) {
+
+                    console.log(response);
                     if(response != 0)
                     {
-                        if(response['data'].length > 0)
+                        console.log(response['data_count']);
+                        if(response['data_count'] > 0)
                         {
+
                             $.each(response['data'],function (i,v) {
                                 latlng = new google.maps.LatLng(v['latitude'], v['longitude']);
+                                console.log(latlng);
                                 makeMarker(latlng,v['name'],rider_icon);
                             });
 
@@ -244,15 +258,23 @@
         });
 
         $('#search_rider').on('change',function () {
+            console.log("r");
             let rider_id = $(this).val();
-            if(rider_id == '')
+            if(rider_id == '' && $('#search_city').val() == '')
             {
+                console.log('r_2');
                 clearMarkerFromMap();
                 ClearRouteFromMap();
                 clearInterval(interval);
                 SetMapCenter(center);
                 return;
             }
+            else if(rider_id == '')
+            {
+                console.log('r_3');
+                return;
+            }
+            console.log("r_4");
             $('#search_city').val('');
             $('#search_city').trigger('change');
             $.ajax({
@@ -414,6 +436,8 @@
 
         // Removing marker from map and clearing marker and location arrays and bound instance
         function clearMarkerFromMap() {
+
+            console.log('m');
             bounds = new google.maps.LatLngBounds();
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
@@ -446,6 +470,7 @@
 
         // Placing marker on map
         function setMarkerOnMap(status = true) {
+            console.log(markers);
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(map);
             }
