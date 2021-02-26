@@ -49,11 +49,8 @@ class V2RiderTrackingController extends Controller
             ->get()->groupBy('pickup_id');
 
         $rider = Rider::where('riders.id',$rider_id)
-            ->leftjoin('rider_location_logs as logs', function($join){
-                $join->on('riders.id','=','logs.rider_id')
-                    ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
-            })
-            ->select('riders.name as name','logs.created_at as created_at','logs.latitude as rider_latitude','logs.longitude as rider_longitude')
+            ->leftjoin('rider_location_logs as logs', 'riders.id','=','logs.rider_id')
+            ->select('riders.name as name','logs.updated_at as created_at','logs.latitude as rider_latitude','logs.longitude as rider_longitude')
             ->first();
 
 
@@ -81,7 +78,7 @@ class V2RiderTrackingController extends Controller
             }
         }
 
-        $array = ['rider_latitude' => $rider->rider_latitude,'rider_longitude'=>$rider->rider_longitude,'rider_name'=>$rider->name,'rider_location_label'=>$rider->name." (".date("d-m-Y",strtotime($rider->created_at)).")",'data'=>$data->toArray(),'data_length'=>$data->count()];
+        $array = ['rider_latitude' => $rider->rider_latitude,'rider_longitude'=>$rider->rider_longitude,'rider_name'=>$rider->name,'data'=>$data->toArray(),'data_length'=>$data->count()];
         return $array;
     }
 
@@ -100,11 +97,8 @@ class V2RiderTrackingController extends Controller
         if($city)
         {
             $data = Rider::where('riders.city_id',$city_id)
-                ->join('rider_location_logs as logs', function($join){
-                    $join->on('riders.id','=','logs.rider_id')
-                        ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
-                })
-                ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.created_at as created_at')
+                ->join('rider_location_logs as logs', 'riders.id','=','logs.rider_id')
+                ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.updated_at as created_at')
                 ->get();
             $date = new \DateTime();
             $date->modify('-15 minutes');

@@ -272,7 +272,7 @@
                     {
                         rider_location = new google.maps.LatLng(response['rider_latitude'], response['rider_longitude']);
                         rider_marker.setPosition(rider_location);
-                        rider_marker.setLabel(response['rider_location_label']);
+                        rider_marker.setLabel(response['rider_name']);
                         rider_status = true;
                     }
                     else{
@@ -335,7 +335,7 @@
                         rider_location = new google.maps.LatLng(response['rider_latitude'], response['rider_longitude']);
                         bounds.extend(rider_location);
                         rider_marker.setPosition(rider_location);
-                        rider_marker.setLabel(response['rider_location_label']);
+                        rider_marker.setLabel(response['rider_name']);
                         rider_status = true;
                     }
                     else{
