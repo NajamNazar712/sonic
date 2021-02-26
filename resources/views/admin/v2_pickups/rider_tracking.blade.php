@@ -22,8 +22,8 @@
                                                 <i class="icon-user text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="" id="total_riders">{{$riders->count()}}</h3>
-                                                <span>Total Rider(s)</span>
+                                                <h3 class="text-white" id="total_riders">{{$riders->count()}}</h3>
+                                                <span class="text-white">Total Rider(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -39,8 +39,8 @@
                                                 <i class="icon-user-follow text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="" id="total_active_riders">{{$riders->where('status',1)->count()}}</h3>
-                                                <span>Active Rider(s)</span>
+                                                <h3 class="text-white" id="total_active_riders">{{$riders->where('status',1)->count()}}</h3>
+                                                <span class="text-white">Active Rider(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -56,8 +56,8 @@
                                                 <i class="icon-user-unfollow text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 class="" id="total_inactive_riders">{{$riders->where('status',0)->count()}}</h3>
-                                                <span>In-Active Rider(s)</span>
+                                                <h3 class="text-white" id="total_inactive_riders">{{$riders->where('status',0)->count()}}</h3>
+                                                <span class="text-white"> In-Active Rider(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -110,16 +110,13 @@
 
     <style>
         .bg-gradient-directional-total {
-            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
-            background-repeat: repeat-x;
+            background-color: #027d8a;
         }
         .bg-gradient-directional-active {
-            background-image: linear-gradient(45deg, #076500, #11f118);
-            background-repeat: repeat-x;
+            background-color: #076500;
         }
         .bg-gradient-directional-inactive {
-            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
-            background-repeat: repeat-x;
+            background-color: #ff0c0c;
         }
     </style>
 @endsection
