@@ -108,7 +108,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370,446], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cubes"></i>First Mile</span></a>
                     <ul class="menu-content">
 						 @if (session('role_id') == 1 || count(array_intersect([368, 369, 370], session('permissions'))) !== 0)
