@@ -205,7 +205,7 @@ class RiderManagementController extends Controller
 
         $route = $route->get();
 
-        return response()->json($route);
+        return response()->json(['route' => $route]);
     }
     public function editRiderView($id){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
