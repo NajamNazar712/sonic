@@ -23,6 +23,7 @@ use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
@@ -1416,7 +1417,16 @@ class RiderAPIController extends Controller
                 $pickup['pickup_request_id'] = $pickup_request->id;
                 $pickup['status'] = $pickup_note_request->status;
                 $pickup['ordering'] = $pickup_note_request->ordering;
-                $pickup['shipments'] = $pickup_request->booked;
+
+                $booked_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->count('id');
+
+                if ($booked_shipments != $pickup_request->booked) {
+                    $pickup_request->booked = $booked_shipments;
+
+                    $pickup_request->save();
+                }
+
+                $pickup['shipments'] = $booked_shipments;
 
                 if ($pickup_note_request->status) {
                     $information['summary']['received']['pickups']++;
@@ -1761,7 +1771,7 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0);
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
