@@ -195,6 +195,8 @@
                 SetMapCenter(center);
                 return;
             }
+            $('#search_rider').val('');
+            $('#search_rider').trigger('change');
             $.ajax({
                 url: '{{route("admin.v2_pickups.rider_tracking.by_city")}}',
                 method: 'get',
@@ -251,6 +253,8 @@
                 SetMapCenter(center);
                 return;
             }
+            $('#search_city').val('');
+            $('#search_city').trigger('change');
             $.ajax({
                 url: '{{route("admin.v2_pickups.rider_tracking.by_rider")}}',
                 method: 'get',
