@@ -177,11 +177,16 @@
                 success:function (data) {
 
                     routelist.empty();
-                    for(var i = 0; i < data.length; i++){
-                        var option = new Option(data[i].code+' ('+data[i].start+' to '+data[i].end+')', data[i].id, true, true);
-                        routelist.append(option).trigger('change');
-                    }
-                    routelist.append('<option value="other">Other</option>').trigger('change');
+                    // for(var i = 0; i < data.length; i++){
+                    //     //var option = new Option(data[i].code+' ('+data[i].start+' to '+data[i].end+')', data[i].id, true, true);
+                    //     routelist.append(option);
+                    // }
+                    //routelist.append('<option value="other">Other</option>').trigger('change');
+                    $.each(data, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                        routelist.append(newOption);
+                    });
+                   routelist.val('').trigger('change');
                 }
             });
         });
