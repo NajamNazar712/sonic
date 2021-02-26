@@ -68,16 +68,6 @@
                     <div class="row mb-2 justify-content-center">
                         <div class="col-4">
                             <fieldset class="form-group">
-                                <select name="search_rider" id="search_rider" class="form-control select2"
-                                        data-rule-required="true" data-msg-required="Rider is required">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                        @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
                                 <select name="search_city" id="search_city" class="form-control select2"
                                         data-rule-required="true" data-msg-required="City is required">
                                     @foreach($cities as $city)
@@ -86,6 +76,17 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="search_rider" id="search_rider" class="form-control select2"
+                                        data-rule-required="true" data-msg-required="Rider is required">
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
                     </div>
 
                     <div class="row">
