@@ -7,6 +7,7 @@ use App\Http\Models\Rider;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class V2RiderTrackingController extends Controller
 {
@@ -17,7 +18,13 @@ class V2RiderTrackingController extends Controller
 
     public function rider_tracking_index ()
     {
-        $cities = City::whereIn('hub_id',session('hubs'))->get();
+        if(Auth::user()->role_id == 1)
+        {
+            $cities = City::all();
+        }
+        else{
+            $cities = City::whereIn('hub_id',session('hubs'))->get();
+        }
         $riders = Rider::whereIn('city_id',$cities->pluck('id')->ToArray())->get();
         return view('admin.v2_pickups.rider_tracking',compact(['riders','cities']));
     }
@@ -81,7 +88,14 @@ class V2RiderTrackingController extends Controller
     public function rider_tracking_by_city(Request $request)
     {
         $city_id = $request->city_id;
-        $city = City::whereIn('hub_id',session('hubs'))->where('id',$city_id)->first();
+
+        if(Auth::user()->role_id == 1)
+        {
+            $city = City::where('id',$city_id)->first();
+        }
+        else{
+            $city = City::whereIn('hub_id',session('hubs'))->where('id',$city_id)->first();
+        }
 
         if($city)
         {
@@ -93,11 +107,12 @@ class V2RiderTrackingController extends Controller
                 ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.created_at as created_at')
                 ->get();
             $date = new \DateTime();
-            $date->modify('-5 minutes');
+            $date->modify('-15 minutes');
             $formatted_date = $date->format('Y-m-d H:i:s');
             $total_riders = $data->count();
             $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();
             $total_inactive_riders = $data->where('created_at','<=',$formatted_date)->count();
+            $data = $data->where('created_at','>=',$formatted_date);
             $array = ['city_latitude'=>$city->location_latitude,'city_longitude'=>$city->location_longitude,'total_riders'=>$total_riders,'total_active_riders'=>$total_active_riders,'total_inactive_riders'=>$total_inactive_riders,'data'=>$data->toArray()];
             return $array;
         }

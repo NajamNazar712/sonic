@@ -81,7 +81,7 @@
                                 <select name="search_city" id="search_city" class="form-control select2"
                                         data-rule-required="true" data-msg-required="City is required">
                                     @foreach($cities as $city)
-                                        <option value="{{$city->id}}" {{$city->id == 202 ? 'selected' : ''}}>{{$city->name}}</option>
+                                        <option value="{{$city->id}}" {{(Auth::user()->default_hub_id != null && Auth::user()->default_hub_id == $city->id) ? 'selected' : (Auth::user()->default_hub_id == null && $city->id == 202 ? 'selected' : '')}}>{{$city->name}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
@@ -103,6 +103,7 @@
 
 @section('css')
 
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
@@ -124,11 +125,12 @@
 
 @section('js')
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8WQKU9QiB31nw6vi4s_Cqo83TnEHKEY0&sensor=false&libraries=geometry,places,drawing"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk&sensor=false&libraries=geometry,places,drawing"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
-        let interval;
+        let interval;  // variable to hold setinterval instance
 
         let picked_icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; // Icon for picked shipment marker
         let not_picked_icon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'; // Icon for not-picked shipment marker
@@ -157,11 +159,11 @@
         let rider_location; // Variable for Rider Location
         let rider_status = false; // Check if rider location is present
 
-        var bounds = new google.maps.LatLngBounds();
+        var bounds = new google.maps.LatLngBounds();  // google map bound reference
         const directionsService = new google.maps.DirectionsService();
         const directionsRenderer = new google.maps.DirectionsRenderer({
             suppressMarkers: true
-        });
+        }); // suppressMarkers set true to remove default google map markers from screen
 
         let center = new google.maps.LatLng(24.865720, 67.077394); //Starting Center
 
@@ -170,20 +172,31 @@
         var uniqueId = function () {
             return currentId++;
         }
-
+    $(document).ready(function (){
         // Initializing Rider Selcet Box
         $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
             placeholder: 'Select Rider',
             width: '100%',
+            allowClear: true,
         });
 
         //Initializing City Select Box
-        $('#search_city').select2({
-           width: '100%',
+        $('#search_city').prepend('<option value=""></option>').select2({
+            placeholder: 'Select City',
+            width: '100%',
+            allowClear: true,
         });
 
         $('#search_city').on('change',function () {
             let city_id = $(this).val();
+            if(city_id == '')
+            {
+                clearMarkerFromMap();
+                ClearRouteFromMap();
+                clearInterval(interval);
+                SetMapCenter(center);
+                return;
+            }
             $.ajax({
                 url: '{{route("admin.v2_pickups.rider_tracking.by_city")}}',
                 method: 'get',
@@ -209,6 +222,7 @@
                             SetMapBound(false);
                         }
                         else{
+                            // If city latitude longitude are available set map center to city else set it to default center
                             if(response['city_latitude'] != null && response['city_longitude'] != null) {
                                 SetMapCenter(new google.maps.LatLng(response['city_latitude'], response['city_longitude']));
                             }
@@ -221,7 +235,8 @@
                         $('#total_inactive_riders').html(response['total_inactive_riders']);
                     }
                     else{
-                        alert('Invalid City');
+                        var error = "Invalid City";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                 }
@@ -230,6 +245,14 @@
 
         $('#search_rider').on('change',function () {
             let rider_id = $(this).val();
+            if(rider_id == '')
+            {
+                clearMarkerFromMap();
+                ClearRouteFromMap();
+                clearInterval(interval);
+                SetMapCenter(center);
+                return;
+            }
             $.ajax({
                 url: '{{route("admin.v2_pickups.rider_tracking.by_rider")}}',
                 method: 'get',
@@ -242,6 +265,8 @@
                     clearInterval(interval);
                 },
                 success: function (response) {
+
+                    // Check if we have rider location and place rider marker
                     if(response['rider_latitude'] != null && response['rider_longitude'] != null)
                     {
                         rider_location = new google.maps.LatLng(response['rider_latitude'], response['rider_longitude']);
@@ -253,6 +278,7 @@
                         rider_status = false;
                     }
 
+                    // check if we have rider pickup note locations
                     if(response['data_length'] > 0) {
                         $.each(response['data'],function (i,v) {
                                 latlng = new google.maps.LatLng(v[0]['latitude'], v[0]['longitude']);
@@ -272,6 +298,8 @@
 
 
                     setMarkerOnMap();
+
+                    // If we have rider pickup locations make route else if we have rider location center map to rider else do nothinhg
                     if(latlngs.length > 0)
                     {
                         ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
@@ -282,11 +310,13 @@
                         SetMapCenter(rider_location);
                     }
 
-                    interval = setInterval(CheckForRiderLocation,60 * 1000,rider_id);
+                    // Ping rider location
+                    interval = setInterval(CheckForRiderLocation,4 * 60 * 1000,rider_id);
                 }
             })
         });
 
+        // function to ping rider location
         function CheckForRiderLocation(rider_id)
         {
             $.ajax({
@@ -347,6 +377,7 @@
             };
 
             map = new google.maps.Map(document.getElementById('googleMap'), myMapOptions);
+            // Triggering city select
             $('#search_city').trigger('change');
         }
 
@@ -368,7 +399,7 @@
             markers[id] = marker;
         }
 
-        // Removing marker from map and clearing marker and location arrays
+        // Removing marker from map and clearing marker and location arrays and bound instance
         function clearMarkerFromMap() {
             bounds = new google.maps.LatLngBounds();
             for (var i = 0; i < markers.length; i++) {
@@ -382,11 +413,13 @@
             rider_status = false;
         }
 
+        // clearing route from map
         function ClearRouteFromMap()
         {
             directionsRenderer.setMap(null);
         }
 
+        // setting map center
         function SetMapCenter(_center)
         {
             map.panTo(_center);
@@ -436,7 +469,8 @@
                             directionsRenderer.setDirections(response);
                         } else {
                             SetMapBound();
-                            console.log("Directions request failed due to " + status);
+                            var error = "Directions request failed due to " + status;
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     }
                 );
@@ -445,5 +479,6 @@
         }
 
         initMap();
+        });
     </script>
 @endsection
