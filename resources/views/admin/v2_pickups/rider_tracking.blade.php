@@ -139,11 +139,11 @@
         let markers = [];  // variable for holding all current markers
         let latlngs = []; // array for holding all markers locations
         let map; // variable for holding map reference
-        let start_location = new google.maps.LatLng(24.8576669,67.1246698); // trax location
 
+        let start_location = null; // variable for setting start location
+        let start_status = false; // check if start location is present
         let start_marker = new google.maps.Marker({
             id: -2,
-            position: start_location,
             label: 'Trax',
             icon: start_icon,
             animation: google.maps.Animation.DROP
@@ -280,6 +280,17 @@
                         rider_status = false;
                     }
 
+                    if(response['city_latitude'] != null && response['city_longitude'] != null)
+                    {
+                        start_location = new google.maps.LatLng(response['city_latitude'], response['city_longitude']);
+                        start_marker.setPosition(start_location);
+                        start_status = true;
+                    }
+                    else{
+                        start_status = false;
+                    }
+
+
                     // check if we have rider pickup note locations
                     if(response['data_length'] > 0) {
                         $.each(response['data'],function (i,v) {
@@ -407,12 +418,14 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
+            start_location = null;
             start_marker.setMap(null);
             rider_marker.setMap(null);
             markers = [];
             latlngs = [];
             currentId = 0;
             rider_status = false;
+            start_status = false;
         }
 
         // clearing route from map
@@ -433,7 +446,7 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(map);
             }
-            if(markers.length > 0 && status) {
+            if(markers.length > 0 && status && start_status) {
                 start_marker.setMap(map);
             }
             if(rider_status && status) {

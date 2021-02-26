@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\Http\Models\V2Pickup\V2PickupNote;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,11 +35,10 @@ class V2RiderTrackingController extends Controller
         $rider_id = $request->rider_id;
 
         // Getting Rider Data
-        $data = Rider::where('riders.id',$rider_id)
-            ->join('v2_pickup_notes as notes',function ($join){
-                $join->on('riders.id','=','notes.rider_id')->whereDate('notes.created_at', Carbon::today());
-            })
-            ->join('v2_pickup_note_requests as pivot_requests','notes.id','=','pivot_requests.pickup_note_id')
+        $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
+            ->where('v2_pickup_notes.rider_id',$rider_id)
+            ->latest('v2_pickup_notes.id')
+            ->join('v2_pickup_note_requests as pivot_requests','v2_pickup_notes.id','=','pivot_requests.pickup_note_id')
             ->join('v2_pickup_requests as requests',function ($join){
                 $join->on('requests.id','=','pivot_requests.pickup_request_id');
             })
@@ -50,8 +50,10 @@ class V2RiderTrackingController extends Controller
 
         $rider = Rider::where('riders.id',$rider_id)
             ->leftjoin('rider_location_logs as logs', 'riders.id','=','logs.rider_id')
-            ->select('riders.name as name','logs.updated_at as created_at','logs.latitude as rider_latitude','logs.longitude as rider_longitude')
+            ->select('riders.name as name','riders.city_id','logs.updated_at as created_at','logs.latitude as rider_latitude','logs.longitude as rider_longitude')
             ->first();
+
+        $city = City::where('id',$rider->city_id)->first();
 
 
         //   Setting Status based on data fetched from v2_rider_pickups table
@@ -78,7 +80,7 @@ class V2RiderTrackingController extends Controller
             }
         }
 
-        $array = ['rider_latitude' => $rider->rider_latitude,'rider_longitude'=>$rider->rider_longitude,'rider_name'=>$rider->name,'data'=>$data->toArray(),'data_length'=>$data->count()];
+        $array = ['city_latitude'=>$city->location_latitude ?? null, 'city_longitude'=>$city->location_longitude ?? null,'rider_latitude' => $rider->rider_latitude,'rider_longitude'=>$rider->rider_longitude,'rider_name'=>$rider->name,'data'=>$data->toArray(),'data_length'=>$data->count()];
         return $array;
     }
 
