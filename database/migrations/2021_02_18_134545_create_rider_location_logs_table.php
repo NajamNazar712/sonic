@@ -15,7 +15,7 @@ class CreateRiderLocationLogsTable extends Migration
     {
         Schema::create('rider_location_logs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('rider_id');
+            $table->integer('rider_id')->index();
             $table->double('latitude','10','6');
             $table->double('longitude','10','6');
             $table->timestamps();
