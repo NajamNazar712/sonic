@@ -37,13 +37,18 @@ class V2RiderTrackingController extends Controller
             })
             ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
             ->leftjoin('users','users.id','=','info.user_id')
+            ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
+            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
+            ->get()->groupBy('pickup_id');
+
+        $rider = Rider::where('riders.id',$rider_id)
             ->leftjoin('rider_location_logs as logs', function($join){
                 $join->on('riders.id','=','logs.rider_id')
                     ->whereRaw('logs.created_at IN (select MAX(a2.created_at) from rider_location_logs as a2 join riders as u2 on u2.id = a2.rider_id group by u2.id)');
             })
-            ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
-            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','logs.created_at as created_at','logs.latitude as current_latitude','logs.longitude as current_longitude','riders.name as rider_name','users.name as name','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
-            ->get()->groupBy('pickup_id');
+            ->select('riders.name as name','logs.created_at as created_at','logs.latitude as rider_latitude','logs.longitude as rider_longitude')
+            ->first();
+
 
         //   Setting Status based on data fetched from v2_rider_pickups table
         foreach ($data as $group)
@@ -68,7 +73,9 @@ class V2RiderTrackingController extends Controller
                 }
             }
         }
-        return $data->toArray();
+
+        $array = ['rider_latitude' => $rider->rider_latitude,'rider_longitude'=>$rider->rider_longitude,'rider_name'=>$rider->name,'rider_location_label'=>$rider->name." (".date("d-m-Y",strtotime($rider->created_at)).")",'data'=>$data->toArray(),'data_length'=>$data->count()];
+        return $array;
     }
 
     public function rider_tracking_by_city(Request $request)

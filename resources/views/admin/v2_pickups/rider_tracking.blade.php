@@ -192,6 +192,8 @@
                 },
                 beforeSend: function(){
                     clearMarkerFromMap();
+                    ClearRouteFromMap();
+                    clearInterval(interval);
                 },
                 success: function (response) {
                     if(response != 0)
@@ -208,12 +210,11 @@
                         }
                         else{
                             if(response['city_latitude'] != null && response['city_longitude'] != null) {
-                                map.panTo(new google.maps.LatLng(response['city_latitude'], response['city_longitude']));
+                                SetMapCenter(new google.maps.LatLng(response['city_latitude'], response['city_longitude']));
                             }
                             else{
-                                map.panTo(center);
+                                SetMapCenter(center);
                             }
-                            map.setZoom(15);
                         }
                         $('#total_riders').html(response['total_riders']);
                         $('#total_active_riders').html(response['total_active_riders']);
@@ -237,10 +238,81 @@
                 },
                 beforeSend: function(){
                     clearMarkerFromMap();
+                    ClearRouteFromMap();
+                    clearInterval(interval);
                 },
                 success: function (response) {
-                    console.log(response);
-                    $.each(response,function (i,v) {
+                    if(response['rider_latitude'] != null && response['rider_longitude'] != null)
+                    {
+                        rider_location = new google.maps.LatLng(response['rider_latitude'], response['rider_longitude']);
+                        rider_marker.setPosition(rider_location);
+                        rider_marker.setLabel(response['rider_location_label']);
+                        rider_status = true;
+                    }
+                    else{
+                        rider_status = false;
+                    }
+
+                    if(response['data_length'] > 0) {
+                        $.each(response['data'],function (i,v) {
+                                latlng = new google.maps.LatLng(v[0]['latitude'], v[0]['longitude']);
+                                // Checking Status for Marker Icons
+                                if( v[0]['status'] == 'picked') {
+                                    var _icon = picked_icon;
+                                }
+                                if( v[0]['status'] == 'not-picked') {
+                                    var _icon = not_picked_icon;
+                                }
+                                if( v[0]['status'] == 'not-reached') {
+                                    var _icon = not_reached_icon;
+                                }
+                                makeMarker(latlng, v[0]['name'],_icon);
+                        });
+                    }
+
+
+                    setMarkerOnMap();
+                    if(latlngs.length > 0)
+                    {
+                        ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
+
+                    }
+                    else if(rider_status)
+                    {
+                        SetMapCenter(rider_location);
+                    }
+
+                    interval = setInterval(CheckForRiderLocation,60 * 1000,rider_id);
+                }
+            })
+        });
+
+        function CheckForRiderLocation(rider_id)
+        {
+            $.ajax({
+                url: '{{route("admin.v2_pickups.rider_tracking.by_rider")}}',
+                method: 'get',
+                data:{
+                    'rider_id': rider_id,
+                },
+                beforeSend: function(){
+                    clearMarkerFromMap();
+                },
+                success: function (response) {
+                    if(response['rider_latitude'] != null && response['rider_longitude'] != null)
+                    {
+                        rider_location = new google.maps.LatLng(response['rider_latitude'], response['rider_longitude']);
+                        bounds.extend(rider_location);
+                        rider_marker.setPosition(rider_location);
+                        rider_marker.setLabel(response['rider_location_label']);
+                        rider_status = true;
+                    }
+                    else{
+                        rider_status = false;
+                    }
+
+                    if(response['data_length'] > 0) {
+                        $.each(response['data'],function (i,v) {
                             latlng = new google.maps.LatLng(v[0]['latitude'], v[0]['longitude']);
                             // Checking Status for Marker Icons
                             if( v[0]['status'] == 'picked') {
@@ -253,31 +325,15 @@
                                 var _icon = not_reached_icon;
                             }
                             makeMarker(latlng, v[0]['name'],_icon);
-                        //    Checking If Rider Location is available or not
-                        if (v[0]['current_latitude'] != null || v[0]['current_longitude'] != null)
-                        {
-                            rider_location = new google.maps.LatLng(v[0]['current_latitude'], v[0]['current_longitude']);
-                            bounds.extend(rider_location);
-                            rider_marker.setPosition(rider_location);
-                            rider_marker.setLabel(v[0]['rider_name']);
-                            rider_status = true;
-                        }
-                        else{
-                            rider_status = false;
-                        }
-                    });
-                    setMarkerOnMap();
-                    if(response != '') {
-                        if(latlngs.length != 0)
-                        {
-                            ShowRoute(start_location,latlngs[latlngs.length-1],latlngs.slice(0,latlngs.length-1));
-
-                        }
+                        });
+                        setMarkerOnMap();
                     }
+
+                    SetMapBound(false);
+
                 }
             })
-        });
-
+        }
 
         // Initializing map
         function initMap() {
@@ -315,15 +371,23 @@
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
-            directionsRenderer.setMap(null);
             start_marker.setMap(null);
             rider_marker.setMap(null);
-            map.panTo(center);
-            map.setZoom(15);
             markers = [];
             latlngs = [];
             currentId = 0;
             rider_status = false;
+        }
+
+        function ClearRouteFromMap()
+        {
+            directionsRenderer.setMap(null);
+        }
+
+        function SetMapCenter(_center)
+        {
+            map.panTo(_center);
+            map.setZoom(15);
         }
 
         // Placing marker on map
@@ -333,9 +397,9 @@
             }
             if(markers.length > 0 && status) {
                 start_marker.setMap(map);
-                if(rider_status) {
-                    rider_marker.setMap(map);
-                }
+            }
+            if(rider_status && status) {
+                rider_marker.setMap(map);
             }
         }
 
