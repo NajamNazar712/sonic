@@ -25,7 +25,7 @@ class V2RiderTrackingController extends Controller
         else{
             $cities = City::whereIn('hub_id',session('hubs'))->get();
         }
-        $riders = Rider::whereIn('city_id',$cities->pluck('id')->ToArray())->get();
+        $riders = Rider::whereIn('city_id',$cities->pluck('id')->ToArray())->where([['status',1],['blacklist',0]])->get();
         return view('admin.v2_pickups.rider_tracking',compact(['riders','cities']));
     }
 
@@ -97,6 +97,7 @@ class V2RiderTrackingController extends Controller
         if($city)
         {
             $data = Rider::where('riders.city_id',$city_id)
+                ->where([['riders.status',1],['riders.blacklist',0]])
                 ->join('rider_location_logs as logs', 'riders.id','=','logs.rider_id')
                 ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.updated_at as created_at')
                 ->get();
