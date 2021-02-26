@@ -119,7 +119,7 @@ class AdminUserRequestController extends Controller
                 $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
                 $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
-                if(session('role_id') == 1 || ((session('department_id') == 2) && ($user->status == 0 || $user->status == 3 ))) {
+                if(session('role_id') == 1 || (( session('role_id') == 63) && ($user->status == 0 || $user->status == 3 ))) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -185,7 +185,7 @@ class AdminUserRequestController extends Controller
     }
 
     public function verify_index($id) {
-        if(session('role_id') == 1 || session('department_id') == 10) {
+        if(session('role_id') == 1 ||  session('role_id') == 63) {
             $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
             $hubs = City::where('hub', 1)->get();
             $user = AdminUserRequest::find($id);
