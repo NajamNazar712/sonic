@@ -329,7 +329,7 @@
                         setMarkerOnMap();
                     }
 
-                    SetMapBound(false);
+                    SetMapBound();
 
                 }
             })
@@ -356,7 +356,10 @@
             var marker = new google.maps.Marker({
                 id: id,
                 position: location,
-                label: label,
+                label: {
+                    text: label,
+                    fontWeight: "bold",
+                },
                 icon: _icon,
                 animation: google.maps.Animation.DROP
             });
@@ -432,6 +435,7 @@
                         if (status === "OK" && response) {
                             directionsRenderer.setDirections(response);
                         } else {
+                            SetMapBound();
                             console.log("Directions request failed due to " + status);
                         }
                     }
