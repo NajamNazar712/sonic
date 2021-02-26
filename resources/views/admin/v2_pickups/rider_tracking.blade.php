@@ -426,6 +426,9 @@
             currentId = 0;
             rider_status = false;
             start_status = false;
+            $('#total_riders').html(0]);
+            $('#total_active_riders').html(0);
+            $('#total_inactive_riders').html(0);
         }
 
         // clearing route from map
