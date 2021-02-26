@@ -41,7 +41,7 @@ class V2RiderTrackingController extends Controller
 //        return $data;
         // Getting Rider Data
         $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
-            ->where('v2_pickup_notes.rider_id',$rider_id)
+            ->where([['v2_pickup_notes.rider_id',$rider_id],['v2_pickup_notes.pickups','>',0]])
             ->latest('v2_pickup_notes.id')
             ->join('v2_pickup_note_requests as pivot_requests','v2_pickup_notes.id','=','pivot_requests.pickup_note_id')
             ->join('v2_pickup_requests as requests',function ($join){
