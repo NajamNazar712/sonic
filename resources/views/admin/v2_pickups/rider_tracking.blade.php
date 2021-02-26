@@ -91,7 +91,7 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <div id="googleMap" style="width:100%;height:400px;"></div>
+                            <div id="googleMap" style="width:100%;height:800px;"></div>
                         </div>
                     </div>
 
