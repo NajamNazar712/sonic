@@ -1635,7 +1635,7 @@ class ReturnController extends Controller
                 ReturnNoteShipment::where(['return_note_id'=>$return_note,'shipment_id'=>$request->shipment_id])->delete();
                 $return = $return->first();
                 $count = $return->shipments_count;
-                $count = $count-1;
+                $count = $count - 1;
                 if($count == 0){
                     ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count,'status'=>2]);
                 }else{
@@ -1647,11 +1647,11 @@ class ReturnController extends Controller
 
                 $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
                 $return_note_data = ReturnNote::find($request->return_note_id);
-                    if($updated_shipments == 0){
-                        $return_note_data->status = 3;
-                        $return_note_data->updated_at = Carbon::now();
-                        $return_note_data->save();
-                    }
+                if($updated_shipments == 0){
+                    $return_note_data->status = 2;
+                    $return_note_data->updated_at = Carbon::now();
+                    $return_note_data->save();
+                }
 
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{
