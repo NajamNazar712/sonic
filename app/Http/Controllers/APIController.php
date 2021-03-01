@@ -1560,6 +1560,19 @@ class APIController extends Controller
 
           $detail['id'] = $city->id;
           $detail['name'] = $city->name;
+
+          $hub = $city->hub_city;
+          $detail['hub'] = array();
+
+          $detail['hub']['id'] = $hub->id;
+          $detail['hub']['name'] = $hub->name;
+
+          $zone = $city->zone;
+          $detail['zone'] = array();
+
+          $detail['zone']['id'] = $zone->id;
+          $detail['zone']['name'] = $zone->name;
+
           $detail['pickup'] = ($city->pickup) ? TRUE : FALSE;
           $detail['delivery'] = array();
 
