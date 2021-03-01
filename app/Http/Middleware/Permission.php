@@ -525,6 +525,7 @@ class Permission
             'user_management.crm.list' => 188,
             'user_management.user_requests.index' => 394,
             'user_management.user_requests.list' => 394,
+            'user_management.fuel_management.index' => 447,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,

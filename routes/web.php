@@ -1418,6 +1418,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
+            Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
+        });
+
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');

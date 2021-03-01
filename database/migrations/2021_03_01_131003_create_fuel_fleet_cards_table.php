@@ -15,6 +15,7 @@ class CreateFuelFleetCardsTable extends Migration
     {
         Schema::create('fuel_fleet_cards', function (Blueprint $table) {
             $table->increments('id');
+
             $table->timestamps();
         });
     }
