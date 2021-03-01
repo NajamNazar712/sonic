@@ -136,8 +136,39 @@ class APIController extends Controller
       'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
       'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-      'distinct' => ':attribute must not be Repeated.'
+      'distinct' => ':attribute must not be Repeated.',
+
+      'phone_number' => ':attribute format is Invalid'
     ];
+
+    static public function phone_number($phone_number) {
+      //Removing anything after Comma (,)
+      $phone_number = preg_replace('/^([^,]*).*$/', '$1', $phone_number);
+
+      //Removing anything after Slash (/)
+      $phone_number = preg_replace('/^([^\/]*).*$/', '$1', $phone_number);
+
+      //Removing all Dashes (-)
+      $phone_number = str_replace('-', '', $phone_number);
+
+      //Removing all Spaces ( )
+      $phone_number = str_replace(' ', '', $phone_number);
+
+      //Replace +92 with 0
+      if (substr($number, 0, 3) == '+92') {
+        $phone_number =  '0' . substr($number, 3);
+      }
+      //Replace 92 with 0
+      else if (substr($number, 0, 2) == '92') {
+        $phone_number =  '0' . substr($number, 2);
+      }
+      //Addition of 0
+      else if (substr($number, 0, 1) != '0') {
+        $phone_number =  '0' . $number;
+      }
+
+      return $phone_number;
+    }
 
     public function login(Request $request) {
       $rules = [
@@ -298,6 +329,19 @@ class APIController extends Controller
     public function shipment_book(Request $request) {
         $user_id = $request->user_id;
 
+        Validator::extend('phone_number', function($attribute, $value, $parameters) {
+          if ($value) {
+            $value = $this->phone_number($value);
+
+            if (preg_match('/^[0][0-9]{9,10}$/', $value)) {
+              return TRUE;
+            }
+            else {
+              return FALSE;
+            }
+          }
+        });
+
         $user_type = User::where('id',$user_id)->first();
         if($user_type['account_type_id'] == 1) {
             $rules = [
@@ -311,8 +355,8 @@ class APIController extends Controller
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
-                'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-                'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+                'consignee_phone_number_1' => ['required', 'phone_number'],
+                'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -371,8 +415,8 @@ class APIController extends Controller
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
-                'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-                'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+                'consignee_phone_number_1' => ['required', 'phone_number'],
+                'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['nullable', 'boolean'],
@@ -434,6 +478,12 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
         else {
+            $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
+
+            if ($request->filled('consignee_phone_number_2')) {
+              $consignee_phone_number_2 = $this->phone_number($request->consignee_phone_number_2);
+            }
+
             $service_type_id = $request->input('service_type_id');
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
@@ -579,7 +629,7 @@ class APIController extends Controller
                     $user_email_id = $user->email;
                 }
                 $pickup_city_id = $request->input('consignee_city_id');
-                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, substr_replace($consignee_phone_number_1, '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
 
                 $pickup_delivery_address_id = $request->input('pickup_address_id');
                 $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
@@ -620,10 +670,10 @@ class APIController extends Controller
                 }
 
                 $consignee_name = $request->input('consignee_name');
-                $consignee_phone_number_1 = substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0);
+                $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
 
                 if ($request->filled('consignee_phone_number_2')) {
-                    $consignee_phone_number_2 = substr_replace($request->input('consignee_phone_number_2'), '-', 4, 0);
+                    $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
                 }
                 else {
                     $consignee_phone_number_2 = NULL;
