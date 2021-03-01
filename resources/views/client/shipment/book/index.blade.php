@@ -1583,12 +1583,7 @@
 				}
 			});
 
-
-
-			$('.phone_number').inputmask({
-				'mask': '9999-9999999',
-				'clearIncomplete': true
-			});
+			// $('.phone_number').inputmask("Regex", { regex: "^(\\+92)-{0,1}\\d{3}-{0,1}\\d{7}$|^\\d{4}-\\d{7}$"});
 
 			$(this).find('.quantity').TouchSpin({
 				min: 1,

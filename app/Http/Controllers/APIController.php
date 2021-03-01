@@ -155,16 +155,16 @@ class APIController extends Controller
       $phone_number = str_replace(' ', '', $phone_number);
 
       //Replace +92 with 0
-      if (substr($number, 0, 3) == '+92') {
-        $phone_number =  '0' . substr($number, 3);
+      if (substr($phone_number, 0, 3) == '+92') {
+        $phone_number =  '0' . substr($phone_number, 3);
       }
       //Replace 92 with 0
-      else if (substr($number, 0, 2) == '92') {
-        $phone_number =  '0' . substr($number, 2);
+      else if (substr($phone_number, 0, 2) == '92') {
+        $phone_number =  '0' . substr($phone_number, 2);
       }
       //Addition of 0
-      else if (substr($number, 0, 1) != '0') {
-        $phone_number =  '0' . $number;
+      else if (substr($phone_number, 0, 1) != '0') {
+        $phone_number =  '0' . $phone_number;
       }
 
       return $phone_number;
