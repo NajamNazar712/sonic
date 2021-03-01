@@ -59,6 +59,27 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="EditTypeSizeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTypeSizeModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Type and Size Quantity</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="update_type_size_button">Update</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="AddRemarks" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRemarks"
          aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
@@ -520,6 +541,62 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('body').on('click','tr td .edit',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+
+                $.ajax({
+                    url: '{!! route('admin.packaging.requests.quantity_details') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '';
+                        html += '<form id="update_type_size_form">';
+                        html += '@csrf @method("put")';
+                        html += '<input type="hidden" value="'+data.request_id+'" name="request_id">'
+                        html += '<table class="table table-sm datatable text-center" id="quantity_table">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Type</strong></th><th><strong>Size</strong></th><th><strong>Quantity</strong></th><th></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.types, function(index, value) {
+
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.type + '</td>';
+                            html += '<td>' + value.size + '</td>';
+                            html += '<td><input type="text" class="type_size_quantity form-control" name="quantity['+value.index+']" value="' + value.quantity + '"></td>';
+                            html += '<td><button type="button" class="btn btn-danger quantity_delete_btn">Remove</button> </td></tr>'
+                        });
+                        html += '</tbody></table></form>';
+
+                        $('.quantity_delete_btn').inputmask({
+                            'alias': 'integer',
+                            'allowMinus': false,
+                            'allowPlus': false,
+                            'rightAlign': false,
+                            'min': 1,
+                            'max': 10000
+                        });
+                        $('#EditTypeSizeModal .modal-body').html(html);
+                        $('#EditTypeSizeModal').modal('show');
+                    }
+                    // console.log(data.success);
+                });
+            });
+
+            $('body').on('click','.quantity_delete_btn',function () {
+                console.log($('#quantity_table tr').length);
+                if($('#quantity_table tr').length > 2)
+                {
+                    $(this).parents('tr').remove();
+                }
+                else{
+                    toastr.error('Atleast one packaging material type is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            })
+
             $('body').on('click','#datatable .quantity',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
 
@@ -844,35 +921,36 @@
                 e.preventDefault();
             });
 
-            $('#update_remarks_button').on('click', function(){
-                var remarks_shipment_id = $('#remarks_shipment_id').val();
-                var packaging_remarks = $('#packaging_remarks').val();
-                if(packaging_remarks == null || packaging_remarks == ''){
-                    var error = 'Please enter remarks';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                else{
-                    $('#update_remarks_button').attr('disabled', true);
-                    $.ajax({
-                        url: '{!! route('admin.packaging.requests.remarks') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': remarks_shipment_id,
-                            'remarks': packaging_remarks,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if(data.status === 1){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.draw();
-                            $('#AddRemarks').modal('hide');
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        $('#update_remarks_button').attr('disabled', false);
-                    });
-                }
+            $('#update_type_size_form').on('submit', function(e){
+                e.preventDefault();
+            });
+
+            $('#update_type_size_button').on('click', function(){
+                $('.type_size_quantity').each(function (i,v) {
+                    if($(v).val() == null || $(v).val() == '' || !$.isNumeric($(v).val()))
+                    {
+                        var error = 'Please enter valid quantity';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    else{
+                        $('#update_type_size_button').attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.update') !!}',
+                            method: 'POST',
+                            data: $("#update_type_size_form").serialize(),
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                                $('#EditTypeSizeModal').modal('hide');
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#update_type_size_button').attr('disabled', false);
+                        });
+                    }
+                });
             });
             var already_selected_size = [];
             $('#AssignAgentModal').on('hide.bs.modal', function (e) {

@@ -1651,6 +1651,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+            Route::put('','Admins\AdminPackagingMaterialController@request_update')->name('update');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
