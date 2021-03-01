@@ -50,7 +50,7 @@ class V2RiderTrackingController extends Controller
             ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
             ->leftjoin('users','users.id','=','info.user_id')
             ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
-            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
+            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.location_latitude as latitude','info.location_longitude as longitude')
             ->get()->groupBy('pickup_id');
 
         $rider = Rider::where('riders.id',$rider_id)
