@@ -133,8 +133,8 @@ class APIController extends Controller
 
       'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-      'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+      'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
 
       'distinct' => ':attribute must not be Repeated.',
 
@@ -333,7 +333,7 @@ class APIController extends Controller
           if ($value) {
             $value = $this->phone_number($value);
 
-            if (preg_match('/^[0][0-9]{9,10}$/', $value)) {
+            if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/', $value)) {
               return TRUE;
             }
             else {
