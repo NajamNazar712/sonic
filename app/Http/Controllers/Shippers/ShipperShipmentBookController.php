@@ -443,7 +443,10 @@ class ShipperShipmentBookController extends Controller
                             $pickup_city_id = $user_shipping_info->city_id;
                         }
                         else {
-                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                            $phone_number = $this->phone_number($request->input('consignee_phone_number_1'));
+
+                            $phone_number = substr_replace($phone_number, '-', 4, 0);
+                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $phone_number, $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                             $pickup_city_id = $request->input('consignee_city');
 
@@ -2530,7 +2533,10 @@ class ShipperShipmentBookController extends Controller
                         $pickup_city_id = $user_shipping_info->city_id;
                     }
                     else {
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                        $phone_number = $this->phone_number($request->input('consignee_phone_number_1'));
+
+                        $phone_number = substr_replace($phone_number, '-', 4, 0);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $phone_number, $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                         $pickup_city_id = $request->input('consignee_city');
                         $pickup_address_id_for_delivery = $request->input('pickup_address');
