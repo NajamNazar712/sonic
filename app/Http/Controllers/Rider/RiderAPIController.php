@@ -3050,10 +3050,10 @@ class RiderAPIController extends Controller
                             ->where('rider_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
                     })
-                    ->leftjoin('admins as ad','ad.id', 'shipments_journey.admin_id')
+                    ->leftjoin('admins as ad', 'ad.id', 'shipments_journey.admin_id')
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number','shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
+                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($delivery_note_shipments->exists()) {
@@ -3082,42 +3082,40 @@ class RiderAPIController extends Controller
 
             } else if ($request->has('return_note_id')) {
                 $return_note_id = $request->return_note_id;
-                /*$return_note_shipments = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
+                $return_note_shipments = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
                     ->leftjoin('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id'));
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23)'));
                     })
                     ->leftjoin('rider_return_deliveries', function ($join) {
                         $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
                             ->where('rider_return_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = rider_return_deliveries.return_note_id)'));
                     })
-                    ->leftjoin('admins as ad','ad.id', 'shipments_journey.admin_id')
+                    ->leftjoin('admins as ad', 'ad.id', 'shipments_journey.admin_id')
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number','ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'return_note_shipments.status as return_note_shipments_status', 'ad.name as updated_by')
-                    ->where('return_note_shipments.return_note_id', $return_note_id)->get();
-                return response()->json(['status' => 0, 'history_details' => $return_note_shipments]);*/
-
-
-
-                $return_note_shipments = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', 's.id')
-                    ->select('s.tracking_number as tacking_no', 'return_note_shipments.status as status')
-                    ->where('return_note_id', $request->return_note_id);
+                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'return_note_shipments.status as return_note_shipments_status', 'ad.name as updated_by')
+                    ->where('return_note_shipments.return_note_id', $return_note_id);
 
                 if ($return_note_shipments->exists()) {
                     $return_note_shipments = $return_note_shipments->get();
                     $data = array();
                     foreach ($return_note_shipments as $return_note_shipment) {
                         $datum = array();
-                        $datum['tracking_no'] = $return_note_shipment->tacking_no;
-                        if ($return_note_shipment->status == 0) {
-                            $datum['status'] = 'Not Attempt';
-                        } else if ($return_note_shipment->status == 1) {
-                            $datum['status'] = 'Undelivered';
-                        } else if ($return_note_shipment->status == 2) {
+                        $datum['tracking_no'] = $return_note_shipment->tracking_number;
+                        $datum['shipment_status'] = $return_note_shipment->shipment_status;
+                        $datum['shipment_reason'] = $return_note_shipment->shipment_reason;
+                        $datum['update_date_time'] = $return_note_shipment->update_date_time;
+                        $datum['received_or_refused_by'] = $return_note_shipment->received_or_refused_by;
+                        $datum['picture_path'] = $return_note_shipment->picture_path;
+                        $datum['updated_by'] = $return_note_shipment->updated_by;
+
+                        if ($return_note_shipment->shipper_status_id == 25) {
                             $datum['status'] = 'Delivered';
+                        } else {
+                            $datum['status'] = 'Undelivered';
                         }
                         $data[] = $datum;
                     }
