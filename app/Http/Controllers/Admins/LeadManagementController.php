@@ -260,7 +260,7 @@ class LeadManagementController extends Controller
         $lead = Lead::find($lead_id);
         $status = $request->status;
         if($status != NULL){
-            if ($lead->sale_person_id != null){
+            // if ($lead->sale_person_id != null){
                 $lead_log = new LeadLog();
                 $lead_log->lead_id = $lead->id;
                 $lead_log->prev_status_id = $lead->status_id;
@@ -279,10 +279,10 @@ class LeadManagementController extends Controller
                 }
 
                 return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
-            }
-            else{
-                return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
-            }
+            // }
+            // else{
+            //     return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
+            // }
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Status!']);
