@@ -88,6 +88,11 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
 	        });
+
+            Route::prefix('location')->name('location.')->group(function(){
+                Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
+            });
+
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');

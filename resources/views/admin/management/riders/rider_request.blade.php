@@ -114,13 +114,6 @@
                                                data-rule-maxlength="4">
                                     </fieldset>
                                 </div>
-                                <div class="col">
-                                    <fieldset class="form-group">
-                                        <input type="text" class="form-control" name="trax_id" id="rider_trax_id"
-                                               placeholder="Trax Id" required data-rule-required="true"
-                                               data-msg-required="ID is required" data-rule-minlength="4">
-                                    </fieldset>
-                                </div>
                             </div>
                         </div>
 
@@ -347,12 +340,12 @@
                             return '';
                         }
                     },
-                    {data: 'rider_name', name: 'rider_name', class: 'align-middle rider_name'},
+                    {data: 'rider_name', name: 'rider_requests.name', class: 'align-middle rider_name'},
                     {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
                     {data: 'phone_no', name: 'phone_no', class: 'align-middle phone_no'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
-                    {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
+                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {
                         data: 'action',

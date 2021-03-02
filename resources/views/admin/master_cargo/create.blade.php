@@ -458,6 +458,8 @@
                         $('#master_cargo_consignment form input.cnic').inputmask({
                             'mask': "99999-9999999-9",
                             'clearIncomplete': true
+                        }).bind('change', function() {
+                            $(this).valid();
                         });
                         $.each(data.shipping_modes, function(index, shipping_mode) {
                             $('#master_cargo_consignment form .shipping_mode_select').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');

@@ -38,6 +38,7 @@ class AdminSearchSonicSeeder extends Seeder
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  Pickups  >  Receive Pickups', 'url'=>'admin.pickups.receive.index', 'permission_id' => 23),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  Pickups  >  Pickups History', 'url'=>'admin.pickups.history.index', 'permission_id' => 123),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  Pickups  >  Rider Pickups', 'url'=>'admin.pickups.rider.index', 'permission_id' => 271),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  Rider Tracking', 'url'=>'admin.v2_pickups.rider_tracking.index', 'permission_id' => 446),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  Pickups  >  Rider Pickup Action Logs', 'url'=>'admin.pickups.rider.action_log.index', 'permission_id' => 272),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  V2 Pickups  >  Pending Pickups', 'url'=>'admin.v2_pickups.pending.index', 'permission_id' => 17),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile  >  V2 Pickups  >  Arrival Service Center', 'url'=>'admin.v2_pickups.arrival_service.service.index', 'permission_id' => 24),
