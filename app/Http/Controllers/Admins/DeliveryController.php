@@ -6079,37 +6079,43 @@ class DeliveryController extends Controller
         $tracking_numbers = $request->tracking_number;
         $delivery_note_id = $request->delivery_note_id;
         $shipment = Shipment::find($shipment_id);
+        $serial = '';
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
 
-                        $total_shipments = $delivery_note->shipments_count;
-                        $total_shipments++;
-                        $cod_amount = $delivery_note->total_cod_amount;
-                        $total_cod_amount = $cod_amount + $shipment->amount;
-                        $delivery_note->shipments_count = $total_shipments;
-                        $delivery_note->total_cod_amount = $total_cod_amount;
-                        $delivery_note->save();
+                $total_shipments = $delivery_note->shipments_count;
+                $total_shipments++;
+                $cod_amount = $delivery_note->total_cod_amount;
+                $total_cod_amount = $cod_amount + $shipment->amount;
+                $delivery_note->shipments_count = $total_shipments;
+                $delivery_note->total_cod_amount = $total_cod_amount;
+                $delivery_note->save();
 
-                        if($delivery_note->ordering == 1){
-                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
-                            $serial = $serial->ordering;
-                        }
-                        else{
-                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->first();
-                        }
-                        if($serial != null){
-                            $serial++;
-                        }
-                        else{
-                            $serial = null;
-                        }
-                        $delivery_note_shipment = new DeliveryNoteShipment();
-                        $delivery_note_shipment->delivery_note_id = $delivery_note_id;
-                        $delivery_note_shipment->shipment_id = $shipment->id;
-                        $delivery_note_shipment->ordering = $serial;
-                        $delivery_note_shipment->save();
-                        return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+                if($delivery_note->ordering == 1){
+                    $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                    $serial = $serial->ordering;
+                }
+                if($serial != null){
+                    $serial++;
+                }
+                else{
+                    $serial = null;
+                }
+                $delivery_note_shipment = new DeliveryNoteShipment();
+                $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+                $delivery_note_shipment->shipment_id = $shipment->id;
+                $delivery_note_shipment->ordering = $serial;
+                $delivery_note_shipment->save();
 
+                $journey = new ShipmentsJourney;
+                $journey->shipment_id = $shipment_id;
+                $journey->verification = 1;
+                $journey->shipper_status_id = 5;
+                $journey->consignee_status_id = 5;
+                $journey->admin_id = Auth::id();
+                $journey->save();
+                NotificationsController::send(10,$delivery_note_id, $shipment_id);
+                return response()->json(['status' => 0, 'success' => 'Shipments Added']);
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
