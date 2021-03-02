@@ -3043,16 +3043,17 @@ class RiderAPIController extends Controller
                     ->leftjoin('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and rider_id is not null)'));
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5)'));
                     })
                     ->leftjoin('rider_deliveries', function ($join) {
                         $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
                             ->where('rider_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
                     })
+                    ->leftjoin('admins as ad','ad.id', 'shipments_journey.admin_id')
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'delivery_note_shipments.status as delivery_note_shipments_status')
+                    ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($delivery_note_shipments->exists()) {
@@ -3069,6 +3070,7 @@ class RiderAPIController extends Controller
                         $datum['received_or_refused_by'] = $delivery_note_shipment->received_or_refused_by;
                         $datum['picture_path'] = $delivery_note_shipment->picture_path;
                         $datum['delivered_status'] = $delivery_note_shipment->delivered_status;
+                        $datum['updated_by'] = $delivery_note_shipment->updated_by;
                         if ($delivery_note_shipment->delivery_note_shipments_status == 0) {
                             $datum['status'] = 'Not Attempt';
                         } elseif ($delivery_note_shipment->delivery_note_shipments_status == 1) {
