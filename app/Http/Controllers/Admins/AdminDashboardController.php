@@ -1612,6 +1612,8 @@ class AdminDashboardController extends Controller
                 if($user->status == 4){
                     $user->status = 3;
                     $user->disable_remarks = null;
+                    $user->reactivated_at = Carbon::now();
+
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
                 }else{
