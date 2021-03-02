@@ -522,6 +522,11 @@ class APIController extends Controller
 
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
+
+                if(($request->input('consignee_city_id') == 1244 && $user_id != 5982)){
+                    return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
+                }
+
                 if (!$consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
