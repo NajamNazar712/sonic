@@ -250,6 +250,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
+
+        .vertical-align-middle{
+            vertical-align: middle !important;
+        }
         table.dataTable {
             font-size: 12px;
         }
@@ -562,16 +566,25 @@
                         html += '<tbody>';
                         $.each(data.types, function(index, value) {
 
-                            var ind = index+1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.type + '</td>';
-                            html += '<td>' + value.size + '</td>';
-                            html += '<td><input type="text" class="type_size_quantity form-control" name="quantity['+value.index+']" value="' + value.quantity + '"></td>';
-                            html += '<td><button type="button" class="btn btn-danger quantity_delete_btn">Remove</button> </td></tr>'
+                            var ind = index + 1;
+                            html += '<tr class=""><td class="vertical-align-middle">' + ind + '</td>';
+                            html += '<td class="vertical-align-middle">' + value.type + '</td>';
+                            html += '<td class="vertical-align-middle">' + value.size + '</td>';
+                            html += '<td><input type="text" class="type_size_quantity form-control" name="quantity[' + value.index + ']" value="' + value.quantity + '"></td>';
+                            if (data.types.length > 1)
+                            {
+                                html += '<td><button type="button" class="btn btn-danger quantity_delete_btn">Remove</button> </td></tr>'
+                            }
+                            else{
+                                html += '<td></td>';
+                            }
                         });
                         html += '</tbody></table></form>';
 
-                        $('.quantity_delete_btn').inputmask({
+
+                        $('#EditTypeSizeModal .modal-body').html(html);
+
+                        $('.type_size_quantity').inputmask({
                             'alias': 'integer',
                             'allowMinus': false,
                             'allowPlus': false,
@@ -579,7 +592,7 @@
                             'min': 1,
                             'max': 10000
                         });
-                        $('#EditTypeSizeModal .modal-body').html(html);
+
                         $('#EditTypeSizeModal').modal('show');
                     }
                     // console.log(data.success);
@@ -587,13 +600,13 @@
             });
 
             $('body').on('click','.quantity_delete_btn',function () {
-                console.log($('#quantity_table tr').length);
                 if($('#quantity_table tr').length > 2)
                 {
                     $(this).parents('tr').remove();
                 }
-                else{
-                    toastr.error('Atleast one packaging material type is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                if($('.quantity_delete_btn').length == 1)
+                {
+                    $('.quantity_delete_btn').remove();
                 }
             })
 

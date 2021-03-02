@@ -446,6 +446,8 @@ class AdminPackagingMaterialController extends Controller
         $request_id = $request->request_id;
 
         $index_array = [];
+        $total_charges = 0;
+
         DB::beginTransaction();
         try {
             foreach ($request->quantity as $index => $quantity) {
@@ -454,9 +456,46 @@ class AdminPackagingMaterialController extends Controller
                     ->where('id', $index)->first();
                 $package->quantity = $quantity;
                 $package->update();
+
+                $user_id = $package->packaging_request->user_id;
+                $packaging_type_id = $package->type_id;
+                $packaging_size_id = $package->type_size_id;
+
+                $charges = PackagingCharge::where('user_id',$user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
+
+                if($charges != null){
+                    $total_charges += $quantity * $charges->charges;
+                }else{
+                    $size = PackagingMaterialTypeSizes::find($packaging_size_id);
+                    $total_charges += $quantity * $size->standard_charges;
+                }
+
+                $created_at = $package->packaging_request->created_at;
             }
+
             PackagingMaterialRequestDetail::whereNotIn('id',$index_array)
                 ->where('packaging_material_request_id', $request_id)->delete();
+
+            $booking_day = $created_at;
+            $discount = DiscountCharge::where('user_id', $user_id)->whereDate('to', '<=', $booking_day)->whereDate('from', '>=', $booking_day)->whereNotNull('packaging');
+
+            if ($discount->exists()) {
+                $discount = $discount->orderBy('shipping_mode_id', 'ASC')->first();
+
+                $discount_packaging = $discount->packaging;
+
+                if (strpos($discount_packaging, '%') !== FALSE) {
+                    $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+                    $total_charges -= $discount_packaging;
+                }
+                else {
+                    $total_charges -= floatval($discount_packaging);
+                }
+            }
+
+            $packaging_request = PackagingMaterialRequest::find($request_id);
+            $packaging_request->amount = $total_charges;
+            $packaging_request->update();
         }
         catch (\Exception $e)
         {
