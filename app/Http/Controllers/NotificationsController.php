@@ -7043,6 +7043,16 @@ class NotificationsController extends Controller
                     }
 
                 }
+                else if($id == 126){
+                     $phone = $reference_1_id;
+                     $tracking_number = $reference_2_id;
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $tracking_number, $body);
+                    }
+                    $to = $phone;
+                    self::sms($body,$to);
+                }
             }
         }
     }
