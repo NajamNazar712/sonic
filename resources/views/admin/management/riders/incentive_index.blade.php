@@ -28,10 +28,11 @@
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Route</th>
                                     <th class="border-primary border-darken-1">Category</th>
-                                    <th class="border-primary border-darken-1">Added On</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created By</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -136,10 +137,11 @@
                             head.push('Address');
                             head.push('Route');
                             head.push('Category');
-                            head.push('Added On');
                             head.push('Status');
                             head.push('Created By');
+                            head.push('Created At');
                             head.push('Updated By');
+                            head.push('Updated At');
 
 
                             $.each(result.data, function(index, values) {
@@ -155,10 +157,11 @@
                                 row.push(values.address);
                                 row.push(values.route);
                                 row.push(values.category);
-                                row.push(values.created_at);
                                 row.push(values.status);
                                 row.push(values.created_by);
+                                row.push(values.created_at);
                                 row.push(values.updated_by);
+                                row.push(values.updated_at);
                                 body.push(row);
                             });
                         },
@@ -276,7 +279,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.riders.incentive.list') }}',
-                order: [[11, 'desc']],
+                order: [[15, 'desc']],
                 rowId : 'rider_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -290,10 +293,11 @@
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'riders.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

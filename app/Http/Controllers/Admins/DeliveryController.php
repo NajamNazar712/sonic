@@ -770,9 +770,8 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category'])
             ->where('delivery_notes.status', 0);
-
 
 
         if (session('role_id') != 1) {
@@ -833,10 +832,25 @@ class DeliveryController extends Controller
                     return 'Pending for Verification';
                 }
             })
+            ->editColumn('business_category', function ($result) {
+                if ($result->business_category == 1) {
+                    return 'Domestic';
+                } else {
+                    return 'International';
+                }
+            })
             ->filterColumn('pending_status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword == 0 || $keyword == 1) {
                     $query->where('delivery_notes.pending_status', '=', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('business_category', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword == 1) {
+                    $query->where('oc.business_category_id', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }
@@ -3627,8 +3641,7 @@ class DeliveryController extends Controller
 
     public function pending_cash_collection_list(Request $request)
     {
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
@@ -3709,10 +3722,14 @@ class DeliveryController extends Controller
                 }
                 return '';
             });
-        if ($tracking_number = $request->get('search_tracking')) {
+        if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+            ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
         }
         return $datatable->make(true);
     }
@@ -3835,10 +3852,19 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             });
-        if ($tracking_number = $request->get('search_tracking')) {
+//        if ($tracking_number = $request->get('search_tracking')) {
+//            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+//                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+//                ->where('s.tracking_number', '=', $tracking_number);
+//        }
+        if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+                ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
         }
 
         return $datatable->make(true);
@@ -5118,7 +5144,7 @@ class DeliveryController extends Controller
     public function history_shipments_delivered(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->whereNotIn('status', [8 ,10, 11])->get();
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->whereNotIn('status', [8 ,10, 11])->where('status',6)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
