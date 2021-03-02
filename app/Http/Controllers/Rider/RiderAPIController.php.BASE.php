@@ -1208,7 +1208,7 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'picture' => ['required', 'image'],
+            'picture' => ['required', 'image']
         ];
         $message = '';
 
@@ -1528,7 +1528,7 @@ class RiderAPIController extends Controller
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_request_not_pick_reasons,id'],
             'rider_remarks' => ['nullable'],
-            'picture' => ['required', 'image'],
+            'picture' => ['required', 'image']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2582,7 +2582,7 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['nullable'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'picture' => ['required', 'image'],
+            'picture' => ['required', 'image']
         ];
         $message = '';
 
@@ -3000,6 +3000,7 @@ class RiderAPIController extends Controller
     public function rider_wallet(Request $request)
     {
         $rules = [
+//            'delivery_note_ids' => ['required', 'array', 'min:1', 'exists:delivery_notes,id']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3026,6 +3027,8 @@ class RiderAPIController extends Controller
             }
         }
     }
+
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
