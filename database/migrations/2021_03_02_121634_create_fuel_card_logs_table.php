@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFuelCardRequestTypesTable extends Migration
+class CreateFuelCardLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateFuelCardRequestTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fuel_card_request_types', function (Blueprint $table) {
+        Schema::create('fuel_card_logs', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->integer('fuel_card_request_id')->index();
+            $table->integer('admin_id')->index();
+            $table->integer('card_request_type_id');
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ class CreateFuelCardRequestTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fuel_card_request_types');
+        Schema::dropIfExists('fuel_card_logs');
     }
 }

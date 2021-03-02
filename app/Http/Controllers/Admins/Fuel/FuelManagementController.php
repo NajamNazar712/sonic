@@ -15,6 +15,7 @@ class FuelManagementController extends Controller
 
     public function fuel_index()
     {
-        return view('admin/user_management/fuel/fuel_management');
+        return view('admin.user_management.fuel.fuel_management');
     }
+
 }

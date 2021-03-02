@@ -119,35 +119,30 @@
                             }
                         }
                     });
-                    var data1 = $.map({!! $departments !!}, function (obj) {
-                        obj.id = obj.id;
+                    {{--var data1 = $.map({!! $departments !!}, function (obj) {--}}
+                    {{--    obj.id = obj.id;--}}
+                    {{--    obj.text = obj.name;--}}
+                    {{--    return obj;--}}
+                    {{--});--}}
 
-                        return obj;
-                    });
-                    var data1 = $.map({!! $departments !!}, function (obj) {
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $("#departments_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
-                        placeholder: "Select Department",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    {{--$("#departments_select").prepend('<option value="" selected></option>').select2({--}}
+                    {{--    data:data1,--}}
+                    {{--    placeholder: "Select Department",--}}
+                    {{--    width:'100%',--}}
+                    {{--    containerCssClass: 'select-xs',--}}
+                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
+                    {{--});--}}
                     this.api().table().columns.adjust();
                 }
             });
 
             @if (session('role_id') == 1 || in_array(87, session('permissions')))
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
+            /*$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var link = '{{ route('admin.user_management.roles.update.index', ["id" => 0]) }}';
 
                 window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-            });
+            });*/
             @endif
         });
     </script>
