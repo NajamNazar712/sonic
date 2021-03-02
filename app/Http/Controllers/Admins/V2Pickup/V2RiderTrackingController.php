@@ -34,11 +34,6 @@ class V2RiderTrackingController extends Controller
     {
         $rider_id = $request->rider_id;
 
-//        $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
-//            ->where('v2_pickup_notes.rider_id',$rider_id)
-//            ->latest('v2_pickup_notes.id')->get();
-//
-//        return $data;
         // Getting Rider Data
         $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
             ->where([['v2_pickup_notes.rider_id',$rider_id],['v2_pickup_notes.pickups','>',0]])
@@ -50,7 +45,7 @@ class V2RiderTrackingController extends Controller
             ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
             ->leftjoin('users','users.id','=','info.user_id')
             ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
-            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.location_latitude as latitude','info.location_longitude as longitude')
+            ->select('v2_pickup_notes.id as node_id','pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.location_latitude as latitude','info.location_longitude as longitude')
             ->get()->groupBy('pickup_id');
 
         $rider = Rider::where('riders.id',$rider_id)
