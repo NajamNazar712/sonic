@@ -2188,7 +2188,7 @@ class AdminFinanceController extends Controller
     }
 
     public function add_shipment_adjustment_index() {
-        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11])->get();
+        $adjustment_types = AdjustmentType::whereIn('id', [6, 7, 8, 9, 10, 11, 15, 16])->get();
         return view('admin.finance.add_shipment_adjustment')->with(['adjustment_types' => $adjustment_types]);
     }
 
@@ -5271,6 +5271,10 @@ class AdminFinanceController extends Controller
                                     <td>S-7930679-5</td>
                                 </tr>
                                 <tr>
+                                    <td class="color primary"><strong>PNTN</strong></td>
+                                    <td>P-7930679-5</td>
+                                </tr>
+                                <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
                                 </tr>
@@ -5832,6 +5836,10 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color primary"><strong>SNTN</strong></td>
                                     <td>S-7930679-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>PNTN</strong></td>
+                                    <td>P-7930679-5</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
