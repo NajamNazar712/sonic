@@ -3039,7 +3039,7 @@ class RiderAPIController extends Controller
         } else {
             if ($request->has('delivery_note_id')) {
                 $delivery_note_id = $request->delivery_note_id;
-                $delivery_note_shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+                $shipment_details = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->leftjoin('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
@@ -3056,33 +3056,9 @@ class RiderAPIController extends Controller
                     ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
-                if ($delivery_note_shipments->exists()) {
-                    $delivery_note_shipments = $delivery_note_shipments->get();
-                    $data = array();
-                    foreach ($delivery_note_shipments as $delivery_note_shipment) {
-                        $datum = array();
-                        $datum['tracking_no'] = $delivery_note_shipment->tracking_number;
-                        $datum['shipment_status'] = $delivery_note_shipment->shipment_status;
-                        $datum['shipment_reason'] = $delivery_note_shipment->shipment_reason;
-                        $datum['update_date_time'] = $delivery_note_shipment->update_date_time;
-                        $datum['received_or_refused_by'] = $delivery_note_shipment->received_or_refused_by;
-                        $datum['picture_path'] = $delivery_note_shipment->picture_path;
-                        $datum['updated_by'] = $delivery_note_shipment->updated_by;
-                        if (in_array($delivery_note_shipment->shipper_status_id, [14, 30, 36, 37])) {
-                            $datum['status'] = 'Delivered';
-                        } else {
-                            $datum['status'] = 'Undelivered';
-                        }
-                        $data[] = $datum;
-                    }
-                    return response()->json(['status' => 0, 'history_details' => $data]);
-                } else {
-                    return response()->json(['status' => 1, 'message' => "No Details Found"]);
-                }
-
             } else if ($request->has('return_note_id')) {
                 $return_note_id = $request->return_note_id;
-                $return_note_shipments = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
+                $shipment_details = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
                     ->leftjoin('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
@@ -3098,33 +3074,33 @@ class RiderAPIController extends Controller
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
                     ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'return_note_shipments.status as return_note_shipments_status', 'ad.name as updated_by')
                     ->where('return_note_shipments.return_note_id', $return_note_id);
-
-                if ($return_note_shipments->exists()) {
-                    $return_note_shipments = $return_note_shipments->get();
-                    $data = array();
-                    foreach ($return_note_shipments as $return_note_shipment) {
-                        $datum = array();
-                        $datum['tracking_no'] = $return_note_shipment->tracking_number;
-                        $datum['shipment_status'] = $return_note_shipment->shipment_status;
-                        $datum['shipment_reason'] = $return_note_shipment->shipment_reason;
-                        $datum['update_date_time'] = $return_note_shipment->update_date_time;
-                        $datum['received_or_refused_by'] = $return_note_shipment->received_or_refused_by;
-                        $datum['picture_path'] = $return_note_shipment->picture_path;
-                        $datum['updated_by'] = $return_note_shipment->updated_by;
-
-                        if ($return_note_shipment->shipper_status_id == 25) {
-                            $datum['status'] = 'Delivered';
-                        } else {
-                            $datum['status'] = 'Undelivered';
-                        }
-                        $data[] = $datum;
-                    }
-                    return response()->json(['status' => 0, 'history_details' => $data]);
-                } else {
-                    return response()->json(['status' => 1, 'message' => "No Details Found"]);
-                }
             } else {
                 return response()->json(['status' => 1, 'message' => "No Parameter Provided"]);
+            }
+
+            if ($shipment_details->exists()) {
+                $shipment_details = $shipment_details->get();
+                $data = array();
+                foreach ($shipment_details as $shipment_detail) {
+                    $datum = array();
+                    $datum['tracking_no'] = $shipment_detail->tracking_number;
+                    $datum['shipment_status'] = $shipment_detail->shipment_status;
+                    $datum['shipment_reason'] = $shipment_detail->shipment_reason;
+                    $datum['update_date_time'] = $shipment_detail->update_date_time;
+                    $datum['received_or_refused_by'] = $shipment_detail->received_or_refused_by;
+                    $datum['picture_path'] = $shipment_detail->picture_path;
+                    $datum['updated_by'] = $shipment_detail->updated_by;
+
+                    if (in_array($shipment_detail->shipper_status_id, [14, 30, 36, 37, 25])) {
+                        $datum['status'] = 'Delivered';
+                    } else {
+                        $datum['status'] = 'Undelivered';
+                    }
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'history_details' => $data]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "No Details Found"]);
             }
         }
 
