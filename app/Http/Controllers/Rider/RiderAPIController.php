@@ -3053,7 +3053,7 @@ class RiderAPIController extends Controller
                     ->leftjoin('admins as ad','ad.id', 'shipments_journey.admin_id')
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number','ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
+                    ->select('s.tracking_number','shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'ad.name as updated_by')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($delivery_note_shipments->exists()) {
