@@ -6114,7 +6114,7 @@ class DeliveryController extends Controller
                 $journey->consignee_status_id = 5;
                 $journey->admin_id = Auth::id();
                 $journey->save();
-                NotificationsController::send(10,$delivery_note_id, $shipment_id);
+//                NotificationsController::send(10,$delivery_note_id, $shipment_id);
                 return response()->json(['status' => 0, 'success' => 'Shipments Added']);
         }
         else{
