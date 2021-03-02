@@ -732,12 +732,7 @@ class ShipperShipmentBookController extends Controller
                             $this->cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $descriptions, $amounts);
                         }
                     }
-                    if($self_collection == TRUE){
-                    $self_collection_shipment = SelfCollectionShipment::where('shipment_id',$shipment_id);
-                    if($self_collection_shipment->exists()){
-                        NotificationsController::send(126,$consignee_phone_number_1,$tracking_number);
-                    }
-                }
+                   
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
