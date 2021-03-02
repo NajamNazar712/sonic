@@ -89,6 +89,11 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
 	        });
+
+            Route::prefix('location')->name('location.')->group(function(){
+                Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
+            });
+
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
@@ -106,6 +111,11 @@ Route::name('api.')->group(function () {
                 Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
                 Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
                 Route::post('return', 'Rider\RiderAPIController@return_history')->name('return');
+
+                Route::post('pickup_v2', 'Rider\RiderAPIController@pickups_history_v2')->name('pickup_v2');
+                Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
+                Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
+                Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
             });
 
             Route::prefix('return')->name('return.')->group(function () {

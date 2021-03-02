@@ -2178,7 +2178,7 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $general_admins->pluck('email')->toArray());
                                 }*/
 
-                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                                $related_admins = Admin::whereIn('role_id', [9, 10, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
                                 });
 
@@ -2332,7 +2332,7 @@ class NotificationsController extends Controller
 //                                    $to = array_merge($to, $general_admins->pluck('email')->toArray());
 //                                }
 
-                                $related_admins = Admin::whereIn('role_id', [8, 9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                                $related_admins = Admin::whereIn('role_id', [9, 10, 25, 31])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                                     $query->where('hub_id', $hub_id);
                                 });
 
@@ -5845,7 +5845,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 8, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
                         $query->where('hub_id', $hub_id);
                     });
                     if ($to_admins->exists()) {
@@ -6759,7 +6759,7 @@ class NotificationsController extends Controller
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
@@ -6808,7 +6808,7 @@ class NotificationsController extends Controller
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city->name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';

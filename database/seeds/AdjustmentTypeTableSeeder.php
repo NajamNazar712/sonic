@@ -31,6 +31,8 @@ class AdjustmentTypeTableSeeder extends Seeder
             array('id' => 12, 'name' => 'Adjustment for Weight Change', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 13, 'name' => 'Adjusted from Month Closing (Return Confirm)', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 14, 'name' => 'Adjusted from Month Closing (Delivered)', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 15, 'name' => 'Manual Adjustment - Recovery', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 16, 'name' => 'Manual Adjustment - Warehouse Fulfillment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }

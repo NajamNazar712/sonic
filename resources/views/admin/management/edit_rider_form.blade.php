@@ -56,7 +56,7 @@
             </div>
             <div class="col">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="pin"  value="{{$rider->pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
+                <input type="text" class="form-control" name="pin"  value="{{$rider->dummy_pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
             </fieldset>
         </div>
         </div>
@@ -140,6 +140,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
         $('#editRiderForm .select2').select2({
@@ -160,6 +161,11 @@
         $('#city_list').val({!! $rider->city_id !!}).trigger('change');
         @if($rider->route_id != Null)
             $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @else
+        $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a route',
+            dropdownParent: $("#editRiderForm")
+        });
         @endif
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
@@ -177,10 +183,15 @@
                 success:function (data) {
 
                     routelist.empty();
-                    for(var i = 0; i < data.length; i++){
-                        var option = new Option(data[i].code+' ('+data[i].start+' - '+data[i].end+')', data[i].id, true, true);
-                        routelist.append(option).trigger('change');
-                    }
+                    // for(var i = 0; i < data.length; i++){
+                    //     var option = new Option(data[i].code+' ('+data[i].start+' - '+data[i].end+')', data[i].id, true, true);
+                    //     routelist.append(option).trigger('change');
+                    // }
+                    $.each(data, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                        routelist.append(newOption);
+                    });
+                    routelist.val('').trigger('change');
                 }
             });
         });

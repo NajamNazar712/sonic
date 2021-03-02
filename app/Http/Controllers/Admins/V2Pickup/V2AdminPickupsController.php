@@ -2454,7 +2454,7 @@ class V2AdminPickupsController extends Controller
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
-            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived_count'), DB::raw('(SELECT SUM(shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived_count'), DB::raw('(SELECT SUM(shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id AND vrp.pickup_request_id in (SELECT pickup_request_id from v2_pickup_note_requests where pickup_note_id = v2_pickup_notes.id)) AS rider_picked'))
             ->groupBy('v2_pickup_notes.id');
 
 
@@ -2513,6 +2513,18 @@ class V2AdminPickupsController extends Controller
         $riders = Rider::where('status', 1)->select(['id','name'])->get();
         return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
     }
+
+
+    public function rider_tracking_index(){
+        // $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
+        //  $users = User::select(['id','name'])->get();
+        //  $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
+        //  $riders = Rider::where('status', 1)->select(['id','name'])->get();
+        //  return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
+     }
+ 
+
+
 
     public function pickup_route_list(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')

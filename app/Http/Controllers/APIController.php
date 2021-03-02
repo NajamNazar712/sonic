@@ -472,6 +472,11 @@ class APIController extends Controller
 
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
+
+                if(($request->input('consignee_city_id') == 1244 && $user_id != 5982)){
+                    return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
+                }
+
                 if (!$consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
@@ -1560,6 +1565,19 @@ class APIController extends Controller
 
           $detail['id'] = $city->id;
           $detail['name'] = $city->name;
+
+          $hub = $city->hub_city;
+          $detail['hub'] = array();
+
+          $detail['hub']['id'] = $hub->id;
+          $detail['hub']['name'] = $hub->name;
+
+          $zone = $city->zone;
+          $detail['zone'] = array();
+
+          $detail['zone']['id'] = $zone->id;
+          $detail['zone']['name'] = $zone->name;
+
           $detail['pickup'] = ($city->pickup) ? TRUE : FALSE;
           $detail['delivery'] = array();
 

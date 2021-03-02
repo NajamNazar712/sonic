@@ -28,9 +28,9 @@
                                     <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Route</th>
                                     <th class="border-primary border-darken-1">Category</th>
-                                    <th class="border-primary border-darken-1">Added On</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created By</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -97,9 +97,9 @@
                             head.push('Type');
                             head.push('Route');
                             head.push('Category');
-                            head.push('Added On');
                             head.push('Status');
                             head.push('Created By');
+                            head.push('Created At');
                             head.push('Updated By');
 
 
@@ -117,9 +117,9 @@
                                 row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.category);
-                                row.push(values.created_at);
                                 row.push(values.status);
                                 row.push(values.created_by);
+                                row.push(values.created_at);
                                 row.push(values.updated_by);
                                 body.push(row);
                             });
@@ -150,7 +150,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.riders.blacklist.list') }}',
-                order: [[11, 'desc']],
+                order: [[13, 'desc']],
                 rowId : 'rider_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -164,9 +164,9 @@
                     {data: 'rider_type', name: 'riders.rider_type_id', class: 'align-middle rider_type'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
