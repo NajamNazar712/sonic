@@ -929,6 +929,10 @@ class Permission
             'retail.pending_cash_collection.index' => 423,
             'retail.completed.index' => 424,
 			'retail.accounts.index' => 428,
+            'retail.franchise.index' => 431,
+            'retail.franchise.list' => 431,
+            'retail.trax_center.index' => 432,
+            'retail.trax_center.list' => 432
         ]
     ];
 
