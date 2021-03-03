@@ -117,6 +117,11 @@
                                     <div class="col">
                                         <div class="row">
                                             <div class="form-group col-6">
+                                                <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="COD Amount*" data-rule-required="true" data-msg-required="COD Amount is required">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
 {{--                                                    <option value="1">Yes</option>--}}
                                                     <option value="0">No</option>
