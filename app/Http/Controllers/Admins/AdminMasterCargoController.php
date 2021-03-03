@@ -1487,10 +1487,6 @@ class AdminMasterCargoController extends Controller
                         border-top: 1px dashed #000000;
                       }
 
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
                       }
@@ -1505,10 +1501,6 @@ class AdminMasterCargoController extends Controller
 
                       .border {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .cargo_checklist {
-                        page-break-before: always;
                       }
                     </style>';
 
