@@ -1420,6 +1420,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
             Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
+            Route::get('list', 'Admins\Fuel\FuelManagementController@fuel_list')->name('list');
+            Route::get('request/create', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
         });
 
         Route::prefix('roles')->name('roles.')->group(function() {
