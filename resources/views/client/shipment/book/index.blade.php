@@ -1583,8 +1583,6 @@
 				}
 			});
 
-
-
 			$('.phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
