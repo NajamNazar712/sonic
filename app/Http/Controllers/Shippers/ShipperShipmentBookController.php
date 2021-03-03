@@ -273,6 +273,10 @@ class ShipperShipmentBookController extends Controller
         if (substr($phone_number, 0, 3) == '+92') {
             $phone_number =  '0' . substr($phone_number, 3);
         }
+        //Replace +nn with 0
+        if (substr($phone_number, 0, 1) == '+') {
+            $phone_number =  '0' . substr($phone_number, 3);
+        }
         //Replace 92 with 0
         else if (substr($phone_number, 0, 2) == '92') {
             $phone_number =  '0' . substr($phone_number, 2);

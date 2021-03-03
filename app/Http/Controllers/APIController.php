@@ -138,7 +138,7 @@ class APIController extends Controller
 
       'distinct' => ':attribute must not be Repeated.',
 
-      'phone_number' => ':attribute format is Invalid'
+      'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).'
     ];
 
     static public function phone_number($phone_number) {
@@ -158,6 +158,10 @@ class APIController extends Controller
       if (substr($phone_number, 0, 3) == '+92') {
         $phone_number =  '0' . substr($phone_number, 3);
       }
+        //Replace +nn with 0
+        if (substr($phone_number, 0, 1) == '+') {
+            $phone_number =  '0' . substr($phone_number, 3);
+        }
       //Replace 92 with 0
       else if (substr($phone_number, 0, 2) == '92') {
         $phone_number =  '0' . substr($phone_number, 2);
