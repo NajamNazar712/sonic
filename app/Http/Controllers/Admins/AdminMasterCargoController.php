@@ -2742,6 +2742,7 @@ class AdminMasterCargoController extends Controller
                         ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
                         $shipper_status_id = 15;
                         $consignee_status_id = 15;
+                        NotificationsController::send(126,$shipment->consignee_phone_number_1,$shipment->tracking_number);
                     }
                     else {
                         $shipper_status_id = 4;
@@ -2793,6 +2794,7 @@ class AdminMasterCargoController extends Controller
 
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        NotificationsController::send(126,$shipment->consignee_phone_number_1,$shipment->tracking_number);
                     }
                     $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                     if ($consolidated_shipment) {
