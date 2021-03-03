@@ -3336,7 +3336,7 @@ class ShipperShipmentBookController extends Controller
             if ($value) {
                 $value = $this->phone_number($value);
 
-                if (preg_match('/^((\+92)|(92|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$/', $value)) {
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
                     return TRUE;
                 }
                 else {
