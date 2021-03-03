@@ -72,12 +72,54 @@
         </div>
     </div>
 
-    <div class="modal fade" id="FuelCardRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FuelCardRequestModal"
+    <div class="modal fade" id="StaffRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="StaffRequestModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Fuel Card Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="RiderRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RiderRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Rider Card Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="VehicleRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="VehicleRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Vehicle Card Request</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -200,16 +242,19 @@
                         }
                     });
                     var card_holder_type_data = $.map({!! $card_holder_types !!}, function (obj) {
+                        obj.id = obj.id; // replace name with the property used for the text
                         obj.text = obj.name; // replace name with the property used for the text
 
                         return obj;
                     });
                     var fuel_type_data = $.map({!! $fuel_types !!}, function (obj) {
+                        obj.id = obj.id; // replace name with the property used for the text
                         obj.text = obj.name; // replace name with the property used for the text
 
                         return obj;
                     });
                     var fuel_deduction_type_data = $.map({!! $fuel_deduction_types !!}, function (obj) {
+                        obj.id = obj.id; // replace name with the property used for the text
                         obj.text = obj.name; // replace name with the property used for the text
 
                         return obj;
@@ -259,21 +304,21 @@
                                 if (response.status == 1) {
                                     $('#FuelCardHolderTypeSelectModal').modal('hide');
                                     html = '';
-                                    html += ` <select name="card_holder" id="card_holder" class="select2 form-control">`;
+                                    html += '<select name="card_holder" id="card_holder" class="select2 form-control">';
                                     $.each(response.data, function(index, values) {
                                         html += `<option value="${values.id}" > ${values.name} </option>`;
                                     });
-                                    html += `</select>`;
-                                    $('#FuelCardRequestModal .modal-body').html(html);
+                                    html += '</select>';
+                                    $('#StaffRequestModal .modal-body').html(html);
 
-                                    $("# ").prepend('<option value="" selected></option>').select2({
+                                    $("#card_holder").prepend('<option value="" selected></option>').select2({
                                         placeholder: "Select Card Holder",
                                         width:'100%',
                                         dropdownCssClass: 'form-control-sm p-0',
                                         allowClear: true,
                                     });
 
-                                    $('#FuelCardRequestModal').modal('show');
+                                    $('#StaffRequestModal').modal('show');
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
