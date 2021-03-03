@@ -1000,7 +1000,6 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        $("input[name='strn_no']").inputmask({'mask': "9999999999999", 'clearIncomplete': true});
 
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
