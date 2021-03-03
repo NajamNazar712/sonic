@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFleetVehiclesTable extends Migration
+class CreateFuelFleetOfficeCardsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateFleetVehiclesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fleet_vehicles', function (Blueprint $table) {
+        Schema::create('fuel_fleet_office_cards', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('name');
-            $table->integer('fleet_vehicle_type_id')->index();
-            $table->integer('city_id')->index();
-            $table->integer('status')->default(1);
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ class CreateFleetVehiclesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fleet_vehicles');
+        Schema::dropIfExists('fuel_fleet_office_cards');
     }
 }

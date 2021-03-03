@@ -18,6 +18,7 @@ class CreateFuelCardRequestsTable extends Migration
             $table->string('card_number')->nullable()->index();
             $table->integer('card_holder_id')->index();
             $table->integer('card_holder_type_id')->index()->nullable();
+            $table->integer('fleet_vehicle_type_id')->index()->nullable();
             $table->integer('card_request_type_id')->index();
             $table->integer('fuel_deduction_type_id')->nullable();
             $table->integer('fuel_type_id')->nullable();
