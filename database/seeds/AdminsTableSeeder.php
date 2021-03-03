@@ -4,6 +4,7 @@ use Illuminate\Database\Seeder;
 use App\Http\Models\Admin\Admin;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AdminsTableSeeder extends Seeder
 {

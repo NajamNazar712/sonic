@@ -95,6 +95,10 @@ class Permission
             'v2_pickups.rider_receiving.index' => 366,
             'v2_pickups.pickup_route.index' => 406,
 
+            'v2_pickups.rider_tracking.index' => 446,
+            'v2_pickups.rider_tracking.by_rider' => 446,
+            'v2_pickups.rider_tracking.by_city' => 446,
+
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
@@ -925,6 +929,10 @@ class Permission
             'retail.pending_cash_collection.index' => 423,
             'retail.completed.index' => 424,
 			'retail.accounts.index' => 428,
+            'retail.franchise.index' => 431,
+            'retail.franchise.list' => 431,
+            'retail.trax_center.index' => 432,
+            'retail.trax_center.list' => 432
         ]
     ];
 

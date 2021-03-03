@@ -256,6 +256,39 @@ class ShipperShipmentBookController extends Controller
         $shipment_item->save();
     }
 
+    static public function phone_number($phone_number) {
+        //Removing anything after Comma (,)
+        $phone_number = preg_replace('/^([^,]*).*$/', '$1', $phone_number);
+
+        //Removing anything after Slash (/)
+        $phone_number = preg_replace('/^([^\/]*).*$/', '$1', $phone_number);
+
+        //Removing all Dashes (-)
+        $phone_number = str_replace('-', '', $phone_number);
+
+        //Removing all Spaces ( )
+        $phone_number = str_replace(' ', '', $phone_number);
+
+        //Replace +92 with 0
+        if (substr($phone_number, 0, 3) == '+92') {
+            $phone_number =  '0' . substr($phone_number, 3);
+        }
+        //Replace 92 with 0
+        else if (substr($phone_number, 0, 2) == '92') {
+            $phone_number =  '0' . substr($phone_number, 2);
+        }
+        //Replace 0092 with 0
+        else if (substr($phone_number, 0, 4) == '0092') {
+            $phone_number =  '0' . substr($phone_number, 4);
+        }
+        //Addition of 0
+        else if (substr($phone_number, 0, 1) != '0') {
+            $phone_number =  '0' . $phone_number;
+        }
+
+        return $phone_number;
+    }
+
     public function __construct() {
         $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'corporate_invoice']);
 
@@ -275,7 +308,12 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if(session('user_id') == 5982){
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        else{
+            $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -452,6 +490,7 @@ class ShipperShipmentBookController extends Controller
                             $city_check = City::select('name')->where('id', $request->input('consignee_city'))->first();
                             $consignee_address = 'TRAX Office ' . $city_check['name'];
                         }
+
                         $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
 
                         if ($request->filled('consignee_phone_number_2')) {
@@ -1719,7 +1758,12 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        if(session('user_id') == 5982){
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
+        else{
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -1742,6 +1786,18 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request) {
 //        return $request;
         $user_id = session('user_id');
+        Validator::extend('phone_number', function($attribute, $value, $parameters) {
+            if ($value) {
+                $value = $this->phone_number($value);
+
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+                    return TRUE;
+                }
+                else {
+                    return FALSE;
+                }
+            }
+        });
 //        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
@@ -1829,8 +1885,9 @@ class ShipperShipmentBookController extends Controller
 
             'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
         ];
 
         $rules = [
@@ -1841,8 +1898,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_phone_number_1' => ['required', 'phone_number'],
+            'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -2108,6 +2165,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
+                        if ($consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
+                        }
+
                         if (!$consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
@@ -2221,6 +2282,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
+                        }
+
                         if (!$pickup_consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -2300,7 +2365,12 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                     else {
-                    $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    if($user_id == 5982){
+                        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    }
+                    else{
+                        $cities = City::where('status', 1)->where('id','!=',1244)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    }
                     $booking_types = BookingType::whereNotIn('id', [4])->pluck('booking_type', 'id');
                     $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                         $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
@@ -2428,7 +2498,12 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if(session('user_id') == 5982){
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        else{
+            $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -2521,6 +2596,7 @@ class ShipperShipmentBookController extends Controller
                         $city_check = City::select('name')->where('id', $request->input('consignee_city'))->first();
                         $consignee_address = 'TRAX Office ' . $city_check['name'];
                     }
+
                     $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
 
                     if ($request->filled('consignee_phone_number_2')) {
@@ -3181,7 +3257,12 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        if(session('user_id') == 5982){
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
+        else{
+            $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
         $products = Product::all();
         $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
@@ -3251,6 +3332,18 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_store(Request $request) {
         $user_id = session('user_id');
+        Validator::extend('phone_number', function($attribute, $value, $parameters) {
+            if ($value) {
+                $value = $this->phone_number($value);
+
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+                    return TRUE;
+                }
+                else {
+                    return FALSE;
+                }
+            }
+        });
 //        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
@@ -3339,8 +3432,9 @@ class ShipperShipmentBookController extends Controller
 
             'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).'
         ];
 
         $rules = [
@@ -3355,8 +3449,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_phone_number_1' => ['required', 'phone_number'],
+            'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -3643,6 +3737,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
+                        if ($consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
+                        }
+
                         if (!$consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
@@ -3757,6 +3855,10 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
+                        }
+
                         if (!$pickup_consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -3837,7 +3939,12 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                if($user_id == 5982){
+                    $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                }
+                else{
+                    $cities = City::where('status', 1)->where('id','!=',1244)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                }
                 $booking_types = BookingType::whereNotIn('id', [3, 4])->pluck('booking_type','id');
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
