@@ -273,13 +273,13 @@ class ShipperShipmentBookController extends Controller
         if (substr($phone_number, 0, 3) == '+92') {
             $phone_number =  '0' . substr($phone_number, 3);
         }
-        //Replace +nn with 0
-        if (substr($phone_number, 0, 1) == '+') {
-            $phone_number =  '0' . substr($phone_number, 3);
-        }
         //Replace 92 with 0
         else if (substr($phone_number, 0, 2) == '92') {
             $phone_number =  '0' . substr($phone_number, 2);
+        }
+        //Replace 0092 with 0
+        else if (substr($phone_number, 0, 4) == '0092') {
+            $phone_number =  '0' . substr($phone_number, 4);
         }
         //Addition of 0
         else if (substr($phone_number, 0, 1) != '0') {
@@ -452,10 +452,7 @@ class ShipperShipmentBookController extends Controller
                             $pickup_city_id = $user_shipping_info->city_id;
                         }
                         else {
-                            $phone_number = $this->phone_number($request->input('consignee_phone_number_1'));
-
-                            $phone_number = substr_replace($phone_number, '-', 4, 0);
-                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $phone_number, $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                             $pickup_city_id = $request->input('consignee_city');
 
@@ -494,15 +491,10 @@ class ShipperShipmentBookController extends Controller
                             $consignee_address = 'TRAX Office ' . $city_check['name'];
                         }
 
-                        $consignee_phone_number_1 = $this->phone_number($request->input('consignee_phone_number_1'));
+                        $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
 
                         if ($request->filled('consignee_phone_number_2')) {
-                            $consignee_phone_number_2 = $this->phone_number($request->input('consignee_phone_number_2'));
-                        }
-                        $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
-
-                        if ($request->filled('consignee_phone_number_2')) {
-                            $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
+                            $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
                         } else {
                             $consignee_phone_number_2 = NULL;
                         }
@@ -1798,7 +1790,7 @@ class ShipperShipmentBookController extends Controller
             if ($value) {
                 $value = $this->phone_number($value);
 
-                if (preg_match('/^((\+92)|(92))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/', $value)) {
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$/', $value)) {
                     return TRUE;
                 }
                 else {
@@ -2566,10 +2558,7 @@ class ShipperShipmentBookController extends Controller
                         $pickup_city_id = $user_shipping_info->city_id;
                     }
                     else {
-                        $phone_number = $this->phone_number($request->input('consignee_phone_number_1'));
-
-                        $phone_number = substr_replace($phone_number, '-', 4, 0);
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $phone_number, $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                         $pickup_city_id = $request->input('consignee_city');
                         $pickup_address_id_for_delivery = $request->input('pickup_address');
@@ -2608,16 +2597,10 @@ class ShipperShipmentBookController extends Controller
                         $consignee_address = 'TRAX Office ' . $city_check['name'];
                     }
 
-                    $consignee_phone_number_1 = $this->phone_number($request->input('consignee_phone_number_1'));
+                    $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
 
                     if ($request->filled('consignee_phone_number_2')) {
-                        $consignee_phone_number_2 = $this->phone_number($request->input('consignee_phone_number_2'));
-                    }
-
-                    $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
-
-                    if ($request->filled('consignee_phone_number_2')) {
-                        $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
+                        $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
                     } else {
                         $consignee_phone_number_2 = NULL;
                     }
@@ -3353,7 +3336,7 @@ class ShipperShipmentBookController extends Controller
             if ($value) {
                 $value = $this->phone_number($value);
 
-                if (preg_match('/^((\+92)|(92))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/', $value)) {
+                if (preg_match('/^((\+92)|(92|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$/', $value)) {
                     return TRUE;
                 }
                 else {

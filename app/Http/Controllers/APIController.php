@@ -158,13 +158,13 @@ class APIController extends Controller
       if (substr($phone_number, 0, 3) == '+92') {
         $phone_number =  '0' . substr($phone_number, 3);
       }
-        //Replace +nn with 0
-        if (substr($phone_number, 0, 1) == '+') {
-            $phone_number =  '0' . substr($phone_number, 3);
-        }
       //Replace 92 with 0
       else if (substr($phone_number, 0, 2) == '92') {
         $phone_number =  '0' . substr($phone_number, 2);
+      }
+      //Replace 0092 with 0
+      else if (substr($phone_number, 0, 4) == '0092') {
+          $phone_number =  '0' . substr($phone_number, 4);
       }
       //Addition of 0
       else if (substr($phone_number, 0, 1) != '0') {
@@ -337,7 +337,7 @@ class APIController extends Controller
           if ($value) {
             $value = $this->phone_number($value);
 
-            if (preg_match('/^((\+92)|(92))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/', $value)) {
+            if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$/', $value)) {
               return TRUE;
             }
             else {
