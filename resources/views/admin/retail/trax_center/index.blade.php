@@ -56,10 +56,10 @@
                             <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="form-group">
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required">
+                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" autocomplete="nope">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="add_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <input type="password" class="form-control" id="add_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
                             <div class="form-control-position" id="add_eye">
                                 <i class="la la-eye success"></i>
                             </div>
