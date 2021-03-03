@@ -53,9 +53,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
-                                @foreach($admins as $admin)
-                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                            <select name="courier_id" id="courier_id" class="form-control select2">
+                                @foreach($couriers as $courier)
+                                    <option value="{{$courier->id}}">{{$courier->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -79,14 +79,13 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
-                        </div>
+                        <fieldset class="form-group">
+                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
                     </div>
                     <div class="col-4">
 
@@ -138,6 +137,16 @@
                         </div>
 
                     </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
+                        </div>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -151,6 +160,7 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider CNIC No.</th>
                         <th class="border-primary border-darken-1">Route</th>
+                        <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
@@ -292,6 +302,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#courier_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider Category',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
@@ -409,6 +424,7 @@
                             head.push('Rider');
                             head.push('Rider CNIC No.');
                             head.push('Route');
+                            head.push('Category');
                             head.push('No Of Shipment(s)');
                             head.push('No Of Shipment(s) Delivered');
                             head.push('Assigned By');
@@ -432,6 +448,7 @@
                                 row.push(values.rider);
                                 row.push(values.cni);
                                 row.push(values.route);
+                                row.push(values.category);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
                                 row.push(values.assignee);
@@ -497,6 +514,7 @@
                     d.update_date_from = $('input[name="update_date_from_formatted"]').val();
                     d.update_date_to = $('input[name="update_date_to_formatted"]').val();
                     d.rider_cnic = $('#rider_cnic').val();
+                    d.courier_id = $('#courier_id').val();
                 }
                 },
                 rowId:'delivery_note_id',
@@ -508,6 +526,7 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'cni' ,name: 'riders.cnic', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
+                    { data:'category' ,name: 'rider_categories.name', class: 'align-middle category'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},

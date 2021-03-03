@@ -17,6 +17,7 @@ use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -179,7 +180,24 @@ class ShipperCRMController extends Controller
                 else{
                     $reopen_check = true;
                 }
-                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check]);
+
+                $product_insurance = ShipmentItem::where('shipment_id',$crm_request->shipment_id);
+                if($product_insurance->exists()){
+                    $product = $product_insurance->first();
+                    $insurance_check = $product->insurance;
+                    if($insurance_check == 1){
+                        $insurance = 'Yes';
+                    }
+                    else{
+                        $insurance = 'No';
+                    }
+                }
+                else{
+                    $insurance = 'No';
+                }
+
+
+                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check,'insurance' => $insurance]);
             }else{
                 return redirect()->back()->with('danger', 'CRM Request Not found!');
             }

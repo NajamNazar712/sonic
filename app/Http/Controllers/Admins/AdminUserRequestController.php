@@ -125,13 +125,13 @@ class AdminUserRequestController extends Controller
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
 
-                    if ((session('department_id') == 2 && $user->status == 0) || (session('role_id') == 1 && $user->status == 0)) {
+                    if ((session('role_id') == 1 || session('role_id') == 63) && $user->status == 0) {
                         $dropdown .= $verify;
                     }
                     if (session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
                     }
-                    if ((session('role_id') == 1 && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
+                    if ((session('role_id') == 1|| session('role_id') == 63) && $user->status == 3) {
                         $dropdown .= $view_details;
                     }
                     return $dropdown;

@@ -8557,20 +8557,28 @@ class AdminDashboardController extends Controller
             'end'=>$request->end,
             'route_type_id'=>$request->route_type_id,
             'junction'=>$request->junction,
-            'status'=>1
         ]);
 
-        if(Rider::where('route_id','=',$id)->exists()){
-            return redirect()->back()->with('success', 'Details Updated !');
+        $existing_riders = Rider::where('route_id', $id);
+        if($existing_riders->exists()){
+            $existing_riders= $existing_riders->get();
+            foreach ($existing_riders as $existing_rider){
+                $existing_rider->route_id = null;
+                $existing_rider->save();
+            }
         }
-        else{
+
+//        if(Rider::where('route_id','=',$id)->exists()){
+//            return redirect()->back()->with('success', 'Details Updated !');
+//        }
+//        else{
             $rider_id = $request->rider_id;
             $rider = Rider::find($rider_id);
             if($rider){
                 $rider->route_id = $id;
                 $rider->save();
             }
-        }
+//        }
         return redirect()->back()->with('success','Route updated successfully');
     }
     public function routeStatus(Request $request){
@@ -8747,6 +8755,7 @@ class AdminDashboardController extends Controller
         return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
     }
     public function editRiderDetails(Request $request,$id){
+
         $validations = [
             'city_id'=>'required|numeric',
             'rider_name'=>'required|max:255',
@@ -8789,10 +8798,14 @@ class AdminDashboardController extends Controller
         }else{
             $rider->special_rider = 0;
         }
-        if($request->pin != '') {
-            $rider->pin = bcrypt($request->pin);
 
-            NotificationsController::send(61, $rider->id, $request->pin);
+        if($request->pin != '') {
+            if($rider->dummy_pin != $request->pin) {
+                $rider->pin = bcrypt($request->pin);
+                $rider->dummy_pin = $request->pin;
+
+                NotificationsController::send(61, $rider->id, $request->pin);
+            }
         }
         $rider->updated_by = Auth::id();
         $rider->save();
@@ -8806,14 +8819,14 @@ class AdminDashboardController extends Controller
         $id = $request->cid;
         $status = $request->status;
         if($status == 'riderActive'){
-            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            $rider = Rider::where('id',$id)->update(['status'=>1,'updated_by'=>Auth::id()]);
             if($rider){
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null,'updated_by'=>Auth::id()]);
             if($rider){
-                return redirect()->back()->with('success','Route is now inactive');
+                return redirect()->back()->with('success','Rider is now inactive');
             }
 
         }
