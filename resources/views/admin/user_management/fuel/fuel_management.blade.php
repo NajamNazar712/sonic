@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="StaffRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="StaffRequestModal"
+    <div class="modal fade" id="FuelRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FuelRequestModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -82,58 +82,58 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <form>
+                    <div class="modal-body">
+                        <div class="row p-1 mb-2">
+                            <div class="col-6">
+                                <fieldset class="form-group" id="card_holder_select_container">
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-6">
+                                <fieldset class="form-group">
+                                    <select name="card_request_type" id="card_request_type" class="select2 form-control">
+                                        @foreach($card_request_types as $card_request_type)
+                                            <option value="{{ $card_request_type->id }}" > {{ $card_request_type->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
+                            <div class="col-6 all_request_type new_request_type">
+                                <fieldset class="form-group">
+                                    <select name="fuel_deduction_type" id="fuel_deduction_type" class="select2 form-control">
+                                        @foreach($fuel_deduction_types as $fuel_deduction_type)
+                                            <option value="{{ $fuel_deduction_type->id }}" > {{ $fuel_deduction_type->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-6 all_request_type new_request_type">
+                                <fieldset class="form-group">
+                                    <select name="fuel_type" id="fuel_type" class="select2 form-control">
+                                        @foreach($fuel_types as $fuel_type)
+                                            <option value="{{ $fuel_type->id }}" > {{ $fuel_type->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-6 all_request_type new_request_type">
+                                <fieldset class="form-group">
+                                    <input type="text" name="amount" id="amount" class="form-control amount" placeholder="Amount">
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="RiderRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RiderRequestModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Rider Card Request</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="VehicleRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="VehicleRequestModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Vehicle Card Request</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
 
 @section('css')
@@ -143,6 +143,7 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -286,7 +287,19 @@
             $("#card_holder_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Card Holder Type",
                 width:'100%',
-                dropdownCssClass: 'form-control-sm p-0'
+            });
+            $("#card_request_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Card Request Type",
+                width:'100%',
+            });
+
+            $("#fuel_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Fuel Type",
+                width:'100%',
+            });
+            $("#fuel_deduction_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Fuel Deduction Type",
+                width:'100%',
             });
 
             $('#FuelCardHolderTypeSelectModal #card_holder_type_value_select_btn').on('click',function () {
@@ -309,16 +322,18 @@
                                         html += `<option value="${values.id}" > ${values.name} </option>`;
                                     });
                                     html += '</select>';
-                                    $('#StaffRequestModal .modal-body').html(html);
+
+                                    $('#FuelRequestModal .modal-body #card_holder_select_container').html(html);
+
 
                                     $("#card_holder").prepend('<option value="" selected></option>').select2({
                                         placeholder: "Select Card Holder",
                                         width:'100%',
-                                        dropdownCssClass: 'form-control-sm p-0',
                                         allowClear: true,
                                     });
-
-                                    $('#StaffRequestModal').modal('show');
+                                    $('#card_request_type').val('');
+                                    $('#card_request_type').trigger('change');
+                                    $('#FuelRequestModal').modal('show');
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
@@ -330,6 +345,16 @@
 
             });
 
+            $('#card_request_type').on('change',function () {
+                if($(this).val() != '')
+                {
+
+                }
+                else{
+
+                }
+            });
         });
+
     </script>
 @endsection

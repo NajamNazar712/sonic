@@ -27,7 +27,8 @@ class FuelManagementController extends Controller
         $fuel_types = FuelType::all();
         $fuel_deduction_types = FuelDeductionType::all();
         $card_holder_types = CardHolderType::all();
-        return view('admin.user_management.fuel.fuel_management',compact('fuel_types','fuel_deduction_types','card_holder_types'));
+        $card_request_types = FuelCardRequestType::all();
+        return view('admin.user_management.fuel.fuel_management',compact('fuel_types','fuel_deduction_types','card_holder_types','card_request_types'));
     }
 
     public function fuel_list(Request $request)
