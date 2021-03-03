@@ -355,7 +355,7 @@ class ReturnController extends Controller
                     continue;
                 }
                 $remark_inp = "remark.$shipment";
-                if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
+                if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
 
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 //                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
@@ -461,7 +461,7 @@ class ReturnController extends Controller
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
-            if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
+            if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
 
