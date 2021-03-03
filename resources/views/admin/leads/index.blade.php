@@ -148,6 +148,7 @@
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Message</th>
+                        <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged At</th>
@@ -528,6 +529,7 @@
                             head.push('Phone No');
                             head.push('Email Address');
                             head.push('Message');
+                            head.push('Lead Reference');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
                             head.push('Sale Person Tagged At');
@@ -547,6 +549,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.message);
+                                row.push(values.lead_reference);
                                 row.push(values.requested_date);
                                 row.push(values.sale_person);
                                 row.push(values.sale_person_updated_at);
@@ -669,7 +672,7 @@
                     }
                 },
                 rowId: 'lead_id',
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -679,6 +682,7 @@
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},
+                    {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
                     {data: 'sale_person_updated_at', name:'leads.sale_person_updated_at', class: 'align-middle sale_person_updated_at'},
