@@ -44,6 +44,7 @@ use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
@@ -2827,13 +2828,10 @@ class DeliveryController extends Controller
                                                     }
                                                 }
 //                                                ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-
                                             }
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             }
-
-
                                         }
                                     }
                                 }//main if condition
