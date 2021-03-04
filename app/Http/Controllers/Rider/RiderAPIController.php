@@ -3174,23 +3174,23 @@ class RiderAPIController extends Controller
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
 
-            $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
-                ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
-                ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
-                ->join('users as u', 'pr.shipper_id', 'u.id')
-                ->select('v2_rider_pickups.id', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', 'v2_rider_pickups.pickup_type', 'u.name as shipper')
-                ->where('pn.rider_id', '=', $rider_id);
+            $rider_pickups = V2PickupNote::join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+                ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+                ->select('v2_pickup_notes.id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id) as rider_picked'), DB::raw('sum(pr.received) as arrived'))
+                ->groupBy('v2_pickup_notes.id')
+                ->where('v2_pickup_notes.rider_id', '=', $rider_id)
+                ->where('v2_pickup_notes.status', 1);
 
             if ($from_date != null && $to_date != null) {
-                $rider_pickups = $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from_date, $to_date]);
+                $rider_pickups = $rider_pickups->whereBetween('v2_pickup_notes.created_at', [$from_date, $to_date]);
             } elseif ($from_date != null) {
-                $rider_pickups = $rider_pickups->whereDate('v2_rider_pickups.created_at', $from_date);
+                $rider_pickups = $rider_pickups->whereDate('v2_pickup_notes.created_at', $from_date);
             }
             if ($pickup_request_id != null) {
-                $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_request_id', $pickup_request_id);
+                $rider_pickups = $rider_pickups->where('pnr.pickup_request_id', $pickup_request_id);
             }
             if ($pickup_note_id != null) {
-                $rider_pickups = $rider_pickups->where('v2_rider_pickups.pickup_note_id', $pickup_note_id);
+                $rider_pickups = $rider_pickups->where('v2_pickup_notes.id', $pickup_note_id);
             }
 
             if ($rider_pickups->exists()) {
