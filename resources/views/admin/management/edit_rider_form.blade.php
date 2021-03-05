@@ -89,6 +89,15 @@
                     </select>
                 </fieldset>
             </div>
+            <div class="col">
+                <fieldset class="form-group">
+                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                        @foreach($operation_rider_ids as $operation)
+                            <option value="{{$operation->id}}">{{$operation->name}}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div>
         </div>
         <div id="new_route_div" class="d-none">
             <div class="row mb-2">
@@ -164,6 +173,15 @@
         @else
         $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a route',
+            dropdownParent: $("#editRiderForm")
+        });
+        @endif
+
+        @if($rider->operation_rider_id != Null)
+        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change');
+        @else
+        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Category',
             dropdownParent: $("#editRiderForm")
         });
         @endif

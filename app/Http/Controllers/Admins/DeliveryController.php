@@ -6,7 +6,6 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
@@ -16,6 +15,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
@@ -33,7 +33,8 @@ use App\Http\Models\City;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
@@ -76,6 +77,7 @@ use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
+
 
 class DeliveryController extends Controller
 {
@@ -271,8 +273,9 @@ class DeliveryController extends Controller
         }
 
         $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes]);
+        return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
 	public function note_consolidation_check(Request $request){

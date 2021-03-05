@@ -80,6 +80,17 @@
                 </select>
             </fieldset>
         </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                    <option value="" selected>Select a Category</option>
+                    @foreach($operation_riders as $operation)
+                        <option value="{{$operation->id}}">{{$operation->name}}</option>
+                    @endforeach
+                </select>
+                <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+            </fieldset>
+        </div>
 
     </div>
     <div id="new_route_div" class="d-none">
@@ -143,6 +154,10 @@
         });
         $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a route',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Category',
             dropdownParent: $("#addRiderForm")
         });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({

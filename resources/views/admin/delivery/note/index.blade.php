@@ -35,8 +35,9 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
-                                <option value="1">Fieled Operations</option>
-                                <option value="2"> Hold In Operations</option>
+                                @foreach($operation_rider_category as $category)
+                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                @endforeach
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
                         </fieldset>
