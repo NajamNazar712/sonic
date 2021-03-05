@@ -3101,7 +3101,18 @@ class RiderAPIController extends Controller
                     ->where('v2_pickup_note_requests.pickup_note_id', $pickup_note_id);
                 if ($pickup_details->exists()) {
                     $pickup_details = $pickup_details->get();
-                    return response()->json(['status' => 0, 'pickup_history_details' => $pickup_details]);
+                    $data = array();
+                    foreach ($pickup_details as $shipment_detail) {
+                        $datum = array();
+                        $datum['shipper'] = $shipment_detail->shipper;
+                        $datum['pickup_request_id'] = $shipment_detail->pickup_request_id;
+                        $datum['total_shipment'] = ($shipment_detail->total_shipment == null) ? 0 : $shipment_detail->total_shipment;
+                        $datum['rider_picked'] = ($shipment_detail->rider_picked == null) ? 0 : $shipment_detail->rider_picked;
+                        $datum['arrived'] = ($shipment_detail->arrived == null) ? 0 : $shipment_detail->arrived;
+                        $datum['pickup_date'] = $shipment_detail->pickup_date;
+                        $data[] = $datum;
+                    }
+                    return response()->json(['status' => 0, 'pickup_history_details' => $data]);
                 } else {
                     return response()->json(['status' => 1, 'message' => "No Details Found"]);
                 }
