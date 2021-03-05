@@ -2704,6 +2704,14 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('print','Retail\RetailCashDepositController@print')->name('print');
     });
 
+    Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {
+        Route::get('', 'Retail\RetailParcelReceivingController@index')->name('index');
+        Route::get('/list', 'Retail\RetailParcelReceivingController@list')->name('list');
+        Route::post('/generate', 'Retail\RetailParcelReceivingController@generate')->name('generate');
+        Route::post('/shipments', 'Retail\RetailParcelReceivingController@shipments')->name('shipments');
+        Route::post('print','Retail\RetailParcelReceivingController@print')->name('print');
+    });
+
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Retail\RetailTrackingController@index')->name('index');
         Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
