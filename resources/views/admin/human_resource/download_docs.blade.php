@@ -68,6 +68,25 @@
                                         </div>
                                     </div>
 
+                                    
+                                    <div class="card text-white box-shadow-0 bg-gradient-y-warning">
+                                        <div class="card-header">
+                                            <h4 class="card-title text-white">Travel Form</h4>
+                                            <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li><a href="{{ asset('file/documents/travel_form.pdf') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1" download><i class="ft-download"></i> Download</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse show">
+                                            <div class="card-body">
+                                                <p class="card-text">This is the document for Travel Form.</p> 
+                                              </div>
+                                        </div>
+                                    </div>
+
                             </div>
                         </div>
                     </div>
