@@ -252,15 +252,15 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-        $riders = Rider::where('status', 1);
+//        $riders = Rider::where('status', 1);
 
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $riders = $riders->get();
+//        if (session('role_id') != 1) {
+//            $riders = $riders->whereHas('city', function ($query) {
+//                $query->whereIn('hub_id', session('hubs'));
+//            });
+//        }
+//
+//        $riders = $riders->get();
 
         $routes = Route::where('status', 1);
 
@@ -272,7 +272,7 @@ class DeliveryController extends Controller
 
         $routes = $routes->get();
 
-        return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
+        return view('admin.delivery.note.index')->with(['routes' => $routes]);
     }
 
 	public function note_consolidation_check(Request $request){
@@ -6189,5 +6189,16 @@ class DeliveryController extends Controller
 //            }
 //        }
 
+    }
+
+    Public function operation_riders(Request $request){
+        $operation_id = $request->operation_rider_id;
+        $riders = Rider::where('operation_rider_id',$operation_id)->where('status',1)->select('id','name')->get();
+        if($riders){
+            return response()->json(['status'=> 1,'riders'=>$riders,'success'=>'Riders Found']);
+        }
+        else{
+            return response()->json(['status'=> 0, 'error' => 'No Riders Found']);
+        }
     }
 }
