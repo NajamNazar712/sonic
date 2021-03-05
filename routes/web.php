@@ -2673,6 +2673,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
+    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+        
+        Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
+        Route::get('all_riders', 'Admins\AdminHumanResourseController@all_riders')->name('all_riders');
+        Route::get('all_admins', 'Admins\AdminHumanResourseController@all_admins')->name('all_admins');
+        // Route::post('all_riders/ajax', 'Admins\AdminHumanResourseController@allriders_ajax')->name('allriders.ajax');
+        
+        Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
+    });
 
 });
 
