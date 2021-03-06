@@ -38,5 +38,12 @@ class FuelIssuanceTableSeeders extends Seeder
             array('id' => 2 ,'name'=>'Daily Litre'),
             array('id' => 3 ,'name'=>'Monthly Litre'),
         ));
+
+        DB::table('fleet_vehicle_types')->truncate();
+        DB::table('fleet_vehicle_types')->insert(array(
+            array('id' => 1 ,'name'=>'Office'),
+            array('id' => 2 ,'name'=>'External'),
+            array('id' => 3 ,'name'=>'Internal'),
+        ));
     }
 }

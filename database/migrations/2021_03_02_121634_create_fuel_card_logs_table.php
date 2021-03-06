@@ -17,7 +17,9 @@ class CreateFuelCardLogsTable extends Migration
             $table->increments('id');
             $table->integer('fuel_card_request_id')->index();
             $table->integer('admin_id')->index();
-            $table->integer('card_request_type_id');
+            $table->integer('card_request_type_id')->nullable();
+            $table->integer('action_type_id')->nullable();
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }

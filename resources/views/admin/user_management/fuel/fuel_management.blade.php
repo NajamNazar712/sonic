@@ -24,6 +24,7 @@
                                     <th class="border-primary border-darken-1">Card Number</th>
                                     <th class="border-primary border-darken-1">Card Holder</th>
                                     <th class="border-primary border-darken-1">Card Holder Type</th>
+                                    <th class="border-primary border-darken-1">Card Request Type</th>
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Fuel Type</th>
                                     <th class="border-primary border-darken-1">Fuel Deduction Type</th>
@@ -56,12 +57,20 @@
                 <div class="modal-body">
                     <div>
                             <div class="form-group text-center">
-                                <select name="card_holder_type" id="card_holder_type" class="form-control select2">
+                                <select name="card_holder_type" id="card_holder_type" form="fuel_request_form" class="form-control select2">
                                     @foreach($card_holder_types as $card_holder_type)
                                         <option value="{{ $card_holder_type->id }}" > {{ $card_holder_type->name }} </option>
                                     @endforeach
                                 </select>
                             </div>
+
+                        <div class="form-group text-center" id="fleet_vehicle_type_container">
+                            <select name="fleet_vehicle_type" id="fleet_vehicle_type" form="fuel_request_form" class="form-control select2">
+                                @foreach($vehicle_types as $vehicle_type)
+                                    <option value="{{ $vehicle_type->id }}" > {{ $vehicle_type->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -74,7 +83,7 @@
 
     <div class="modal fade" id="FuelRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FuelRequestModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Fuel Card Request</h4>
@@ -82,15 +91,11 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form>
+                <form id="fuel_request_form" method="post" action="{{route('admin.user_management.fuel_management.store')}}">
+                    @csrf
                     <div class="modal-body">
                         <div class="row p-1 mb-2">
-                            <div class="col-6">
-                                <fieldset class="form-group" id="card_holder_select_container">
-
-                                </fieldset>
-                            </div>
-                            <div class="col-6">
+                            <div class="col-12">
                                 <fieldset class="form-group">
                                     <select name="card_request_type" id="card_request_type" class="select2 form-control">
                                         @foreach($card_request_types as $card_request_type)
@@ -99,8 +104,70 @@
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-8 all_request_type reassign_request_type block_request_type unblock_request_type">
+                                <fieldset class="form-group">
+                                    <input type="text" class="form-control" name="card_number" id="search_card_number_input"  placeholder="Search Card Number">
+                                </fieldset>
+                            </div>
+                            <div class="col-4 all_request_type reassign_request_type block_request_type unblock_request_type">
+                                <fieldset class="form-group">
+                                    <button type="button" id="search_card_number_btn" class="btn btn-success w-100">Search</button>
+                                </fieldset>
+                            </div>
+                            <div class="col-12 all_request_type reassign_request_type block_request_type unblock_request_type">
+                                <input type="hidden" name="card_request_id" id="card_request_id" />
+                                <table class="table table-bordered ">
+                                    <thead>
+                                        <tr>
+                                            <th>Card Number</th>
+                                            <th>Card Holder</th>
+                                            <th>Card Holder Type</th>
+                                            <th>Amount</th>
+                                            <th>Fuel Type</th>
+                                            <th>Fuel Deduction Type</th>
+                                            <th>Requested By</th>
+                                            <th>Approved By</th>
+                                            <th>Approved At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
-                            <div class="col-6 all_request_type new_request_type">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 all_request_type new_request_type reassign_request_type">
+                                <fieldset class="form-group" id="card_holder_select_container">
+
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
+                        <button type="button" onclick="$('#FuelRequestModal').modal('hide');$('#FuelCardHolderTypeSelectModal').modal('show');" class="btn btn-danger">Back</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ApproveModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ApproveModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Approve</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="fuel_request_approve_form" method="post" action="{{route('admin.user_management.fuel_management.approve')}}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="request_id" id="request_id">
+                        <div class="row p-1 mb-2">
+                            <div class="col-6">
                                 <fieldset class="form-group">
                                     <select name="fuel_deduction_type" id="fuel_deduction_type" class="select2 form-control">
                                         @foreach($fuel_deduction_types as $fuel_deduction_type)
@@ -109,7 +176,7 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-6 all_request_type new_request_type">
+                            <div class="col-6">
                                 <fieldset class="form-group">
                                     <select name="fuel_type" id="fuel_type" class="select2 form-control">
                                         @foreach($fuel_types as $fuel_type)
@@ -118,22 +185,21 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-6 all_request_type new_request_type">
+                            <div class="col-12">
                                 <fieldset class="form-group">
-                                    <input type="text" name="amount" id="amount" class="form-control amount" placeholder="Amount">
+                                   <input type="text" name="amount" class="form-control" id="amount" placeholder="Amount"/>
                                 </fieldset>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
+                        <button type="submit" id="fuel_request_approve_btn" class="btn btn-success">Approve</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('css')
@@ -178,15 +244,16 @@
                 serverSide: true,
                 ajax: '{{ route('admin.user_management.fuel_management.list') }}',
                 rowId: 'id',
-                order: [[6, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'card_number', name: 'card_number', class: 'align-middle card_number'},
                     {data: 'card_holder', name: 'card_holder', class: 'align-middle card_holder'},
-                    {data: 'card_holder_type', name: 'card_holder_type', class: 'align-middle card_holder_type'},
+                    {data: 'card_holder_type', name: 'card_holder_type_id', class: 'align-middle card_holder_type'},
+                    {data: 'card_request_type', name: 'fcrt.id', class: 'align-middle card_request_type'},
                     {data: 'amount', name: 'amount', class: 'align-middle amount'},
-                    {data: 'fuel_type', name: 'fuel_type', class: 'align-middle fuel_type'},
-                    {data: 'fuel_deduction_type', name: 'fuel_deduction_type', class: 'align-middle fuel_deduction_type'},
+                    {data: 'fuel_type', name: 'fuel_type_id', class: 'align-middle fuel_type'},
+                    {data: 'fuel_deduction_type', name: 'fuel_deduction_type_id', class: 'align-middle fuel_deduction_type'},
                     {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'approved_at', name: 'approved_at', class: 'align-middle approved_at'},
@@ -206,13 +273,13 @@
                     var card_holder_type_select = '<select name="card_holder_type_select" id="card_holder_type_select" class="select2 form-control"></select>';
                     var fuel_type_select = '<select name="fuel_type_select" id="fuel_type_select" class="select2 form-control"></select>';
                     var fuel_deduction_type_select = '<select name="fuel_deduction_type_select" id="fuel_deduction_type_select" class="select2 form-control"></select>';
-
+                    var card_request_type_select = '<select name="card_request_type_select" id="card_request_type_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.card_holder')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.card_holder_type')){
                             $(card_holder_type_select).appendTo($(search))
@@ -228,6 +295,12 @@
                         }
                         else if($(header).is('.fuel_deduction_type')){
                             $(fuel_deduction_type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.card_request_type')){
+                            $(card_request_type_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -260,6 +333,12 @@
 
                         return obj;
                     });
+                    var card_request_type_data = $.map({!! $card_request_types !!}, function (obj) {
+                        obj.id = obj.id; // replace name with the property used for the text
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
                     $("#card_holder_type_select").prepend('<option value="" selected></option>').select2({
                         data:card_holder_type_data,
                         placeholder: "Select Card Holder Type",
@@ -281,6 +360,14 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    $("#card_request_type_select").prepend('<option value="" selected></option>').select2({
+                        data:card_request_type_data,
+                        placeholder: "Select Card Request Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });
@@ -293,8 +380,8 @@
                 width:'100%',
             });
 
-            $("#fuel_type").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Fuel Type",
+            $("#fleet_vehicle_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Fleet Vehicle Type",
                 width:'100%',
             });
             $("#fuel_deduction_type").prepend('<option value="" selected></option>').select2({
@@ -302,15 +389,29 @@
                 width:'100%',
             });
 
+            $("#fuel_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Fuel Type",
+                width:'100%',
+            });
+
+            $('#amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+            });
+
             $('#FuelCardHolderTypeSelectModal #card_holder_type_value_select_btn').on('click',function () {
                     var card_holder_type = $('#card_holder_type').val();
-                    if(card_holder_type != '')
+                    var fleet_vehicle_type = $('#fleet_vehicle_type').val();
+                    if(card_holder_type != '' && ((card_holder_type !=3) || (card_holder_type == 3 && fleet_vehicle_type != '')))
                     {
                         $.ajax({
                             url: '{!! route('admin.user_management.fuel_management.create') !!}',
                             method: 'get',
                             data: {
                                 'card_holder_type': card_holder_type,
+                                'fleet_vehicle_type' : fleet_vehicle_type,
                             }
                         })
                             .done(function (response) {
@@ -335,23 +436,159 @@
                                     $('#card_request_type').trigger('change');
                                     $('#FuelRequestModal').modal('show');
                                 } else {
-                                    toastr.error(data.error, 'Error!', {
+                                    toastr.error(response.error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
                                 }
                             });
                     }
+                    else{
+                        toastr.warning('Please Select All Fields', 'Warning!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
 
             });
 
-            $('#card_request_type').on('change',function () {
-                if($(this).val() != '')
+            $('#card_holder_type').on('change',function () {
+                if($(this).val() == 3)
                 {
+                    $('#fleet_vehicle_type_container').show(1000);
+                }
+                else{
+                    $('#fleet_vehicle_type_container').hide(1000);
+                    $('#fleet_vehicle_type').val('')
+                    $('#fleet_vehicle_type').trigger('change');
+                }
+            });
+
+            $('#card_request_type').on('change',function () {
+                $('#FuelRequestModal .modal-body input[type=text]').each(function (i,v) {
+                    $(v).val('');
+                });
+
+                $('#FuelRequestModal .modal-body .all_request_type .select2').each(function (i,v) {
+                    $(v).val('');
+                    $(v).trigger('change');
+                });
+                if($(this).val() == '')
+                {
+                    $('.all_request_type').hide();
 
                 }
                 else{
+                    if($(this).val() == 1)
+                    {
+                        $('.all_request_type').hide();
+                        $('.new_request_type').show(1000);
+                    }
+                    else if($(this).val() == 2)
+                    {
+                        $('.all_request_type').hide();
+                        $('.reassign_request_type').show(1000);
+                    }
+                    else if($(this).val() == 3)
+                    {
+                        $('.all_request_type').hide();
+                        $('.block_request_type').show(1000);
+                    }
+                    else if($(this).val() == 4)
+                    {
+                        $('.all_request_type').hide();
+                        $('.unblock_request_type').show(1000);
+                    }
+                }
+            });
 
+            $('#search_card_number_btn').on('click',function () {
+                var card_number = $('#search_card_number_input').val();
+                var card_holder_type = $('#card_holder_type').val();
+                var fleet_vehicle_type = $('#fleet_vehicle_type').val();
+                if(fleet_vehicle_type == '')
+                {
+                    fleet_vehicle_type = null;
+                }
+                $.ajax({
+                    url: '{!! route('admin.user_management.fuel_management.search_by_card') !!}',
+                    method: 'get',
+                    data: {
+                        'card_number': card_number,
+                        'card_holder_type': card_holder_type,
+                        'fleet_vehicle_type' : fleet_vehicle_type,
+                    }
+                })
+                    .done(function (response) {
+                        if (response.status == 1) {
+                            html = `<tr>
+                                        <td>${response.data.card_number}</td>
+                                        <td>${response.data.card_holder}</td>
+                                        <td>${response.data.card_holder_type}</td>
+                                        <td>${response.data.amount}</td>
+                                        <td>${response.data.fuel_type}</td>
+                                        <td>${response.data.fuel_deduction_type}</td>
+                                        <td>${response.data.requested_by}</td>
+                                        <td>${response.data.approved_by}</td>
+                                        <td>${response.data.approved_at}</td>
+                                    </tr>`;
+                                $('#FuelRequestModal #card_request_id').val(response.data.id);
+                                $('#FuelRequestModal table tbody').html(html);
+                        } else {
+                            $('#FuelRequestModal #card_request_id').val('');
+                            $('#FuelRequestModal table tbody').html('');
+                            toastr.error(response.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+            });
+
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var request_id = $(this).parents('tr').attr('id');
+                if($(this).hasClass('approve_new'))
+                {
+                    $("#fuel_deduction_type").val('');
+                    $("#fuel_deduction_type").trigger('change');
+
+                    $("#fuel_type").val('');
+                    $("#fuel_type").trigger('change');
+
+                    $('#amount').val('');
+
+                    $('#request_id').val(request_id);
+                    $('#ApproveModal').modal('show');
+                }
+                if($(this).hasClass('approve'))
+                {
+                    var text = $(this).attr('data-msg');
+                    swal({
+                        text: text,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            alert();
+                        }
+                    });
                 }
             });
         });

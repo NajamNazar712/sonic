@@ -16,6 +16,7 @@ class CreateFuelFleetExternalCardsTable extends Migration
         Schema::create('fuel_fleet_external_cards', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->boolean('blocked')->default(0);
             $table->timestamps();
         });
     }

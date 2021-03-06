@@ -1421,7 +1421,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
             Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
             Route::get('list', 'Admins\Fuel\FuelManagementController@fuel_list')->name('list');
-            Route::get('request/create', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
+            Route::get('request', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
+            Route::post('request', 'Admins\Fuel\FuelManagementController@request_store')->name('store');
+            Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
+            Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
         });
 
         Route::prefix('roles')->name('roles.')->group(function() {
