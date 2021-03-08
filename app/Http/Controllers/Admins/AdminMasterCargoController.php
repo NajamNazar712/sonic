@@ -897,7 +897,7 @@ class AdminMasterCargoController extends Controller
                 }
             })
             ->addColumn('action', function($pickup_request) {
-                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(453, session('permissions'))) {
                     return '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
