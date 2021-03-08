@@ -39,7 +39,7 @@
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
                             </select>
-                            <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                            <div class="danger" id="operation_error" style="display:none;">This field is required</div>
                         </fieldset>
                     </div>
                     <div class="col-3">
@@ -980,6 +980,7 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
+                var operation_id = $('#operation_rider_id').val();
                 var special = parseInt($('#rider_name').find(':selected').data('special'));
                 
 
@@ -1000,6 +1001,15 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#route_error').css('display', 'block');
+                }
+                if (operation_id !== '' && operation_id !== null) {
+
+                    $('#operation_error').css('display', 'none');
+                } else {
+                    var error = "Category not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#operation_error').css('display', 'block');
                 }
 
                 if(count > 0) {

@@ -6195,10 +6195,18 @@ class DeliveryController extends Controller
     }
 
     Public function operation_riders(Request $request){
+
         $operation_id = $request->operation_rider_id;
-        $riders = Rider::where('operation_rider_id',$operation_id)->where('status',1)->select('id','name')->get();
+        $riders = Rider::where('operation_rider_id',$operation_id)->where('status',1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
         if($riders){
-            return response()->json(['status'=> 1,'riders'=>$riders,'success'=>'Riders Found']);
+            $riders = $riders->select('id','name')->get();
+            return response()->json(['status'=> 1,'riders' => $riders,'success'=>'Riders Found']);
         }
         else{
             return response()->json(['status'=> 0, 'error' => 'No Riders Found']);
