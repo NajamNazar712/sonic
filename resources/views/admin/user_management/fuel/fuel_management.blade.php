@@ -473,10 +473,12 @@
                     $(v).val('');
                     $(v).trigger('change');
                 });
+
+                $('#FuelRequestModal table tbody').html('');
+
                 if($(this).val() == '')
                 {
                     $('.all_request_type').hide();
-
                 }
                 else{
                     if($(this).val() == 1)
@@ -506,6 +508,7 @@
                 var card_number = $('#search_card_number_input').val();
                 var card_holder_type = $('#card_holder_type').val();
                 var fleet_vehicle_type = $('#fleet_vehicle_type').val();
+                var request_type = $('#card_request_type').val();
                 if(fleet_vehicle_type == '')
                 {
                     fleet_vehicle_type = null;
@@ -517,6 +520,7 @@
                         'card_number': card_number,
                         'card_holder_type': card_holder_type,
                         'fleet_vehicle_type' : fleet_vehicle_type,
+                        'request_type' : request_type,
                     }
                 })
                     .done(function (response) {
@@ -550,6 +554,7 @@
                 var request_id = $(this).parents('tr').attr('id');
                 if($(this).hasClass('approve_new'))
                 {
+                    url = "{!! route('admin.user_management.fuel_management.approve') !!}"
                     $("#fuel_deduction_type").val('');
                     $("#fuel_deduction_type").trigger('change');
 
@@ -559,8 +564,10 @@
                     $('#amount').val('');
 
                     $('#request_id').val(request_id);
+                    $('#ApproveModal #fuel_request_approve_form').attr('action',url);
                     $('#ApproveModal').modal('show');
                 }
+
                 if($(this).hasClass('approve'))
                 {
                     var text = $(this).attr('data-msg');
@@ -586,9 +593,26 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if (confirm) {
-                            alert();
+                            $('#fuel_request_approve_form #request_id').val(request_id);
+                            $('#fuel_request_approve_form').submit();
                         }
                     });
+                }
+
+                if($(this).hasClass('edit'))
+                {
+                    url = "{!! route('admin.user_management.fuel_management.edit') !!}"
+                    $("#fuel_deduction_type").val('');
+                    $("#fuel_deduction_type").trigger('change');
+
+                    $("#fuel_type").val('');
+                    $("#fuel_type").trigger('change');
+
+                    $('#amount').val('');
+
+                    $('#request_id').val(request_id);
+                    $('#ApproveModal #fuel_request_approve_form').attr('action',url);
+                    $('#ApproveModal').modal('show');
                 }
             });
         });

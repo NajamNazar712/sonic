@@ -86,14 +86,14 @@ class FuelManagementController extends Controller
             })
             ->addColumn('action',function ($fuel_card) {
                 if (session('role_id') == 1 || in_array(448, session('permissions'))) {
-                    if($fuel_card->status == 0 || ($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2)) {
+                    if($fuel_card->status == 0 || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null))) {
                         $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if ($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) {
+                    if (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) && ($fuel_card->card_number != null)) {
                         $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
 
@@ -102,7 +102,7 @@ class FuelManagementController extends Controller
                     }
                     else if($fuel_card->status == 0 && $fuel_card->card_request_type_id == 2)
                     {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to ReAssign this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reassign</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Re-assign this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reassign</div></button>';
                     }
                     else if($fuel_card->status == 0 && $fuel_card->card_request_type_id == 3)
                     {
@@ -151,7 +151,7 @@ class FuelManagementController extends Controller
 
     public function request_search_by_card(Request $request)
     {
-        $fuel_card_request = FuelCardRequest::where([['card_number',$request->card_number],['card_holder_type_id',$request->card_holder_type]]);
+        $fuel_card_request = FuelCardRequest::where([['card_number',$request->card_number],['card_holder_type_id',$request->card_holder_type],['fuel_card_requests.status',1]]);
         if($request->fleet_vehicle_type != null)
         {
             $fuel_card_request->where('fleet_vehicle_type_id',$request->fleet_vehicle_type);
@@ -165,16 +165,48 @@ class FuelManagementController extends Controller
                 ->leftjoin('admins as approved_by','fuel_card_requests.approved_by','=','approved_by.id')
                 ->leftjoin('card_holder_types as cht','fuel_card_requests.card_holder_type_id','=','cht.id');
             if ($data->card_holder_type_id == 1) {
+                    $status = FuelStaffCard::where([['name',$request->card_number],['blocked',1]])->exists();
+
                 $fuel_card_request = $fuel_card_request->leftjoin('admins as card_holder','fuel_card_requests.card_holder_id','=','card_holder.id');
             } else if ($data->card_holder_type_id == 2) {
+                $status = FuelRiderCard::where([['name',$request->card_number],['blocked',1]])->exists();
+
                 $fuel_card_request = $fuel_card_request->leftjoin('riders as card_holder','fuel_card_requests.card_holder_id','=','card_holder.id');
             } else if ($data->card_holder_type_id == 3) {
+                if($data->fleet_vehicle_type_id == 1)
+                {
+                    $status = FuelFleetOfficeCard::where([['name',$request->card_number],['blocked',1]])->exists();
+                }
+                else if($data->fleet_vehicle_type_id == 2)
+                {
+                    $status = FuelFleetExternalCard::where([['name',$request->card_number],['blocked',1]])->exists();
+                }
+                else if($data->fleet_vehicle_type_id == 3)
+                {
+                    $status  = FuelFleetInternalCard::where([['name',$request->card_number],['blocked',1]])->exists();
+                }
+                else {
+                    return response()->json(['status' => 0, 'error' => 'No user assigned to this card number']);
+                }
                 $fuel_card_request = $fuel_card_request->leftjoin('fleet_vehicles as card_holder','fuel_card_requests.card_holder_id','=','card_holder.id');
             } else {
                 return response()->json(['status' => 0, 'error' => 'No user assigned to this card number']);
             }
-           $fuel_card_request =  $fuel_card_request->select('fuel_card_requests.id as id','fuel_card_requests.card_number as card_number','cht.name as card_holder_type','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','card_holder.name as card_holder');
-            return response()->json(['status' => 1, 'data' => $fuel_card_request->first()]);
+            $fuel_card_request =  $fuel_card_request->select('fuel_card_requests.id as id','fuel_card_requests.card_number as card_number','cht.name as card_holder_type','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','card_holder.name as card_holder');
+            if(($request->request_type != 4 && !$status) || ($request->request_type == 4 && $status))
+            {
+                return response()->json(['status' => 1, 'data' => $fuel_card_request->first()]);
+            }
+            else{
+                if($request->request_type != 4)
+                {
+                    return response()->json(['status' => 0, 'error' => 'Card is Blocked']);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'Card is already Unblocked']);
+                }
+            }
+
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Card Number!']);
@@ -217,7 +249,7 @@ class FuelManagementController extends Controller
         {
             $fuel_card_request_id = $this->create_request($request,$request->card_holder);
             $this->request_log($fuel_card_request_id,$card_request_type,$card_request_type);
-            return redirect()->back()->with(['success'=>'Request Created Successfully']);
+            return redirect()->back()->with(['success'=>'New Card Request Created Successfully']);
         }
         else if($card_request_type == 2) // Reassign Request
         {
@@ -236,7 +268,7 @@ class FuelManagementController extends Controller
 
                 $fuel_card_request_id = $this->create_request($request,$request->card_holder,$card_number,$fuel_deduction_type,$fuel_type,$amount);
                 $this->request_log($fuel_card_request_id,$card_request_type,$card_request_type);
-                return redirect()->back()->with(['success'=>'Request Created Successfully']);
+                return redirect()->back()->with(['success'=>'Reassign Request Created Successfully']);
             }
             else{
                 return redirect()->back()->with(['error'=>'Card not found to reassign, Check Card Number']);
@@ -248,9 +280,19 @@ class FuelManagementController extends Controller
             $current_request = FuelCardRequest::find($request->card_request_id);
             if($current_request->exists())
             {
-                $fuel_card_request_id = $this->create_request($request,null,$current_request->card_number,$current_request->fuel_deduction_type_id,$current_request->fuel_type_id,$current_request->amount);
+                $card_number = $current_request->card_number;
+                $fuel_type = $current_request->fuel_type_id;
+                $fuel_deduction_type = $current_request->fuel_deduction_type_id;
+                $amount = $current_request->amount;
+                $current_request->card_number = null;
+                $current_request->fuel_type_id = null;
+                $current_request->fuel_Deduction_type_id = null;
+                $current_request->amount = null;
+                $current_request->update();
+
+                $fuel_card_request_id = $this->create_request($request,null,$card_number,$fuel_deduction_type,$fuel_type,$amount);
                 $this->request_log($fuel_card_request_id,$card_request_type,$card_request_type);
-                return redirect()->back()->with(['success'=>'Request Created Successfully']);
+                return redirect()->back()->with(['success'=>'Block Request Created Successfully']);
             }
             else{
                 return redirect()->back()->with(['error'=>'Card not found to reassign, Check Card Number']);
@@ -261,9 +303,19 @@ class FuelManagementController extends Controller
             $current_request = FuelCardRequest::find($request->card_request_id);
             if($current_request->exists())
             {
-                $fuel_card_request_id = $this->create_request($request,$current_request->card_holder_id,$current_request->card_number,$current_request->fuel_deduction_type_id,$current_request->fuel_type_id,$current_request->amount);
+                $card_number = $current_request->card_number;
+                $fuel_type = $current_request->fuel_type_id;
+                $fuel_deduction_type = $current_request->fuel_deduction_type_id;
+                $amount = $current_request->amount;
+                $current_request->card_number = null;
+                $current_request->fuel_type_id = null;
+                $current_request->fuel_Deduction_type_id = null;
+                $current_request->amount = null;
+                $current_request->update();
+
+                $fuel_card_request_id = $this->create_request($request,null,$card_number,$fuel_deduction_type,$fuel_type,$amount);
                 $this->request_log($fuel_card_request_id,$card_request_type,$card_request_type);
-                return redirect()->back()->with(['success'=>'Request Created Successfully']);
+                return redirect()->back()->with(['success'=>'Un Block Request Created Successfully']);
             }
             else{
                 return redirect()->back()->with(['error'=>'Card not found to reassign, Check Card Number']);
@@ -301,22 +353,7 @@ class FuelManagementController extends Controller
 
     public function request_approve(Request $request)
     {
-        $messages = [
-            'fuel_deduction_type.required'      =>  'Fuel Deduction Type is required',
-            'fuel_type.required'                =>  'Fuel Type is Required',
-            'amount.required_'                  =>  'Amount is Required',
-        ];
 
-        $rules = [
-            'fuel_deduction_type' => 'required',
-            'fuel_type' => 'required',
-            'amount'   => 'required',
-        ];
-        $validate = Validator::make($request->all(),$rules,$messages);
-        if($validate->fails())
-        {
-            return redirect()->back()->withErrors($validate);
-        }
 
         $table = FuelCardRequest::where([['id',$request->request_id],['status',0]]);
         if(!$table->exists())
@@ -327,6 +364,22 @@ class FuelManagementController extends Controller
         $table = $table->first();
 
         if($table->card_request_type_id == 1) {
+            $messages = [
+                'fuel_deduction_type.required'      =>  'Fuel Deduction Type is required',
+                'fuel_type.required'                =>  'Fuel Type is Required',
+                'amount.required_'                  =>  'Amount is Required',
+            ];
+
+            $rules = [
+                'fuel_deduction_type' => 'required',
+                'fuel_type' => 'required',
+                'amount'   => 'required',
+            ];
+            $validate = Validator::make($request->all(),$rules,$messages);
+            if($validate->fails())
+            {
+                return redirect()->back()->withErrors($validate);
+            }
             if ($table->card_holder_type_id == 1) {
                 $card = new FuelStaffCard();
                 $card->name = ' ';
@@ -376,11 +429,46 @@ class FuelManagementController extends Controller
             }
 
             $table->card_number = $card->name;
+            $table->fuel_type_id = $request->fuel_type;
+            $table->fuel_deduction_type_id = $request->fuel_deduction_type;
+            $table->amount = $request->amount;
         }
 
-        $table->fuel_type_id = $request->fuel_type;
-        $table->fuel_deduction_type_id = $request->fuel_deduction_type;
-        $table->amount = $request->amount;
+        if($table->card_request_type_id == 3)
+        {
+            $blocked = 1;
+        }
+        if($table->card_request_type_id == 4)
+        {
+            $blocked = 0;
+        }
+        if($table->card_request_type_id == 3 || $table->card_request_type_id == 4)
+        {
+            if ($table->card_holder_type_id == 1) {
+                $card = FuelStaffCard::where('name',$table->card_number)->first();
+            }
+            else if ($table->card_holder_type_id == 2) {
+                $card = FuelRiderCard::where('name',$table->card_number)->first();
+            }
+            else if ($table->card_holder_type_id == 3) {
+                if ($table->fleet_vehicle_type_id == 1) {
+                    $card = FuelFleetOfficeCard::where('name',$table->card_number)->first();
+                } else if ($table->fleet_vehicle_type_id == 2) {
+                    $card = FuelFleetExternalCard::where('name',$table->card_number)->first();
+                } else if ($table->fleet_vehicle_type_id == 3) {
+                    $card = FuelFleetInternalCard::where('name',$table->card_number)->first();
+                } else {
+                    return redirect()->back()->with(['error' => 'Record is corrupted']);
+                }
+            }
+            else {
+                return redirect()->back()->with(['error' => 'Record is corrupted']);
+            }
+
+            $card->blocked = $blocked;
+            $card->update();
+        }
+
         $table->approved_by = Auth::id();
         $table->approved_at = Carbon::now();
         $table->status = 1;
@@ -389,6 +477,43 @@ class FuelManagementController extends Controller
         $this->request_log($table->id,6,$table->card_request_type_id);
 
         return redirect()->back()->with(['success'=>'Card Request Approved Successfully']);
+    }
+
+    public function request_edit(Request $request)
+    {
+        $messages = [
+            'fuel_deduction_type.required'      =>  'Fuel Deduction Type is required',
+            'fuel_type.required'                =>  'Fuel Type is Required',
+            'amount.required_'                  =>  'Amount is Required',
+        ];
+
+        $rules = [
+            'fuel_deduction_type' => 'required',
+            'fuel_type' => 'required',
+            'amount'   => 'required',
+        ];
+        $validate = Validator::make($request->all(),$rules,$messages);
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate);
+        }
+
+        $table = FuelCardRequest::where('id',$request->request_id)->whereNotNull('card_number');
+
+        if(!$table->exists())
+        {
+            return redirect()->back()->with(['error'=>'No Record Found']);
+        }
+
+        $table = $table->first();
+        $table->fuel_type_id = $request->fuel_type;
+        $table->fuel_deduction_type_id = $request->fuel_deduction_type;
+        $table->amount = $request->amount;
+        $table->update();
+
+        $this->request_log($table->id,5);
+
+        return redirect()->back()->with(['success'=>'Request Edited Successfully']);
     }
 
 }

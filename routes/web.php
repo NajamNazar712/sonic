@@ -1424,6 +1424,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('request', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
             Route::post('request', 'Admins\Fuel\FuelManagementController@request_store')->name('store');
             Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
+            Route::post('request/edit', 'Admins\Fuel\FuelManagementController@request_edit')->name('edit');
             Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
         });
 
