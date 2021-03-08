@@ -23,6 +23,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use DB;
 
 class FuelManagementController extends Controller
 {
@@ -53,19 +54,21 @@ class FuelManagementController extends Controller
             ->leftjoin('fuel_card_request_types as fcrt','fuel_card_requests.card_request_type_id','=','fcrt.id')
             ->leftJoin('admins as staff', function ($join) {
                 $join->on('staff.id', '=', 'fuel_card_requests.card_holder_id')
-                    ->where('fuel_card_requests.card_holder_type_id', '=',1);
+                    ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(1))
+                    ->whereNotNull('fuel_card_requests.card_holder_id');
             })
             ->leftJoin('riders as rider', function ($join) {
                 $join->on('rider.id', '=', 'fuel_card_requests.card_holder_id')
-                    ->where('fuel_card_requests.card_holder_type_id', '=',2);
+                    ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(2))
+                    ->whereNotNull('fuel_card_requests.card_holder_id');
             })
             ->leftJoin('fleet_vehicles as fleet', function ($join) {
                 $join->on('fleet.id', '=', 'fuel_card_requests.card_holder_id')
-                    ->where('fuel_card_requests.card_holder_type_id', '=',3);
+                    ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
+                    ->whereNotNull('fuel_card_requests.card_holder_id');
             })
-            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
+            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.tracking_id','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
 
-//        return $requests->get();
         return Datatables::of($requests)
             ->editColumn('card_holder', function ($data) {
                if ($data->card_holder_type_id == 1)
@@ -84,8 +87,11 @@ class FuelManagementController extends Controller
                    return '';
                }
             })
+            ->editColumn('tracking_id', function ($data) {
+                return '<a target="_blank" href="'.route('admin.user_management.fuel_management.history.index',['tracking_number'=>$data->tracking_id]).'">'.$data->tracking_id.'</a>';
+            })
             ->addColumn('action',function ($fuel_card) {
-                if (session('role_id') == 1 || in_array(448, session('permissions'))) {
+                if (session('role_id') == 1 || count(array_intersect([448, 450], session('permissions'))) !== 0) {
                     if($fuel_card->status == 0 || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null))) {
                         $dropdown = '
                     <div class="btn-group">
@@ -93,24 +99,20 @@ class FuelManagementController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) && ($fuel_card->card_number != null)) {
+                    if (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) && ($fuel_card->card_number != null) && (session('role_id') == 1 || in_array(450, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
 
-                    if ($fuel_card->status == 0 && $fuel_card->card_request_type_id == 1) {
-                        $dropdown .= '<button type="button" class="dropdown-item approve_new"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                    }
-                    else if($fuel_card->status == 0 && $fuel_card->card_request_type_id == 2)
-                    {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Re-assign this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reassign</div></button>';
-                    }
-                    else if($fuel_card->status == 0 && $fuel_card->card_request_type_id == 3)
-                    {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Block this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Block</div></button>';
-                    }
-                    else if($fuel_card->status == 0 && $fuel_card->card_request_type_id == 4)
-                    {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Unblock this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
+                    if(session('role_id') == 1 || in_array(448, session('permissions'))) {
+                        if ($fuel_card->status == 0 && $fuel_card->card_request_type_id == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve_new"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        } else if ($fuel_card->status == 0 && $fuel_card->card_request_type_id == 2) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Re-assign this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reassign</div></button>';
+                        } else if ($fuel_card->status == 0 && $fuel_card->card_request_type_id == 3) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Block this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Block</div></button>';
+                        } else if ($fuel_card->status == 0 && $fuel_card->card_request_type_id == 4) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-msg="Are you sure you want to Unblock this Card"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
+                        }
                     }
                     $dropdown .= '
                     </div>
@@ -337,6 +339,9 @@ class FuelManagementController extends Controller
         $table->amount = $amount;
         $table->save();
 
+        $table->tracking_id = '000000'.$table->id;
+        $table->update();
+
         return $table->id;
     }
 
@@ -514,6 +519,53 @@ class FuelManagementController extends Controller
         $this->request_log($table->id,5);
 
         return redirect()->back()->with(['success'=>'Request Edited Successfully']);
+    }
+
+    public function request_history(Request $request)
+    {
+        $data = null;
+        if(request()->ajax())
+        {
+            $tracking_number = $request->tracking_number;
+            $data = FuelCardRequest::where('tracking_id',$tracking_number);
+            if($data->exists()) {
+                $request = clone($data);
+                $request = $request->leftjoin('fuel_types as ft', 'fuel_card_requests.fuel_type_id', '=', 'ft.id')
+                        ->leftjoin('fuel_deduction_types as fdt', 'fuel_card_requests.fuel_deduction_type_id', '=', 'fdt.id')
+                        ->leftjoin('admins as requested_by', 'fuel_card_requests.requested_by', '=', 'requested_by.id')
+                        ->leftjoin('admins as approved_by', 'fuel_card_requests.approved_by', '=', 'approved_by.id')
+                        ->leftjoin('card_holder_types as cht', 'fuel_card_requests.card_holder_type_id', '=', 'cht.id')
+                        ->leftjoin('fuel_card_request_types as fcrt', 'fuel_card_requests.card_request_type_id', '=', 'fcrt.id')
+                        ->leftJoin('admins as staff', function ($join) {
+                            $join->on('staff.id', '=', 'fuel_card_requests.card_holder_id')
+                                ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(1))
+                                ->whereNotNull('fuel_card_requests.card_holder_id');
+                        })
+                        ->leftJoin('riders as rider', function ($join) {
+                            $join->on('rider.id', '=', 'fuel_card_requests.card_holder_id')
+                                ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(2))
+                                ->whereNotNull('fuel_card_requests.card_holder_id');
+                        })
+                        ->leftJoin('fleet_vehicles as fleet', function ($join) {
+                            $join->on('fleet.id', '=', 'fuel_card_requests.card_holder_id')
+                                ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(3))
+                                ->whereNotNull('fuel_card_requests.card_holder_id');
+                        })
+                        ->select('fcrt.name as card_request_type', 'fuel_card_requests.tracking_id', 'fuel_card_requests.card_number as card_number', 'cht.name as card_holder_type', 'fuel_card_requests.card_holder_type_id as card_holder_type_id', 'fuel_card_requests.amount as amount', 'ft.name as fuel_type', 'fdt.name as fuel_deduction_type', 'requested_by.name as requested_by', 'approved_by.name as approved_by', 'fuel_card_requests.approved_at as approved_at', 'staff.name as staff_name', 'rider.name as rider_name', 'fleet.name as fleet_name')
+                        ->first();
+
+                $logs_data = $data->leftjoin('fuel_card_logs as logs', 'fuel_card_requests.id', '=', 'logs.fuel_card_request_id')
+                                ->leftjoin('action_types as actions', 'logs.action_type_id', '=', 'actions.id')
+                                ->leftjoin('admins as admin', 'logs.admin_id', '=', 'admin.id')
+                                ->select('actions.name as action','logs.created_at as created_at','admin.name as approved_by')
+                                ->get();
+                return response()->json(['status'=> 1,'request'=>$request,'logs'=>$logs_data]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Invalid Tracking Number']);
+            }
+        }
+        return view('admin.user_management.fuel.history');
     }
 
 }

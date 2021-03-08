@@ -21,6 +21,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Card Number</th>
                                     <th class="border-primary border-darken-1">Card Holder</th>
                                     <th class="border-primary border-darken-1">Card Holder Type</th>
@@ -157,7 +158,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Approve</h4>
+                    <h4 class="modal-title" id=""></h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -217,9 +218,11 @@
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                @if (session('role_id') == 1 || in_array(448, session('permissions')))
+
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                @if (session('role_id') == 1 || in_array(451, session('permissions')))
+                 {
                     text: 'Add',
                     className: 'btn btn-primary add',
                     text: '<i class="la la-plus"></i> Add',
@@ -228,11 +231,20 @@
                         $('#card_holder_type').trigger('change');
                         $('#FuelCardHolderTypeSelectModal').modal('show');
                     }
-                },'reset'],
-                @else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
+
+                },
                 @endif
+                @if (session('role_id') == 1 || in_array(452, session('permissions')))
+                {
+                    text: 'History',
+                    className: 'btn btn-primary history',
+                    text: '<i class="la la-history"></i> History',
+                    action: function (e, dt, node, config) {
+                        window.open("{!! route('admin.user_management.fuel_management.history.index') !!}",'_blank');
+                    }
+                }
+                @endif
+                ,'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -244,9 +256,10 @@
                 serverSide: true,
                 ajax: '{{ route('admin.user_management.fuel_management.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_id', name: 'fuel_card_requests.tracking_id', class: 'align-middle tracking_id'},
                     {data: 'card_number', name: 'card_number', class: 'align-middle card_number'},
                     {data: 'card_holder', name: 'card_holder', class: 'align-middle card_holder'},
                     {data: 'card_holder_type', name: 'card_holder_type_id', class: 'align-middle card_holder_type'},
@@ -554,7 +567,7 @@
                 var request_id = $(this).parents('tr').attr('id');
                 if($(this).hasClass('approve_new'))
                 {
-                    url = "{!! route('admin.user_management.fuel_management.approve') !!}"
+                    url = "{!! route('admin.user_management.fuel_management.approve') !!}";
                     $("#fuel_deduction_type").val('');
                     $("#fuel_deduction_type").trigger('change');
 

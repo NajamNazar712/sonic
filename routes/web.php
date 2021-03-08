@@ -1426,6 +1426,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
             Route::post('request/edit', 'Admins\Fuel\FuelManagementController@request_edit')->name('edit');
             Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\Fuel\FuelManagementController@request_history')->name('index');
+            });
         });
 
         Route::prefix('roles')->name('roles.')->group(function() {
