@@ -2522,8 +2522,6 @@ class V2AdminPickupsController extends Controller
         //  $riders = Rider::where('status', 1)->select(['id','name'])->get();
         //  return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
      }
- 
-
 
 
     public function pickup_route_list(){

@@ -458,7 +458,7 @@
                                     Adjustment</a></li>
                         @endif
                         @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
-                            <li class=" menu-item"><a href="#"><span class="menu-title">Payments</span></a>
+                            <li class=" menu-item"><a href="#"><span class="menu-title">COD Payments</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(59, session('permissions')))
                                         <li><a class="menu-item"
@@ -476,6 +476,23 @@
                                     @if (session('role_id') == 1 || in_array(396, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.make_payments_pickup_wise.index') }}">Pickup Wise Make</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+
+                        @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
+                            <li class=" menu-item"><a href="#"><span class="menu-title">Retail Payments</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
+                                    @endif
+
+
+                                    @if (session('role_id') == 1 || in_array(61, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
                                     @endif
                                 </ul>
                             </li>

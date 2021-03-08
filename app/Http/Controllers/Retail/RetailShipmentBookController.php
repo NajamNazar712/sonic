@@ -120,15 +120,15 @@ class RetailShipmentBookController extends Controller
     }
 
     static public function create_shipment_pieces($shipment_id, $pieces){
-        $total_pieces= 0;
+        $total_pieces = 0;
         if($pieces > 1){
 
             for($i=1; $i<=$pieces; $i++){
                 $shipment_piece = new ShipmentPiece();
                 $shipment_piece->shipment_id = $shipment_id;
                 $total_pieces++;
-                $shipment_piece->numbering=$total_pieces;
-                $shipment_piece->tracking_number= $shipment_id . $total_pieces;
+                $shipment_piece->numbering = $total_pieces;
+                $shipment_piece->tracking_number = $shipment_id . $total_pieces;
                 $shipment_piece->save();
             }
 
