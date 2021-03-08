@@ -67,7 +67,7 @@ class FuelManagementController extends Controller
                     ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
                     ->whereNotNull('fuel_card_requests.card_holder_id');
             })
-            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.tracking_id','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
+            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
 
         return Datatables::of($requests)
             ->editColumn('card_holder', function ($data) {
@@ -87,8 +87,8 @@ class FuelManagementController extends Controller
                    return '';
                }
             })
-            ->editColumn('tracking_id', function ($data) {
-                return '<a target="_blank" href="'.route('admin.user_management.fuel_management.history.index',['tracking_number'=>$data->tracking_id]).'">'.$data->tracking_id.'</a>';
+            ->editColumn('fuel_request_id', function ($data) {
+                return '<a target="_blank" href="'.route('admin.user_management.fuel_management.history.index',['fuel_request_id'=>$data->fuel_request_id]).'">'.$data->fuel_request_id.'</a>';
             })
             ->addColumn('action',function ($fuel_card) {
                 if (session('role_id') == 1 || count(array_intersect([448, 450], session('permissions'))) !== 0) {
@@ -339,7 +339,7 @@ class FuelManagementController extends Controller
         $table->amount = $amount;
         $table->save();
 
-        $table->tracking_id = '000000'.$table->id;
+        $table->fuel_request_id = '000000'.$table->id;
         $table->update();
 
         return $table->id;
@@ -526,8 +526,8 @@ class FuelManagementController extends Controller
         $data = null;
         if(request()->ajax())
         {
-            $tracking_number = $request->tracking_number;
-            $data = FuelCardRequest::where('tracking_id',$tracking_number);
+            $fuel_request_id = $request->fuel_request_id;
+            $data = FuelCardRequest::where('fuel_request_id',$fuel_request_id);
             if($data->exists()) {
                 $request = clone($data);
                 $request = $request->leftjoin('fuel_types as ft', 'fuel_card_requests.fuel_type_id', '=', 'ft.id')
@@ -551,7 +551,7 @@ class FuelManagementController extends Controller
                                 ->where('fuel_card_requests.card_holder_type_id', '=', DB::raw(3))
                                 ->whereNotNull('fuel_card_requests.card_holder_id');
                         })
-                        ->select('fcrt.name as card_request_type', 'fuel_card_requests.tracking_id', 'fuel_card_requests.card_number as card_number', 'cht.name as card_holder_type', 'fuel_card_requests.card_holder_type_id as card_holder_type_id', 'fuel_card_requests.amount as amount', 'ft.name as fuel_type', 'fdt.name as fuel_deduction_type', 'requested_by.name as requested_by', 'approved_by.name as approved_by', 'fuel_card_requests.approved_at as approved_at', 'staff.name as staff_name', 'rider.name as rider_name', 'fleet.name as fleet_name')
+                        ->select('fcrt.name as card_request_type', 'fuel_card_requests.fuel_request_id as fuel_request_id', 'fuel_card_requests.card_number as card_number', 'cht.name as card_holder_type', 'fuel_card_requests.card_holder_type_id as card_holder_type_id', 'fuel_card_requests.amount as amount', 'ft.name as fuel_type', 'fdt.name as fuel_deduction_type', 'requested_by.name as requested_by', 'approved_by.name as approved_by', 'fuel_card_requests.approved_at as approved_at', 'staff.name as staff_name', 'rider.name as rider_name', 'fleet.name as fleet_name')
                         ->first();
 
                 $logs_data = $data->leftjoin('fuel_card_logs as logs', 'fuel_card_requests.id', '=', 'logs.fuel_card_request_id')

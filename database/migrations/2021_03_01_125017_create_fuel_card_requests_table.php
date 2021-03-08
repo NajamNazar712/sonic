@@ -15,7 +15,7 @@ class CreateFuelCardRequestsTable extends Migration
     {
         Schema::create('fuel_card_requests', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('tracking_id')->nullable()->index();
+            $table->string('fuel_request_id')->nullable()->index();
             $table->string('card_number')->nullable()->index();
             $table->integer('card_holder_id')->index()->nullable();
             $table->integer('card_holder_type_id')->index()->nullable();

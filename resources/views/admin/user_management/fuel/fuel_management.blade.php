@@ -21,7 +21,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Fuel Request Id</th>
                                     <th class="border-primary border-darken-1">Card Number</th>
                                     <th class="border-primary border-darken-1">Card Holder</th>
                                     <th class="border-primary border-darken-1">Card Holder Type</th>
@@ -259,7 +259,7 @@
                 order: [[11, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_id', name: 'fuel_card_requests.tracking_id', class: 'align-middle tracking_id'},
+                    {data: 'fuel_request_id', name: 'fuel_request_id', class: 'align-middle fuel_request_id'},
                     {data: 'card_number', name: 'card_number', class: 'align-middle card_number'},
                     {data: 'card_holder', name: 'card_holder', class: 'align-middle card_holder'},
                     {data: 'card_holder_type', name: 'card_holder_type_id', class: 'align-middle card_holder_type'},

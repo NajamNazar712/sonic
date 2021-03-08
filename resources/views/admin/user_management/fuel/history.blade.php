@@ -19,18 +19,18 @@
 
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="row p-1 mb-2 w-50">
-                                    <div class=" col-6">
+                                    <div class=" col-9">
                                         <fieldset class="form-group">
-                                            <input type="text" name="tracking_numbers" class="form-control w-100 tracking_numbers" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                            <input type="text" name="fuel_request_id" class="form-control w-100 fuel_request_id" placeholder="Fuel Request Id*" data-tags-input-name="fuel_request_id" data-rule-required="true" data-msg-required="Fuel Request Id is required">
                                         </fieldset>
                                     </div>
-                                    <div class="form-group ml-1">
-                                        <button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
+                                    <div class="col-2 form-group ml-1">
+                                        <button type="submit" class="btn btn-primary" value="See History">See History</button>
                                     </div>
                                 </div>
                             </form>
 
-                            <div class="tracking" id="tracking">
+                            <div class="history" id="history">
                             </div>
 
                         </div>
@@ -65,25 +65,24 @@
     <script>
         $(document).ready(function() {
 
-            function track(tracking_numbers) {
-                console.log(tracking_numbers);
+            function track(fuel_request_id) {
                 $.ajax({
                     url: '{!! route('admin.user_management.fuel_management.history.index') !!}',
                     method: 'GET',
                     data: {
-                        'tracking_number': tracking_numbers,
+                        'fuel_request_id': fuel_request_id,
                     }
                 })
                     .done(function (data) {
 
-                        $('#tracking').html('');
+                        $('#history').html('');
 
                         if (data.status == 1)
                         {
                             html = '';
                             html += `<div class="mt-4 border-primary">
                                 <div class="d-flex flex-wrap align-items-center bg-primary">
-                                    <div class="mb-0 ml-1 mr-1 font-medium-3 white">${data.request.tracking_id}</div>
+                                    <div class="mb-0 ml-1 mr-1 font-medium-3 white">${data.request.fuel_request_id}</div>
                                 </div>
                                 <div class="p-1">
                                     <div class="row justify-content-between">
@@ -128,7 +127,7 @@
                                             <h4><u>Request History</u></h4>
                                             <div class="border table-responsive">
                                                 <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                                                    <table class="table table-sm table-borderless tracking_history no-footer" id="DataTables_Table_0" role="grid">
+                                                    <table class="table table-sm table-borderless request_history no-footer" id="DataTables_Table_0" role="grid">
                                                         <thead>
                                                             <tr role="row">
                                                                 <th class="align-middle date_time"><strong>Date / Time</strong></th>
@@ -157,7 +156,7 @@
                                 </div>
                             </div>`;
 
-                            $('#tracking').html(html);
+                            $('#history').html(html);
 
                         }
                         else
@@ -170,8 +169,8 @@
                     });
             }
 
-            @if (app('request')->has('tracking_number'))
-                track("{{ app('request')->input('tracking_number') }}");
+            @if (app('request')->has('fuel_request_id'))
+                track("{{ app('request')->input('fuel_request_id') }}");
             @endif
 
             $('#track_form').validate({
@@ -182,7 +181,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function (form) {
-                    track($(form).find('.tracking_numbers').val());
+                    track($(form).find('.fuel_request_id').val());
                     return false;
                 }
             });
