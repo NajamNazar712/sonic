@@ -12,11 +12,11 @@ class UpdateShipmentStatusReasonsNameTableSeeder extends Seeder
     public function run()
     {
 
-        $reason_ids = [26, 29, 43, 44, 51, 2, 22, 55, 56, 16, 58, 38, 9, 10, 11, 20, 57, 48];
+        $reason_ids = [43, 44, 51, 22, 56, 16, 58, 10, 11, 20, 57];
 
         DB::table('shipment_status_reason')->where('id', 31)->update(['name' => 'Mistake In Booking']);
-        DB::table('shipment_status_reason')->where('id', 32)->update(['name' => 'Consignee did not Handover Due To Product or Shipper Issue']);
-        DB::table('shipment_status_reason')->where('id', 33)->update(['name' => 'Consignee Wants to Receive Both Shipments']);
+        DB::table('shipment_status_reason')->where('id', 32)->update(['name' => 'Consignee Did Not Handover Due To Product or Shipper Issue']);
+        DB::table('shipment_status_reason')->where('id', 33)->update(['name' => 'Consignee Wants To Receive Both Shipments']);
         DB::table('shipment_status_reason')->where('id', 14)->update(['name' => 'Delivery Area Blocked/Closed/Restricted']);
         DB::table('shipment_status_reason')->where('id', 28)->update(['name' => 'Replacement Not Handed Over']);
         DB::table('shipment_status_reason')->where('id', 36)->update(['name' => 'Snatched By Consignee']);
@@ -24,7 +24,7 @@ class UpdateShipmentStatusReasonsNameTableSeeder extends Seeder
         DB::table('shipment_status_reason')->where('id', 45)->update(['name' => 'No One Came For Self-Collection']);
         DB::table('shipment_status_reason')->where('id', 5)->update(['name' => 'Consignee Out Of City']);
         DB::table('shipment_status_reason')->where('id', 19)->update(['name' => 'No Such Consignee Found']);
-        DB::table('shipment_status_reason')->where('id', 12)->update(['name' => 'Out of Service Area']);
+        DB::table('shipment_status_reason')->where('id', 12)->update(['name' => 'Out Of Service Area']);
         DB::table('shipment_status_reason')->where('id', 23)->update(['name' => 'Due To Accident']);
         DB::table('shipment_status_reason')->where('id', 25)->update(['name' => 'Due To Uncertain Weather']);
         DB::table('shipment_status_reason')->where('id', 40)->update(['name' => 'Wrong Destination']);
