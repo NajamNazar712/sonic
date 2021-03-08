@@ -3822,6 +3822,7 @@ class RiderAPIController extends Controller
                     $consignee_address = $shipment_data->consignee_address;
                     $booking_type = $shipment_data->booking_type_id;
                     $consignee_phone = $shipment_data->consignee_phone_number_1;
+                    $open_box = $shipment_data->open_box;
                     if ($shipment_data->consignee_phone_number_2 != null) {
                         $consignee_phone .= ' / ' . $shipment_data->consignee_phone_number_2;
                     }
@@ -3856,6 +3857,7 @@ class RiderAPIController extends Controller
                     $deliveries['cod_amount'] = $cod_amount;
                     $deliveries['special_instructions'] = $special_instructions;
                     $deliveries['booking_type'] = $booking_type;
+                    $deliveries['open_box'] = $open_box;
                     $deliveries['remarks'] = $remarks;
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
