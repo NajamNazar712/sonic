@@ -1420,13 +1420,13 @@ class ReturnController extends Controller
 
                             if(ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status',0)->exists()){
 
-                                $return_note_shupment = ReturnNoteShipment::where('return_note_id', $old_return_note_id->return_note_id)->where('shipment_id', $shipment->id)->where('status', 0);
+                                /*$return_note_shupment = ReturnNoteShipment::where('return_note_id', $old_return_note_id->return_note_id)->where('shipment_id', $shipment->id)->where('status', 0);
 
                                 if($return_note_shupment->exists()){
                                     $return_note_shupment->delete();
                                     unset($valid_shipments);
                                     continue;
-                                }
+                                }*/
                                 $journey = ShipmentsJourney::where('shipment_id',$shipment_id)->latest()->first();
 
                                 ShipmentsJourneyController::add($journey->shipment_id,57,NULL,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);
