@@ -47,7 +47,7 @@ class SalePersonShipmentNumbersIndividual extends Command
             $query->from('admin_roles')
                 ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
                 ->where('department_id', '=', 7);
-        })->select('id', 'name')->get();
+        })->where('admins.status', '=', 1)->select('id', 'name')->get();
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = SalesPersonNumbersReportController::sale_person_numbers_individual($date . ' 00:00:00', $sales_person->id);
