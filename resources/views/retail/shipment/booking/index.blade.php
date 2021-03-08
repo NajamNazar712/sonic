@@ -115,9 +115,9 @@
                                         <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="col">
-                                        <div class="row">
+                                        <div class="row d-none" id="cod_check">
                                             <div class="form-group col-6">
-                                                <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="COD Amount*" data-rule-required="true" data-msg-required="COD Amount is required">
+                                                <input type="text" name="cod" id="cod" class="form-control rounded-right amount" placeholder="COD Amount*" data-rule-required="true" data-msg-required="COD Amount is required">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -385,6 +385,12 @@
                     }
                     else{
                         $('#trax_box_div').addClass('d-none');
+                    }
+                    if(id == 3){
+                        $('#cod_check').removeClass('d-none');
+                    }
+                    else{
+                        $('#cod_check').addClass('d-none');
                     }
                     overland = false;
                 }

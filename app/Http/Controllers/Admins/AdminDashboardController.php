@@ -1411,10 +1411,9 @@ class AdminDashboardController extends Controller
             $user = User::find($id);
             if($user->status == 2){
                 $now = Carbon::now();
-                $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now]);
+                $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
                 if($user->lead_id != null){
                     $lead = Lead::find($user->lead_id);
-
                     $lead_log = new LeadLog();
                     $lead_log->lead_id = $lead->id;
                     $lead_log->prev_status_id = $lead->status_id;

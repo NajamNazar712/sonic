@@ -2713,6 +2713,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
+    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+        
+        Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
+        Route::get('all_riders', 'Admins\AdminHumanResourseController@all_riders')->name('all_riders');
+        Route::get('all_admins', 'Admins\AdminHumanResourseController@all_admins')->name('all_admins');
+        // Route::post('all_riders/ajax', 'Admins\AdminHumanResourseController@allriders_ajax')->name('allriders.ajax');
+        
+        Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
+    });
 
 });
 
@@ -2742,6 +2752,14 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print','Retail\RetailCashDepositController@print')->name('print');
+    });
+
+    Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {
+        Route::get('', 'Retail\RetailParcelReceivingController@index')->name('index');
+        Route::get('/list', 'Retail\RetailParcelReceivingController@list')->name('list');
+        Route::post('/generate', 'Retail\RetailParcelReceivingController@generate')->name('generate');
+        Route::post('/shipments', 'Retail\RetailParcelReceivingController@shipments')->name('shipments');
+        Route::post('print','Retail\RetailParcelReceivingController@print')->name('print');
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {
