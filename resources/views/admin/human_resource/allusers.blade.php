@@ -10,7 +10,7 @@
             
             <div class="col-12">
                 <div class="card">
-                    <h2 class="heading_user">All Riders</h2>
+                    <h2 class="heading_user">All Users</h2>
                     @include('admin.inc.messages')
     
                     <div class="card-content">
@@ -22,8 +22,9 @@
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Name</th>
                                         <th class="border-primary border-darken-1">Cnic</th>
-                                        <th class="border-primary border-darken-1">Phone #</th>
-                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Phone#</th>
+                                        <th class="border-primary border-darken-1">Employee ID</th>
+                                        <th class="border-primary border-darken-1">Role</th>
                                         <th class="border-primary border-darken-1">Created at</th>
                                     </tr>
                                 </thead>
@@ -35,36 +36,6 @@
         </div>
     </section>
 
-    <section>
-        <div class="row">
-            
-            <div class="col-12">
-                <div class="card">
-                    <h2 class="heading_user">All Admins</h2>
-                    @include('admin.inc.messages')
-    
-                    <div class="card-content">
-                        <div class="card-body card-dashboard">
-                            
-                            <table class="table table-bordered datatable" id="datatable2" style="z-index: 3;">
-                                <thead>
-                                    <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1">S. No</th>
-                                        <th class="border-primary border-darken-1">Name</th>
-                                        <th class="border-primary border-darken-1">Email</th>
-                                        <th class="border-primary border-darken-1">Phone #</th>
-                                        <th class="border-primary border-darken-1">Cnic</th>
-                                        <th class="border-primary border-darken-1">Designation</th>
-                                        <th class="border-primary border-darken-1">Created at</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
     
 @endsection
 
@@ -93,21 +64,77 @@
     <script type="text/javascript">
     $(function () {
     
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    blockPagePermanently();
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.human_resourse.all_user_ajax') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            footer = [];
+
+                            head.push('S. No');
+                            head.push('Name');
+                            head.push('Cnic');
+                            head.push('Phone#');
+                            head.push('Employee ID');
+                            head.push('Role');
+                            head.push('Created at');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.cnic);
+                                row.push(values.phone);
+                                row.push(values.trax_id);
+                                row.push(values.role);
+                                if(values.created_at){
+                                row.push(values.created_at.date);    
+                                }else{
+
+                                    row.push(values.created_at);    
+                                }
+                                body.push(row);
+                            });
+                         
+                        },
+                        async: false
+                    });
+                    UnblockPagePermanently();
+
+                    return {body: body, header: head};
+                }
+            });
+
+
     var table = $('#datatable').DataTable({
         dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
-                buttons: [
+                    buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        className: 'btn btn-primary',
+                        title: 'All Users List',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+
+                    },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                serverSide: true,
                 language: {
                     processing: data_table_loader
                 },
-                serverSide: true,
+                
         ajax:{
-                    url: '{{ route('admin.human_resourse.all_riders') }}'
+                    url: '{{ route('admin.human_resourse.all_user_ajax') }}'
                    
                 },
         columns: [
@@ -115,11 +142,16 @@
                     {data: 'name', name: 'name', class: 'align-middle name'},
                     {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'address', name: 'address', class: 'align-middle address'},
+                    {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
+                    {data: 'role', name: 'role', class: 'align-middle role'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
+                    if(data['created_at']){
 
+                        console.log(data['created_at']['date']);
+                        $('td:eq(6)', row).html(data['created_at']['date']);
+                    }
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -151,65 +183,6 @@
                 }
     });
 
-
-    var table = $('#datatable2').DataTable({
-        dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
-                buttons: [
-                ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: true,
-        ajax:{
-                    url: '{{ route('admin.human_resourse.all_admins') }}'
-                   
-                },
-        columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'name', class: 'align-middle name'},
-                    {data: 'email', name: 'email', class: 'align-middle email'},
-                    {data: 'phone_number', name: 'phone_number', class: 'align-middle phone_number'},
-                    {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
-                    {data: 'designation', name: 'designation', class: 'align-middle designation'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                ],rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-
-                        }
-                    });
-
-                    this.api().table().columns.adjust();
-                }
-    });
     
   });
 
