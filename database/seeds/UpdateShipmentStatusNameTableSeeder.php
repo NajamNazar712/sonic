@@ -11,6 +11,8 @@ class UpdateShipmentStatusNameTableSeeder extends Seeder
      */
     public function run()
     {
-
+        DB::table('shipment_status')->where('id', 56)->update(['name' => 'Replacement - Not Collected']);
+        DB::table('shipment_status')->where('id', 7)->update(['name' => 'Shipment - Attempt Failed']);
+        DB::table('shipment_status')->where('id', 12)->update(['name' => 'Shipment - Return Confirmation Pending']);
     }
 }
