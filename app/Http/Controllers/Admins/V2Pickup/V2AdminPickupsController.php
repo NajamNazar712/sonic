@@ -795,7 +795,7 @@ class V2AdminPickupsController extends Controller
 
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
-                            NotificationsController::send(126,$shipment->id);
+                            NotificationsController::send(126,$shipment_id);
                         }
                     }
                     $shipment->fresh();
@@ -804,7 +804,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
-                        NotificationsController::send(126,$shipment->id);
+                        NotificationsController::send(126,$shipment_id);
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
@@ -1373,7 +1373,7 @@ class V2AdminPickupsController extends Controller
 
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
-                            NotificationsController::send(126,$shipment->id);
+                            NotificationsController::send(126,$shipment_id);
                         }
                     }
                     $shipment->fresh();
@@ -1382,7 +1382,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
-                        NotificationsController::send(126,$shipment->id);
+                        NotificationsController::send(126,$shipment_id);
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
