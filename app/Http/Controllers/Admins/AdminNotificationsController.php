@@ -400,7 +400,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 126){
-            $details['fields'] = ['tracking_number'];
+            $details['fields'] = ['tracking_number','location'];
         }
 
 		return $details;
