@@ -45,7 +45,6 @@ class FuelManagementController extends Controller
 
     public function fuel_list(Request $request)
     {
-
         $requests = FuelCardRequest::leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
             ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')
             ->leftjoin('admins as requested_by','fuel_card_requests.requested_by','=','requested_by.id')
@@ -67,7 +66,27 @@ class FuelManagementController extends Controller
                     ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
                     ->whereNotNull('fuel_card_requests.card_holder_id');
             })
-            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
+            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.fuel_request_id as fuel_request_id_for_excel','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','fuel_card_requests.updated_at as updated_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
+
+//        if($card_holder = $request->get('card_holder')){
+//
+//            $requests->where('fuel_card_requests.card_holder', $card_holder);
+//        }
+
+        if($request->get('card_number')){
+            $card_number = explode(',',$request->get('card_number'));
+            $requests->where(function ($subquery) use($card_number) {
+                for ($i = 0; $i < count($card_number); $i++){
+                    $subquery->orwhere('fuel_card_requests.card_number', 'like',  '%' . $card_number[$i] .'%');
+                }
+            });
+        }
+
+        if ($request->get('aprroved_at_from') && $request->get('approved_at_to')) {
+            $from = $request->get('aprroved_at_from');
+            $to = $request->get('approved_at_to');
+            $requests->whereBetween('fuel_card_requests.approved_at', [$from,$to]);
+        }
 
         return Datatables::of($requests)
             ->editColumn('card_holder', function ($data) {
@@ -89,6 +108,22 @@ class FuelManagementController extends Controller
             })
             ->editColumn('fuel_request_id', function ($data) {
                 return '<a target="_blank" href="'.route('admin.user_management.fuel_management.history.index',['fuel_request_id'=>$data->fuel_request_id]).'">'.$data->fuel_request_id.'</a>';
+            })
+            ->editColumn('amount', function ($data) {
+                if($data->amount != null)
+                {
+                    if($data->fuel_deduction_type_id == 1)
+                    {
+                        return $data->amount.' Rs';
+                    }
+                    else{
+                        return $data->amount.' Liter';
+                    }
+
+                }
+                else{
+                    return '';
+                }
             })
             ->addColumn('action',function ($fuel_card) {
                 if (session('role_id') == 1 || count(array_intersect([448, 450], session('permissions'))) !== 0) {
@@ -153,13 +188,30 @@ class FuelManagementController extends Controller
 
     public function request_search_by_card(Request $request)
     {
-        $fuel_card_request = FuelCardRequest::where([['card_number',$request->card_number],['card_holder_type_id',$request->card_holder_type],['fuel_card_requests.status',1]]);
+        $fuel_card_request = FuelCardRequest::where('card_number',$request->card_number);
+        if(!$fuel_card_request->exists())
+        {
+            return response()->json(['status' => 0, 'error' => 'Enter a valid Card Number']);
+        }
+
+        $fuel_card_request->where('card_holder_type_id',$request->card_holder_type);
+
         if($request->fleet_vehicle_type != null)
         {
             $fuel_card_request->where('fleet_vehicle_type_id',$request->fleet_vehicle_type);
         }
 
-        if($fuel_card_request->exists()) {
+        if(!$fuel_card_request->exists())
+        {
+            return response()->json(['status' => 0, 'error' => 'Card not belong to this card holder type']);
+        }
+
+        $fuel_card_request->where('fuel_card_requests.status',1);
+
+        if(!$fuel_card_request->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Card Previous Request is not approved']);
+        }
+
             $data = clone($fuel_card_request->first());
             $fuel_card_request = $fuel_card_request->leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
                 ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')
@@ -194,7 +246,7 @@ class FuelManagementController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'No user assigned to this card number']);
             }
-            $fuel_card_request =  $fuel_card_request->select('fuel_card_requests.id as id','fuel_card_requests.card_number as card_number','cht.name as card_holder_type','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','card_holder.name as card_holder');
+            $fuel_card_request =  $fuel_card_request->select('fuel_card_requests.id as id','fuel_card_requests.card_number as card_number','cht.name as card_holder_type','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','card_holder.name as card_holder');
             if(($request->request_type != 4 && !$status) || ($request->request_type == 4 && $status))
             {
                 return response()->json(['status' => 1, 'data' => $fuel_card_request->first()]);
@@ -208,11 +260,6 @@ class FuelManagementController extends Controller
                     return response()->json(['status' => 0, 'error' => 'Card is already Unblocked']);
                 }
             }
-
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Invalid Card Number!']);
-        }
     }
 
     public function request_store(Request $request)

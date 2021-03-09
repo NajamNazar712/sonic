@@ -17,6 +17,50 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            <form id="search_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="row justify-content-center">
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <input type="text" class="dt_search form-control" placeholder="Search Card Number" data-tags-input-name="card_number" name="card_number_search" id="card_number_search">
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Card Holder" name="card_holder" id="card_holder_search">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row mb-2 justify-content-center ">
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                            </span>
+                                            </div>
+                                            <input type="text" name="approved_at_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="approved_at_from" placeholder="Approved At From">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                            </div>
+                                            <input type="text" name="approved_at_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="approved_at_to" placeholder="Approved At To">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <button type="submit" id="search_filter_btn" class="mr-1 w-100 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -26,12 +70,13 @@
                                     <th class="border-primary border-darken-1">Card Holder</th>
                                     <th class="border-primary border-darken-1">Card Holder Type</th>
                                     <th class="border-primary border-darken-1">Card Request Type</th>
-                                    <th class="border-primary border-darken-1">Amount</th>
+                                    <th class="border-primary border-darken-1">Amount / Liter</th>
                                     <th class="border-primary border-darken-1">Fuel Type</th>
                                     <th class="border-primary border-darken-1">Fuel Deduction Type</th>
                                     <th class="border-primary border-darken-1">Requested by</th>
                                     <th class="border-primary border-darken-1">Approved by</th>
                                     <th class="border-primary border-darken-1">Approved at</th>
+                                    <th class="border-primary border-darken-1">Updated at</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -57,16 +102,16 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                            <div class="form-group text-center">
-                                <select name="card_holder_type" id="card_holder_type" form="fuel_request_form" class="form-control select2">
-                                    @foreach($card_holder_types as $card_holder_type)
-                                        <option value="{{ $card_holder_type->id }}" > {{ $card_holder_type->name }} </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="form-group text-center">
+                            <select name="card_holder_type" id="card_holder_type" form="fuel_request_form" class="select2">
+                                @foreach($card_holder_types as $card_holder_type)
+                                    <option value="{{ $card_holder_type->id }}" > {{ $card_holder_type->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <div class="form-group text-center" id="fleet_vehicle_type_container">
-                            <select name="fleet_vehicle_type" id="fleet_vehicle_type" form="fuel_request_form" class="form-control select2">
+                            <select name="fleet_vehicle_type" id="fleet_vehicle_type" form="fuel_request_form" class="select2">
                                 @foreach($vehicle_types as $vehicle_type)
                                     <option value="{{ $vehicle_type->id }}" > {{ $vehicle_type->name }} </option>
                                 @endforeach
@@ -123,7 +168,7 @@
                                             <th>Card Number</th>
                                             <th>Card Holder</th>
                                             <th>Card Holder Type</th>
-                                            <th>Amount</th>
+                                            <th>Amount / Liter</th>
                                             <th>Fuel Type</th>
                                             <th>Fuel Deduction Type</th>
                                             <th>Requested By</th>
@@ -188,7 +233,7 @@
                             </div>
                             <div class="col-12">
                                 <fieldset class="form-group">
-                                   <input type="text" name="amount" class="form-control" id="amount" placeholder="Amount"/>
+                                   <input type="text" name="amount" class="form-control" id="amount" placeholder="Amount / Liter"/>
                                 </fieldset>
                             </div>
                         </div>
@@ -206,6 +251,9 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 @endsection
 
@@ -214,9 +262,131 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+
+
+            var today = new Date();
+            today.setHours(0,0,0,0);
+
+            var approved_at_from = $('#search_form #approved_at_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                max: today,
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #approved_at_to').pickadate('picker').set('min', $('#search_form #approved_at_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var approved_at_to = $('#search_form #approved_at_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                max: today,
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #approved_at_from').pickadate('picker').set('max', $('#search_form #approved_at_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var card_number_selectize = $('#search_form #card_number_search').selectize({
+                placeholder: 'Card Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                // onType: function(str) {
+                //     var regex = /^[0-9,]+$/;
+                //
+                //     if (!regex.test(str)) {
+                //         select[0].selectize.setTextboxValue('');
+                //     }
+                // },
+                create: function(input) {
+                    if (input.length >= 15 ) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.user_management.fuel_management.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Fuel Request ID');
+                            head.push('Card Number');
+                            head.push('Card Holder');
+                            head.push('Card Holder Type');
+                            head.push('Card Request Type');
+                            head.push('Amount / Liter');
+                            head.push('Fuel Type');
+                            head.push('Fuel Deduction Type');
+                            head.push('Requested By');
+                            head.push('Approved By');
+                            head.push('Approved At');
+                            head.push('Updated At');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.fuel_request_id_for_excel);
+                                row.push(values.card_number);
+                                row.push(values.card_holder);
+                                row.push(values.card_holder_type);
+                                row.push(values.card_request_type);
+                                row.push(values.amount);
+                                row.push(values.fuel_type);
+                                row.push(values.fuel_deduction_type);
+                                row.push(values.requested_by);
+                                row.push(values.approved_by);
+                                row.push(values.approved_at);
+                                row.push(values.updated_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
+
             var table = $('#datatable').DataTable({
 
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -244,7 +414,12 @@
                     }
                 }
                 @endif
-                ,'reset'],
+                ,{
+                        extend: 'excel',
+                        title: 'Fuel Card Requests',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -254,9 +429,17 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.user_management.fuel_management.list') }}',
+                ajax: {
+                    url: '{{ route('admin.user_management.fuel_management.list') }}',
+                    data: function (d) {
+                        d.card_number = $('#card_number_search').val();
+                        d.card_holder =$('#card_holder_search').val();
+                        d.aprroved_at_from = $('input[name="approved_at_from_formatted"]').val();
+                        d.approved_at_to = $('input[name="approved_at_to_formatted"]').val();
+                    },
+                },
                 rowId: 'id',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'fuel_request_id', name: 'fuel_request_id', class: 'align-middle fuel_request_id'},
@@ -270,6 +453,7 @@
                     {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'approved_at', name: 'approved_at', class: 'align-middle approved_at'},
+                    {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -384,6 +568,7 @@
                     this.api().table().columns.adjust();
                 }
             });
+
             $("#card_holder_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Card Holder Type",
                 width:'100%',
@@ -417,51 +602,58 @@
             $('#FuelCardHolderTypeSelectModal #card_holder_type_value_select_btn').on('click',function () {
                     var card_holder_type = $('#card_holder_type').val();
                     var fleet_vehicle_type = $('#fleet_vehicle_type').val();
-                    if(card_holder_type != '' && ((card_holder_type !=3) || (card_holder_type == 3 && fleet_vehicle_type != '')))
+                    if(card_holder_type == '')
                     {
-                        $.ajax({
-                            url: '{!! route('admin.user_management.fuel_management.create') !!}',
-                            method: 'get',
-                            data: {
-                                'card_holder_type': card_holder_type,
-                                'fleet_vehicle_type' : fleet_vehicle_type,
-                            }
-                        })
-                            .done(function (response) {
-                                if (response.status == 1) {
-                                    $('#FuelCardHolderTypeSelectModal').modal('hide');
-                                    html = '';
-                                    html += '<select name="card_holder" id="card_holder" class="select2 form-control">';
-                                    $.each(response.data, function(index, values) {
-                                        html += `<option value="${values.id}" > ${values.name} </option>`;
-                                    });
-                                    html += '</select>';
-
-                                    $('#FuelRequestModal .modal-body #card_holder_select_container').html(html);
-
-
-                                    $("#card_holder").prepend('<option value="" selected></option>').select2({
-                                        placeholder: "Select Card Holder",
-                                        width:'100%',
-                                        allowClear: true,
-                                    });
-                                    $('#card_request_type').val('');
-                                    $('#card_request_type').trigger('change');
-                                    $('#FuelRequestModal').modal('show');
-                                } else {
-                                    toastr.error(response.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                            });
-                    }
-                    else{
-                        toastr.warning('Please Select All Fields', 'Warning!', {
+                        toastr.error('Please Select Card Holder Type', 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                        return;
                     }
+                    if(card_holder_type == 3 && fleet_vehicle_type == '') {
+                        toastr.error('Please Select Fleet Vehicle Type', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '{!! route('admin.user_management.fuel_management.create') !!}',
+                        method: 'get',
+                        data: {
+                            'card_holder_type': card_holder_type,
+                            'fleet_vehicle_type' : fleet_vehicle_type,
+                        }
+                    })
+                        .done(function (response) {
+                            if (response.status == 1) {
+                                $('#FuelCardHolderTypeSelectModal').modal('hide');
+                                html = '';
+                                html += '<select name="card_holder" id="card_holder" class="select2 form-control">';
+                                $.each(response.data, function(index, values) {
+                                    html += `<option value="${values.id}" > ${values.name} </option>`;
+                                });
+                                html += '</select>';
+
+                                $('#FuelRequestModal .modal-body #card_holder_select_container').html(html);
+
+
+                                $("#card_holder").prepend('<option value="" selected></option>').select2({
+                                    placeholder: "Select Card Holder",
+                                    width:'100%',
+                                    allowClear: true,
+                                });
+                                $('#card_request_type').val('');
+                                $('#card_request_type').trigger('change');
+                                $('#FuelRequestModal').modal('show');
+                            } else {
+                                toastr.error(response.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
 
             });
 
@@ -479,6 +671,10 @@
 
             $('#card_request_type').on('change',function () {
                 $('#FuelRequestModal .modal-body input[type=text]').each(function (i,v) {
+                    $(v).val('');
+                });
+
+                $('#FuelRequestModal .modal-body input[type=hidden]').each(function (i,v) {
                     $(v).val('');
                 });
 
@@ -526,6 +722,14 @@
                 {
                     fleet_vehicle_type = null;
                 }
+                if(card_number == '')
+                {
+                    toastr.error('Please Enter a Valid Card Number', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    return;
+                }
                 $.ajax({
                     url: '{!! route('admin.user_management.fuel_management.search_by_card') !!}',
                     method: 'get',
@@ -542,7 +746,16 @@
                                         <td>${response.data.card_number}</td>
                                         <td>${response.data.card_holder}</td>
                                         <td>${response.data.card_holder_type}</td>
-                                        <td>${response.data.amount}</td>
+                                        <td>${response.data.amount}`
+                                if(response.data.fuel_deduction_type_id == 1)
+                                {
+                                    html += ' Rs';
+                                }
+                                else{
+                                    html += ' Liter';
+                                }
+
+                                html +=`</td>
                                         <td>${response.data.fuel_type}</td>
                                         <td>${response.data.fuel_deduction_type}</td>
                                         <td>${response.data.requested_by}</td>
@@ -562,12 +775,54 @@
                     });
             });
 
+            $('#fuel_request_form').on('submit',function (e) {
+                var card_request_type = $('#card_request_type').val();
+                var card_request_id = $('#card_request_id').val();
+                var card_holder = $('#card_holder').val();
+
+                console.log()
+                if(card_request_type == '')
+                {
+                    toastr.error('Please Select Card Request Type', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    e.preventDefault();
+                    return;
+                }
+
+                if(card_request_type != 1)
+                {
+                    if(card_request_id == '') {
+                        toastr.error('Please Enter a Valid Card Number', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                if(card_request_type == 1 || card_request_type == 2)
+                {
+                    if(card_holder == '') {
+                        toastr.error('Please Select Card Holder', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+            })
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var request_id = $(this).parents('tr').attr('id');
                 if($(this).hasClass('approve_new'))
                 {
                     url = "{!! route('admin.user_management.fuel_management.approve') !!}";
+                    heading = 'Approve Request';
                     $("#fuel_deduction_type").val('');
                     $("#fuel_deduction_type").trigger('change');
 
@@ -578,6 +833,7 @@
 
                     $('#request_id').val(request_id);
                     $('#ApproveModal #fuel_request_approve_form').attr('action',url);
+                    $('#ApproveModal .modal-title').html(heading);
                     $('#ApproveModal').modal('show');
                 }
 
@@ -614,7 +870,8 @@
 
                 if($(this).hasClass('edit'))
                 {
-                    url = "{!! route('admin.user_management.fuel_management.edit') !!}"
+                    url = "{!! route('admin.user_management.fuel_management.edit') !!}";
+                    heading = 'Edit Request';
                     $("#fuel_deduction_type").val('');
                     $("#fuel_deduction_type").trigger('change');
 
@@ -625,8 +882,14 @@
 
                     $('#request_id').val(request_id);
                     $('#ApproveModal #fuel_request_approve_form').attr('action',url);
+                    $('#ApproveModal .modal-title').html(heading);
                     $('#ApproveModal').modal('show');
                 }
+            });
+
+            $('#search_form').bind('submit', function (e) {
+                e.preventDefault();
+                table.draw();
             });
         });
 
