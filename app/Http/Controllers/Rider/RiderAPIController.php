@@ -3463,7 +3463,7 @@ class RiderAPIController extends Controller
                     if ($request->has('audio')) {
                         $extension = $request->file('audio')->getClientOriginalExtension();
                         $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
-                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                         $rider_delivery->audio_path = $audio_path;
                         $rider_delivery->save();
                     }
@@ -3602,7 +3602,7 @@ class RiderAPIController extends Controller
                     if ($request->has('audio')) {
                         $extension = $request->file('audio')->getClientOriginalExtension();
                         $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
-                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                         $rider_pickup->audio_path = $audio_path;
                         $rider_pickup->save();
                     }
@@ -3711,7 +3711,7 @@ class RiderAPIController extends Controller
                     if ($request->has('audio')) {
                         $extension = $request->file('audio')->getClientOriginalExtension();
                         $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
-                        Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                        Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                         $rider_return_delivery->audio_path = $audio_path;
                         $rider_return_delivery->save();
                     }
