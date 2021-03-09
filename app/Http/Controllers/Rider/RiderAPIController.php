@@ -3127,7 +3127,7 @@ class RiderAPIController extends Controller
                     ->leftjoin('rider_deliveries', function ($join) {
                         $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
                             ->where('rider_deliveries.id', '=',
-                                DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = rider_deliveries.delivery_note_id)'));
+                                DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
