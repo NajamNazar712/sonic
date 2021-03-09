@@ -47,7 +47,11 @@ class AdminHumanResourseController extends Controller
                 $user['phone'] = $rider->phone;
                 $user['trax_id'] = $rider->trax_id;
                 $user['role'] = 'Rider';
-                $user['created_at'] = $rider->created_at;
+                if($rider->created_at){
+                    $user['created_at'] = date_format($rider->created_at,"Y/m/d H:i:s");
+                }else{
+                    $user['created_at'] = $rider->created_at;
+                }
                 $users[] = $user;
                 $users = collect($users);
             }
@@ -61,7 +65,12 @@ class AdminHumanResourseController extends Controller
                 $user['phone'] = $admin->phone_number;
                 $user['trax_id'] = $admin->trax_id;
                 $user['role'] = 'Admin';
-                $user['created_at'] = $admin->created_at;
+                if($admin->created_at){
+                    $user['created_at'] = date_format($admin->created_at,"Y/m/d H:i:s");
+                }else{
+                    $user['created_at'] = $admin->created_at;
+                }
+                
                 $users[] = $user;
                 $users = collect($users);
             }

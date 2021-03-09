@@ -147,11 +147,12 @@
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data['created_at']){
+                    // if(data['created_at']){
 
-                        console.log(data['created_at']['date']);
-                        $('td:eq(6)', row).html(data['created_at']['date']);
-                    }
+                    //     console.log(data['created_at']['date']);
+                    //     console.log('asdsa');
+                    //     $('td:eq(6)', row).html(data['created_at']['date']);
+                    // }
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
