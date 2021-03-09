@@ -3854,14 +3854,21 @@ class RiderAPIController extends Controller
                     $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment_id);
                     if ($rider_delivery->exists()) {
                         $rider_delivery = $rider_delivery->orderBy('id', 'DESC')->first();
-                        if ($rider_delivery->delivered_status == 0 || $delivery_note_shipment->status == 1){
+                        if ($rider_delivery->delivered_status == 0) {
                             $status = 3;
-                        } else if ($rider_delivery->delivered_status == 1 || $delivery_note_shipment->status > 1) {
+                        } else if ($rider_delivery->delivered_status == 1) {
                             $status = 2;
-
+                        } else {
+                            $status = 1;
                         }
                     } else {
-                        $status = 1;
+                        if ($delivery_note_shipment->status == 1) {
+                            $status = 3;
+                        } else if ($delivery_note_shipment->status > 1) {
+                            $status = 2;
+                        } else {
+                            $status = 1;
+                        }
                     }
 
 
