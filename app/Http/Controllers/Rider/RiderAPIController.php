@@ -3097,7 +3097,7 @@ class RiderAPIController extends Controller
                 $pickup_note_id = $request->pickup_note_id;
                 $pickup_details = V2PickupNoteRequest::join('v2_pickup_requests as pr', 'pr.id', '=', 'v2_pickup_note_requests.pickup_request_id')
                     ->join('users as u', 'u.id', '=', 'pr.shipper_id')
-                    ->select('u.name as shipper', 'pr.id as pickup_request_id', 'pr.booked as total_shipment', DB::raw('(select shipments from v2_rider_pickups where pickup_request_id = pr.id and pickup_type = 1 ) as rider_picked'), 'pr.received as arrived', DB::raw('(select created_at from v2_rider_pickups where pickup_request_id = pr.id and pickup_type = 1 ) as pickup_date'))
+                    ->select('u.name as shipper', 'pr.id as pickup_request_id', 'pr.booked as total_shipment', DB::raw('(select shipments from v2_rider_pickups where pickup_request_id = pr.id) as rider_picked'), 'pr.received as arrived', DB::raw('(select created_at from v2_rider_pickups where pickup_request_id = pr.id) as pickup_date'))
                     ->where('v2_pickup_note_requests.pickup_note_id', $pickup_note_id);
                 if ($pickup_details->exists()) {
                     $pickup_details = $pickup_details->get();
@@ -3240,7 +3240,13 @@ class RiderAPIController extends Controller
                 $rider_pickups = $rider_pickups->whereDate('v2_pickup_notes.created_at', $from_date);
             }
             if ($pickup_request_id != null) {
-                $rider_pickups = $rider_pickups->where('pnr.pickup_request_id', $pickup_request_id);
+                $pickup_note = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id);
+                if ($pickup_note->exists()) {
+                    $pickup_note = $pickup_note->first();
+                    $rider_pickups = $rider_pickups->where('v2_pickup_notes.id', $pickup_note->pickup_note_id);
+                } else {
+                    return response()->json(["status" => 1, "message" => "No pickups found!"]);
+                }
             }
             if ($pickup_note_id != null) {
                 $rider_pickups = $rider_pickups->where('v2_pickup_notes.id', $pickup_note_id);
