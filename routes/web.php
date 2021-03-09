@@ -1670,6 +1670,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+            Route::put('','Admins\AdminPackagingMaterialController@request_update')->name('update');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
@@ -2684,6 +2685,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
+    });
+    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+        
+        Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
+        Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
+        Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
     });
 
 });

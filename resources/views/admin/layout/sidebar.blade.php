@@ -1351,16 +1351,16 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([331, 332], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Retail</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([331, 332], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
                                         <li class=" nav-item"><a href="#"><span class="menu-title">Store Management</span></a>
                                             <ul class="menu-content">
-                                                @if (session('role_id') == 1 || in_array(331, session('permissions')))
+                                                @if (session('role_id') == 1 || in_array(431, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.franchise.index') }}">Franchise</a></li>
                                                 @endif
-                                                @if (session('role_id') == 1 || in_array(332, session('permissions')))
+                                                @if (session('role_id') == 1 || in_array(432, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.trax_center.index') }}">Trax Center</a></li>
                                                 @endif
                                             </ul>
@@ -1400,6 +1400,19 @@
                             @endif  
                     </ul>
                 </li>
+            @endif
+                
+            @if (session('role_id') == 1 || count(array_intersect([448], session('permissions'))) !== 0)
+            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
+                <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(448, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(448, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Users</a></li>
+                        @endif
+                </ul>
+            </li>
             @endif
 
                 <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>

@@ -18,4 +18,7 @@ class Lead extends Model
     public function status() {
         return $this->belongsTo('App\Http\Models\Admin\Lead\LeadStatus', 'status_id', 'id');
     }
+    public function city() {
+        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
+    }
 }

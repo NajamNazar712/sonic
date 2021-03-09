@@ -42,11 +42,11 @@ class AdminUserRequestController extends Controller
         ->select('admin_user_requests.id','admin_user_requests.trax_id as trax_id','admin_user_requests.designation as designation','admin_user_requests.name as name', 'admin_user_requests.email as email', 'admin_user_requests.phone_number as phone_number', 'admin_user_requests.cnic as cnic','c.name as default_hub','ad.name as department','admin_user_requests.request_created_at as request_created_at','a.name as request_craeted_by','admin_user_requests.verified_by_hr_at as verified_by_hr_at','as.name as verified_by_hr','admin_user_requests.status as status','admin_user_requests.forwarded_at','ac.name as forwarded_by', 'admin_user_requests.outlook_email')
             ->orderBy('admin_user_requests.created_at','desc');
 
-            if(session('role_id') != 1 && session('department_id') != 2){
+            if(session('role_id') != 1 && session('role_id') != 63){
                 $users->whereIn('admin_user_requests.status',[0,1]);
             };
 
-        if(session('role_id') != 1 && session('department_id') != 2){
+        if(session('role_id') != 1 && session('role_id') != 63){
             $users->where('ad.id',session('department_id'));
         }
 
@@ -119,19 +119,19 @@ class AdminUserRequestController extends Controller
                 $forwarded_by = '<button type="button" class="dropdown-item forward"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-arrow-circle-right"></i></div><div class="col-9 offset-1">Forward</div></button>';
                 $view_details = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="la la-file-o"></i></div><div class="col-9 offset-1">View Details</div></button>';
 
-                if(session('role_id') == 1 || ((session('department_id') == 2) && ($user->status == 0 || $user->status == 3 ))) {
+                if(session('role_id') == 1 || (( session('role_id') == 63) && ($user->status == 0 || $user->status == 3 ))) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
 
-                    if ((session('department_id') == 2 && $user->status == 0) || (session('role_id') == 1 && $user->status == 0)) {
+                    if ((session('role_id') == 1 || session('role_id') == 63) && $user->status == 0) {
                         $dropdown .= $verify;
                     }
                     if (session('role_id') == 1 && $user->status == 1) {
                         $dropdown .= $add_role;
                     }
-                    if ((session('role_id') == 1 && $user->status == 3) || session('department_id') == 2 && $user->status == 3) {
+                    if ((session('role_id') == 1|| session('role_id') == 63) && $user->status == 3) {
                         $dropdown .= $view_details;
                     }
                     return $dropdown;
@@ -185,7 +185,7 @@ class AdminUserRequestController extends Controller
     }
 
     public function verify_index($id) {
-        if(session('role_id') == 1 || session('department_id') == 10) {
+        if(session('role_id') == 1 ||  session('role_id') == 63) {
             $departments = AdminDepartment::select('id','name')->where('id','!=',1)->get();
             $hubs = City::where('hub', 1)->get();
             $user = AdminUserRequest::find($id);

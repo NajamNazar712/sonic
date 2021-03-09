@@ -98,8 +98,9 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
             ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 'leads.sale_person_updated_at');
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 'leads.sale_person_updated_at', 'lr.name as lead_reference');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -260,7 +261,7 @@ class LeadManagementController extends Controller
         $lead = Lead::find($lead_id);
         $status = $request->status;
         if($status != NULL){
-            if ($lead->sale_person_id != null){
+            if ($status == 3) {
                 $lead_log = new LeadLog();
                 $lead_log->lead_id = $lead->id;
                 $lead_log->prev_status_id = $lead->status_id;
@@ -280,9 +281,32 @@ class LeadManagementController extends Controller
 
                 return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
             }
-            else{
-                return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
+            else {
+                if ($lead->sale_person_id != null){
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = $status;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    $lead_log->reference_person_id = $lead->reference_person_id;
+                    $lead_log->updated_by = Auth::id();
+                    $lead_log->save();
+    
+                    $lead->status_id = $status;
+                    $lead->updated_by = Auth::id();
+                    $lead->save();
+    
+                    if($status == 9){
+                        NotificationsController::send(113, $lead);
+                    }
+    
+                    return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
+                }
             }
+            
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Status!']);

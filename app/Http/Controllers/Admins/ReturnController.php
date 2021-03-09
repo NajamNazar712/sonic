@@ -355,7 +355,7 @@ class ReturnController extends Controller
                     continue;
                 }
                 $remark_inp = "remark.$shipment";
-                if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
+                if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
 
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 //                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
@@ -385,6 +385,12 @@ class ReturnController extends Controller
                         $parcel->save();
 
                         AdminFinanceController::done_payment($shipment, 1);
+                    }
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
+                    if($return_assign_shipment->exists()){
+                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
                     }
 
                 }
@@ -461,7 +467,7 @@ class ReturnController extends Controller
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
-            if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
+            if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
 
@@ -486,6 +492,12 @@ class ReturnController extends Controller
                     $parcel->save();
 
                     AdminFinanceController::done_payment($request->shipment_id, 1);
+                }
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                if($return_assign_shipment->exists()){
+                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
@@ -1635,7 +1647,7 @@ class ReturnController extends Controller
                 ReturnNoteShipment::where(['return_note_id'=>$return_note,'shipment_id'=>$request->shipment_id])->delete();
                 $return = $return->first();
                 $count = $return->shipments_count;
-                $count = $count-1;
+                $count = $count - 1;
                 if($count == 0){
                     ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count,'status'=>2]);
                 }else{
@@ -1646,12 +1658,15 @@ class ReturnController extends Controller
                 ShipmentsJourneyController::add($parcel->id, $shipper_status, NULL, NULL, NULL, NULL, Auth::id(),$request->return_note_id);
 
                 $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
-                $return_note_data = ReturnNote::find($request->return_note_id);
-                    if($updated_shipments == 0){
-                        $return_note_data->status = 3;
+                if($updated_shipments == 0){
+                    $return_note_data = ReturnNote::where('id', $request->return_note_id)->where('status', '!=', 2)->first();
+                    if($return_note_data){
+                        $return_note_data->status = 2;
                         $return_note_data->updated_at = Carbon::now();
                         $return_note_data->save();
                     }
+
+                }
 
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{

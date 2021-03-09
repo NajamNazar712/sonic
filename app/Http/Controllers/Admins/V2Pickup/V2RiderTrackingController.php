@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class V2RiderTrackingController extends Controller
 {
@@ -34,23 +35,18 @@ class V2RiderTrackingController extends Controller
     {
         $rider_id = $request->rider_id;
 
-//        $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
-//            ->where('v2_pickup_notes.rider_id',$rider_id)
-//            ->latest('v2_pickup_notes.id')->get();
-//
-//        return $data;
         // Getting Rider Data
-        $data = V2PickupNote::whereDate('v2_pickup_notes.created_at', Carbon::today())
-            ->where([['v2_pickup_notes.rider_id',$rider_id],['v2_pickup_notes.pickups','>',0]])
-            ->latest('v2_pickup_notes.id')
-            ->join('v2_pickup_note_requests as pivot_requests','v2_pickup_notes.id','=','pivot_requests.pickup_note_id')
+        $data = V2PickupNote::join('v2_pickup_note_requests as pivot_requests','v2_pickup_notes.id','=','pivot_requests.pickup_note_id')
             ->join('v2_pickup_requests as requests',function ($join){
                 $join->on('requests.id','=','pivot_requests.pickup_request_id');
             })
             ->join('user_shipping_infos as info','info.id','=','requests.pickup_address_id')
             ->leftjoin('users','users.id','=','info.user_id')
             ->leftjoin('v2_rider_pickups as pickups', 'pickups.pickup_request_id','=','pivot_requests.pickup_request_id')
-            ->select('pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.pickup_address_lat as latitude','info.pickup_address_long as longitude')
+            ->select('v2_pickup_notes.id as node_id','pickups.id as checking_id','pickups.pickup_not_pick_reason_id as checking_reason','requests.pickup_address_id as pickup_id','users.name as name','info.pickup_address as address','info.location_latitude as latitude','info.location_longitude as longitude')
+            ->whereDate('v2_pickup_notes.created_at', Carbon::today())
+            ->where('v2_pickup_notes.rider_id',$rider_id)
+            ->where('v2_pickup_notes.id', DB::raw('(select MAX(id) from v2_pickup_notes as vpn where vpn.rider_id = v2_pickup_notes.rider_id and vpn.pickups > 0)'))
             ->get()->groupBy('pickup_id');
 
         $rider = Rider::where('riders.id',$rider_id)

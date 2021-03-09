@@ -858,7 +858,12 @@ class Permission
 //            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
-            'leads.view_remarks' => 416
+            'leads.view_remarks' => 416,
+            'human_resourse.allusers' => 449,
+            'human_resourse.download_docs' => 449,
+            'human_resourse.all_user_ajax' => 449
+            
+           
         ],
 
         'shipper' => [
@@ -938,6 +943,10 @@ class Permission
             'retail.pending_cash_collection.index' => 423,
             'retail.completed.index' => 424,
 			'retail.accounts.index' => 428,
+            'retail.franchise.index' => 431,
+            'retail.franchise.list' => 431,
+            'retail.trax_center.index' => 432,
+            'retail.trax_center.list' => 432
         ]
     ];
 
