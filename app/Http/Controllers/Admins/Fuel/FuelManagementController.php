@@ -40,7 +40,10 @@ class FuelManagementController extends Controller
         $card_holder_types = CardHolderType::all();
         $card_request_types = FuelCardRequestType::all();
         $vehicle_types = FleetVehicleType::all();
-        return view('admin.user_management.fuel.fuel_management',compact('fuel_types','fuel_deduction_types','card_holder_types','card_request_types','vehicle_types'));
+        $staffs = Admin::where('status','1')->get();
+        $riders = Rider::where([['status','1'],['blacklist','0']])->get();
+        $fleets = FleetVehicle::where([['status',1]])->get();
+        return view('admin.user_management.fuel.fuel_management',compact('fuel_types','fuel_deduction_types','card_holder_types','card_request_types','vehicle_types','staffs', 'riders','fleets'));
     }
 
     public function fuel_list(Request $request)
@@ -80,6 +83,18 @@ class FuelManagementController extends Controller
                     $subquery->orwhere('fuel_card_requests.card_number', 'like',  '%' . $card_number[$i] .'%');
                 }
             });
+        }
+
+        if($card_holder = $request->get('staff_card_holder') && $request->get('staff_card_holder') != ''){
+            $requests->where('staff.name',$card_holder);
+        }
+
+        if($card_holder = $request->get('rider_card_holder') && $request->get('rider_card_holder') != ''){
+            $requests->where('rider.name',$card_holder);
+        }
+
+        if($card_holder = $request->get('fleet_card_holder') && $request->get('fleet_card_holder') != ''){
+            $requests->where('fleet.name',$card_holder);
         }
 
         if ($request->get('aprroved_at_from') && $request->get('approved_at_to')) {

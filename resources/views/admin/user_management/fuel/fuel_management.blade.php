@@ -19,14 +19,38 @@
 
                             <form id="search_form" class=" mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="row justify-content-center">
-                                    <div class="col-5">
+                                    <div class="col-3">
                                         <div class="form-group">
-                                            <input type="text" class="dt_search form-control" placeholder="Search Card Number" data-tags-input-name="card_number" name="card_number_search" id="card_number_search">
+                                            <input type="text" class="form-control" placeholder="Search Card Number" data-tags-input-name="card_number" name="card_number_search" id="card_number_search">
                                         </div>
                                     </div>
-                                    <div class="col-5">
+                                    <div class="col-3">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Search Card Holder" name="card_holder" id="card_holder_search">
+                                            <select name="staff_select" id="staff_select" class="select2">
+                                                @foreach($staffs as $staff)
+                                                    <option > {{ $staff->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <select name="rider_select" id="rider_select" class="select2">
+                                                @foreach($riders as $rider)
+                                                    <option > {{ $rider->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <select name="fleet_select" id="fleet_select" class="select2">
+                                                @foreach($fleets as $fleet)
+                                                    <option> {{ $fleet->name }} </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -433,7 +457,9 @@
                     url: '{{ route('admin.user_management.fuel_management.list') }}',
                     data: function (d) {
                         d.card_number = $('#card_number_search').val();
-                        d.card_holder =$('#card_holder_search').val();
+                        d.staff_card_holder =$('#staff_select').val();
+                        d.rider_card_holder =$('#rider_select').val();
+                        d.fleet_card_holder =$('#fleet_select').val();
                         d.aprroved_at_from = $('input[name="approved_at_from_formatted"]').val();
                         d.approved_at_to = $('input[name="approved_at_to_formatted"]').val();
                     },
@@ -541,7 +567,7 @@
                         placeholder: "Select Card Holder Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
                     });
                     $("#fuel_type_select").prepend('<option value="" selected></option>').select2({
                         data:fuel_type_data,
@@ -572,24 +598,42 @@
             $("#card_holder_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Card Holder Type",
                 width:'100%',
+                dropdownParent: $('#FuelCardHolderTypeSelectModal'),
+            });
+            $('#staff_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Staff",
+                width:'100%',
+            });
+            $('#rider_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider",
+                width:'100%',
+            });
+            $('#fleet_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Fleet",
+                width:'100%',
             });
             $("#card_request_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Card Request Type",
                 width:'100%',
+                dropdownParent: $('#FuelRequestModal'),
             });
 
             $("#fleet_vehicle_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Fleet Vehicle Type",
                 width:'100%',
+                dropdownParent: $('#FuelCardHolderTypeSelectModal'),
             });
             $("#fuel_deduction_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Fuel Deduction Type",
                 width:'100%',
+                dropdownParent: $('#ApproveModal'),
+
             });
 
             $("#fuel_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Fuel Type",
                 width:'100%',
+                dropdownParent: $('#ApproveModal'),
             });
 
             $('#amount').inputmask({
@@ -643,6 +687,7 @@
                                     placeholder: "Select Card Holder",
                                     width:'100%',
                                     allowClear: true,
+                                    dropdownParent: $('#FuelRequestModal'),
                                 });
                                 $('#card_request_type').val('');
                                 $('#card_request_type').trigger('change');
