@@ -486,7 +486,7 @@
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(59, session('permissions')))
                                         <li><a class="menu-item"
-                                               href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
+                                               href="{{ route('admin.finance.retail.make_payments.index') }}">Make</a></li>
                                     @endif
 
 

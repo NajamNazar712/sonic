@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Make Payments')
+@section('title', 'Retail Make Payments')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Make Payments
+					Retail Make Payments
 				</h1>
 
 				<div class="card">
@@ -18,11 +18,11 @@
 							@include('admin.inc.messages')
 
 							<div class="row text-center">
-								<div class="col-2">
+								<div class="col-3">
 									<fieldset class="form-group">
 										<select name="search_shipper" id="search_shipper" class="form-control select2">
 											@foreach($shippers as $shipper)
-												<option value="{{$shipper->id}}">{{$shipper->name}}</option>
+												<option value="{{$shipper->id}}">{{$shipper->shipper_name}}</option>
 											@endforeach
 										</select>
 									</fieldset>
@@ -55,42 +55,14 @@
 									</div>
 								</form>
 								</div>
-								
-								<div class="col-3">
-									<form id="shipper_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
-									<div class="form-group">
-										<select name="shipper_status" class="select2 shipper_status">
-											@foreach($shipper_status as $id => $status)
-												<option value="{{$id}}">{{$status}}</option>
-											@endforeach
-										</select>
-									</div>
-									</form>
-								</div>
-								<div class="col-3">
-									<form id="shipper_document_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
-									<div class="form-group">
-										<select name="shipper_document_status" class="select2 shipper_document_status">
-												<option value="0">Pending</option>
-												<option value="1">Unverified</option>
-												<option value="2">Verified</option>
-												<option value="3">Rejected</option>
-										</select>
-									</div>
-									</form>
-								</div>
 							</div>
 
 							<div class="row text-center">
-								<div class="col-4">
+								<div class="col-6">
 									<h4 class="bg-primary mb-0 text-white border">Total Amount</h4><p class="border" id="stats_total_amount">Rs. {{ $total_amount }}</p>
 								</div>
 
-								<div class="col-4">
-									<h4 class="bg-primary mb-0 text-white border">Total Charges</h4><p class="border" id="stats_total_charges">Rs. {{ $total_charges }}</p>
-								</div>
-
-								<div class="col-4">
+								<div class="col-6">
 									<h4 class="bg-primary mb-0 text-white border">Total Payable</h4><p class="border" id="stats_total_payable">Rs. {{ $total_payable }}</p>
 								</div>
 							</div>
@@ -108,22 +80,13 @@
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Total Pending Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
-										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
-										<th class="border-primary border-darken-1">Total Charges</th>
-										<th class="border-primary border-darken-1">Total GST</th>
-										<th class="border-primary border-darken-1">Packing Charges</th>
-										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
-										<th class="border-primary border-darken-1">Bank Branch</th>
 										<th class="border-primary border-darken-1">Account No.</th>
-										<th class="border-primary border-darken-1">Account Title</th>
 										<th class="border-primary border-darken-1">IBAN</th>
 										<th class="border-primary border-darken-1">Account City</th>
-										<th class="border-primary border-darken-1">Payment Cycle</th>
-										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -134,25 +97,6 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="delivered_shipments_title">Delivered Shipment(s)</h4>
-
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-												<span aria-hidden="true">×</span>
-											</button>
-										</div>
-										<div class="modal-body text-center">
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="modal fade" id="returned_shipments" role="dialog" aria-labelledby="returned_shipments_title" aria-hidden="true">
-								<div class="modal-dialog modal-sm" role="document">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title" id="returned_shipments_title">Returned Shipment(s)</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -226,18 +170,15 @@
 														<th class="border-primary border-darken-1">Origin</th>
 														<th class="border-primary border-darken-1">Type</th>
 														<th class="border-primary border-darken-1">Status</th>
-														<th class="border-primary border-darken-1">Delivery / Return Datetime</th>
+														<th class="border-primary border-darken-1">Delivery</th>
 														<th class="border-primary border-darken-1">Aging</th>
 														<th class="border-primary border-darken-1">Amount</th>
-														<th class="border-primary border-darken-1">Charges</th>
-														<th class="border-primary border-darken-1">GST</th>
-														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 													</tr>
 												</thead>
 											</table>
 
-											<form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
+											<form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.retail.make_payments.store') }}">
 												{{ csrf_field() }}
 
 												<input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
@@ -246,20 +187,6 @@
 													<div class="form-group">
 														<label class="mx-auto">Total Amount</label>
 														<input type="text" name="total_amount" class="form-control text-center total_amount" placeholder="Total Amount" readonly="readonly">
-													</div>
-												</div>
-
-												<div class="col-2">
-													<div class="form-group">
-														<label class="mx-auto">Total Charges</label>
-														<input type="text" name="total_charges" class="form-control text-center total_charges" placeholder="Total Charges" readonly="readonly">
-													</div>
-												</div>
-
-												<div class="col-2">
-													<div class="form-group">
-														<label class="mx-auto">Total GST</label>
-														<input type="text" name="total_gst" class="form-control text-center total_gst" placeholder="Total GST" readonly="readonly">
 													</div>
 												</div>
 												<div class="col-2 mt-2">
@@ -278,22 +205,8 @@
 
 												<div class="col-2">
 													<div class="form-group">
-														<label class="mx-auto">Total Deductable</label>
-														<input type="text" name="total_deductable" class="form-control text-center total_deductable" placeholder="Total Deductable" readonly="readonly">
-													</div>
-												</div>
-
-												<div class="col-2">
-													<div class="form-group">
 														<label class="mx-auto">Total Payable</label>
 														<input type="text" name="total_payable" class="form-control text-center total_payable" placeholder="Total Payable" readonly="readonly">
-													</div>
-												</div>
-
-												<div class="col-2">
-													<div class="form-group">
-														<label class="mx-auto">Total Hold</label>
-														<input type="text" name="total_hold" class="form-control text-center total_hold" placeholder="Total Hold" readonly="readonly">
 													</div>
 												</div>
 
@@ -329,21 +242,20 @@
 	<script>
 		$(document).ready(function() {
 			@if (session('print'))
-				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
+				window.open('{!! route('admin.finance.retail.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
 			@endif
 
 			function stats_calculate() {
 				positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 
 				$.ajax({
-					url: '{!! route('admin.finance.make_payments.stats_calculate') !!}',
+					url: '{!! route('admin.finance.retail.make_payments.stats_calculate') !!}',
 					data: {
 						'positive_negative_filter': positive_negative_filter
 					}
 				})
 				.done(function(data) {
 					$('#stats_total_amount').html(data.total_amount);
-					$('#stats_total_charges').html(data.total_charges);
 					$('#stats_total_payable').html(data.total_payable);
 				});
 			}
@@ -370,22 +282,6 @@
 				table.draw(false);
 			});
 
-			$('#shipper_status_form select.shipper_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Shipper Status',
-                width:'100%',
-                allowClear:true
-            }).bind('change', function() {
-				table.draw(false);
-			});
-
-			$('#shipper_document_status_form select.shipper_document_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Shipper Document Status',
-                width:'100%',
-                allowClear:true
-            }).bind('change', function() {
-				table.draw(false);
-			});
-
 			$('#payment_cycle_filter_form select.payment_cycle_filter').select2({
                 placeholder:'Payment Cycle Filter',
                 width:'100%',
@@ -408,7 +304,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.make_payments.list') }}',
+                        url: '{{ route('admin.finance.retail.make_payments.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -422,55 +318,34 @@
                             head.push('Total Shipments');
                             head.push('Total Pending Shipments');
                             head.push('Delivered Shipments');
-                            head.push('Returned Shipments');
                             head.push('Adjusted Shipments');
                             head.push('Total Amount');
-                            head.push('Total Charges');
-                            head.push('Total GST');
-                            head.push('Packing Charges');
-                            head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Bank');
-                            head.push('Bank Branch');
                             head.push('Account No.');
-                            head.push('Account Title');
                             head.push('IBAN');
                             head.push('Account City');
-                            head.push('Payment Cycle');
-                            head.push('Return Shipments Avg. Aging');
-
-
 
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
-                                row.push(values.address);
+                                row.push(values.shipper_address);
                                 row.push(values.created_at);
                                 row.push(values.total_shipments);
                                 row.push(values.total_pending_shipments);
                                 row.push(values.delivered_shipments_count);
-                                row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
                                 row.push(values.total_amount);
-                                row.push(values.total_charges);
-                                row.push(values.total_gst);
-                                row.push(values.packaging_charges);
-                                row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
-                                row.push(values.bank_branch);
-                                row.push(values.account_no);
-                                row.push(values.account_title);
+                                row.push(values.account_number);
                                 row.push(values.iban);
                                 row.push(values.account_city);
-                                row.push(values.payment_cycle);
-                                row.push(values.return_shipments_average_aging);
 
                                 body.push(row);
                             });
@@ -491,11 +366,7 @@
 						enabled: false,
 						action: function (e, dt, node, config) {
 							$('#make_payments #make_payments_form .total_amount').val(0);
-							$('#make_payments #make_payments_form .total_charges').val(0);
-							$('#make_payments #make_payments_form .total_gst').val(0);
-							$('#make_payments #make_payments_form .total_deductable').val(0);
 							$('#make_payments #make_payments_form .total_payable').val(0);
-							$('#make_payments #make_payments_form .total_hold').val(0);
 
 
 							$('#make_payments #make_payments_form button.make').prop('disabled', true);
@@ -595,14 +466,12 @@
                 },
 				serverSide: true,
 				ajax: {
-					url: '{{ route('admin.finance.make_payments.list') }}',
+					url: '{{ route('admin.finance.retail.make_payments.list') }}',
 					data: function (d) {
 						d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter').val();
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 						d.search_shipper = $('#search_shipper').val();
-						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
-						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
 					}
 				},
 				rowId: 'id',
@@ -610,38 +479,26 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+					{data:'shipper', name: 'rsi.shipper_name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
-					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
-					{data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
-					{data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
+					{data:'shipper_address', name: 'rsi.shipper_address', class: 'align-middle text-center address'},
+					{data:'created_at', name: 'retail_pending_payments.created_at', class: 'align-middle text-center created_at'},
+					{data:'total_shipments', name: 'retail_pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'total_pending_shipments', name: 'total_pending_shipments', class: 'align-middle text-center total_pending_shipments', orderable: false},
-					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
-					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
-					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
+					{data:'delivered_shipments', name: 'retail_pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
+					{data:'adjusted_shipments', name: 'retail_pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
-					{data:'total_charges', name: 'ppc.charges', class: 'align-middle text-center total_charges', orderable: false},
-					{data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
-					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
-					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
-					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
-					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
-					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
-					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
+					{data:'account_number', name: 'rsi.account_number', class: 'align-middle text-center account_no'},
+					{data:'iban', name: 'rsi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
-					if (data.documents_status == 2) {
-                        $('td:eq(0)', row).addClass('select-checkbox');
-                    }
-
 					var info = table.page.info();
+					$('td:eq(0)', row).addClass('select-checkbox');
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
@@ -658,38 +515,18 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
-                    // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
-                    //     '<option value="ibft">IBFT</option>' +
-                    //     '<option value="invoices">Invoices</option>' +
-                    //     '</select>';
-                    var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
-                        '<option value="1">Daily</option>' +
-                        '<option value="2">Weekly</option>' +
-                        '<option value="3">Monthly</option>' +
-                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.packaging_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        // }else if($(header).is('.payment_mode')){
-                        //     $(payment_mode_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        }else if($(header).is('.payment_cycle')){
-                            $(payment_cycle_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
-
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -724,12 +561,6 @@
                     //     containerCssClass: 'select-xs',
                     //     dropdownCssClass: 'form-control-sm p-0'
                     // });
-                    $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Cycle",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
 					this.api().table().columns.adjust();
 				}
 			});
@@ -763,7 +594,7 @@
 						e.preventDefault();
 
 						if (selected_rows_shipments.length != 0) {
-							window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' + selected_rows_shipments, '_blank');
+							window.open('{!! route('admin.finance.retail.make_payments.shipment_export_selected') !!}?ids=' + selected_rows_shipments, '_blank');
 						}
 					}
 				}, {
@@ -819,7 +650,7 @@
                 },
 				serverSide: true,
 				ajax: {
-					url: '{{ route('admin.finance.make_payments.shipment_list') }}',
+					url: '{{ route('admin.finance.retail.make_payments.shipment_list') }}',
 					data: function (d) {
 						d.ids = selected_rows;
 					}
@@ -829,18 +660,15 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
+					{data:'shipper', name: 'rsi.shipper_name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
 					{data:'origin', name: 'oc.name', class: 'align-middle origin'},
 					{data:'type', name: 'type', class: 'align-middle type'},
 					{data:'status', name: 'ss.name', class: 'align-middle status'},
-					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
+					{data:'created_at', name: 'retail_pending_payment_shipments.created_at', class: 'align-middle created_at'},
 					{data:'aging', name: 'aging', class: 'align-middle aging', orderable: false},
-					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
-					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
-					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
-					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
-					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
+					{data:'amount', name: 'retail_pending_payment_shipments.amount', class: 'align-middle amount'},
+					{data:'payable', name: 'retail_pending_payment_shipments.payable', class: 'align-middle payable'}
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
@@ -932,7 +760,7 @@
 				$('#delivered_shipments .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.finance.make_payments.delivered_shipments') !!}',
+					url: '{!! route('admin.finance.retail.make_payments.delivered_shipments') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
@@ -964,13 +792,6 @@
 					make_payments_table.rows().nodes().each(function(index) {
 						var row = make_payments_table.row(index);
 						if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-
-							// var shipments = parseInt($(row.node()).find('td.shipment').text());
-							// var charges = parseInt($(row.node()).find('td.charges').text());
-							// if(charges == 0){
-							// 	console.log(shipments);
-							// }
-
 
 							var shipments = parseInt($(row.node()).find('td.shipment').text());
 							var account_type = parseInt($(row.node()).attr('account_type'));
@@ -1033,41 +854,13 @@
 				}
 			});
 
-			$('#datatable tbody').on('click', 'tr td.returned_shipments button', function() {
-				var id = parseInt($(this).parents('tr').attr('id'));
-
-				$('#returned_shipments .modal-body').html('');
-
-				$.ajax({
-					url: '{!! route('admin.finance.make_payments.returned_shipments') !!}',
-					method: 'POST',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'id': id
-					}
-				})
-				.done(function(data) {
-					if (data) {
-						var tracking_numbers = '';
-
-						$.each(data, function(index, tracking_number) {
-							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-						});
-
-						$('#returned_shipments .modal-body').html(tracking_numbers);
-
-						$('#returned_shipments').modal('show');
-					}
-				});
-			});
-
 			$('#datatable tbody').on('click', 'tr td.adjusted_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
 				$('#adjusted_shipments .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.finance.make_payments.adjusted_shipments') !!}',
+					url: '{!! route('admin.finance.retail.make_payments.adjusted_shipments') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
@@ -1096,7 +889,7 @@
 					$('#view_details .modal-body').html('');
 
 					$.ajax({
-						url: '{!! route('admin.finance.make_payments.shipment_details') !!}',
+						url: '{!! route('admin.finance.retail.make_payments.shipment_details') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -1104,16 +897,13 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
 							details += '<td class="align-middle text-center">' + detail.tracking_number + '</td>';
 							details += '<td class="align-middle text-center">' + detail.type + '</td>';
 							details += '<td class="align-middle text-center">' + detail.amount + '</td>';
-							details += '<td class="align-middle text-center">' + detail.charges + '</td>';
-							details += '<td class="align-middle text-center">' + detail.gst + '</td>';
-							details += '<td class="align-middle text-center">' + detail.deductable + '</td>';
 							details += '<td class="align-middle text-center">' + detail.payable + '</td>';
 							details += '</tr>';
 						});
@@ -1135,11 +925,7 @@
 					selected_rows.push(id);
 
 					$('#make_payments #make_payments_form .total_amount').val(0);
-					$('#make_payments #make_payments_form .total_charges').val(0);
-					$('#make_payments #make_payments_form .total_gst').val(0);
-					$('#make_payments #make_payments_form .total_deductable').val(0);
 					$('#make_payments #make_payments_form .total_payable').val(0);
-					$('#make_payments #make_payments_form .total_hold').val(0);
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -1167,51 +953,31 @@
 				var index = $.inArray(id, selected_rows_shipments);
 
 				var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
-				var total_charges_selector = $('#make_payments #make_payments_form .total_charges');
-				var total_gst_selector = $('#make_payments #make_payments_form .total_gst');
-				var total_deductable_selector = $('#make_payments #make_payments_form .total_deductable');
 				var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
-				var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
 
 				if (index === -1) {
 					selected_rows_shipments.push(id);
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html().replace(/,/g, '')) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
-					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
 					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 				else {
 					selected_rows_shipments.splice(index, 1);
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html().replace(/,/g, '')) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
-					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) - ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
 					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 
 				if (selected_rows_shipments.length > 0) {
 					total_amount_selector.val(parseInt(total_amount));
-					total_charges_selector.val(parseFloat(total_charges).toFixed(2));
-					total_gst_selector.val(parseFloat(total_gst).toFixed(2));
-					total_deductable_selector.val(parseFloat(total_deductable).toFixed(2));
 					total_payable_selector.val(parseFloat(total_payable).toFixed(2));
-					total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', false);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
 				}
 				else {
 					total_amount_selector.val(0);
-					total_charges_selector.val(0);
-					total_gst_selector.val(0);
-					total_deductable_selector.val(0);
 					total_payable_selector.val(0);
-					total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -1262,7 +1028,7 @@
 			var shipments_array = [];
 			function verify_make_payments(form){
 				$.ajax({
-					url: '{!! route('admin.finance.make_payments.verify') !!}',
+					url: '{!! route('admin.finance.retail.make_payments.verify') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',

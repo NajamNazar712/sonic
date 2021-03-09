@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRetailDonePaymentShipmentsTable extends Migration
+class CreateRetailShipmentsPaymentJourneysTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateRetailDonePaymentShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('retail_done_payment_shipments', function (Blueprint $table) {
+        Schema::create('retail_shipments_payment_journeys', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamps();
-            $table->integer('retail_done_payment_id');
             $table->integer('shipment_id')->index();
-            $table->tinyInteger('type');
-            $table->bigInteger('amount')->default(0);
-            $table->decimal('payable', 16,2)->default(0);
+            $table->integer('status_id')->index();
+            $table->integer('admin_id')->index();
+            $table->string('payable_remarks');
+            $table->string('payment_id')->index();
+            $table->timestamps();
         });
     }
 
@@ -31,6 +31,6 @@ class CreateRetailDonePaymentShipmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('retail_done_payment_shipments');
+        Schema::dropIfExists('retail_shipments_payment_journeys');
     }
 }

@@ -15,4 +15,7 @@ class RetailShipment extends Model
     public function shipping_modes() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShippingMode', 'shipping_mode', 'id');
     }
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipperInfo', 'shipper_account_no', 'id');
+    }
 }

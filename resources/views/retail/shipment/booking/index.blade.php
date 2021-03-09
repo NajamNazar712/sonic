@@ -203,41 +203,41 @@
                                     </div>
                                 </div>
                             </div>
-{{--                            <div class="row justify-content-center p-2" id="account_details">--}}
-{{--                                <div class="col-5 border">--}}
-{{--                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="iban">--}}
-{{--                                            IBAN Number:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="account_name">Account Number:--}}
-{{--                                            <span class="danger">*</span></label>--}}
-{{--                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="bank">--}}
-{{--                                            Bank Name:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <select name="bank" id="bank" class="select2 form-control required">--}}
-{{--                                            @foreach($banks as $bank)--}}
-{{--                                                <option value="{{$bank->id}}">{{$bank->name}}</option>--}}
-{{--                                            @endforeach--}}
-{{--                                        </select>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="bank">--}}
-{{--                                            Cheque Image:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
+                            <div class="row justify-content-center p-2" id="account_details">
+                                <div class="col-5 border">
+                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
+                                    <div class="form-group col">
+                                        <label for="iban">
+                                            IBAN Number:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="account_name">Account Number:
+                                            <span class="danger">*</span></label>
+                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Bank Name:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <select name="bank" id="bank" class="select2 form-control required">
+                                            @foreach($banks as $bank)
+                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Cheque Image:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -557,42 +557,43 @@
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
-                                // if(data.complete_info == false){
-                                //     complete_shipper_info = false;
-                                //     $('#account_details').removeClass('d-none');
-                                // }
-                                // else{
-                                //     complete_shipper_info = true;
-                                //     $('#account_details').addClass('d-none');
-                                // }
+                                if(data.complete_info == false){
+                                    complete_shipper_info = false;
+                                    $('#account_details').removeClass('d-none');
+                                }
+                                else{
+                                    complete_shipper_info = true;
+                                    $('#account_details').addClass('d-none');
+                                }
                             }
-                            // else{
-                            //     complete_shipper_info = false;
-                            //     first_shipment = true;
-                            //     $('#account_details').removeClass('d-none');
-                            // }
+                            else{
+                                complete_shipper_info = false;
+                                first_shipment = true;
+                                $('#account_details').removeClass('d-none');
+                            }
+
+                            if(complete_shipper_info == false){
+                                if(first_shipment == true){
+                                    $('#iban_no').removeClass('required');
+                                    $('#account_no').removeClass('required');
+                                    $('#bank').removeClass('required');
+                                    $('#cheque_image').removeClass('required');
+                                    first_shipment = false;
+                                }
+                                else{
+                                    $('#account_details').removeClass('d-none');
+                                    $('#iban_no').addClass('required');
+                                    $('#account_no').addClass('required');
+                                    $('#bank').addClass('required');
+                                    $('#cheque_image').addClass('required');
+                                }
+                            }
                         });
                 }
             });
 
             var shipment_ids = [];
             $('#book').on('click', function () {
-                // if(complete_shipper_info == false){
-                //     if(first_shipment == true){
-                //         $('#iban_no').removeClass('required');
-                //         $('#account_no').removeClass('required');
-                //         $('#bank').removeClass('required');
-                //         $('#cheque_image').removeClass('required');
-                //         first_shipment = false;
-                //     }
-                //     else{
-                //         $('#account_details').removeClass('d-none');
-                //         $('#iban_no').addClass('required');
-                //         $('#account_no').addClass('required');
-                //         $('#bank').addClass('required');
-                //         $('#cheque_image').addClass('required');
-                //     }
-                // }
                var validator = $('#booking_form').valid();
                if(validator) {
                    swal({
