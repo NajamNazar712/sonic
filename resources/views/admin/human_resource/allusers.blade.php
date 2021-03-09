@@ -159,6 +159,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var role_select = '<select name="role_select" id="role_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -166,6 +167,11 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.role')){
+                            $(role_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -178,7 +184,20 @@
 
                         }
                     });
+                    var data1 = $.map({!! $roles !!}, function (obj) {
+                        obj.id = obj.id;
 
+                        return obj;
+                    });
+                 
+
+                    $("#role_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Role",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
     });
