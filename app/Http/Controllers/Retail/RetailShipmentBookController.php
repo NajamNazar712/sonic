@@ -189,7 +189,7 @@ class RetailShipmentBookController extends Controller
         $gst = $gst * $total_charges_without_gst;
         $total_charges = $total_charges_without_gst + $gst;
         if($shipping_mode_check == 3){
-            $amount = $request->input('cod');
+            $amount = str_replace(',', '', $request->input('cod'));
             $r_amount = 0;
         }
         else{
