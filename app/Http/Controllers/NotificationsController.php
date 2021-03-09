@@ -3354,7 +3354,7 @@ class NotificationsController extends Controller
                             //     $cc = $general_managers->pluck('admins.email')->toArray();
                             // }
 
-                            $to[] = 'ammar.mir@trax.pk';
+                            $to[] = 'uzair.anees@trax.pk';
                             $admins = Admin::whereIn('role_id', [31])->where('status', 1);
 
                             if ($admins->exists()) {
@@ -3485,7 +3485,7 @@ class NotificationsController extends Controller
 
                     // self::email($subject, $body, $to, $cc);
 
-                    $to = 'ammar.mir@trax.pk';
+                    $to = 'uzair.anees@trax.pk';
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
