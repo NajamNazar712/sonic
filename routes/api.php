@@ -100,6 +100,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
                 Route::get('summary/multiple', 'Rider\RiderAPIController@delivery_summary_multiple')->name('delivery_summary_multiple');
+                Route::get('summary/multiple_v2', 'Rider\RiderAPIController@delivery_summary_multiple_v2')->name('delivery_summary_multiple_v2');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
