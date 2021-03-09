@@ -3097,7 +3097,7 @@ class RiderAPIController extends Controller
                 $pickup_note_id = $request->pickup_note_id;
                 $pickup_details = V2PickupNoteRequest::join('v2_pickup_requests as pr', 'pr.id', '=', 'v2_pickup_note_requests.pickup_request_id')
                     ->join('users as u', 'u.id', '=', 'pr.shipper_id')
-                    ->select('u.name as shipper', 'pr.id as pickup_request_id', 'pr.booked as total_shipment', DB::raw('(select shipments from v2_rider_pickups where pickup_request_id = pr.id) as rider_picked'), 'pr.received as arrived', DB::raw('(select created_at from v2_rider_pickups where pickup_request_id = pr.id) as pickup_date'))
+                    ->select('u.name as shipper', 'pr.id as pickup_request_id', 'pr.booked as total_shipment', DB::raw('(select shipments from v2_rider_pickups where pickup_request_id = pr.id and pickup_type = 1) as rider_picked'), 'pr.received as arrived', DB::raw('(select created_at from v2_rider_pickups where pickup_request_id = pr.id) as pickup_date'))
                     ->where('v2_pickup_note_requests.pickup_note_id', $pickup_note_id);
                 if ($pickup_details->exists()) {
                     $pickup_details = $pickup_details->get();
@@ -3854,9 +3854,9 @@ class RiderAPIController extends Controller
                     $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment_id);
                     if ($rider_delivery->exists()) {
                         $rider_delivery = $rider_delivery->orderBy('id', 'DESC')->first();
-                        if ($rider_delivery->delivered_status == 0) {
+                        if ($rider_delivery->delivered_status == 0 || $delivery_note_shipment->status == 1){
                             $status = 3;
-                        } else if ($rider_delivery->delivered_status == 1) {
+                        } else if ($rider_delivery->delivered_status == 1 || $delivery_note_shipment->status > 1) {
                             $status = 2;
 
                         }
