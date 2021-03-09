@@ -386,8 +386,9 @@ class ReturnController extends Controller
 
                         AdminFinanceController::done_payment($shipment, 1);
                     }
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                    if($return_assign_shipment){
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
+                    if($return_assign_shipment->exists()){
+                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
                         $return_assign_shipment->status = 0;
                         $return_assign_shipment->save();
                     }
