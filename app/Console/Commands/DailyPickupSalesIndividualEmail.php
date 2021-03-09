@@ -45,7 +45,7 @@ class DailyPickupSalesIndividualEmail extends Command
         $sales_persons = DB::connection('reports')->table('admins')->whereExists(function($query) {
             $query->from('admin_roles')
                 ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
-                ->where('department_id', '=', 7);
+                ->where('admin_roles.department_id', '=', 7);
         })->where('admins.status', '=', 1)->select('id', 'name')->get();
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){

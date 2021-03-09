@@ -12,7 +12,7 @@ class UpdateSealNumberForCargo extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 453, 'name' => 'Update Seal Number For Master Cargo','module_id' => 3)
+            array('id' => 453, 'name' => 'Update Seal Number For Master Cargo','module_id' => 4)
         ));
     }
 }
