@@ -157,9 +157,9 @@
             dropdownParent: $("#addRiderForm")
         });
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Category',
+            placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
-        });
+        });                          
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a rider category',
             dropdownParent: $("#addRiderForm")

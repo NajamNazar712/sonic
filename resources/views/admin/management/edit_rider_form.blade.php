@@ -181,7 +181,7 @@
         $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change');
         @else
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Category',
+            placeholder:'Select Functional Category',
             dropdownParent: $("#editRiderForm")
         });
         @endif
