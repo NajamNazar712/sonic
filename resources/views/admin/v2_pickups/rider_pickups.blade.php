@@ -97,6 +97,7 @@
 										<th class="border-primary border-darken-1">Reason</th>
 										<th class="border-primary border-darken-1">Remark(s)</th>
 										<th class="border-primary border-darken-1">Picture</th>
+										<th class="border-primary border-darken-1">Audio</th>
 										<th class="border-primary border-darken-1">Shipper Signature Via App</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
 										<th class="border-primary border-darken-1">Pickup Request ID</th>
@@ -153,6 +154,25 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title" id="signature_modal_title">Signature</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="audio_modal" data-backdrop="static" role="dialog" aria-labelledby="audio_modal" aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="audio_modal_title">Audio</h4>
 
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">×</span>
@@ -260,6 +280,7 @@
 				{data: 'reason', name: 'v2_rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
 				{data: 'rider_remarks', name: 'v2_rider_pickups.rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
 				{data: 'picture_path', name: 'v2_rider_pickups.picture_path', class: 'align-middle picture_path text-center', orderable: false, searchable: false},
+				{data: 'audio_path', name: 'v2_rider_pickups.audio_path', class: 'align-middle audio_path text-center', orderable: false, searchable: false},
 				{data: 'signature_via_app', name: 'v2_rider_pickups.signature_via_app', class: 'align-middle signature_via_app text-center', orderable: false, searchable: false},
 				{data: 'pickup_note_id', name: 'v2_rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
 				{data: 'pickup_request_id', name: 'v2_rider_pickups.pickup_request_id', class: 'align-middle pickup_request_id'}
@@ -287,7 +308,7 @@
 					var column = this;
 					var header = column.header();
 
-					if ($(header).is('.serial_number') || $(header).is('.picture_path') || $(header).is('.rider_remarks')) {
+					if ($(header).is('.serial_number') || $(header).is('.picture_path') || $(header).is('.rider_remarks') || $(header).is('.audio_path')) {
 						$(td).appendTo($(search));
 					}
 					else if($(header).is('.pickup_type')) {
@@ -337,14 +358,10 @@
 				this.api().table().columns.adjust();
 			}
 		});
-			
-			
-			
+
 			$('#search_filter_btn').on('click',function () {
                 table.draw();
             });
-
-			
 
 			var route = '{!! route('admin.tracking.index') !!}';
 
@@ -352,6 +369,7 @@
 				var link = $(this).attr('data-link');
 
 				var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+				console.log(link,image);
 
 				$('#picture_modal .modal-body').html(image);
 
@@ -366,6 +384,17 @@
 				$('#signature_modal .modal-body').html(image);
 
 				$('#signature_modal').modal('show');
+			});
+
+			$('#datatable tbody').on('click','tr td.audio_path button',function () {
+				var link = $(this).attr('data-link');
+
+				var audio = '<audio controls autoplay> <source src="' + link + '" type="audio/mp4" > </audio>';
+				console.log(link,audio);
+
+				$('#audio_modal .modal-body').html(audio);
+
+				$('#audio_modal').modal('show');
 			});
 
 	
