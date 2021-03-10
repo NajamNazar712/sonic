@@ -493,6 +493,12 @@ class ReturnController extends Controller
 
                     AdminFinanceController::done_payment($request->shipment_id, 1);
                 }
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                if($return_assign_shipment->exists()){
+                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
+                }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }

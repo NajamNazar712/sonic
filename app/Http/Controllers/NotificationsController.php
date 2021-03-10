@@ -7058,6 +7058,28 @@ class NotificationsController extends Controller
                     }
 
                 }
+                else if($id == 126){
+                     $shipment = Shipment::find($reference_1_id);
+                     $phone = $shipment->consignee_phone_number_1;
+                     $tracking_number = $shipment->tracking_number;
+                     $city = $shipment->consignee_city;
+                     if($city->location_latitude != null &&  $city->location_longitude != null){
+                         $lat = $city->location_latitude;
+                         $long = $city->location_longitude;
+                         $location = 'www.google.com/maps/place/'. $lat . ',' . $long;
+                     }
+                     else{
+                         $location = '-';
+                     }
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $tracking_number, $body);
+                    }
+                    if (strpos($body, '[location]') !== FALSE) {
+                        $body = str_replace('[location]', $location, $body);
+                    }
+                    $to = $phone;
+                    self::sms($body,$to);
+                }
             }
         }
     }
