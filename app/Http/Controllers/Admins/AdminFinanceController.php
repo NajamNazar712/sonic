@@ -20,6 +20,7 @@ use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\http\Models\RetailAdjustmentLog;
+use App\Http\Models\RetailDonePayment;
 use App\Http\Models\RetailDonePaymentCalculation;
 use App\Http\Models\RetailPendingPayment;
 use App\Http\Models\RetailPendingPaymentCalculation;
@@ -8007,4 +8008,1041 @@ class AdminFinanceController extends Controller
 
         $writer->save('php://output');
     }
+
+    public function retail_done_payments_index() {
+
+        $shippers = RetailShipperInfo::select('id', 'shipper_name as name')->get();
+
+
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
+
+        $banks = BanksList::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
+
+        return view('admin.finance.retail.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels, 'shipper_status' => $shipper_status]);
+    }
+
+    public function retail_done_payments_list(Request $request) {
+
+        $done_payments = RetailDonePayment::join('retail_shipper_infos as rsi', 'retail_done_payments.user_id', '=', 'rsi.id')
+            ->join('cities as c', 'rsi.city_id', '=', 'c.id')
+            ->leftjoin('retail_done_payment_calculations as dpc','dpc.retail_done_payment_id', '=', 'retail_done_payments.id')
+            ->leftJoin('banks_lists as ubi', 'ubi.id', '=', 'rsi.bank_id')
+            ->leftjoin('banks_lists as b', 'retail_done_payments.company_bank_id', '=', 'b.id')
+            ->select('retail_done_payments.id as id','retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at');
+
+        if (session('role_id') != 1) {
+            $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
+        }
+
+        $datatables = Datatables::of($done_payments)
+            ->addColumn('id_padded', function ($done_payment) {
+                return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('retail_done_payments.id', function ($query, $keyword) {
+                return $query->where('retail_done_payments.id', '=', $keyword);
+            })
+            ->editColumn('payment_id', function($done_payment) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('total_deductable', function($done_payment) {
+                return number_format($done_payment->ibft_charges, 2);
+            })
+            ->editColumn('delivered_shipments', function($done_payment) {
+                if ($done_payment->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('adjusted_shipments', function($done_payment) {
+                if ($done_payment->adjusted_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->adjusted_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('total_amount', function($done_payment) {
+                return number_format($done_payment->total_amount, 2);
+            })
+            ->editColumn('adjustment_charges', function($done_payment) {
+                return number_format($done_payment->adjustment_charges, 2);
+            })
+            ->editColumn('total_payable', function($done_payment) {
+                return number_format(ROUND($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->editColumn('status', function($done_payment) {
+                if ($done_payment->status == 0) {
+                    return 'Processed';
+                }
+                else if ($done_payment->status == 1) {
+                    return 'Paid';
+                }
+                else if ($done_payment->status == 2) {
+                    return 'Reverted';
+                }
+                else {
+                    return 'Unknown';
+                }
+            })
+            ->filterColumn('bank', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('ub.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('company_bank', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('b.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('action', function($done_payment) {
+                $dropdown = '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
+
+                if (session('role_id') == 1 || session('department_id') == 4) {
+                    $dropdown .= '<button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Details</div></button>';
+                }
+
+                $dropdown .= '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
+                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
+                  </div>
+                </div>
+            ';
+                return $dropdown;
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword == 0) {
+                    $query->where('retail_done_payments.status', '=', 0);
+                }
+                else if ($keyword == 1) {
+                    $query->where('retail_done_payments.status', '=', 1);
+                }
+                else if ($keyword == 2) {
+                    $query->where('retail_done_payments.status', '=', 2);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->join('retail_done_payment_shipments as dps', 'retail_done_payments.id', '=', 'dps.retail_done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('retail_done_payments.id');
+        }
+        if ($payment_ids = $request->get('search_payment_ids')) {
+            $datatables->whereIn('retail_done_payments.id', explode(',', $payment_ids));
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $datatables->where('rsi.id', '=', $shipper);
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables->whereBetween('retail_done_payments.created_at', [$from,$to]);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('retail_done_payments.status_updated_at', [$from,$to]);
+        }
+        return $datatables->make(true);
+    }
+
+    public function retail_done_payments_paid(Request $request) {
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = RetailDonePayment::find($done_payment_id);
+
+            if ($done_payment->status != 1) {
+                $done_payment->status = 1;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
+
+                $done_payment->save();
+
+                $payment_clear = new VisionSoftCodPaymentClear();
+                $payment_clear->payment_id = $done_payment_id;
+                $payment_clear->status = 1;
+                $payment_clear->save();
+
+                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                    $shipment = $done_payment_shipment->shipment;
+
+                    if ($done_payment_shipment->type == 1) {
+                        $shipment->payment_status_id = 7;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                    }
+                    else {
+                        $shipment->payment_status_id = 3;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                    }
+                }
+            }
+        }
+
+        return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
+    }
+
+    public function retail_done_payments_reverted(Request $request) {
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = RetailDonePayment::find($done_payment_id);
+
+            if ($done_payment->status != 2) {
+                $done_payment->status = 2;
+                $done_payment->status_updated_at = Carbon::now();
+                $done_payment->status_updated_by = Auth::id();
+
+                $done_payment->save();
+
+                $payment_clear = new VisionSoftCodPaymentClear();
+                $payment_clear->payment_id = $done_payment_id;
+                $payment_clear->status = 2;
+                $payment_clear->save();
+
+                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                    $shipment = $done_payment_shipment->shipment;
+
+                    if ($done_payment_shipment->type == 1) {
+                        $shipment->payment_status_id = 6;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                    }
+                    else {
+                        $shipment->payment_status_id = 2;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                        //NotificationsController::send(92,$done_payment->id ,$shipment->id);
+                    }
+                }
+
+            }
+            NotificationsController::send(92,$done_payment->id);
+        }
+
+        return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
+    }
+
+    public function retail_done_payments_excel_store(Request $request){
+        $names = [
+            'payment_id' => 'Payment ID',
+            'company_bank_id' => 'Company Bank ID',
+            'status' => 'Status',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+
+        $rules = [
+            'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('done_payments', 'id')],
+            'company_bank_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('banks_lists', 'id')->where(function($query) {
+                $query->where('affiliate', DB::raw(1));
+            })],
+            'status' => ['required', 'string', 'in:paid,Paid,Reverted,reverted,PAID,REVERTED'],
+        ];
+
+        $fields = [0 => 'payment_id', 1 => 'company_bank_id', 2 => 'status'];
+
+        if($file = $request->file('payments')) {
+
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Payment ID', 'Company Bank ID', 'Status'];
+        }
+
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {}
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+            }
+            if(isset($errors)){
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+                return redirect()->back()->withErrors($errors);
+            }
+            else{
+                foreach ($rows as $key => $row) {
+                    $payment_id = (int)$row['payment_id'];
+                    $done_payment = DonePayment::find($payment_id);
+                    $status = strtolower($row['status']);
+                    if($status == "paid"){
+                        if ($done_payment->status != 1) {
+                            $payment_clear = new VisionSoftCodPaymentClear();
+                            $payment_clear->payment_id = $payment_id;
+                            $payment_clear->status = 1;
+                            $payment_clear->save();
+
+                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
+                            $done_payment->status = 1;
+
+                            $done_payment->save();
+
+                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                $shipment = $done_payment_shipment->shipment;
+
+                                if ($done_payment_shipment->type == 1) {
+                                    $shipment->payment_status_id = 7;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                }
+                                else {
+                                    $shipment->payment_status_id = 3;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+                    }
+                    elseif($status == "reverted"){
+                        if ($done_payment->status != 2 && $done_payment->status != 1) {
+                            $payment_clear = new VisionSoftCodPaymentClear();
+                            $payment_clear->payment_id = $payment_id;
+                            $payment_clear->status = 2;
+                            $payment_clear->save();
+
+                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                            $done_payment->status_updated_at = Carbon::now();
+                            $done_payment->status_updated_by = Auth::id();
+                            $done_payment->status = 2;
+
+                            $done_payment->save();
+
+                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                $shipment = $done_payment_shipment->shipment;
+
+                                if ($done_payment_shipment->type == 1) {
+                                    $shipment->payment_status_id = 6;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                }
+                                else {
+                                    $shipment->payment_status_id = 2;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+
+                        if ($done_payment->status == 2) {
+                            NotificationsController::send(92,$done_payment->id);
+                        }
+
+                    }
+                }
+                return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
+            }
+
+        }
+        else {
+            return redirect()->back()->with('error', 'No Payments in File');
+        }
+    }
+
+    public function retail_done_payments_delivered_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 0)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function retail_done_payments_returned_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 1)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function retail_done_payments_adjusted_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 2)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function retail_done_payments_details_print(Request $request) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $done_payment = DonePayment::find($request->id);
+
+        $shipper = $done_payment->shipper;
+
+        if($done_payment->user_bank_info_id == null){
+            $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
+        }else{
+            $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+        }
+
+
+        $account_type_id = $shipper->account_type_id;
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Payment Details</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .summary {
+                        page-break-inside: avoid;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+                      <div class="p-1">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Payment ID</strong></td>
+                              <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
+                              <td rowspan="11" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Client</strong></td>
+                              <td>' . $shipper->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Client Bank</strong></td>
+                              <td>' . $shipper_bank->bank->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Account Title</strong></td>
+                              <td>' . $shipper_bank->account_title . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>IBAN</strong></td>
+                              <td>' . $shipper_bank->iban . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Company Bank</strong></td>
+                              <td>' . (($done_payment->company_bank_id) ? $done_payment->company_bank->name : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Reference Number</strong></td>
+                              <td>' . $done_payment->reference_number . '</td>
+                            </tr>
+        ';
+
+        $shipment_details = '';
+
+        $serial_number = 1;
+
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packing_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_intercept_charges = 0;
+        $total_nsa_osa_charges = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
+        foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $shipment_weight = $shipment->actual_weight;
+            $weight_charges = $shipment->weight_charges;
+
+            if($done_payment_shipment->type != 2){
+                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                if($change_shipment_weight_log->exists()){
+                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+                    $shipment_weight = $change_shipment_weight_log->old_weight;
+                    $weight_charges = $change_shipment_weight_log->old_charges;
+                }
+            }
+
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
+            $pickup_address = $shipment->pickup_address;
+
+            $shipment_details .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $type . '</td>
+                              <td>' . $shipment->order_id . '</td>
+                              <td>' . (($pickup_address->vendor) ? $pickup_address->vendor : '') . '</td>
+                              <td>' . $pickup_address->city->name . '</td>
+                              <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->shipping_mode->mode . '</td>
+                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                              <td>' . $shipment->booking_type->booking_type . '</td>
+                              <td>' . $shipment_weight   . '</td>
+                              <td>' . number_format($done_payment_shipment->amount) . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                            </tr>
+            ';
+
+            $serial_number++;
+
+            if ($account_type_id == 1) {
+                if ($done_payment_shipment->type != 2) {
+                    if ($done_payment_shipment->charges != 0) {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+                        if($shipment->packaging_charges != null){
+                            $total_packing_charges += $shipment->packaging_charges;
+                        }
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                        $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                    }
+                    else if ($done_payment_shipment->type == 0) {
+                        $total_collection_amount += $done_payment_shipment->amount;
+                    }
+                }
+                else {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_gst += $done_payment_shipment->gst;
+                $total_charges += $done_payment_shipment->charges;
+                $total_payable += $done_payment_shipment->payable;
+            }
+            else {
+                if ($done_payment_shipment->type == 0) {
+                    $total_collection_amount += $done_payment_shipment->amount;
+                }
+                else if ($done_payment_shipment->type == 2) {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_payable += $done_payment_shipment->payable;
+            }
+        }
+
+        $shipment_details .= '
+                            <tr>
+                                <td colspan="10"></td>
+                                <td class="color primary"><strong>Total</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
+                            </tr>
+      ';
+
+        $html .= '
+                            <tr>
+                              <td class="color secondary"><strong>Total Collection Amount (PKR)</strong></td>
+                              <td>' . number_format($total_collection_amount) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
+                              <td>' . number_format(ROUND(($total_payable - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>S. No.</strong></td>
+                              <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Type</strong></td>
+                              <td class="color primary"><strong>Order ID</strong></td>
+                              <td class="color primary"><strong>Vendor</strong></td>
+                              <td class="color primary"><strong>Origin</strong></td>
+                              <td class="color primary"><strong>Destination</strong></td>
+                              <td class="color primary"><strong>Shipping Mode</strong></td>
+                              <td class="color primary"><strong>Consignee</strong></td>
+                              <td class="color primary"><strong>Service Type</strong></td>
+                              <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
+                              <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Adjustments (PKR)</strong></td>
+                            </tr>
+      ';
+
+        $html .= $shipment_details;
+
+        $html .= '
+                          </tbody>
+                        </table>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm table-bordered border summary">
+                                  <tbody>
+                                    <tr>
+                                        <td class="color primary" colspan="2"><strong>Charges Summary (PKR)</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Weight Charges</strong></td>
+                                        <td>' . number_format($total_weight_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
+                                        <td>' . number_format($total_cash_handling_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Insurance Charges</strong></td>
+                                        <td>' . number_format($total_insurance_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Replacement Charges</strong></td>
+                                        <td>' . number_format($total_replacement_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Try & Buy Charges</strong></td>
+                                        <td>' . number_format($total_try_and_buy_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Return Charges</strong></td>
+                                        <td>' . number_format($total_return_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
+                                        <td>' . number_format($total_fuel_surcharge, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Intercept Charges</strong></td>
+                                        <td>' . number_format($total_intercept_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total OSA Charges</strong></td>
+                                        <td>' . number_format($total_nsa_osa_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
+                                        <td class="color secondary">' . number_format(($total_charges - $total_packaging_material_charges), 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total GST</strong></td>
+                                        <td class="color secondary">' . number_format($total_gst, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Packing Charges</strong></td>
+                                        <td>' . number_format($total_packing_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
+                                        <td>' . number_format($total_packaging_material_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Adjustments</strong></td>
+                                        <td class="color secondary">' . number_format($total_adjustments, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>IBFT Charges</strong></td>
+                                        <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color primary"><strong>Overall Charges</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
+    }
+
+    public function retail_done_payments_details(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $details = array();
+
+        $details['reference_number'] = $done_payment->reference_number;
+        $details['company_bank_id'] = $done_payment->company_bank_id;
+
+        return $details;
+    }
+
+    public function retail_done_payments_update_details(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $done_payment->reference_number = $request->reference_number;
+        $done_payment->company_bank_id = $request->company_bank_id;
+
+        $done_payment->save();
+
+        return ['status' => 0, 'success' => 'Details Updated'];
+    }
+
+    public function retail_done_payments_export_to_excel(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
+
+        $details = array();
+
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
+
+        $account_type_id = $done_payment->shipper->account_type_id;
+
+        $serial_number = 1;
+
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_intercept_charges = 0;
+        $total_nsa_osa_charges = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
+
+        foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $shipment_weight = $shipment->actual_weight;
+            $weight_charges = $shipment->weight_charges;
+
+            if($done_payment_shipment->type != 2){
+                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                if($change_shipment_weight_log->exists()){
+                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+                    $shipment_weight = $change_shipment_weight_log->old_weight;
+                    $weight_charges = $change_shipment_weight_log->old_charges;
+                }
+            }
+
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
+            $pickup_address = $shipment->pickup_address;
+
+            $row = array();
+
+            $row[] = $serial_number;
+            $row[] = $shipment->tracking_number;
+            $row[] = $shipment->created_at;
+            $row[] = $type;
+            $row[] = $shipment->order_id;
+            $row[] = $pickup_address->vendor;
+            $row[] = $pickup_address->city->name;
+            $row[] = $shipment->consignee_name;
+            $row[] = $shipment->consignee_phone_number_1;
+            $row[] = $shipment->consignee_city->name;
+            $row[] = $shipment->booking_type->booking_type;
+            $row[] = $shipment_weight;
+            $row[] = $done_payment_shipment->amount;
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+            $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+
+            $details[] = $row;
+
+            $serial_number++;
+
+            if ($account_type_id == 1) {
+                if ($done_payment_shipment->type != 2) {
+                    if ($done_payment_shipment->charges != 0) {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $shipment->weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                        $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                    }
+                    else if ($done_payment_shipment->type == 0) {
+                        $total_collection_amount += $done_payment_shipment->amount;
+                    }
+                }
+                else {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_gst += $done_payment_shipment->gst;
+                $total_charges += $done_payment_shipment->charges;
+                $total_payable += $done_payment_shipment->payable;
+            }
+            else {
+                if ($done_payment_shipment->type == 0) {
+                    $total_collection_amount += $done_payment_shipment->amount;
+                }
+                else if ($done_payment_shipment->type == 2) {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_payable += $done_payment_shipment->payable;
+            }
+        }
+
+        $total_columns = count($details[0]);
+
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges)];
+
+        $details[] = [];
+
+        $row = array();
+
+        for ($c = 0; $c < $total_columns; $c++) {
+            $row[] = '';
+        }
+
+        $row[] = 'Charges Summary (PKR)';
+        $row[] = '';
+
+        $details[] = $row;
+
+        foreach ($summary as $name => $value) {
+            $row = array();
+
+            for ($c = 0; $c < $total_columns; $c++) {
+                $row[] = '';
+            }
+
+            $row[] = $name;
+            $row[] = $value;
+
+            $details[] = $row;
+        }
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
+
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
 }

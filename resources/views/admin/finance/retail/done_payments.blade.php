@@ -28,15 +28,6 @@
 												</select>
 											</fieldset>
 										</div>
-										<div class="col-3">
-											<fieldset class="form-group">
-												<select name="search_shipper_status" id="search_shipper_status" class="form-control select2">
-													@foreach($shipper_status as $id => $status)
-														<option value="{{$id}}">{{$status}}</option>
-													@endforeach
-												</select>
-											</fieldset>
-										</div>
 										<div class="col-3 text-center">
 											<form id="tracking_number_search_form"
 												  class="form" novalidate="novalidate">
@@ -99,7 +90,7 @@
 										</div>
 										<div class="col mb-1 text-center">
 											<button type="button" id="search_filter_btn"
-													class="btn btn-outline-primary w-25"><i
+													class="btn btn-outline-primary btn-block"><i
 														class="la la-search"></i> Search
 											</button>
 										</div>
@@ -144,16 +135,12 @@
 										<th class="border-primary border-darken-1">Payment ID</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">City</th>
-										<th class="border-primary border-darken-1">Phone No(s).</th>
+										<th class="border-primary border-darken-1">Phone No.</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
-										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
-										<th class="border-primary border-darken-1">Total Charges</th>
-										<th class="border-primary border-darken-1">Total GST</th>
-										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
@@ -382,11 +369,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Shipper Status',
-                width:'100%',
-                allowClear:true
-            });
+
 			$('#update_details .company_bank').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Company Bank*'
@@ -466,7 +449,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.done_payments.list') }}',
+                        url: '{{ route('admin.finance.retail.done_payments.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -475,7 +458,7 @@
                             head.push('Payment ID');
                             head.push('Shipper');
                             head.push('City');
-                            head.push('Phone No(s).');
+                            head.push('Phone No.');
                             head.push('Address');
                             head.push('Total Shipments');
                             head.push('Delivered Shipments');
@@ -501,7 +484,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.shipper);
                                 row.push(values.city);
-                                row.push(values.phone_numbers);
+                                row.push(values.shipper_phone);
                                 row.push(values.address);
                                 row.push(values.total_shipments);
                                 row.push(values.delivered_shipments_count);
@@ -690,11 +673,10 @@
                 },
 				serverSide: true,
 				ajax: {
-					url: '{{ route('admin.finance.done_payments.list') }}',
+					url: '{{ route('admin.finance.retail.done_payments.list') }}',
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.search_shipper = $('#search_shipper').val();
-                        d.search_shipper_status = $('#search_shipper_status').val();
                         d.search_from = $('input[name="search_from_formatted"]').val();
                         d.search_to = $('input[name="search_to_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_status_from_formatted"]').val();
@@ -708,25 +690,21 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'payment_id', name: 'done_payments.id', class: 'align-middle text-center payment_id'},
-					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+					{data:'payment_id', name: 'retail_done_payments.id', class: 'align-middle text-center payment_id'},
+					{data:'shipper', name: 'rsi.shipper_name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
-					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
-					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
-					{data:'total_shipments', name: 'done_payments.total_shipments', class: 'align-middle text-center total_shipments'},
-					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
-					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
-					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
+					{data:'shipper_phone', name: 'rsi.shipper_phone_no', class: 'align-middle text-center shipper_phone'},
+					{data:'address', name: 'rsi.shipper_address', class: 'align-middle text-center address'},
+					{data:'total_shipments', name: 'retail_done_payments.total_shipments', class: 'align-middle text-center total_shipments'},
+					{data:'delivered_shipments', name: 'retail_done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
+					{data:'adjusted_shipments', name: 'retail_done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
-					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
-					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
-					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
-					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
-					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
-					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
+					{data:'bank', name: 'ubi.id', class: 'align-middle text-center bank'},
+					{data:'reference_number', name: 'retail_done_payments.reference_number', class: 'align-middle text-center reference_number'},
+					{data:'done_at', name: 'retail_done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -815,12 +793,7 @@
                     });
                     var data1 = $.map({!! $company_banks !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $company_banks !!}, function (obj) {
-                        obj.text = obj.name;
-
+						obj.text = obj.name;
                         return obj;
                     });
 

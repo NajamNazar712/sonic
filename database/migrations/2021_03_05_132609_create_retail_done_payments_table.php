@@ -26,6 +26,7 @@ class CreateRetailDonePaymentsTable extends Migration
             $table->integer('ibft_charges')->nullable();
             $table->timestamp('status_updated_at')->nullable();
             $table->integer('status_updated_by')->nullable();
+            $table->integer('user_bank_info_id')->nullable();
         });
     }
 

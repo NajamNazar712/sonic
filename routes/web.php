@@ -1589,18 +1589,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::prefix('done_payments')->name('done_payments.')->group(function () {
-                Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
-                Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
-                Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
-                Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
-                Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
-                Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
-                Route::post('adjusted_shipments', 'Admins\AdminFinanceController@done_payments_adjusted_shipments')->name('adjusted_shipments');
-                Route::post('details_print', 'Admins\AdminFinanceController@done_payments_details_print')->name('details_print');
-                Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
-                Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
-                Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
-                Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
+                Route::get('', 'Admins\AdminFinanceController@retail_done_payments_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@retail_done_payments_list')->name('list');
+                Route::put('paid', 'Admins\AdminFinanceController@retail_done_payments_paid')->name('paid');
+                Route::put('reverted', 'Admins\AdminFinanceController@retail_done_payments_reverted')->name('reverted');
+                Route::post('delivered_shipments', 'Admins\AdminFinanceController@retail_done_payments_delivered_shipments')->name('delivered_shipments');
+                Route::post('adjusted_shipments', 'Admins\AdminFinanceController@retail_done_payments_adjusted_shipments')->name('adjusted_shipments');
+                Route::post('details_print', 'Admins\AdminFinanceController@retail_done_payments_details_print')->name('details_print');
+                Route::post('details', 'Admins\AdminFinanceController@retail_done_payments_details')->name('details');
+                Route::put('update_details', 'Admins\AdminFinanceController@retail_done_payments_update_details')->name('update_details');
+                Route::get('export_to_excel', 'Admins\AdminFinanceController@retail_done_payments_export_to_excel')->name('export_to_excel');
+                Route::post('excel_store', 'Admins\AdminFinanceController@retail_done_payments_excel_store')->name('excel_store');
             });
 
         });

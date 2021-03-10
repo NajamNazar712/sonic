@@ -492,7 +492,7 @@
 
                                     @if (session('role_id') == 1 || in_array(61, session('permissions')))
                                         <li><a class="menu-item"
-                                               href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
+                                               href="{{ route('admin.finance.retail.done_payments.index') }}">Done</a></li>
                                     @endif
                                 </ul>
                             </li>
