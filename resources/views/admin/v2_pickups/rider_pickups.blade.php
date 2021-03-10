@@ -369,7 +369,6 @@
 				var link = $(this).attr('data-link');
 
 				var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
-				console.log(link,image);
 
 				$('#picture_modal .modal-body').html(image);
 
@@ -389,13 +388,18 @@
 			$('#datatable tbody').on('click','tr td.audio_path button',function () {
 				var link = $(this).attr('data-link');
 
-				var audio = '<audio controls autoplay> <source src="' + link + '" type="audio/mp4" > </audio>';
-				console.log(link,audio);
+				var audio = '<audio controls id="sound"> <source src="' + link + '" type="audio/3gp"  > </audio>';
 
 				$('#audio_modal .modal-body').html(audio);
 
 				$('#audio_modal').modal('show');
 			});
+			
+			$('#audio_modal').on('hide.bs.modal', function (e) {
+				$('audio#sound')[0].pause();
+				$('audio#sound')[0].currentTime = 0;
+			});
+
 
 	
 		});
