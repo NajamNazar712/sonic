@@ -19,7 +19,7 @@ class CreateRetailShipmentsPaymentJourneysTable extends Migration
             $table->integer('status_id')->index();
             $table->integer('admin_id')->index();
             $table->string('payable_remarks');
-            $table->string('payment_id')->index();
+            $table->string('payment_id')->nullable()->index();
             $table->timestamps();
         });
     }
