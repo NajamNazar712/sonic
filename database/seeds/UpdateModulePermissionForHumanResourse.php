@@ -13,7 +13,7 @@ class UpdateModulePermissionForHumanResourse extends Seeder
     {
         //
         DB::table('module_permissions')->insert(array(
-            array('id' => 449, 'name' => 'Human Resource', 'module_id' => 11),
+            array('id' => 449, 'name' => 'Human Resource - View', 'module_id' => 11),
         ));
     }
 }

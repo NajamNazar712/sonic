@@ -860,7 +860,6 @@ class Permission
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
             'human_resourse.allusers' => 449,
-            'human_resourse.download_docs' => 449,
             'human_resourse.all_user_ajax' => 449
             
            
