@@ -47,7 +47,6 @@ class DailyPickupSalesIndividualEmail extends Command
                 ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
                 ->where('admin_roles.department_id', '=', 7);
         })->where('admins.status', '=', 1)->select('admins.id', 'admins.name')->get();
-        dd($sales_persons);
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = DailyPickupSalesReportController::daily_pickup_sales_report_individual( $date . ' 00:00:00', $sales_person->id);
