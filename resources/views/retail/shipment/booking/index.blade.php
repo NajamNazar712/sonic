@@ -234,7 +234,7 @@
                                             Cheque Image:
                                             <span class="danger">*</span>
                                         </label>
-                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                        <input class="form-control form-control-sm" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                     </div>
                                 </div>
                             </div>
@@ -387,6 +387,7 @@
                         $('#trax_box_div').addClass('d-none');
                     }
                     if(id == 3){
+                        $('#cod').val('');
                         $('#cod_check').removeClass('d-none');
                     }
                     else{
@@ -557,6 +558,9 @@
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
+                                $('#iban_no').val(data.details.iban);
+                                $('#account_no').val(data.details.account_number);
+                                $('#bank').val(data.details.bank_id).trigger('change');
                                 if(data.complete_info == false){
                                     complete_shipper_info = false;
                                     $('#account_details').removeClass('d-none');
@@ -577,7 +581,6 @@
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
-                                    $('#cheque_image').removeClass('required');
                                     first_shipment = false;
                                 }
                                 else{
@@ -585,7 +588,6 @@
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
-                                    $('#cheque_image').addClass('required');
                                 }
                             }
                         });
@@ -663,6 +665,7 @@
                         $('#gst').val('');
                         $('#total_charges').val('');
                         $('#insurance_amount').val('');
+                        $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
 

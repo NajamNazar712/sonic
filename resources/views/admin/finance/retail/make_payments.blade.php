@@ -383,7 +383,7 @@
 					},
                     {
                         extend: 'excel',
-                        title: 'Make Payments',
+                        title: 'Retail Make Payments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }, {
