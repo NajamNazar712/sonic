@@ -358,6 +358,7 @@ class AdminCRMController extends Controller
             $shipment_status_date = null;
             $shipper = null;
             $arrival_date = '';
+            $insurance = 'No';
             if($crm_request->shipment_id != null) {
                 $shipment_status = Shipment::find($crm_request->shipment_id);
                 $shipment_status = $shipment_status->status_shipper->name;
@@ -368,6 +369,9 @@ class AdminCRMController extends Controller
                 }
                 $shipment_status_journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->latest('id')->first();
                 $shipment_status_date = $shipment_status_journey->created_at;
+
+
+
 
                 $product_insurance = ShipmentItem::where('shipment_id',$crm_request->shipment_id);
                 if($product_insurance->exists()){

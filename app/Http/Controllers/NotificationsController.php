@@ -6263,9 +6263,18 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                 }
                 else if ($id == 105) {
+                    
                     $pickup_request_id = $reference_1_id;
                     $reason_id = $reference_2_id;
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
+                    
+                    //start
+                    //pickup address
+                    $pickup_address = $pickup_request->pickup_address->pickup_address;
+                    //city name
+                    $city_name = $pickup_request->pickup_address->city->name;
+                    //end
+
                     $shipper_name = $pickup_request->shipper->name;
                     $shipper_id = $pickup_request->shipper->id;
                     $reason = V2PickupRequestNotPickReason::find($reason_id);
@@ -6284,6 +6293,12 @@ class NotificationsController extends Controller
                         }
                         if (strpos($body, '[reason]') !== FALSE) {
                             $body = str_replace('[reason]', $reason->name, $body);
+                        }
+                        if (strpos($body, '[pickup_address]') !== FALSE) {
+                            $body = str_replace('[pickup_address]', $pickup_address, $body);
+                        }
+                        if (strpos($body, '[city_name]') !== FALSE) {
+                            $body = str_replace('[city_name]', $city_name, $body);
                         }
 
                         $to = $sale_person_phone;
@@ -6759,7 +6774,7 @@ class NotificationsController extends Controller
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';
@@ -6808,7 +6823,7 @@ class NotificationsController extends Controller
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->contact_person . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->city->name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->phone_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->email_address . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $lead->requested_date . '</td>';

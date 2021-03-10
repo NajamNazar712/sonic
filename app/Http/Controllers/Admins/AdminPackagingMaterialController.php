@@ -55,7 +55,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-use DB;
+use Illuminate\Support\Facades\DB;
+
 class AdminPackagingMaterialController extends Controller
 {
     public function __construct()
@@ -398,7 +399,7 @@ class AdminPackagingMaterialController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('action',function ($packaging) {
-                if ((session('role_id') == 1 && $packaging->status_id == 1) || ($packaging->status_id == 1 && (in_array(226, session('permissions')) || in_array(227, session('permissions'))))) {
+                if ((session('role_id') == 1 && ($packaging->status_id == 1)) || (($packaging->status_id == 1) && (in_array(226, session('permissions')) || in_array(227, session('permissions'))))) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -413,6 +414,10 @@ class AdminPackagingMaterialController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                         }
                     }
+                    if ($packaging->status_id == 1) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+
 //                    if ($packaging->status_id >= 2) {
 //                        $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
 //                    }
@@ -437,11 +442,77 @@ class AdminPackagingMaterialController extends Controller
             ->make(true);
     }
 
+    public function request_update(Request $request){
+        $request_id = $request->request_id;
+
+        $index_array = [];
+        $total_charges = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->quantity as $index => $quantity) {
+                array_push($index_array, $index);
+                $package = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)
+                    ->where('id', $index)->first();
+                $package->quantity = $quantity;
+                $package->update();
+
+                $user_id = $package->packaging_request->user_id;
+                $packaging_type_id = $package->type_id;
+                $packaging_size_id = $package->type_size_id;
+
+                $charges = PackagingCharge::where('user_id',$user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
+
+                if($charges != null){
+                    $total_charges += $quantity * $charges->charges;
+                }else{
+                    $size = PackagingMaterialTypeSizes::find($packaging_size_id);
+                    $total_charges += $quantity * $size->standard_charges;
+                }
+
+                $created_at = $package->packaging_request->created_at;
+            }
+
+            PackagingMaterialRequestDetail::whereNotIn('id',$index_array)
+                ->where('packaging_material_request_id', $request_id)->delete();
+
+            $booking_day = $created_at;
+            $discount = DiscountCharge::where('user_id', $user_id)->whereDate('to', '<=', $booking_day)->whereDate('from', '>=', $booking_day)->whereNotNull('packaging');
+
+            if ($discount->exists()) {
+                $discount = $discount->orderBy('shipping_mode_id', 'ASC')->first();
+
+                $discount_packaging = $discount->packaging;
+
+                if (strpos($discount_packaging, '%') !== FALSE) {
+                    $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+                    $total_charges -= $discount_packaging;
+                }
+                else {
+                    $total_charges -= floatval($discount_packaging);
+                }
+            }
+
+            $packaging_request = PackagingMaterialRequest::find($request_id);
+            $packaging_request->amount = $total_charges;
+            $packaging_request->update();
+        }
+        catch (\Exception $e)
+        {
+            DB::rollback();
+            return response()->json(['status' => 0, 'error' => $e->getMessage()]);
+            return response()->json(['status' => 0, 'error' => 'Packaging request quantity can\'t be updated!']);
+        }
+
+        DB::commit();
+        return response()->json(['status' => 1, 'success' => 'Packaging request quantity updated successfully!']);
+    }
+
     public function quantity_details(Request $request){
         $request_id = $request->id;
 
-        $packaging_material_request_details = PackagingMaterialRequestDetail::leftjoin('packaging_material_types as pmt', 'pmt.id', '=', 'packaging_material_request_details.type_id')->leftjoin('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'packaging_material_request_details.type_size_id')->select('pmt.type as type', 'pmts.size as size', 'packaging_material_request_details.quantity')->where('packaging_material_request_id',$request_id)->get();
-        return response()->json(['status' => 1, 'types' => $packaging_material_request_details]);
+        $packaging_material_request_details = PackagingMaterialRequestDetail::leftjoin('packaging_material_types as pmt', 'pmt.id', '=', 'packaging_material_request_details.type_id')->leftjoin('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'packaging_material_request_details.type_size_id')->select('pmt.type as type', 'pmts.size as size', 'packaging_material_request_details.quantity','packaging_material_request_details.id as index')->where('packaging_material_request_id',$request_id)->get();
+        return response()->json(['status' => 1, 'types' => $packaging_material_request_details,'request_id'=>$request_id]);
     }
 
     public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $status) {

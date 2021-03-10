@@ -1418,6 +1418,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
+            Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
+            Route::get('list', 'Admins\Fuel\FuelManagementController@fuel_list')->name('list');
+            Route::get('request', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
+            Route::post('request', 'Admins\Fuel\FuelManagementController@request_store')->name('store');
+            Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
+            Route::post('request/edit', 'Admins\Fuel\FuelManagementController@request_edit')->name('edit');
+            Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\Fuel\FuelManagementController@request_history')->name('index');
+            });
+        });
+
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
@@ -1657,6 +1670,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+            Route::put('','Admins\AdminPackagingMaterialController@request_update')->name('update');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
@@ -2671,6 +2685,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
+    });
+    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+        
+        Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
+        Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
+        Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
     });
 
 });
