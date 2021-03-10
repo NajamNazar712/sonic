@@ -387,6 +387,7 @@
                         $('#trax_box_div').addClass('d-none');
                     }
                     if(id == 3){
+                        $('#cod').val('');
                         $('#cod_check').removeClass('d-none');
                     }
                     else{
