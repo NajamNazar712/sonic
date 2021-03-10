@@ -665,6 +665,7 @@
                         $('#gst').val('');
                         $('#total_charges').val('');
                         $('#insurance_amount').val('');
+                        $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
 
