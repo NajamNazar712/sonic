@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Controllers\NotificationsController;
@@ -304,6 +305,13 @@ class ShipperReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     AdminFinanceController::add_payment($request->shipment_id, 1);
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                    if($return_assign_shipment->exists()){
+                        $return_assign_shipment = $return_assign_shipment->latest()->first();
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+                    }
+
                 }
                 else {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);

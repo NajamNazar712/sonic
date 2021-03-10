@@ -525,6 +525,15 @@ class Permission
             'user_management.crm.list' => 188,
             'user_management.user_requests.index' => 394,
             'user_management.user_requests.list' => 394,
+            //  Fuel Management Permissions
+            'user_management.fuel_management.index' => 447,
+            'user_management.fuel_management.list' => 447,
+            'user_management.fuel_management.create' => 451,
+            'user_management.fuel_management.search_by_card' => 451,
+            'user_management.fuel_management.store' => 451,
+            'user_management.fuel_management.approve' => 448,
+            'user_management.fuel_management.edit' => 450,
+            'user_management.fuel_management.history.index' => 452,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,
@@ -849,7 +858,11 @@ class Permission
 //            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
-            'leads.view_remarks' => 416
+            'leads.view_remarks' => 416,
+            'human_resourse.allusers' => 449,
+            'human_resourse.all_user_ajax' => 449
+            
+           
         ],
 
         'shipper' => [

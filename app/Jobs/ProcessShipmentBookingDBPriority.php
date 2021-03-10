@@ -90,6 +90,10 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             if (!empty(trim($this->booking['consignee_phone_number_2']))) {
                 $consignee_phone_number_2 = ShipperShipmentBookController::phone_number($this->booking['consignee_phone_number_2']);
             }
+            else{
+
+                $consignee_phone_number_2 = null;
+            }
 
             if (!empty(trim($this->booking['consignee_email_address']))) {
                 $consignee_email_address = $this->booking['consignee_email_address'];
