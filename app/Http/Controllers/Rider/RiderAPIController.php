@@ -3100,7 +3100,7 @@ class RiderAPIController extends Controller
                     ->select('u.name as shipper', 'pr.id as pickup_request_id', 'pr.booked as total_shipment', DB::raw('(select shipments from v2_rider_pickups where pickup_request_id = pr.id and pickup_type = 1) as rider_picked'), 'pr.received as arrived', DB::raw('(select created_at from v2_rider_pickups where pickup_request_id = pr.id) as pickup_date'))
                     ->where('v2_pickup_note_requests.pickup_note_id', $pickup_note_id);
                 if ($pickup_details->exists()) {
-                    $pickup_details = $pickup_details->get();
+                    $pickup_details = $pickup_details->orderBy('v2_pickup_note_requests.pickup_note_id', 'DESC')->get();
                     $data = array();
                     foreach ($pickup_details as $shipment_detail) {
                         $datum = array();
@@ -3135,7 +3135,7 @@ class RiderAPIController extends Controller
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($shipment_details->exists()) {
-                    $shipment_details = $shipment_details->get();
+                    $shipment_details = $shipment_details->orderBy('delivery_note_shipments.delivery_note_id', 'DESC')->get();
                     $data = array();
                     foreach ($shipment_details as $shipment_detail) {
                         $datum = array();
@@ -3181,7 +3181,7 @@ class RiderAPIController extends Controller
                     ->where('return_note_shipments.return_note_id', $return_note_id);
 
                 if ($shipment_details->exists()) {
-                    $shipment_details = $shipment_details->get();
+                    $shipment_details = $shipment_details->orderBy('return_note_shipments.return_note_id', 'DESC')->get();
                     $data = array();
                     foreach ($shipment_details as $shipment_detail) {
                         $datum = array();
@@ -3383,7 +3383,7 @@ class RiderAPIController extends Controller
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image'],
-            'open_box' => ['required', 'integer', 'digits_between:1,10'],
+            'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file']
         ];
         $message = '';
@@ -3474,14 +3474,13 @@ class RiderAPIController extends Controller
 
                             $shipment->shipper_status_id = $request->shipper_status_id;
                             $shipment->consignee_status_id = $request->status_reason_id;
+                            $shipment->open_box = $request->open_box;
                             $shipment->save();
 
                             $remarks = NULL;
-
-                        $shipment->shipper_status_id = $request->shipper_status_id;
-                        $shipment->consignee_status_id = $request->status_reason_id;
-                        $shipment->open_box = $request->open_box;
-                        $shipment->save();
+                            if ($request->has('remarks')) {
+                                $remarks = $request->remarks;
+                            }
 
                             ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
                             DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
@@ -3865,26 +3864,6 @@ class RiderAPIController extends Controller
                     } else {
                         $status = 1;
                     }
-
-                    /*if ($rider_delivery->exists()) {
-                        $rider_delivery = $rider_delivery->orderBy('id', 'DESC')->first();
-                        if ($rider_delivery->delivered_status == 0) {
-                            $status = 3;
-                        } else if ($rider_delivery->delivered_status == 1) {
-                            $status = 2;
-                        } else {
-                            $status = 1;
-                        }
-                    } else {
-                        if ($delivery_note_shipment->status == 1) {
-                            $status = 3;
-                        } else if ($delivery_note_shipment->status > 1) {
-                            $status = 2;
-                        } else {
-                            $status = 1;
-                        }
-                    }*/
-
 
                     $deliveries = array();
                     $deliveries['shipment_id'] = $shipment_id;
