@@ -59,7 +59,7 @@ class RetailParcelReceivingController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $cash_deposit->whereBetween('retail_cash_deposits.created_at', [$from,$to]);
+            $cash_deposit->whereBetween('retail_parcel_receivings.created_at', [$from,$to]);
         }
         return  $datatable->make(true);
     }
