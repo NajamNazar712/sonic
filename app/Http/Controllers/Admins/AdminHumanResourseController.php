@@ -25,8 +25,14 @@ class AdminHumanResourseController extends Controller
 
     public function allusers()
     {
-        $riders = Rider::where('status', 1)->get();
-        $admins = Admin::where('status', 1)->get();
+        $riders = Rider::where([
+            ['status', 1],
+            ['city_id', Auth::user()->hubs->id],
+        ])->get();
+        $admins = Admin::where([
+            ['status', 1],
+            ['default_hub_id', Auth::user()->hubs->id],
+        ])->get();
         $roles=['Admin','Rider'];
         $roles = collect($roles);
         return view('admin.human_resource.allusers')->with(['riders' => $riders, 'admins' => $admins, 'roles' => $roles]);
