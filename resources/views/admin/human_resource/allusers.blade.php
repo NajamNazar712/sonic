@@ -86,6 +86,8 @@
                             head.push('Role');
                             head.push('Created at');
                             $.each(result.data, function(index, values) {
+                                if(values.id!=null){
+
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.name);
@@ -100,6 +102,8 @@
                                     row.push(values.created_at);    
                                 }
                                 body.push(row);
+                            }
+
                             });
                          
                         },
@@ -153,7 +157,11 @@
                     //     console.log('asdsa');
                     //     $('td:eq(6)', row).html(data['created_at']['date']);
                     // }
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    console.log(data['id']);
+                    if(data['id']!=null){
+
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    }
                 },initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
