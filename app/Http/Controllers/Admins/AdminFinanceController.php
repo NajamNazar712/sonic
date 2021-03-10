@@ -8191,4 +8191,35 @@ class AdminFinanceController extends Controller
 
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
+    public function retail_make_payments_stats_calculate(Request $request) {
+        $total_amount = 0;
+        $total_payable = 0;
+
+        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+            if (RetailPendingPayment::exists()) {
+                foreach (RetailPendingPayment::get() as $pending_payment) {
+                    $payable = RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('payable');
+
+                    if ($positive_negative_filter == 1 && $payable >= 0) {
+                        $total_amount += RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_payable += $payable;
+                    }
+                    else if ($positive_negative_filter == 2 && $payable < 0) {
+                        $total_amount += RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_payable += $payable;
+                    }
+                }
+            }
+            else {
+                $total_amount = RetailPendingPaymentShipment::sum('amount');
+                $total_payable = RetailPendingPaymentShipment::sum('payable');
+            }
+        }
+        else {
+            $total_amount = RetailPendingPaymentShipment::sum('amount');
+            $total_payable = RetailPendingPaymentShipment::sum('payable');
+        }
+
+        return ['total_amount' => $total_amount, 'total_payable' => $total_payable];
+    }
 }

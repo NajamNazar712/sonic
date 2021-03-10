@@ -1585,7 +1585,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('verify', 'Admins\AdminFinanceController@retail_make_payments_verify')->name('verify');
                 Route::get('export_bank_order', 'Admins\AdminFinanceController@retail_make_payments_export_bank_order')->name('export_bank_order');
                 Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
-                Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
+                Route::get('stats_calculate', 'Admins\AdminFinanceController@retail_make_payments_stats_calculate')->name('stats_calculate');
             });
 
             Route::prefix('done_payments')->name('done_payments.')->group(function () {
