@@ -179,6 +179,44 @@ class FuelManagementController extends Controller
 
                 return $dropdown;
             })
+            ->addColumn('card_status',function ($fuel_card) {
+               if($fuel_card->status == 0)
+               {
+                   return 'Pending';
+               }
+               else if($fuel_card->card_request_type_id == 3 && $fuel_card || $fuel_card->card_request_type_id == 4 || ($fuel_card->card_request_type_id == 1 && $fuel_card->card_number == '') || ($fuel_card->card_request_type_id == 2 && $fuel_card->card_number == ''))
+               {
+                   return 'Unassigned';
+               }
+               else if($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2)
+               {
+                   return 'Assigned';
+               }
+
+               return '';
+            })
+            ->filterColumn('card_status', function($query, $keyword) {
+                if($keyword == 'Pending')
+                {
+                    $query->where('fuel_card_requests.status',0);
+                }
+                else if($keyword == 'Unassigned')
+                {
+                    $query->where('fuel_card_requests.status',1)->where(function($q){
+                        $q->orwhere('fuel_card_requests.card_request_type_id',3)
+                            ->orwhere('fuel_card_requests.card_request_type_id',4)
+                            ->orwhere([['fuel_card_requests.card_request_type_id',1],['fuel_card_requests.card_number',null]])
+                            ->orwhere([['fuel_card_requests.card_request_type_id',2],['fuel_card_requests.card_number',null]]);
+                    });
+                }
+                else if($keyword == 'Assigned')
+                {
+                    $query->where('fuel_card_requests.status',1)->where(function($q){
+                        $q->orwhere([['fuel_card_requests.card_request_type_id',1],['fuel_card_requests.card_number','!=','']])
+                            ->orwhere([['fuel_card_requests.card_request_type_id',2],['fuel_card_requests.card_number','!=','']]);
+                    });
+                }
+            })
             ->make(true);
     }
 
