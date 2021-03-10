@@ -9,6 +9,8 @@ use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
+use Auth;
+
 class AdminHumanResourseController extends Controller
 {
     //
@@ -25,24 +27,40 @@ class AdminHumanResourseController extends Controller
 
     public function allusers()
     {
-        $riders = Rider::where([
-            ['status', 1],
-            ['city_id', Auth::user()->hubs->id],
-        ])->get();
-        $admins = Admin::where([
-            ['status', 1],
-            ['default_hub_id', Auth::user()->hubs->id],
-        ])->get();
+        // $riders = Rider::where('status', 1)->get();
+        //         $admins = Admin::where('status', 1)->get();
         $roles=['Admin','Rider'];
         $roles = collect($roles);
-        return view('admin.human_resource.allusers')->with(['riders' => $riders, 'admins' => $admins, 'roles' => $roles]);
+        return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
 
 
     public function all_user_ajax()
     {
-        $admins = Admin::where('status', 1)->select('id', 'name', 'cnic', 'phone_number', 'trax_id', 'created_at')->get();
-        $riders = Rider::where('status', 1)->select('id', 'name', 'cnic', 'phone', 'trax_id', 'created_at')->get();
+
+        if(count(Auth::user()->hubs)>0){
+            $riders = Rider::where([
+                ['status', 1],
+                ['city_id', Auth::user()->hubs->id],
+            ])->get();
+            $admins = Admin::where([
+                ['status', 1],
+                ['default_hub_id', Auth::user()->hubs->id],
+            ])->get();
+        }else{
+            $riders = Rider::where([
+                ['status', 1],
+                ['city_id', NULL],
+            ])->get();
+            $admins = Admin::where([
+                ['status', 1],
+                ['default_hub_id', NULL],
+            ])->get();
+        }
+        // $riders = Rider::where('status', 1)->get();
+        //         $admins = Admin::where('status', 1)->get();
+        // $admins = Admin::where('status', 1)->select('id', 'name', 'cnic', 'phone_number', 'trax_id', 'created_at')->get();
+        // $riders = Rider::where('status', 1)->select('id', 'name', 'cnic', 'phone', 'trax_id', 'created_at')->get();
         $users = array();
         if (count($riders) > 0) {
             foreach ($riders as $rider) {
