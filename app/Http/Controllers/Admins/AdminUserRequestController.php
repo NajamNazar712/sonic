@@ -322,8 +322,8 @@ class AdminUserRequestController extends Controller
         $admin_user_request->department = $request->input('department');
         $admin_user_request->designation = $request->input('designation');
         $admin_user_request->default_hub_id = $request->input('default_hub');
-        $admin_user_request->verified_by_hr = Auth::id();
-        $admin_user_request->verified_by_hr_at = Carbon::now();
+//        $admin_user_request->verified_by_hr = Auth::id();
+//        $admin_user_request->verified_by_hr_at = Carbon::now();
         $admin_user_request->password = bcrypt($request->input('password'));
         $admin_user_request->visible_password = $request->input('password');
         if($admin_user_request->outlook_email == 1){
