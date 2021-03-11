@@ -919,6 +919,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
+			Route::post('operation_riders','Admins\DeliveryController@operation_riders')->name('operation_riders');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {

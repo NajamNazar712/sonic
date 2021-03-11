@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RiderType;
@@ -123,7 +124,9 @@ class RiderManagementController extends Controller
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $route_types = RouteType::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city]);
+        $operation_riders = OperationRidersCategory::all();
+        
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -134,6 +137,7 @@ class RiderManagementController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required',
+            'operation_rider_id'=>'required',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
         ];
@@ -181,6 +185,7 @@ class RiderManagementController extends Controller
             'address'=>$request->address,
             'route_id'=>$route_id,
             'rider_category_id'=>$request->rider_category,
+            'operation_rider_id'=>$request->operation_rider_id,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
@@ -213,7 +218,8 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
+        $operation_rider_ids =  OperationRidersCategory::all();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [

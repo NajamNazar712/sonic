@@ -32,13 +32,20 @@
                 </form>
 
                 <div class="row mb-2 justify-content-center">
-
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="rider_name" id="rider_name" class="form-control select2" required >
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}" data-id="{{$rider->route_id}}" data-special="{{ $rider->special_rider }}">{{$rider->name}}</option>
+                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                @foreach($operation_rider_category as $category)
+                                    <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
+                            </select>
+                            <div class="danger" id="operation_error" style="display:none;">This field is required</div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="rider_name" id="rider_name" class="form-control select2" required>
+                              
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -432,6 +439,38 @@
             $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider*',
             });
+
+            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Category*',
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.operation_riders') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'operation_rider_id': this.value,
+                        }
+                    }).done(function(data){
+
+                        if (data.status == 1) {
+                            $('#rider_name').empty().trigger('change');
+                            $.each(data.riders, function(key,value) {
+                                var newOption = new Option(value.name,value.id, false, false);
+                                $('#rider_name').append(newOption).trigger('change');
+
+                            });
+                            $('#rider_name').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Route*',
             });
@@ -442,6 +481,7 @@
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
+            
             var rowsCount = 0;
             // function  countRows() {
             //     rowsCount = table.row().count();
@@ -940,6 +980,7 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
+                var operation_id = $('#operation_rider_id').val();
                 var special = parseInt($('#rider_name').find(':selected').data('special'));
                 
 
@@ -960,6 +1001,15 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#route_error').css('display', 'block');
+                }
+                if (operation_id !== '' && operation_id !== null) {
+
+                    $('#operation_error').css('display', 'none');
+                } else {
+                    var error = "Category not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#operation_error').css('display', 'block');
                 }
 
                 if(count > 0) {

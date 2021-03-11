@@ -20,10 +20,10 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Trax ID</th>
                                         <th class="border-primary border-darken-1">Name</th>
                                         <th class="border-primary border-darken-1">Cnic</th>
                                         <th class="border-primary border-darken-1">Phone#</th>
-                                        <th class="border-primary border-darken-1">Employee ID</th>
                                         <th class="border-primary border-darken-1">Role</th>
                                         <th class="border-primary border-darken-1">Created at</th>
                                     </tr>
@@ -79,19 +79,21 @@
                             footer = [];
 
                             head.push('S. No');
+                            head.push('Trax ID');
                             head.push('Name');
                             head.push('Cnic');
                             head.push('Phone#');
-                            head.push('Employee ID');
                             head.push('Role');
                             head.push('Created at');
                             $.each(result.data, function(index, values) {
+                                if(values.id!=null){
+
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.cnic);
                                 row.push(values.phone);
-                                row.push(values.trax_id);
                                 row.push(values.role);
                                 if(values.created_at){
                                 row.push(values.created_at.date);    
@@ -100,6 +102,8 @@
                                     row.push(values.created_at);    
                                 }
                                 body.push(row);
+                            }
+
                             });
                          
                         },
@@ -114,7 +118,7 @@
 
     var table = $('#datatable').DataTable({
         dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                     buttons: [
                     {
                         extend: 'excelHtml5',
@@ -139,10 +143,10 @@
                 },
         columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'name', name: 'name', class: 'align-middle name'},
                     {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'role', name: 'role', class: 'align-middle role'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                 ],rowCallback: function(row, data, index) {
@@ -153,7 +157,11 @@
                     //     console.log('asdsa');
                     //     $('td:eq(6)', row).html(data['created_at']['date']);
                     // }
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    console.log(data['id']);
+                    if(data['id']!=null){
+
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    }
                 },initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
