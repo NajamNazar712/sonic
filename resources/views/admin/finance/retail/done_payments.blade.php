@@ -899,33 +899,7 @@
 				});
 			});
 
-			$('#datatable tbody').on('click', 'tr td.returned_shipments button', function() {
-				var id = parseInt($(this).parents('tr').attr('id'));
-
-				$('#returned_shipments .modal-body').html('');
-
-				$.ajax({
-					url: '{!! route('admin.finance.retail.done_payments.returned_shipments') !!}',
-					method: 'POST',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'id': id
-					}
-				})
-				.done(function(data) {
-					if (data) {
-						var tracking_numbers = '';
-
-						$.each(data, function(index, tracking_number) {
-                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-						});
-
-						$('#returned_shipments .modal-body').html(tracking_numbers);
-
-						$('#returned_shipments').modal('show');
-					}
-				});
-			});
+			
 
 			$('#datatable tbody').on('click', 'tr td.adjusted_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
