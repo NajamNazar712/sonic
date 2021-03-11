@@ -4001,7 +4001,7 @@ class RiderAPIController extends Controller
             $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
 
             $information['return_deliveries'] = array();
-            $return_note_shipments = $return_note->return_note_shipments->where('status', '!=', 1);
+            $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
             $return_note_shipments = $return_note_shipments->pluck('shipment_id')->toArray();
 
             $return_note_shipments_data = Shipment::select('user_id', DB::raw('count(id) as count'))
