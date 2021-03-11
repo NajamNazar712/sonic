@@ -7957,7 +7957,7 @@ class AdminFinanceController extends Controller
             $shipper = RetailShipperInfo::find($done_payment->user_id);
 
 
-            $payable = number_format(ROUND((DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable') - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN));
+            $payable = number_format(ROUND((RetailDonePaymentShipment::where('retail_done_payment_id', $done_payment_id)->sum('payable') - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN));
 
             $row = array();
 
@@ -7989,8 +7989,8 @@ class AdminFinanceController extends Controller
 
     public function retail_make_payments_store(Request $request) {
 
-        $pending_payment_shipment_ids = RetailPendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
-            return [$item['pending_payment_id'] => $item['id']];
+        $pending_payment_shipment_ids = RetailPendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('retail_pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
+            return [$item['retail_pending_payment_id'] => $item['id']];
         })->toArray();
         $company_bank = $request->get('company_bank_id');
 
@@ -7998,7 +7998,7 @@ class AdminFinanceController extends Controller
 
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
-            $total_shipments = RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
+            $total_shipments = RetailPendingPaymentShipment::where('retail_pending_payment_id', $pending_payment_id)->count();
             $selected_shipments = count($pending_payment_shipment_ids);
 
             $pending_payment = RetailPendingPayment::find($pending_payment_id);
@@ -8121,7 +8121,7 @@ class AdminFinanceController extends Controller
                                 $adjusted_shipments++;
                             }
 
-                            $done_payment_shipment = new DonePaymentShipment();
+                            $done_payment_shipment = new RetailDonePaymentShipment();
 
                             $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
                             $done_payment_shipment->retail_done_payment_id = $done_payment->id;
@@ -8185,7 +8185,7 @@ class AdminFinanceController extends Controller
 
                     $done_payment_ids[] = $done_payment->id;
 
-                    NotificationsController::send(20, $done_payment->id);
+//                    NotificationsController::send(20, $done_payment->id);
                 }
             }
         }
@@ -8200,14 +8200,14 @@ class AdminFinanceController extends Controller
         if ($positive_negative_filter = $request->get('positive_negative_filter')) {
             if (RetailPendingPayment::exists()) {
                 foreach (RetailPendingPayment::get() as $pending_payment) {
-                    $payable = RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('payable');
+                    $payable = RetailPendingPaymentShipment::where('retail_pending_payment_id', $pending_payment->id)->sum('payable');
 
                     if ($positive_negative_filter == 1 && $payable >= 0) {
-                        $total_amount += RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_amount += RetailPendingPaymentShipment::where('retail_pending_payment_id', $pending_payment->id)->sum('amount');
                         $total_payable += $payable;
                     }
                     else if ($positive_negative_filter == 2 && $payable < 0) {
-                        $total_amount += RetailPendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->sum('amount');
+                        $total_amount += RetailPendingPaymentShipment::where('retail_pending_payment_id', $pending_payment->id)->sum('amount');
                         $total_payable += $payable;
                     }
                 }
@@ -8461,7 +8461,7 @@ class AdminFinanceController extends Controller
                 }
 
             }
-            NotificationsController::send(92,$done_payment->id);
+//            NotificationsController::send(92,$done_payment->id);
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
@@ -8623,9 +8623,9 @@ class AdminFinanceController extends Controller
                             }
                         }
 
-                        if ($done_payment->status == 2) {
+                        /*if ($done_payment->status == 2) {
                             NotificationsController::send(92,$done_payment->id);
-                        }
+                        }*/
 
                     }
                 }
