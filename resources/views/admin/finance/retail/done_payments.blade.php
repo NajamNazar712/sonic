@@ -731,7 +731,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.adjustment_charges')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -761,12 +761,7 @@
 					});
                     var data = $.map({!! $banks !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data = $.map({!! $banks !!}, function (obj) {
-                        obj.text = obj.name;
-
+						obj.text = obj.name;
                         return obj;
                     });
 
