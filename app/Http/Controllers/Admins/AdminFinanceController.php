@@ -8675,11 +8675,11 @@ class AdminFinanceController extends Controller
         $shipper = $done_payment->shipper;
 
 
-        $shipper_bank = $shipper->bank_id;
+        $shipper_bank = $shipper;
 
 
 
-        $account_type_id = $shipper->account_type_id;
+//        $account_type_id = $shipper->account_type_id;
 
         $html = '
                 <!doctype html>
@@ -8758,15 +8758,15 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Client</strong></td>
-                              <td>' . $shipper->name . '</td>
+                              <td>' . $shipper->shipper_name . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Client Bank</strong></td>
                               <td>' . $shipper_bank->bank->name . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Account Title</strong></td>
-                              <td>' . $shipper_bank->account_title . '</td>
+                              <td class="color secondary"><strong>Account Number</strong></td>
+                              <td>' . $shipper_bank->account_number . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>IBAN</strong></td>
@@ -8820,13 +8820,10 @@ class AdminFinanceController extends Controller
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
             }
-            else if ($done_payment_shipment->type == 1) {
-                $type = 'Returned';
-            }
             else {
                 $type = 'Adjusted';
             }
-
+            $account_type_id = 1;
             $pickup_address = $shipment->pickup_address;
 
             $shipment_details .= '
@@ -9046,7 +9043,7 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_done_payments_details(Request $request) {
-        $done_payment = DonePayment::find($request->id);
+        $done_payment = RetailDonePayment::find($request->id);
 
         $details = array();
 
@@ -9057,7 +9054,7 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_done_payments_update_details(Request $request) {
-        $done_payment = DonePayment::find($request->id);
+        $done_payment = RetailDonePayment::find($request->id);
 
         $done_payment->reference_number = $request->reference_number;
         $done_payment->company_bank_id = $request->company_bank_id;
@@ -9068,15 +9065,15 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_done_payments_export_to_excel(Request $request) {
-        $done_payment = DonePayment::find($request->id);
+        $done_payment = RetailDonePayment::find($request->id);
 
-        $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
+        $filename = 'sonic_retail_payment_details_' . $request->id . '.xlsx';
 
         $details = array();
 
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
 
-        $account_type_id = $done_payment->shipper->account_type_id;
+        $account_type_id = 1;
 
         $serial_number = 1;
 
