@@ -694,7 +694,7 @@
 					{data:'shipper', name: 'rsi.shipper_name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'shipper_phone', name: 'rsi.shipper_phone_no', class: 'align-middle text-center shipper_phone'},
-					{data:'address', name: 'rsi.shipper_address', class: 'align-middle text-center address'},
+					{data:'shipper_address', name: 'rsi.shipper_address', class: 'align-middle text-center address'},
 					{data:'total_shipments', name: 'retail_done_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'retail_done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'adjusted_shipments', name: 'retail_done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
@@ -899,7 +899,7 @@
 				});
 			});
 
-			
+
 
 			$('#datatable tbody').on('click', 'tr td.adjusted_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
