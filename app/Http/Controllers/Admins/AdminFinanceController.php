@@ -4520,10 +4520,10 @@ class AdminFinanceController extends Controller
                     }
                     elseif($status == "reverted"){
                         if ($done_payment->status != 2 && $done_payment->status != 1) {
-                            $payment_clear = new VisionSoftCodPaymentClear();
+                            /*$payment_clear = new VisionSoftCodPaymentClear();
                             $payment_clear->payment_id = $payment_id;
                             $payment_clear->status = 2;
-                            $payment_clear->save();
+                            $payment_clear->save();*/
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status_updated_at = Carbon::now();
@@ -8395,10 +8395,10 @@ class AdminFinanceController extends Controller
 
                 $done_payment->save();
 
-                $payment_clear = new VisionSoftCodPaymentClear();
+                /*$payment_clear = new VisionSoftCodPaymentClear();
                 $payment_clear->payment_id = $done_payment_id;
                 $payment_clear->status = 1;
-                $payment_clear->save();
+                $payment_clear->save();*/
 
                 foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                     $shipment = $done_payment_shipment->shipment;
@@ -8435,10 +8435,10 @@ class AdminFinanceController extends Controller
 
                 $done_payment->save();
 
-                $payment_clear = new VisionSoftCodPaymentClear();
+                /*$payment_clear = new VisionSoftCodPaymentClear();
                 $payment_clear->payment_id = $done_payment_id;
                 $payment_clear->status = 2;
-                $payment_clear->save();
+                $payment_clear->save();*/
 
                 foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                     $shipment = $done_payment_shipment->shipment;
@@ -8557,10 +8557,10 @@ class AdminFinanceController extends Controller
                     $status = strtolower($row['status']);
                     if($status == "paid"){
                         if ($done_payment->status != 1) {
-                            $payment_clear = new VisionSoftCodPaymentClear();
+                            /*$payment_clear = new VisionSoftCodPaymentClear();
                             $payment_clear->payment_id = $payment_id;
                             $payment_clear->status = 1;
-                            $payment_clear->save();
+                            $payment_clear->save();*/
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status_updated_at = Carbon::now();
@@ -8591,10 +8591,10 @@ class AdminFinanceController extends Controller
                     }
                     elseif($status == "reverted"){
                         if ($done_payment->status != 2 && $done_payment->status != 1) {
-                            $payment_clear = new VisionSoftCodPaymentClear();
+                            /*$payment_clear = new VisionSoftCodPaymentClear();
                             $payment_clear->payment_id = $payment_id;
                             $payment_clear->status = 2;
-                            $payment_clear->save();
+                            $payment_clear->save();*/
 
                             $done_payment->company_bank_id = (int)$row['company_bank_id'];
                             $done_payment->status_updated_at = Carbon::now();
