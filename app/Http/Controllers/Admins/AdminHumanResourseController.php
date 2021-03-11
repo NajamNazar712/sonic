@@ -41,11 +41,11 @@ class AdminHumanResourseController extends Controller
 
         $assigned_hubs = session('hubs');
 
-        if(session('role_id') != 1){
+        // if(session('role_id') != 1){
             $riders = Rider::where([['status' => 1, 'rider_type_id' =>1]])->whereIn('city_id', $assigned_hubs)->get();
             $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
 
-        }
+        // }
 
         if(count(Auth::user()->hubs)>0){
             foreach (Auth::user()->hubs as $hub){
