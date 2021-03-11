@@ -39,12 +39,16 @@ class AdminHumanResourseController extends Controller
     public function all_user_ajax()
     {
 
-        if(count(Auth::user()->hubs)>0){
-            foreach (Auth::user()->hubs as $hub){
-                $total_hubs[] = $hub->hub_id;
-            }
-            $riders = Rider::where([['status', 1],['rider_type_id',1]])->whereIn('city_id', $total_hubs)->distinct()->get();
-            $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->whereIn('ah.hub_id', $total_hubs)->where('admins.status', 1)->groupBy('admins.id')->get();
+        $assigned_hubs = session('hubs');
+
+        // if(session('role_id') != 1){
+            // $riders = Rider::where([['status' => 1, 'rider_type_id' =>1]])->whereIn('city_id', $assigned_hubs)->get();
+            // $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
+
+        if(count($assigned_hubs)>0){
+            $riders = Rider::where('status',1)->where('rider_type_id',1)->whereIn('city_id', $assigned_hubs)->get();
+            $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
+
             $users = array();
             if (count($riders) > 0) {
                 foreach ($riders as $rider) {
