@@ -76,7 +76,7 @@ class FuelManagementController extends Controller
 //            $requests->where('fuel_card_requests.card_holder', $card_holder);
 //        }
 
-        if($request->get('card_number')){
+        if($request->get('card_number') && $request->get('card_number') != ''){
             $card_number = explode(',',$request->get('card_number'));
             $requests->where(function ($subquery) use($card_number) {
                 for ($i = 0; $i < count($card_number); $i++){
@@ -85,16 +85,20 @@ class FuelManagementController extends Controller
             });
         }
 
-        if($card_holder = $request->get('staff_card_holder') && $request->get('staff_card_holder') != ''){
-            $requests->where('staff.name',$card_holder);
+
+        if($request->get('staff_card_holder') && $request->get('staff_card_holder') != ''){
+            $staff_card_holder = $request->get('staff_card_holder');
+            $requests->where('staff.name','like',"%".$staff_card_holder."%");
         }
 
-        if($card_holder = $request->get('rider_card_holder') && $request->get('rider_card_holder') != ''){
-            $requests->where('rider.name',$card_holder);
+        if($request->get('rider_card_holder') && $request->get('rider_card_holder') != ''){
+            $rider_card_holder = $request->get('rider_card_holder');
+            $requests->where('rider.name',$rider_card_holder);
         }
 
-        if($card_holder = $request->get('fleet_card_holder') && $request->get('fleet_card_holder') != ''){
-            $requests->where('fleet.name',$card_holder);
+        if($request->get('fleet_card_holder') && $request->get('fleet_card_holder') != ''){
+            $fleet_card_holder = $request->get('fleet_card_holder');
+            $requests->where('fleet.name',$fleet_card_holder);
         }
 
         if ($request->get('aprroved_at_from') && $request->get('approved_at_to')) {
@@ -662,7 +666,7 @@ class FuelManagementController extends Controller
                 return response()->json(['status'=> 1,'request'=>$request,'logs'=>$logs_data]);
             }
             else{
-                return response()->json(['status' => 0, 'error' => 'Invalid Tracking Number']);
+                return response()->json(['status' => 0, 'error' => 'Invalid Fuel Request Id']);
             }
         }
         return view('admin.user_management.fuel.history');
