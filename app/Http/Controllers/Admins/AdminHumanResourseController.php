@@ -44,7 +44,7 @@ class AdminHumanResourseController extends Controller
                 $total_hubs[] = $hub->hub_id;
             }
             $riders = Rider::where([['status', 1],['rider_type_id',1]])->whereIn('city_id', $total_hubs)->distinct()->get();
-            $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->whereIn('ah.hub_id', $total_hubs)->where('admins.status', 1)->distinct()->get();
+            $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->whereIn('ah.hub_id', $total_hubs)->where('admins.status', 1)->groupBy('admins.id')->get();
             $users = array();
             if (count($riders) > 0) {
                 foreach ($riders as $rider) {
