@@ -8408,14 +8408,14 @@ class AdminFinanceController extends Controller
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
                     }
                     else {
                         $shipment->payment_status_id = 3;
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
                     }
                 }
             }
@@ -8448,14 +8448,14 @@ class AdminFinanceController extends Controller
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id, 1);
                     }
                     else {
                         $shipment->payment_status_id = 2;
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id, 1);
                         //NotificationsController::send(92,$done_payment->id ,$shipment->id);
                     }
                 }
@@ -8577,14 +8577,14 @@ class AdminFinanceController extends Controller
 
                                     $shipment->save();
 
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
                                 }
                                 else {
                                     $shipment->payment_status_id = 3;
 
                                     $shipment->save();
 
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
                                 }
                             }
                         }
@@ -8611,14 +8611,14 @@ class AdminFinanceController extends Controller
 
                                     $shipment->save();
 
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id, 1);
                                 }
                                 else {
                                     $shipment->payment_status_id = 2;
 
                                     $shipment->save();
 
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id, 1);
                                 }
                             }
                         }
