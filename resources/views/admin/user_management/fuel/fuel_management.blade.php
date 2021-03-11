@@ -101,6 +101,7 @@
                                     <th class="border-primary border-darken-1">Approved by</th>
                                     <th class="border-primary border-darken-1">Approved at</th>
                                     <th class="border-primary border-darken-1">Updated at</th>
+                                    <th class="border-primary border-darken-1">Card Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -383,6 +384,7 @@
                             head.push('Approved By');
                             head.push('Approved At');
                             head.push('Updated At');
+                            head.push('Card Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -400,6 +402,7 @@
                                 row.push(values.approved_by);
                                 row.push(values.approved_at);
                                 row.push(values.updated_at);
+                                row.push(values.card_status);
 
                                 body.push(row);
                             });
@@ -480,6 +483,7 @@
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'approved_at', name: 'approved_at', class: 'align-middle approved_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
+                    {data: 'card_status', name: 'card_status', class: 'align-middle card_status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -497,6 +501,7 @@
                     var fuel_type_select = '<select name="fuel_type_select" id="fuel_type_select" class="select2 form-control"></select>';
                     var fuel_deduction_type_select = '<select name="fuel_deduction_type_select" id="fuel_deduction_type_select" class="select2 form-control"></select>';
                     var card_request_type_select = '<select name="card_request_type_select" id="card_request_type_select" class="select2 form-control"></select>';
+                    var card_status_select = '<select name="card_status_select" id="card_status_select" class="select2 form-control"><option>Pending</option><option>Assigned</option><option>Unassigned</option></select>'
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -524,6 +529,12 @@
                         }
                         else if($(header).is('.card_request_type')){
                             $(card_request_type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.card_status')){
+                            $(card_status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -561,6 +572,13 @@
                         obj.text = obj.name; // replace name with the property used for the text
 
                         return obj;
+                    });
+
+                    $("#card_status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Card Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
                     });
                     $("#card_holder_type_select").prepend('<option value="" selected></option>').select2({
                         data:card_holder_type_data,
