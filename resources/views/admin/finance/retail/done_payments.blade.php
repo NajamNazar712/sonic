@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Done Payments
+					Retail Done Payments
 				</h1>
 
 				<div class="card">
@@ -98,7 +98,7 @@
 								</div>
 							</div>
 							@if(session('role_id') == 1 || in_array(268, session('permissions')))
-								<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+								<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.retail.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 									{{ csrf_field() }}
 
 									<div class="row align-items-center justify-content-center">
@@ -526,7 +526,7 @@
 							enabled: false,
 							action: function (e, dt, node, config) {
 								$.ajax({
-									url: '{!! route('admin.finance.done_payments.paid') !!}',
+									url: '{!! route('admin.finance.retail.done_payments.paid') !!}',
 									method: 'PUT',
 									data: {
 										'_token': '{{ csrf_token() }}',
@@ -561,7 +561,7 @@
 							enabled: false,
 							action: function (e, dt, node, config) {
 								$.ajax({
-									url: '{!! route('admin.finance.done_payments.reverted') !!}',
+									url: '{!! route('admin.finance.retail.done_payments.reverted') !!}',
 									method: 'PUT',
 									data: {
 										'_token': '{{ csrf_token() }}',
@@ -877,7 +877,7 @@
 				$('#delivered_shipments .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.finance.done_payments.delivered_shipments') !!}',
+					url: '{!! route('admin.finance.retail.done_payments.delivered_shipments') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
@@ -905,7 +905,7 @@
 				$('#returned_shipments .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.finance.done_payments.returned_shipments') !!}',
+					url: '{!! route('admin.finance.retail.done_payments.returned_shipments') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
@@ -933,7 +933,7 @@
 				$('#adjusted_shipments .modal-body').html('');
 
 				$.ajax({
-					url: '{!! route('admin.finance.done_payments.adjusted_shipments') !!}',
+					url: '{!! route('admin.finance.retail.done_payments.adjusted_shipments') !!}',
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
@@ -960,7 +960,7 @@
 
 				if ($(this).hasClass('view_details')) {
 					$.ajax({
-						url: '{!! route('admin.finance.done_payments.details_print') !!}',
+						url: '{!! route('admin.finance.retail.done_payments.details_print') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -988,7 +988,7 @@
 				}
 				else if ($(this).hasClass('update_details')) {
 					$.ajax({
-						url: '{!! route('admin.finance.done_payments.details') !!}',
+						url: '{!! route('admin.finance.retail.done_payments.details') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -1008,7 +1008,7 @@
 					});
 				}
 				else if ($(this).hasClass('export_to_excel')) {
-					window.open('{!! route('admin.finance.done_payments.export_to_excel') !!}?id=' + id, '_blank');
+					window.open('{!! route('admin.finance.retail.done_payments.export_to_excel') !!}?id=' + id, '_blank');
 				}
 				else if ($(this).hasClass('request_add')) {
                     var selected_id = id.toString().padStart(6, 0);
@@ -1040,7 +1040,7 @@
 					var company_bank_id = parseInt($(form).find('select.company_bank').val());
 
 					$.ajax({
-						url: '{!! route('admin.finance.done_payments.update_details') !!}',
+						url: '{!! route('admin.finance.retail.done_payments.update_details') !!}',
 						method: 'PUT',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -1065,7 +1065,7 @@
 			});
 			function print(id){
                 $.ajax({
-                    url: '{!! route('admin.finance.done_payments.details_print') !!}',
+                    url: '{!! route('admin.finance.retail.done_payments.details_print') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
