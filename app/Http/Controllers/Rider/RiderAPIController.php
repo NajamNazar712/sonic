@@ -3975,78 +3975,78 @@ class RiderAPIController extends Controller
     }
 
     public function return_summary_multiple_v2(Request $request)
-    {
-        $rider_id = $request->rider_id;
+{
+    $rider_id = $request->rider_id;
 
-        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
+    $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
 
-        if ($return_notes->exists()) {
-            $return_notes = $return_notes->get();
+    if ($return_notes->exists()) {
+        $return_notes = $return_notes->get();
 
-            $nodes = array();
+        $nodes = array();
 
-            foreach ($return_notes as $return_note) {
-                $information = array();
+        foreach ($return_notes as $return_note) {
+            $information = array();
 
-                $information['return_note_id'] = $return_note->id;
-                $information['assigned_date'] = $return_note->created_at->toDateTimeString();
-                $information['no_of_parcels'] = $return_note->shipments_count;
-                $information['summary'] = array();
-                $total_shipments = $return_note->shipments_count;
-                $information['summary']['deliveries'] = $total_shipments;
-                $information['summary']['completed'] = array();
+            $information['return_note_id'] = $return_note->id;
+            $information['assigned_date'] = $return_note->created_at->toDateTimeString();
+            $information['no_of_parcels'] = $return_note->shipments_count;
+            $information['summary'] = array();
+            $total_shipments = $return_note->shipments_count;
+            $information['summary']['deliveries'] = $total_shipments;
+            $information['summary']['completed'] = array();
 
-                $information['summary']['completed']['pending'] = $return_note->return_note_shipments->where('status', 0)->count('shipment_id');
-                $information['summary']['completed']['undelivered'] = $return_note->return_note_shipments->where('status', 2)->count('shipment_id');
-                $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
+            $information['summary']['completed']['pending'] = $return_note->return_note_shipments->where('status', 0)->count('shipment_id');
+            $information['summary']['completed']['undelivered'] = $return_note->return_note_shipments->where('status', 2)->count('shipment_id');
+            $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
 
-                $information['return_deliveries'] = array();
-                $return_note_shipments = $return_note->return_note_shipments->where('status', '!=', 1);
-                $return_note_shipments = $return_note_shipments->pluck('shipment_id')->toArray();
+            $information['return_deliveries'] = array();
+            $return_note_shipments = $return_note->return_note_shipments->where('status', '!=', 1);
+            $return_note_shipments = $return_note_shipments->pluck('shipment_id')->toArray();
 
-                $return_note_shipments_data = Shipment::select('user_id', DB::raw('count(id) as count'))
-                    ->groupBy('user_id')
-                    ->whereIn('id', $return_note_shipments);
+            $return_note_shipments_data = Shipment::select('user_id', DB::raw('count(id) as count'))
+                ->groupBy('user_id')
+                ->whereIn('id', $return_note_shipments);
 
-                if($return_note_shipments_data->exists()){
-                    $return_note_shipments_data = $return_note_shipments_data->get();
-                    foreach ($return_note_shipments_data as $return_note_shipment) {
+            if($return_note_shipments_data->exists()){
+                $return_note_shipments_data = $return_note_shipments_data->get();
+                foreach ($return_note_shipments_data as $return_note_shipment) {
 
-                        $shipper_info = UserShippingInfo::where('user_id',$return_note_shipment->user_id)->first();
+                    $shipper_info = UserShippingInfo::where('user_id',$return_note_shipment->user_id)->first();
 
-                        $total_shipments = $return_note_shipment->count;
-                        $shipper_name = $shipper_info->user->name;
-                        $shipper_id = $shipper_info->id;
-                        $shipper_poc = $shipper_info->poc;
-                        $shipper_address = $shipper_info->pickup_address;
-                        $phone = $shipper_info->phone;
-                        $phone2 = $shipper_info->phone2;
-                        ($phone2 != null) ? $shipper_phone = $phone." | ".$phone2 : $shipper_phone = $phone;
+                    $total_shipments = $return_note_shipment->count;
+                    $shipper_name = $shipper_info->user->name;
+                    $shipper_id = $shipper_info->id;
+                    $shipper_poc = $shipper_info->poc;
+                    $shipper_address = $shipper_info->pickup_address;
+                    $phone = $shipper_info->phone;
+                    $phone2 = $shipper_info->phone2;
+                    ($phone2 != null) ? $shipper_phone = $phone." | ".$phone2 : $shipper_phone = $phone;
 
-                        $deliveries = array();
-                        $deliveries['shipper_id'] = $shipper_id;
-                        $deliveries['shipper_name'] = $shipper_name;
-                        $deliveries['shipper_poc'] = $shipper_poc;
-                        $deliveries['shipper_address'] = $shipper_address;
-                        $deliveries['shipper_phone'] = $shipper_phone;
-                        $deliveries['total_shipments'] = $total_shipments;
-                        $deliveries['latitude'] = NULL;
-                        $deliveries['longitude'] = NULL;
-                        $shipper_lat = $shipper_info->location_latitude;
-                        $shipper_long = $shipper_info->location_longitude;
-                        if ($shipper_lat != null && $shipper_long != null) {
-                            $deliveries['latitude'] = $shipper_lat;
-                            $deliveries['longitude'] = $shipper_long;
-                        }
-                        $information['return_deliveries'][] = $deliveries;
+                    $deliveries = array();
+                    $deliveries['shipper_id'] = $shipper_id;
+                    $deliveries['shipper_name'] = $shipper_name;
+                    $deliveries['shipper_poc'] = $shipper_poc;
+                    $deliveries['shipper_address'] = $shipper_address;
+                    $deliveries['shipper_phone'] = $shipper_phone;
+                    $deliveries['total_shipments'] = $total_shipments;
+                    $deliveries['latitude'] = NULL;
+                    $deliveries['longitude'] = NULL;
+                    $shipper_lat = $shipper_info->location_latitude;
+                    $shipper_long = $shipper_info->location_longitude;
+                    if ($shipper_lat != null && $shipper_long != null) {
+                        $deliveries['latitude'] = (double)$shipper_lat;
+                        $deliveries['longitude'] = (double)$shipper_long;
                     }
+                    $information['return_deliveries'][] = $deliveries;
                 }
-                $nodes[] = $information;
             }
-            return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
+            $nodes[] = $information;
         }
-        return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
+        return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
     }
+    return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
+}
 
 
     /*public function delivery_packaging_material_update($tracking_number){
