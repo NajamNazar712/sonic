@@ -8480,7 +8480,7 @@ class AdminFinanceController extends Controller
         ];
 
         $rules = [
-            'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('done_payments', 'id')],
+            'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_done_payments', 'id')],
             'company_bank_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('banks_lists', 'id')->where(function($query) {
                 $query->where('affiliate', DB::raw(1));
             })],
