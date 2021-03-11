@@ -22,6 +22,7 @@ use App\Http\Models\PickupAddressIbanMapping;
 use App\http\Models\RetailAdjustmentLog;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\RetailDonePaymentCalculation;
+use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\RetailPendingPayment;
 use App\Http\Models\RetailPendingPaymentCalculation;
 use App\Http\Models\RetailPendingPaymentShipment;
@@ -8552,7 +8553,7 @@ class AdminFinanceController extends Controller
             else{
                 foreach ($rows as $key => $row) {
                     $payment_id = (int)$row['payment_id'];
-                    $done_payment = DonePayment::find($payment_id);
+                    $done_payment = RetailDonePayment::find($payment_id);
                     $status = strtolower($row['status']);
                     if($status == "paid"){
                         if ($done_payment->status != 1) {
@@ -8640,7 +8641,7 @@ class AdminFinanceController extends Controller
     public function retail_done_payments_delivered_shipments(Request $request) {
         $tracking_numbers = array();
 
-        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 0)->get();
+        $done_payment_shipments = RetailDonePaymentShipment::where('retail_done_payment_id', $request->id)->where('type', 0)->get();
 
         foreach ($done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -8651,24 +8652,11 @@ class AdminFinanceController extends Controller
         return $tracking_numbers;
     }
 
-    public function retail_done_payments_returned_shipments(Request $request) {
-        $tracking_numbers = array();
-
-        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 1)->get();
-
-        foreach ($done_payment_shipments as $done_payment_shipment) {
-            $shipment = $done_payment_shipment->shipment;
-
-            $tracking_numbers[] = $shipment->tracking_number;
-        }
-
-        return $tracking_numbers;
-    }
 
     public function retail_done_payments_adjusted_shipments(Request $request) {
         $tracking_numbers = array();
 
-        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 2)->get();
+        $done_payment_shipments = RetailDonePaymentShipment::where('retail_done_payment_id', $request->id)->where('type', 2)->get();
 
         foreach ($done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -8682,15 +8670,13 @@ class AdminFinanceController extends Controller
     public function retail_done_payments_details_print(Request $request) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-        $done_payment = DonePayment::find($request->id);
+        $done_payment = RetailDonePayment::find($request->id);
 
         $shipper = $done_payment->shipper;
 
-        if($done_payment->user_bank_info_id == null){
-            $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
-        }else{
-            $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
-        }
+
+        $shipper_bank = $shipper->bank_id;
+
 
 
         $account_type_id = $shipper->account_type_id;
@@ -8704,7 +8690,7 @@ class AdminFinanceController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Payment Details</title>
+                    <title>Retail Payment Details</title>
 
                     <style>
                       @page {
@@ -8759,7 +8745,7 @@ class AdminFinanceController extends Controller
                           <tbody>
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
+                              <td class="text-center align-middle color primary"><strong>Retail Payment Details</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             </tr>
                             <tr>
