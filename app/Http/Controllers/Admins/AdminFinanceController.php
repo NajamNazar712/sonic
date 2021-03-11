@@ -7120,7 +7120,7 @@ class AdminFinanceController extends Controller
                 $done_payment_charges->adjustment = $done_payment_charges->adjustment + $adjustment_amount;
                 $done_payment_charges->save();
             } else {
-                $done_payment_charges = new DonePaymentCalculation();
+                $done_payment_charges = new RetailDonePaymentCalculation();
                 $done_payment_charges->retail_done_payment_id = $done_payment_id;
                 $done_payment_charges->amount = $amount;
                 $done_payment_charges->payable = $payable;
@@ -8038,7 +8038,7 @@ class AdminFinanceController extends Controller
                         $pending_payment_shipment = RetailPendingPaymentShipment::find($pending_payment_shipment_id);
 
                         if ($pending_payment_shipment) {
-                            $done_payment_shipment = new DonePaymentShipment();
+                            $done_payment_shipment = new RetailDonePaymentShipment();
 
                             $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
                             $done_payment_shipment->retail_done_payment_id = $done_payment->id;
