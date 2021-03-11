@@ -792,7 +792,7 @@
             $('body').on('click','#app_shipments_datatable tbody tr td.audio_path button',function () {
                 var link = $(this).attr('data-link');
 
-                var audio = '<audio controls id="sound"> <source src="' + link + '" type="audio/3gp"  > </audio>';
+                var audio = '<audio controls id="sound"> <source src="' + link + '" type="audio/mp4"  > </audio>';
 
                 $('#audio_modal .modal-body').html(audio);
 
