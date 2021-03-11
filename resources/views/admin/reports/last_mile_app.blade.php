@@ -246,6 +246,7 @@
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
+                            <th class="border-primary border-darken-1">Audio</th>
                         </tr>
                         </thead>
                     </table>
@@ -295,6 +296,25 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="picture_modal_title">Picture</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="audio_modal" data-backdrop="static" role="dialog" aria-labelledby="audio_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="audio_modal_title">Audio</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -673,6 +693,7 @@
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
                             { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+                            { data:'audio_path' ,name: 'rider_deliveries.audio_path', class: 'align-middle audio_path',orderable: false, searchable: false},
 
                         ],
                         rowCallback: function(row, data, index) {
@@ -768,6 +789,15 @@
                 $('#picture_modal').modal('show');
             });
 
+            $('body').on('click','#app_shipments_datatable tbody tr td.audio_path button',function () {
+                var link = $(this).attr('data-link');
+
+                var audio = '<audio controls id="sound"> <source src="' + link + '" type="audio/mp4"  > </audio>';
+
+                $('#audio_modal .modal-body').html(audio);
+
+                $('#audio_modal').modal('show');
+            });
 
 
             function print(id) {
@@ -803,11 +833,12 @@
 
                 print(delivery_note_id);
             });
-        });
-       
-        
-        
 
+            $('#audio_modal').on('hide.bs.modal', function (e) {
+                $('audio#sound')[0].pause();
+                $('audio#sound')[0].currentTime = 0;
+            });
+        });
         
     </script>
 @endsection
