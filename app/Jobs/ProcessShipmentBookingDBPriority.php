@@ -54,8 +54,9 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                 $user = User::find($user_id);
                 $user_email_id = $user->email;
             }
+            $phone_number = ShipperShipmentBookController::phone_number($this->booking['consignee_phone_number_1']);
             $pickup_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
-            $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $this->booking['consignee_address'], $this->booking['consignee_name'], NULL, substr_replace($this->booking['consignee_phone_number_1'], '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
+            $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $this->booking['consignee_address'], $this->booking['consignee_name'], NULL, substr_replace($phone_number, '-', 4, 0), $user_email_id, $pickup_city_id, 0, TRUE);
 
             $pickup_delivery_address_id = $this->booking['pickup_address_id'];
             $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
@@ -83,12 +84,15 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;
             $consignee_name = $this->booking['consignee_name'];
             $consignee_address = $this->booking['consignee_address'];
-            $consignee_phone_number_1 = $this->booking['consignee_phone_number_1'];
+
+            $consignee_phone_number_1 = ShipperShipmentBookController::phone_number($this->booking['consignee_phone_number_1']);
 
             if (!empty(trim($this->booking['consignee_phone_number_2']))) {
-                $consignee_phone_number_2 = $this->booking['consignee_phone_number_2'];
-            } else {
-                $consignee_phone_number_2 = NULL;
+                $consignee_phone_number_2 = ShipperShipmentBookController::phone_number($this->booking['consignee_phone_number_2']);
+            }
+            else{
+
+                $consignee_phone_number_2 = null;
             }
 
             if (!empty(trim($this->booking['consignee_email_address']))) {

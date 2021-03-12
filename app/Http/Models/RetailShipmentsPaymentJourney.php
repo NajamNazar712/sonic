@@ -1,0 +1,18 @@
+<?php
+
+namespace App\http\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class RetailShipmentsPaymentJourney extends Model
+{
+    protected $fillable = ['shipment_id', 'status_id', 'payable_remarks', 'admin_id', 'reference_1_id', 'reference_2_id'];
+
+    public function status() {
+        return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'status_id', 'id');
+    }
+
+    public function admin() {
+        return $this->belongsTo('App\Http\Models\Admin\Admin', 'admin_id', 'id');
+    }
+}

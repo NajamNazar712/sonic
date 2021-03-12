@@ -25,6 +25,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\http\Models\CRM\CrmSettings;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
@@ -277,7 +278,7 @@ class RetailTrackingController extends Controller
                             if ($shipment_payment_journey) {
                                 foreach ($shipment_payment_journey as $journey) {
                                     $journey_details = array();
-                                    $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
+                                    $payment = RetailDonePaymentShipment::where('shipment_id', $shipment->id)->first();
                                     $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                     if($journey->payment_id == null){
                                         $journey_details['status'] = $journey->status->name;
