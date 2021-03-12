@@ -3357,7 +3357,8 @@ class RiderAPIController extends Controller
                     $return_history = array();
                     $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
                     $return_history['total_shipments'] = $rider_return_delivery->shipments_count;
-                    $return_history['delivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->count();
+                    $return_history['delivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->where('update_type', 1)->count();
+                    $return_history['undelivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 1)->where('update_type', 1)->count();
                     $rider_return_history[] = $return_history;
                 }
                 return response()->json(["status" => 0, "return_history" => $rider_return_history]);
