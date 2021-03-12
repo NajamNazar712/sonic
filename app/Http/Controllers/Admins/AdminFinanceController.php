@@ -8975,18 +8975,6 @@ class AdminFinanceController extends Controller
         $serial_number = 1;
 
         $total_collection_amount = 0;
-        $total_weight_charges = 0;
-        $total_cash_handling_charges = 0;
-        $total_insurance_charges = 0;
-        $total_replacement_charges = 0;
-        $total_try_and_buy_charges = 0;
-        $total_return_charges = 0;
-        $total_packaging_material_charges = 0;
-        $total_fuel_surcharge = 0;
-        $total_intercept_charges = 0;
-        $total_nsa_osa_charges = 0;
-        $total_gst = 0;
-        $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
 
@@ -8994,22 +8982,17 @@ class AdminFinanceController extends Controller
             $shipment = $done_payment_shipment->shipment;
 
             $shipment_weight = $shipment->actual_weight;
-            $weight_charges = $shipment->weight_charges;
 
             if($done_payment_shipment->type != 2){
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if($change_shipment_weight_log->exists()){
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
                     $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
                 }
             }
 
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
-            }
-            else if ($done_payment_shipment->type == 1) {
-                $type = 'Returned';
             }
             else {
                 $type = 'Adjusted';
@@ -9023,18 +9006,12 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->tracking_number;
             $row[] = $shipment->created_at;
             $row[] = $type;
-            $row[] = $shipment->order_id;
-            $row[] = $pickup_address->vendor;
             $row[] = $pickup_address->city->name;
             $row[] = $shipment->consignee_name;
             $row[] = $shipment->consignee_phone_number_1;
             $row[] = $shipment->consignee_city->name;
-            $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
-            $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
-            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
@@ -9046,24 +9023,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->charges != 0) {
                         if ($done_payment_shipment->type == 0) {
                             $total_collection_amount += $done_payment_shipment->amount;
-                            $total_cash_handling_charges += $shipment->cash_handling_charges;
-                            $total_replacement_charges += $shipment->replacement_charges;
-                            $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                         }
-                        else {
-                            $total_return_charges += $shipment->return_charges;
-                        }
-
-                        $total_weight_charges += $shipment->weight_charges;
-
-                        if ($shipment->packaging_material_request) {
-                            $total_packaging_material_charges += $shipment->packaging_material_charges;
-                        }
-
-                        $total_insurance_charges += $shipment->insurance_charges;
-                        $total_fuel_surcharge += $shipment->fuel_surcharge;
-                        $total_intercept_charges += $shipment->intercept_charges;
-                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -9073,8 +9033,6 @@ class AdminFinanceController extends Controller
                     $total_adjustments += $done_payment_shipment->payable;
                 }
 
-                $total_gst += $done_payment_shipment->gst;
-                $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
             }
             else {
@@ -9091,7 +9049,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges)];
+        $summary = ['Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_adjustments + $done_payment->ibft_charges)];
 
         $details[] = [];
 
