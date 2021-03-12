@@ -6360,19 +6360,17 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
-            ->leftJoin('shipments as ds', function ($join){
-                $join->on('ds.id', '=', 'dns.shipment_id')
-                    ->where('ds.shipper_status_id', 14);
+            ->leftJoin('shipments_journey as ds', function ($join) {
+                $join->on('ds.shipment_id', '=', 's.id')
+                    ->where('ds.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1)'));
             })
-            ->leftJoin('shipments as uds', function ($join){
-                $join->on('uds.id', '=', 'dns.shipment_id')
-                    ->where('uds.shipper_status_id', '!=', 14);
+            ->leftJoin('shipments_journey as cps', function ($join) {
+                $join->on('cps.shipment_id', '=', 's.id')
+                    ->where('cps.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->leftJoin('shipments as cps', function ($join){
-                $join->on('cps.id', '=', 'dns.shipment_id')
-                    ->where('cps.shipper_status_id', 12);
-            })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(uds.id) as undelivered_shipments'), DB::raw('ROUND((count(uds.id)/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(s.id) - count(ds.id) as undelivered_shipments'), DB::raw('ROUND(((count(s.id) - count(ds.id))/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
             ->groupBy('r.id');
 
 
