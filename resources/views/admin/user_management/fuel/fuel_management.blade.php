@@ -250,6 +250,7 @@
                                             <option value="{{ $fuel_deduction_type->id }}" > {{ $fuel_deduction_type->name }} </option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger text-sm-left my_error" id="fuel_deduction_type_error"></span>
                                 </fieldset>
                             </div>
                             <div class="col-6">
@@ -259,17 +260,19 @@
                                             <option value="{{ $fuel_type->id }}" > {{ $fuel_type->name }} </option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger text-sm-left my_error" id="fuel_type_error"></span>
                                 </fieldset>
                             </div>
                             <div class="col-12">
                                 <fieldset class="form-group">
                                    <input type="text" name="amount" class="form-control" id="amount" placeholder="Amount / Liter"/>
+                                    <span class="text-danger text-sm-left my_error" id="amount_error"></span>
                                 </fieldset>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" id="fuel_request_approve_btn" class="btn btn-success">Approve</button>
+                        <button type="button" id="fuel_request_approve_btn" class="btn btn-success">Approve</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -824,7 +827,7 @@
                         if (response.status == 1) {
                             html = `<tr>
                                         <td>${response.data.card_number}</td>
-                                        <td>${response.data.card_holder}</td>
+                                        <td style="text-align: center;">${response.data.card_holder == null ? '-' : response.data.card_holder}</td>
                                         <td>${response.data.card_holder_type}</td>
                                         <td>${response.data.amount}`
                                 if(response.data.fuel_deduction_type_id == 1)
@@ -980,6 +983,30 @@
             $('#search_form').bind('submit', function (e) {
                 e.preventDefault();
                 table.draw();
+            });
+
+            $('#fuel_request_approve_btn').on('click',function(){
+                amount = $('#ApproveModal #fuel_request_approve_form #amount').val();
+                fuel_type = $('#ApproveModal #fuel_request_approve_form #fuel_type').val();
+                fuel_deduction_type = $('#ApproveModal #fuel_request_approve_form #fuel_deduction_type').val();
+                $('.my_error').html("");
+                if(fuel_deduction_type == '')
+                {
+                    $('#ApproveModal #fuel_request_approve_form #fuel_deduction_type_error').html('Fuel Deduction Type is Required');
+                    return;
+                }
+                if(fuel_type == '')
+                {
+                    $('#ApproveModal #fuel_request_approve_form #fuel_type_error').html('Fuel Type is Required');
+                    return;
+                }
+                if(amount == '')
+                {
+                    $('#ApproveModal #fuel_request_approve_form #amount_error').html('Amount is Required');
+                    return;
+                }
+
+                $('#ApproveModal #fuel_request_approve_form').submit();
             });
         });
 

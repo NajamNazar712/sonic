@@ -91,27 +91,27 @@
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
-                                                            <td><strong>Card Number</strong></td><td>${data.request.card_number}</td>
+                                                            <td><strong>Card Number</strong></td><td>${(data.request.card_number != null ? data.request.card_number : '-')}</td>
                                                             <td><strong>Card Holder Name</strong></td><td>`
                             if (data.request.card_holder_type_id == 1) {
-                                html += data.request.staff_name
+                                html += (data.request.staff_name != null ? data.request.staff_name : '-')
                             } else if (data.request.card_holder_type_id == 2) {
-                                html += data.request.rider_name
+                                html += (data.request.rider_name != null ? data.request.rider_name : '-')
                             } else if (data.request.card_holder_type_id == 3) {
-                                html += data.request.fleet_name
+                                html += (data.request.fleet_name != null ? data.request.fleet_name : '-')
                             }
                             html += `</td>
                                                             <td><strong>Card Holder Type</strong></td><td>${data.request.card_holder_type}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td><strong>Fuel Type</strong></td><td>${data.request.fuel_type}</td>
-                                                            <td><strong>Fuel Deduction Type</strong></td><td>${data.request.fuel_deduction_type}</td>
-                                                            <td><strong>Amount</strong></td><td>${data.request.amount}</td>
+                                                            <td><strong>Fuel Type</strong></td><td>${(data.request.fuel_type != null ? data.request.fuel_type : '-')}</td>
+                                                            <td><strong>Fuel Deduction Type</strong></td><td>${(data.request.fuel_deduction_type != null ? data.request.fuel_deduction_type : '-')}</td>
+                                                            <td><strong>Amount</strong></td><td>${(data.request.amount != null ? data.request.amount : '-')}</td>
                                                         </tr>
                                                         <tr>
                                                             <td><strong>Request Type</strong></td><td>${data.request.card_request_type}</td>
                                                             <td><strong>Requested By</strong></td><td>${data.request.requested_by}</td>
-                                                            <td><strong>Approved By</strong></td><td>${data.request.approved_by}</td>
+                                                            <td><strong>Approved By</strong></td><td>${(data.request.approved_by != null ? data.request.approved_by : '-')}</td>
                                                         </tr>
                                                      </tbody>
                                                 </table>
