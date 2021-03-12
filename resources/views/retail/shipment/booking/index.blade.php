@@ -556,6 +556,7 @@
                         .done(function (data) {
                             var cod = data.cod;
                             var iban = data.details.iban;
+                        
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
@@ -579,28 +580,30 @@
                                 $('#account_details').removeClass('d-none');
                             }
                             if(complete_shipper_info == false){
+                                console.log(1);
+                                var mode = $('#shipping_mode').val();
                                 if(first_shipment == true){
+                                    console.log(2);
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
-                                else if($('#shipping_mode').val() != 3){
-                                    $('#iban_no').removeClass('required');
-                                    $('#account_no').removeClass('required');
-                                    $('#bank').removeClass('required');
-                                }
-                                else if(cod == true && (iban == null || iban == '' )){
-                                    console.log('hello');
-                                }
-                                else{
-
-                                    $('#account_details').removeClass('d-none');
+                                else if(cod == true && (iban == null) && $('#shipping_mode').val() == 3){
+                                    console.log(3);
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
                                 }
-                                if(cod == true && (iban == null)){
+                                else if($('#shipping_mode').val() != 3){
+                                    console.log(3);
+                                    $('#iban_no').removeClass('required');
+                                    $('#account_no').removeClass('required');
+                                    $('#bank').removeClass('required');
+                                }
+                                else{
+                                    console.log(4);
+                                    $('#account_details').removeClass('d-none');
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
