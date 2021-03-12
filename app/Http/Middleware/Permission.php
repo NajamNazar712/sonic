@@ -357,6 +357,10 @@ class Permission
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
             'finance.make_payments_pickup_wise.index' => 396,
+            'finance.retail.make_payments.index' => 454,
+            'finance.retail.make_payments.list' => 454,
+            'finance.retail.done_payments.index' => 455,
+            'finance.retail.done_payments.list' => 455,
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
