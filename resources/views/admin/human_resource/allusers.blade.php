@@ -1,16 +1,16 @@
 @extends('admin.layout.master')
 
-@section('title', 'All Users List')
+@section('title', 'All Employees List')
 
 @section('content')
-    <h1>Active Accounts List</h1>
+    <h1>Active Employees List</h1>
 
     <section>
         <div class="row">
             
             <div class="col-12">
                 <div class="card">
-                    <h2 class="heading_user">All Users</h2>
+                    <h2 class="heading_user">All Employees</h2>
                     @include('admin.inc.messages')
     
                     <div class="card-content">
@@ -118,6 +118,7 @@
 
     var table = $('#datatable').DataTable({
         dom: '<"d-inline-block"l><"pull-right"B>tipr',
+        "order": [[6]],
                 scrollX: false, scrollY: '500px',
                     buttons: [
                     {
@@ -151,12 +152,6 @@
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    // if(data['created_at']){
-
-                    //     console.log(data['created_at']['date']);
-                    //     console.log('asdsa');
-                    //     $('td:eq(6)', row).html(data['created_at']['date']);
-                    // }
                     console.log(data['id']);
                     if(data['id']!=null){
 

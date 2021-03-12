@@ -1406,7 +1406,7 @@
                 <ul class="menu-content">
                             <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
                         @if (session('role_id') == 1 || in_array(449, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Users</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
                         @endif
                 </ul>
             </li>
