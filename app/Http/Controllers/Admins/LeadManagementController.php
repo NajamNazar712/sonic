@@ -95,12 +95,14 @@ class LeadManagementController extends Controller
 
     public function list(Request $request){
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
+            ->leftjoin('territories as t', 't.id', '=', 'leads.territory_id')
+            ->leftjoin('area_territories as at', 'at.id', '=', 'leads.territory_area_id')
             ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
             ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 'leads.sale_person_updated_at', 'lr.name as lead_reference');
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
