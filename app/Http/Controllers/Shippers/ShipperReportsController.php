@@ -586,7 +586,7 @@ class ShipperReportsController extends Controller
 
         $sales = $sales->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
-                ->orwhereIn('shipments.user_id', session('sister_users'));
+                ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
         $datatable = Datatables::of($sales)
