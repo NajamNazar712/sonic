@@ -587,7 +587,7 @@
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
-                                else if(cod == true && ($('#iban_no').val() == null) && $('#shipping_mode').val() == 3){
+                                else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '') && $('#shipping_mode').val() == 3){
                                     console.log(3);
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
