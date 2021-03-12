@@ -22,6 +22,7 @@ use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WarehouseStock;
@@ -3744,7 +3745,7 @@ class RiderAPIController extends Controller
                         }
 
                         ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 0, NULL, $rider_id);
-                        ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1]);
+                        ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if (!$rider_return_note_status->exists()) {
                             $new_status = new RiderReturnNoteStatus();
@@ -3960,6 +3961,227 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $nodes]);
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
+    }
+
+    public function return_summary_multiple_v3(Request $request)
+{
+    $rider_id = $request->rider_id;
+
+    $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
+
+    if ($return_notes->exists()) {
+        $return_notes = $return_notes->get();
+
+        $nodes = array();
+
+        foreach ($return_notes as $return_note) {
+            $information = array();
+
+            $information['return_note_id'] = $return_note->id;
+            $information['assigned_date'] = $return_note->created_at->toDateTimeString();
+            $information['no_of_parcels'] = $return_note->shipments_count;
+            $information['summary'] = array();
+            $total_shipments = $return_note->shipments_count;
+            $information['summary']['deliveries'] = $total_shipments;
+            $information['summary']['completed'] = array();
+
+            $information['summary']['completed']['pending'] = $return_note->return_note_shipments->where('status', 0)->count('shipment_id');
+            $information['summary']['completed']['undelivered'] = $return_note->return_note_shipments->where('status', 2)->count('shipment_id');
+            $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
+
+            $information['return_deliveries'] = array();
+            $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
+            $return_note_shipments = $return_note_shipments->pluck('shipment_id')->toArray();
+
+            $return_note_shipments_data = Shipment::select('user_id', DB::raw('count(id) as count'))
+                ->groupBy('user_id')
+                ->whereIn('id', $return_note_shipments);
+
+            if($return_note_shipments_data->exists()){
+                $return_note_shipments_data = $return_note_shipments_data->get();
+                foreach ($return_note_shipments_data as $return_note_shipment) {
+
+                    $shipper_info = UserShippingInfo::where('user_id',$return_note_shipment->user_id)->first();
+
+                    $total_shipments = $return_note_shipment->count;
+                    $shipper_name = $shipper_info->user->name;
+                    $shipper_id = $shipper_info->id;
+                    $shipper_poc = $shipper_info->poc;
+                    $shipper_address = $shipper_info->pickup_address;
+                    $phone = $shipper_info->phone;
+                    $phone2 = $shipper_info->phone2;
+                    ($phone2 != null) ? $shipper_phone = $phone." | ".$phone2 : $shipper_phone = $phone;
+
+                    $deliveries = array();
+                    $deliveries['shipper_id'] = $shipper_id;
+                    $deliveries['shipper_name'] = $shipper_name;
+                    $deliveries['shipper_poc'] = $shipper_poc;
+                    $deliveries['shipper_address'] = $shipper_address;
+                    $deliveries['shipper_phone'] = $shipper_phone;
+                    $deliveries['total_shipments'] = $total_shipments;
+                    $deliveries['latitude'] = NULL;
+                    $deliveries['longitude'] = NULL;
+                    $shipper_lat = $shipper_info->location_latitude;
+                    $shipper_long = $shipper_info->location_longitude;
+                    if ($shipper_lat != null && $shipper_long != null) {
+                        $deliveries['latitude'] = (double)$shipper_lat;
+                        $deliveries['longitude'] = (double)$shipper_long;
+                    }
+                    $information['return_deliveries'][] = $deliveries;
+                }
+            }
+            $nodes[] = $information;
+        }
+        return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
+    }
+    return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
+}
+
+    public function return_summary_multiple_v2(Request $request)
+    {
+        $rider_id = $request->rider_id;
+
+        $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
+
+        if ($return_notes->exists()) {
+            $return_notes = $return_notes->get();
+
+            $nodes = array();
+
+            foreach ($return_notes as $return_note) {
+                $information = array();
+
+                $information['return_note_id'] = $return_note->id;
+                $information['assigned_date'] = $return_note->created_at->toDateTimeString();
+                $information['no_of_parcels'] = $return_note->shipments_count;
+                $information['summary'] = array();
+                $total_shipments = $return_note->shipments_count;
+                $information['summary']['deliveries'] = $total_shipments;
+                $information['summary']['completed'] = array();
+
+                $information['summary']['completed']['pending'] = $return_note->return_note_shipments->where('status', 0)->count('shipment_id');
+                $information['summary']['completed']['undelivered'] = $return_note->return_note_shipments->where('status', 2)->count('shipment_id');
+                $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
+
+                $information['summary']['requests'] = array();
+                $information['summary']['requests']['complains'] = 0;
+                $information['summary']['requests']['service_requests'] = 0;
+                $information['summary']['requests']['claims'] = 0;
+
+                $information['return_deliveries'] = array();
+                $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
+                foreach ($return_note_shipments as $return_note_shipment) {
+
+                    $shipment_data = $return_note_shipment->shipment;
+                    $pickup_address = $shipment_data->pickup_address;
+
+                    $shipment_id = $shipment_data->id;
+                    $tracking_number = $shipment_data->tracking_number;
+                    $shipper_name = $pickup_address->user->name;
+                    $shipper_id = $shipment_data->user_id;
+                    $shipper_poc = $pickup_address->poc;
+                    $shipper_address = $pickup_address->pickup_address;
+                    $shipper_phone = $pickup_address->phone;
+                    $special_instructions = $shipment_data->special_instructions;
+                    $remarks = '';
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment_data->id)->where('remarks', '!=', null)->select('remarks');
+                    if ($journey->exists()) {
+                        $journey = $journey->orderBy('id', 'DESC')->first();
+                        $remarks = $journey->remarks;
+                    }
+                    $rider_return_deliveries = RiderReturnDelivery::where('return_note_id', $return_note->id)->where('shipment_id', $shipment_id);
+                    if ($rider_return_deliveries->exists()) {
+                        $rider_return_deliveries = $rider_return_deliveries->first();
+                        if ($rider_return_deliveries->delivered_status == 0) {
+                            $status = 3;
+                        } else if ($rider_return_deliveries->delivered_status == 1) {
+                            $status = 2;
+                        }
+                    } else {
+                        $status = 1;
+                    }
+
+                    $deliveries = array();
+                    $deliveries['shipment_id'] = $shipment_id;
+                    $deliveries['tracking_number'] = $tracking_number;
+                    $deliveries['consignee_name'] = $shipper_name;
+                    $deliveries['consignee_id'] = $shipper_id;
+                    $deliveries['consignee_poc'] = $shipper_poc;
+                    $deliveries['consignee_address'] = $shipper_address;
+                    $deliveries['consignee_phone'] = $shipper_phone;
+                    $deliveries['special_instructions'] = $special_instructions;
+                    $deliveries['remarks'] = $remarks;
+                    $deliveries['latitude'] = NULL;
+                    $deliveries['longitude'] = NULL;
+                    $deliveries['status'] = $status;
+                    $shipper_lat = $pickup_address->location_latitude;
+                    $shipper_long = $pickup_address->location_longitude;
+                    if ($shipper_lat != null && $shipper_long != null) {
+                        $deliveries['latitude'] = $shipper_lat;
+                        $deliveries['longitude'] = $shipper_long;
+                    }
+                    if (CrmRequest::where('shipment_id', $shipment_data->id)->whereIn('case_nature_id', [1, 2, 4])->whereNotIn('status_id', [3, 4])->exists()) {
+                        $deliveries['request'] = array();
+                        $crm_request = CrmRequest::where('shipment_id', $shipment_data->id)->where('case_nature_id', '!=', 3)->latest()->first();
+                        $deliveries['request']['id'] = $crm_request->id;
+
+                        if ($crm_request->case_nature_id == 1) {
+                            $information['summary']['requests']['complains']++;
+                            $deliveries['ordering'] = 1;
+                            $deliveries['request']['type'] = 1;
+                        } else if ($crm_request->case_nature_id == 2) {
+                            $information['summary']['requests']['service_requests']++;
+                            $deliveries['ordering'] = 2;
+                            $deliveries['request']['type'] = 2;
+                        } else if ($crm_request->case_nature_id == 4) {
+                            $information['summary']['requests']['claims']++;
+                            $deliveries['ordering'] = 3;
+                            $deliveries['request']['type'] = 4;
+                        } else {
+                            $deliveries['ordering'] = 4;
+                        }
+
+                        $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
+                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['comments'] = array();
+
+                        $crm_request_comments = $crm_request->comments->where('comment_type', 2);
+                        if (count($crm_request_comments) > 0) {
+                            foreach ($crm_request_comments as $crm_request_comment) {
+                                if ($crm_request_comment->comment_by == 0) {
+                                    $comments = array();
+                                    $comments['name'] = Admin::find($crm_request_comment->comment_by_id)->name;
+                                    $comments['comment'] = $crm_request_comment->comment;
+                                    $comments['type'] = 'Admin';
+                                    $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
+                                    $deliveries['request']['comments'][] = $comments;
+                                } else if ($crm_request_comment->comment_by == 2) {
+                                    $comments = array();
+                                    $comments['name'] = Rider::find($crm_request_comment->comment_by_id)->name;
+                                    $comments['comment'] = $crm_request_comment->comment;
+                                    $comments['type'] = 'Rider';
+                                    $comments['commented_at'] = Carbon::parse($crm_request_comment->created_at)->format('Y-m-d H:i:s');
+                                    $deliveries['request']['comments'][] = $comments;
+                                }
+                            }
+                        }
+
+                    } else {
+                        $deliveries['ordering'] = 4;
+                    }
+
+                    $information['return_deliveries'][] = $deliveries;
+                }
+
+                usort($information['return_deliveries'], function ($a, $b) {
+                    return $a['ordering'] <=> $b['ordering'];
+                });
+
+                $nodes[] = $information;
+            }
+            return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
+        }
+        return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
     }
 
 
