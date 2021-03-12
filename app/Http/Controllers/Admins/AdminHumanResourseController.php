@@ -46,7 +46,15 @@ class AdminHumanResourseController extends Controller
             // $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
 
         if(count($assigned_hubs)>0){
-            $riders = Rider::where('status',1)->where('rider_type_id',1)->whereIn('city_id', $assigned_hubs)->get();
+            // $riders = Rider::where('status',1)->where('rider_type_id',1)->whereIn('city_id', $assigned_hubs)->get();
+
+            $riders = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+           ->select('c.name as hub','riders.id','riders.name', 'riders.trax_id' ,'riders.phone','riders.cnic','riders.created_at as created_at')
+           ->where('rider_type_id',1)
+           ->whereIn('city_id', $assigned_hubs)->get();
+
+
             $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
 
             $users = array();
