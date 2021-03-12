@@ -22,9 +22,9 @@
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Trax ID</th>
                                         <th class="border-primary border-darken-1">Name</th>
-                                        <th class="border-primary border-darken-1">Cnic</th>
-                                        <th class="border-primary border-darken-1">Phone#</th>
-                                        <th class="border-primary border-darken-1">Role</th>
+                                        <th class="border-primary border-darken-1">CNIC</th>
+                                        <th class="border-primary border-darken-1">Phone No.</th>
+                                        <th class="border-primary border-darken-1">Employee Role</th>
                                         <th class="border-primary border-darken-1">Created at</th>
                                     </tr>
                                 </thead>
@@ -81,9 +81,9 @@
                             head.push('S. No');
                             head.push('Trax ID');
                             head.push('Name');
-                            head.push('Cnic');
-                            head.push('Phone#');
-                            head.push('Role');
+                            head.push('CNIC');
+                            head.push('Phone No.');
+                            head.push('Employee Role');
                             head.push('Created at');
                             $.each(result.data, function(index, values) {
                                 if(values.id!=null){
@@ -95,12 +95,7 @@
                                 row.push(values.cnic);
                                 row.push(values.phone);
                                 row.push(values.role);
-                                if(values.created_at){
-                                row.push(values.created_at.date);    
-                                }else{
-
-                                    row.push(values.created_at);    
-                                }
+                                row.push(values.created_at);
                                 body.push(row);
                             }
 
@@ -124,7 +119,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'All Users List',
+                        title: 'All Employees List',
                         text: '<i class="la la-file-excel-o"></i> Excel',
 
                     },
