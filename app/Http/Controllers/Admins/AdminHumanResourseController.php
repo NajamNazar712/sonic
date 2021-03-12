@@ -9,38 +9,104 @@ use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
+use Auth;
+
 class AdminHumanResourseController extends Controller
 {
     //
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:admin');
         $this->middleware('Permission');
     }
 
-    public function download_docs(){
+    public function download_docs()
+    {
         return view('admin.human_resource.download_docs');
     }
 
-    public function allusers(){
+    public function allusers()
+    {
 
-        $riders = Rider::where('status',1)->get();
-        $admins = Admin::where('status',1)->get();
-       
-        return view('admin.human_resource.allusers')->with(['riders'=>$riders,'admins'=>$admins]);
-
+        // $riders = Rider::where('status', 1)->get();
+        //         $admins = Admin::where('status', 1)->get();
+        $roles=['Admin','Rider'];
+        $roles = collect($roles);
+        return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
 
-    public function all_riders(){
 
-        $data = Rider::where('status',1)->select('name', 'cnic','phone','address','created_at')->get();
-            return Datatables::of($data)
-                    ->make(true);
-    }
+    public function all_user_ajax()
+    {
 
-    public function all_admins(){
+        $assigned_hubs = session('hubs');
+        // if(session('role_id') != 1){
+        if(count($assigned_hubs)>0){
+            // $riders = Rider::where('status',1)->where('rider_type_id',1)->whereIn('city_id', $assigned_hubs)->get();
+            $riders = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+           ->select('c.name as hub','riders.id','riders.name', 'riders.trax_id' ,'riders.phone','riders.cnic','riders.created_at as created_at')
+           ->where('rider_type_id',1)
+           ->whereIn('cities.hub_id', $assigned_hubs)->get();
 
-        $data = Admin::where('status',1)->select('name', 'email','phone_number','cnic','designation','created_at')->get();
-            return Datatables::of($data)
-                    ->make(true);
+
+            $admins = Admin::whereIn('default_hub_id', $assigned_hubs)->where('status', 1)->get();
+
+            $users = array();
+            if (count($riders) > 0) {
+                foreach ($riders as $rider) {
+                    $user = array();
+                    $user['id'] = $rider->id;
+                    $user['name'] = $rider->name;
+                    $user['cnic'] = $rider->cnic;
+                    $user['phone'] = $rider->phone;
+                    $user['trax_id'] = $rider->trax_id;
+                    $user['role'] = 'Rider';
+                    if($rider->created_at){
+                        $user['created_at'] = date_format($rider->created_at,"Y/m/d H:i:s");
+                    }else{
+                        $user['created_at'] = $rider->created_at;
+                    }
+                    $users[] = $user;
+                    $users = collect($users);
+                }
+            }
+            if (count($admins) > 0) {
+                foreach ($admins as $admin) {
+                    $user = array();
+                    $user['id'] = $admin->id;
+                    $user['name'] = $admin->name;
+                    $user['cnic'] = $admin->cnic;
+                    $user['phone'] = $admin->phone_number;
+                    $user['trax_id'] = $admin->trax_id;
+                    $user['role'] = 'Admin';
+                    if($admin->created_at){
+                        $user['created_at'] = date_format($admin->created_at,"Y/m/d H:i:s");
+                    }else{
+                        $user['created_at'] = $admin->created_at;
+                    }
+                    
+                    $users[] = $user;
+                    $users = collect($users);
+                }
+            }
+    
+            return Datatables::of($users)
+            ->make(true);  
+        }else{
+            $user = array();
+            $user['id'] = NULL;
+            $user['name'] = '';
+            $user['cnic'] = '';
+            $user['phone'] = '';
+            $user['trax_id'] = '';
+            $user['role'] = '';
+            $user['created_at'] = '';
+            $users[] = $user;
+            $users = collect($users);
+            return Datatables::of($users)
+            ->make(true);  
+        }
+      
     }
 }

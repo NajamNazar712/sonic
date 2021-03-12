@@ -878,6 +878,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+
                     if (data.status == 0) {
                         $('#territory').empty();
                         $.each(data.territory, function (key, value) {
@@ -894,6 +895,11 @@
                             containerId: 'toast-top-center'
                         });
                     }
+                    @if($lead != null)
+                    @if($lead->territory_id != null)
+                    $('select[name="territory_id"]').val({{$lead->territory_id}}).trigger('change');
+                    @endif
+                    @endif
                 });
             }
 

@@ -919,6 +919,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
+			Route::post('operation_riders','Admins\DeliveryController@operation_riders')->name('operation_riders');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -1415,6 +1416,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('update/{id}')->name('update.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_update_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@user_update_store')->name('store');
+            });
+        });
+
+        Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
+            Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
+            Route::get('list', 'Admins\Fuel\FuelManagementController@fuel_list')->name('list');
+            Route::get('request', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
+            Route::post('request', 'Admins\Fuel\FuelManagementController@request_store')->name('store');
+            Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
+            Route::post('request/edit', 'Admins\Fuel\FuelManagementController@request_edit')->name('edit');
+            Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\Fuel\FuelManagementController@request_history')->name('index');
             });
         });
 
@@ -2714,10 +2728,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
         
         Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
-        Route::get('all_riders', 'Admins\AdminHumanResourseController@all_riders')->name('all_riders');
-        Route::get('all_admins', 'Admins\AdminHumanResourseController@all_admins')->name('all_admins');
-        // Route::post('all_riders/ajax', 'Admins\AdminHumanResourseController@allriders_ajax')->name('allriders.ajax');
-        
+        Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
     });

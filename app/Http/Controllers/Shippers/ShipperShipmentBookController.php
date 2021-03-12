@@ -580,6 +580,7 @@ class ShipperShipmentBookController extends Controller
                     $business_category_id = 1;
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
+
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -765,6 +766,7 @@ class ShipperShipmentBookController extends Controller
                             $this->cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $descriptions, $amounts);
                         }
                     }
+                   
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
