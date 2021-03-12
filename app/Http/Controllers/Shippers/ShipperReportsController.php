@@ -567,7 +567,7 @@ class ShipperReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sjrr', function ($join) use($connection) {
                 $join->on('sjrr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+//                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
                     ->where('sjrr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
             })
