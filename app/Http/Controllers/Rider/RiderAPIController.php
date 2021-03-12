@@ -4184,6 +4184,23 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
     }
 
+    public function rider_profile(Request $request)
+    {
+        $rider_id = $request->rider_id;
+
+        $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
+            ->join('cities as c', 'c.id', '=', 'riders.city_id')
+            ->join('cities as h', 'h.id', '=', 'c.hub_id')
+            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category')
+            ->where('riders.id', $rider_id);
+        if ($rider_profile->exists()) {
+            $rider_profile = $rider_profile->get();
+            return response()->json(['status' => 0, 'rider' => $rider_profile]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Rider Profile Not Found"]);
+        }
+    }
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
