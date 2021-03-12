@@ -8787,33 +8787,18 @@ class AdminFinanceController extends Controller
         $serial_number = 1;
 
         $total_collection_amount = 0;
-        $total_weight_charges = 0;
-        $total_cash_handling_charges = 0;
-        $total_insurance_charges = 0;
-        $total_replacement_charges = 0;
-        $total_try_and_buy_charges = 0;
-        $total_return_charges = 0;
-        $total_packing_charges = 0;
-        $total_packaging_material_charges = 0;
-        $total_fuel_surcharge = 0;
-        $total_intercept_charges = 0;
-        $total_nsa_osa_charges = 0;
-        $total_gst = 0;
-        $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
             $shipment_weight = $shipment->actual_weight;
-            $weight_charges = $shipment->weight_charges;
 
             if($done_payment_shipment->type != 2){
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if($change_shipment_weight_log->exists()){
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
                     $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
                 }
             }
 
@@ -8831,18 +8816,12 @@ class AdminFinanceController extends Controller
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
                               <td>' . $type . '</td>
-                              <td>' . $shipment->order_id . '</td>
-                              <td>' . (($pickup_address->vendor) ? $pickup_address->vendor : '') . '</td>
                               <td>' . $pickup_address->city->name . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . $shipment->shipping_mode->mode . '</td>
+                              <td>' . $shipment->retail->shipping_modes->name . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
-                              <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment_weight   . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
             ';
@@ -8854,26 +8833,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->charges != 0) {
                         if ($done_payment_shipment->type == 0) {
                             $total_collection_amount += $done_payment_shipment->amount;
-                            $total_cash_handling_charges += $shipment->cash_handling_charges;
-                            $total_replacement_charges += $shipment->replacement_charges;
-                            $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                         }
-                        else {
-                            $total_return_charges += $shipment->return_charges;
-                        }
-
-                        $total_weight_charges += $weight_charges;
-
-                        if ($shipment->packaging_material_request) {
-                            $total_packaging_material_charges += $shipment->packaging_material_charges;
-                        }
-                        if($shipment->packaging_charges != null){
-                            $total_packing_charges += $shipment->packaging_charges;
-                        }
-                        $total_insurance_charges += $shipment->insurance_charges;
-                        $total_fuel_surcharge += $shipment->fuel_surcharge;
-                        $total_intercept_charges += $shipment->intercept_charges;
-                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -8883,8 +8843,6 @@ class AdminFinanceController extends Controller
                     $total_adjustments += $done_payment_shipment->payable;
                 }
 
-                $total_gst += $done_payment_shipment->gst;
-                $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
             }
             else {
@@ -8904,9 +8862,6 @@ class AdminFinanceController extends Controller
                                 <td colspan="10"></td>
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
                             </tr>
       ';
@@ -8929,18 +8884,12 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>S. No.</strong></td>
                               <td class="color primary"><strong>Tracking No.</strong></td>
                               <td class="color primary"><strong>Type</strong></td>
-                              <td class="color primary"><strong>Order ID</strong></td>
-                              <td class="color primary"><strong>Vendor</strong></td>
                               <td class="color primary"><strong>Origin</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Shipping Mode</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
-                              <td class="color primary"><strong>Service Type</strong></td>
                               <td class="color primary"><strong>Weight (kg)</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
-                              <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
-                              <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
-                              <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
                             </tr>
       ';
@@ -8959,58 +8908,6 @@ class AdminFinanceController extends Controller
                                         <td class="color primary" colspan="2"><strong>Charges Summary (PKR)</strong></td>
                                     </tr>
                                     <tr>
-                                        <td class="color secondary"><strong>Total Weight Charges</strong></td>
-                                        <td>' . number_format($total_weight_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
-                                        <td>' . number_format($total_cash_handling_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Insurance Charges</strong></td>
-                                        <td>' . number_format($total_insurance_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Replacement Charges</strong></td>
-                                        <td>' . number_format($total_replacement_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Try & Buy Charges</strong></td>
-                                        <td>' . number_format($total_try_and_buy_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Return Charges</strong></td>
-                                        <td>' . number_format($total_return_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
-                                        <td>' . number_format($total_fuel_surcharge, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Intercept Charges</strong></td>
-                                        <td>' . number_format($total_intercept_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total OSA Charges</strong></td>
-                                        <td>' . number_format($total_nsa_osa_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
-                                        <td class="color secondary">' . number_format(($total_charges - $total_packaging_material_charges), 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total GST</strong></td>
-                                        <td class="color secondary">' . number_format($total_gst, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Packing Charges</strong></td>
-                                        <td>' . number_format($total_packing_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
-                                        <td>' . number_format($total_packaging_material_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
                                         <td class="color secondary"><strong>Total Adjustments</strong></td>
                                         <td class="color secondary">' . number_format($total_adjustments, 2) . '</td>
                                     </tr>
@@ -9020,7 +8917,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_collection_amount - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
