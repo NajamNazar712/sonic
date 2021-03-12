@@ -563,7 +563,7 @@ class ShipperReportsController extends Controller
             ->leftJoin('shipments_journey as dr', function ($join) use($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37) shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipments_journey as sjrr', function ($join) use($connection) {
                 $join->on('sjrr.shipment_id', '=', 'shipments.id')
