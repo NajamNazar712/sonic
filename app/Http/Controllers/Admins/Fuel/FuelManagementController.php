@@ -48,8 +48,7 @@ class FuelManagementController extends Controller
 
     public function fuel_list(Request $request)
     {
-        $requests = FuelCardRequest::where('card_number','!=', null)
-            ->leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
+        $requests = FuelCardRequest::leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
             ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')
             ->leftjoin('admins as requested_by','fuel_card_requests.requested_by','=','requested_by.id')
             ->leftjoin('admins as approved_by','fuel_card_requests.approved_by','=','approved_by.id')
@@ -70,13 +69,14 @@ class FuelManagementController extends Controller
                     ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
                     ->whereNotNull('fuel_card_requests.card_holder_id');
             })
+            ->where([['card_request_type_id',1],['fuel_card_requests.status',0]])
+            ->orwhere([['card_number','!=',null],['card_request_type_id',1]])
+            ->orwhere([['card_number','!=',null],['card_request_type_id',2]])
+            ->orWhere([['card_number','!=',null],['card_request_type_id',3]])
+            ->orWhere([['card_number','!=',null],['card_request_type_id',4]])
+//            ->whereIn('fuel_card_requests.id',DB::raw("SELECT id FROM fuel_card_requests WHERE NOT ('card_number', 'card_request_type_id') IN ((null, 1)"))
             ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.fuel_request_id as fuel_request_id_for_excel','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','fuel_card_requests.updated_at as updated_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
-
-//        if($card_holder = $request->get('card_holder')){
-//
-//            $requests->where('fuel_card_requests.card_holder', $card_holder);
-//        }
-
+        
         if($request->get('card_number') && $request->get('card_number') != ''){
             $card_number = explode(',',$request->get('card_number'));
             $requests->where(function ($subquery) use($card_number) {
