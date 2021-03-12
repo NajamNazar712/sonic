@@ -4079,6 +4079,7 @@ class RiderAPIController extends Controller
                     $tracking_number = $shipment_data->tracking_number;
                     $shipper_name = $pickup_address->user->name;
                     $shipper_id = $shipment_data->user_id;
+                    $shipper_address_id = $shipment_data->pickup_address_id;
                     $shipper_poc = $pickup_address->poc;
                     $shipper_address = $pickup_address->pickup_address;
                     $shipper_phone = $pickup_address->phone;
@@ -4106,6 +4107,7 @@ class RiderAPIController extends Controller
                     $deliveries['tracking_number'] = $tracking_number;
                     $deliveries['consignee_name'] = $shipper_name;
                     $deliveries['consignee_id'] = $shipper_id;
+                    $deliveries['consignee_address_id'] = $shipper_address_id;
                     $deliveries['consignee_poc'] = $shipper_poc;
                     $deliveries['consignee_address'] = $shipper_address;
                     $deliveries['consignee_phone'] = $shipper_phone;
