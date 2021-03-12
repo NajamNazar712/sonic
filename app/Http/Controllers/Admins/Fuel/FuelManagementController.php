@@ -48,7 +48,8 @@ class FuelManagementController extends Controller
 
     public function fuel_list(Request $request)
     {
-        $requests = FuelCardRequest::leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
+        $requests = FuelCardRequest::where('card_number','!=', null)
+            ->leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
             ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')
             ->leftjoin('admins as requested_by','fuel_card_requests.requested_by','=','requested_by.id')
             ->leftjoin('admins as approved_by','fuel_card_requests.approved_by','=','approved_by.id')
@@ -146,7 +147,7 @@ class FuelManagementController extends Controller
             })
             ->addColumn('action',function ($fuel_card) {
                 if (session('role_id') == 1 || count(array_intersect([448, 450], session('permissions'))) !== 0) {
-                    if(($fuel_card->status == 0 && count(array_intersect([448], session('permissions'))) !== 0) || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null) && (count(array_intersect([450], session('permissions'))) !== 0))) {
+                    if(($fuel_card->status == 0 && (count(array_intersect([448], session('permissions'))) !== 0 || session('role_id') == 1)) || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null) && (count(array_intersect([450], session('permissions'))) !== 0 || session('role_id') == 1))) {
                         $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
