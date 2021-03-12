@@ -622,7 +622,8 @@ class RiderManagementController extends Controller
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
         $route = Route::all();
-        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city]);
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function rider_request_list(Request $request)
@@ -674,7 +675,8 @@ class RiderManagementController extends Controller
             'rider_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_request_id' => 'required',
-            'rider_type' => "required|numeric"
+            'rider_type' => "required|numeric",
+            'category' => "required|numeric"
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -707,7 +709,8 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
-            'rider_type_id'  => $request->rider_type
+            'rider_type_id'  => $request->rider_type,
+            'operation_rider_id'  => $request->category
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
