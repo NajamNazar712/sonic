@@ -8917,11 +8917,11 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_collection_amount - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
-                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
+                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab & KPK</span>
                             </div>
                         </div>
                       </div>
