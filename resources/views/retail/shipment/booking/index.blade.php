@@ -373,6 +373,7 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if(id === 1){
+                    $('#cod_check').addClass('d-none');
                     $('#domestic_overland_destination_div').removeClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     overland = true;
@@ -583,7 +584,13 @@
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
+                                else if($('#shipping_mode').val() != 3){
+                                    $('#iban_no').removeClass('required');
+                                    $('#account_no').removeClass('required');
+                                    $('#bank').removeClass('required');
+                                }
                                 else{
+
                                     $('#account_details').removeClass('d-none');
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
