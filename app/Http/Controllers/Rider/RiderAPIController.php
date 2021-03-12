@@ -3166,12 +3166,12 @@ class RiderAPIController extends Controller
             } else if ($request->has('return_note_id')) {
                 $return_note_id = $request->return_note_id;
                 $shipment_details = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
-                    ->leftjoin('shipments_journey', function ($join) {
+                    ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
                                 DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23 and shipments_journey.rider_id is not null)'));
                     })
-                    ->leftjoin('rider_return_deliveries', function ($join) {
+                    ->join('rider_return_deliveries', function ($join) {
                         $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
                             ->where('rider_return_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
