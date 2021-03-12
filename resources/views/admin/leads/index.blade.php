@@ -145,6 +145,8 @@
                         <th class="border-primary border-darken-1">Lead ID</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Territory</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Message</th>
@@ -526,6 +528,8 @@
                             head.push('Lead ID');
                             head.push('Contact Person');
                             head.push('City');
+                            head.push('Territory');
+                            head.push('Area');
                             head.push('Phone No');
                             head.push('Email Address');
                             head.push('Message');
@@ -546,6 +550,8 @@
                                 row.push(values.lead_id);
                                 row.push(values.contact_person);
                                 row.push(values.city);
+                                row.push(values.territory);
+                                row.push(values.area);
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.message);
@@ -672,13 +678,15 @@
                     }
                 },
                 rowId: 'lead_id',
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'lead_id', name: 'leads.id', class: 'align-middle lead_id'},
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'territory', name: 't.name', class: 'align-middle territory'},
+                    {data: 'area', name: 'at.name', class: 'align-middle area'},
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},

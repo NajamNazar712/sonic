@@ -66,19 +66,18 @@
         $(document).ready(function() {
 
             function track(fuel_request_id) {
-                $.ajax({
+                    $.ajax({
                     url: '{!! route('admin.user_management.fuel_management.history.index') !!}',
                     method: 'GET',
                     data: {
                         'fuel_request_id': fuel_request_id,
                     }
-                })
+                    })
                     .done(function (data) {
 
                         $('#history').html('');
 
-                        if (data.status == 1)
-                        {
+                        if (data.status == 1) {
                             html = '';
                             html += `<div class="mt-4 border-primary">
                                 <div class="d-flex flex-wrap align-items-center bg-primary">
@@ -94,19 +93,14 @@
                                                         <tr>
                                                             <td><strong>Card Number</strong></td><td>${data.request.card_number}</td>
                                                             <td><strong>Card Holder Name</strong></td><td>`
-                                if(data.request.card_holder_type_id == 1)
-                                {
-                                    html += data.request.staff_name
-                                }
-                                else if(data.request.card_holder_type_id == 2)
-                                {
-                                    html += data.request.rider_name
-                                }
-                                else if(data.request.card_holder_type_id == 3)
-                                {
-                                    html += data.request.fleet_name
-                                }
-                                html += `</td>
+                            if (data.request.card_holder_type_id == 1) {
+                                html += data.request.staff_name
+                            } else if (data.request.card_holder_type_id == 2) {
+                                html += data.request.rider_name
+                            } else if (data.request.card_holder_type_id == 3) {
+                                html += data.request.fleet_name
+                            }
+                            html += `</td>
                                                             <td><strong>Card Holder Type</strong></td><td>${data.request.card_holder_type}</td>
                                                         </tr>
                                                         <tr>
@@ -127,7 +121,7 @@
                                             <h4><u>Request History</u></h4>
                                             <div class="border table-responsive">
                                                 <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                                                    <table class="table table-sm table-borderless request_history no-footer" id="DataTables_Table_0" role="grid">
+                                                    <table class="table table-sm table-borderless request_history no-footer" id="datatable_history" role="grid">
                                                         <thead>
                                                             <tr role="row">
                                                                 <th class="align-middle date_time"><strong>Date / Time</strong></th>
@@ -137,17 +131,17 @@
                                                         </thead>
                                                         <tbody>`;
 
-                             $.each(data.logs, function (i,v) {
-                                 html += `
+                            $.each(data.logs, function (i, v) {
+                                html += `
                                         <tr>
                                             <td>${v['created_at']}</td>
                                             <td>${v['action']}</td>
                                             <td>${v['approved_by']}</td>
                                         </tr>
                                  `;
-                             });
+                            });
 
-                            html +=                        `</tbody>
+                            html += `</tbody>
                                                     </table>
                                                 </div>
                                             </div>
@@ -158,15 +152,20 @@
 
                             $('#history').html(html);
 
-                        }
-                        else
-                        {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+
+                            $('#history table#datatable_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'action_performed', class: 'align-middle action_performed'},
+                                    {name: 'performed_by', class: 'align-middle performed_by'},
+                                ]
                             });
                         }
                     });
+
             }
 
             @if (app('request')->has('fuel_request_id'))

@@ -133,6 +133,7 @@
                                     <option value="{{ $card_holder_type->id }}" > {{ $card_holder_type->name }} </option>
                                 @endforeach
                             </select>
+                            <span class="text-danger text-sm-left my_error" id="card_holder_type_error"></span>
                         </div>
 
                         <div class="form-group text-center" id="fleet_vehicle_type_container">
@@ -141,6 +142,7 @@
                                     <option value="{{ $vehicle_type->id }}" > {{ $vehicle_type->name }} </option>
                                 @endforeach
                             </select>
+                            <span class="text-danger text-sm-left my_error" id="fleet_vehicle_type_error"></span>
                         </div>
                     </div>
                 </div>
@@ -173,11 +175,13 @@
                                             <option value="{{ $card_request_type->id }}" > {{ $card_request_type->name }} </option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger text-sm-left my_error" id="card_request_type_error"></span>
                                 </fieldset>
                             </div>
                             <div class="col-8 all_request_type reassign_request_type block_request_type unblock_request_type">
                                 <fieldset class="form-group">
                                     <input type="text" class="form-control" name="card_number" id="search_card_number_input"  placeholder="Search Card Number">
+                                    <span class="text-danger text-sm-left my_error" id="search_card_number_input_error"></span>
                                 </fieldset>
                             </div>
                             <div class="col-4 all_request_type reassign_request_type block_request_type unblock_request_type">
@@ -210,12 +214,13 @@
                                 <fieldset class="form-group" id="card_holder_select_container">
 
                                 </fieldset>
+                                <span class="text-danger text-sm-left my_error" id="card_holder_error"></span>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" id="fuel_card_request_btn" class="btn btn-success">Submit</button>
-                        <button type="button" onclick="$('#FuelRequestModal').modal('hide');$('#FuelCardHolderTypeSelectModal').modal('show');" class="btn btn-danger">Back</button>
+                        <button type="button" onclick="$('#FuelRequestModal').modal('hide');$('#FuelCardHolderTypeSelectModal').modal('show');$('.my_error').html('');" class="btn btn-danger">Back</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
@@ -292,6 +297,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -426,6 +432,7 @@
                     action: function (e, dt, node, config) {
                         $('#card_holder_type').val('')
                         $('#card_holder_type').trigger('change');
+                        $('.my_error').html("");
                         $('#FuelCardHolderTypeSelectModal').modal('show');
                     }
 
@@ -483,7 +490,7 @@
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'approved_at', name: 'approved_at', class: 'align-middle approved_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
-                    {data: 'card_status', name: 'card_status', class: 'align-middle card_status'},
+                    {data: 'card_status', orderable: false, name: 'card_status', class: 'align-middle card_status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -666,17 +673,21 @@
                     var fleet_vehicle_type = $('#fleet_vehicle_type').val();
                     if(card_holder_type == '')
                     {
-                        toastr.error('Please Select Card Holder Type', 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
+                        $('.my_error').html("");
+                        $('#FuelCardHolderTypeSelectModal #card_holder_type_error').html('Please Select Card Holder Type');
+                        // toastr.error('Please Select Card Holder Type', 'Error!', {
+                        //     positionClass: 'toast-top-center',
+                        //     containerId: 'toast-top-center'
+                        // });
                         return;
                     }
                     if(card_holder_type == 3 && fleet_vehicle_type == '') {
-                        toastr.error('Please Select Fleet Vehicle Type', 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
+                        $('.my_error').html("");
+                        $('#FuelCardHolderTypeSelectModal #fleet_vehicle_type_error').html('Please Select Fleet Vehicle Type');
+                        // toastr.error('Please Select Fleet Vehicle Type', 'Error!', {
+                        //     positionClass: 'toast-top-center',
+                        //     containerId: 'toast-top-center'
+                        // });
                         return;
                     }
 
@@ -709,12 +720,15 @@
                                 });
                                 $('#card_request_type').val('');
                                 $('#card_request_type').trigger('change');
+                                $('.my_error').html("");
                                 $('#FuelRequestModal').modal('show');
                             } else {
-                                toastr.error(response.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
+                                $('.my_error').html("");
+                                $('#FuelCardHolderTypeSelectModal #card_holder_type_error').html(response.error);
+                                // toastr.error(, 'Error!', {
+                                //     positionClass: 'toast-top-center',
+                                //     containerId: 'toast-top-center'
+                                // });
                             }
                         });
 
@@ -733,6 +747,7 @@
             });
 
             $('#card_request_type').on('change',function () {
+                $('.my_error').html("");
                 $('#FuelRequestModal .modal-body input[type=text]').each(function (i,v) {
                     $(v).val('');
                 });
@@ -787,10 +802,12 @@
                 }
                 if(card_number == '')
                 {
-                    toastr.error('Please Enter a Valid Card Number', 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
+                    $('.my_error').html("");
+                    $('#search_card_number_input_error').html("Please Enter a Valid Card Number")
+                    // toastr.error('Please Enter a Valid Card Number', 'Error!', {
+                    //     positionClass: 'toast-top-center',
+                    //     containerId: 'toast-top-center'
+                    // });
                     return;
                 }
                 $.ajax({
@@ -830,10 +847,12 @@
                         } else {
                             $('#FuelRequestModal #card_request_id').val('');
                             $('#FuelRequestModal table tbody').html('');
-                            toastr.error(response.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
+                            $('.my_error').html("");
+                            $('#search_card_number_input_error').html(response.error);
+                            // toastr.error(response.error, 'Error!', {
+                            //     positionClass: 'toast-top-center',
+                            //     containerId: 'toast-top-center'
+                            // });
                         }
                     });
             });
@@ -846,10 +865,12 @@
                 console.log()
                 if(card_request_type == '')
                 {
-                    toastr.error('Please Select Card Request Type', 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
+                    $('.my_error').html("");
+                    $('#card_request_type_error').html("Please Select Card Request Type");
+                    // toastr.error('Please Select Card Request Type', 'Error!', {
+                    //     positionClass: 'toast-top-center',
+                    //     containerId: 'toast-top-center'
+                    // });
                     e.preventDefault();
                     return;
                 }
@@ -857,10 +878,12 @@
                 if(card_request_type != 1)
                 {
                     if(card_request_id == '') {
-                        toastr.error('Please Enter a Valid Card Number', 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
+                        $('.my_error').html("");
+                        $('#search_card_number_input_error').html("Please Enter a Valid Card Number")
+                        // toastr.error('Please Enter a Valid Card Number', 'Error!', {
+                        //     positionClass: 'toast-top-center',
+                        //     containerId: 'toast-top-center'
+                        // });
                         e.preventDefault();
                         return;
                     }
@@ -869,10 +892,12 @@
                 if(card_request_type == 1 || card_request_type == 2)
                 {
                     if(card_holder == '') {
-                        toastr.error('Please Select Card Holder', 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
+                        $('.my_error').html("");
+                        $('#card_holder_error').html("Please Select Card Holder");
+                        // toastr.error('Please Select Card Holder', 'Error!', {
+                        //     positionClass: 'toast-top-center',
+                        //     containerId: 'toast-top-center'
+                        // });
                         e.preventDefault();
                         return;
                     }
@@ -897,6 +922,7 @@
                     $('#request_id').val(request_id);
                     $('#ApproveModal #fuel_request_approve_form').attr('action',url);
                     $('#ApproveModal .modal-title').html(heading);
+                    $('.my_error').html("");
                     $('#ApproveModal').modal('show');
                 }
 
@@ -946,6 +972,7 @@
                     $('#request_id').val(request_id);
                     $('#ApproveModal #fuel_request_approve_form').attr('action',url);
                     $('#ApproveModal .modal-title').html(heading);
+                    $('.my_error').html("");
                     $('#ApproveModal').modal('show');
                 }
             });

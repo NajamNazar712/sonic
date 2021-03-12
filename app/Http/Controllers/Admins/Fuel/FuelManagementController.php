@@ -76,7 +76,7 @@ class FuelManagementController extends Controller
 //            $requests->where('fuel_card_requests.card_holder', $card_holder);
 //        }
 
-        if($request->get('card_number')){
+        if($request->get('card_number') && $request->get('card_number') != ''){
             $card_number = explode(',',$request->get('card_number'));
             $requests->where(function ($subquery) use($card_number) {
                 for ($i = 0; $i < count($card_number); $i++){
@@ -85,16 +85,20 @@ class FuelManagementController extends Controller
             });
         }
 
-        if($card_holder = $request->get('staff_card_holder') && $request->get('staff_card_holder') != ''){
-            $requests->where('staff.name',$card_holder);
+
+        if($request->get('staff_card_holder') && $request->get('staff_card_holder') != ''){
+            $staff_card_holder = $request->get('staff_card_holder');
+            $requests->where('staff.name','like',"%".$staff_card_holder."%");
         }
 
-        if($card_holder = $request->get('rider_card_holder') && $request->get('rider_card_holder') != ''){
-            $requests->where('rider.name',$card_holder);
+        if($request->get('rider_card_holder') && $request->get('rider_card_holder') != ''){
+            $rider_card_holder = $request->get('rider_card_holder');
+            $requests->where('rider.name',$rider_card_holder);
         }
 
-        if($card_holder = $request->get('fleet_card_holder') && $request->get('fleet_card_holder') != ''){
-            $requests->where('fleet.name',$card_holder);
+        if($request->get('fleet_card_holder') && $request->get('fleet_card_holder') != ''){
+            $fleet_card_holder = $request->get('fleet_card_holder');
+            $requests->where('fleet.name',$fleet_card_holder);
         }
 
         if ($request->get('aprroved_at_from') && $request->get('approved_at_to')) {
@@ -349,12 +353,22 @@ class FuelManagementController extends Controller
 
         if($card_request_type == 1) // New Request
         {
+            $previous_card = FuelCardRequest::where([['card_holder_id',$request->card_holder],['card_holder_type_id',$card_holder_type],['card_number','!=',null]]);
+            if($previous_card->exists())
+            {
+                return redirect()->back()->with(['error'=>'Card already assigned to this User']);
+            }
             $fuel_card_request_id = $this->create_request($request,$request->card_holder);
             $this->request_log($fuel_card_request_id,$card_request_type,$card_request_type);
             return redirect()->back()->with(['success'=>'New Card Request Created Successfully']);
         }
         else if($card_request_type == 2) // Reassign Request
         {
+            $previous_card = FuelCardRequest::where([['card_holder_id',$request->card_holder],['card_holder_type_id',$card_holder_type],['card_number','!=',null]]);
+            if($previous_card->exists())
+            {
+                return redirect()->back()->with(['error'=>'Card already assigned to this User']);
+            }
             $current_request = FuelCardRequest::find($request->card_request_id);
             if($current_request->exists())
             {
@@ -662,7 +676,7 @@ class FuelManagementController extends Controller
                 return response()->json(['status'=> 1,'request'=>$request,'logs'=>$logs_data]);
             }
             else{
-                return response()->json(['status' => 0, 'error' => 'Invalid Tracking Number']);
+                return response()->json(['status' => 0, 'error' => 'Invalid Fuel Request Id']);
             }
         }
         return view('admin.user_management.fuel.history');
