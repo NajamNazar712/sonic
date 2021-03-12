@@ -48,7 +48,8 @@ class FuelManagementController extends Controller
 
     public function fuel_list(Request $request)
     {
-        $requests = FuelCardRequest::leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
+        $requests = FuelCardRequest::where('removed',0)
+            ->leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
             ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')
             ->leftjoin('admins as requested_by','fuel_card_requests.requested_by','=','requested_by.id')
             ->leftjoin('admins as approved_by','fuel_card_requests.approved_by','=','approved_by.id')
@@ -69,14 +70,8 @@ class FuelManagementController extends Controller
                     ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
                     ->whereNotNull('fuel_card_requests.card_holder_id');
             })
-            ->where([['card_request_type_id',1],['fuel_card_requests.status',0]])
-            ->orwhere([['card_number','!=',null],['card_request_type_id',1]])
-            ->orwhere([['card_number','!=',null],['card_request_type_id',2]])
-            ->orWhere([['card_number','!=',null],['card_request_type_id',3]])
-            ->orWhere([['card_number','!=',null],['card_request_type_id',4]])
-//            ->whereIn('fuel_card_requests.id',DB::raw("SELECT id FROM fuel_card_requests WHERE NOT ('card_number', 'card_request_type_id') IN ((null, 1)"))
             ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.fuel_request_id as fuel_request_id_for_excel','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','fuel_card_requests.updated_at as updated_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
-        
+
         if($request->get('card_number') && $request->get('card_number') != ''){
             $card_number = explode(',',$request->get('card_number'));
             $requests->where(function ($subquery) use($card_number) {
@@ -246,7 +241,7 @@ class FuelManagementController extends Controller
 
     public function request_search_by_card(Request $request)
     {
-        $fuel_card_request = FuelCardRequest::where('card_number',$request->card_number);
+        $fuel_card_request = FuelCardRequest::where([['card_number',$request->card_number],['removed',0]]);
         if(!$fuel_card_request->exists())
         {
             return response()->json(['status' => 0, 'error' => 'Enter a valid Card Number']);
@@ -381,6 +376,7 @@ class FuelManagementController extends Controller
                 $current_request->fuel_type_id = null;
                 $current_request->fuel_Deduction_type_id = null;
                 $current_request->amount = null;
+                $current_request->removed = 1;
                 $current_request->update();
 
                 $fuel_card_request_id = $this->create_request($request,$request->card_holder,$card_number,$fuel_deduction_type,$fuel_type,$amount);
@@ -405,6 +401,7 @@ class FuelManagementController extends Controller
                 $current_request->fuel_type_id = null;
                 $current_request->fuel_Deduction_type_id = null;
                 $current_request->amount = null;
+                $current_request->removed = 1;
                 $current_request->update();
 
                 $fuel_card_request_id = $this->create_request($request,null,$card_number,$fuel_deduction_type,$fuel_type,$amount);
@@ -428,6 +425,7 @@ class FuelManagementController extends Controller
                 $current_request->fuel_type_id = null;
                 $current_request->fuel_Deduction_type_id = null;
                 $current_request->amount = null;
+                $current_request->removed = 1;
                 $current_request->update();
 
                 $fuel_card_request_id = $this->create_request($request,null,$card_number,$fuel_deduction_type,$fuel_type,$amount);

@@ -462,7 +462,6 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
-                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -955,6 +954,8 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if (confirm) {
+                            url = "{!! route('admin.user_management.fuel_management.approve') !!}";
+                            $('#ApproveModal #fuel_request_approve_form').attr('action',url);
                             $('#fuel_request_approve_form #request_id').val(request_id);
                             $('#fuel_request_approve_form').submit();
                         }
