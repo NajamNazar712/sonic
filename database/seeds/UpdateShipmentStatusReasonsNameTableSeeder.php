@@ -12,8 +12,6 @@ class UpdateShipmentStatusReasonsNameTableSeeder extends Seeder
     public function run()
     {
 
-        $reason_ids = [43, 44, 51, 22, 56, 16, 58, 10, 11, 20, 57];
-
         DB::table('shipment_status_reason')->where('id', 31)->update(['name' => 'Mistake In Booking']);
         DB::table('shipment_status_reason')->where('id', 32)->update(['name' => 'Consignee Did Not Handover Due To Product or Shipper Issue']);
         DB::table('shipment_status_reason')->where('id', 33)->update(['name' => 'Consignee Wants To Receive Both Shipments']);
@@ -34,6 +32,5 @@ class UpdateShipmentStatusReasonsNameTableSeeder extends Seeder
             array('id' => 61, 'name' => 'Theft/Robbery'),
         ));
 
-        DB::table('shipment_status_reason')->whereIn('id', $reason_ids)->delete();
     }
 }
