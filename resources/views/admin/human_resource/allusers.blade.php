@@ -1,16 +1,16 @@
 @extends('admin.layout.master')
 
-@section('title', 'All Users List')
+@section('title', 'All Employees List')
 
 @section('content')
-    <h1>Active Accounts List</h1>
+    <h1>Active Employees List</h1>
 
     <section>
         <div class="row">
             
             <div class="col-12">
                 <div class="card">
-                    <h2 class="heading_user">All Users</h2>
+                    <h2 class="heading_user">All Employees</h2>
                     @include('admin.inc.messages')
     
                     <div class="card-content">
@@ -22,9 +22,9 @@
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Trax ID</th>
                                         <th class="border-primary border-darken-1">Name</th>
-                                        <th class="border-primary border-darken-1">Cnic</th>
-                                        <th class="border-primary border-darken-1">Phone#</th>
-                                        <th class="border-primary border-darken-1">Role</th>
+                                        <th class="border-primary border-darken-1">CNIC</th>
+                                        <th class="border-primary border-darken-1">Phone No.</th>
+                                        <th class="border-primary border-darken-1">Employee Role</th>
                                         <th class="border-primary border-darken-1">Created at</th>
                                     </tr>
                                 </thead>
@@ -81,9 +81,9 @@
                             head.push('S. No');
                             head.push('Trax ID');
                             head.push('Name');
-                            head.push('Cnic');
-                            head.push('Phone#');
-                            head.push('Role');
+                            head.push('CNIC');
+                            head.push('Phone No.');
+                            head.push('Employee Role');
                             head.push('Created at');
                             $.each(result.data, function(index, values) {
                                 if(values.id!=null){
@@ -95,12 +95,7 @@
                                 row.push(values.cnic);
                                 row.push(values.phone);
                                 row.push(values.role);
-                                if(values.created_at){
-                                row.push(values.created_at.date);    
-                                }else{
-
-                                    row.push(values.created_at);    
-                                }
+                                row.push(values.created_at);
                                 body.push(row);
                             }
 
@@ -118,12 +113,13 @@
 
     var table = $('#datatable').DataTable({
         dom: '<"d-inline-block"l><"pull-right"B>tipr',
+        "order": [[ 6, "desc" ]],
                 scrollX: false, scrollY: '500px',
                     buttons: [
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'All Users List',
+                        title: 'All Employees List',
                         text: '<i class="la la-file-excel-o"></i> Excel',
 
                     },
@@ -151,12 +147,6 @@
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    // if(data['created_at']){
-
-                    //     console.log(data['created_at']['date']);
-                    //     console.log('asdsa');
-                    //     $('td:eq(6)', row).html(data['created_at']['date']);
-                    // }
                     console.log(data['id']);
                     if(data['id']!=null){
 
