@@ -69,7 +69,7 @@ class WebsiteLead extends Command
                 $new_lead->contact_person = $lead->full_name;
                 $new_lead->city_id = $lead->city_id;
                 $new_lead->territory_id = $lead->territory_id;
-                $new_lead->territory_area_id = $lead->area_id;
+                $new_lead->territory_area_id = $lead->territory_area_id;
                 $new_lead->phone_number = $lead->phone_number;
                 $new_lead->email_address = $lead->email;
                 $new_lead->requested_date = $lead->created_at;
