@@ -146,7 +146,7 @@ class FuelManagementController extends Controller
             })
             ->addColumn('action',function ($fuel_card) {
                 if (session('role_id') == 1 || count(array_intersect([448, 450], session('permissions'))) !== 0) {
-                    if($fuel_card->status == 0 || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null))) {
+                    if(($fuel_card->status == 0 && count(array_intersect([448], session('permissions'))) !== 0) || (($fuel_card->card_request_type_id == 1 || $fuel_card->card_request_type_id == 2) &&($fuel_card->card_number != null) && (count(array_intersect([450], session('permissions'))) !== 0))) {
                         $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
