@@ -3254,7 +3254,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_pickups->exists()) {
-                $rider_pickups = $rider_pickups->get();
+                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.id','DESC')->get();
                 return response()->json(["status" => 0, "pickups" => $rider_pickups]);
             } else {
                 return response()->json(["status" => 1, "message" => "No pickups found!"]);
@@ -3307,7 +3307,7 @@ class RiderAPIController extends Controller
 
 
             if ($rider_deliveries->exists()) {
-                $rider_deliveries = $rider_deliveries->get();
+                $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
                 return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
             } else {
                 return response()->json(["status" => 1, "message" => "No deliveries found!"]);
@@ -3352,7 +3352,7 @@ class RiderAPIController extends Controller
             }
             $rider_return_history = array();
             if ($rider_return_deliveries->exists()) {
-                $rider_return_deliveries = $rider_return_deliveries->get();
+                $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.id', 'DESC')->get();
                 foreach ($rider_return_deliveries as $rider_return_delivery) {
                     $return_history = array();
                     $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
