@@ -554,6 +554,8 @@
                         }
                     })
                         .done(function (data) {
+                            var cod = data.cod;
+                            var iban = data.details.iban;
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
@@ -576,7 +578,6 @@
                                 first_shipment = true;
                                 $('#account_details').removeClass('d-none');
                             }
-
                             if(complete_shipper_info == false){
                                 if(first_shipment == true){
                                     $('#iban_no').removeClass('required');
@@ -589,9 +590,17 @@
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                 }
+                                else if(cod == true && (iban == null || iban == '' )){
+                                    console.log('hello');
+                                }
                                 else{
 
                                     $('#account_details').removeClass('d-none');
+                                    $('#iban_no').addClass('required');
+                                    $('#account_no').addClass('required');
+                                    $('#bank').addClass('required');
+                                }
+                                if(cod == true && (iban == null)){
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');

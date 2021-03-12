@@ -404,13 +404,20 @@ class RetailShipmentBookController extends Controller
             $details['account_number'] = $shipper_info->account_number;
             $details['bank_id'] = $shipper_info->bank_id;
 
+            $shipment = RetailShipment::where('shipper_phone_no', $shipper_info->shipper_phone_no)->where('shipping_mode',3);
+            if($shipment->exists()){
+                $cod = true;
+            }
+            else{
+                $cod = false;
+            }
             if($shipper_info->completed_status == 1){
                 $complete_info = true;
             }
             else{
                 $complete_info = false;
             }
-            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details, 'complete_info' => $complete_info]);
+            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details, 'complete_info' => $complete_info,'cod' => $cod]);
         }
         else{
             return response()->json(['status' => 2, 'error' => 'Shipper Info Not Found!']);
