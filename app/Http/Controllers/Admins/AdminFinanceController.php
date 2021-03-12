@@ -7578,7 +7578,7 @@ class AdminFinanceController extends Controller
 
                 $dropdown .= $view_details_button;
 
-                if (session('role_id') == 1 || in_array(60, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(460, session('permissions'))) {
                     $dropdown .= $make_payments_button;
                 }
 

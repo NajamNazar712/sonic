@@ -448,7 +448,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
@@ -481,16 +481,16 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([454, 455, 232], session('permissions'))) !== 0)
                             <li class=" menu-item"><a href="#"><span class="menu-title">Retail Payments</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(454, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.retail.make_payments.index') }}">Make</a></li>
                                     @endif
 
 
-                                    @if (session('role_id') == 1 || in_array(61, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(455, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.retail.done_payments.index') }}">Done</a></li>
                                     @endif

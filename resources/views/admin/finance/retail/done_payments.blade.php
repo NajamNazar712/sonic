@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Done Payments')
+@section('title', 'Retail Done Payments')
 
 @section('content')
 	<div class="app-content content">
@@ -97,7 +97,7 @@
 									</div>
 								</div>
 							</div>
-							@if(session('role_id') == 1 || in_array(268, session('permissions')))
+							@if(session('role_id') == 1 || in_array(459, session('permissions')))
 								<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.retail.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 									{{ csrf_field() }}
 
@@ -508,10 +508,10 @@
 			var table = $('#datatable').DataTable({
 				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([457, 458], session('permissions'))) !== 0)
 
 					buttons: [
-						@if (session('role_id') == 1 || in_array(62, session('permissions')))
+						@if (session('role_id') == 1 || in_array(457, session('permissions')))
 							{
 							text: 'Paid',
 							className: 'btn btn-primary paid',
@@ -546,7 +546,7 @@
 						},
 					@endif
 
-					@if (session('role_id') == 1 || in_array(63, session('permissions')))
+					@if (session('role_id') == 1 || in_array(458, session('permissions')))
 						{
 							text: 'Reverted',
 							className: 'btn btn-primary reverted',
