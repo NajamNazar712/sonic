@@ -3120,12 +3120,12 @@ class RiderAPIController extends Controller
             } else if ($request->has('delivery_note_id')) {
                 $delivery_note_id = $request->delivery_note_id;
                 $shipment_details = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-                    ->leftjoin('shipments_journey', function ($join) {
+                    ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
                                 DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and shipments_journey.rider_id is not null)'));
                     })
-                    ->leftjoin('rider_deliveries', function ($join) {
+                    ->join('rider_deliveries', function ($join) {
                         $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
                             ->where('rider_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
@@ -3283,7 +3283,6 @@ class RiderAPIController extends Controller
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-                ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
                 ->where('delivery_notes.pending_status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
@@ -3308,7 +3307,18 @@ class RiderAPIController extends Controller
 
             if ($rider_deliveries->exists()) {
                 $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
-                return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
+                $rider_delivery_history = array();
+                foreach ($rider_deliveries as $rider_delivery) {
+                    $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
+                    $delivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', '>', 1)->where('update_type', 1)->count();
+                    $delivery_history = array();
+                    $delivery_history['delivery_note_id'] = $rider_delivery->delivery_note_id;
+                    $delivery_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
+                    $delivery_history['delivered_shipments'] = $delivered_shipments;
+                    $delivery_history['undelivered_shipments'] = $undelivered_shipments;
+                    $rider_delivery_history[] = $delivery_history;
+                }
+                return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
             } else {
                 return response()->json(["status" => 1, "message" => "No deliveries found!"]);
             }
