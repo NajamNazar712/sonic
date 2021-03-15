@@ -7622,11 +7622,8 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
-<<<<<<< HEAD
-	public function last_mile_app_shipments_list(Request $request){
-=======
     public function last_mile_app_shipments_list(Request $request){
->>>>>>> 1dfefb20720a67a1439af932cee85a1192cffc75
+
         $delivery_note_id = $request->delivery_note_id;
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
