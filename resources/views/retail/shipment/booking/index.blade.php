@@ -115,6 +115,11 @@
                                         <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="col">
+                                        <div class="row d-none" id="cod_check">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="cod" id="cod" class="form-control rounded-right amount" placeholder="COD Amount*" data-rule-required="true" data-msg-required="COD Amount is required">
+                                            </div>
+                                        </div>
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
@@ -198,41 +203,41 @@
                                     </div>
                                 </div>
                             </div>
-{{--                            <div class="row justify-content-center p-2" id="account_details">--}}
-{{--                                <div class="col-5 border">--}}
-{{--                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="iban">--}}
-{{--                                            IBAN Number:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="account_name">Account Number:--}}
-{{--                                            <span class="danger">*</span></label>--}}
-{{--                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="bank">--}}
-{{--                                            Bank Name:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <select name="bank" id="bank" class="select2 form-control required">--}}
-{{--                                            @foreach($banks as $bank)--}}
-{{--                                                <option value="{{$bank->id}}">{{$bank->name}}</option>--}}
-{{--                                            @endforeach--}}
-{{--                                        </select>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="form-group col">--}}
-{{--                                        <label for="bank">--}}
-{{--                                            Cheque Image:--}}
-{{--                                            <span class="danger">*</span>--}}
-{{--                                        </label>--}}
-{{--                                        <input class="form-control form-control-sm required" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
+                            <div class="row justify-content-center p-2" id="account_details">
+                                <div class="col-5 border">
+                                    <h4 id="account_detail_header" class="form-section mb-2 text-center">Account Details</h4>
+                                    <div class="form-group col">
+                                        <label for="iban">
+                                            IBAN Number:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="account_name">Account Number:
+                                            <span class="danger">*</span></label>
+                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Bank Name:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <select name="bank" id="bank" class="select2 form-control required">
+                                            @foreach($banks as $bank)
+                                                <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col">
+                                        <label for="bank">
+                                            Cheque Image:
+                                            <span class="danger">*</span>
+                                        </label>
+                                        <input class="form-control form-control-sm" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -368,6 +373,7 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if(id === 1){
+                    $('#cod_check').addClass('d-none');
                     $('#domestic_overland_destination_div').removeClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     overland = true;
@@ -380,6 +386,13 @@
                     }
                     else{
                         $('#trax_box_div').addClass('d-none');
+                    }
+                    if(id == 3){
+                        $('#cod').val('');
+                        $('#cod_check').removeClass('d-none');
+                    }
+                    else{
+                        $('#cod_check').addClass('d-none');
                     }
                     overland = false;
                 }
@@ -541,47 +554,65 @@
                         }
                     })
                         .done(function (data) {
+                            var cod = data.cod;
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 $('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
                                 $('#shipper_address').val(data.details.shipper_address);
-                                // if(data.complete_info == false){
-                                //     complete_shipper_info = false;
-                                //     $('#account_details').removeClass('d-none');
-                                // }
-                                // else{
-                                //     complete_shipper_info = true;
-                                //     $('#account_details').addClass('d-none');
-                                // }
+                                $('#iban_no').val(data.details.iban);
+                                $('#account_no').val(data.details.account_number);
+                                $('#bank').val(data.details.bank_id).trigger('change');
+                                if(data.complete_info == false){
+                                    complete_shipper_info = false;
+                                    $('#account_details').removeClass('d-none');
+                                }
+                                else{
+                                    complete_shipper_info = true;
+                                    $('#account_details').addClass('d-none');
+                                }
                             }
-                            // else{
-                            //     complete_shipper_info = false;
-                            //     first_shipment = true;
-                            //     $('#account_details').removeClass('d-none');
-                            // }
+                            else{
+                                complete_shipper_info = false;
+                                first_shipment = true;
+                                $('#account_details').removeClass('d-none');
+                            }
+                            if(complete_shipper_info == false){
+                                console.log(1);
+                                var mode = $('#shipping_mode').val();
+                                if(first_shipment == true){
+                                    console.log(2);
+                                    $('#iban_no').removeClass('required');
+                                    $('#account_no').removeClass('required');
+                                    $('#bank').removeClass('required');
+                                    first_shipment = false;
+                                }
+                                else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '') && $('#shipping_mode').val() == 3){
+                                    console.log(3);
+                                    $('#iban_no').addClass('required');
+                                    $('#account_no').addClass('required');
+                                    $('#bank').addClass('required');
+                                }
+                                else if($('#shipping_mode').val() != 3){
+                                    console.log(4);
+                                    $('#iban_no').removeClass('required');
+                                    $('#account_no').removeClass('required');
+                                    $('#bank').removeClass('required');
+                                }
+                                else{
+                                    console.log(5);
+                                    $('#account_details').removeClass('d-none');
+                                    $('#iban_no').addClass('required');
+                                    $('#account_no').addClass('required');
+                                    $('#bank').addClass('required');
+                                }
+                            }
                         });
                 }
             });
 
             var shipment_ids = [];
             $('#book').on('click', function () {
-                // if(complete_shipper_info == false){
-                //     if(first_shipment == true){
-                //         $('#iban_no').removeClass('required');
-                //         $('#account_no').removeClass('required');
-                //         $('#bank').removeClass('required');
-                //         $('#cheque_image').removeClass('required');
-                //         first_shipment = false;
-                //     }
-                //     else{
-                //         $('#account_details').removeClass('d-none');
-                //         $('#iban_no').addClass('required');
-                //         $('#account_no').addClass('required');
-                //         $('#bank').addClass('required');
-                //         $('#cheque_image').addClass('required');
-                //     }
-                // }
                var validator = $('#booking_form').valid();
                if(validator) {
                    swal({
@@ -651,6 +682,7 @@
                         $('#gst').val('');
                         $('#total_charges').val('');
                         $('#insurance_amount').val('');
+                        $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
 

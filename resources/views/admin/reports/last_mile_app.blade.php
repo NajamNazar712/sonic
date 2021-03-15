@@ -246,6 +246,7 @@
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
+                            <th class="border-primary border-darken-1">Audio</th>
                         </tr>
                         </thead>
                     </table>
@@ -309,6 +310,25 @@
         </div>
     </div>
 
+    <div class="modal fade" id="audio_modal" data-backdrop="static" role="dialog" aria-labelledby="audio_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="audio_modal_title">Audio</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -332,6 +352,10 @@
         }
         span.font-13{
             font-size: 13px;
+        }
+        table tfoot tr th, table.dataTable tfoot tr th {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
         }
     </style>
 
@@ -431,6 +455,7 @@
                         data: params,
                         success: function (result) {
                             head = [];
+                            footer = [];
 
                             head.push('S. No');
                             head.push('Delivery Note#');
@@ -460,23 +485,22 @@
                                 update_via_app_count+=values.shipments_rider_updated
                                 update_via_dbf_count+=values.shipments_dbf_updated
                             });
-                            footer = [];
+                            
 
-                            footer.push('-');
+                            footer.push('');
                             footer.push('Total');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
-                            footer.push(total_shipments_count.toFixed(2));
-                            footer.push(update_via_app_count.toFixed(2));
-                            footer.push(update_via_dbf_count.toFixed(2));
-                            body.push(footer);
+                            footer.push(total_shipments_count);
+                            footer.push(update_via_app_count);
+                            footer.push(update_via_dbf_count);
                         },
                         async: false
                     });
                     UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return {body: body, header: head, footer: footer};
                 }
             });
             var total_shipments = 0;
@@ -493,6 +517,8 @@
                         className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        footer: true
+
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -507,6 +533,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
+
                         d.search_rider = $('#search_rider').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
@@ -514,6 +541,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
                         d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
+
                     }
                 },
                 rowId: 'delivery_note_id',
@@ -548,17 +576,21 @@
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
                     }
-
+                   
+             
+                },
+                drawCallback: function () {
                     var api = this.api();
+                    
                     var update_via_app_count = 0;
                     var update_via_dbf_count = 0;
                     var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        console.table(this.data());
-                        console.log('updated_via_App ',this.data().update_via_app);
-                        console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
-                        console.log('total_shipments ',this.data().total_shipments);
-                        update_via_app_count+=this.data().update_via_app;
+                        // console.table(this.data());
+                        // console.log('updated_via_App ',this.data().update_via_app);
+                        // console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
+                        // console.log('total_shipments ',this.data().total_shipments);
+                        update_via_app_count+=this.data().shipments_rider_updated;
                         update_via_dbf_count+=this.data().shipments_dbf_updated;
                     total_shipment_count+=this.data().total_shipments;
     
@@ -571,8 +603,6 @@
                     document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
                     document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
                 }, 1000);
-                },
-                drawCallback: function () {
                     
     },
                 stateLoaded: function (settings, data) {
@@ -663,6 +693,7 @@
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
                             { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+                            { data:'audio_path' ,name: 'rider_deliveries.audio_path', class: 'align-middle audio_path',orderable: false, searchable: false},
 
                         ],
                         rowCallback: function(row, data, index) {
@@ -758,6 +789,15 @@
                 $('#picture_modal').modal('show');
             });
 
+            $('body').on('click','#app_shipments_datatable tbody tr td.audio_path button',function () {
+                var link = $(this).attr('data-link');
+
+                var audio = '<audio controls id="sound"> <source src="' + link + '" type="audio/mp4"  > </audio>';
+
+                $('#audio_modal .modal-body').html(audio);
+
+                $('#audio_modal').modal('show');
+            });
 
 
             function print(id) {
@@ -793,11 +833,12 @@
 
                 print(delivery_note_id);
             });
-        });
-       
-        
-        
 
+            $('#audio_modal').on('hide.bs.modal', function (e) {
+                $('audio#sound')[0].pause();
+                $('audio#sound')[0].currentTime = 0;
+            });
+        });
         
     </script>
 @endsection

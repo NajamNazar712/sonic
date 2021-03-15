@@ -56,7 +56,7 @@
             </div>
             <div class="col">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="pin"  value="{{$rider->pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
+                <input type="text" class="form-control" name="pin"  value="{{$rider->dummy_pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
             </fieldset>
         </div>
         </div>
@@ -86,6 +86,15 @@
                             <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
                         @endforeach
                         <option value="other">Other</option>
+                    </select>
+                </fieldset>
+            </div>
+            <div class="col">
+                <fieldset class="form-group">
+                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                        @foreach($operation_rider_ids as $operation)
+                            <option value="{{$operation->id}}">{{$operation->name}}</option>
+                        @endforeach
                     </select>
                 </fieldset>
             </div>
@@ -140,6 +149,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
         $('#editRiderForm .select2').select2({
@@ -160,6 +170,20 @@
         $('#city_list').val({!! $rider->city_id !!}).trigger('change');
         @if($rider->route_id != Null)
             $('#route_list').val({!! $rider->route_id !!}).trigger('change');
+        @else
+        $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a route',
+            dropdownParent: $("#editRiderForm")
+        });
+        @endif
+
+        @if($rider->operation_rider_id != Null)
+        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change');
+        @else
+        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Functional Category',
+            dropdownParent: $("#editRiderForm")
+        });
         @endif
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
@@ -177,10 +201,15 @@
                 success:function (data) {
 
                     routelist.empty();
-                    for(var i = 0; i < data.length; i++){
-                        var option = new Option(data[i].code+' ('+data[i].start+' - '+data[i].end+')', data[i].id, true, true);
-                        routelist.append(option).trigger('change');
-                    }
+                    // for(var i = 0; i < data.length; i++){
+                    //     var option = new Option(data[i].code+' ('+data[i].start+' - '+data[i].end+')', data[i].id, true, true);
+                    //     routelist.append(option).trigger('change');
+                    // }
+                    $.each(data, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                        routelist.append(newOption);
+                    });
+                    routelist.val('').trigger('change');
                 }
             });
         });

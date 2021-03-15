@@ -13,7 +13,7 @@ class UpdateModulePermissionForRiderTracking extends Seeder
     {
         //
         DB::table('module_permissions')->insert(array(
-            array('id' => 447, 'name' => 'Rider Request - View', 'module_id' => 3),
+            array('id' => 446, 'name' => 'Rider Tracking - View', 'module_id' => 3),
         ));
     }
 }

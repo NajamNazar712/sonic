@@ -56,10 +56,10 @@
                             <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="form-group">
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required">
+                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="" autocomplete="nope">
                         </div>
                         <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
                             <div class="form-control-position" id="eye">
                                 <i class="la la-eye success"></i>
                             </div>
@@ -115,7 +115,7 @@
                         </div>
                         <div class="form-group position-relative">
                             <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="eye">
+                            <div class="form-control-position" id="peye">
                                 <i class="la la-eye success"></i>
                             </div>
                         </div>
@@ -177,6 +177,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',

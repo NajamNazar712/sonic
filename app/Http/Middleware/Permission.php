@@ -95,6 +95,10 @@ class Permission
             'v2_pickups.rider_receiving.index' => 366,
             'v2_pickups.pickup_route.index' => 406,
 
+            'v2_pickups.rider_tracking.index' => 446,
+            'v2_pickups.rider_tracking.by_rider' => 446,
+            'v2_pickups.rider_tracking.by_city' => 446,
+
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
@@ -353,6 +357,10 @@ class Permission
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
             'finance.make_payments_pickup_wise.index' => 396,
+            'finance.retail.make_payments.index' => 454,
+            'finance.retail.make_payments.list' => 454,
+            'finance.retail.done_payments.index' => 455,
+            'finance.retail.done_payments.list' => 455,
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
@@ -521,6 +529,15 @@ class Permission
             'user_management.crm.list' => 188,
             'user_management.user_requests.index' => 394,
             'user_management.user_requests.list' => 394,
+            //  Fuel Management Permissions
+            'user_management.fuel_management.index' => 447,
+            'user_management.fuel_management.list' => 447,
+            'user_management.fuel_management.create' => 451,
+            'user_management.fuel_management.search_by_card' => 451,
+            'user_management.fuel_management.store' => 451,
+            'user_management.fuel_management.approve' => 448,
+            'user_management.fuel_management.edit' => 450,
+            'user_management.fuel_management.history.index' => 452,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,
@@ -845,7 +862,11 @@ class Permission
 //            'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
-            'leads.view_remarks' => 416
+            'leads.view_remarks' => 416,
+            'human_resourse.allusers' => 449,
+            'human_resourse.all_user_ajax' => 449
+            
+           
         ],
 
         'shipper' => [
@@ -925,6 +946,10 @@ class Permission
             'retail.pending_cash_collection.index' => 423,
             'retail.completed.index' => 424,
 			'retail.accounts.index' => 428,
+            'retail.franchise.index' => 431,
+            'retail.franchise.list' => 431,
+            'retail.trax_center.index' => 432,
+            'retail.trax_center.list' => 432
         ]
     ];
 

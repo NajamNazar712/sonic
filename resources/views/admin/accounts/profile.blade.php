@@ -837,7 +837,6 @@
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-            $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
             
             
             var selected_rows = [];

@@ -396,6 +396,60 @@
         </div>
     </div>
     {{--Password Modal--}}
+
+    {{--Consignee Refused--}}
+    <div class="modal fade text-left" id="consignee_refused_modal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="consignee_refused_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Consignee Refused</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+
+                    <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
+                    <input type="hidden" name="iad_status" id="iad_status">
+                    <div class="row justify-content-center mb-2">
+                        <div class="col-9 text-left">
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio11" status="Consignee Wants To Open The Shipment.">
+                                    <label class="custom-control-label" for="customRadio11">Consignee Wants To Open The Shipment</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio12" status="Issue In The COD Amount/Product.">
+                                    <label class="custom-control-label" for="customRadio12">Issue In The COD Amount/Product</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio13" status="No Such Order From Consignee.">
+                                    <label class="custom-control-label" for="customRadio13"> No Such Order From Consignee</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio14" status="Refused After Opening The Shipment.">
+                                    <label class="custom-control-label" for="customRadio14">Refused After Opening The Shipment</label>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button id="CRUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--Consignee Refused--}}
 @endsection
 
 @section('css')
@@ -863,6 +917,7 @@
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
+
             });
 
             $('body').on('click', 'input.open_box', function(){
@@ -891,6 +946,18 @@
                 }
 
             });
+
+            $('.cr_radio').on('click', function () {
+                var id = $(this).attr('id');
+                var status = $(this).attr('status');
+                $('#iad_status').val(status);
+                $('#CRUpdate').attr('disabled', false);
+
+            });
+
+
+
+
             $('#other_description').on('input', function () {
                var description = $.trim($(this).val());
                if(description != ''){
@@ -907,10 +974,15 @@
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var reasonSelection = $(this).find(':selected');
                 var reason_status = reasonSelection.val();
+                console.log(reason_status);
 
                 shipment_reason[rowid] = reason_status;
 				if(reason_status == 3){
                     $('#IncompleteAddressModal').modal('show');
+                    $('#iad_shipment_id').val(rowid);
+                }
+                if(reason_status == 8){
+                    $('#consignee_refused_modal').modal('show');
                     $('#iad_shipment_id').val(rowid);
                 }
                 if(reason_status == 5){
@@ -992,6 +1064,7 @@
 
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
+                console.log(statusSelection,status);
                 var all_reason = $('#select_all_reason');
                 $.ajax({
                     url:'{!! route('admin.delivery.receive.reason_all') !!}',
@@ -1030,6 +1103,17 @@
                 $('#IncompleteAddressModal').modal('hide');
             });
 
+
+            $('#CRUpdate').on('click', function () {
+                var status = $('#iad_status').val();
+                var id = $('#iad_shipment_id').val();
+                var remark_input = $('#datatable tr#'+id).find('td.remarks input');
+                var remark = remark_input.val();
+                remark = remark+ ' ' + status;
+                remark_input.val(remark);
+                $('#consignee_refused_modal').modal('hide');
+            });
+
             $('#IncompleteAddressModal').on('hide.bs.modal', function () {
                 $('#iad_status').val('');
                 $('#iad_shipment_id').val('');
@@ -1037,6 +1121,13 @@
                 $('#AICUpdate').attr('disabled', true);
                 $('#other_description').parent('fieldset').addClass('d-none');
                 $('#other_description').val('');
+            });
+
+            $('#consignee_refused_modal').on('hide.bs.modal', function () {
+                $('#iad_status').val('');
+                $('#iad_shipment_id').val('');
+                $('.cr_radio').prop('checked', false);
+                $('#CRUpdate').attr('disabled', true);
             });
 
             var shipments = [];

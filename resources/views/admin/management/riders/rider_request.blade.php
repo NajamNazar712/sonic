@@ -67,6 +67,19 @@
                         <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <select name="category" id="category" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($operation_rider_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
                                     <select name="city_id" id="city_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($cities as $city)
@@ -188,6 +201,11 @@
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider Type',
+                dropdownParent: $('#approveRiderModal')
+            });
+            $('#category').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Functional Category',
                 dropdownParent: $('#approveRiderModal')
             });
 
@@ -340,12 +358,12 @@
                             return '';
                         }
                     },
-                    {data: 'rider_name', name: 'rider_name', class: 'align-middle rider_name'},
+                    {data: 'rider_name', name: 'rider_requests.name', class: 'align-middle rider_name'},
                     {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
                     {data: 'phone_no', name: 'phone_no', class: 'align-middle phone_no'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
-                    {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
+                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {
                         data: 'action',

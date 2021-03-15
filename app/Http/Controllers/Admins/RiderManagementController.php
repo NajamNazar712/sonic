@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RiderType;
@@ -35,13 +36,14 @@ class RiderManagementController extends Controller
     }
 
     public function permanent_list(Request $request){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
 
@@ -122,7 +124,9 @@ class RiderManagementController extends Controller
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $route_types = RouteType::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city]);
+        $operation_riders = OperationRidersCategory::all();
+        
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -133,6 +137,7 @@ class RiderManagementController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required',
+            'operation_rider_id'=>'required',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
         ];
@@ -180,6 +185,7 @@ class RiderManagementController extends Controller
             'address'=>$request->address,
             'route_id'=>$route_id,
             'rider_category_id'=>$request->rider_category,
+            'operation_rider_id'=>$request->operation_rider_id,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
@@ -204,7 +210,7 @@ class RiderManagementController extends Controller
 
         $route = $route->get();
 
-        return response()->json($route);
+        return response()->json(['route' => $route]);
     }
     public function editRiderView($id){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
@@ -212,7 +218,8 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
+        $operation_rider_ids =  OperationRidersCategory::all();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -269,9 +276,12 @@ class RiderManagementController extends Controller
             $rider->route_id = $request->route_id;
         }
         if($request->pin != '') {
-            $rider->pin = bcrypt($request->pin);
+            if($rider->dummy_pin != $request->pin) {
+                $rider->pin = bcrypt($request->pin);
+                $rider->dummy_pin = $request->pin;
 
-            NotificationsController::send(61, $rider->id, $request->pin);
+                NotificationsController::send(61, $rider->id, $request->pin);
+            }
         }
 
 
@@ -331,6 +341,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 1){
                     $rider->rider_type_id = 2;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                 }
@@ -348,6 +359,7 @@ class RiderManagementController extends Controller
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
                     $rider->rider_type_id = 1;
+                    $rider->updated_by = Auth::id();
                     $rider->save();
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
@@ -372,12 +384,14 @@ class RiderManagementController extends Controller
         if($action == 'block'){
             $rider->blacklist = 1;
             $rider->status = 0;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
             $rider->blacklist = 0;
             $rider->status = 1;
+            $rider->updated_by = Auth::id();
             $rider->save();
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
@@ -608,7 +622,8 @@ class RiderManagementController extends Controller
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
         $route = Route::all();
-        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city]);
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function rider_request_list(Request $request)
@@ -660,7 +675,8 @@ class RiderManagementController extends Controller
             'rider_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_request_id' => 'required',
-            'rider_type' => "required|numeric"
+            'rider_type' => "required|numeric",
+            'category' => "required|numeric"
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -693,7 +709,8 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
-            'rider_type_id'  => $request->rider_type
+            'rider_type_id'  => $request->rider_type,
+            'operation_rider_id'  => $request->category
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);

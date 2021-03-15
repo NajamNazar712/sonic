@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class RetailShipmentBookController extends Controller
 {
@@ -120,15 +121,15 @@ class RetailShipmentBookController extends Controller
     }
 
     static public function create_shipment_pieces($shipment_id, $pieces){
-        $total_pieces= 0;
+        $total_pieces = 0;
         if($pieces > 1){
 
             for($i=1; $i<=$pieces; $i++){
                 $shipment_piece = new ShipmentPiece();
                 $shipment_piece->shipment_id = $shipment_id;
                 $total_pieces++;
-                $shipment_piece->numbering=$total_pieces;
-                $shipment_piece->tracking_number= $shipment_id . $total_pieces;
+                $shipment_piece->numbering = $total_pieces;
+                $shipment_piece->tracking_number = $shipment_id . $total_pieces;
                 $shipment_piece->save();
             }
 
@@ -138,7 +139,7 @@ class RetailShipmentBookController extends Controller
     public function index(){
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
-        $shipping_modes = RetailShippingMode::where('id','!=', 3)->get();
+        $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
@@ -187,9 +188,14 @@ class RetailShipmentBookController extends Controller
         $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
         $gst = $gst * $total_charges_without_gst;
         $total_charges = $total_charges_without_gst + $gst;
-
-        $amount = $total_charges;
-        $r_amount = $total_charges;
+        if($shipping_mode_check == 3){
+            $amount = str_replace(',', '', $request->input('cod'));
+            $r_amount = 0;
+        }
+        else{
+            $amount = 0;
+            $r_amount = 0;
+        }
         $payment_mode_id = 1;
         $try_and_buy_charges = NULL;
 
@@ -254,19 +260,20 @@ class RetailShipmentBookController extends Controller
             $shipper_info->city_id = $pickup_city_id;
 
 
-//            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
-//                $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-//
-//                $file = $request->file('cheque_image');
-//
-//                Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
-//
-//                $shipper_info->bank_id = $request->bank;
-//                $shipper_info->iban = $request->iban_no;
-//                $shipper_info->account_number = $request->account_no;
-//                $shipper_info->cheque_image = $filename;
-//                $shipper_info->completed_status = 1;
-//            }
+            if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')){
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
             $shipper_info->save();
         }
         else{
@@ -276,19 +283,20 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
-//            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
-//                $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-//
-//                $file = $request->file('cheque_image');
-//
-//                Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
-//
-//                $shipper_info->bank_id = $request->bank;
-//                $shipper_info->iban = $request->iban_no;
-//                $shipper_info->account_number = $request->account_no;
-//                $shipper_info->cheque_image = $filename;
-//                $shipper_info->completed_status = 1;
-//            }
+            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
             $shipper_info->save();
         }
         $retail_shipment = new RetailShipment();
@@ -392,14 +400,24 @@ class RetailShipmentBookController extends Controller
             $details['shipper_name'] = $shipper_info->shipper_name;
             $details['shipper_cnic'] = $shipper_info->shipper_cnic;
             $details['shipper_address'] = $shipper_info->shipper_address;
+            $details['iban'] = $shipper_info->iban;
+            $details['account_number'] = $shipper_info->account_number;
+            $details['bank_id'] = $shipper_info->bank_id;
 
+            $shipment = RetailShipment::where('shipper_phone_no', $shipper_info->shipper_phone_no)->where('shipping_mode',3);
+            if($shipment->exists()){
+                $cod = true;
+            }
+            else{
+                $cod = false;
+            }
             if($shipper_info->completed_status == 1){
                 $complete_info = true;
             }
             else{
                 $complete_info = false;
             }
-            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details, 'complete_info' => $complete_info]);
+            return response()->json(['status' => 1, 'success' => 'Shipper Info Found!', 'details' => $details, 'complete_info' => $complete_info,'cod' => $cod]);
         }
         else{
             return response()->json(['status' => 2, 'error' => 'Shipper Info Not Found!']);
@@ -888,14 +906,15 @@ class RetailShipmentBookController extends Controller
                               <tr>
                                 <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                     ';
+                        $amount = $shipment->amount;;
 
                         if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
                             $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                         } else {
                             $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                         }
                     }

@@ -494,6 +494,14 @@
                     }
                 });
             });
+            function camera_scan_detected(tracking_number) {
+                $('#add_shipment_form input.tracking_number').val(tracking_number);
+
+                $('#add_shipment_form input.tracking_number').focus();
+
+            }
+
+
             $( "#add_shipment_form" ).validate({
 
                 errorClass:"danger",

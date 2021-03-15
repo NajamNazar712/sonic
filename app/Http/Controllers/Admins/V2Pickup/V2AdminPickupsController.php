@@ -795,6 +795,7 @@ class V2AdminPickupsController extends Controller
 
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
+                            NotificationsController::send(126,$shipment_id);
                         }
                     }
                     $shipment->fresh();
@@ -803,6 +804,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
+                        NotificationsController::send(126,$shipment_id);
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
@@ -1371,6 +1373,7 @@ class V2AdminPickupsController extends Controller
 
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
+                            NotificationsController::send(126,$shipment_id);
                         }
                     }
                     $shipment->fresh();
@@ -1379,6 +1382,7 @@ class V2AdminPickupsController extends Controller
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, $piece_request_remarks, NULL, Auth::id());
+                        NotificationsController::send(126,$shipment_id);
                     }
                     if($shipment->booking_type_id == 4){
                         $print_shipment_ids[] = $shipment_id;
@@ -1791,7 +1795,7 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks');
+            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id',$pickup_not_picked,$pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks','v2_rider_pickups.audio_path');
         if (session('role_id') != 1) {
             $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
         }
@@ -1855,6 +1859,17 @@ class V2AdminPickupsController extends Controller
                         return $image;
                     }
                 } else {
+                    return '-';
+                }
+            })
+            ->editColumn('audio_path', function ($rider_pickup) {
+                    $audio = '';
+                    if($rider_pickup->audio_path != null){
+                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($rider_pickup->audio_path)) . '"><i class="la la-file-sound-o"></i> Listen</button></div>';
+
+                        return $audio;
+                    }
+                 else {
                     return '-';
                 }
             });
@@ -2454,7 +2469,7 @@ class V2AdminPickupsController extends Controller
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
-            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived_count'), DB::raw('(SELECT SUM(shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
+            ->select('v2_pickup_notes.id as note_id','v2_pickup_notes.id as id','v2_pickup_notes.created_at as date','r.name as rider','vpr.booked', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment'), DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived'), DB::raw('(SELECT COUNT(vprs.shipment_id) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_received_shipments AS vprs ON vprs.pickup_request_id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_arrived_count'), DB::raw('(SELECT SUM(shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id AND vrp.pickup_request_id in (SELECT pickup_request_id from v2_pickup_note_requests where pickup_note_id = v2_pickup_notes.id)) AS rider_picked'))
             ->groupBy('v2_pickup_notes.id');
 
 
@@ -2522,8 +2537,6 @@ class V2AdminPickupsController extends Controller
         //  $riders = Rider::where('status', 1)->select(['id','name'])->get();
         //  return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities,'riders' => $riders,'users' => $users]);
      }
- 
-
 
 
     public function pickup_route_list(){

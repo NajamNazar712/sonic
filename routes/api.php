@@ -59,6 +59,9 @@ Route::name('api.')->group(function () {
             Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
             Route::post('air_waybill', 'APIController@shipment_air_waybill_shopify_invoice')->name('air_waybill');
         });
+
+		Route::get('catalyst_users', 'APIController@catalyst_users')->name('catalyst_users');
+
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
@@ -82,18 +85,26 @@ Route::name('api.')->group(function () {
                 Route::post('pick_v2', 'Rider\RiderAPIController@pickup_pick_v2')->name('pickup_pick_v2');
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
+                Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
 
                 Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
 
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
 	        });
+
+            Route::prefix('location')->name('location.')->group(function(){
+                Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
+            });
+
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('delivered', 'Rider\RiderAPIController@shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
                 Route::get('summary/multiple', 'Rider\RiderAPIController@delivery_summary_multiple')->name('delivery_summary_multiple');
+                Route::get('summary/multiple_v2', 'Rider\RiderAPIController@delivery_summary_multiple_v2')->name('delivery_summary_multiple_v2');
+                Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -104,6 +115,11 @@ Route::name('api.')->group(function () {
                 Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
                 Route::post('delivery', 'Rider\RiderAPIController@delivery_history')->name('delivery');
                 Route::post('return', 'Rider\RiderAPIController@return_history')->name('return');
+
+                Route::post('pickup_v2', 'Rider\RiderAPIController@pickups_history_v2')->name('pickup_v2');
+                Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
+                Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
+                Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
             });
 
             Route::prefix('return')->name('return.')->group(function () {
@@ -111,6 +127,8 @@ Route::name('api.')->group(function () {
                 Route::post('delivered', 'Rider\RiderAPIController@return_shipment_delivered')->name('delivered');
                 Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
+                Route::post('undelivered_v2', 'Rider\RiderAPIController@return_shipment_undelivered_v2')->name('undelivered_v2');
+                Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');

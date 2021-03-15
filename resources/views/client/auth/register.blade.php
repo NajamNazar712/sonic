@@ -878,6 +878,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+
                     if (data.status == 0) {
                         $('#territory').empty();
                         $.each(data.territory, function (key, value) {
@@ -894,6 +895,11 @@
                             containerId: 'toast-top-center'
                         });
                     }
+                    @if($lead != null)
+                    @if($lead->territory_id != null)
+                    $('select[name="territory_id"]').val({{$lead->territory_id}}).trigger('change');
+                    @endif
+                    @endif
                 });
             }
 
@@ -1000,7 +1006,6 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        $("input[name='strn_no']").inputmask({'mask': "9999999999999", 'clearIncomplete': true});
 
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,

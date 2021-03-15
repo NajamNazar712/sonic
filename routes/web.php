@@ -900,10 +900,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rider_tracking')->name('rider_tracking.')->group(function () {
-            Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_index')->name('index');
-            Route::get('/list', 'Admins\V2Pickup\V2AdminPickupsController@pickup_route_list')->name('list');
-            Route::post('/ajax', 'Admins\V2Pickup\V2AdminPickupsController@edit_route_ajax')->name('edit_ajax');
-            //Route::post('store', 'Admins\V2Pickup\V2AdminArrivalServiceController@service_arrival_submit')->name('store');
+            Route::get('', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_index')->name('index');
+            Route::get('by_rider', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_by_rider')->name('by_rider');
+            Route::get('by_city', 'Admins\V2Pickup\V2RiderTrackingController@rider_tracking_by_city')->name('by_city');
         });
 
     });
@@ -920,6 +919,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
             Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 			Route::post('consolidation_check','Admins\DeliveryController@note_consolidation_check')->name('consolidation_check');
+			Route::post('operation_riders','Admins\DeliveryController@operation_riders')->name('operation_riders');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -1419,6 +1419,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
+            Route::get('', 'Admins\Fuel\FuelManagementController@fuel_index')->name('index');
+            Route::get('list', 'Admins\Fuel\FuelManagementController@fuel_list')->name('list');
+            Route::get('request', 'Admins\Fuel\FuelManagementController@request_create')->name('create');
+            Route::post('request', 'Admins\Fuel\FuelManagementController@request_store')->name('store');
+            Route::post('request/approve', 'Admins\Fuel\FuelManagementController@request_approve')->name('approve');
+            Route::post('request/edit', 'Admins\Fuel\FuelManagementController@request_edit')->name('edit');
+            Route::get('request/search/card', 'Admins\Fuel\FuelManagementController@request_search_by_card')->name('search_by_card');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\Fuel\FuelManagementController@request_history')->name('index');
+            });
+        });
+
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
@@ -1570,6 +1583,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoice_for_reimbursement_index')->name('index');
             Route::get('generate', 'Admins\AdminFinanceController@invoice_for_reimbursement_generate')->name('generate');
         });
+
+
+
+        Route::prefix('retail')->name('retail.')->group(function () {
+
+            Route::prefix('make_payments')->name('make_payments.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@retail_make_payments_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@retail_make_payments_list')->name('list');
+                Route::post('delivered_shipments', 'Admins\AdminFinanceController@retail_make_payments_delivered_shipments')->name('delivered_shipments');
+                Route::post('adjusted_shipments', 'Admins\AdminFinanceController@retail_make_payments_adjusted_shipments')->name('adjusted_shipments');
+                Route::post('shipment_details', 'Admins\AdminFinanceController@retail_make_payments_shipment_details')->name('shipment_details');
+                Route::get('shipment_list', 'Admins\AdminFinanceController@retail_make_payments_shipment_list')->name('shipment_list');
+                Route::get('shipment_export_selected', 'Admins\AdminFinanceController@retail_make_payments_shipment_export_selected')->name('shipment_export_selected');
+                Route::post('verify', 'Admins\AdminFinanceController@retail_make_payments_verify')->name('verify');
+                Route::get('export_bank_order', 'Admins\AdminFinanceController@retail_make_payments_export_bank_order')->name('export_bank_order');
+                Route::post('store', 'Admins\AdminFinanceController@retail_make_payments_store')->name('store');
+                Route::get('stats_calculate', 'Admins\AdminFinanceController@retail_make_payments_stats_calculate')->name('stats_calculate');
+            });
+
+            Route::prefix('done_payments')->name('done_payments.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@retail_done_payments_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@retail_done_payments_list')->name('list');
+                Route::put('paid', 'Admins\AdminFinanceController@retail_done_payments_paid')->name('paid');
+                Route::put('reverted', 'Admins\AdminFinanceController@retail_done_payments_reverted')->name('reverted');
+                Route::post('delivered_shipments', 'Admins\AdminFinanceController@retail_done_payments_delivered_shipments')->name('delivered_shipments');
+                Route::post('adjusted_shipments', 'Admins\AdminFinanceController@retail_done_payments_adjusted_shipments')->name('adjusted_shipments');
+                Route::post('details_print', 'Admins\AdminFinanceController@retail_done_payments_details_print')->name('details_print');
+                Route::post('details', 'Admins\AdminFinanceController@retail_done_payments_details')->name('details');
+                Route::put('update_details', 'Admins\AdminFinanceController@retail_done_payments_update_details')->name('update_details');
+                Route::get('export_to_excel', 'Admins\AdminFinanceController@retail_done_payments_export_to_excel')->name('export_to_excel');
+                Route::post('excel_store', 'Admins\AdminFinanceController@retail_done_payments_excel_store')->name('excel_store');
+            });
+
+        });
+
+
+
+
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
@@ -1658,6 +1709,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+            Route::put('','Admins\AdminPackagingMaterialController@request_update')->name('update');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
@@ -2673,6 +2725,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
+    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+        
+        Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
+        Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
+        Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
+    });
 
 });
 
@@ -2702,6 +2761,14 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print','Retail\RetailCashDepositController@print')->name('print');
+    });
+
+    Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {
+        Route::get('', 'Retail\RetailParcelReceivingController@index')->name('index');
+        Route::get('/list', 'Retail\RetailParcelReceivingController@list')->name('list');
+        Route::post('/generate', 'Retail\RetailParcelReceivingController@generate')->name('generate');
+        Route::post('/shipments', 'Retail\RetailParcelReceivingController@shipments')->name('shipments');
+        Route::post('print','Retail\RetailParcelReceivingController@print')->name('print');
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {

@@ -4,7 +4,7 @@ namespace App\Http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FuelFactorHistory extends Model
+class OperationRidersCategory extends Model
 {
-    //
+    public $timestamps = false;
 }

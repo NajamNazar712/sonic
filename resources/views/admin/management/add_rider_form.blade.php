@@ -80,6 +80,17 @@
                 </select>
             </fieldset>
         </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                    <option value="" selected>Select a Category</option>
+                    @foreach($operation_riders as $operation)
+                        <option value="{{$operation->id}}">{{$operation->name}}</option>
+                    @endforeach
+                </select>
+                <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+            </fieldset>
+        </div>
 
     </div>
     <div id="new_route_div" class="d-none">
@@ -145,6 +156,10 @@
             placeholder:'Select a route',
             dropdownParent: $("#addRiderForm")
         });
+        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Functional Category',
+            dropdownParent: $("#addRiderForm")
+        });                          
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a rider category',
             dropdownParent: $("#addRiderForm")
@@ -177,11 +192,16 @@
                 success:function (data) {
 
                     routelist.empty();
-                    for(var i = 0; i < data.length; i++){
-                        var option = new Option(data[i].code+' ('+data[i].start+' to '+data[i].end+')', data[i].id, true, true);
-                        routelist.append(option).trigger('change');
-                    }
-                    routelist.append('<option value="other">Other</option>').trigger('change');
+                    // for(var i = 0; i < data.length; i++){
+                    //     //var option = new Option(data[i].code+' ('+data[i].start+' to '+data[i].end+')', data[i].id, true, true);
+                    //     routelist.append(option);
+                    // }
+                    //routelist.append('<option value="other">Other</option>').trigger('change');
+                    $.each(data, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                        routelist.append(newOption);
+                    });
+                   routelist.val('').trigger('change');
                 }
             });
         });
