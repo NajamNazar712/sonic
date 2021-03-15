@@ -3120,12 +3120,12 @@ class RiderAPIController extends Controller
             } else if ($request->has('delivery_note_id')) {
                 $delivery_note_id = $request->delivery_note_id;
                 $shipment_details = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
-                    ->leftjoin('shipments_journey', function ($join) {
+                    ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5)'));
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and shipments_journey.rider_id is not null)'));
                     })
-                    ->leftjoin('rider_deliveries', function ($join) {
+                    ->join('rider_deliveries', function ($join) {
                         $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
                             ->where('rider_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
@@ -3166,12 +3166,12 @@ class RiderAPIController extends Controller
             } else if ($request->has('return_note_id')) {
                 $return_note_id = $request->return_note_id;
                 $shipment_details = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
-                    ->leftjoin('shipments_journey', function ($join) {
+                    ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
                             ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23)'));
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23 and shipments_journey.rider_id is not null)'));
                     })
-                    ->leftjoin('rider_return_deliveries', function ($join) {
+                    ->join('rider_return_deliveries', function ($join) {
                         $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
                             ->where('rider_return_deliveries.id', '=',
                                 DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
@@ -3283,7 +3283,6 @@ class RiderAPIController extends Controller
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
                 ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
                 ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-                ->select(['delivery_notes.id as delivery_note', 'delivery_notes.delivered_shipments', 'delivery_notes.shipments_count'])
                 ->where('delivery_notes.pending_status', '=', 1)
                 ->where('riders.id', '=', $rider_id);
 
@@ -3308,7 +3307,18 @@ class RiderAPIController extends Controller
 
             if ($rider_deliveries->exists()) {
                 $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
-                return response()->json(["status" => 0, "deliveries" => $rider_deliveries]);
+                $rider_delivery_history = array();
+                foreach ($rider_deliveries as $rider_delivery) {
+                    $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
+                    $delivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', '>', 1)->where('update_type', 1)->count();
+                    $delivery_history = array();
+                    $delivery_history['delivery_note_id'] = $rider_delivery->delivery_note_id;
+                    $delivery_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
+                    $delivery_history['delivered_shipments'] = $delivered_shipments;
+                    $delivery_history['undelivered_shipments'] = $undelivered_shipments;
+                    $rider_delivery_history[] = $delivery_history;
+                }
+                return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
             } else {
                 return response()->json(["status" => 1, "message" => "No deliveries found!"]);
             }
@@ -3354,10 +3364,13 @@ class RiderAPIController extends Controller
             if ($rider_return_deliveries->exists()) {
                 $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.id', 'DESC')->get();
                 foreach ($rider_return_deliveries as $rider_return_delivery) {
+                    $undelivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 1)->where('update_type', 1)->count();
+                    $delivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->where('update_type', 1)->count();
                     $return_history = array();
                     $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
-                    $return_history['total_shipments'] = $rider_return_delivery->shipments_count;
-                    $return_history['delivered_shipments'] = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->count();
+                    $return_history['total_shipments'] = $delivered_shipments+$undelivered_shipments;
+                    $return_history['delivered_shipments'] = $delivered_shipments;
+                    $return_history['undelivered_shipments'] = $undelivered_shipments;
                     $rider_return_history[] = $return_history;
                 }
                 return response()->json(["status" => 0, "return_history" => $rider_return_history]);
@@ -3962,80 +3975,6 @@ class RiderAPIController extends Controller
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
-
-    public function return_summary_multiple_v3(Request $request)
-{
-    $rider_id = $request->rider_id;
-
-    $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
-
-    if ($return_notes->exists()) {
-        $return_notes = $return_notes->get();
-
-        $nodes = array();
-
-        foreach ($return_notes as $return_note) {
-            $information = array();
-
-            $information['return_note_id'] = $return_note->id;
-            $information['assigned_date'] = $return_note->created_at->toDateTimeString();
-            $information['no_of_parcels'] = $return_note->shipments_count;
-            $information['summary'] = array();
-            $total_shipments = $return_note->shipments_count;
-            $information['summary']['deliveries'] = $total_shipments;
-            $information['summary']['completed'] = array();
-
-            $information['summary']['completed']['pending'] = $return_note->return_note_shipments->where('status', 0)->count('shipment_id');
-            $information['summary']['completed']['undelivered'] = $return_note->return_note_shipments->where('status', 2)->count('shipment_id');
-            $information['summary']['completed']['delivered'] = $return_note->return_note_shipments->where('status', 1)->count('shipment_id');
-
-            $information['return_deliveries'] = array();
-            $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
-            $return_note_shipments = $return_note_shipments->pluck('shipment_id')->toArray();
-
-            $return_note_shipments_data = Shipment::select('user_id', DB::raw('count(id) as count'))
-                ->groupBy('user_id')
-                ->whereIn('id', $return_note_shipments);
-
-            if($return_note_shipments_data->exists()){
-                $return_note_shipments_data = $return_note_shipments_data->get();
-                foreach ($return_note_shipments_data as $return_note_shipment) {
-
-                    $shipper_info = UserShippingInfo::where('user_id',$return_note_shipment->user_id)->first();
-
-                    $total_shipments = $return_note_shipment->count;
-                    $shipper_name = $shipper_info->user->name;
-                    $shipper_id = $shipper_info->id;
-                    $shipper_poc = $shipper_info->poc;
-                    $shipper_address = $shipper_info->pickup_address;
-                    $phone = $shipper_info->phone;
-                    $phone2 = $shipper_info->phone2;
-                    ($phone2 != null) ? $shipper_phone = $phone." | ".$phone2 : $shipper_phone = $phone;
-
-                    $deliveries = array();
-                    $deliveries['shipper_id'] = $shipper_id;
-                    $deliveries['shipper_name'] = $shipper_name;
-                    $deliveries['shipper_poc'] = $shipper_poc;
-                    $deliveries['shipper_address'] = $shipper_address;
-                    $deliveries['shipper_phone'] = $shipper_phone;
-                    $deliveries['total_shipments'] = $total_shipments;
-                    $deliveries['latitude'] = NULL;
-                    $deliveries['longitude'] = NULL;
-                    $shipper_lat = $shipper_info->location_latitude;
-                    $shipper_long = $shipper_info->location_longitude;
-                    if ($shipper_lat != null && $shipper_long != null) {
-                        $deliveries['latitude'] = (double)$shipper_lat;
-                        $deliveries['longitude'] = (double)$shipper_long;
-                    }
-                    $information['return_deliveries'][] = $deliveries;
-                }
-            }
-            $nodes[] = $information;
-        }
-        return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
-    }
-    return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
-}
 
     public function return_summary_multiple_v2(Request $request)
     {

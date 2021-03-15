@@ -59,6 +59,9 @@ Route::name('api.')->group(function () {
             Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
             Route::post('air_waybill', 'APIController@shipment_air_waybill_shopify_invoice')->name('air_waybill');
         });
+
+		Route::get('catalyst_users', 'APIController@catalyst_users')->name('catalyst_users');
+
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {

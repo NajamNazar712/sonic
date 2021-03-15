@@ -67,6 +67,19 @@
                         <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <select name="category" id="category" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($operation_rider_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
                                     <select name="city_id" id="city_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($cities as $city)
@@ -188,6 +201,11 @@
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider Type',
+                dropdownParent: $('#approveRiderModal')
+            });
+            $('#category').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Functional Category',
                 dropdownParent: $('#approveRiderModal')
             });
 

@@ -47,7 +47,12 @@ class Shipment extends Model
     }
 
     public function shipment_payment_journey(){
-	    return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney')->orderBy('id', 'DESC');
+        if($this->shipment_type == 2) {
+            return $this->hasMany('App\Http\Models\RetailShipmentsPaymentJourney')->orderBy('id', 'DESC');
+        }
+        else{
+            return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney')->orderBy('id', 'DESC');
+        }
     }
 
     public function shipment_pickup_journey(){

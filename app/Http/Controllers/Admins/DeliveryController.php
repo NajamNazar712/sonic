@@ -6,7 +6,6 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
@@ -16,6 +15,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
@@ -33,7 +33,8 @@ use App\Http\Models\City;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
@@ -44,6 +45,7 @@ use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
@@ -75,6 +77,7 @@ use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
+
 
 class DeliveryController extends Controller
 {
@@ -251,15 +254,15 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-        $riders = Rider::where('status', 1);
+//        $riders = Rider::where('status', 1);
 
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $riders = $riders->get();
+//        if (session('role_id') != 1) {
+//            $riders = $riders->whereHas('city', function ($query) {
+//                $query->whereIn('hub_id', session('hubs'));
+//            });
+//        }
+//
+//        $riders = $riders->get();
 
         $routes = Route::where('status', 1);
 
@@ -270,8 +273,9 @@ class DeliveryController extends Controller
         }
 
         $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
+        return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
 	public function note_consolidation_check(Request $request){
@@ -2835,13 +2839,10 @@ class DeliveryController extends Controller
                                                     }
                                                 }
 //                                                ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-
                                             }
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             }
-
-
                                         }
                                     }
                                 }//main if condition
@@ -6113,37 +6114,43 @@ class DeliveryController extends Controller
         $tracking_numbers = $request->tracking_number;
         $delivery_note_id = $request->delivery_note_id;
         $shipment = Shipment::find($shipment_id);
+        $serial = '';
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
 
-                        $total_shipments = $delivery_note->shipments_count;
-                        $total_shipments++;
-                        $cod_amount = $delivery_note->total_cod_amount;
-                        $total_cod_amount = $cod_amount + $shipment->amount;
-                        $delivery_note->shipments_count = $total_shipments;
-                        $delivery_note->total_cod_amount = $total_cod_amount;
-                        $delivery_note->save();
+                $total_shipments = $delivery_note->shipments_count;
+                $total_shipments++;
+                $cod_amount = $delivery_note->total_cod_amount;
+                $total_cod_amount = $cod_amount + $shipment->amount;
+                $delivery_note->shipments_count = $total_shipments;
+                $delivery_note->total_cod_amount = $total_cod_amount;
+                $delivery_note->save();
 
-                        if($delivery_note->ordering == 1){
-                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
-                            $serial = $serial->ordering;
-                        }
-                        else{
-                            $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->first();
-                        }
-                        if($serial != null){
-                            $serial++;
-                        }
-                        else{
-                            $serial = null;
-                        }
-                        $delivery_note_shipment = new DeliveryNoteShipment();
-                        $delivery_note_shipment->delivery_note_id = $delivery_note_id;
-                        $delivery_note_shipment->shipment_id = $shipment->id;
-                        $delivery_note_shipment->ordering = $serial;
-                        $delivery_note_shipment->save();
-                        return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+                if($delivery_note->ordering == 1){
+                    $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                    $serial = $serial->ordering;
+                }
+                if($serial != null){
+                    $serial++;
+                }
+                else{
+                    $serial = null;
+                }
+                $delivery_note_shipment = new DeliveryNoteShipment();
+                $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+                $delivery_note_shipment->shipment_id = $shipment->id;
+                $delivery_note_shipment->ordering = $serial;
+                $delivery_note_shipment->save();
 
+                $journey = new ShipmentsJourney;
+                $journey->shipment_id = $shipment_id;
+                $journey->verification = 1;
+                $journey->shipper_status_id = 5;
+                $journey->consignee_status_id = 5;
+                $journey->admin_id = Auth::id();
+                $journey->save();
+//                NotificationsController::send(10,$delivery_note_id, $shipment_id);
+                return response()->json(['status' => 0, 'success' => 'Shipments Added']);
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
@@ -6193,5 +6200,24 @@ class DeliveryController extends Controller
 //            }
 //        }
 
+    }
+
+    Public function operation_riders(Request $request){
+
+        $operation_id = $request->operation_rider_id;
+        $riders = Rider::where('operation_rider_id',$operation_id)->where('status',1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        if($riders){
+            $riders = $riders->select('id','name')->get();
+            return response()->json(['status'=> 1,'riders' => $riders,'success'=>'Riders Found']);
+        }
+        else{
+            return response()->json(['status'=> 0, 'error' => 'No Riders Found']);
+        }
     }
 }
