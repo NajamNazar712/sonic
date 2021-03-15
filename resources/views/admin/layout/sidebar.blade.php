@@ -1258,6 +1258,10 @@
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
                                         @endif
 
+                                        @if (session('role_id') == 1 || in_array(152, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Rider Ticker</a></li>
+                                        @endif
+
                                         @if (session('role_id') == 1 || count(array_intersect([81, 85, 279,394,447], session('permissions'))) !== 0)
                                             <li class=" nav-item"><a href="#"><span class="menu-title">User Management</span></a>
                                                 <ul class="menu-content">

@@ -2084,6 +2084,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
+
+        Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
+        });
+
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');

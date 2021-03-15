@@ -42,6 +42,7 @@ use App\Http\Models\Rider;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
+use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -3354,6 +3355,17 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
 
+    }
+
+    public function rider_ticker_index()
+    {
+        $documents = UserDocumentAttachment::first();
+
+        $user = User::first();
+        if($documents == null){
+            $documents = false;
+        }
+        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status, 'shipper' => $user->name]);
     }
 
 }
