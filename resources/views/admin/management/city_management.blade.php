@@ -19,6 +19,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">City Code</th>
+                                    <th class="border-primary border-darken-1">City ID</th>
                                     <th class="border-primary border-darken-1">Hub Name</th>
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
@@ -120,6 +121,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.name);
+                                row.push(values.city_code);
                                 row.push(values.city_id);
                                 row.push(values.hub);
                                 row.push(values.hub_id);
@@ -207,6 +209,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'city_code', name: 'cities.city_code', class: 'align-middle city_code'},
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},

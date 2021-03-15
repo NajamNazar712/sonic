@@ -7,10 +7,18 @@
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
+            
         </div>
+       
+        
         <div class="col d-none" id="country_name_div">
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="countryName" placeholder="Add Country Name*" required data-rule-required="true" data-msg-required="This field is required">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
             </fieldset>
         </div>
         <div class="col-3">
