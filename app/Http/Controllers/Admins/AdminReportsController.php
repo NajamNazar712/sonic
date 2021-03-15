@@ -3774,7 +3774,7 @@ class AdminReportsController extends Controller
 
     }
     public function sales_person_performance_download(Request $request){
-        $file_name = "/reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "/reports/sales_person_performance".Auth::id().".xlsx";
 
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
