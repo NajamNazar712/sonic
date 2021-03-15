@@ -1649,6 +1649,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('approved')->name('approved.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
+            Route::get('{id}/view', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view')->name('view');
+            Route::get('{id}/view/list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view_list')->name('view.list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
             Route::post('bulk_adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_bulk_adjusted')->name('bulk_adjusted');
