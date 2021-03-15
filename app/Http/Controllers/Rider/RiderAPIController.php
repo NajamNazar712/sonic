@@ -3313,7 +3313,7 @@ class RiderAPIController extends Controller
                     $delivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', '>', 1)->where('update_type', 1)->count();
                     $delivery_history = array();
                     $delivery_history['delivery_note'] = $rider_delivery->delivery_note_id;
-                    $delivery_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
+                    $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
                     $rider_delivery_history[] = $delivery_history;
