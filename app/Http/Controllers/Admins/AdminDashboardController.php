@@ -8167,6 +8167,7 @@ class AdminDashboardController extends Controller
                 elseif($request->postType == 'hub'){
                     City::where('id',$id)->update([
                         'name'=>$request->cityName,
+                        'city_code'=>$request->city_code,
                         'hub'=>1,
                         'hub_id'=>$id,
                         'zone_id'=>$request->zone_id,
