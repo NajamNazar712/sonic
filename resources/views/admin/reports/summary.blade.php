@@ -195,6 +195,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_intransit pull-up">
+                                <div class="card-content" id="total_return_intransit">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-loop text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="returned_intransit">0</h3>
+                                                <span>Return - In Transit Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-3">
                             <div class="card bg-gradient-directional-red pull-up">
                                 <div class="card-content" id="total_cancelled">
@@ -255,6 +274,11 @@
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
         }
+        .bg-gradient-directional-return_intransit {
+            background-image: linear-gradient(45deg, #ff39aed6, #bb82e7);
+            background-repeat: repeat-x;
+        }
+        
         .show_active{
             -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
             -moz-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
@@ -382,6 +406,7 @@
                             $('#delivered').text(data.stats.delivered);
                             $('#in_process').text(data.stats.in_process);
                             $('#return').text(data.stats.return);
+                            $('#returned_intransit').text(data.stats.returned_intransit);
                             $('#canceled').text(data.stats.canceled);
                             table.draw();
 
@@ -392,6 +417,7 @@
                            $('#delivered').text(0);
                            $('#in_process').text(0);
                            $('#return').text(0);
+                           $('#returned_intransit').text(0);
                            $('#canceled').text(0);
                            table.draw();
                        }
@@ -550,6 +576,13 @@
                 $('#cards_filter_input').val('returned');
                 table.draw();
             });
+            $('#total_return_intransit').on('click', function () {
+                add_animation($(this));
+                $('#cards_filter_input').val('returned_intransit');
+                table.draw();
+            });
+            
+            
             $('#total_inprocess').on('click', function () {
                 add_animation($(this));
                 $('#cards_filter_input').val('in_process');
