@@ -734,6 +734,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_open_bag_store(Request $request) {
+        $bag_numbers = array();
         $shipment_ids = explode(',', $request->input('shipment_ids'));
         $open_box_ids = explode(',', $request->input('open_box_ids'));
         foreach ($shipment_ids as $key => $shipment_id) {
@@ -843,9 +844,16 @@ class AdminMasterCargoController extends Controller
                 }
 
                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id, $bag->builty_number);
+
+                if($bag_numbers == ''){
+                    $bag_numbers = $bag->seal_number;
+                }
+                else{
+                    $bag_numbers = $bag_numbers . ', ' . $bag->seal_number;
+                }
             }
 
-            return redirect()->route('admin.master_cargo.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Number: ' . $bag->seal_number]);
+            return redirect()->route('admin.master_cargo.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers]);
         }
         else {
             return back()->withErrors('All Shipments have already been added to another Bag!');
