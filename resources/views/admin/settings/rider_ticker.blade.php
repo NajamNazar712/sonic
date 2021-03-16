@@ -28,7 +28,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image1"  id="image"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image1"  id="image1"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -37,7 +37,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image2"  id="image"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image2"  id="image2" value=""></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -46,7 +46,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image3"  id="image"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image3"  id="image3" value=""></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -55,7 +55,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image4"  id="image"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image4"  id="image4" value=""></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -64,50 +64,18 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image5"  id="image"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image5"  id="image5" value=""></td>
                                         @endif
                                     </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        {{--@if(session('role_id') == 1 || in_array(277, session('permissions')) || in_array(278, session('permissions')))
-                            <div class="row justify-content-center mt-4">
-                                @if($document_status == 0 || $document_status == 3)
-                                    @if(session('role_id') == 1 || in_array(277, session('permissions')))
-                                        <div class="mr-1">
-                                            <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
-                                        </div>
-                                    @endif
-
-                                    @if($documents && $documents->filled_and_signed_pdf != null && $documents->signed_acknowledgement_pdf != null  && $documents->cnic_front_image != null  && $documents->cnic_back_image != null  && $documents->blank_cheque_image != null)
-                                        <div class="mr-1">
-                                            <button type="button" class="btn btn-outline-success mr-1 confirm">Confirm</button>
-                                        </div>
-                                    @endif
-                                @elseif($document_status == 2)
-                                    @if(session('role_id') == 1 || in_array(277, session('permissions')))
-                                        <div class="mr-1">
-                                            <button type="button" class="btn btn-outline-primary mr-1 edit">Edit</button>
-                                        </div>
-                                    @endif
-                                @elseif($document_status == 1)
-                                    @if(session('role_id') == 1 || in_array(278, session('permissions')))
-                                        <div class="mr-1">
-                                            <button type="button" class="btn btn-success approve">Approve</button>
-                                        </div>
-                                        <form id="reject_reason">
-                                            <div class="form-group mr-1">
-                                                <textarea class="form-control" id="reason" name="reason" placeholder="Reject reason"></textarea>
-                                            </div>
-                                        </form>
-                                        <div class="">
-                                            <button type="button" class="btn btn-danger reject">Reject</button>
-                                        </div>
-                                    @endif
-                                @endif
+                        <div class="row justify-content-center mt-4">
+                            <div class="mr-1">
+                                <button type="button" class="btn btn-outline-primary mr-1 upload">Upload</button>
                             </div>
-                        @endif--}}
+                        </div>
                     </div>
                     {{--<div class="row justify-content-center">--}}
                     {{--<button type="submit" class="btn btn-primary col-2">--}}
@@ -118,69 +86,6 @@
             </div>
         </div>
     </div>
-
-
-    <div class="modal fade" id="upload_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <form id="upload_documents_form" class="form form-horizontal" method="post" action="{{route('admin.accounts.documents.upload')}}" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="user_id" id="user_id" value="{{$id}}">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="shipments_modal_title">Upload Document(s)</h4>
-
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="filled_and_signed_image">
-                                    Pdf of filled and signed document:
-                                </label><br>
-                                <span id="old_filled_and_signed_pdf"> </span><input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf">
-                            </div>
-                            <div class="form-group">
-                                <label for="signed_acknowledgement_image">
-                                    Pdf of signed Acknowledgement form:
-                                </label>
-                                <br>
-                                <span id="old_signed_acknowledgement_pdf"> </span>
-                                <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf"  id="signed_acknowledgement_pdf">
-                            </div>
-                            <div class="form-group">
-                                <label for="cnic_front_image">
-                                    Picture of CNIC (Front):
-                                </label><br>
-                                <span id="old_cnic_front_image"> </span>
-                                <input class="form-control form-control-sm" type="file" name="cnic_front_image"  id="cnic_front_image">
-                            </div>
-                            <div class="form-group">
-                                <label for="cnic_back_image">
-                                    Picture of CNIC (Back):
-                                </label><br>
-                                <span id="old_cnic_back_image"> </span>
-                                <input class="form-control form-control-sm" type="file" name="cnic_back_image"  id="cnic_back_image">
-                            </div>
-                            <div class="form-group">
-                                <label for="blank_cheque_image">
-                                    Picture of Blank cheque:
-                                </label><br>
-                                <span id="old_blank_cheque_image"> </span>
-                                <input class="form-control form-control-sm" type="file" name="blank_cheque_image"  id="blank_cheque_image">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
@@ -206,10 +111,47 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('.edit').on('click', function() {
+            $('.upload').on('click', function() {
+                var image_1 = $('#image1').val();
+                var image_2 = $('#image2').val();
+                var image_3 = $('#image3').val();
+                var image_4 = $('#image4').val();
+                var image_5 = $('#image5').val();
+                if(image_1 != '' || image_2 != '' || image_3 != '' || image_4 != '' || image_5 != ''){
+                    console.log(image_2);
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to upload documents',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            form.submit();
+                        }
+                    });
+                }
+                else{
+                    var error = 'No file Selected';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
 
-                var user_id = {!! $id !!};
-                console.log(user_id);
+
                 $.ajax({
                     url: '{!! route('admin.accounts.documents.edit') !!}',
                     method: 'POST',
@@ -293,7 +235,7 @@
                 });
             });
 
-            $( "#upload_documents_form" ).validate({
+            $( "#documents_form" ).validate({
                 errorClass:"danger",
                 normalizer: function(value) {
                     return $.trim(value);
