@@ -23,50 +23,55 @@
                                 <table class="table table-sm table-bordered text-center">
                                     <tbody>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Pdf of filled and signed document:</b></h6></td>
-                                        @if($documents && $documents->filled_and_signed_pdf != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        @if(isset($rider_ticker[0]))
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle">-</td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image1"  id="image"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Pdf of signed Acknowledgement form:</b></h6></td>
-                                        @if($documents && $documents->signed_acknowledgement_pdf != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'signed_acknowledgement_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                        <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        @if(isset($rider_ticker[1]))
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle">-</td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image2"  id="image"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Picture of CNIC (Front):</b></h6></td>
-                                        @if($documents && $documents->cnic_front_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_front_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                        <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        @if(isset($rider_ticker[2]))
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle">-</td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image3"  id="image"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Picture of CNIC (Back):</b></h6></td>
-                                        @if($documents && $documents->cnic_back_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'cnic_back_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                        <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        @if(isset($rider_ticker[3]))
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle">-</td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image4"  id="image"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Picture of Blank cheque:</b></h6></td>
-                                        @if($documents && $documents->blank_cheque_image != null)
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'blank_cheque_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                        <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        @if(isset($rider_ticker[4]))
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle">-</td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image5"  id="image"></td>
                                         @endif
                                     </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        @if(session('role_id') == 1 || in_array(277, session('permissions')) || in_array(278, session('permissions')))
+                        {{--@if(session('role_id') == 1 || in_array(277, session('permissions')) || in_array(278, session('permissions')))
                             <div class="row justify-content-center mt-4">
                                 @if($document_status == 0 || $document_status == 3)
                                     @if(session('role_id') == 1 || in_array(277, session('permissions')))
@@ -102,7 +107,7 @@
                                     @endif
                                 @endif
                             </div>
-                        @endif
+                        @endif--}}
                     </div>
                     {{--<div class="row justify-content-center">--}}
                     {{--<button type="submit" class="btn btn-primary col-2">--}}

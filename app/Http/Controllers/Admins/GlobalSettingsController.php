@@ -39,6 +39,7 @@ use App\Http\Models\Holiday;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
@@ -3359,13 +3360,8 @@ class GlobalSettingsController extends Controller
 
     public function rider_ticker_index()
     {
-        $documents = UserDocumentAttachment::first();
-
-        $user = User::first();
-        if($documents == null){
-            $documents = false;
-        }
-        return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status, 'shipper' => $user->name]);
+        $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1,'rider_ticker' => $rider_ticker]);
     }
 
 }

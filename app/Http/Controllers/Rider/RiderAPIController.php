@@ -4125,6 +4125,17 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
     }
 
+    public function rider_ticker_images(Request $request){
+        $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
+        if($rider_ticker_images->exists()){
+            $rider_ticker_images = $rider_ticker_images->get();
+            return response()->json(['status' => 0, 'images' => $rider_ticker_images]);
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'No Images Found']);
+        }
+    }
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
