@@ -1064,7 +1064,7 @@ class AdminMasterCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['shipping_modes'] = ShippingMode::all();
+        $details['shipping_modes'] = ShippingMode::whereIn('id',[1,2])->get();
 
         $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
             $query->where('hub_id',  $destination_details['id']);
@@ -1123,9 +1123,9 @@ class AdminMasterCargoController extends Controller
             $master_cargo->driver_name = $request->input('driver_name');
             $master_cargo->vehicle = $request->input('vehicle');
             $master_cargo->phone_number = $request->input('phone_number');
-            if($request->has('cnic')){
-                $master_cargo->cnic = $request->input('cnic');
-            }
+//            if($request->has('cnic')){
+//                $master_cargo->cnic = $request->input('cnic');
+//            }
 
             if ($request->input('transport_mode_vendor') == 0) {
                 $transport_mode_vendor = new TransportModeVendor();

@@ -136,7 +136,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required">
+                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col">
@@ -160,22 +160,22 @@
 
                                                     <div class="w-100"></div>
 
-                                                    <div class="col">
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
                                                             <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">
-                                                        </div>
-                                                    </div>
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
                                                 </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary" value="submit_and_print_form">Submit &amp; Print</button>
-                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
+                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary btn-block" value="submit_and_print_form">Submit &amp; Print</button>
+{{--                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>--}}
                                             </div>
                                         </form>
                                     </div>
@@ -515,6 +515,8 @@
                             }
                         });
                         $('#master_cargo_consignment form .transport_mode').val(2).trigger('change');
+                        $('#master_cargo_consignment form .shipping_mode_select').val(1).trigger('change');
+                        $('#master_cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
                         UnblockPagePermanently();
                     }
                 });
