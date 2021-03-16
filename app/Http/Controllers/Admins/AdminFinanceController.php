@@ -1956,7 +1956,7 @@ class AdminFinanceController extends Controller
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function($query){
                 $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
             })],
-            'actual_weight' => ['required', 'numeric', 'between:0.1,100000'],
+            'actual_weight' => ['required', 'numeric', 'between:0.01,100000'],
         ];
 
         $fields = [0 => 'tracking_number', 1 => 'actual_weight'];

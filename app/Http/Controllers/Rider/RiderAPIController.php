@@ -2504,7 +2504,7 @@ class RiderAPIController extends Controller
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-            if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [25])->exists()) {
+            if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
                 if (!RiderReturnDelivery::where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                     if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) {
                         {
@@ -2581,7 +2581,7 @@ class RiderAPIController extends Controller
                                 $shipment->consignee_status_id = 25;
                                 $shipment->save();
                                 ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
-                                ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $request->return_note_id, NULL, 0, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $request->return_note_id, NULL, 1, $received_by, $rider_id);
                             }
                             $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                             if (!$rider_return_note_status->exists()) {
@@ -2720,7 +2720,7 @@ class RiderAPIController extends Controller
                             $remarks = $request->remarks;
                         }
 
-                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 0, NULL, $rider_id);
+                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 1, NULL, $rider_id);
                         ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                         $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                         if (!$rider_return_note_status->exists()) {
@@ -3767,7 +3767,7 @@ class RiderAPIController extends Controller
                                     $remarks = $request->remarks;
                                 }
 
-                                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 0, NULL, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 1, NULL, $rider_id);
                                 ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                                 $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                                 if (!$rider_return_note_status->exists()) {

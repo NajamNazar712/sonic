@@ -2386,9 +2386,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk'];
+                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk'];
 
-                    $bcc = ['muhammad.waqas@trax.pk'];
+                    $bcc = ['muhammad.waqas@trax.pk','anum.khan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
@@ -3354,7 +3354,7 @@ class NotificationsController extends Controller
                             //     $cc = $general_managers->pluck('admins.email')->toArray();
                             // }
 
-                            $to[] = 'ammar.mir@trax.pk';
+                            $to[] = 'uzair.anees@trax.pk';
                             $admins = Admin::whereIn('role_id', [31])->where('status', 1);
 
                             if ($admins->exists()) {
@@ -3485,7 +3485,7 @@ class NotificationsController extends Controller
 
                     // self::email($subject, $body, $to, $cc);
 
-                    $to = 'ammar.mir@trax.pk';
+                    $to = 'uzair.anees@trax.pk';
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
