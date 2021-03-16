@@ -2115,6 +2115,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
                 Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
             });
+            Route::prefix('consignee')->name('consignee.')->group( function(){
+                Route::get('', 'Admins\GlobalSettingsController@petty_cash_consignee_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@petty_cash_consignee_list')->name('list');
+                Route::Post('', 'Admins\GlobalSettingsController@petty_cash_consignee_store')->name('store');
+                Route::Post('edit', 'Admins\GlobalSettingsController@petty_cash_consignee_edit')->name('edit');
+                Route::prefix('city')->name('city.')->group( function(){
+                    Route::get('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_index')->name('index');
+                    Route::Post('{id}/check', 'Admins\GlobalSettingsController@petty_cash_consignee_city_check')->name('check');
+                    Route::Post('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_update')->name('update');
+                });
+            });
         });
 
         Route::prefix('debriefing_report_cut_off_time')->name('debriefing_report_cut_off_time.')->group(function () {

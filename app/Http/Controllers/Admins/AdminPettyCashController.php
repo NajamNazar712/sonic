@@ -6,6 +6,8 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
@@ -1458,12 +1460,20 @@ class AdminPettyCashController extends Controller
 
     public function create_shipment($petty_cash_statement_id)
     {
-        $user_id = 1690;
-        $user = User::find($user_id);
-
         if ($petty_cash_statement_id) {
             $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
             $city_id = $petty_cash_statement->hub_id;
+            $consignee_hub = PettyCashConsigneeHub::where('city_id',$city_id);
+            if($consignee_hub->exists())
+            {
+                $user_id = PettyCashConsignee::find($consignee_hub->first()->petty_cash_consignee_id)->consignee_id;
+            }
+            else{
+                $user_id = 1690;
+            }
+
+            $user = User::find($user_id);
+
             $special_instructions = 'Petty Cash Statement # ' . $petty_cash_statement_id;
             $pickup = UserShippingInfo::where('user_id', $user_id)->where('city_id', $city_id);
             $pickup_address_id = '';
@@ -1479,7 +1489,7 @@ class AdminPettyCashController extends Controller
                 $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
             }
 
-            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, 202, 'Fawad Ahmed Finance Manager', 'Trax Head Office Karachi', '0213-8772222', NULL, $user->email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
+            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, $city_id, $user->name, 'Trax Head Office '.$petty_cash_statement->hub->name, $user->phone, NULL, $user->email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
 
             $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, 202);
             $this->add_item($shipment->id, 24, $special_instructions, 1, null, 0, 0);

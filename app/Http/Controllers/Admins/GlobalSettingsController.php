@@ -16,6 +16,8 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -45,6 +47,7 @@ use App\http\Models\RunnerJunction;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
+use http\Env\Response;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -534,6 +537,146 @@ class GlobalSettingsController extends Controller
         } else {
             return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
         }
+    }
+
+    public function petty_cash_consignee_index(){
+        $consignees = User::where([['status',3],['blacklist',0]])->get(['id','name']);
+        $hubs = City::where('hub',1)->get(['id','name']);
+        return view('admin.settings.petty_cash.consignee_settings')->with(['consignees'=>$consignees,'hubs'=>$hubs]);
+    }
+
+    public function petty_cash_consignee_list(){
+
+        $data = PettyCashConsignee::join('users as consignees','consignees.id','=','petty_cash_consignees.consignee_id')
+            ->join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
+            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.consignee_id as consignee_id', 'petty_cash_consignees.id as id','hubs.name as hub_name','consignees.name as consignee_name');
+        return Datatables::of($data)
+            ->addColumn('action', function ($data) {
+                    $update_city_url = route('admin.settings.petty_cash.consignee.city.index',$data->id);
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        $dropdown .= '<a href="'.$update_city_url.'"><button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Update Cities</div></button></a>';
+
+                    return $dropdown;
+
+            })
+            ->make(true);
+    }
+
+    public function petty_cash_consignee_store(Request $request)
+    {
+        $consignee_error = "";
+        $hub_error = "";
+        $consignee_error_status = PettyCashConsignee::where('consignee_id',$request->consignee)->exists();
+        $hub_error_status = PettyCashConsignee::where('hub_id',$request->hub)->exists();
+        if($consignee_error_status)
+        {
+            $consignee_error = "Please Select a Unique Consignee";
+        }
+        if($hub_error_status)
+        {
+            $hub_error = "Please Select a Unique Hub";
+        }
+        if($consignee_error_status || $hub_error_status)
+        {
+            return response()->json(['status' => 0, 'consignee_error' => $consignee_error,'hub_error'=>$hub_error]);
+        }
+
+        $table = new PettyCashConsignee();
+        $table->consignee_id = $request->consignee;
+        $table->hub_id = $request->hub;
+        $table->save();
+
+        return response()->json(['status' => 1, 'success' => "Petty Cash Consignee Added Successfully"]);
+    }
+
+    public function petty_cash_consignee_edit(Request $request)
+    {
+        $consignee_error = "";
+        $hub_error = "";
+        $consignee_error_status = PettyCashConsignee::where([['consignee_id',$request->consignee],['id','!=',$request->id]])->exists();
+        $hub_error_status = PettyCashConsignee::where([['hub_id',$request->hub],['id','!=',$request->id]])->exists();
+        if($consignee_error_status)
+        {
+            $consignee_error = "Please Select a Unique Consignee";
+        }
+        if($hub_error_status)
+        {
+            $hub_error = "Please Select a Unique Hub";
+        }
+        if($consignee_error_status || $hub_error_status)
+        {
+            return response()->json(['status' => 0, 'consignee_error' => $consignee_error,'hub_error'=>$hub_error]);
+        }
+
+        $table = PettyCashConsignee::find($request->id);
+        if(!$table->exists())
+        {
+            return response()->json(['status' => 0, 'error' => "Petty Cash Consignee Information Not Found, Please Try again!"]);
+        }
+
+        $table->consignee_id = $request->consignee;
+        $table->hub_id = $request->hub;
+        $table->update();
+
+        return response()->json(['status' => 1, 'success' => "Petty Cash Consignee Updated Successfully"]);
+    }
+
+    public function petty_cash_consignee_city_index($id)
+    {
+        $cities = City::all(['id','name']);
+        $consignee = PettyCashConsignee::where('petty_cash_consignees.id',$id)
+            ->join('users as consignees','consignees.id','=','petty_Cash_consignees.consignee_id')
+            ->join('cities as hubs','hubs.id','=','petty_Cash_consignees.hub_id')
+            ->select('hubs.name as hub_name','consignees.name as consignee_name','petty_cash_consignees.id as id')
+            ->first();
+        $petty_cash_cities = PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->pluck('city_id')->toArray();
+        return view('admin.settings.petty_cash.consignee_city_update')->with(['cities'=>$cities,'petty_cash_cities'=>$petty_cash_cities,'consignee'=>$consignee]);
+    }
+
+    public function petty_cash_consignee_city_check($id, Request $request)
+    {
+        if ($request->has('cities')) {
+            if (count($request->cities) > 0) {
+                $cities = $request->cities;
+                foreach ($cities as $city_id) {
+                    if(PettyCashConsigneeHub::where([['city_id',$city_id],['petty_cash_consignee_id','!=',$id]])->exists())
+                    {
+                        return response()->json(['error'=>'Select Unique Cities, '.City::find($city_id)->name.' is already assigned to consignee']);
+                    }
+                }
+            }
+            else{
+                return response()->json(['error'=>'Cities are required']);
+            }
+        }
+        else{
+            return response()->json(['error'=>'Cities are required']);
+        }
+
+        return 0;
+    }
+
+    public function petty_cash_consignee_city_update($id, Request $request)
+    {
+        PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->delete();
+        if ($request->has('cities')) {
+            if (count($request->cities) > 0) {
+                $cities = $request->cities;
+                foreach ($cities as $city_id) {
+                    $petty_cash_consignee_city = new PettyCashConsigneeHub();
+                    $petty_cash_consignee_city->petty_cash_consignee_id = $id;
+                    $petty_cash_consignee_city->city_id = $city_id;
+                    $petty_cash_consignee_city->save();
+                }
+            }
+        }
+        return redirect()->route('admin.settings.petty_cash.consignee.index')->with('success', 'Petty Cash Consignee Cities Updated!');
     }
 
     public function walk_in_index()
