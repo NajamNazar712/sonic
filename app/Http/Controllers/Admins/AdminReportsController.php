@@ -5732,6 +5732,18 @@ class AdminReportsController extends Controller
                             ->where('cities.id', $origin);
                     });
             });
+
+            $stats['return_intransit'] = $stats['return_intransit']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+
+        
             $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -5750,6 +5762,7 @@ class AdminReportsController extends Controller
             $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
             $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
             $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['return_intransit'] = $stats['return_intransit']->where('consignee_city_id', $destination);
             $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
         }
         $stats['total'] = number_format($stats['total']->count());
@@ -5758,6 +5771,7 @@ class AdminReportsController extends Controller
         $stats['received'] = number_format($stats['received']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
+        $stats['return_intransit'] = number_format($stats['return_intransit']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
 
 

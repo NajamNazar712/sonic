@@ -205,7 +205,7 @@
                                                 <i class="icon-loop text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="return">0</h3>
+                                                <h3 class="text-white" id="returned_intransit">0</h3>
                                                 <span>Return - In Transit Shipment(s)</span>
                                             </div>
                                         </div>
@@ -406,6 +406,7 @@
                             $('#delivered').text(data.stats.delivered);
                             $('#in_process').text(data.stats.in_process);
                             $('#return').text(data.stats.return);
+                            $('#returned_intransit').text(data.stats.returned_intransit);
                             $('#canceled').text(data.stats.canceled);
                             table.draw();
 
@@ -416,6 +417,7 @@
                            $('#delivered').text(0);
                            $('#in_process').text(0);
                            $('#return').text(0);
+                           $('#returned_intransit').text(0);
                            $('#canceled').text(0);
                            table.draw();
                        }
