@@ -141,7 +141,7 @@
                                                     </div>
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle*" data-rule-required="true" data-msg-required="Vehicle is required">
+                                                            <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is required">
                                                         </div>
                                                     </div>
 

@@ -62,7 +62,6 @@
                                     <th class="border-primary border-darken-1">Junction 2</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
-                                    <th class="border-primary border-darken-1">Builty No.</th>
                                     <th class="border-primary border-darken-1">Driver Name</th>
                                     <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Contact No.</th>
@@ -233,7 +232,6 @@
                             head.push('Junction 2');
                             head.push('Transport Mode');
                             head.push('Vendor');
-                            head.push('Builty No.');
                             head.push('Driver Name');
                             head.push('Vehicle');
                             head.push('Contact No.');
@@ -260,7 +258,6 @@
                                 row.push(values.junction_2);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
-                                row.push(values.builty_number);
                                 row.push(values.driver_name);
                                 row.push(values.vehicle);
                                 row.push(values.phone_number);
@@ -353,7 +350,6 @@
                     {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
-                    {data: 'builty_number', name: 'master_cargoes.builty_number', class: 'align-middle builty_number'},
                     {data: 'driver_name', name: 'master_cargoes.driver_name', class: 'align-middle driver_name'},
                     {data: 'vehicle', name: 'master_cargoes.vehicle', class: 'align-middle vehicle'},
                     {data: 'phone_number', name: 'master_cargoes.phone_number', class: 'align-middle phone_number'},
