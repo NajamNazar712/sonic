@@ -729,6 +729,129 @@ class AdminMasterCargoController extends Controller
         }
     }
 
+    public function create_open_bag_index() {
+        return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
+    }
+
+    public function create_open_bag_store(Request $request) {
+        $shipment_ids = explode(',', $request->input('shipment_ids'));
+        $open_box_ids = explode(',', $request->input('open_box_ids'));
+        foreach ($shipment_ids as $key => $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+
+            if (!in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                unset($shipment_ids[$key]);
+            }
+            $bag = Bag::where('seal_number', $shipment->seal_number);
+            if($bag->exists()){
+                unset($shipment_ids[$key]);
+            }
+        }
+
+        if (!empty($shipment_ids)) {
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+                $bag = new Bag();
+
+                $bag->origin_hub_id = $request->input('origin_hub_id');
+                $bag->destination_hub_id = $request->input('destination_hub_id');
+                $bag->junction_hub_1_id = $request->input('junction_1');
+                $bag->junction_hub_2_id = $request->input('junction_2');
+                $bag->seal_number = $shipment->tracking_number;
+                $bag->shipping_mode_id = $request->input('shipping_mode_id');
+                $bag->transport_mode_id = $request->input('transport_mode');
+
+                if ($request->input('transport_mode_vendor') == 0) {
+                    $transport_mode_vendor = new TransportModeVendor();
+
+                    $transport_mode_vendor->transport_mode_id = $request->input('transport_mode');
+                    $transport_mode_vendor->name = $request->input('vendor_name');
+
+                    $transport_mode_vendor->save();
+
+                    $bag->transport_mode_vendor_id = $transport_mode_vendor->id;
+                }
+                else {
+                    $bag->transport_mode_vendor_id = $request->input('transport_mode_vendor');
+                }
+
+                $bag->shipments = 1;
+                $bag->quantity = count($shipment->items);
+                $bag->shipments_weight = $shipment->actual_weight;
+
+                $bag->actual_weight = $shipment->actual_weight;
+                $bag->created_by = Auth::id();
+
+                $bag->type = $request->input('bag_type');
+
+                $bag->status_id = 1;
+
+                $bag->save();
+
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
+
+                $id = $bag->id;
+
+                $bag_shipment = new BagShipment();
+
+                $bag_shipment->bag_id = $id;
+                $bag_shipment->shipment_id = $shipment_id;
+
+                $bag_shipment->save();
+
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
+
+                if ($request->input('bag_type') == 1) {
+                    $shipper_status_id = 3;
+                    $consignee_status_id = 3;
+                }
+                else {
+                    $shipper_status_id = 21;
+                    $consignee_status_id = 21;
+
+                    if ($shipment->shipper_status_id != 20) {
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
+                        }
+                        else if ($shipment->booking_type_id == 2) {
+                            $shipper_status_id = 26;
+                            $consignee_status_id = 26;
+                        }
+                        else if ($shipment->booking_type_id == 3) {
+                            $shipper_status_id = 32;
+                            $consignee_status_id = 32;
+                        }
+                        else {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
+                        }
+                    }
+                }
+
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+
+                $shipment->save();
+
+
+                if(in_array($shipment_id, $open_box_ids)){
+                    $shipment->open_box = 1;
+                    $shipment->save();
+                    ShipmentOpenBoxJourneyController::add($shipment_id,1,Auth::id());
+                }
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id, $bag->builty_number);
+            }
+
+            return redirect()->route('admin.master_cargo.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Number: ' . $bag->seal_number]);
+        }
+        else {
+            return back()->withErrors('All Shipments have already been added to another Bag!');
+        }
+    }
+
     public  function history_index(){
         $shipping_mode = ShippingMode::all();
         $bag_statuses = BagStatus::all();
