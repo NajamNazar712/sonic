@@ -152,6 +152,8 @@ class Permission
             'master_cargo.bag.create.shipment_details' => 26,
             'master_cargo.bag.create.bag_details' => 26,
             'master_cargo.bag.create.store' => 26,
+            'master_cargo.bag.create.open_bag.index' => 26,
+            'master_cargo.bag.create.open_bag.store' => 26,
             'master_cargo.bag.history.index' => 124,
             'master_cargo.bag.history.list' => 124,
             'master_cargo.bag.receive.quick.index' => 31,
