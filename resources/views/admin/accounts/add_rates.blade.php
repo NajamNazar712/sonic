@@ -491,21 +491,21 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_packaging_rate" disabled>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
 
                                     </div>
@@ -923,21 +923,21 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text" id="radio-addon3">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text" id="radio-addon3">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_packaging_rate" disabled>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
                                         
                                     </div>
@@ -1360,21 +1360,21 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_packaging_rate" disabled>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
                                         
                                     </div>
@@ -1754,21 +1754,21 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
                                         
                                     </div>
@@ -3247,9 +3247,9 @@
         ondiscountSwitch[3].onchange = function () {
             ONdiscount(ondiscountSwitch[3]);
         };
-        ondiscountSwitch[4].onchange = function () {
-            ONdiscount(ondiscountSwitch[4]);
-        };
+        // ondiscountSwitch[4].onchange = function () {
+        //     ONdiscount(ondiscountSwitch[4]);
+        // };
         // $.each(ondiscountSwitch,function () {
         //     console.log('heeee');
         // });
@@ -3289,9 +3289,9 @@
         overlandDiscountSwitch[3].onchange = function () {
             OLdiscount(overlandDiscountSwitch[3]);
         };
-        overlandDiscountSwitch[4].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[4]);
-        };
+        // overlandDiscountSwitch[4].onchange = function () {
+        //     OLdiscount(overlandDiscountSwitch[4]);
+        // };
         function OLdiscount(eveOver) {
             if(eveOver.checked === true){
 
@@ -3302,7 +3302,7 @@
             }else if(eveOver.checked === false){
                 $(eveOver).parent().parent().next().prop('disabled',true);
 
-                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true || overlandDiscountSwitch[4].checked === true){
+                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true /*|| overlandDiscountSwitch[4].checked === true*/){
                     $('input[name="ol_discount_title"]').prop('disabled',false);
                     $('input[name="ol_daterange"]').prop('disabled',false);
                 }else{
@@ -3329,9 +3329,9 @@
         detainDiscountSwitch[3].onchange = function () {
             Detaindiscount(detainDiscountSwitch[3]);
         };
-        detainDiscountSwitch[4].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[4]);
-        };
+        // detainDiscountSwitch[4].onchange = function () {
+        //     Detaindiscount(detainDiscountSwitch[4]);
+        // };
         function Detaindiscount(eveDet) {
             if(eveDet.checked === true){
 
@@ -3342,7 +3342,7 @@
             }else if(eveDet.checked === false){
                 $(eveDet).parent().parent().next().prop('disabled',true);
 
-                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true || detainDiscountSwitch[4].checked === true){
+                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true /*|| detainDiscountSwitch[4].checked === true*/){
                     $('input[name="detain_discount_title"]').prop('disabled',false);
                     $('input[name="detain_daterange"]').prop('disabled',false);
                 }else{
@@ -3368,9 +3368,9 @@
         samedayDiscountSwitch[3].onchange = function () {
             SamedayDiscount(samedayDiscountSwitch[3]);
         };
-        samedayDiscountSwitch[4].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[4]);
-        };
+        // samedayDiscountSwitch[4].onchange = function () {
+        //     SamedayDiscount(samedayDiscountSwitch[4]);
+        // };
         function SamedayDiscount(eveSameday) {
             if(eveSameday.checked === true){
 
@@ -3381,7 +3381,7 @@
             }else if(eveSameday.checked === false){
                 $(eveSameday).parent().parent().next().prop('disabled',true);
 
-                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true || samedayDiscountSwitch[4].checked === true){
+                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true /*|| samedayDiscountSwitch[4].checked === true*/){
                     $('input[name="sameday_discount_title"]').prop('disabled',false);
                     $('input[name="sameday_daterange"]').prop('disabled',false);
                 }else{
