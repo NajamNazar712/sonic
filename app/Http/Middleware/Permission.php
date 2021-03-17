@@ -365,6 +365,9 @@ class Permission
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.approved.index' => 147,
+            'petty_cash_approved.view' => 461,
+            'petty_cash_approved.view.list' => 461,
+
 //            'petty_cash.statements.approve' => 173,
 //            'petty_cash.statements.approve' => 190,
 //            'petty_cash.statements.approve' => 191,
