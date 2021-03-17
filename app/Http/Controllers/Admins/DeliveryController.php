@@ -5921,8 +5921,8 @@ class DeliveryController extends Controller
             $deposit_amount= $sdn->sdn_deposit_amount;
             $adjustment_amount =  $request->adjustment_amount;
 
-//            $total = $deposit_amount + $adjustment_amount;
-//            if($dncc_amount == $total){
+            $total = $deposit_amount + $adjustment_amount;
+            if($dncc_amount == $total){
                 $sdn->adjustment_amount = $request->adjustment_amount;
                 $sdn->adjustment_date = $request->adjustment_date_formatted;
                 $sdn->adjustment_ref = $request->adjustment_ref;
@@ -5941,10 +5941,10 @@ class DeliveryController extends Controller
 
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
 
-//            }
-//            else{
-//                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
-//            }
+            }
+            else{
+                return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
+            }
 
         }else{
             return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
