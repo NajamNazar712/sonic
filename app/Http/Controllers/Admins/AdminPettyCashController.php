@@ -741,7 +741,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action', function ($petty) {
                 $dropdown = '';
-                if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
+                if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14 || in_array(461, session('permissions')))) {
                         if((session('role_id') == 1 || in_array(461, session('permissions'))) || $petty->status == 3) {
                             $dropdown = '
               <div class="btn-group">
@@ -777,8 +777,17 @@ class AdminPettyCashController extends Controller
     {
         $petty = PettyCashStatement::where('petty_cash_statements.id',$id)
             ->leftJoin('cities as hubs','hubs.id','=','petty_cash_statements.hub_id')
-            ->select('petty_cash_statements.*','hubs.name as hub_name')
-            ->first();
+            ->select('petty_cash_statements.*','hubs.name as hub_name');
+
+        if (session('role_id') != 1) {
+            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+        }
+
+        if(!$petty->exists())
+        {
+            return back();
+        }
+        $petty = $petty->first();
         $head = PettyCashAccountHead::select('id', 'name')->get();
         $cities = City::select('id', 'name')->get();
         return view('admin.petty_cash.view')->with(['heads' => $head, 'cities' => $cities, 'petty_statement' => $petty]);
