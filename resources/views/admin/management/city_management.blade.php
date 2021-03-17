@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+    @extends('admin.layout.master')
 
 @section('title', 'City Management')
 
@@ -16,22 +16,27 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S No.</th>
-                                    <th class="border-primary border-darken-1">City Name</th>
-                                    <th class="border-primary border-darken-1">City Code</th>
-                                    <th class="border-primary border-darken-1">City ID</th>
-                                    <th class="border-primary border-darken-1">Hub Name</th>
-                                    <th class="border-primary border-darken-1">Hub Code</th>
-                                    <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Businees Category</th>
-                                    <th class="border-primary border-darken-1">GC Area</th>
-                                    <th class="border-primary border-darken-1">Attempt Tat</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
-                                    <th class="border-primary border-darken-1">Updated At</th>
-                                    <th class="border-primary border-darken-1">Location</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1" rowspan="2">S No.</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">City Name</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">City Code</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">City ID</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Hub Name</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Hub Code</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Zone</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Businees Category</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">GC Area</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Attempt Tat</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Status</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Updated By</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Updated At</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Location</th>
+                                    <th class="border-primary border-darken-1" rowspan="2">Address</th>
+                                    <th class="border-primary border-darken-1" colspan="2">Forwarding Point</th>
+                                    <th class="border-primary border-darken-1" rowspan="2"></th>
+                                </tr>
+                                <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1" >Longitude</th>
+                                    <th class="border-primary border-darken-1" >Latitude</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -104,6 +109,7 @@
                             head.push('S.No');
                             head.push('City Name');
                             head.push('City Code');
+                            head.push('City Id');
                             head.push('Hub Name');
                             head.push('Hub Code');
                             head.push('Zone');
@@ -114,6 +120,8 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Address');
+                            head.push('Latitude');
+                            head.push('Longitude');
 
 
                             $.each(result.data, function(index, values) {
@@ -133,6 +141,8 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.address);
+                                row.push(values.location_latitude);
+                                row.push(values.location_longitude);
 
                                 body.push(row);
                             });
@@ -222,6 +232,8 @@
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
+                    {data: 'location_latitude', name: 'cities.location_latitude', class: 'align-middle longitude'},
+                    {data: 'location_longitude', name: 'cities.location_longitude', class: 'align-middle latitude'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
@@ -257,7 +269,7 @@
                        var column = this;
                        var header = column.header();
 
-                       if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')) {
+                       if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location') || $(header).is('.latitude') || $(header).is('.longitude')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
