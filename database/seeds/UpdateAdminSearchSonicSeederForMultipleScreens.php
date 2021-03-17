@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class UpdateAdminSearchSonicSeederForMultipleScreens extends Seeder
 {
@@ -12,7 +13,7 @@ class UpdateAdminSearchSonicSeederForMultipleScreens extends Seeder
     public function run()
     {
 
-        DB::table('admins_screen_list')->where('name','Settings > Last Mile > Route Management ')->update(['name' => 'Settings > Last Mile > Return Confirmation Pending Shipment Selection Time ']);
+        DB::table('admins_screen_list')->where('name','Settings  >  Last Mile  >  Route Management')->update(['name' => 'Settings > Last Mile > Return Confirmation Pending Shipment Selection Time']);
         DB::table('admins_screen_list')->where('name','Shippers  >  Packaging  >  Requests > Packaging Material Stock Requests')->delete();
         DB::table('admins_screen_list')->where('name','First Mile  >  Pickups  >  Pending Pickups')->delete();
         DB::table('admins_screen_list')->where('name','First Mile  >  Pickups  >  Assigned Pickups')->delete();
@@ -29,11 +30,14 @@ class UpdateAdminSearchSonicSeederForMultipleScreens extends Seeder
         DB::table('admins_screen_list')->where('name','Supply Chain  >  Cargo  >  Quick Receive List')->delete();
         DB::table('admins_screen_list')->where('name','Financials  >  Payments  >  Make Payments')->delete();
         DB::table('admins_screen_list')->where('name','Financials  >  Payments  >  Done Payments')->delete();
+        DB::table('admins_screen_list')->where('name','Supply Chain  >  Master Cargo  >  Bag > Pending Shipments for Bag')->delete();
+        DB::table('admins_screen_list')->where('name','Supply Chain  >  Master Cargo  >  Runners')->delete();
+        DB::table('admins_screen_list')->where('name','Supply Chain  >  Master Cargo  >  Receive Master Cargo')->delete();
+        DB::table('admins_screen_list')->where('name','First Mile  >  Pickups  >  Rider Pickup Action Logs')->delete();
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper > Accounts > Retail Accounts', 'url'=>'admin.retail.accounts.index', 'permission_id' => 428));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Pickups > Pickup Routes', 'url'=>'admin.v2_pickups.pickup_route.index', 'permission_id' => 406));
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Rider Tracking', 'url'=>'admin.v2_pickups.rider_tracking.index', 'permission_id' => 446));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Supply Chain > Master Cargo > Bag > Pending Shipments for Bag', 'url'=>'admin.master_cargo.bag.pending.index', 'permission_id' => 25));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => ' Supply Chain > Master Cargo > Bag > Create Bag', 'url'=>'admin.master_cargo.bag.create.index', 'permission_id' => 26));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Supply Chain > Master Cargo > Bag > Bag(s) History', 'url'=>'admin.master_cargo.bag.history.index', 'permission_id' => 124));
@@ -52,7 +56,6 @@ class UpdateAdminSearchSonicSeederForMultipleScreens extends Seeder
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Financials > Retail Payments > Retail Done Payments', 'url'=>'admin.finance.retail.done_payments.index', 'permission_id' => 455));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Sales > Key Accounts Dashboard', 'url'=>'admin.settings.sales.key_accounts.dashboard', 'permission_id' => 397));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > User Wise Commission', 'url'=>'admin.dashboard.userwise', 'permission_id' => 333));
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Overall Commission', 'url'=>'admin.dashboard.overall', 'permission_id' => 334));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > International > International Rates Settings', 'url'=>'admin.settings.international_rates.index', 'permission_id' => 438));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Human Resource > Active Employees List', 'url'=>'admin.human_resourse.allusers', 'permission_id' => 449));
     }
