@@ -6358,25 +6358,25 @@ class AdminDashboardController extends Controller
         }
 
         //Packaging Charges
-        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
-            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
-
-            foreach ($packaging_types as $type){
-                if($request->has('packaging_type_'.$type->id)){
-                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                    foreach ($packaging_size as $size) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $type->id;
-                        $packaging_charges->size_id = $size->id;
-                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
-                        $packaging_charges->save();
-                    }
-
-                }
-            }
-
-        }
+//        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+//            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+//
+//            foreach ($packaging_types as $type){
+//                if($request->has('packaging_type_'.$type->id)){
+//                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+//                    foreach ($packaging_size as $size) {
+//                        $packaging_charges = new PackagingCharge();
+//                        $packaging_charges->user_id = $id;
+//                        $packaging_charges->type_id = $type->id;
+//                        $packaging_charges->size_id = $size->id;
+//                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
+//                        $packaging_charges->save();
+//                    }
+//
+//                }
+//            }
+//
+//        }
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             if($request->has('on_default') && $request->on_default == 'on'){
