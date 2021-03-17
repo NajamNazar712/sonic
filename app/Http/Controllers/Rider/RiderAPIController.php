@@ -463,6 +463,7 @@ class RiderAPIController extends Controller
                         $information = array();
 
                         $information['name'] = $rider->name;
+                        $information['role'] = 'rider';
 
                         if ($rider->api_token) {
                             $information['api_token'] = $rider->api_token;

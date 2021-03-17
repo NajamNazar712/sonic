@@ -56,6 +56,7 @@ class AdminAPIController extends Controller
 
                     $information['id'] = $user->id;
                     $information['name'] = $user->name;
+                    $information['role'] = 'staff';
 
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
