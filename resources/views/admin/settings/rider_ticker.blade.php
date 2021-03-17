@@ -111,15 +111,20 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            $('#image1').val("");
+            $('#image2').val("");
+            $('#image3').val("");
+            $('#image4').val("");
+            $('#image5').val("");
             $('.upload').on('click', function() {
-                var image_1 = $('#image1').value;
-                var image_2 = $('#image2').value;
-                var image_3 = $('#image3').value;
-                var image_4 = $('#image4').value;
-                var image_5 = $('#image5').value;
+                var image_1 = $('#image1').val();
+                var image_2 = $('#image2').val();
+                var image_3 = $('#image3').val();
+                var image_4 = $('#image4').val();
+                var image_5 = $('#image5').val();
                 console.log(image_2);
+                console.log(image_3);
                 if(image_1 != '' || image_2 != '' || image_3 != '' || image_4 != '' || image_5 != ''){
-                    console.log(image_2);
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to upload documents',
@@ -143,7 +148,25 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if(confirm){
-                            form.submit();
+                            $.ajax({
+                                url: '{!! route('admin.settings.rider_ticker.store') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'image_1': image_1,
+                                    'image_2': image_2,
+                                    'image_3': image_3,
+                                    'image_4': image_4,
+                                    'image_5': image_5
+                                }
+                            }).done(function(data){
+                                if(data.status){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    window.location.reload();
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
                         }
                     });
                 }
