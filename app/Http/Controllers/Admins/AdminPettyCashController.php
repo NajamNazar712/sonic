@@ -785,7 +785,7 @@ class AdminPettyCashController extends Controller
 
         if(!$petty->exists())
         {
-            return back();
+            return back()->with(['error'=>"No Data Found!!"]);
         }
         $petty = $petty->first();
         $head = PettyCashAccountHead::select('id', 'name')->get();
