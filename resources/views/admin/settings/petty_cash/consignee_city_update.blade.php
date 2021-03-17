@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', {{$consignee->consignee_name($consignee->hub_name) .'City Update')
+@section('title','City Update')
 
 @section('content')
     <div class="app-content content">

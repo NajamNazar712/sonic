@@ -631,8 +631,8 @@ class GlobalSettingsController extends Controller
     {
         $cities = City::all(['id','name']);
         $consignee = PettyCashConsignee::where('petty_cash_consignees.id',$id)
-            ->join('users as consignees','consignees.id','=','petty_Cash_consignees.consignee_id')
-            ->join('cities as hubs','hubs.id','=','petty_Cash_consignees.hub_id')
+            ->join('users as consignees','consignees.id','=','petty_cash_consignees.consignee_id')
+            ->join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
             ->select('hubs.name as hub_name','consignees.name as consignee_name','petty_cash_consignees.id as id')
             ->first();
         $petty_cash_cities = PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->pluck('city_id')->toArray();

@@ -1177,7 +1177,7 @@
                                                     <li><a class="menu-item" href="{{route('admin.settings.petty_cash.titles.index')}}">Titles</a></li>
                                                 @endif
                                                 @if (session('role_id') == 1 || in_array(462, session('permissions')))
-                                                    <li><a class="menu-item" href="{{route('admin.settings.petty_cash.consignee.index')}}">Consignee</a></li>
+                                                    <li><a class="menu-item" href="{{route('admin.settings.petty_cash.consignee.index')}}">Hub Assigning</a></li>
                                                 @endif
                                             </ul>
                                         </li>

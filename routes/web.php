@@ -1626,6 +1626,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
         Route::prefix('make')->name('make.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
+            Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
@@ -2115,7 +2116,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
                 Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
             });
-            Route::prefix('consignee')->name('consignee.')->group( function(){
+            Route::prefix('hub-assigning')->name('consignee.')->group( function(){
                 Route::get('', 'Admins\GlobalSettingsController@petty_cash_consignee_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@petty_cash_consignee_list')->name('list');
                 Route::Post('', 'Admins\GlobalSettingsController@petty_cash_consignee_store')->name('store');
