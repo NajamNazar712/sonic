@@ -31,7 +31,7 @@
                                     <th class="border-primary border-darken-1" rowspan="2">Updated At</th>
                                     <th class="border-primary border-darken-1" rowspan="2">Location</th>
                                     <th class="border-primary border-darken-1" rowspan="2">Address</th>
-                                    <th class="border-primary border-darken-1" colspan="2">Forwarding Point</th>
+                                    <th class="border-primary border-darken-1 text-center" colspan="2">Forwarding Point</th>
                                     <th class="border-primary border-darken-1" rowspan="2"></th>
                                 </tr>
                                 <tr class="bg-primary white">
