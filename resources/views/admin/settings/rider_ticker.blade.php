@@ -112,11 +112,12 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('.upload').on('click', function() {
-                var image_1 = $('#image1').val();
-                var image_2 = $('#image2').val();
-                var image_3 = $('#image3').val();
-                var image_4 = $('#image4').val();
-                var image_5 = $('#image5').val();
+                var image_1 = $('#image1').value;
+                var image_2 = $('#image2').value;
+                var image_3 = $('#image3').value;
+                var image_4 = $('#image4').value;
+                var image_5 = $('#image5').value;
+                console.log(image_2);
                 if(image_1 != '' || image_2 != '' || image_3 != '' || image_4 != '' || image_5 != ''){
                     console.log(image_2);
                     swal({

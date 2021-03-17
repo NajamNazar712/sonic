@@ -19,6 +19,7 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentsJourney;
