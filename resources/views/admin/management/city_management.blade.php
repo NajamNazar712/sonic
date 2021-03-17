@@ -104,6 +104,7 @@
                             head.push('S.No');
                             head.push('City Name');
                             head.push('City Code');
+                            head.push('City ID');
                             head.push('Hub Name');
                             head.push('Hub Code');
                             head.push('Zone');
