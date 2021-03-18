@@ -48,7 +48,7 @@ class AdminHumanResourseController extends Controller
                     ->join('cities as c', 'cities.hub_id', '=', 'c.id')
                     ->select('c.name as hub', 'riders.id', 'riders.name', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.created_at as created_at')
                     ->where('rider_type_id', 1)
-                    ->where('status', 1)
+                    ->where('riders.status', 1)
                     ->whereIn('cities.hub_id', $assigned_hubs)->get();
 
 
