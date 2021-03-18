@@ -103,7 +103,9 @@ class RiderAPIController extends Controller
         'actions.*.logged_at' => 'Logged At',
         'actions.*.type_id' => 'Type ID',
         'actions.*.pickup_note_id' => 'Pickup Note ID',
-        'actions.*.pickup_request_id' => 'Pickup Request ID'
+        'actions.*.pickup_request_id' => 'Pickup Request ID',
+
+        'from_date' => 'From Date'
     ];
 
     private $messages = [
@@ -4208,6 +4210,41 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'attendance_details' => []]);
         }
     }
+
+    public function attendance_history(Request $request)
+    {
+        $rules = [
+            'from_date' => ['required'],
+            'to_date' => ['nullable']
+        ];
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $rider_attendance = RiderAttendance::where('rider_id', $rider_id)
+                ->orderBy('attendance_date', 'ASC');
+
+            if ($to_date != null) {
+                $rider_attendance = $rider_attendance->whereBetween('attendance_date', [$from_date, $to_date]);
+            } else {
+                $rider_attendance = $rider_attendance->whereDate('attendance_date', $from_date);
+            }
+
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->get();
+                return response()->json(['status' => 0, 'history_details' => $rider_attendance]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Details Found"]);
+        }
+    }
+
 
 
     /*public function delivery_packaging_material_update($tracking_number){

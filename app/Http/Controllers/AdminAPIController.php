@@ -22,7 +22,8 @@ class AdminAPIController extends Controller
         'attendance_date' => 'Attendance Date',
         'latitude' => 'Latitude',
         'longitude' => 'Longitude',
-        'action' => 'Action'
+        'action' => 'Action',
+        'from_date' => 'From Date'
 
     ];
 
@@ -322,6 +323,40 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
             }
             return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
+    }
+
+    public function attendance_history(Request $request)
+    {
+        $rules = [
+            'from_date' => ['required'],
+            'to_date' => ['nullable']
+        ];
+        $admin_id = $request->admin_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $admin_attendance = AdminAttendance::where('admin_id', $admin_id)
+                ->orderBy('attendance_date', 'ASC');
+
+            if ($to_date != null) {
+                $admin_attendance = $admin_attendance->whereBetween('attendance_date', [$from_date, $to_date]);
+            } else {
+                $admin_attendance = $admin_attendance->whereDate('attendance_date', $from_date);
+            }
+
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->get();
+                return response()->json(['status' => 0, 'history_details' => $admin_attendance]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Details Found"]);
         }
     }
 
