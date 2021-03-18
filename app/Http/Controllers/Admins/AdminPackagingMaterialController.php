@@ -583,11 +583,13 @@ class AdminPackagingMaterialController extends Controller
                     $total_quantity = $total_quantity + $item->quantity;
 
                     $check_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id);
+                    dd($check_current_stock);
                     if($check_current_stock->exists()){
                         $check_current_stock = $check_current_stock->first();
                         if($check_current_stock->stock < $item->quantity){
                             $product = WmsProduct::find($item->wms_product_id);
                             $invalid_product_ids[] = $item->wms_product_id;
+                            dd(0,$invalid_product_ids);
                             if($invalid_products == ''){
                                 $invalid_products = $product->name;
                             }
@@ -599,6 +601,7 @@ class AdminPackagingMaterialController extends Controller
                     else{
                         $product = WmsProduct::find($item->wms_product_id);
                         $invalid_product_ids[] = $item->wms_product_id;
+                        dd(1,$invalid_product_ids);
                         if($invalid_products == ''){
                             $invalid_products = $product->name;
                         }
