@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAdminAttendancesTable extends Migration
+class CreateRiderAttendancesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateAdminAttendancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('admin_attendances', function (Blueprint $table) {
+        Schema::create('rider_attendances', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('admin_id')->index();
+            $table->integer('rider_id')->index();
             $table->date('attendance_date');
             $table->Time('clock_in')->nullable();
             $table->Time('clock_out')->nullable();
@@ -34,6 +34,6 @@ class CreateAdminAttendancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin_attendances');
+        Schema::dropIfExists('rider_attendances');
     }
 }

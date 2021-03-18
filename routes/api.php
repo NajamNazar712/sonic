@@ -134,8 +134,9 @@ Route::name('api.')->group(function () {
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
-                Route::post('mark', 'RiderAPIController@mark_attendance')->name('mark');
-                Route::post('history', 'RiderAPIController@attendance_history')->name('history');
+                Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
+                Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
+                Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
             });
 
 		});
@@ -151,7 +152,7 @@ Route::name('api.')->group(function () {
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
-                Route::get('detail', 'AdminAPIController@attendance_details')->name('detail');
+                Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
             });

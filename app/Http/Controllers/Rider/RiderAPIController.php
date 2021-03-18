@@ -32,6 +32,8 @@ use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Rider\RiderAttendance;
+use App\Http\Models\Rider\RiderAttendanceActionLog;
 
 use Psy\Util\Json;
 use Validator;
@@ -4114,6 +4116,97 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
         }
         return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
+    }
+
+    public function mark_attendance(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
+
+            $rider_attendance = RiderAttendance::where('rider_id', $rider_id)
+                ->whereDate('attendance_date', $attendance_date);
+            $rider_attendance_action = new RiderAttendanceActionLog();
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->first();
+            } else {
+                $rider_attendance = new RiderAttendance();
+                $rider_attendance->rider_id = $rider_id;
+                $rider_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $rider_attendance->clock_in = $attendance_time;
+                $rider_attendance->clock_in_latitude = $request->latitude;
+                $rider_attendance->clock_in_longitude = $request->longitude;
+                $rider_attendance->save();
+
+                $rider_attendance_action->rider_id = $rider_id;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully']);
+            } elseif ($request->action == 2) {
+                $rider_attendance->clock_out = $attendance_time;
+                $rider_attendance->clock_out_latitude = $request->latitude;
+                $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->save();
+
+                $rider_attendance_action->rider_id = $rider_id;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully']);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function attendance_details(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_attendance_action = RiderAttendanceActionLog::where('rider_id', $rider_id)
+                ->whereDate('action_date', $request->attendance_date)
+                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->orderBy('action_date', 'ASC');
+            if ($rider_attendance_action->exists()) {
+                $rider_attendance_action = $rider_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $rider_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
     }
 
 
