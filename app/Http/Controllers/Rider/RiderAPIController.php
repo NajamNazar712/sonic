@@ -4163,7 +4163,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->longitude = $request->longitude;
                 $rider_attendance_action->save();
 
-                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
             } elseif ($request->action == 2) {
                 $rider_attendance->clock_out = $attendance_time;
                 $rider_attendance->clock_out_latitude = $request->latitude;
@@ -4176,7 +4176,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
                 $rider_attendance_action->save();
-                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action]);
             }
 
             return response()->json(['status' => 1, 'message' => 'Failed']);

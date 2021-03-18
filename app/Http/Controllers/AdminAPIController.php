@@ -279,7 +279,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->save();
 
-                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
             } elseif ($request->action == 2) {
                 $admin_attendance->clock_out = $attendance_time;
                 $admin_attendance->clock_out_latitude = $request->latitude;
@@ -292,7 +292,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->save();
-                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
             }
 
             return response()->json(['status' => 1, 'message' => 'Failed']);
