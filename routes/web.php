@@ -1048,6 +1048,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
 
         });
+        Route::prefix('quick_receiving')->name('quick_receiving.')->group(function (){
+            Route::get('','Admins\DeliveryController@quick_receiving_delivery_index')->name('index');
+        });
 
         Route::prefix('signature')->name('signature.')->group(function () {
             Route::get('', 'Admins\DeliveryController@signature_index')->name('index');

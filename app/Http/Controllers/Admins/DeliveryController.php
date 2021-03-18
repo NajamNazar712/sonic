@@ -6220,4 +6220,9 @@ class DeliveryController extends Controller
             return response()->json(['status'=> 0, 'error' => 'No Riders Found']);
         }
     }
+
+    public function quick_receiving_delivery_index()
+    {
+        return view('admin.delivery.quick_receiving.index');
+    }
 }
