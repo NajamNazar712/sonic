@@ -3275,18 +3275,10 @@ class RiderAPIController extends Controller
         if ($from_date == null && $to_date == null && $delivery_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
-            $rider_deliveries = DeliveryNote::
-            join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-                ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-                ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-                ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
-                ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-                ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+            $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
-                ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-                ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-                ->where('delivery_notes.pending_status', '=', 1)
-                ->where('riders.id', '=', $rider_id);
+                ->where('delivery_notes.pending_status', 1)
+                ->where('delivery_notes.rider_id', $rider_id);
 
             if ($from_date != null && $to_date != null) {
                 $rider_deliveries = $rider_deliveries->whereBetween('delivery_notes.created_at', [$from_date, $to_date])
@@ -3305,7 +3297,6 @@ class RiderAPIController extends Controller
                 $rider_deliveries = $rider_deliveries->where('shipments.tracking_number', $tracking_no)
                     ->groupBy('delivery_notes.id');
             }
-
 
             if ($rider_deliveries->exists()) {
                 $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
