@@ -1425,6 +1425,18 @@
                         @if (session('role_id') == 1 || in_array(449, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
                         @endif
+
+                    <li class=" nav-item"><a href="#"><span class="menu-title">Attendance</span></a>
+                        <ul class="menu-content">
+                            @if (session('role_id') == 1 || in_array(449, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.attendance.admin.index')}}">Staff Attendance</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(449, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">Rider Attendance</a></li>
+                            @endif
+                        </ul>
+                    </li>
+
                 </ul>
             </li>
 

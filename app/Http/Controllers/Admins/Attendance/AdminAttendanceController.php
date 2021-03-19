@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Controllers\Admins\Attendance;
+
+use App\Http\Models\Admin\Attendance\AdminAttendance;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Auth;
+use DB;
+use Illuminate\Support\Facades\Storage;
+use Yajra\Datatables\Datatables;
+
+class AdminAttendanceController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+        $this->middleware('Permission');
+    }
+
+    public function admin_attendance_index(Request $request){
+        return view('admin.attendance.admin.index');
+    }
+
+    public function admin_attendance_list(Request $request)
+    {
+
+        $admin_attendance = AdminAttendance::join('admins as a', 'a.id', 'admin_attendances.admin_id')
+            ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'a.designation as designation', 'admin_attendances.attendance_date as attendance_date', 'admin_attendances.clock_in as clock_in', 'admin_attendances.clock_out as clock_out', 'admin_attendances.clock_in_latitude as clock_in_latitude', 'admin_attendances.clock_in_longitude as clock_in_longitude', 'admin_attendances.clock_out_latitude', 'admin_attendances.clock_out_longitude');
+
+//        if (session('role_id') != 1) {
+//            $rider_request = $rider_request->whereIn('c.hub_id', session('hubs'));
+//        }
+        return Datatables::of($admin_attendance)
+            ->addColumn('department', function ($admin_attendance) {
+                return '-';
+            })
+            ->addColumn("clock_in_location", function ($admin_attendance) {
+                if($admin_attendance->clock_in_latitude && $admin_attendance->clock_in_longitude){
+                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $admin_attendance->clock_in_latitude . ',' . $admin_attendance->clock_in_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                }else{
+                    $clock_in = '-';
+                }
+                return $clock_in;
+            })
+            ->addColumn("clock_out_location", function ($admin_attendance) {
+                if($admin_attendance->clock_out_latitude && $admin_attendance->clock_out_longitude){
+                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $admin_attendance->clock_out_latitude . ',' . $admin_attendance->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                }else{
+                    $clock_out = '-';
+                }
+
+                return $clock_out;
+            })
+            ->make(true);
+
+
+    }
+}
