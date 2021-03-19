@@ -1632,6 +1632,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
         Route::prefix('make')->name('make.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
+            Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
@@ -1655,6 +1656,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('approved')->name('approved.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
+            Route::get('{id}/view', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view')->name('view');
+            Route::get('{id}/view/list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view_list')->name('view.list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
             Route::post('bulk_adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_bulk_adjusted')->name('bulk_adjusted');
@@ -2120,6 +2123,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_titles_edit')->name('edit');
                 Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
                 Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
+            });
+            Route::prefix('hub-assigning')->name('consignee.')->group( function(){
+                Route::get('', 'Admins\GlobalSettingsController@petty_cash_consignee_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@petty_cash_consignee_list')->name('list');
+                Route::Post('', 'Admins\GlobalSettingsController@petty_cash_consignee_store')->name('store');
+                Route::Post('edit', 'Admins\GlobalSettingsController@petty_cash_consignee_edit')->name('edit');
+                Route::prefix('city')->name('city.')->group( function(){
+                    Route::get('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_index')->name('index');
+                    Route::Post('{id}/check', 'Admins\GlobalSettingsController@petty_cash_consignee_city_check')->name('check');
+                    Route::Post('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_update')->name('update');
+                });
             });
         });
 

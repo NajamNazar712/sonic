@@ -51,3 +51,5 @@ class Admin extends Authenticatable
         return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
     }
 }
+
+

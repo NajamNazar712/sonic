@@ -162,7 +162,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            let main_hub = '';
+            let main_hub_id = '';
             @if (session('print'))
             $.ajax({
                 url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -367,7 +368,7 @@
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control form-control-sm select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control form-control-sm select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var hub_select = '<select class="form-control form-control-sm hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
+                var hub_select = '<input type="hidden" value="'+main_hub_id+'" class="hub_select_id"  name="hub['+rows_count+']"></input><input type="text" readonly value="'+main_hub+'" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
@@ -553,6 +554,31 @@
                     {{--}--}}
                 {{--})--}}
             {{--});--}}
+
+
+            $('#select_statement_hub').on('change',function () {
+                var value = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: '{!! route('admin.petty_cash.make.destination') !!}', // script to validate in server side
+                    data: {hub_id: value,'_token': '{!! csrf_token() !!}'},
+                    success: function (response) {
+                        if(response.status == 1)
+                        {
+                            main_hub = response.data.name;
+                            main_hub_id = response.data.id;
+                        }
+                        else{
+                            main_hub = '';
+                            main_hub_id = '';
+                        }
+                        console.log(main_hub);
+                        console.log(response.status);
+                        $('.hub_select').val(main_hub);
+                        $('.hub_select_id').val(main_hub_id);
+                    }
+                });
+            });
         });
     </script>
 @endsection
