@@ -1333,6 +1333,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
             Route::post('receive_at_link', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link')->name('receive_at_link');
+            Route::post('receive_at_link/store', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link_store')->name('receive_at_link.store');
             Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
         });
 

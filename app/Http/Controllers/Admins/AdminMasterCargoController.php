@@ -1421,50 +1421,50 @@ class AdminMasterCargoController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-
-            ->addColumn('action', function($master_cargo) {
-
-                $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
-//                $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
-//                $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
-                $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
-                $lost_button = '<button type="button" class="dropdown-item lost"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Lost</div></button>';
-                $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
-
-                $dropdown = '
-          <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-            <div class="dropdown-menu dropdown-menu-sm">
-        ';
-
-                $dropdown .= $print_button;
-
-//                if (($master_cargo->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($master_cargo->origin_hub_id, session('hubs'))))) {
-//                    $dropdown .= $add_forwarding_details_button;
-//                }
-
-//                $dropdown .= $view_forwarding_details_button;
-
-                if (session('role_id') == 1 || in_array(29, session('permissions'))) {
-                    $dropdown .= $launch_dispute_button;
-                }
-
-                if (session('role_id') == 1 || in_array(222, session('permissions'))) {
-                    $dropdown .= $lost_button;
-                }
-
-                if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($master_cargo->destination_hub_id, session('hubs')))) {
-                    $dropdown .= $receive_button;
-                }
-
-                $dropdown .= '
-            </div>
-          </div>
-        ';
-
-                return $dropdown;
             });
+
+//            ->addColumn('action', function($master_cargo) {
+//
+//                $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
+////                $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
+////                $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
+//                $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
+//                $lost_button = '<button type="button" class="dropdown-item lost"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Lost</div></button>';
+//                $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+//
+//                $dropdown = '
+//          <div class="btn-group">
+//            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+//            <div class="dropdown-menu dropdown-menu-sm">
+//        ';
+//
+//                $dropdown .= $print_button;
+//
+////                if (($master_cargo->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($master_cargo->origin_hub_id, session('hubs'))))) {
+////                    $dropdown .= $add_forwarding_details_button;
+////                }
+//
+////                $dropdown .= $view_forwarding_details_button;
+//
+//                if (session('role_id') == 1 || in_array(29, session('permissions'))) {
+//                    $dropdown .= $launch_dispute_button;
+//                }
+//
+//                if (session('role_id') == 1 || in_array(222, session('permissions'))) {
+//                    $dropdown .= $lost_button;
+//                }
+//
+//                if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($master_cargo->destination_hub_id, session('hubs')))) {
+//                    $dropdown .= $receive_button;
+//                }
+//
+//                $dropdown .= '
+//            </div>
+//          </div>
+//        ';
+//
+//                return $dropdown;
+//            });
         if($request->get('tracking_number') || $bag_number = $request->get('bag_number')){
             $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
                 ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
@@ -1919,7 +1919,7 @@ class AdminMasterCargoController extends Controller
             $cargo_consignment = $cargo_consignment->first();
 
             if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
-                if ($cargo_consignment->status_id == 1 || $cargo_consignment->status_id == 6) {
+                if ($cargo_consignment->status_id == 1 || $cargo_consignment->status_id == 3 || $cargo_consignment->status_id == 6) {
                     $details = array();
 
                     $details['id'] = $cargo_consignment->id;
@@ -1944,63 +1944,156 @@ class AdminMasterCargoController extends Controller
         }
     }
 
+//    public function master_cargo_in_transit_receive_at_link(Request $request) {
+//        if(is_array($request->master_cargo_consignment_ids)){
+//            foreach ($request->master_cargo_consignment_ids as $cargo_consignment_id) {
+//                $cargo_consignment_junction_receival = new MasterCargoJunctionReceival();
+//
+//                $cargo_consignment_junction_receival->master_cargo_id = $cargo_consignment_id;
+//                $cargo_consignment_junction_receival->junction_id = $request->junction;
+//                $cargo_consignment_junction_receival->receiver_id = Auth::id();
+//
+//                $cargo_consignment_junction_receival->save();
+//
+//                $cargo_consignment = MasterCargo::find($cargo_consignment_id);
+//
+//                $master_bags = $cargo_consignment->master_bags;
+//
+//                if ($cargo_consignment->junction_hub_1_id == $request->junction) {
+//                    foreach ($master_bags as $master_bag){
+//                        $master_bag->status = 1;
+//                        $master_bag->save();
+//                        $bag = $master_bag->bag;
+//                        $bag->status_id = 5;
+//                        $bag->save();
+//                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+//                    }
+//                }
+//                else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
+//                    foreach ($master_bags as $master_bag){
+//                        $master_bag->status = 1;
+//                        $master_bag->save();
+//                        $bag = $master_bag->bag;
+//                        $bag->status_id = 6;
+//                        $bag->save();
+//                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+//                    }
+//                }
+//                else {
+//                    foreach ($master_bags as $master_bag){
+//                        $master_bag->status = 1;
+//                        $master_bag->save();
+//                        $bag = $master_bag->bag;
+//                        $bag->status_id = 3;
+//                        $bag->save();
+//                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+//                    }
+//                }
+//
+//                $cargo_consignment->status_id = 2;
+//                $cargo_consignment->received_at = Carbon::now();
+//                $cargo_consignment->received_by = Auth::id();
+//                $cargo_consignment->save();
+//            }
+//
+//            return ['status' => 0, 'success' => 'Master Cargo(s) has been received at Junction'];
+//        }
+//        else{
+//            return ['status' => 1, 'success' => 'Master Cargo(s) Not Found'];
+//        }
+//    }
+
     public function master_cargo_in_transit_receive_at_link(Request $request) {
-        if(is_array($request->master_cargo_consignment_ids)){
-            foreach ($request->master_cargo_consignment_ids as $cargo_consignment_id) {
-                $cargo_consignment_junction_receival = new MasterCargoJunctionReceival();
+        $master_cargo_id = $request->cargo_ids;
+        if (session('role_id') == 1 || (in_array($request->junction, session('hubs')))) {
+            $total = MasterCargoBag::where('master_cargo_id', $master_cargo_id)->where('status', 0)->count();
+            return view('admin.master_cargo.receive_at_junction')->with(['cargo_id' => $master_cargo_id, 'total' => $total, 'junction' => $request->junction]);
+        }
+        else {
+            return back()->withErrors('Master Cargo doesn\'t belong to your assigned hub(s)!');
+        }
 
-                $cargo_consignment_junction_receival->master_cargo_id = $cargo_consignment_id;
-                $cargo_consignment_junction_receival->junction_id = $request->junction;
-                $cargo_consignment_junction_receival->receiver_id = Auth::id();
+    }
+    public function master_cargo_in_transit_receive_at_link_store(Request $request) {
+        $cargo_consignment_id = $request->cargo_consignment_id;
+        $cargo_consignment_junction_receival = new MasterCargoJunctionReceival();
 
-                $cargo_consignment_junction_receival->save();
+        $cargo_consignment_junction_receival->master_cargo_id = $cargo_consignment_id;
+        $cargo_consignment_junction_receival->junction_id = $request->junction;
+        $cargo_consignment_junction_receival->receiver_id = Auth::id();
 
-                $cargo_consignment = MasterCargo::find($cargo_consignment_id);
+        $cargo_consignment_junction_receival->save();
 
-                $master_bags = $cargo_consignment->master_bags;
 
-                if ($cargo_consignment->junction_hub_1_id == $request->junction) {
-                    foreach ($master_bags as $master_bag){
-                        $master_bag->status = 1;
-                        $master_bag->save();
-                        $bag = $master_bag->bag;
-                        $bag->status_id = 5;
-                        $bag->save();
-                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
-                    }
-                }
-                else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
-                    foreach ($master_bags as $master_bag){
-                        $master_bag->status = 1;
-                        $master_bag->save();
-                        $bag = $master_bag->bag;
-                        $bag->status_id = 6;
-                        $bag->save();
-                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
-                    }
-                }
-                else {
-                    foreach ($master_bags as $master_bag){
-                        $master_bag->status = 1;
-                        $master_bag->save();
-                        $bag = $master_bag->bag;
-                        $bag->status_id = 3;
-                        $bag->save();
-                        MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
-                    }
-                }
+        $cargo_consignment = MasterCargo::find($cargo_consignment_id);
 
-                $cargo_consignment->status_id = 2;
-                $cargo_consignment->received_at = Carbon::now();
-                $cargo_consignment->received_by = Auth::id();
-                $cargo_consignment->save();
+        $master_bags = $cargo_consignment->master_bags;
+
+        if ($cargo_consignment->junction_hub_1_id == $request->junction) {
+            foreach ($master_bags as $master_bag){
+                $master_bag->status = 1;
+                $master_bag->save();
+                $bag = $master_bag->bag;
+                $bag->status_id = 5;
+                $bag->save();
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
             }
+        }
+        else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
+            foreach ($master_bags as $master_bag){
+                $master_bag->status = 1;
+                $master_bag->save();
+                $bag = $master_bag->bag;
+                $bag->status_id = 6;
+                $bag->save();
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+            }
+        }
+        else {
+            foreach ($master_bags as $master_bag){
+                $master_bag->status = 1;
+                $master_bag->save();
+                $bag = $master_bag->bag;
+                $bag->status_id = 3;
+                $bag->save();
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+            }
+        }
 
-            return ['status' => 0, 'success' => 'Master Cargo(s) has been received at Junction'];
+        $cargo_consignment->received_bags = MasterCargoBag::where('master_cargo_id', $cargo_consignment_id)->where('status', 1)->count();
+
+        $short_received = MasterCargoBag::where('master_cargo_id', $cargo_consignment_id)->where('status', 0)->count();
+
+        if ($short_received > 0) {
+            $cargo_consignment->short_received_bags = $short_received;
+            $status_id = 3;
         }
-        else{
-            return ['status' => 1, 'success' => 'Master Cargo(s) Not Found'];
+        else {
+            $cargo_consignment->short_received_bags = 0;
+            $status_id = 2;
         }
+        $cargo_consignment->status_id = $status_id;
+
+        $cargo_consignment->received_at = Carbon::now();
+        $cargo_consignment->received_by = Auth::id();
+        $cargo_consignment->save();
+
+        //dispute for short received
+        if($cargo_consignment->status_id == 3){
+            $cargo_short_received_bags = MasterCargoBag::where(['master_cargo_id'=>$cargo_consignment_id,'status'=>0])->select('bag_id')->get();
+            foreach ($cargo_short_received_bags as $cargo_short_received_bag){
+                $bag_short_received_shipments = array();
+                $short_received_bag = Bag::find($cargo_short_received_bag->bag_id);
+                $short_received_bag_shipments = $short_received_bag->shipment;
+                foreach ($short_received_bag_shipments as $short_received_bag_shipment){
+                    $bag_short_received_shipments[] = $short_received_bag_shipment->shipment_id;
+                }
+                if(!empty($bag_short_received_shipments)){
+                    DisputeController::add_cargo_short_received($short_received_bag->seal_number,$bag_short_received_shipments, 2);
+                }
+            }
+        }
+        return redirect()->route('admin.master_cargo.in_transit.index')->with('success', 'Master Cargo No# ' . $cargo_consignment_id . ' has been Received at Junction');
     }
 
     public function master_cargo_in_transit_receive(Request $request) {

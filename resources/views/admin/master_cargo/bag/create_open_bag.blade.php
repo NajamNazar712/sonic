@@ -99,7 +99,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <select name="junction_1" class="select2 junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
+                                                            <select name="junction_1" class="select2 junction_1">
                                                             </select>
                                                         </div>
                                                     </div>
@@ -485,7 +485,7 @@
                             $('#cargo_consignment form .junction_1').val(data.junction_1);
                             $('#cargo_consignment form .junction_1').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1*'
+                                placeholder: 'Junction 1'
                             }).bind('change', function() {
                                 $(this).valid();
                             });
@@ -493,7 +493,7 @@
                         else{
                             $('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1*'
+                                placeholder: 'Junction 1'
                             }).bind('change', function() {
                                 $(this).valid();
                             });

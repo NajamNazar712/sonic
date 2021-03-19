@@ -69,7 +69,7 @@
                                     <th class="border-primary border-darken-1">Transit By</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                 </tr>
                                 </thead>
                             </table>
@@ -111,7 +111,7 @@
                             </div>
 
                             <div class="form-group ml-1">
-                                <button type="submit" name="add" class="btn btn-primary" value="Add">Scan</button>
+                                <button type="submit" name="add" class="btn btn-primary add" value="Add">Scan</button>
                             </div>
                         </form>
 
@@ -128,7 +128,9 @@
                             </thead>
                         </table>
 
-                        <form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
+                        <form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.master_cargo.in_transit.receive_at_link') }}">
+                            {{ csrf_field() }}
+                            <input type="hidden" name="cargo_ids" id="link_cargo_ids" value="">
                             <div class="form-group">
                                 <select name="junction" class="select2 junction" data-rule-required="true" data-msg-required="Junction is required">
                                 </select>
@@ -289,6 +291,7 @@
 
                             master_cargo_consignment_ids = [];
 
+                            $('#receive_at_link #scan_master_cargo_number button.add').prop('disabled', false);
                             $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', true);
 
                             if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
@@ -357,7 +360,7 @@
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -936,6 +939,7 @@
                                                 $(this).valid();
                                             });
                                         });
+                                    $('#receive_at_link #scan_master_cargo_number button.add').prop('disabled', true);
                                         $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', false);
 
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -960,31 +964,33 @@
                     error.addClass('w-100').insertAfter(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var junction = $(form).find('.junction').val();
+                    $('#link_cargo_ids').val(master_cargo_consignment_ids);
+                    form.submit();
+                    {{--var junction = $(form).find('.junction').val();--}}
 
-                    $.ajax({
-                        url: '{!! route('admin.master_cargo.in_transit.receive_at_link') !!}',
-                        method: 'POST',
-                        data: {
-                            'master_cargo_consignment_ids': master_cargo_consignment_ids,
-                            'junction': junction,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                $('#receive_at_link').modal('hide');
+                    {{--$.ajax({--}}
+                    {{--    url: '{!! route('admin.master_cargo.in_transit.receive_at_link') !!}',--}}
+                    {{--    method: 'POST',--}}
+                    {{--    data: {--}}
+                    {{--        'master_cargo_consignment_ids': master_cargo_consignment_ids,--}}
+                    {{--        'junction': junction,--}}
+                    {{--        '_token': '{{ csrf_token() }}'--}}
+                    {{--    }--}}
+                    {{--})--}}
+                    {{--    .done(function(data) {--}}
+                    {{--        if (data.status == 0) {--}}
+                    {{--            $('#receive_at_link').modal('hide');--}}
 
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
+                    {{--            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                    {{--        }--}}
+                    {{--        else {--}}
+                    {{--            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--        }--}}
 
-                            table.draw();
-                        });
+                    {{--        table.draw();--}}
+                    {{--    });--}}
 
-                    return false;
+                    {{--return false;--}}
                 }
             });
             @endif
