@@ -2008,6 +2008,7 @@ class AdminMasterCargoController extends Controller
     }
     public function master_cargo_in_transit_receive_at_link_store(Request $request) {
         $cargo_consignment_id = $request->cargo_consignment_id;
+        $bag_ids = array_unique(explode(',', $request->bag_ids));
         $cargo_consignment_junction_receival = new MasterCargoJunctionReceival();
 
         $cargo_consignment_junction_receival->master_cargo_id = $cargo_consignment_id;
@@ -2023,32 +2024,38 @@ class AdminMasterCargoController extends Controller
 
         if ($cargo_consignment->junction_hub_1_id == $request->junction) {
             foreach ($master_bags as $master_bag){
-                $master_bag->status = 1;
-                $master_bag->save();
-                $bag = $master_bag->bag;
-                $bag->status_id = 5;
-                $bag->save();
-                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                if(in_array($master_bag->bag_id, $bag_ids)){
+                    $master_bag->status = 1;
+                    $master_bag->save();
+                    $bag = $master_bag->bag;
+                    $bag->status_id = 5;
+                    $bag->save();
+                    MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                }
             }
         }
         else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
             foreach ($master_bags as $master_bag){
-                $master_bag->status = 1;
-                $master_bag->save();
-                $bag = $master_bag->bag;
-                $bag->status_id = 6;
-                $bag->save();
-                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                if(in_array($master_bag->bag_id, $bag_ids)) {
+                    $master_bag->status = 1;
+                    $master_bag->save();
+                    $bag = $master_bag->bag;
+                    $bag->status_id = 6;
+                    $bag->save();
+                    MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                }
             }
         }
         else {
             foreach ($master_bags as $master_bag){
-                $master_bag->status = 1;
-                $master_bag->save();
-                $bag = $master_bag->bag;
-                $bag->status_id = 3;
-                $bag->save();
-                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                if(in_array($master_bag->bag_id, $bag_ids)) {
+                    $master_bag->status = 1;
+                    $master_bag->save();
+                    $bag = $master_bag->bag;
+                    $bag->status_id = 3;
+                    $bag->save();
+                    MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $cargo_consignment->id, 2);
+                }
             }
         }
 
