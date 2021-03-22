@@ -1425,6 +1425,10 @@
                         @if (session('role_id') == 1 || in_array(449, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(463, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resourse.employee_directory.index')}}">Employee Directory</a></li>
+                        @endif
                 </ul>
             </li>
 

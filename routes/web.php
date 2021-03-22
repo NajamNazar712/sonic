@@ -2728,10 +2728,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
     Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
-        
+
         Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
         Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
+        Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
+            Route::post('store', 'Admins\AdminHumanResourseController@employee_directory_store')->name('store');
+        });
 
     });
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\HR\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
@@ -24,7 +25,6 @@ class AdminHumanResourseController extends Controller
     {
         return view('admin.human_resource.download_docs');
     }
-
     public function allusers()
     {
 
@@ -34,8 +34,6 @@ class AdminHumanResourseController extends Controller
         $roles = collect($roles);
         return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
-
-
     public function all_user_ajax()
     {
 
@@ -157,5 +155,51 @@ class AdminHumanResourseController extends Controller
             return Datatables::of($users)
                 ->make(true);
         }
+    }
+
+    public function employee_directory_index(){
+        return view('admin.human_resource.employee_directory.index');
+    }
+
+    public function employee_directory_list(Request $request){
+        $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
+            ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
+            ->join('employee_types as et','et.id','=','employees.employee_type_id')
+            ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
+            ->join('employee_statuses as es','es.id','=','employees.status_id')
+
+            ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
+
+        if (session('role_id') != 1) {
+            $employees = $employees->whereIn('cities.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($employees)
+            ->addColumn('id_padded', function ($user) {
+                return str_pad($user->employee_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
+            ->addColumn("action", function ($result) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+                $dropdown .= '
+                </div>
+              </div>
+            ';
+
+                return $dropdown;
+            })
+            ->make(true);
+    }
+    public function employee_directory_store(Request $request){
+        return $request;
     }
 }
