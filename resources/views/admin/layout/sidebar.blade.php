@@ -1432,7 +1432,7 @@
                                 <li><a class="menu-item" href="{{ route('admin.attendance.admin.index')}}">Staff Attendance</a></li>
                             @endif
                             @if (session('role_id') == 1 || in_array(449, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">Rider Attendance</a></li>
+                                <li><a class="menu-item" href="{{ route('admin.attendance.rider.index')}}">Rider Attendance</a></li>
                             @endif
                         </ul>
                     </li>

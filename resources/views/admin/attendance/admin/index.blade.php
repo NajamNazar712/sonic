@@ -135,14 +135,14 @@
                     },
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
                     {data: 'admin_name', name: 'a.name', class: 'align-middle admin_name'},
-                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'city_name', name: 'c.id', class: 'align-middle city_name'},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
-                    {data: 'department', name: '', class: 'align-middle department'},
+                    {data: 'department', name: 'ad.id', class: 'align-middle department'},
                     {data: 'attendance_date', name: 'admin_attendances.attendance_date', class: 'align-middle attendance_date'},
                     {data: 'clock_in', name: 'admin_attendances.clock_in', class: 'align-middle clock_in'},
-                    {data: 'clock_in_location', name: '', class: 'align-middle clock_in_location'},
+                    {data: 'clock_in_location', name: '', class: 'align-middle clock_in_location', sortable: false},
                     {data: 'clock_out', name: 'admin_attendances.clock_out', class: 'align-middle clock_out'},
-                    {data: 'clock_out_location', name: '', class: 'align-middle clock_out_location'},
+                    {data: 'clock_out_location', name: '', class: 'align-middle clock_out_location', sortable: false},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -155,13 +155,29 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var department = '<select name="rider_type" id="department_select" class="select2 form-control"></select>';
+                    var city = '<select name="city" id="city_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') || $(header).is('.status')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') || $(header).is('.status') || $(header).is('.clock_out_location') || $(header).is('.clock_in_location')) {
                             $(td).appendTo($(search));
-                        } else {
+                        }
+                        else if($(header).is('.department')){
+                            $(department).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.city_name')){
+                            $(city).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -171,14 +187,40 @@
                             }
                         }
                     });
-                    $("#type_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Rider Type",
+
+                    var data = $.map({!! $department !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data = $.map({!! $department !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    var data1 = $.map({!! $city !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $city !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#department_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Department",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
+
+                    $("#city_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Hub",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
