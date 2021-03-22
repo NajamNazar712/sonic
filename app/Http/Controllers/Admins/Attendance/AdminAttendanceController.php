@@ -41,7 +41,7 @@ class AdminAttendanceController extends Controller
         return Datatables::of($admin_attendance)
             ->addColumn("clock_in_location", function ($admin_attendance) {
                 if($admin_attendance->clock_in_latitude && $admin_attendance->clock_in_longitude){
-                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $admin_attendance->clock_in_latitude . ',' . $admin_attendance->clock_in_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/dir/' . $admin_attendance->clock_in_latitude . ',' . $admin_attendance->clock_in_longitude . '"" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 }else{
                     $clock_in = '-';
                 }
@@ -49,7 +49,7 @@ class AdminAttendanceController extends Controller
             })
             ->addColumn("clock_out_location", function ($admin_attendance) {
                 if($admin_attendance->clock_out_latitude && $admin_attendance->clock_out_longitude){
-                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $admin_attendance->clock_out_latitude . ',' . $admin_attendance->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/dir/' . $admin_attendance->clock_out_latitude . ',' . $admin_attendance->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 }else{
                     $clock_out = '-';
                 }

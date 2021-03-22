@@ -40,7 +40,7 @@ class RiderAttendanceController extends Controller
             })
             ->addColumn("clock_in_location", function ($rider_attendance) {
                 if($rider_attendance->clock_in_latitude && $rider_attendance->clock_in_longitude){
-                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $rider_attendance->clock_in_latitude . ',' . $rider_attendance->clock_in_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/dir/' . $rider_attendance->clock_in_latitude . ',' . $rider_attendance->clock_in_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 }else{
                     $clock_in = '-';
                 }
@@ -48,7 +48,7 @@ class RiderAttendanceController extends Controller
             })
             ->addColumn("clock_out_location", function ($rider_attendance) {
                 if($rider_attendance->clock_out_latitude && $rider_attendance->clock_out_longitude){
-                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="http://maps.google.com/maps?saddr=' . $rider_attendance->clock_out_latitude . ',' . $rider_attendance->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/dir/' . $rider_attendance->clock_out_latitude . ',' . $rider_attendance->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 }else{
                     $clock_out = '-';
                 }
