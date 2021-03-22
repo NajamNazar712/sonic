@@ -155,7 +155,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
+                                                <button type="submit" name="submit_form" class="btn btn-primary btn-block" value="submit_form">Submit</button>
                                             </div>
                                         </form>
                                     </div>
@@ -601,8 +601,10 @@
                             }
                         });
                         $('#cargo_consignment form .transport_mode').val(2).trigger('change');
+                        $('#cargo_consignment form .transport_mode').prop("disabled", true);
                         $('#cargo_consignment form .shipping_mode_select').val(1).trigger('change');
                         $('#cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
+                        $('#cargo_consignment form .transport_mode_vendor').prop("disabled",true);
                         UnblockPagePermanently();
                     }
                 });
@@ -654,7 +656,8 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-
+                            $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                            $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
                             form.submit();
                         }
                         else {

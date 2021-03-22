@@ -493,6 +493,7 @@
                             $('#master_cargo_consignment form .transport_mode_vendor').append(option);
 
                             $('#master_cargo_consignment form .transport_mode_vendor').val(null).trigger('change');
+
                         });
 
                         transport_mode_vendors = data.transport_mode_vendors;
@@ -515,8 +516,10 @@
                             }
                         });
                         $('#master_cargo_consignment form .transport_mode').val(2).trigger('change');
+                        $('#master_cargo_consignment form .transport_mode').prop("disabled", true);
                         $('#master_cargo_consignment form .shipping_mode_select').val(1).trigger('change');
                         $('#master_cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
+                        $('#master_cargo_consignment form .transport_mode_vendor').prop("disabled", true);
                         UnblockPagePermanently();
                     }
                 });
@@ -569,7 +572,8 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-
+                            $('#master_cargo_consignment form .transport_mode').prop("disabled", false);
+                            $('#master_cargo_consignment form .transport_mode_vendor').prop("disabled", false);
                             form.submit();
                         }
                         else {
