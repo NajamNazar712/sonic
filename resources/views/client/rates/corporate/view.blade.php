@@ -28,7 +28,7 @@
 
                                     <div class="card">
 
-                                        <div class="">
+                                   {{--     <div class="">
                                             @if(count($packaging_material_types) > 0)
 
                                                 @php
@@ -97,7 +97,7 @@
 
                                             @endif
 
-                                        </div>
+                                        </div>--}}
 
                                     </div>
                                     <div id="" class="card-header border-success">
