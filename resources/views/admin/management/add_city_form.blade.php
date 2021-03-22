@@ -7,6 +7,9 @@
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
+            </fieldset>
         </div>
         <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="city">

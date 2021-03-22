@@ -1420,7 +1420,7 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
                 if ($note) {
-                    foreach ($valid_shipments as $shipment_id) {
+                    foreach ($valid_shipments as $index  => $shipment_id) {
                         $shipment = Shipment::where('id', $shipment_id);
 
                         $shipment = $shipment->first();
@@ -1431,6 +1431,14 @@ class ReturnController extends Controller
                             $old_return_note_id = $old_return_note_id->first();
 
                             if(ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status',0)->exists()){
+
+                                /*$return_note_shupment = ReturnNoteShipment::where('return_note_id', $old_return_note_id->return_note_id)->where('shipment_id', $shipment->id)->where('status', 0);
+
+                                if($return_note_shupment->exists()){
+                                    $return_note_shupment->delete();
+                                    unset($valid_shipments);
+                                    continue;
+                                }*/
                                 $journey = ShipmentsJourney::where('shipment_id',$shipment_id)->latest()->first();
 
                                 ShipmentsJourneyController::add($journey->shipment_id,57,NULL,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);

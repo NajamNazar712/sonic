@@ -12,7 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div id="search_form" class="row mb-2 justify-content-center">
+                <div id="search_form" class="">
+                    <div class="row row mb-2 justify-content-center">
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -123,34 +124,36 @@
                             <input type="text" name="update_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_from" placeholder="Update Date (From)">
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        <div class="form-group input-group ml">
-                            <div class="input-group-prepend">
+
+                        <div class="col-4">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
+                                </div>
+
+                                <input type="text" name="update_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_to" placeholder="Update Date (To)">
                             </div>
 
-                            <input type="text" name="update_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_to" placeholder="Update Date (To)">
                         </div>
-
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
+                                </div>
+                                <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
                             </div>
-                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
                         </div>
-                    </div>
-                    <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        <div class="col-2">
+                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+
                     </div>
                 </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">

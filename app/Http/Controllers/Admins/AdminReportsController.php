@@ -3774,7 +3774,7 @@ class AdminReportsController extends Controller
 
     }
     public function sales_person_performance_download(Request $request){
-        $file_name = "/reports/sales_person_performance".Auth::id()."xlsx";
+        $file_name = "/reports/sales_person_performance".Auth::id().".xlsx";
 
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
@@ -5432,6 +5432,7 @@ class AdminReportsController extends Controller
              })
             ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges')
             ->groupBy('crm_requests.id');
+
         $datatable = Datatables::of($crm)
             ->editColumn('tagged_to', function ($crm_request){
                 if($crm_request->tagging_type == 2){
@@ -5674,7 +5675,8 @@ class AdminReportsController extends Controller
         $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return_intransit'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',21)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
         $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         if ($origin) {
             $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
@@ -5731,6 +5733,18 @@ class AdminReportsController extends Controller
                             ->where('cities.id', $origin);
                     });
             });
+
+            $stats['return_intransit'] = $stats['return_intransit']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+
+        
             $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -5749,6 +5763,7 @@ class AdminReportsController extends Controller
             $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
             $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
             $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['return_intransit'] = $stats['return_intransit']->where('consignee_city_id', $destination);
             $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
         }
         $stats['total'] = number_format($stats['total']->count());
@@ -5757,6 +5772,7 @@ class AdminReportsController extends Controller
         $stats['received'] = number_format($stats['received']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
+        $stats['return_intransit'] = number_format($stats['return_intransit']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
 
 
@@ -5857,7 +5873,10 @@ class AdminReportsController extends Controller
                     $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
                     break;
                 case 'returned':
-                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    $datatable->whereIn('shipments.shipper_status_id',[20,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    break;
+                case 'returned_intransit':
+                    $datatable->where('shipments.shipper_status_id',21);
                     break;
                 case 'in_process':
                     $datatable->whereIn('shipments.shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52]);
@@ -6360,19 +6379,17 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
-            ->leftJoin('shipments as ds', function ($join){
-                $join->on('ds.id', '=', 'dns.shipment_id')
-                    ->where('ds.shipper_status_id', 14);
+            ->leftJoin('shipments_journey as ds', function ($join) {
+                $join->on('ds.shipment_id', '=', 's.id')
+                    ->where('ds.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1)'));
             })
-            ->leftJoin('shipments as uds', function ($join){
-                $join->on('uds.id', '=', 'dns.shipment_id')
-                    ->where('uds.shipper_status_id', '!=', 14);
+            ->leftJoin('shipments_journey as cps', function ($join) {
+                $join->on('cps.shipment_id', '=', 's.id')
+                    ->where('cps.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->leftJoin('shipments as cps', function ($join){
-                $join->on('cps.id', '=', 'dns.shipment_id')
-                    ->where('cps.shipper_status_id', 12);
-            })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(uds.id) as undelivered_shipments'), DB::raw('ROUND((count(uds.id)/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(s.id) - count(ds.id) as undelivered_shipments'), DB::raw('ROUND(((count(s.id) - count(ds.id))/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
             ->groupBy('r.id');
 
 
@@ -7622,6 +7639,7 @@ class AdminReportsController extends Controller
     }
 
     public function last_mile_app_shipments_list(Request $request){
+
         $delivery_note_id = $request->delivery_note_id;
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
@@ -7686,7 +7704,6 @@ class AdminReportsController extends Controller
 
     public function last_mile_dbf_shipments_list(Request $request){
         $delivery_note_id = $request->delivery_note_id;
-//        $shipment_ids = RiderDelivery::where('delivery_note_id', $delivery_note_id)->pluck('shipment_id')->toArray();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->leftjoin('shipments_journey', function ($join) {
