@@ -921,14 +921,14 @@
                                             'ids': master_cargo_consignment_ids
                                         }
                                     })
-                                        .done(function(data) {
+                                        .done(function(junction_data) {
                                             if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
                                                 $('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
                                             }
 
                                             $('#receive_at_link #receive_at_link_form .junction').show();
 
-                                            $.each(data, function(index, junction) {
+                                            $.each(junction_data, function(index, junction) {
                                                 $('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
                                             });
 
@@ -942,7 +942,7 @@
                                     $('#receive_at_link #scan_master_cargo_number button.add').prop('disabled', true);
                                         $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', false);
 
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data .success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                                 else {
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
