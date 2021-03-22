@@ -14,6 +14,83 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 ">
+                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col-3 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_admin" id="search_admin" class="form-control select2">
+                                                    @foreach($admins as $admin)
+                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-3 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_city" id="search_city" class="form-control select2">
+                                                    @foreach($city as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-3 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_trax_id" id="search_trax_id" class="form-control select2">
+                                                    @foreach($trax_id as $trax_id)
+                                                        <option value="{{$trax_id->id}}">{{$trax_id->trax_id}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-3 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_department" id="search_department" class="form-control select2">
+                                                    @foreach($department as $department)
+                                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="col-5 mt-1">
+                                            <div class="form-group input-group ">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_from"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_from" placeholder="Attandance Date (From)">
+                                            </div>
+                                        </div>
+                                        <div class="col-5 mt-1">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_to"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_to" placeholder="Attandance Date (To)">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 mt-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -41,6 +118,7 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 @endsection
@@ -50,6 +128,9 @@
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
             type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
@@ -57,6 +138,53 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Employee',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_department').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Department',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search TraxID',
+                width:'100%',
+                allowClear:true
+            });
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -119,7 +247,20 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.attendance.admin.list') }}',
+
+                ajax: {
+                    url: '{{ route('admin.attendance.admin.list') }}',
+                    data: function (d) {
+
+                        d.search_admin = $('#search_admin').val();
+                        d.search_city = $('#search_city').val();
+                        d.search_department = $('#search_department').val();
+                        d.search_trax_id = $('#search_trax_id').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+
+                    }
+                },
                 order: [[6, 'desc']],
                 rowId: 'id',
                 columns: [
@@ -150,84 +291,12 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function () {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var department = '<select name="rider_type" id="department_select" class="select2 form-control"></select>';
-                    var city = '<select name="city" id="city_select" class="select2 form-control"></select>';
-
-                    this.api().columns().every(function (column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') || $(header).is('.status') || $(header).is('.clock_out_location') || $(header).is('.clock_in_location')) {
-                            $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.department')){
-                            $(department).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.city_name')){
-                            $(city).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-
-                    var data = $.map({!! $department !!}, function (obj) {
-                        obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data = $.map({!! $department !!}, function (obj) {
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    var data1 = $.map({!! $city !!}, function (obj) {
-                        obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $city !!}, function (obj) {
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $("#department_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Department",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    $("#city_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
-                        placeholder: "Select Hub",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
 
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
