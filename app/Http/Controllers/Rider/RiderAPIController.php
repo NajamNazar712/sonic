@@ -4152,18 +4152,8 @@ class RiderAPIController extends Controller
         }
     }
 
-public function mark_attendance(Request $request)
+    public function mark_attendance(Request $request)
     {
-
-
-
-
-
-
-
-
-
-
         $rules = [
             'attendance_date' => ['required'],
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],

@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Staff Attendance')
+@section('title', 'Employee Attendance')
 
 @section('content')
-    <h1>Staff Attendance</h1>
+    <h1>Employee Attendance</h1>
 
     <section>
         <div class="row">
@@ -17,37 +17,46 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="col-3 mt-1">
+                                        <div class="col-4 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_admin" id="search_admin" class="form-control select2">
                                                     @foreach($admins as $admin)
-                                                        <option value="{{$admin->name}}">{{$admin->name}}</option>
+                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
-                                        <div class="col-3 mt-1">
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_rider" id="search_rider" class="form-control select2">
+                                                    @foreach($riders as $rider)
+                                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-4 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_city" id="search_city" class="form-control select2">
-                                                    @foreach($city as $city)
-                                                        <option value="{{$city->name}}">{{$city->name}}</option>
+                                                    @foreach($cities as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
-                                        <div class="col-3 mt-1">
+                                        <div class="col-6 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_trax_id" id="search_trax_id" class="form-control select2">
-                                                    @foreach($trax_id as $trax_id)
-                                                        <option value="{{$trax_id->id}}">{{$trax_id->trax_id}}</option>
+                                                    @foreach($trax_ids as $trax_id)
+                                                        <option value="{{$trax_id}}">{{$trax_id}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
-                                        <div class="col-3 mt-1">
+                                        <div class="col-6 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_department" id="search_department" class="form-control select2">
-                                                    @foreach($department as $department)
+                                                    @foreach($departments as $department)
                                                         <option value="{{$department->id}}">{{$department->name}}</option>
                                                     @endforeach
                                                 </select>
@@ -143,7 +152,12 @@
         $(document).ready(function () {
 
             $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Employee',
+                placeholder:'Search Staff',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider',
                 width:'100%',
                 allowClear:true
             });
@@ -237,7 +251,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Staff Attendance',
+                        title: 'Employee Attendance',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -258,6 +272,7 @@
                     data: function (d) {
 
                         d.search_admin = $('#search_admin').val();
+                        d.search_rider = $('#search_rider').val();
                         d.search_city = $('#search_city').val();
                         d.search_department = $('#search_department').val();
                         d.search_trax_id = $('#search_trax_id').val();
@@ -280,7 +295,7 @@
                         }
                     },
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
-                    {data: 'name', name: 'name', class: 'align-middle name'},
+                    {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
