@@ -26,76 +26,76 @@
                             @csrf
                             <div class="card">
 
-                                <div class="">
-                                    @if(count($packaging_material_types) > 0)
+{{--                                <div class="">--}}
+{{--                                    @if(count($packaging_material_types) > 0)--}}
 
-                                        @php
-                                            $packaging_switch = '';
-                                        if(count($packaging_charges) > 0){
-                                            $packaging_switch = 'checked';
-                                             }else{
-                                            $packaging_switch = '';
-                                            }
-                                        @endphp
-                                        <div class="card-header border-primary">
-                                            <div class="row">
-                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
-                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}} disabled/></a></div>
+{{--                                        @php--}}
+{{--                                            $packaging_switch = '';--}}
+{{--                                        if(count($packaging_charges) > 0){--}}
+{{--                                            $packaging_switch = 'checked';--}}
+{{--                                             }else{--}}
+{{--                                            $packaging_switch = '';--}}
+{{--                                            }--}}
+{{--                                        @endphp--}}
+{{--                                        <div class="card-header border-primary">--}}
+{{--                                            <div class="row">--}}
+{{--                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>--}}
+{{--                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}} disabled/></a></div>--}}
 
-                                            </div>
-                                        </div>
+{{--                                            </div>--}}
+{{--                                        </div>--}}
 
-                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
-                                            @foreach($packaging_material_types as $index => $type)
-                                                @php
-                                                    $packaging_type_switch = '';
-                                                    if(in_array($type->id, $packaging_type_ids)){
-                                                        $packaging_type_switch = 'checked';
-                                                    }
-                                                @endphp
-                                                <div class="card-header border-primary">
-                                                    <div class="row">
-                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
-                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}} disabled/></a></a></div>
+{{--                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">--}}
+{{--                                            @foreach($packaging_material_types as $index => $type)--}}
+{{--                                                @php--}}
+{{--                                                    $packaging_type_switch = '';--}}
+{{--                                                    if(in_array($type->id, $packaging_type_ids)){--}}
+{{--                                                        $packaging_type_switch = 'checked';--}}
+{{--                                                    }--}}
+{{--                                                @endphp--}}
+{{--                                                <div class="card-header border-primary">--}}
+{{--                                                    <div class="row">--}}
+{{--                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>--}}
+{{--                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}} disabled/></a></a></div>--}}
 
-                                                    </div>
-                                                </div>
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
 
-                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
-                                                    <div class="card-content">
-                                                        <div class="card-body packaging-charges-div">
-                                                            <div class="row">
-                                                                @foreach($type->sizes as $ind => $size)
+{{--                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">--}}
+{{--                                                    <div class="card-content">--}}
+{{--                                                        <div class="card-body packaging-charges-div">--}}
+{{--                                                            <div class="row">--}}
+{{--                                                                @foreach($type->sizes as $ind => $size)--}}
 
-                                                                    @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}" disabled>
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @else
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}" disabled>
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @endif
+{{--                                                                    @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)--}}
+{{--                                                                        <div class="col-md-3 text-center">--}}
+{{--                                                                            <label class="card-title">{{$size->size}}</label>--}}
+{{--                                                                            <fieldset class="form-group">--}}
+{{--                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}" disabled>--}}
+{{--                                                                            </fieldset>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    @else--}}
+{{--                                                                        <div class="col-md-3 text-center">--}}
+{{--                                                                            <label class="card-title">{{$size->size}}</label>--}}
+{{--                                                                            <fieldset class="form-group">--}}
+{{--                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}" disabled>--}}
+{{--                                                                            </fieldset>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    @endif--}}
 
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
+{{--                                                                @endforeach--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                </div>
-                                            @endforeach
-                                        </div>
+{{--                                                </div>--}}
+{{--                                            @endforeach--}}
+{{--                                        </div>--}}
 
 
-                                    @endif
+{{--                                    @endif--}}
 
-                                </div>
+{{--                                </div>--}}
 
                             </div>
 

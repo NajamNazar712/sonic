@@ -27,75 +27,75 @@
 
                             <div class="card">
 
-                                <div class="">
-                                    @if(count($packaging_material_types) > 0)
+{{--                                <div class="">--}}
+{{--                                    @if(count($packaging_material_types) > 0)--}}
 
-                                        @php
-                                            $packaging_switch = '';
-                                        if(count($packaging_charges) > 0){
-                                            $packaging_switch = 'checked';
-                                             }else{
-                                            $packaging_switch = '';
-                                            }
-                                        @endphp
-                                        <div class="card-header border-primary">
-                                            <div class="row">
-                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
-                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}}/></a></div>
+{{--                                        @php--}}
+{{--                                            $packaging_switch = '';--}}
+{{--                                        if(count($packaging_charges) > 0){--}}
+{{--                                            $packaging_switch = 'checked';--}}
+{{--                                             }else{--}}
+{{--                                            $packaging_switch = '';--}}
+{{--                                            }--}}
+{{--                                        @endphp--}}
+{{--                                        <div class="card-header border-primary">--}}
+{{--                                            <div class="row">--}}
+{{--                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>--}}
+{{--                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}}/></a></div>--}}
 
-                                            </div>
-                                        </div>
+{{--                                            </div>--}}
+{{--                                        </div>--}}
 
-                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
-                                            @foreach($packaging_material_types as $index => $type)
-                                                @php
-                                                $packaging_type_switch = '';
-                                                if(in_array($type->id, $packaging_type_ids)){
-                                                    $packaging_type_switch = 'checked';
-                                                }
-                                                @endphp
-                                                <div class="card-header border-primary">
-                                                    <div class="row">
-                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
-                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}}/></a></a></div>
+{{--                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">--}}
+{{--                                            @foreach($packaging_material_types as $index => $type)--}}
+{{--                                                @php--}}
+{{--                                                $packaging_type_switch = '';--}}
+{{--                                                if(in_array($type->id, $packaging_type_ids)){--}}
+{{--                                                    $packaging_type_switch = 'checked';--}}
+{{--                                                }--}}
+{{--                                                @endphp--}}
+{{--                                                <div class="card-header border-primary">--}}
+{{--                                                    <div class="row">--}}
+{{--                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>--}}
+{{--                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}}/></a></a></div>--}}
 
-                                                    </div>
-                                                </div>
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
 
-                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
-                                                    <div class="card-content">
-                                                        <div class="card-body packaging-charges-div">
-                                                            <div class="row">
-                                                                @foreach($type->sizes as $ind => $size)
-                                                                    @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control @if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) changed @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) {{$e_packaging_charges[$type->id][$ind]->charges}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @else
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @endif
+{{--                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">--}}
+{{--                                                    <div class="card-content">--}}
+{{--                                                        <div class="card-body packaging-charges-div">--}}
+{{--                                                            <div class="row">--}}
+{{--                                                                @foreach($type->sizes as $ind => $size)--}}
+{{--                                                                    @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)--}}
+{{--                                                                        <div class="col-md-3 text-center">--}}
+{{--                                                                            <label class="card-title">{{$size->size}}</label>--}}
+{{--                                                                            <fieldset class="form-group">--}}
+{{--                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control @if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) changed @endif amount" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) {{$e_packaging_charges[$type->id][$ind]->charges}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">--}}
+{{--                                                                            </fieldset>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    @else--}}
+{{--                                                                        <div class="col-md-3 text-center">--}}
+{{--                                                                            <label class="card-title">{{$size->size}}</label>--}}
+{{--                                                                            <fieldset class="form-group">--}}
+{{--                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">--}}
+{{--                                                                            </fieldset>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    @endif--}}
 
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
+{{--                                                                @endforeach--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                </div>
-                                            @endforeach
-                                        </div>
+{{--                                                </div>--}}
+{{--                                            @endforeach--}}
+{{--                                        </div>--}}
 
 
-                                    @endif
+{{--                                    @endif--}}
 
-                                </div>
+{{--                                </div>--}}
 
                             </div>
 
@@ -836,21 +836,21 @@
                                             $e_on_discount_packaging_sw = '';
                                             }
                                             @endphp
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch" {{$on_discount_packaging_switch}}/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_packaging_sw != $on_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[1][0]) && $e_on_discount_packaging_sw != $on_discount_packaging_sw) {{$e_on_discount_packaging_sw}} @endif" name="on_discount_packaging_rate" value="{{$on_discount_packaging_sw}}" {{$on_discount_packaging_disable}}>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch" {{$on_discount_packaging_switch}}/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_packaging_sw != $on_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[1][0]) && $e_on_discount_packaging_sw != $on_discount_packaging_sw) {{$e_on_discount_packaging_sw}} @endif" name="on_discount_packaging_rate" value="{{$on_discount_packaging_sw}}" {{$on_discount_packaging_disable}}>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
 
                                     </div>
@@ -1589,21 +1589,21 @@
                                             $e_ol_discount_packaging_sw = '';
                                             }
                                             @endphp
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text" id="radio-addon3">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch" {{$ol_discount_packaging_switch}}/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_packaging_sw != $ol_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[2][0]) && $e_ol_discount_packaging_sw != $ol_discount_packaging_sw) {{$e_ol_discount_packaging_sw}} @endif" name="ol_discount_packaging_rate" value="{{$ol_discount_packaging_sw}}" {{$ol_discount_packaging_disable}}>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text" id="radio-addon3">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch" {{$ol_discount_packaging_switch}}/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_packaging_sw != $ol_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[2][0]) && $e_ol_discount_packaging_sw != $ol_discount_packaging_sw) {{$e_ol_discount_packaging_sw}} @endif" name="ol_discount_packaging_rate" value="{{$ol_discount_packaging_sw}}" {{$ol_discount_packaging_disable}}>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
 
                                     </div>
@@ -2349,21 +2349,21 @@
                                             $e_det_discount_packaging_sw = '';
                                             }
                                             @endphp
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch" {{$det_discount_packaging_switch}}/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_packaging_sw != $det_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[3][0]) && $e_det_discount_packaging_sw != $det_discount_packaging_sw) {{$e_det_discount_packaging_sw}} @endif" name="detain_discount_packaging_rate" value="{{$det_discount_packaging_sw}}" {{$det_discount_packaging_disable}}>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch" {{$det_discount_packaging_switch}}/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_packaging_sw != $det_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[3][0]) && $e_det_discount_packaging_sw != $det_discount_packaging_sw) {{$e_det_discount_packaging_sw}} @endif" name="detain_discount_packaging_rate" value="{{$det_discount_packaging_sw}}" {{$det_discount_packaging_disable}}>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
 
                                     </div>
@@ -3057,21 +3057,21 @@
                                             $e_same_discount_packaging_sw = '';
                                             }
                                             @endphp
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch" {{$same_discount_packaging_switch}}/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_packaging_sw != $same_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[4][0]) && $e_same_discount_packaging_sw != $same_discount_packaging_sw) {{$e_same_discount_packaging_sw}} @endif" data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" value="{{$same_discount_packaging_sw}}" {{$same_discount_packaging_disable}}>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+{{--                                            <div class="col text-center">--}}
+{{--                                                <fieldset>--}}
+{{--                                                    <div class="input-group input-group-sm form-group">--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                            <span class="input-group-text" id="">Packaging</span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <div class="input-group-prepend">--}}
+{{--                                                              <span class="input-group-text">--}}
+{{--                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch" {{$same_discount_packaging_switch}}/>--}}
+{{--                                                              </span>--}}
+{{--                                                        </div>--}}
+{{--                                                        <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_packaging_sw != $same_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[4][0]) && $e_same_discount_packaging_sw != $same_discount_packaging_sw) {{$e_same_discount_packaging_sw}} @endif" data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" value="{{$same_discount_packaging_sw}}" {{$same_discount_packaging_disable}}>--}}
+{{--                                                    </div>--}}
+{{--                                                </fieldset>--}}
+{{--                                            </div>--}}
                                         </div>
 
                                     </div>
@@ -4413,39 +4413,39 @@
             }
         };
         // Packaging Charges Overnight
-        packagingChargesSwitch.onchange = function () {
-            if(packagingChargesSwitch.checked === true){
-                $('#packaging_material_charges_div').slideDown('slow');
-                $('.packaging-charges-div-overnight').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitch.checked === false){
-                $('#packaging_material_charges_div').slideUp('slow');
-                $('.packaging-charges-div-overnight').find('input').prop('disabled',true);
+        // packagingChargesSwitch.onchange = function () {
+        //     if(packagingChargesSwitch.checked === true){
+        //         $('#packaging_material_charges_div').slideDown('slow');
+        //         $('.packaging-charges-div-overnight').find('input').prop('disabled',false);
+        //     }else if(packagingChargesSwitch.checked === false){
+        //         $('#packaging_material_charges_div').slideUp('slow');
+        //         $('.packaging-charges-div-overnight').find('input').prop('disabled',true);
+        //
+        //     }
+        // };
 
-            }
-        };
-
-        @if(count($packaging_material_types) > 0)
+{{--        @if(count($packaging_material_types) > 0)--}}
 
 
-        @foreach($packaging_material_types as $index => $type)
-            var PackageSwitch = [];
-            var type_id_{{$index}} = '{{$type->id}}';
-            var type_id = '{{$type->id}}';
-            PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);
-            PackageSwitch[type_id].onchange = function () {
+{{--        @foreach($packaging_material_types as $index => $type)--}}
+{{--            var PackageSwitch = [];--}}
+{{--            var type_id_{{$index}} = '{{$type->id}}';--}}
+{{--            var type_id = '{{$type->id}}';--}}
+{{--            PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);--}}
+{{--            PackageSwitch[type_id].onchange = function () {--}}
 
-                if ($(this).is(':checked') === true) {
-                    $('#package_type_'+type_id_{{$index}}).slideDown('slow');
+{{--                if ($(this).is(':checked') === true) {--}}
+{{--                    $('#package_type_'+type_id_{{$index}}).slideDown('slow');--}}
 
-                } else if ($(this).is(':checked') === false) {
-                    $('#package_type_'+type_id_{{$index}}).slideUp('slow');
+{{--                } else if ($(this).is(':checked') === false) {--}}
+{{--                    $('#package_type_'+type_id_{{$index}}).slideUp('slow');--}}
 
-                }
-            };
+{{--                }--}}
+{{--            };--}}
 
-        @endforeach
+{{--        @endforeach--}}
 
-        @endif
+{{--        @endif--}}
 
 
 
@@ -4995,9 +4995,9 @@
         ondiscountSwitch[3].onchange = function () {
             ONdiscount(ondiscountSwitch[3]);
         };
-        ondiscountSwitch[4].onchange = function () {
-            ONdiscount(ondiscountSwitch[4]);
-        };
+        // ondiscountSwitch[4].onchange = function () {
+        //     ONdiscount(ondiscountSwitch[4]);
+        // };
         // $.each(ondiscountSwitch,function () {
         //     console.log('heeee');
         // });
@@ -5011,7 +5011,7 @@
             }else if(eve.checked === false){
                 $(eve).parent().parent().next().prop('disabled',true);
 
-                if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true || ondiscountSwitch[4].checked === true){
+                if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true /*|| ondiscountSwitch[4].checked === true*/){
                     $('input[name="on_discount_title"]').prop('disabled',false);
                     $('input[name="on_daterange"]').prop('disabled',false);
                 }else{
@@ -5037,9 +5037,9 @@
         overlandDiscountSwitch[3].onchange = function () {
             OLdiscount(overlandDiscountSwitch[3]);
         };
-        overlandDiscountSwitch[4].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[4]);
-        };
+        // overlandDiscountSwitch[4].onchange = function () {
+        //     OLdiscount(overlandDiscountSwitch[4]);
+        // };
         function OLdiscount(eveOver) {
             if(eveOver.checked === true){
 
@@ -5050,7 +5050,7 @@
             }else if(eveOver.checked === false){
                 $(eveOver).parent().parent().next().prop('disabled',true);
 
-                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true || overlandDiscountSwitch[4].checked === true){
+                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true /*|| overlandDiscountSwitch[4].checked === true*/){
                     $('input[name="ol_discount_title"]').prop('disabled',false);
                     $('input[name="ol_daterange"]').prop('disabled',false);
                 }else{
@@ -5077,9 +5077,9 @@
         detainDiscountSwitch[3].onchange = function () {
             Detaindiscount(detainDiscountSwitch[3]);
         };
-        detainDiscountSwitch[4].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[4]);
-        };
+        // detainDiscountSwitch[4].onchange = function () {
+        //     Detaindiscount(detainDiscountSwitch[4]);
+        // };
         function Detaindiscount(eveDet) {
             if(eveDet.checked === true){
 
@@ -5090,7 +5090,7 @@
             }else if(eveDet.checked === false){
                 $(eveDet).parent().parent().next().prop('disabled',true);
 
-                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true || detainDiscountSwitch[4].checked === true){
+                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true /*|| detainDiscountSwitch[4].checked === true*/){
                     $('input[name="detain_discount_title"]').prop('disabled',false);
                     $('input[name="detain_daterange"]').prop('disabled',false);
                 }else{
@@ -5116,9 +5116,9 @@
         samedayDiscountSwitch[3].onchange = function () {
             SamedayDiscount(samedayDiscountSwitch[3]);
         };
-        samedayDiscountSwitch[4].onchange = function () {
+       /* samedayDiscountSwitch[4].onchange = function () {
             SamedayDiscount(samedayDiscountSwitch[4]);
-        };
+        };*/
         function SamedayDiscount(eveSameday) {
             if(eveSameday.checked === true){
 
@@ -5129,7 +5129,7 @@
             }else if(eveSameday.checked === false){
                 $(eveSameday).parent().parent().next().prop('disabled',true);
 
-                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true || samedayDiscountSwitch[4].checked === true){
+                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true /*|| samedayDiscountSwitch[4].checked === true*/){
                     $('input[name="sameday_discount_title"]').prop('disabled',false);
                     $('input[name="sameday_daterange"]').prop('disabled',false);
                 }else{
