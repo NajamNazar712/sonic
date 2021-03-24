@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\Attendance\AdminAttendance;
-use App\Http\Models\Admin\Attendance\AdminAttendanceActionLog;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use Carbon\Carbon;
@@ -257,14 +257,16 @@ class AdminAPIController extends Controller
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
 
-            $admin_attendance = AdminAttendance::where('admin_id', $admin_id)
-                ->whereDate('attendance_date', $attendance_date);
-            $admin_attendance_action = new AdminAttendanceActionLog();
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
             if ($admin_attendance->exists()) {
                 $admin_attendance = $admin_attendance->first();
             } else {
-                $admin_attendance = new AdminAttendance();
-                $admin_attendance->admin_id = $admin_id;
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
                 $admin_attendance->attendance_date = $attendance_date;
             }
             if ($request->action == 1) {
@@ -273,7 +275,8 @@ class AdminAPIController extends Controller
                 $admin_attendance->clock_in_longitude = $request->longitude;
                 $admin_attendance->save();
 
-                $admin_attendance_action->admin_id = $admin_id;
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
@@ -287,7 +290,8 @@ class AdminAPIController extends Controller
                 $admin_attendance->clock_out_longitude = $request->longitude;
                 $admin_attendance->save();
 
-                $admin_attendance_action->admin_id = $admin_id;
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
@@ -314,8 +318,9 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admin_attendance_action = AdminAttendanceActionLog::where('admin_id', $admin_id)
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->whereDate('action_date', $request->attendance_date)
+                ->where('employee_type', 1)
                 ->select('action_id', 'action_date', 'latitude', 'longitude')
                 ->orderBy('action_date', 'ASC');
             if ($admin_attendance_action->exists()) {
@@ -343,7 +348,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $admin_attendance = AdminAttendance::where('admin_id', $admin_id)
+            $admin_attendance = EmployeeAttendance::where('admin_id', $admin_id)
                 ->orderBy('attendance_date', 'ASC');
 
             if ($to_date != null) {

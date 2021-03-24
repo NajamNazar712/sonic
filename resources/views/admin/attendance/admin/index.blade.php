@@ -21,7 +21,7 @@
                                             <fieldset class="form-group">
                                                 <select name="search_admin" id="search_admin" class="form-control select2">
                                                     @foreach($admins as $admin)
-                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                        <option value="{{$admin->name}}">{{$admin->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
@@ -30,7 +30,7 @@
                                             <fieldset class="form-group">
                                                 <select name="search_city" id="search_city" class="form-control select2">
                                                     @foreach($city as $city)
-                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        <option value="{{$city->name}}">{{$city->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
@@ -98,6 +98,7 @@
                                     <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
@@ -119,7 +120,9 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
 
 @endsection
 
@@ -193,7 +196,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.attendance.admin.list') }}',
+                        url: '{{ route('admin.attendance.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -201,6 +204,7 @@
                             head.push('Trax ID');
                             head.push('Employee Name');
                             head.push('Hub');
+                            head.push('Employee Type');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
@@ -211,8 +215,9 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.trax_id);
-                                row.push(values.admin_name);
+                                row.push(values.name);
                                 row.push(values.city_name);
+                                row.push(values.employee_type);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.attendance_date);
@@ -249,7 +254,7 @@
                 serverSide: true,
 
                 ajax: {
-                    url: '{{ route('admin.attendance.admin.list') }}',
+                    url: '{{ route('admin.attendance.list') }}',
                     data: function (d) {
 
                         d.search_admin = $('#search_admin').val();
@@ -275,14 +280,15 @@
                         }
                     },
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
-                    {data: 'admin_name', name: 'a.name', class: 'align-middle admin_name'},
-                    {data: 'city_name', name: 'c.id', class: 'align-middle city_name'},
+                    {data: 'name', name: 'name', class: 'align-middle name'},
+                    {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
+                    {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.id', class: 'align-middle department'},
-                    {data: 'attendance_date', name: 'admin_attendances.attendance_date', class: 'align-middle attendance_date'},
-                    {data: 'clock_in', name: 'admin_attendances.clock_in', class: 'align-middle clock_in'},
+                    {data: 'attendance_date', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_date'},
+                    {data: 'clock_in', name: 'employee_attendances.clock_in', class: 'align-middle clock_in'},
                     {data: 'clock_in_location', name: '', class: 'align-middle clock_in_location', sortable: false},
-                    {data: 'clock_out', name: 'admin_attendances.clock_out', class: 'align-middle clock_out'},
+                    {data: 'clock_out', name: 'employee_attendances.clock_out', class: 'align-middle clock_out'},
                     {data: 'clock_out_location', name: '', class: 'align-middle clock_out_location', sortable: false},
                 ],
                 rowCallback: function (row, data, index) {
@@ -293,6 +299,7 @@
                 initComplete: function () {
                     this.api().table().columns.adjust();
                 }
+
             });
 
             $('#search_filter_btn').on('click',function () {

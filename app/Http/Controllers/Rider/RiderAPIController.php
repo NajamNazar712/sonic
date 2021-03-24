@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
@@ -32,8 +34,7 @@ use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Models\Rider\RiderAttendance;
-use App\Http\Models\Rider\RiderAttendanceActionLog;
+
 
 use Psy\Util\Json;
 use Validator;
@@ -4142,14 +4143,16 @@ class RiderAPIController extends Controller
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
 
-            $rider_attendance = RiderAttendance::where('rider_id', $rider_id)
-                ->whereDate('attendance_date', $attendance_date);
-            $rider_attendance_action = new RiderAttendanceActionLog();
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 2);
+            $rider_attendance_action = new EmployeeAttendanceActionLog();
             if ($rider_attendance->exists()) {
                 $rider_attendance = $rider_attendance->first();
             } else {
-                $rider_attendance = new RiderAttendance();
-                $rider_attendance->rider_id = $rider_id;
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider_id;
+                $rider_attendance->employee_type = 2;
                 $rider_attendance->attendance_date = $attendance_date;
             }
             if ($request->action == 1) {
@@ -4158,7 +4161,8 @@ class RiderAPIController extends Controller
                 $rider_attendance->clock_in_longitude = $request->longitude;
                 $rider_attendance->save();
 
-                $rider_attendance_action->rider_id = $rider_id;
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
@@ -4172,7 +4176,8 @@ class RiderAPIController extends Controller
                 $rider_attendance->clock_out_longitude = $request->longitude;
                 $rider_attendance->save();
 
-                $rider_attendance_action->rider_id = $rider_id;
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
@@ -4199,8 +4204,9 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $rider_attendance_action = RiderAttendanceActionLog::where('rider_id', $rider_id)
+            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
                 ->whereDate('action_date', $request->attendance_date)
+                ->where('employee_type', 2)
                 ->select('action_id', 'action_date', 'latitude', 'longitude')
                 ->orderBy('action_date', 'ASC');
             if ($rider_attendance_action->exists()) {
@@ -4228,7 +4234,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $rider_attendance = RiderAttendance::where('rider_id', $rider_id)
+            $rider_attendance = EmployeeAttendance::where('rider_id', $rider_id)
                 ->orderBy('attendance_date', 'ASC');
 
             if ($to_date != null) {
