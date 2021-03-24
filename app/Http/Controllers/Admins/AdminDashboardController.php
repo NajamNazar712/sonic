@@ -7348,7 +7348,7 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if($result->id != 8761){
+                if($result->id != 8761 && $result->id != 9358){
                     if(in_array($result->id, session('tagged_shippers'))){
                         $multiple_sale_check = true;
                     }

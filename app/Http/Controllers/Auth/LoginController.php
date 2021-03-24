@@ -114,6 +114,10 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Access Denied!');
             }
+            else if ($user->id == 9358) {
+                auth('web')->logout();
+                return back()->with('info', 'Access Denied!');
+            }
             else {
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
