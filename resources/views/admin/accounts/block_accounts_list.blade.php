@@ -8,7 +8,8 @@
             <div class="col-12">
                 <div class="card">
                     @include('admin.inc.messages')
-
+                    <div class="card-content">
+                        <div class="card-body card-dashboard">
                 @if (session('role_id') == 1 || in_array(276, session('permissions')))
                         <div id="search_form" class="row mb-2 justify-content-center">
                             <div class="col-4">
@@ -20,14 +21,18 @@
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <input type="email" name="search_email" id="search_email" class="form-control cnic" placeholder="Email">
+                                </fieldset>
+                            </div>
                             <div class="col-2">
                                 <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                             </div>
                         </div>
                     @endif
 
-                    <div class="card-content">
-                        <div class="card-body card-dashboard">
+
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
@@ -232,7 +237,7 @@
         var hub_ids = [];
         var table = $('.datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            scrollX: true, scrollY: '500px',
+            scrollX: false, scrollY: '500px',
             buttons: [
                 {
                     text: 'Sales Tier Tagging',
@@ -418,6 +423,7 @@
                 url: '{{ route('admin.accounts.block.ajax') }}',
                 data: function (d) {
                     d.sale_persons = $('#search_admins').val();
+                    d.search_email = $('#search_email').val();
                 }
             },
             columns: [

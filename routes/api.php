@@ -132,6 +132,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
+            Route::get('rider_profile', 'Rider\RiderAPIController@rider_profile')->name('rider_profile');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');

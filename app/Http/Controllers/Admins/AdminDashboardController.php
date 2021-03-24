@@ -7786,6 +7786,9 @@ class AdminDashboardController extends Controller
         if($sale_persons = $request->get('sale_persons')){
             $users = $users->whereIn('ad.id', $sale_persons);
         }
+        if($search_email = $request->get('search_email')){
+            $users = $users->where('users.email',$search_email);
+        }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
