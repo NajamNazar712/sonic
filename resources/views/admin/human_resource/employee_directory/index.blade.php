@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Riders Pending Request')
+@section('title', 'Employee Directory')
 
 @section('content')
     <h1>Employee Directory</h1>

@@ -167,7 +167,6 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-
             ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
 
         if (session('role_id') != 1) {
@@ -188,7 +187,10 @@ class AdminHumanResourseController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->employee_id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+                $route = route("admin.human_resourse.employee_directory.edit",$result->employee_id);
+                $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
 
                 $dropdown .= '
                 </div>
@@ -199,7 +201,13 @@ class AdminHumanResourseController extends Controller
             })
             ->make(true);
     }
+
     public function employee_directory_store(Request $request){
         return $request;
+    }
+
+    public function employee_directory_edit(Employee $employee)
+    {
+        return $employee;
     }
 }

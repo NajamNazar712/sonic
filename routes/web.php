@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Models\HR\Employee;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -2737,6 +2737,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('store', 'Admins\AdminHumanResourseController@employee_directory_store')->name('store');
+            Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
         });
 
     });
