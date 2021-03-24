@@ -1418,7 +1418,6 @@
                     </ul>
                 </li>
             @endif
-
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
@@ -1428,16 +1427,15 @@
                     @if (session('role_id') == 1 || in_array(449, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
                     @endif
+                </ul>
             </li>
-
-                <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
-
+            <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Power BI Dashboard</span></a>
                 <ul class="menu-content">
-                        <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales</a>
-                        </li>
-                        <li class="menu-item"><a href="{{ route('admin.power_bi.operation') }}">Operation</a>
-                        </li>
+                    <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales</a>
+                    </li>
+                    <li class="menu-item"><a href="{{ route('admin.power_bi.operation') }}">Operation</a>
+                    </li>
                 </ul>
             </li>
         </ul>
