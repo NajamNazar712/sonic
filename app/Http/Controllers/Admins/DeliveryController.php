@@ -6228,9 +6228,10 @@ class DeliveryController extends Controller
         return view('admin.delivery.quick_receiving.index');
     }
 
+    public $undelivered_status = array(7,8,9,12,15,18,56,29,10,11,29,35);
+
     public function quick_receiving_track_delivery_note(Request $request)
     {
-        $undelivered_status = array(7,8,9,12,15,18,56);
         $delivery_note_id = $request->delivery_note_id;
         $total_shipments = 0;
         $delivery_note = DeliveryNote::where('id',$delivery_note_id);
@@ -6242,16 +6243,19 @@ class DeliveryController extends Controller
         $delivery_note_shipments = $delivery_note->delivery_note_shipments;
         foreach ($delivery_note_shipments as $delivery_note_shipment){
             $shipment = $delivery_note_shipment->shipment;
-            if(in_array($shipment->shipper_status_id, $undelivered_status)){
+            if(in_array($shipment->shipper_status_id, $this->undelivered_status)){
                 $total_shipments++;
             }
+        }
+        if($total_shipments == 0)
+        {
+            return response()->json(['status'=>1,'error'=>'Delivery Note doesn\'t contain any returned shipments']);
         }
         return response()->json(['status'=>0,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
     }
 
     public function quick_receiving_track_tracking_number(Request $request)
     {
-        $undelivered_status = array(7,8,9,12,15,18,56);
         $delivery_note_id = $request->delivery_note_id;
         $tracking_number = $request->tracking_number;
         $shipment = Shipment::where('tracking_number', $tracking_number);
@@ -6260,7 +6264,7 @@ class DeliveryController extends Controller
             return response()->json(['status'=>1,'error'=>'Invalid Tracking Number']);
         }
         $shipment = $shipment->first();
-        if(!in_array($shipment->shipper_status_id, $undelivered_status))
+        if(!in_array($shipment->shipper_status_id, $this->undelivered_status))
         {
             return response()->json(['status'=>1,'error'=>'Invalid Tracking Number']);
         }
@@ -6274,12 +6278,12 @@ class DeliveryController extends Controller
         $delivery_shipments = $delivery_shipments->first();
         $journey = $shipment->shipment_journey->first();
 
-        return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>$journey->created_at,'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name]]);
+        return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name]]);
     }
 
     public function quick_receiving_submit (Request $request)
     {
-        $undelivered_status = array(7,8,9,12,15,18,56);
+
         $delivery_note_id = $request->delivery_note;
         $tracking_numbers = $request->tracking_number;
         $shipments = Shipment::whereIn('tracking_number', $tracking_numbers);
@@ -6293,7 +6297,7 @@ class DeliveryController extends Controller
         foreach ($shipment_ids_from_delivery_note as $id)
         {
             $temp_shipment_var = Shipment::find($id);
-            if(in_array($temp_shipment_var->shipper_status_id, $undelivered_status))
+            if(in_array($temp_shipment_var->shipper_status_id, $this->undelivered_status))
             {
                 array_push($shipment_ids,$id);
                 array_push($shipment_trackings,$temp_shipment_var->tracking_number);
@@ -6303,7 +6307,7 @@ class DeliveryController extends Controller
         for($i = 0; $i < count($shipment_trackings); $i++) {
             if(in_array($shipment_trackings[$i],$tracking_numbers)) {
                 if (DeliveryShipmentsReceivedOperation::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_ids[$i])->exists() || DeliveryShipmentsNotReceivedOperations::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_ids[$i])->exists()) {
-                    return back()->with(['error' => 'Shipment# ' . $shipment_trackings[$i] . ' From This Delivery Note Is Already Received']);
+                    return back()->with(['error' => 'This delivery note can not be received again']);
                 }
             }
         }

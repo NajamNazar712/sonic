@@ -183,11 +183,10 @@
                 }).done(function(data){
                     UnblockPagePermanently();
                     $("#scan_tracking").val('');
-                    $(".myError").html("");
                     if(data.status == 0){
                         if(tracking_numbers.indexOf(data.details.tracking_number) != -1)
                         {
-                            $("#scan_tracking_error").html("Tracking Number Already Scanned");
+                            toastr.error("Tracking Number Already Scanned", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             return;
                         }
                         tracking_numbers.push(data.details.tracking_number);
@@ -195,13 +194,13 @@
                         $("#remaining_scanned").html(parseInt($("#remaining_scanned").html()) + 1);
                         var rowNo = table.rows().count();
                         var tracking_number_column = `<input type="hidden" form="submit_form" name="tracking_number[]" value="${data.details.tracking_number}">${data.details.tracking_number}`
-                        table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date.date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).node().id = data.details.row_id;
+                        table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).node().id = data.details.row_id;
                         table.draw(false);
                         table.order([0, 'asc']).draw();
                     }else{
                         scan_sound(2);
                         $("#scan_tracking").focus();
-                        $("#scan_tracking_error").html(data.error);
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                 });
@@ -211,7 +210,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function(e) {
                 blockPagePermanently();
                 var delivery_note_id = this.value;
                 $.ajax({
@@ -230,15 +229,14 @@
                         $("#scan_delivery_note").attr("readonly",true);
                         $("#scan_tracking").attr("readonly",false);
                         $("#scan_tracking").focus();
-                        $(".myError").html("");
                     }else{
                         scan_sound(2);
                         $("#delivery_note_label").html("");
-                        $("#total_to_scan").html("");
+                        $("#total_to_scan").html("0");
                         $("#scan_delivery_note").attr("readonly",false);
                         $("#scan_delivery_note").focus();
                         $("#scan_tracking").attr("readonly",true);
-                        $("#delivery_note_error").html(data.error);
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                 });

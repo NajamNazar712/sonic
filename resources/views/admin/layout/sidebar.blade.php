@@ -345,13 +345,13 @@
                                         </li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(36, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
+                                    @endif
+
                                     @if (session('role_id') == 1 || in_array(464, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.quick_receiving.index') }}">Quick Receiving</a>
                                         </li>
-                                    @endif
-
-                                    @if (session('role_id') == 1 || in_array(36, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
                                     @endif
 
 {{--                                    @if (session('role_id') == 1 || in_array(105, session('permissions')))--}}
