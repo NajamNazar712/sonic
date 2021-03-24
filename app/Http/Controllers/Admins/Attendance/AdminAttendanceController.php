@@ -50,57 +50,51 @@ class AdminAttendanceController extends Controller
         }
 
         $datatable = Datatables::of($attendances)
-            ->editColumn('trax_id', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('trax_id', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return $employee->rider_trax_id;
-                }
-                else{
+                } else {
                     return $employee->trax_id;
                 }
             })
-            ->editColumn('name', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('name', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return $employee->rider_name;
-                }
-                else{
+                } else {
                     return $employee->admin_name;
                 }
             })
-            ->editColumn('city_name', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('city_name', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return $employee->rider_city_name;
-                }
-                else{
+                } else {
                     return $employee->city_name;
                 }
             })
-            ->editColumn('employee_type', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('employee_type', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return "Rider";
-                }
-                else{
+                } else {
                     return "Staff";
                 }
             })
-            ->editColumn('designation', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('designation', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return $employee->rider_type;
-                }
-                else{
+                } else {
                     return $employee->designation;
                 }
             })
-            ->editColumn('department', function($employee){
-                if($employee->employee_type == 2){
+            ->editColumn('department', function ($employee) {
+                if ($employee->employee_type == 2) {
                     return "Operations";
-                }
-                else{
+                } else {
                     return $employee->department;
                 }
             })
             ->addColumn("clock_in_location", function ($employee) {
                 if ($employee->clock_in_latitude && $employee->clock_in_longitude) {
-                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $employee->clock_in_latitude . ',' . $employee->clock_in_longitude.'" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_in = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $employee->clock_in_latitude . ',' . $employee->clock_in_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 } else {
                     $clock_in = '-';
                 }
@@ -108,7 +102,7 @@ class AdminAttendanceController extends Controller
             })
             ->addColumn("clock_out_location", function ($employee) {
                 if ($employee->clock_out_latitude && $employee->clock_out_longitude) {
-                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $employee->clock_out_latitude . ',' . $employee->clock_out_longitude.'" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                    $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $employee->clock_out_latitude . ',' . $employee->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
                 } else {
                     $clock_out = '-';
                 }
@@ -116,10 +110,10 @@ class AdminAttendanceController extends Controller
                 return $clock_out;
             });
 
-        if($search_admin = $request->get('search_admin')){
+        if ($search_admin = $request->get('search_admin')) {
             $datatable->where('a.id', $search_admin);
         }
-        if($search_rider = $request->get('search_rider')){
+        if ($search_rider = $request->get('search_rider')) {
             $datatable->where('r.id', $search_rider);
         }
         if ($search_city = $request->get('search_city')) {
@@ -130,7 +124,7 @@ class AdminAttendanceController extends Controller
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
             $datatable->where('a.trax_id', $search_trax_id)
-            ->orWhere('r.trax_id', $search_trax_id);
+                ->orWhere('r.trax_id', $search_trax_id);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -139,7 +133,7 @@ class AdminAttendanceController extends Controller
             $datatable->whereBetween('employee_attendances.attendance_date', [$from, $to]);
         }
 
-         return $datatable->make(true);
+        return $datatable->make(true);
     }
 
 }

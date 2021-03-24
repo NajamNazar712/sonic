@@ -72,7 +72,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Attandance Date (From)">
+                                                       id="search_date_from" placeholder="Attandance Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
                                         <div class="col-5 mt-1">
@@ -84,7 +84,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_to"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_to" placeholder="Attandance Date (To)">
+                                                       id="search_date_to" placeholder="Attandance Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
 
@@ -111,9 +111,9 @@
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
-                                    <th class="border-primary border-darken-1">Clock In</th>
+                                    <th class="border-primary border-darken-1">Clock In Time</th>
                                     <th class="border-primary border-darken-1">Clock In Location</th>
-                                    <th class="border-primary border-darken-1">Clock Out</th>
+                                    <th class="border-primary border-darken-1">Clock Out Time</th>
                                     <th class="border-primary border-darken-1">Clock Out Location</th>
                                 </tr>
                                 </thead>
@@ -281,7 +281,7 @@
 
                     }
                 },
-                order: [[6, 'desc']],
+                order: [[7, 'desc']],
                 rowId: 'id',
                 columns: [
                     {
