@@ -1786,7 +1786,7 @@ class AdminMasterCargoController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $master_cargo->destination_hub->name . '</td>
-                              <td class="color secondary"><strong>Vehicle Name</strong></td>
+                              <td class="color secondary"><strong>Vehicle Number</strong></td>
                               <td>' . $master_cargo->vehicle . '</td>
                             </tr>
                             <tr>

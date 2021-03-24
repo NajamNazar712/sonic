@@ -337,7 +337,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
