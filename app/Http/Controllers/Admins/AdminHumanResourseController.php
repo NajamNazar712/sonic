@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeeReligion;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
@@ -208,6 +212,11 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_edit(Employee $employee)
     {
+        $religions = EmployeeReligion::all();
+        $nationalities = EmployeeNationality::all();
+        $domiciles = EmployeeDomicile::all();
+        $maritial_statuses = EmployeeMaritalStatus::all();
+        return view('admin.human_resource.employee_directory.update',compact('religions','nationalities','domiciles','maritial_statuses'));
         return $employee;
     }
 }

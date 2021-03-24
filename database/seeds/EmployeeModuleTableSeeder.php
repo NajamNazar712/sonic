@@ -83,5 +83,13 @@ class EmployeeModuleTableSeeder extends Seeder
             array('id' => 2 ,'name'=>'Team Lead'),
             array('id' => 3 ,'name'=>'Software Engineer'),
         ));
+
+        DB::table('employee_domiciles')->truncate();
+        DB::table('employee_domiciles')->insert(array(
+            array('id' => 1 ,'name'=>'Sindh'),
+            array('id' => 2 ,'name'=>'Punjab'),
+            array('id' => 3 ,'name'=>'Balochistan'),
+            array('id' => 4 ,'name'=>'KPK'),
+        ));
     }
 }
