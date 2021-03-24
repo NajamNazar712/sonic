@@ -63,7 +63,7 @@
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Driver Name</th>
-                                    <th class="border-primary border-darken-1">Vehicle</th>
+                                    <th class="border-primary border-darken-1">Vehicle Number</th>
                                     <th class="border-primary border-darken-1">Contact No.</th>
                                     <th class="border-primary border-darken-1">Transit Date</th>
                                     <th class="border-primary border-darken-1">Transit By</th>
@@ -235,7 +235,7 @@
                             head.push('Transport Mode');
                             head.push('Vendor');
                             head.push('Driver Name');
-                            head.push('Vehicle');
+                            head.push('Vehicle Number');
                             head.push('Contact No.');
                             head.push('Transit Datetime');
                             head.push('Transit By');
