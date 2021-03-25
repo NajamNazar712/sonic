@@ -16,7 +16,7 @@
 
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" autofocus autocomplete="off" form="submit_form" class="form-control" placeholder="Scan Delivery Note Number" name="delivery_note" id="scan_delivery_note">
+                            <input type="text" autofocus autocomplete="off" class="form-control" placeholder="Scan Delivery Note Number" name="delivery_note" id="scan_delivery_note">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -36,7 +36,7 @@
 
                 </div>
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-3 text-center border-right-black">
+                    <div class="col-3 text-center">
                         <span>Delivery Note #</span>
                         <span id="delivery_note_label"></span>
                     </div>
@@ -168,7 +168,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).on('change', function() {
                 blockPagePermanently();
                 var tracking_number = this.value;
                 var delivery_note_id = $("#scan_delivery_note").val();
@@ -210,7 +210,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function(e) {
+            }).on('change', function(e) {
                 blockPagePermanently();
                 var delivery_note_id = this.value;
                 $.ajax({
@@ -249,8 +249,12 @@
                     $("#delivery_note_error").html("Delivery Note Number Can\'t Be Empty or Invalid");
                     return;
                 }
-
-                $('#submit_form').submit();
+                if(tracking_numbers.length > 0){
+                    $('#submit_form').submit();
+                }
+                else{
+                    toastr.error("Please scan Tracking Number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
             });
 
         });
