@@ -2018,7 +2018,7 @@ class RiderAPIController extends Controller
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->pin = $request->pin;
                             $employee_request->city_id = $request->city_id;
-                            $employee_request->employee_type = 2;
+                            $employee_request->employee_type_id = 2;
                             $employee_request->save();
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
