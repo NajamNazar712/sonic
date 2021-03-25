@@ -1250,16 +1250,16 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100,417, 418, 152, 279, 358,394,447], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100,417, 418, 152, 279, 358,394,447, 466], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394,447], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394,447, 466], session('permissions'))) !== 0)
                                         @if (session('role_id') == 1 || in_array(152, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
                                         @endif
 
 
-                                        @if (session('role_id') == 1 || in_array(152, session('permissions')))
+                                        @if (session('role_id') == 1 || in_array(466, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.settings.rider_ticker.index')}}">Rider Ticker</a></li>
                                         @endif
 
@@ -1429,7 +1429,7 @@
                     @if (session('role_id') == 1 || in_array(449, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
                     @endif
-                    @if (session('role_id') == 1 || in_array(449, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(465, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
                     @endif
                 </ul>
