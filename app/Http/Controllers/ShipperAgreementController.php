@@ -403,7 +403,7 @@ otherwise it will be rejected</li>
                 else{
                     $corporate_rate_type = 2;
                 }
-                $packaging_details = '';
+               /* $packaging_details = '';
                 $packaging_charges = PackagingCharge::where('user_id', $id)->get();
                 if($packaging_charges){
                     $packaging_details .= '<table class="table table-sm table-bordered mb-0">
@@ -424,7 +424,7 @@ otherwise it will be rejected</li>
                     }
                     $packaging_details .=  '</tbody>
                               </table>';
-                }
+                }*/
 
                 if($shipper->account_type_id == 1){
                     $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
@@ -689,7 +689,7 @@ otherwise it will be rejected</li>
                     $rate_details .= $return_charges_details;
                     $rate_details .= '<div class="new-page"></div>';
                 }
-                $html .= $packaging_details;
+              /*  $html .= $packaging_details;*/
                 $html .= $rate_details;
             }
 

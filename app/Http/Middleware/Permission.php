@@ -194,6 +194,9 @@ class Permission
             'delivery.note.index' => 35,
             'delivery.note.shipment.info' => 35,
             'delivery.note.create' => 35,
+
+            'delivery.quick_receiving.index' => 464,
+
             'delivery.receive.index' => 36,
             'delivery.receive.list' => 36,
             'delivery.receive.shipments' => 36,
