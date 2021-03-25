@@ -70,7 +70,9 @@
                 <div class="row mb-2 justify-content-center">
                     <form id="submit_form" action="{{route('admin.delivery.quick_receiving.submit')}}" method="post">
                         @csrf
-                        <button type="button" id="submit_button" class="btn btn-primary">Recieve</button>
+                        <input type="hidden" name="delivery_note" id="submit_delivery_note_id" value="">
+{{--                        <input type="hidden" name="tracking_numbers" id="submit_tracking_numbers" value="">--}}
+                        <button type="button" id="submit_button" class="btn btn-primary">Receive</button>
                     </form>
                 </div>
             </div>
@@ -264,6 +266,7 @@
                     return;
                 }
                 if(tracking_numbers.length > 0){
+                    $('#submit_delivery_note_id').val(delivery_note);
                     $('#submit_form').submit();
                 }
                 else{
