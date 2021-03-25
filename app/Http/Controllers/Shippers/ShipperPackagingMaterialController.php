@@ -342,7 +342,6 @@ class ShipperPackagingMaterialController extends Controller
         $packaging_quantities = $request->quantity;
         $packaging_type_ids = array();
         $packaging_wms_product_ids = array();
-
         $total_charges = 0;
 
         foreach ($packaging_size_ids as $index => $packaging_size_id){
@@ -521,6 +520,7 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function packaging_request_cart_index(){
+       
         if(session('foc_account') == 1){
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
         }
@@ -528,15 +528,15 @@ class ShipperPackagingMaterialController extends Controller
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
         }
 
-        $user_charges = array();
+//        $user_charges = array();
         $standard_charges = array();
-        $size_charges = PackagingCharge::where('user_id', session('user_id'));
-        if($size_charges->exists()){
-            $size_charges = $size_charges->get();
-            foreach ($size_charges as $size_charge){
-                $user_charges[$size_charge->size_id] = $size_charge->charges;
-            }
-        }
+//        $size_charges = PackagingCharge::where('user_id', session('user_id'));
+//        if($size_charges->exists()){
+//            $size_charges = $size_charges->get();
+//            foreach ($size_charges as $size_charge){
+//                $user_charges[$size_charge->size_id] = $size_charge->charges;
+//            }
+//        }
         $size_charges = PackagingMaterialTypeSizes::get();
         foreach ($size_charges as $size_charge){
             $standard_charges[$size_charge->id] = $size_charge->standard_charges;
@@ -552,7 +552,7 @@ class ShipperPackagingMaterialController extends Controller
                 $pictures[$packaging_type->id] = 'img/trax_logo.png';
             }
         }
-        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, 'user_charges' => $user_charges, 'standard_charges' => $standard_charges, 'pictures' => $pictures]);
+        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures]);
     }
 
     public function packaging_request_cart_details(Request $request){

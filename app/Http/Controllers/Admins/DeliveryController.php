@@ -14,6 +14,8 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
+use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -6219,5 +6221,115 @@ class DeliveryController extends Controller
         else{
             return response()->json(['status'=> 0, 'error' => 'No Riders Found']);
         }
+    }
+
+    public function quick_receiving_delivery_index()
+    {
+        return view('admin.delivery.quick_receiving.index');
+    }
+
+    public $undelivered_status = array(7,8,9,12,15,18,56,29,10,11,29,35);
+
+    public function quick_receiving_track_delivery_note(Request $request)
+    {
+        $delivery_note_id = $request->delivery_note_id;
+        $total_shipments = 0;
+        $delivery_note = DeliveryNote::where('id',$delivery_note_id);
+        if($delivery_note->doesntExist())
+        {
+            return response()->json(['status'=>1,'error'=>'Invalid Delivery Note Number']);
+        }
+        $delivery_note = $delivery_note->first();
+        $delivery_note_shipments = $delivery_note->delivery_note_shipments;
+        foreach ($delivery_note_shipments as $delivery_note_shipment){
+            $shipment = $delivery_note_shipment->shipment;
+            if(in_array($shipment->shipper_status_id, $this->undelivered_status)){
+                $total_shipments++;
+            }
+        }
+        if($total_shipments == 0)
+        {
+            return response()->json(['status'=>1,'error'=>'Delivery Note doesn\'t contain any returned shipments']);
+        }
+        return response()->json(['status'=>0,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
+    }
+
+    public function quick_receiving_track_tracking_number(Request $request)
+    {
+        $delivery_note_id = $request->delivery_note_id;
+        $tracking_number = $request->tracking_number;
+        $shipment = Shipment::where('tracking_number', $tracking_number);
+        if($shipment->doesntExist())
+        {
+            return response()->json(['status'=>1,'error'=>'Invalid Tracking Number']);
+        }
+        $shipment = $shipment->first();
+        if(!in_array($shipment->shipper_status_id, $this->undelivered_status))
+        {
+            return response()->json(['status'=>1,'error'=>'Invalid Tracking Number']);
+        }
+
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        $delivery_shipments = $delivery_note->delivery_note_shipments->where('shipment_id',$shipment->id);
+        if($delivery_shipments->count() < 1)
+        {
+            return response()->json(['status'=>1,'error'=>'Tracking Number doesn\'t belong to this delivery note']);
+        }
+        $delivery_shipments = $delivery_shipments->first();
+        $journey = $shipment->shipment_journey->first();
+
+        return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name]]);
+    }
+
+    public function quick_receiving_submit (Request $request)
+    {
+
+        $delivery_note_id = $request->delivery_note;
+        $tracking_numbers = $request->tracking_number;
+        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers);
+        if ($shipments->count() != count($tracking_numbers)) {
+            return back()->with(['error' => 'Invalid Tracking Numbers']);
+        }
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        $shipment_ids_from_delivery_note = $delivery_note->delivery_note_shipments->pluck('shipment_id');
+        $shipment_ids = array();
+        $shipment_trackings = array();
+        foreach ($shipment_ids_from_delivery_note as $id)
+        {
+            $temp_shipment_var = Shipment::find($id);
+            if(in_array($temp_shipment_var->shipper_status_id, $this->undelivered_status))
+            {
+                array_push($shipment_ids,$id);
+                array_push($shipment_trackings,$temp_shipment_var->tracking_number);
+            }
+        }
+
+        for($i = 0; $i < count($shipment_trackings); $i++) {
+            if(in_array($shipment_trackings[$i],$tracking_numbers)) {
+                if (DeliveryShipmentsReceivedOperation::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_ids[$i])->exists() || DeliveryShipmentsNotReceivedOperations::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_ids[$i])->exists()) {
+                    return back()->with(['error' => 'This delivery note can not be received again']);
+                }
+            }
+        }
+
+        for($i = 0; $i < count($shipment_trackings); $i++)
+        {
+            if(in_array($shipment_trackings[$i],$tracking_numbers))
+            {
+                $received = new DeliveryShipmentsReceivedOperation();
+                $received->delivery_note_id = $delivery_note_id;
+                $received->shipment_id = $shipment_ids[$i];
+                $received->admin_id = Auth::id();
+                $received->save();
+            }
+            else{
+                $not_received = new DeliveryShipmentsNotReceivedOperations();
+                $not_received->delivery_note_id = $delivery_note_id;
+                $not_received->shipment_id = $shipment_ids[$i];
+                $not_received->save();
+            }
+        }
+
+        return back()->with(['success' => 'Shipments Received Successfully']);
     }
 }

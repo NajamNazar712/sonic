@@ -6,6 +6,8 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
@@ -44,6 +46,24 @@ class AdminPettyCashController extends Controller
         }
         $cities = City::select('id', 'name')->get();
         return view('admin.petty_cash.make')->with(['heads' => $head, 'cities' => $cities, 'hub_cities' => $hub_cities]);
+    }
+
+    public function make_petty_cash_statement_check_destination(Request $request)
+    {
+            $city_id = $request->hub_id;
+            $petty = PettyCashConsigneeHub::where('city_id',$city_id);
+            if($petty->exists())
+            {
+                $data = PettyCashConsignee::where('petty_cash_consignees.id',$petty->first()->petty_cash_consignee_id)
+                    ->join('cities','cities.id','=','petty_cash_consignees.hub_id')
+                    ->select(['petty_cash_consignees.hub_id as id','cities.name as name'])
+                    ->first();
+
+                return response()->json(['status'=>1,'data'=>$data]);
+            }
+            else{
+                return response()->json(['status'=>0]);
+            }
     }
 
     public function make_petty_cash_statement_check_reference(Request $request)
@@ -1569,6 +1589,13 @@ class AdminPettyCashController extends Controller
         if ($petty_cash_statement_id) {
             $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
             $city_id = $petty_cash_statement->hub_id;
+            $petty_cash_statement_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash_statement_id)->first();
+            $consignee_city_id = $petty_cash_statement_detail->hub_id;
+            $consignee_city_name = City::where('id',$consignee_city_id)->pluck("name")->first();
+            $consignee_id = PettyCashConsignee::where('hub_id',$consignee_city_id)->first()->consignee_id;
+
+            $consignee = User::find($consignee_id);
+
             $special_instructions = 'Petty Cash Statement # ' . $petty_cash_statement_id;
             $pickup = UserShippingInfo::where('user_id', $user_id)->where('city_id', $city_id);
             $pickup_address_id = '';
@@ -1584,9 +1611,9 @@ class AdminPettyCashController extends Controller
                 $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
             }
 
-            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, 202, 'Fawad Ahmed Finance Manager', 'Trax Head Office Karachi', '0213-8772222', NULL, $user->email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
+            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, $consignee_city_id,$consignee->name, 'Trax Office '.$consignee_city_name, $consignee->phone, NULL, $consignee->email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
 
-            $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, 202);
+            $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, $consignee_city_id);
             $this->add_item($shipment->id, 24, $special_instructions, 1, null, 0, 0);
             ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
             ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
