@@ -2739,6 +2739,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
+        Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+    });
+
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {

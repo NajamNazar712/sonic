@@ -897,7 +897,7 @@ class AdminMasterCargoController extends Controller
                 }
             })
             ->addColumn('action', function($pickup_request) {
-                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(453, session('permissions'))) {
                     return '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
@@ -1487,10 +1487,6 @@ class AdminMasterCargoController extends Controller
                         border-top: 1px dashed #000000;
                       }
 
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
                       }
@@ -1505,10 +1501,6 @@ class AdminMasterCargoController extends Controller
 
                       .border {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .cargo_checklist {
-                        page-break-before: always;
                       }
                     </style>';
 
