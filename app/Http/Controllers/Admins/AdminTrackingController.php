@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -1042,15 +1043,16 @@ class AdminTrackingController extends Controller
                         }
                     }
 
-                    $quick_receiving_shipment_journey = $shipment->quick_receiving_shipments_journeys;
+                    $quick_receiving_shipment_journey = DeliveryShipmentsReceivedOperation::where('shipment_id', $shipment->id);
 
-                    if ($quick_receiving_shipment_journey) {
+                    if ($quick_receiving_shipment_journey->exists()) {
+                        $quick_receiving_shipment_journey = $quick_receiving_shipment_journey->get();
                         foreach ($quick_receiving_shipment_journey as $quick_receiving_journey) {
                             $journey_details = array();
 
                             $journey_details['delivery_note_id'] = '<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $quick_receiving_journey->delivery_note_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                            $journey_details['received_by'] = $journey->admin->name;
-                            $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $journey_details['received_by'] = $quick_receiving_journey->admin->name;
+                            $journey_details['created_at'] = Carbon::parse($quick_receiving_journey->created_at)->toDateTimeString();
 
                             $details['quick_receiving_shipments_journeys'][] = $journey_details;
                         }

@@ -1118,18 +1118,18 @@
                                     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
                                     shipment += '<thead>';
                                     shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Delivery Note ID</strong></th>';
                                     shipment += '<th><strong>Received By</strong></th>';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '</tr>';
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
                                     $.each(details.quick_receiving_shipments_journeys, function (index, history) {
                                         shipment += '<tr>';
+                                        shipment += '<td>' + history.created_at + '</td>';
                                         shipment += '<td>' + history.delivery_note_id + '</td>';
                                         shipment += '<td>' + history.received_by + '</td>';
-                                        shipment += '<td>' + history.created_at + '</td>';
                                         shipment += '</tr>';
                                     });
 

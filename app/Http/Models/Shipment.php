@@ -106,9 +106,6 @@ class Shipment extends Model
 	public function handover_shipments_journeys(){
 	    return $this->hasMany('App\Http\Models\Handover\HandoverShipmentsJourney')->orderBy('id', 'DESC');
     }
-	public function quick_receiving_shipments_journeys(){
-	    return $this->hasMany('App\Http\Models\Admin\DeliveryShipmentsReceivedOperation', 'id', 'shipment_id')->orderBy('created_at', 'DESC');
-    }
 
     public function order_date(){
         return $this->hasOne('App\Http\Models\ShipmentOrderDate', 'shipment_id', 'id');
