@@ -1050,7 +1050,7 @@ class AdminTrackingController extends Controller
                         foreach ($quick_receiving_shipment_journey as $quick_receiving_journey) {
                             $journey_details = array();
 
-                            $journey_details['delivery_note_id'] = '<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $quick_receiving_journey->delivery_note_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                            $journey_details['delivery_note_id'] = '<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $quick_receiving_journey->delivery_note_id . '">' . str_pad($quick_receiving_journey->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             $journey_details['received_by'] = $quick_receiving_journey->admin->name;
                             $journey_details['created_at'] = Carbon::parse($quick_receiving_journey->created_at)->toDateTimeString();
 
