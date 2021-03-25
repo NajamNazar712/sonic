@@ -222,8 +222,8 @@
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
-                            head.push('Clock In');
-                            head.push('Clock Out');
+                            head.push('Clock In Time');
+                            head.push('Clock Out Time');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
