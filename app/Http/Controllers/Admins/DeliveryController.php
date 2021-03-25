@@ -6277,8 +6277,23 @@ class DeliveryController extends Controller
         }
         $delivery_shipments = $delivery_shipments->first();
         $journey = $shipment->shipment_journey->first();
+        $class = null;
+        if ($shipment->shipper_status_id !== 5) {
+            $delivered_statuses = array(14, 30, 36, 37);
+            if (in_array($shipment->shipper_status_id, $delivered_statuses)) {
+                $class = 'statusDelivered';
+            } else if ($shipment->shipper_status_id == 12) {
+                $class = 'statusReturn';
+            } else {
+                $class = 'statusUpdated';
+            }
+        }else if(CrmRequest::where('shipment_id', $shipment->id)->exists()){
+            $class = 'complaint_row';
+        } else {
+            $class = '';
+        }
 
-        return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name]]);
+        return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name, 'class' => $class]]);
     }
 
     public function quick_receiving_submit (Request $request)
