@@ -207,7 +207,8 @@
                         $("#remaining_scanned").html(parseInt($("#remaining_scanned").html()) + 1);
                         var rowNo = table.rows().count();
                         var tracking_number_column = `<input type="hidden" form="submit_form" name="tracking_number[]" value="${data.details.tracking_number}">${data.details.tracking_number}`
-                        table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).addClass(data.details.class).node().id = data.details.row_id;
+                        var rowNode = table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).node().id = data.details.row_id;
+                        $(rowNode).find('tr').addClass(data.details.class);
                         table.draw(false);
                         table.order([0, 'asc']).draw();
                     }else{
