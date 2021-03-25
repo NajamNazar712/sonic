@@ -39,11 +39,7 @@
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                                @foreach($consignees as $consignee)
-                                        <option value="{{ $consignee->id }}">{{ $consignee->name }}</option>
-                                @endforeach
-                            </select>
+                            <input name="consignee" class="form-control" id="consignee" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                             <span class="text-danger font-small-3 myError" id="consignee_error"></span>
                         </div>
                     </div>
@@ -83,11 +79,7 @@
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <select name="consignee" class="select2" id="edit_consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                                @foreach($consignees as $consignee)
-                                    <option value="{{ $consignee->id }}">{{ $consignee->name }}</option>
-                                @endforeach
-                            </select>
+                            <input name="consignee" class="form-control" id="edit_consignee" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                             <span class="text-danger font-small-3 myError" id="edit_consignee_error"></span>
                         </div>
                     </div>
@@ -138,7 +130,6 @@
                         $(".myError").html('');
                         $('#consignee').val('');
                         $('#hub').val('');
-                        $('#consignee').trigger('change');
                         $('#hub').trigger('change');
                         $('#AddConsigneeModal').modal('show');
                     }
@@ -157,13 +148,12 @@
                 order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'consignee_name', name: 'consignees.name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_name', name: 'petty_cash_consignees.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'hub_name', name: 'hubs.name', class: 'align-middle hub_name'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 createdRow: function( row, data, dataIndex ) {
-                    $( row ).find('td:eq(1)').attr('data-consignee_id', data.consignee_id);
                     $( row ).find('td:eq(2)').attr('data-hub_id', data.hub_id);
                 },
                 rowCallback: function(row, data, index) {
@@ -177,7 +167,6 @@
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var hub_select = '<select name="hub_select" id="hub_select" class="select2 form-control"></select>';
-                    var name_select = '<select name="name_select" id="name_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -190,20 +179,8 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.consignee_name')){
-                            $(name_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
                     });
                     var hub_data = $.map({!! $hubs !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
-
-                    var name_data = $.map({!! $consignees !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
                         return obj;
@@ -217,28 +194,8 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-
-                    $("#name_select").prepend('<option value="" selected></option>').select2({
-                        data:name_data,
-                        placeholder: "Select Consignee",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
-            });
-
-            $("#consignee").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Consignee",
-                width:'100%',
-                dropdownParent: $('#AddConsigneeModal'),
-            });
-
-            $("#edit_consignee").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Consignee",
-                width:'100%',
-                dropdownParent: $('#EditConsigneeModal'),
             });
 
             $("#hub").prepend('<option value="" selected></option>').select2({
@@ -260,7 +217,6 @@
                 if(id && consignee && hub){
                     $('#edit_petty_cash_consignee_id').val(id);
                     $('#edit_consignee').val(consignee);
-                    $('#edit_consignee').trigger("change");
                     $('#edit_hub').val(hub);
                     $('#edit_hub').trigger("change");
                     $(".myError").html('');
@@ -301,7 +257,6 @@
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         $('#consignee').val('');
                         $('#hub').val('');
-                        $('#consignee').trigger('change');
                         $('#hub').trigger('change');
                         $('#AddConsigneeModal').modal('hide');
                     }else{
@@ -358,10 +313,6 @@
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         $('#EditConsigneeModal').modal('hide');
                     }else{
-                        if(data.consignee_error)
-                        {
-                            $("#edit_consignee_error").html(data.consignee_error);
-                        }
 
                         if(data.hub_error)
                         {

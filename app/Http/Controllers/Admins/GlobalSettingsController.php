@@ -547,9 +547,8 @@ class GlobalSettingsController extends Controller
 
     public function petty_cash_consignee_list(){
 
-        $data = PettyCashConsignee::join('users as consignees','consignees.id','=','petty_cash_consignees.consignee_id')
-            ->join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
-            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.consignee_id as consignee_id', 'petty_cash_consignees.id as id','hubs.name as hub_name','consignees.name as consignee_name');
+        $data = PettyCashConsignee::join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
+            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.id as id','hubs.name as hub_name','petty_cash_consignees.consignee_name as consignee_name');
         return Datatables::of($data)
             ->addColumn('action', function ($data) {
                     $update_city_url = route('admin.settings.petty_cash.consignee.city.index',$data->id);
@@ -570,25 +569,19 @@ class GlobalSettingsController extends Controller
 
     public function petty_cash_consignee_store(Request $request)
     {
-        $consignee_error = "";
         $hub_error = "";
-        $consignee_error_status = PettyCashConsignee::where('consignee_id',$request->consignee)->exists();
         $hub_error_status = PettyCashConsignee::where('hub_id',$request->hub)->exists();
-        if($consignee_error_status)
-        {
-            $consignee_error = "Please Select a Unique Consignee";
-        }
         if($hub_error_status)
         {
             $hub_error = "Please Select a Unique Hub";
         }
-        if($consignee_error_status || $hub_error_status)
+        if($hub_error_status)
         {
-            return response()->json(['status' => 0, 'consignee_error' => $consignee_error,'hub_error'=>$hub_error]);
+            return response()->json(['status' => 0,'hub_error'=>$hub_error]);
         }
 
         $table = new PettyCashConsignee();
-        $table->consignee_id = $request->consignee;
+        $table->consignee_name = $request->consignee;
         $table->hub_id = $request->hub;
         $table->save();
 
@@ -597,21 +590,15 @@ class GlobalSettingsController extends Controller
 
     public function petty_cash_consignee_edit(Request $request)
     {
-        $consignee_error = "";
         $hub_error = "";
-        $consignee_error_status = PettyCashConsignee::where([['consignee_id',$request->consignee],['id','!=',$request->id]])->exists();
         $hub_error_status = PettyCashConsignee::where([['hub_id',$request->hub],['id','!=',$request->id]])->exists();
-        if($consignee_error_status)
-        {
-            $consignee_error = "Please Select a Unique Consignee";
-        }
         if($hub_error_status)
         {
             $hub_error = "Please Select a Unique Hub";
         }
-        if($consignee_error_status || $hub_error_status)
+        if($hub_error_status)
         {
-            return response()->json(['status' => 0, 'consignee_error' => $consignee_error,'hub_error'=>$hub_error]);
+            return response()->json(['status' => 0, 'hub_error'=>$hub_error]);
         }
 
         $table = PettyCashConsignee::find($request->id);
@@ -620,7 +607,7 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 0, 'error' => "Petty Cash Consignee Information Not Found, Please Try again!"]);
         }
 
-        $table->consignee_id = $request->consignee;
+        $table->consignee_name = $request->consignee;
         $table->hub_id = $request->hub;
         $table->update();
 
