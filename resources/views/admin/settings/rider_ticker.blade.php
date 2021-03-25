@@ -15,7 +15,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="documents_form" class="form form-horizontal" action="#">
+                <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post">
                     @csrf
                     <div class="form-body">
                         <div class="row justify-content-center">
@@ -28,7 +28,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image1"  id="image1"></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -37,7 +37,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image2"  id="image2" value=""></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_2"  id="upload_image_2"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -46,7 +46,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image3"  id="image3" value=""></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_3"  id="upload_image_3"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -55,7 +55,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image4"  id="image4" value=""></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_4"  id="upload_image_4"></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
@@ -64,7 +64,7 @@
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
                                             <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
                                         @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="image5"  id="image5" value=""></td>
+                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_5"  id="upload_image_5"></td>
                                         @endif
                                     </tr>
                                     </tbody>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="row justify-content-center mt-4">
                             <div class="mr-1">
-                                <button type="button" class="btn btn-outline-primary mr-1 upload">Upload</button>
+                                <button type="submit" class="btn btn-outline-primary mr-1 upload">Upload</button>
                             </div>
                         </div>
                     </div>
@@ -111,153 +111,11 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#image1').val("");
-            $('#image2').val("");
-            $('#image3').val("");
-            $('#image4').val("");
-            $('#image5').val("");
-            $('.upload').on('click', function() {
-                var image_1 = $('#image1').val();
-                var image_2 = $('#image2').val();
-                var image_3 = $('#image3').val();
-                var image_4 = $('#image4').val();
-                var image_5 = $('#image5').val();
-                console.log(image_2);
-                console.log(image_3);
-                if(image_1 != '' || image_2 != '' || image_3 != '' || image_4 != '' || image_5 != ''){
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to upload documents',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            $.ajax({
-                                url: '{!! route('admin.settings.rider_ticker.store') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'image_1': image_1,
-                                    'image_2': image_2,
-                                    'image_3': image_3,
-                                    'image_4': image_4,
-                                    'image_5': image_5
-                                }
-                            }).done(function(data){
-                                if(data.status){
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    window.location.reload();
-                                }else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                        }
-                    });
-                }
-                else{
-                    var error = 'No file Selected';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-
-                $.ajax({
-                    url: '{!! route('admin.accounts.documents.edit') !!}',
-                    method: 'POST',
-                    data: {
-                        'user_id': user_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        // console.log(data);
-                        // console.log(data.user_attachment.blank_cheque_image);
-                        $('#old_filled_and_signed_pdf').text(data.user_attachment.filled_and_signed_pdf);
-                        $('#old_signed_acknowledgement_pdf').text(data.user_attachment.signed_acknowledgement_pdf);
-                        $('#old_cnic_front_image').text(data.user_attachment.cnic_front_image);
-                        $('#old_cnic_back_image').text(data.user_attachment.cnic_back_image);
-                        $('#old_blank_cheque_image').text(data.user_attachment.blank_cheque_image);
-                        $('#upload_modal').modal('show');
-                    }
-                    else{
-                        $('#old_filled_and_signed_pdf').text("");
-                        $('#old_signed_acknowledgement_pdf').text("");
-                        $('#old_cnic_front_image').text("");
-                        $('#old_cnic_back_image').text("");
-                        $('#old_blank_cheque_image').text("");
-                        $('#upload_modal').modal('show');
-                    }
-                });
-
-            });
-
-            $('#upload_modal').on('hide.bs.modal', function (e) {
-                $('#upload_documents_form')[0].reset();
-                $('#filled_and_signed_pdf').val('');
-                $('#signed_acknowledgement_pdf').val('');
-                $('#cnic_front_image').val('');
-                $('#cnic_back_image').val('');
-                $('#blank_cheque_image').val('');
-
-            });
-            var user_id = {!! $id !!};
-            $('button.confirm').on('click', function(){
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to confirm all documents uploaded!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        $.ajax({
-                            url: '{!! route('admin.accounts.documents.confirm') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'user_id': user_id
-                            }
-                        }).done(function(data){
-                            if(data.status){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                window.location.reload();
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                    }
-                });
-            });
+            /*$('#upload_image_1').val("");
+            $('#upload_image_2').val("");
+            $('#upload_image_3').val("");
+            $('#upload_image_4').val("");
+            $('#upload_image_5').val("");*/
 
             $( "#documents_form" ).validate({
                 errorClass:"danger",
@@ -268,15 +126,16 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var filled_and_signed_pdf = $('#filled_and_signed_pdf').val();
-                    var signed_acknowledgement_pdf = $('#signed_acknowledgement_pdf').val();
-                    var cnic_front_image = $('#cnic_front_image').val();
-                    var cnic_back_image = $('#cnic_back_image').val();
-                    var blank_cheque_image = $('#blank_cheque_image').val();
-                    if(filled_and_signed_pdf !== '' || signed_acknowledgement_pdf !== '' || cnic_front_image !== '' || cnic_back_image !== '' || blank_cheque_image !== ''){
+                    var image_1 = $('#upload_image_1').val();
+                    var image_2 = $('#upload_image_2').val();
+                    var image_3 = $('#upload_image_3').val();
+                    var image_4 = $('#upload_image_4').val();
+                    var image_5 = $('#upload_image_5').val();
+
+                    if((image_1 !== "" && image_1 != null) || (image_2 !== "" && image_2 != null) || (image_3 !== "" && image_3 != null) || (image_4 !== "" && image_4 != null) || (image_5 !== "" && image_5 != null)){
                         swal({
                             title: 'Are You Sure?',
-                            text: 'Select Yes to upload documents',
+                            text: 'Select Yes to upload Image(s)',
                             icon: 'warning',
                             buttons: {
                                 cancel: {

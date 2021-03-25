@@ -3365,17 +3365,21 @@ class GlobalSettingsController extends Controller
     }
 
     public function rider_ticker_store(Request $request){
-/*
-        $request->validate([
-            'image_1'=>'nullable|image|mimes:jpeg,png,max:2048',
-//            'image_2'=>'nullable|mimes:jpeg,png',
-            'image_3'=>'nullable|image|mimes:jpeg,png,max:2048',
-            'image_4'=>'nullable|image|mimes:jpeg,png,max:2048',
-            'image_5'=>'nullable|image|mimes:jpeg,png,max:2048',
+
+        /*$request->validate([
+            'upload_image_1'=>'nullable|File|mimes:jpeg,png,max:2048',
+            'upload_image_2'=>'nullable|File|mimes:jpeg,png,max:2048',
+            'upload_image_3'=>'nullable|image|mimes:jpeg,png,max:2048',
+            'upload_image_4'=>'nullable|image|mimes:jpeg,png,max:2048',
+            'upload_image_5'=>'nullable|image|mimes:jpeg,png,max:2048',
         ]);*/
-        if (!$request->has('image_1') && !$request->has('image_2') && !$request->has('image_3') && !$request->has('image_4') && !$request->has('image_5') ) {
-            return ['error' => 'No Image Provided'];
+        if($request->has('upload_image_2')){
+            file_get_contents($request->upload_image_2);
         }
+
+        /*if (!$request->has('image_1') && !$request->has('image_2') && !$request->has('image_3') && !$request->has('image_4') && !$request->has('image_5') ) {
+            return ['error' => 'No Image Provided'];
+        }*/
         if ($request->hasFile('image_1')) {
             $picture_path = 'rider_ticker/image_1' . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->image_1));
