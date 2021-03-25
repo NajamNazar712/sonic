@@ -20,51 +20,47 @@
                     <div class="form-body">
                         <div class="row justify-content-center">
                             <div class="col-4">
-                                <table class="table table-sm table-bordered text-center">
+                                <table class="table table-sm table-bordered text-center" id="Image_table">
                                     <tbody>
                                     <tr style="height: 50px">
                                         <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
                                         @if(isset($rider_ticker[0]))
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
-                                        @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_1" id="rider_request_id" value="{{$rider_ticker[0]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[0]->picture_path))}}">View</button></a></td>
                                         @endif
+
                                     </tr>
                                     <tr style="height: 50px">
                                         <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_2"  id="upload_image_2"></td>
                                         @if(isset($rider_ticker[1]))
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
-                                        @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_2"  id="upload_image_2"></td>
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_2" id="rider_request_id" value="{{$rider_ticker[1]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[1]->picture_path))}}">View</button></a></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
                                         <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_3"  id="upload_image_3"></td>
                                         @if(isset($rider_ticker[2]))
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
-                                        @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_3"  id="upload_image_3"></td>
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_3" id="rider_request_id" value="{{$rider_ticker[2]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[2]->picture_path))}}">View</button></a></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
                                         <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_4"  id="upload_image_4"></td>
                                         @if(isset($rider_ticker[3]))
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
-                                        @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_4"  id="upload_image_4"></td>
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_4" id="rider_request_id" value="{{$rider_ticker[3]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[3]->picture_path))}}">View</button></a></td>
                                         @endif
                                     </tr>
                                     <tr style="height: 50px">
                                         <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_5"  id="upload_image_5"></td>
                                         @if(isset($rider_ticker[4]))
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
-                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => 1,'check' => 'filled_and_signed_pdf', 'pdf' => 1])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">Delete</button></a></td>
-                                        @else
-                                            <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_5"  id="upload_image_5"></td>
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_5" id="rider_request_id" value="{{$rider_ticker[4]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[4]->picture_path))}}">View</button></a></td>
                                         @endif
                                     </tr>
                                     </tbody>
@@ -77,12 +73,26 @@
                             </div>
                         </div>
                     </div>
-                    {{--<div class="row justify-content-center">--}}
-                    {{--<button type="submit" class="btn btn-primary col-2">--}}
-                    {{--Update--}}
-                    {{--</button>--}}
-                    {{--</div>--}}
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="picture_modal" data-backdrop="static" role="dialog" aria-labelledby="picture_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="picture_modal_title">Picture</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -111,11 +121,16 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            /*$('#upload_image_1').val("");
-            $('#upload_image_2').val("");
-            $('#upload_image_3').val("");
-            $('#upload_image_4').val("");
-            $('#upload_image_5').val("");*/
+
+            $('#Image_table tbody').on('click','tr td.view button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#picture_modal .modal-body').html(image);
+
+                $('#picture_modal').modal('show');
+            });
 
             $( "#documents_form" ).validate({
                 errorClass:"danger",
@@ -165,74 +180,6 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
-            });
-
-            $('.approve').on('click', function() {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to approve documents',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        var route = '{!!route('admin.accounts.documents.approve', ['id' => $id, 'approve' => 1, 'reject' => "null"])!!}';
-                        window.location.href = route;
-                    }
-                });
-            });
-            $('.reject').on('click', function() {
-                var reject_reason = $('#reason').val();
-                if(reject_reason !== "" && reject_reason !== null){
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to reject documents',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            var route = '{!!route('admin.accounts.documents.approve', ['id' => $id, 'approve' => 0, 'reject'])!!}';
-                            route = route.replace("reject", reject_reason);
-                            window.location.href = route;
-                        }
-                    });
-                }
-                else{
-                    var error = 'Reason is required in case of rejection';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
             });
         });
     </script>

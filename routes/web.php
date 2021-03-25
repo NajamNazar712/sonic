@@ -2087,7 +2087,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
         });
 
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
