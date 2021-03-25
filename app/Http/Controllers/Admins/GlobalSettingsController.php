@@ -79,6 +79,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 class GlobalSettingsController extends Controller
 {
@@ -3364,59 +3365,62 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.rider_ticker')->with(['id' => 1,'rider_ticker' => $rider_ticker]);
     }
 
-    public function rider_ticker_store(Request $request){
+    public function rider_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_1' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_2' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_3' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_4' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_5' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
 
-        /*$request->validate([
-            'upload_image_1'=>'nullable|File|mimes:jpeg,png,max:2048',
-            'upload_image_2'=>'nullable|File|mimes:jpeg,png,max:2048',
-            'upload_image_3'=>'nullable|image|mimes:jpeg,png,max:2048',
-            'upload_image_4'=>'nullable|image|mimes:jpeg,png,max:2048',
-            'upload_image_5'=>'nullable|image|mimes:jpeg,png,max:2048',
-        ]);*/
-        if($request->has('upload_image_2')){
-            file_get_contents($request->upload_image_2);
+        if (!$request->hasFile('upload_image_1') && !$request->hasFile('upload_image_2') && !$request->hasFile('upload_image_3') && !$request->hasFile('upload_image_4') && !$request->hasFile('upload_image_5')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
         }
 
-        /*if (!$request->has('image_1') && !$request->has('image_2') && !$request->has('image_3') && !$request->has('image_4') && !$request->has('image_5') ) {
-            return ['error' => 'No Image Provided'];
-        }*/
-        if ($request->hasFile('image_1')) {
-            $picture_path = 'rider_ticker/image_1' . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->image_1));
-            RiderTickerImage::create([
-                'picture_path' => $picture_path
-                ]);
+        if ($request->hasFile('upload_image_1')) {
+            $rider_ticker = new RiderTickerImage();
+            $rider_ticker->save();
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_1));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
         }
-        if ($request->hasFile('image_2')) {
-            $picture_path = 'rider_ticker/image_2' . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->image_2));
-            RiderTickerImage::create([
-                'picture_path' => $picture_path
-                ]);
+        if ($request->hasFile('upload_image_2')) {
+            $rider_ticker = new RiderTickerImage();
+            $rider_ticker->save();
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_2));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
         }
-        if ($request->hasFile('image_3')) {
-            $picture_path = 'rider_ticker/image_3' . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->image_3));
-            RiderTickerImage::create([
-                'picture_path' => $picture_path
-                ]);
+        if ($request->hasFile('upload_image_3')) {
+            $rider_ticker = new RiderTickerImage();
+            $rider_ticker->save();
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_3));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
         }
-        if ($request->hasFile('image_4')) {
-            $picture_path = 'rider_ticker/image_4' . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->image_4));
-            RiderTickerImage::create([
-                'picture_path' => $picture_path
-                ]);
+        if ($request->hasFile('upload_image_4')) {
+            $rider_ticker = new RiderTickerImage();
+            $rider_ticker->save();
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_4));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
         }
-        if ($request->hasFile('image_5')) {
-            $picture_path = 'rider_ticker/image_5' . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->image_5));
-            RiderTickerImage::create([
-                'picture_path' => $picture_path
-                ]);
+        if ($request->hasFile('upload_image_5')) {
+            $rider_ticker = new RiderTickerImage();
+            $rider_ticker->save();
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_5));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
         }
-        return ['success' => 'Images Uploaded!'];
 
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
     }
 
 }

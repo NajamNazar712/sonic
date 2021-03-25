@@ -15,7 +15,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post">
+                <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="form-body">
                         <div class="row justify-content-center">
