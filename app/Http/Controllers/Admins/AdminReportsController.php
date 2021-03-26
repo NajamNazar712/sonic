@@ -7664,9 +7664,8 @@ class AdminReportsController extends Controller
                     if(file_exists($img_url)){
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                     }else{
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
 
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($img)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::disk('s3')->url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                     }
 
                     return $image;
