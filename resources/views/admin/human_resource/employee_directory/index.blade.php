@@ -38,47 +38,6 @@
             </div>
         </div>
     </section>
-
-    <div class="modal fade text-left" id="approveRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="approveRiderModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Approve Rider</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form action="{{route('admin.human_resource.employee_directory.approve')}}" method="post" class="mt-1"
-                      id="approveRiderForm" novalidate="novalidate">
-                    {{csrf_field()}}
-                    <input type="hidden" name="employee_id" id="employee_id" value="">
-                    <div class="modal-body" id="riderApproveDiv">
-                        <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="rider_category" id="category_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($rider_categories as $rider_category)
-                                            <option value="{{$rider_category->id}}">{{$rider_category->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add
-                            Rider
-                        </button>
-                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     <div class="modal fade text-left" id="approveRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="approveRiderModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -239,7 +198,7 @@
                 }
             });
 
-            $('body').on('click', '.rider_approve', function (e) {
+            $('body').on('click', '.approve_rider', function (e) {
                 var id = $(this).data('target-id');
                 swal({
                     title: 'Are You Sure?',

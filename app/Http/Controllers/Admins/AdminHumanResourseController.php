@@ -195,7 +195,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
+            ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
 
         if (session('role_id') != 1) {
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
@@ -214,16 +214,13 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->employee_id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
-
                 if (session('role_id') == 1 || in_array(468, session('permissions'))) {
                     $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
                 }
-                if($result->request_status == 1 || $result->request_status == 2){
+                if($result->request_status_id == 1 || $result->request_status_id == 2){
                     if (session('role_id') == 1 || in_array(469, session('permissions'))) {
-                        if($result->employee_type == 2){
+                        if($result->employee_type_id == 2){
                             $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         }
                         else{
@@ -262,17 +259,8 @@ class AdminHumanResourseController extends Controller
         }
 
         $employee->trax_id = $trax_id;
-        $employee->status = 3;
+        $employee->request_status_id = 3;
         $employee->save();
-
-        if($employee->employee_type_id == 2){
-            $rider_request = RiderRequest::find($employee->rider_request_id);
-            $rider_request->trax_id = $trax_id;
-            $rider_request->save();
-        }
-//        else{
-//
-//        }
 
         return response()->json(['status' => 0, 'success' => 'Employee Approved Successfully!']);
     }
