@@ -1348,7 +1348,7 @@
 
             $("#add_family_member").on('click',function () {
                 family_member_index++;
-                html = `<div class="row">
+                html = `<div class="row" id="family_member_` + family_member_index + `">
                             <hr style="width:100%">
                             <div class="col-md-10">
                                 <div class="col-md-12">
@@ -1414,7 +1414,7 @@
                     width:'100%',
                 });
 
-                $('#medical_info_container .validated').each(function() {
+                $('#family_member_' + family_member_index + ' .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
@@ -1424,7 +1424,7 @@
 
             $("#add_education").on('click',function () {
                 education_background_index++;
-                html = `<div class="row">
+                html = `<div class="row" id="education_background_ ` + education_background_index + `">
                             <hr style="width:100%">
                             <div class="col-md-10">
                                 <div class="col-md-12">
@@ -1486,16 +1486,17 @@
                     max: today,
                 });
 
-                $('#education_info_container .validated').each(function() {
+                $('#education_background_ ' + education_background_index + ' .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
                         })
                 });
             });
-
+            var employment = 1;
             $("#add_employment").on('click',function () {
-                html = `<div class="row">
+                employment++;
+                html = `<div class="row" id="employment_` + employment +`>
                             <hr style="width:100%">
                             <div class="col-md-10">
                                 <div class="col-md-12">
@@ -1566,7 +1567,7 @@
                     max: today,
                 });
 
-                $('#employment_info_container .validated').each(function() {
+                $('#employment_' + employment +' .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
