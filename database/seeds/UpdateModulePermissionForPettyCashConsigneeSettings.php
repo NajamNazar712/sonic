@@ -12,7 +12,7 @@ class UpdateModulePermissionForPettyCashConsigneeSettings extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 462, 'name' => 'Petty Cash Consignee Setting', 'module_id' => 14)
+            array('id' => 462, 'name' => 'Petty Cash Hub Assigning - View', 'module_id' => 14)
         ));
     }
 }
