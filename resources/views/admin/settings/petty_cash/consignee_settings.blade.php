@@ -154,6 +154,7 @@
 
                 ],
                 createdRow: function( row, data, dataIndex ) {
+                    $( row ).find('td:eq(1)').attr('data-consignee_name', data.consignee_name);
                     $( row ).find('td:eq(2)').attr('data-hub_id', data.hub_id);
                 },
                 rowCallback: function(row, data, index) {
