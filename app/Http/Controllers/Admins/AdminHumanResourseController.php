@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
@@ -18,6 +21,9 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\RiderCategory;
+use App\Http\Models\Route;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -176,7 +182,11 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_index(){
-        return view('admin.human_resource.employee_directory.index');
+        $rider_type = RiderType::all();
+        $route = Route::all();
+        $operation_rider_category = OperationRidersCategory::all();
+        $rider_categories = RiderCategory::all();
+        return view('admin.human_resource.employee_directory.index')->with(['rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function employee_directory_list(Request $request){
@@ -211,16 +221,18 @@ class AdminHumanResourseController extends Controller
                     $route = route("admin.human_resourse.employee_directory.edit", $result->employee_id);
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
                 }
-                if (session('role_id') == 1 || in_array(469, session('permissions'))) {
-                    if($result->employee_type == 2){
-                        $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                    }
-                    else{
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                    }
+                if($result->request_status == 1 || $result->request_status == 2){
+                    if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                        if($result->employee_type == 2){
+                            $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        }
 
-                    $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
+                    }
                 }
                 $dropdown .= '
                 </div>
@@ -232,8 +244,49 @@ class AdminHumanResourseController extends Controller
             ->make(true);
     }
 
-    public function employee_directory_store(Request $request){
-        return $request;
+    public function employee_directory_approve(Request $request){
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+        if($global_setting->exists()){
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        }
+        else{
+            $trax_id = null;
+        }
+
+        $employee->trax_id = $trax_id;
+        $employee->status = 3;
+        $employee->save();
+
+        if($employee->employee_type_id == 2){
+            $rider_request = RiderRequest::find($employee->rider_request_id);
+            $rider_request->trax_id = $trax_id;
+            $rider_request->save();
+        }
+//        else{
+//
+//        }
+
+        return response()->json(['status' => 0, 'success' => 'Employee Approved Successfully!']);
+    }
+    public function employee_directory_reject(Request $request){
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+        $employee->status = 4;
+        $employee->save();
+
+        if($employee->employee_type_id == 2){
+            RiderRequest::where('id', $employee->rider_request_id)->delete();
+        }
+
+        return response()->json(['status' => 0, 'success' => 'Employee Rejected Successfully!']);
     }
 
     public function employee_directory_edit(Employee $employee)

@@ -49,23 +49,23 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{route('admin.human_resourse.employee_directory.store')}}" method="post" class="mt-1"
+                <form action="{{route('admin.human_resourse.employee_directory.approve')}}" method="post" class="mt-1"
                       id="approveRiderForm" novalidate="novalidate">
                     {{csrf_field()}}
+                    <input type="hidden" name="employee_id" id="employee_id" value="">
                     <div class="modal-body" id="riderApproveDiv">
-
                         <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
-                                    <select name="rider_type" id="rider_type_list" class="form-control select2"
+                                    <select name="rider_category" id="category_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
-
+                                        @foreach($rider_categories as $rider_category)
+                                            <option value="{{$rider_category->id}}">{{$rider_category->name}}</option>
+                                        @endforeach
                                     </select>
                                 </fieldset>
                             </div>
                         </div>
-
-
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add
@@ -76,6 +76,31 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="approveRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="approveRiderModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Approve Rider</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+{{--                <form action="{{route('admin.human_resourse.employee_directory.approve')}}" method="post" class="mt-1"--}}
+{{--                      id="approveRiderForm" novalidate="novalidate">--}}
+{{--                    {{csrf_field()}}--}}
+{{--                    <div class="modal-footer">--}}
+{{--                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add--}}
+{{--                            Rider--}}
+{{--                        </button>--}}
+{{--                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">--}}
+{{--                            Cancel--}}
+{{--                        </button>--}}
+{{--                    </div>--}}
+{{--                </form>--}}
             </div>
         </div>
     </div>
@@ -101,7 +126,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -210,26 +234,136 @@
                             }
                         }
                     });
-                    /*$("#type_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Rider Type",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });*/
 
                     this.api().table().columns.adjust();
                 }
             });
 
+            $('body').on('click', '.rider_approve', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes Approve Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Employee is being Approved',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resourse.employee_directory.approve') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                table.draw('false');
+                            });
+                        swal.close();
+                    }
+                });
+                // var id = $(this).data('target-id');
+                // $('#employee_id').val(id);
+                // $('#approveRiderModal').modal('show');
+            });
+
+            $('body').on('click', '.reject', function (e) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes Reject Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Employee is being Rejected',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resourse.employee_directory.reject') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                table.draw('false');
+                            });
+                        swal.close();
+                    }
+                });
+            });
 
             $("#approveRiderForm").validate({
-
                 errorClass: "danger",
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -247,7 +381,6 @@
                     });
 
                     form.submit();
-
                 }
             });
         });
