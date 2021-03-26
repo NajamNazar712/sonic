@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Models\HR\Employee;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -2758,10 +2758,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
     Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
-        
+
         Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
         Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
+
+        Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
+            Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
+            Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
+            Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
+            Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
+            Route::post('{employee}/bank', 'Admins\AdminHumanResourseController@employee_directory_bank_update')->name('bank.update');
+            Route::post('{employee}/reference', 'Admins\AdminHumanResourseController@employee_directory_reference_update')->name('reference.update');
+            Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
+            Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
+            Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+        });
 
     });
 
