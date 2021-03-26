@@ -340,13 +340,14 @@ class AdminHumanResourseController extends Controller
             $medical_info->date_of_birth = $request->formatted_dob[$key];
             $medical_info->marital_status = $request->marital_status[$key];
             $medical_info->save();
+
+            echo $request->formatted_dob[$key];
         }
         if(count($request->name) > 0)
         {
             $employee->request_status_id = 2;
             $employee->update();
         }
-
 
         return back()->with(['success'=>'Employee Medical Information Updated Successfully']);
     }
