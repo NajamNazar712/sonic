@@ -1281,6 +1281,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('bag_details', 'Admins\AdminMasterCargoController@create_bag_details')->name('bag_details');
                 Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
+
+                Route::prefix('open_bag')->name('open_bag.')->group(function () {
+                    Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
+                    Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
+                });
             });
             Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
             Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
@@ -1334,6 +1339,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
             Route::post('receive_at_link', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link')->name('receive_at_link');
+            Route::post('receive_at_link/store', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link_store')->name('receive_at_link.store');
             Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
         });
 

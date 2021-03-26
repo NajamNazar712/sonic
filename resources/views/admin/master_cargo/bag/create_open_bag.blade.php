@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Create Bag')
+@section('title', 'Create Open Bag')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Create Bag
+                    Create Open Bag
                 </h1>
 
                 <div class="card">
@@ -63,7 +63,7 @@
                             <div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
-                                        <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.bag.create.store') }}" novalidate="novalidate">
+                                        <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.bag.create.open_bag.store') }}" novalidate="novalidate">
                                             {{ csrf_field() }}
 
                                             <input type="hidden" name="bag_type" class="bag_type">
@@ -135,17 +135,6 @@
 
                                                     <div class="w-100"></div>
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-remote="{{ route('admin.master_cargo.bag.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique" id="seal_number">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>
-                                                        </div>
-                                                    </div>
                                                     <div class="col-12">
                                                         <div class="form-group">
                                                             <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
@@ -155,7 +144,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit_form" class="btn btn-primary btn-block" value="submit_form">Submit</button>
+                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
                                             </div>
                                         </form>
                                     </div>
@@ -486,7 +475,6 @@
                         $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
                         $('#cargo_consignment form .destination').html(data.destination.name);
 
-                        $('#cargo_consignment form .actual_weight').val(data.actual_weight);
 
                         $.each(data.junctions, function(index, junction) {
                             $('#cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
@@ -539,14 +527,6 @@
                         //     }
                         // });
 
-                        $('#cargo_consignment form input.actual_weight').inputmask({
-                            'alias': 'decimal',
-                            'allowMinus': false,
-                            'allowPlus': false,
-                            'digits': 2,
-                            'min': 0.1,
-                            'max': 100000
-                        });
                         $.each(data.shipping_modes, function(index, shipping_mode) {
                             $('#cargo_consignment form .shipping_mode_select').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
                         });
@@ -602,9 +582,9 @@
                         });
                         $('#cargo_consignment form .transport_mode').val(2).trigger('change');
                         $('#cargo_consignment form .transport_mode').prop("disabled", true);
-                        $('#cargo_consignment form .shipping_mode_select').val(1).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').prop("disabled",true);
+                        $('#cargo_consignment form .transport_mode_vendor ').val(9).trigger('change');
+                        $('#cargo_consignment form .transport_mode_vendor').prop("disabled", true);
+                        $('#cargo_consignment form .shipping_mode_select  ').val(1).trigger('change');
                         UnblockPagePermanently();
                     }
                 });
