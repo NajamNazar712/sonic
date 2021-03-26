@@ -869,9 +869,25 @@ class Permission
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
+
             'human_resourse.allusers' => 449,
             'human_resourse.all_user_ajax' => 449
-            
+
+            'human_resourse.employee_directory.index' => 467,
+            'human_resourse.employee_directory.list' => 467,
+
+            'human_resourse.employee_directory.edit' => 468,
+            'human_resourse.employee_directory.profile.update' => 468,
+            'human_resourse.employee_directory.medical.update' => 468,
+            'human_resourse.employee_directory.bank.update' => 468,
+            'human_resourse.employee_directory.reference.update' => 468,
+            'human_resourse.employee_directory.education.update' => 468,
+            'human_resourse.employee_directory.employment.update' => 468,
+            'human_resourse.employee_directory.attachments.update' => 468,
+
+            'human_resourse.employee_directory.approve' => 469,
+            'human_resourse.employee_directory.reject' => 469,
+
            
         ],
 
