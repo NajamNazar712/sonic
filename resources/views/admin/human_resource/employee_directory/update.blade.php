@@ -1229,7 +1229,7 @@
             var dob = $('#medical-form .dob_family_member').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
