@@ -347,7 +347,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -381,7 +381,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
