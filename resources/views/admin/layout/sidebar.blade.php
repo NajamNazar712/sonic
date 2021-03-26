@@ -1262,12 +1262,17 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100,417, 418, 152, 279, 358,394,447], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([81, 85, 100,417, 418, 152, 279, 358,394,447, 466], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394,447], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([81, 85, 100, 152, 279, 358,394,447, 466], session('permissions'))) !== 0)
                                         @if (session('role_id') == 1 || in_array(152, session('permissions')))
                                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
+                                        @endif
+
+
+                                        @if (session('role_id') == 1 || in_array(466, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.settings.rider_ticker.index')}}">App Slider</a></li>
                                         @endif
 
                                         @if (session('role_id') == 1 || count(array_intersect([81, 85, 279,394,447], session('permissions'))) !== 0)
@@ -1430,24 +1435,24 @@
                     </ul>
                 </li>
             @endif
-                
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
                 <ul class="menu-content">
-                            <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
-                        @if (session('role_id') == 1 || in_array(449, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
-                        @endif
+                    <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
+                    @if (session('role_id') == 1 || in_array(449, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || in_array(465, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
+                    @endif
                 </ul>
             </li>
-
-                <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
-
+            <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Power BI Dashboard</span></a>
                 <ul class="menu-content">
-                        <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales</a>
-                        </li>
-                        <li class="menu-item"><a href="{{ route('admin.power_bi.operation') }}">Operation</a>
-                        </li>
+                    <li class="menu-item"><a href="{{ route('admin.power_bi.sales') }}">Sales</a>
+                    </li>
+                    <li class="menu-item"><a href="{{ route('admin.power_bi.operation') }}">Operation</a>
+                    </li>
                 </ul>
             </li>
         </ul>

@@ -41,9 +41,11 @@ use App\Http\Models\Holiday;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
+use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -80,6 +82,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 class GlobalSettingsController extends Controller
 {
@@ -3485,4 +3488,106 @@ class GlobalSettingsController extends Controller
 
     }
 
+    public function rider_ticker_index()
+    {
+        $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+    }
+
+    public function rider_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_1' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_2' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_3' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_4' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_5' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_1') && !$request->hasFile('upload_image_2') && !$request->hasFile('upload_image_3') && !$request->hasFile('upload_image_4') && !$request->hasFile('upload_image_5')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_1')) {
+            if ($request->has('rider_ticker_id_1')) {
+                $ticker_id = $request->get('rider_ticker_id_1');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_1));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_2')) {
+            if ($request->has('rider_ticker_id_2')) {
+                $ticker_id = $request->get('rider_ticker_id_2');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_2));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_3')) {
+            if ($request->has('rider_ticker_id_3')) {
+                $ticker_id = $request->get('rider_ticker_id_3');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_3));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_4')) {
+            if ($request->has('rider_ticker_id_4')) {
+                $ticker_id = $request->get('rider_ticker_id_4');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_4));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_5')) {
+            if ($request->has('rider_ticker_id_5')) {
+                $ticker_id = $request->get('rider_ticker_id_5');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_5));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
 }

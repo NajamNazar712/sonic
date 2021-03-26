@@ -782,6 +782,9 @@ class Permission
 
             'settings.international_rates.index' => 438,
 
+            'settings.rider_ticker.index' => 466,
+            'settings.rider_ticker.store' => 466,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -881,7 +884,10 @@ class Permission
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
             'human_resourse.allusers' => 449,
-            'human_resourse.all_user_ajax' => 449
+            'human_resourse.all_user_ajax' => 449,
+
+            'attendance.index' => 465,
+            'attendance.list' => 465
             
            
         ],

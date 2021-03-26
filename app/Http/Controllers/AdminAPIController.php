@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use Carbon\Carbon;
@@ -16,7 +18,13 @@ class AdminAPIController extends Controller
 {
     private $names = [
         'email_address' => 'Email Address',
-        'password' => 'Password'
+        'password' => 'Password',
+        'attendance_date' => 'Attendance Date',
+        'latitude' => 'Latitude',
+        'longitude' => 'Longitude',
+        'action' => 'Action',
+        'from_date' => 'From Date'
+
     ];
 
     private $messages = [
@@ -56,6 +64,7 @@ class AdminAPIController extends Controller
 
                     $information['id'] = $user->id;
                     $information['name'] = $user->name;
+                    $information['role'] = 'staff';
 
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
@@ -225,4 +234,136 @@ class AdminAPIController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
     }
+
+    public function mark_attendance(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
+
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $admin_attendance->clock_in = $attendance_time;
+                $admin_attendance->clock_in_latitude = $request->latitude;
+                $admin_attendance->clock_in_longitude = $request->longitude;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
+            } elseif ($request->action == 2) {
+                $admin_attendance->clock_out = $attendance_time;
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function attendance_details(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->whereDate('action_date', $request->attendance_date)
+                ->where('employee_type', 1)
+                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->orderBy('action_date', 'ASC');
+            if ($admin_attendance_action->exists()) {
+                $admin_attendance_action = $admin_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
+    }
+
+    public function attendance_history(Request $request)
+    {
+        $rules = [
+            'from_date' => ['required'],
+            'to_date' => ['nullable']
+        ];
+        $admin_id = $request->admin_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $admin_attendance = EmployeeAttendance::where('admin_id', $admin_id)
+                ->orderBy('attendance_date', 'ASC');
+
+            if ($to_date != null) {
+                $admin_attendance = $admin_attendance->whereBetween('attendance_date', [$from_date, $to_date]);
+            } else {
+                $admin_attendance = $admin_attendance->whereDate('attendance_date', $from_date);
+            }
+
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->get();
+                return response()->json(['status' => 0, 'history_details' => $admin_attendance]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Details Found"]);
+        }
+    }
+
+
 }

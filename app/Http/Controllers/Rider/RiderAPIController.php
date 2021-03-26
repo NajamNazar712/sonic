@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
@@ -19,6 +21,7 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentsJourney;
@@ -101,7 +104,9 @@ class RiderAPIController extends Controller
         'actions.*.logged_at' => 'Logged At',
         'actions.*.type_id' => 'Type ID',
         'actions.*.pickup_note_id' => 'Pickup Note ID',
-        'actions.*.pickup_request_id' => 'Pickup Request ID'
+        'actions.*.pickup_request_id' => 'Pickup Request ID',
+
+        'from_date' => 'From Date'
     ];
 
     private $messages = [
@@ -463,6 +468,7 @@ class RiderAPIController extends Controller
                         $information = array();
 
                         $information['name'] = $rider->name;
+                        $information['role'] = 'rider';
 
                         if ($rider->api_token) {
                             $information['api_token'] = $rider->api_token;
@@ -3275,18 +3281,10 @@ class RiderAPIController extends Controller
         if ($from_date == null && $to_date == null && $delivery_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
-            $rider_deliveries = DeliveryNote::
-            join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-                ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-                ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-                ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
-                ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-                ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+            $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
-                ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-                ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-                ->where('delivery_notes.pending_status', '=', 1)
-                ->where('riders.id', '=', $rider_id);
+                ->where('delivery_notes.pending_status', 1)
+                ->where('delivery_notes.rider_id', $rider_id);
 
             if ($from_date != null && $to_date != null) {
                 $rider_deliveries = $rider_deliveries->whereBetween('delivery_notes.created_at', [$from_date, $to_date])
@@ -3305,7 +3303,6 @@ class RiderAPIController extends Controller
                 $rider_deliveries = $rider_deliveries->where('shipments.tracking_number', $tracking_no)
                     ->groupBy('delivery_notes.id');
             }
-
 
             if ($rider_deliveries->exists()) {
                 $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
@@ -3484,13 +3481,22 @@ class RiderAPIController extends Controller
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
+                            $environment = config('app.env');
 
                             if ($request->has('audio')) {
-                                $extension = $request->file('audio')->getClientOriginalExtension();
-                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
-                                Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                $rider_delivery->audio_path = $audio_path;
-                                $rider_delivery->save();
+                                if ($environment == 'production') {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_delivery->audio_path = $audio_path;
+                                    $rider_delivery->save();
+                                } else {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_delivery->audio_path = $audio_path;
+                                    $rider_delivery->save();
+                                }
                             }
 
                             if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
@@ -3630,12 +3636,22 @@ class RiderAPIController extends Controller
 
                     $rider_pickup->save();
 
+                    $environment = config('app.env');
+
                     if ($request->has('audio')) {
-                        $extension = $request->file('audio')->getClientOriginalExtension();
-                        $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
-                        Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                        $rider_pickup->audio_path = $audio_path;
-                        $rider_pickup->save();
+                        if ($environment == 'production') {
+                            $extension = $request->file('audio')->getClientOriginalExtension();
+                            $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                            Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                            $rider_pickup->audio_path = $audio_path;
+                            $rider_pickup->save();
+                        } else {
+                            $extension = $request->file('audio')->getClientOriginalExtension();
+                            $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                            Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                            $rider_pickup->audio_path = $audio_path;
+                            $rider_pickup->save();
+                        }
                     }
 
                     V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
@@ -3747,12 +3763,21 @@ class RiderAPIController extends Controller
                             $rider_return_delivery->picture_path = $picture_path;
                             $rider_return_delivery->save();
 
+                            $environment = config('app.env');
                             if ($request->has('audio')) {
-                                $extension = $request->file('audio')->getClientOriginalExtension();
-                                $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
-                                Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                $rider_return_delivery->audio_path = $audio_path;
-                                $rider_return_delivery->save();
+                                if ($environment == 'production') {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_return_delivery->audio_path = $audio_path;
+                                    $rider_return_delivery->save();
+                                } else {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_return_delivery->audio_path = $audio_path;
+                                    $rider_return_delivery->save();
+                                }
                             }
 
                             if (ReturnNote::where('id', $request->return_note_id)->exists()) {
@@ -4139,6 +4164,162 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Return Delivery Note Is Assigned', 'information' => $nodes]);
         }
         return response()->json(['status' => 0, 'message' => 'No Return Delivery Note Assigned']);
+    }
+
+    public function rider_profile(Request $request)
+    {
+        $rider_id = $request->rider_id;        $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
+            ->join('cities as c', 'c.id', '=', 'riders.city_id')
+            ->join('cities as h', 'h.id', '=', 'c.hub_id')
+            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category')
+            ->where('riders.id', $rider_id);
+        if ($rider_profile->exists()) {
+            $rider_profile = $rider_profile->get();
+            return response()->json(['status' => 0, 'rider' => $rider_profile]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Rider Profile Not Found"]);
+        }
+    }
+
+    public function mark_attendance(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
+
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 2);
+            $rider_attendance_action = new EmployeeAttendanceActionLog();
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->first();
+            } else {
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider_id;
+                $rider_attendance->employee_type = 2;
+                $rider_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $rider_attendance->clock_in = $attendance_time;
+                $rider_attendance->clock_in_latitude = $request->latitude;
+                $rider_attendance->clock_in_longitude = $request->longitude;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
+            } elseif ($request->action == 2) {
+                $rider_attendance->clock_out = $attendance_time;
+                $rider_attendance->clock_out_latitude = $request->latitude;
+                $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function attendance_details(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                ->whereDate('action_date', $request->attendance_date)
+                ->where('employee_type', 2)
+                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->orderBy('action_date', 'ASC');
+            if ($rider_attendance_action->exists()) {
+                $rider_attendance_action = $rider_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $rider_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
+    }
+
+    public function attendance_history(Request $request)
+    {
+        $rules = [
+            'from_date' => ['required'],
+            'to_date' => ['nullable']
+        ];
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $rider_attendance = EmployeeAttendance::where('rider_id', $rider_id)
+                ->orderBy('attendance_date', 'ASC');
+
+            if ($to_date != null) {
+                $rider_attendance = $rider_attendance->whereBetween('attendance_date', [$from_date, $to_date]);
+            } else {
+                $rider_attendance = $rider_attendance->whereDate('attendance_date', $from_date);
+            }
+
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->get();
+                return response()->json(['status' => 0, 'history_details' => $rider_attendance]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Details Found"]);
+        }
+    }
+
+
+    public function rider_ticker_images(Request $request){
+        $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
+        if($rider_ticker_images->exists()){
+            $rider_ticker_images = $rider_ticker_images->get();
+            return response()->json(['status' => 0, 'images' => $rider_ticker_images]);
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'No Images Found']);
+        }
     }
 
 

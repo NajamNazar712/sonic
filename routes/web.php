@@ -2099,6 +2099,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
+
+        Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
+        });
+
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
@@ -2757,6 +2763,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
+    });
+
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
+        Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
     });
 
 });
