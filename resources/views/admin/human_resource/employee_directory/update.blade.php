@@ -39,7 +39,7 @@
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
-                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.profile.update',$employee->id)}}">
+                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6">
@@ -222,7 +222,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="medical" aria-labelledby="medical-tab" >
-                        <form id="medical-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.medical.update',$employee->id)}}">
+                        <form id="medical-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.medical.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -346,7 +346,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="bank" aria-labelledby="bank-tab" >
-                        <form id="bank-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.bank.update',$employee->id)}}">
+                        <form id="bank-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.bank.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -408,7 +408,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="education" aria-labelledby="education-tab" >
-                        <form id="education-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.education.update',$employee->id)}}">
+                        <form id="education-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.education.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -532,7 +532,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="employment_history" aria-labelledby="employment_history-tab" >
-                        <form id="employment_history-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.employment.update',$employee->id)}}">
+                        <form id="employment_history-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.employment.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -662,7 +662,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="references" aria-labelledby="references-tab" >
-                        <form id="references-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.reference.update',$employee->id)}}">
+                        <form id="references-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.reference.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -720,7 +720,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="attachments" aria-labelledby="attachments-tab" >
-                        <form id="attachments-form" novalidate="novalidate" class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
+                        <form id="attachments-form" novalidate="novalidate" class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resource.employee_directory.attachments.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">

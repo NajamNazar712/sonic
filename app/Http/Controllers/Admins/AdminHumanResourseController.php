@@ -218,7 +218,7 @@ class AdminHumanResourseController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->employee_id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 if (session('role_id') == 1 || in_array(468, session('permissions'))) {
-                    $route = route("admin.human_resourse.employee_directory.edit", $result->employee_id);
+                    $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
                 }
                 if($result->request_status == 1 || $result->request_status == 2){

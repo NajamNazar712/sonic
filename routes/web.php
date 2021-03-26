@@ -2757,7 +2757,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
-    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
+    Route::prefix('human_resource')->name('human_resource.')->group(function () {
 
         Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
         Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');

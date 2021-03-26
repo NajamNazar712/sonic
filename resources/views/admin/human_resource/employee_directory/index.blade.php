@@ -49,7 +49,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{route('admin.human_resourse.employee_directory.approve')}}" method="post" class="mt-1"
+                <form action="{{route('admin.human_resource.employee_directory.approve')}}" method="post" class="mt-1"
                       id="approveRiderForm" novalidate="novalidate">
                     {{csrf_field()}}
                     <input type="hidden" name="employee_id" id="employee_id" value="">
@@ -89,7 +89,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-{{--                <form action="{{route('admin.human_resourse.employee_directory.approve')}}" method="post" class="mt-1"--}}
+{{--                <form action="{{route('admin.human_resource.employee_directory.approve')}}" method="post" class="mt-1"--}}
 {{--                      id="approveRiderForm" novalidate="novalidate">--}}
 {{--                    {{csrf_field()}}--}}
 {{--                    <div class="modal-footer">--}}
@@ -133,7 +133,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resourse.employee_directory.list') }}',
+                        url: '{{ route('admin.human_resource.employee_directory.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -189,7 +189,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.human_resourse.employee_directory.list') }}',
+                ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
                 order: [[10, 'desc']],
                 rowId: 'employee_id',
                 columns: [
@@ -274,7 +274,7 @@
                         });
 
                         $.ajax({
-                            url: '{!! route('admin.human_resourse.employee_directory.approve') !!}',
+                            url: '{!! route('admin.human_resource.employee_directory.approve') !!}',
                             method: 'POST',
                             data: {
                                 'employee_id': id,
@@ -337,7 +337,7 @@
                         });
 
                         $.ajax({
-                            url: '{!! route('admin.human_resourse.employee_directory.reject') !!}',
+                            url: '{!! route('admin.human_resource.employee_directory.reject') !!}',
                             method: 'POST',
                             data: {
                                 'employee_id': id,

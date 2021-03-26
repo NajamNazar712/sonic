@@ -881,23 +881,23 @@ class Permission
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
 
-            'human_resourse.allusers' => 449,
-            'human_resourse.all_user_ajax' => 449,
+            'human_resource.allusers' => 449,
+            'human_resource.all_user_ajax' => 449,
 
-            'human_resourse.employee_directory.index' => 467,
-            'human_resourse.employee_directory.list' => 467,
+            'human_resource.employee_directory.index' => 467,
+            'human_resource.employee_directory.list' => 467,
 
-            'human_resourse.employee_directory.edit' => 468,
-            'human_resourse.employee_directory.profile.update' => 468,
-            'human_resourse.employee_directory.medical.update' => 468,
-            'human_resourse.employee_directory.bank.update' => 468,
-            'human_resourse.employee_directory.reference.update' => 468,
-            'human_resourse.employee_directory.education.update' => 468,
-            'human_resourse.employee_directory.employment.update' => 468,
-            'human_resourse.employee_directory.attachments.update' => 468,
+            'human_resource.employee_directory.edit' => 468,
+            'human_resource.employee_directory.profile.update' => 468,
+            'human_resource.employee_directory.medical.update' => 468,
+            'human_resource.employee_directory.bank.update' => 468,
+            'human_resource.employee_directory.reference.update' => 468,
+            'human_resource.employee_directory.education.update' => 468,
+            'human_resource.employee_directory.employment.update' => 468,
+            'human_resource.employee_directory.attachments.update' => 468,
 
-            'human_resourse.employee_directory.approve' => 469,
-            'human_resourse.employee_directory.reject' => 469,
+            'human_resource.employee_directory.approve' => 469,
+            'human_resource.employee_directory.reject' => 469,
 
 			'attendance.index' => 465,
             'attendance.list' => 465

@@ -1437,16 +1437,16 @@
             @endif
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.human_resourse.download_docs')}}">Download Docs</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
                     @if (session('role_id') == 1 || in_array(449, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.human_resourse.allusers')}}">All Employees</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.allusers')}}">All Employees</a></li>
                     @endif
                     @if (session('role_id') == 1 || in_array(465, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
                     @endif
 
                         @if (session('role_id') == 1 || in_array(467, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resourse.employee_directory.index')}}">Employee Directory</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_directory.index')}}">Employee Directory</a></li>
                         @endif
                 </ul>
             </li>

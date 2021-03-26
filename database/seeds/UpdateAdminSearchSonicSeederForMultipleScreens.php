@@ -57,6 +57,6 @@ class UpdateAdminSearchSonicSeederForMultipleScreens extends Seeder
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Sales > Key Accounts Dashboard', 'url'=>'admin.settings.sales.key_accounts.dashboard', 'permission_id' => 397));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > User Wise Commission', 'url'=>'admin.dashboard.userwise', 'permission_id' => 333));
         DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > International > International Rates Settings', 'url'=>'admin.settings.international_rates.index', 'permission_id' => 438));
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Human Resource > Active Employees List', 'url'=>'admin.human_resourse.allusers', 'permission_id' => 449));
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Human Resource > Active Employees List', 'url'=>'admin.human_resource.allusers', 'permission_id' => 449));
     }
 }
