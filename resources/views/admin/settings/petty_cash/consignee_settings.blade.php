@@ -164,7 +164,8 @@
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var hub_select = '<select name="hub_select" id="hub_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
@@ -178,6 +179,15 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
                         }
                     });
                     var hub_data = $.map({!! $hubs !!}, function (obj) {
@@ -212,7 +222,7 @@
 
             $('body').on('click','#datatable button.edit',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                var consignee = $(this).parents('tr').find('td.consignee_name').attr('data-consignee_id');
+                var consignee = $(this).parents('tr').find('td.consignee_name').attr('data-consignee_name');
                 var hub = $(this).parents('tr').find('td.hub_name').attr('data-hub_id');
                 if(id && consignee && hub){
                     $('#edit_petty_cash_consignee_id').val(id);
