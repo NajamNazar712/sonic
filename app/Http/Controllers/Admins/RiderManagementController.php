@@ -691,6 +691,8 @@ class RiderManagementController extends Controller
         $employee = Employee::where('rider_request_id', $request->rider_request_id);
         if($employee->exists()){
             $employee = $employee->first();
+            $employee->status_id = 1;
+            $employee->save();
             $trax_id = $employee->trax_id;
         }
         else{
