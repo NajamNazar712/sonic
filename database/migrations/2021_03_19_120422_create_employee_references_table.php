@@ -16,12 +16,12 @@ class CreateEmployeeReferencesTable extends Migration
         Schema::create('employee_references', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employee_id')->index();
-            $table->string('name');
-            $table->string('occupation');
-            $table->string('relationship');
-            $table->string('years');
-            $table->string('phone_number');
-            $table->string('email');
+            $table->string('name')->nullable();
+            $table->string('occupation')->nullable();
+            $table->string('relationship')->nullable();
+            $table->string('years')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('email')->nullable();
             $table->timestamps();
         });
     }

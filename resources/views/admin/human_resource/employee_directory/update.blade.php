@@ -39,7 +39,7 @@
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
-                        <form id="profile-form" class="form form-horizontal" method="post" action="">
+                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.profile.update',$employee->id)}}">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6">
@@ -48,7 +48,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Father's/Husband Name</label>
-                                                    <input type="text" id="name" class="form-control border-primary" value="" name="name" required>
+                                                    <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -56,7 +56,7 @@
                                                     <label>Religion</label>
                                                     <select name="religion" id="religion" class="select2 form-control required" style="width: 100%">
                                                         @foreach($religions as $religion)
-                                                            <option id="{{$religion->id}}">{{$religion->name}}</option>
+                                                            <option value="{{$religion->id}}">{{$religion->name}}</option>
                                                         @endforeach
                                                     </select>
                                             </div>
@@ -66,7 +66,7 @@
                                                     <label>Nationality</label>
                                                     <select name="nationality" id="nationality" class="select2 form-control required" style="width: 100%">
                                                         @foreach($nationalities as $nationality)
-                                                            <option id="{{$nationality->id}}">{{$nationality->name}}</option>
+                                                            <option value="{{$nationality->id}}">{{$nationality->name}}</option>
                                                         @endforeach
                                                     </select>
                                              </div>
@@ -76,7 +76,7 @@
                                                     <label>Domicile</label>
                                                     <select name="domicile" id="domicile" class="select2 form-control required" style="width: 100%">
                                                         @foreach($domiciles as $domicile)
-                                                            <option id="{{$domicile->id}}">{{$domicile->name}}</option>
+                                                            <option value="{{$domicile->id}}">{{$domicile->name}}</option>
                                                         @endforeach
                                                     </select>
                                              </div>
@@ -86,7 +86,7 @@
                                                     <label>Marital Status</label>
                                                     <select name="marital_status" id="marital_status" class="select2 form-control required" style="width: 100%">
                                                         @foreach($maritial_statuses as $maritial_status)
-                                                            <option id="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                                         @endforeach
                                                     </select>
                                             </div>
@@ -94,25 +94,25 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Blood Group</label>
-                                                    <input type="text" id="blood_group" class="form-control border-primary" value="" name="blood_group" required>
+                                                    <input type="text" id="blood_group" class="form-control border-primary" value="{{$employee->blood_group}}" name="blood_group">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Email</label>
-                                                    <input type="email" id="email" class="form-control border-primary" value="" name="email" required>
+                                                    <label>Personal Email</label>
+                                                    <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Address</label>
-                                                    <textarea class="form-control border-primary" id="address" name="address"></textarea>
+                                                    <textarea class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Emergency Contact</label>
-                                                <input type="text" id="emergency_contact" class="form-control border-primary" value="" name="emergency_contact" required>
+                                                <input type="text" id="emergency_contact" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -123,7 +123,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="cnic_issue_date"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
+                                                <input type="text" name="cnic_issue_date" data-value="{{$employee->cnic_issue_date != null ? date('Y/m/d',strtotime($employee->cnic_issue_date)) : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
                                          </div>
                                     </div>
                                         <div class="col-md-12">
@@ -134,7 +134,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="cnic_expiry_date"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
+                                                <input type="text" name="cnic_expiry_date" data-value="{{$employee->cnic_expiry_date != null ? date('Y/m/d',strtotime($employee->cnic_expiry_date)) : ''}}"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
                                         </div>
                                     </div>
                                     </div>
@@ -142,178 +142,778 @@
                                 <div class="col-md-6">
                                     <div class="form-body">
                                         <h4 class="form-section">Official Info</h4>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Company Name:</label>
-                                                        {{--<span class="danger">*</span>--}}
-                                                        @if(session('role_id') == 1 || in_array(250, session('permissions')))
-                                                            <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="" name="name" required>
-                                                        @else
-                                                            <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="" name="name" required readonly>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Person of Contact:</label>
-                                                        <span class="danger">*</span>
-                                                        <input type="text" id="poc"  data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" class="form-control border-primary" value="" name="poc" required>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Designation</label>
+                                                <select name="designation" id="designation" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($designations as $designation)
+                                                        <option value="{{$designation->id}}">{{$designation->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Email Address</label>
-                                                        <span class="danger">*</span>
-                                                        <input type="email" id="email" class="form-control border-primary" data-rule-remote="" data-msg-remote="Email must be unique" data-rule-required="true" data-msg-required="Email address is required" value="" name="email" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Address:</label>
-                                                        <span class="danger">*</span>
-                                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" data-rule-required="true" data-msg-required="Address is required" value="" name="address" required></textarea>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Hub</label>
+                                                <select name="hub" id="hub" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Phone Number 1</label>
-                                                        <span class="danger">*</span>
-                                                        <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone number is required" value="" name="phone" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>Phone Number 2:</label>
-                                                        <input type="text" id="phone2" class="form-control border-primary" value="" name="phone2">
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Department</label>
+                                                <select name="department" id="department" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>CNIC No.</label>
-                                                        <span class="danger">*</span>
-                                                        <input type="text" id="cnic" class="form-control border-primary" data-rule-required="true" data-msg-required="CNIC Number is required" value="" name="cnic" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>NTN Number</label>
-                                                        <input type="text" id="ntn_no" class="form-control border-primary" value="" name="ntn_no">
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Zone</label>
+                                                <select name="zone" id="zone" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($zones as $zone)
+                                                        <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>URL</label>
-                                                        <input type="text" data-rule-maxlength="190" data-msg-maxlength="URL can be maximum 190 characters" id="url" class="form-control border-primary" value="" name="url">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>Product Type</label>
-                                                        <span class="danger">*</span>
-                                                        <select name="product_id" id="product_id" data-rule-required="true" data-msg-required="Product Type is required" class="select2 form-control required" style="width: 100%">
-
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="row" id="product_name_div">
-                                                    <div class="col-md-12">
-                                                        <div class="row">
-                                                            <div class="form-group col-md-9">
-                                                                <label>Product Name</label>
-                                                                <span class="danger">*</span>
-                                                                <input type="text" id="product_name" class="form-control border-primary" value="" name="product_name" data-msg-required="Product Name is required">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official Email</label>
+                                                <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>Password:</label>
-                                                        <input type="password" id="password" class="form-control border-primary" value="" name="password">
-                                                    </div>
-                                                </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official Number</label>
+                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
                                             </div>
-                                            <input type="hidden" name="user_id" value="">
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label>City</label>
-                                                        <span class="danger">*</span>
-                                                        <select name="city_id" id="city_id" data-rule-required="true" data-msg-required="City is required" class="select2 form-control required" style="width: 100%">
-
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Sonic ID</label>
+                                                <input type="text" id="sonic_id" class="form-control border-primary" value="{{$employee->sonic_id}}" name="sonic_id" >
                                             </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="form-group col-md-9">
-                                                        <label for="segments">Segments:
-                                                            <span class="danger">*</span>
-                                                        </label>
-
-                                                        <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
-
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Bolt Pin</label>
+                                                <input type="text" id="bolt_pin" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" >
                                             </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>STRN Number</label>
-                                                        <input type="text" id="strn_no" class="form-control border-primary" value="" name="strn_no">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group row">
-                                                    <div class="col-md-9">
-                                                        <label>Brand Name</label>
-                                                        <input type="text" id="brand_name" class="form-control border-primary" value="" name="brand_name">
-                                                    </div>
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="medical" aria-labelledby="medical-tab" >
+                        <form id="medical-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.medical.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                            <div class="form-body" id="medical_info_container">
+                                                <h4 class="form-section">Medical Detail</h4>
+                                                @forelse($medical_infos as $medical_info)
+                                                <div class="row">
+                                                    @if(!$loop->first)
+                                                    <hr style="width: 100%;">
+                                                    @endif
+                                                    <div class="col-md-10">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Name Of Family Member</label>
+                                                                <input type="text" class="form-control border-primary name_family_member" value="{{$medical_info->name}}" name="name[]" data-rule-required="true" data-msg-required="Name is required">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Relationship</label>
+                                                                <select name="relationship[]" id="relationship_family_member_{{$loop->index}}" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relation is required" style="width: 100%">
+                                                                    @foreach($relationships as $relationship)
+                                                                        <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label>Date Of Birth</label>
+                                                            <div class="form-group input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                                </div>
+                                                                <input type="text" data-rule-required="true" data-msg-required="Date Of Birth is required" name="dob[]" data-value="{{date('Y/m/d',strtotime($medical_info->date_of_birth))}}"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Marital Status</label>
+                                                                <select name="marital_status[]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_{{$loop->index}}" class="select2 form-control marital_status_family_member" style="width: 100%">
+                                                                    @foreach($maritial_statuses as $maritial_status)
+                                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-body">
+                                                            @if($loop->first)
+                                                                <button type="button" id="add_family_member" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                            @else
+                                                                <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @empty
+                                                    <div class="row">
+                                                        <div class="col-md-10">
+                                                            <div class="col-md-12">
+                                                                <div class="form-group">
+                                                                    <label>Name Of Family Member</label>
+                                                                    <input type="text" class="form-control border-primary name_family_member" value="" name="name[]" data-rule-required="true" data-msg-required="Name is required">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <div class="form-group">
+                                                                    <label>Relationship</label>
+                                                                    <select name="relationship[]" id="relationship_family_member_0" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relationship is required" style="width: 100%">
+                                                                        @foreach($relationships as $relationship)
+                                                                            <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <label>Date Of Birth</label>
+                                                                <div class="form-group input-group">
+                                                                    <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                                    </div>
+                                                                    <input type="text" name="dob[]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <div class="form-group">
+                                                                    <label>Marital Status</label>
+                                                                    <select name="marital_status[]" id="marital_status_family_member_0" class="select2 form-control marital_status_family_member" data-rule-required="true" data-msg-required="Marital Status is required" style="width: 100%">
+                                                                        @foreach($maritial_statuses as $maritial_status)
+                                                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-body">
+                                                                <button type="button" id="add_family_member" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+                                <div class="col-md-8">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="bank" aria-labelledby="bank-tab" >
+                        <form id="bank-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.bank.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-body">
+                                        <h4 class="form-section">Bank Information</h4>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Account Title</label>
+                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Branch Code</label>
+                                                <input type="text" class="form-control border-primary" id="branch_code" value="{{$bank_info->branch_code ?? ''}}" name="branch_code">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Account Number</label>
+                                                <input type="text" class="form-control border-primary" id="account_number" value="{{$bank_info->account_no ?? ''}}" name="account_number">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Bank Name</label>
+                                                <select name="bank_name" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($banks as $bank)
+                                                        <option value="{{$bank->id}}">{{$bank->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Branch Name</label>
+                                                <input type="text" class="form-control border-primary" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>IBAN Number</label>
+                                                <input type="text" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="education" aria-labelledby="education-tab" >
+                        <form id="education-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.education.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-body" id="education_info_container">
+                                        <h4 class="form-section">Educational Background</h4>
+                                        @forelse($educations as $education)
+                                            @if(!$loop->first)
+                                                <hr style="width: 100%;">
+                                            @endif
+                                            <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Name Of Institute</label>
+                                                        <input type="text" class="form-control border-primary name_institute" value="{{$education->name}}" name="name[]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Degree Awarded</label>
+                                                        <input type="text" class="form-control border-primary degree" value="{{$education->degree}}" name="degree[]" data-rule-required="true" data-msg-required="Degree is required">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Grade Achieved</label>
+                                                        <select name="grade[]" id="grade_{{$loop->index}}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
+                                                            <option>A+</option>
+                                                            <option>A</option>
+                                                            <option>B</option>
+                                                            <option>C</option>
+                                                            <option>D</option>
+                                                            <option>E</option>
+                                                            <option>F</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label>Graduation Year</label>
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                        </div>
+                                                        <input type="text" data-rule-required="true" data-value="{{date('Y/m/d',strtotime($education->passing_year))}}" data-msg-required="Graduation Year is required" name="passing_year[]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-body">
+                                                    @if($loop->first)
+                                                        <button type="button" id="add_education" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                    @else
+                                                        <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @empty
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Name Of Institute</label>
+                                                            <input type="text" class="form-control border-primary name_institute" value="" name="name[]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Degree Awarded</label>
+                                                            <input type="text" class="form-control border-primary degree" value="" name="degree[]" data-rule-required="true" data-msg-required="Degree is required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Grade Achieved</label>
+                                                            <select name="grade[]" id="grade_0" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
+                                                                <option>A+</option>
+                                                                <option>A</option>
+                                                                <option>B</option>
+                                                                <option>C</option>
+                                                                <option>D</option>
+                                                                <option>E</option>
+                                                                <option>F</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>Graduation Year</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Graduation Year is required" name="passing_year[]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                        <button type="button" id="add_education" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="employment_history" aria-labelledby="employment_history-tab" >
+                        <form id="employment_history-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.employment.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-body" id="employment_info_container">
+                                        <h4 class="form-section">Employment History</h4>
+                                        @forelse($employments as $employment)
+                                            <div class="row">
+                                                @if(!$loop->first)
+                                                    <hr style="width: 100%;">
+                                                @endif
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Company/Organization Name</label>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="{{$employment->name ?? ''}}" name="name[]">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Position/Designation</label>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="{{$employment->designation ?? ''}}" name="position[]">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>From</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                                        </span>
+                                                            </div>
+                                                            <input type="text" data-value="{{date('Y/m/d',strtotime($employment->from))}}" data-rule-required="true" data-msg-required="From is required" name="from[]"  class="form-control bg-primary border-primary white rounded-right pickadate from_employment" placeholder="From">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>To</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                                        </span>
+                                                            </div>
+                                                            <input type="text" data-value="{{date('Y/m/d',strtotime($employment->to))}}" data-value="" data-rule-required="true" data-msg-required="To is required" name="to[]"  class="form-control bg-primary border-primary white rounded-right pickadate to_employment" placeholder="To">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Reason</label>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[]">{{$employment->reason}}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                        @if($loop->first)
+                                                    <button type="button" id="add_employment" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                        @else
+                                                            <button type="button" class="btn btn-danger btn-xs mt-2 remove_employment"><i class="ft-minus"></i></button>
+                                                        @endif
+                                                </div>
+                                                </div>
+                                        </div>
+                                        @empty
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Company/Organization Name</label>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="" name="name[]">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Position/Designation</label>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="" name="position[]">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>From</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="From is required" name="from[]"  class="form-control bg-primary border-primary white rounded-right pickadate from_employment" placeholder="From">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>To</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                                    </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="To is required" name="to[]"  class="form-control bg-primary border-primary white rounded-right pickadate to_employment" placeholder="To">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Reason</label>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[]"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                        <button type="button" id="add_employment" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="references" aria-labelledby="references-tab" >
+                        <form id="references-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.reference.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-body">
+                                        <h4 class="form-section">References</h4>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control border-primary" id="reference_name" value="{{$reference->name ?? ''}}" name="name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Occupation</label>
+                                                <input type="text" class="form-control border-primary" id="reference_occupation" value="{{$reference->occupation ?? ''}}" name="occupation">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Relationship</label>
+                                                <input type="text" class="form-control border-primary" id="reference_relationship" value="{{$reference->relationship ?? ''}}" name="relationship">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Years</label>
+                                                <input type="text" class="form-control border-primary" id="reference_years" value="{{$reference->years ?? ''}}" name="years">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Phone Number</label>
+                                                <input type="text" class="form-control border-primary" id="references_phone" value="{{$reference->phone_number ?? ''}}" name="phone">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" class="form-control border-primary" id="references_email" value="{{$reference->email ?? ''}}" name="email">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-actions center">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="attachments" aria-labelledby="attachments-tab" >
+                        <form id="attachments-form" class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-body" id="employment_info_container">
+                                        <h4 class="form-section">Attachments</h4>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>CV/Resume</label>
+                                                    <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->cv != null)
+                                                    <img src="{{asset(Storage::url($attachments->cv))}}" alt="">
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Scanned CNIC</label>
+                                                    <input type="file" name="cnic" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->cnic != null)
+                                                    <img src="{{asset(Storage::url($attachments->cnic))}}" alt="">
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Passport Size Photo</label>
+                                                    <input type="file" name="photo" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->photo != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Academic Credentials</label>
+                                                    <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->academic != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Experience Certificates</label>
+                                                    <input type="file" name="experience_certificates" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->experience != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Last Pay Slip</label>
+                                                    <input type="file" name="pay_slip" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->last_pay_slip != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Nikkah Namma</label>
+                                                    <input type="file" name="nikkah_nama" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->nikkah_nama != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Scanned CNIC Spouse</label>
+                                                    <input type="file" name="cnic_spouse" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->cnic_spouse != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Children B-Form</label>
+                                                    <input type="file" name="bform" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->child_b_form != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Scanned CNIC Nominee</label>
+                                                    <input type="file" name="cnic_nominee" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->cnic_nominee != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Scanned Utility Bill</label>
+                                                    <input type="file" name="utility_bill" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->utility_bill != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Affidavit</label>
+                                                    <input type="file" name="affidavit" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->affidavit != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label>Cheque</label>
+                                                    <input type="file" name="cheque" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if(isset($attachments) && $attachments->cheque != null)
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
                                     <div class="form-actions center">
                                         <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                             Cancel
@@ -354,6 +954,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="https://cdnjs.com/libraries/jquery-validation-unobtrusive" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
@@ -363,6 +964,18 @@
         today.setHours(0,0,0,0);
 
         $(document).ready(function() {
+            $('#profile-form #emergency_contact , #profile-form #official_number , #references-form #references_phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+
+            $('#references-form #reference_years').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+            });
+
             var cnic_issue_date = $('#profile-form #cnic_issue_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -388,25 +1001,365 @@
                 min: today,
             });
 
+            var dob = $('#medical-form .dob_family_member').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenPrefix: 'formatted_',
+                max: today,
+            });
+
+            var passing_year = $('#education-form .passing_year').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenPrefix: 'formatted_',
+                max: today,
+            });
+
+            var from = $('#employment_history-form .from_employment').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenPrefix: 'formatted_',
+                max: today,
+            });
+
+            var to = $('#employment_history-form .to_employment').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenPrefix: 'formatted_',
+                max: today,
+            });
+
             $("#religion").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Religion",
                 width:'100%',
             });
+            $("#religion").val("{{$employee->religion_id ?? ''}}").trigger('change');
 
             $("#domicile").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Domicile",
                 width:'100%',
             });
+            $("#domicile").val("{{$employee->domicile_id ?? ''}}").trigger('change');
 
             $("#marital_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Maritial Status",
                 width:'100%',
             });
+            $("#marital_status").val("{{$employee->marital_status_id ?? ''}}").trigger('change');
 
             $("#nationality").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Nationality",
                 width:'100%',
             });
+            $("#nationality").val("{{$employee->nationality_id ?? ''}}").trigger('change');
+
+            $("#designation").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Designation",
+                width:'100%',
+            });
+            $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
+
+            $("#hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width:'100%',
+            });
+            $("#hub").val("{{$employee->city_id ?? ''}}").trigger('change');
+
+            $("#zone").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Zone",
+                width:'100%',
+            });
+            $("#zone").val("{{$employee->zone_id ?? ''}}").trigger('change');
+
+            $("#department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department",
+                width:'100%',
+            });
+            $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
+
+            var family_member_index = 0;
+            $(".marital_status_family_member").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Marital Status",
+                width:'100%',
+            });
+
+            $(".relationship_family_member").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Relationship",
+                width:'100%',
+            });
+
+            @foreach($medical_infos as $medical_info)
+                $("#marital_status_family_member_{{$loop->index}}").val({{$medical_info->marital_status}}).trigger('change');
+                $("#relationship_family_member_{{$loop->index}}").val({{$medical_info->relationship_id}}).trigger('change');
+                family_member_index = {{$loop->index}};
+            @endforeach
+
+            $("#bank_name").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bank",
+                width:'100%',
+            });
+            $("#bank_name").val("{{$bank_info->bank_id ?? ''}}").trigger('change');
+
+
+            $(".grade").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Grade",
+                width:'100%',
+            });
+            var education_background_index = 0
+
+            @foreach($educations as $education)
+                $("#grade_{{$loop->index}}").val("{{$education->grade}}").trigger('change');
+                education_background_index = {{$loop->index}};
+            @endforeach
+
+            $("#add_family_member").on('click',function () {
+                family_member_index++;
+                html = `<div class="row">
+                            <hr style="width:100%">
+                            <div class="col-md-10">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Name Of Family Member</label>
+                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control border-primary name_family_member" value="" name="name[]">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Relationship</label>
+                                        <select name="relationship[]" data-rule-required="true" data-msg-required="Relationship is required" id="relationship_family_member_${family_member_index}" class="select2 form-control relationship_family_member" style="width: 100%">
+                                            @foreach($relationships as $relationship)
+                                                <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Date Of Birth</label>
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" name="dob[]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
+                                    </div>
+                                </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Marital Status</label>
+                                    <select name="marital_status[]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_${family_member_index}" class="select2 form-control marital_status_family_member" style="width: 100%">
+                                        @foreach($maritial_statuses as $maritial_status)
+                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-body">
+                                <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+                $("#medical_info_container").append(html);
+                $('#medical-form .dob_family_member').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenPrefix: 'formatted_',
+                    max: today,
+                });
+                $("#marital_status_family_member_" + family_member_index).prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Marital Status",
+                    width:'100%',
+                });
+                $("#relationship_family_member_" + family_member_index).prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Relationship",
+                    width:'100%',
+                });
+            });
+
+            $("#add_education").on('click',function () {
+                education_background_index++;
+                html = `<div class="row">
+                            <hr style="width:100%">
+                            <div class="col-md-10">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Name Of Institute</label>
+                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control border-primary name_institute" value="" name="name[]">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Degree Awarded</label>
+                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control border-primary degree" value="" name="degree[]">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Grade Achieved</label>
+                                        <select name="grade[]" id="grade_${education_background_index}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
+                                            <option>A+</option>
+                                            <option>A</option>
+                                            <option>B</option>
+                                            <option>C</option>
+                                            <option>D</option>
+                                            <option>E</option>
+                                            <option>F</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Graduation Year</label>
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" data-rule-required="true" data-msg-required="Graduation Year is required" name="passing_year[]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-body">
+                                    <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
+                                </div>
+                            </div>
+                        </div>`;
+                $("#education_info_container").append(html);
+                $("#grade_"+ education_background_index).prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Grade",
+                    width:'100%',
+                });
+                $('#education-form .passing_year').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenPrefix: 'formatted_',
+                    max: today,
+                });
+
+            });
+
+            $("#add_employment").on('click',function () {
+                html = `<div class="row">
+                            <hr style="width:100%">
+                            <div class="col-md-10">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Company/Organization Name</label>
+                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="" name="name[]">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Position/Designation</label>
+                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="" name="position[]">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>From</label>
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" data-rule-required="true" data-msg-required="From is required" name="from[]"  class="form-control bg-primary border-primary white rounded-right pickadate from_employment" placeholder="From">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>To</label>
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" name="to[]" data-rule-required="true" data-msg-required="To is required"  class="form-control bg-primary border-primary white rounded-right pickadate to_employment" placeholder="To">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Reason</label>
+                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[]"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-body">
+                                    <button type="button" class="btn btn-danger btn-xs mt-2 remove_employment"><i class="ft-minus"></i></button>
+                                </div>
+                            </div>
+                        </div>`;
+
+                $("#employment_info_container").append(html);
+                $('#employment_history-form .from_employment').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenPrefix: 'formatted_',
+                    max: today,
+                });
+                $('#employment_history-form .to_employment').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenPrefix: 'formatted_',
+                    max: today,
+                });
+            });
+
+            $(document).on('click',".remove_family_member , .remove_education , .remove_employment",function () {
+               $(this).closest('div.row').remove();
+            });
+
+            $('#medical-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
+            $('#education-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
+            $('#employment_history-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
         });
     </script>
 @endsection

@@ -16,7 +16,7 @@ class CreateEmployeeMedicalInformationsTable extends Migration
         Schema::create('employee_medical_informations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employee_id')->index();
-            $table->string('Name');
+            $table->string('name');
             $table->integer('relationship_id')->index();
             $table->timestamp('date_of_birth')->nullable();
             $table->integer('marital_status')->index();

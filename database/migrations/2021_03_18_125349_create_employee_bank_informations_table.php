@@ -16,12 +16,12 @@ class CreateEmployeeBankInformationsTable extends Migration
         Schema::create('employee_bank_informations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employee_id')->index();
-            $table->string('account_title');
-            $table->string('branch_code');
-            $table->string('account_no');
-            $table->string('bank_id');
-            $table->string('branch_name');
-            $table->string('iban');
+            $table->string('account_title')->nullable();
+            $table->string('branch_code')->nullable();
+            $table->string('account_no')->nullable();
+            $table->integer('bank_id')->nullable();
+            $table->string('branch_name')->nullable();
+            $table->string('iban')->nullable();
             $table->timestamps();
         });
     }

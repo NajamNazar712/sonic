@@ -2,16 +2,30 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\BanksList;
+use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeEducationalBackground;
+use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeeReference;
+use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\Zone;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 use Auth;
@@ -216,7 +230,194 @@ class AdminHumanResourseController extends Controller
         $nationalities = EmployeeNationality::all();
         $domiciles = EmployeeDomicile::all();
         $maritial_statuses = EmployeeMaritalStatus::all();
-        return view('admin.human_resource.employee_directory.update',compact('religions','nationalities','domiciles','maritial_statuses'));
-        return $employee;
+        $designations = EmployeeDesignation::all();
+        $hubs = City::where('hub',1)->get();
+        $zones = Zone::all();
+        $departments = AdminDepartment::all();
+        $relationships = EmployeeRelationship::all();
+        $banks = BanksList::where('status',1)->get();
+        $medical_infos = $employee->medical_infos;
+        $bank_info = $employee->bank_info;
+        $reference = $employee->reference;
+        $educations = $employee->education_infos;
+        $employments = $employee->employment_history;
+        $attachments = $employee->attachments;
+        return view('admin.human_resource.employee_directory.update',compact('employments','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships'));
+    }
+
+    public function employee_directory_profile_update (Employee $employee, Request $request)
+    {
+        $employee->guardian_name = $request->name;
+        $employee->religion_id = $request->religion;
+        $employee->nationality_id = $request->nationality;
+        $employee->domicile_id = $request->domicile;
+        $employee->marital_status_id = $request->marital_status;
+        $employee->blood_group = $request->blood_group;
+        $employee->personal_email = $request->personal_email;
+        $employee->address = $request->address;
+        $employee->emergency_contact = $request->emergency_contact;
+        $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
+        $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+        $employee->designation_id = $request->designation;
+        $employee->city_id = $request->hub;
+        $employee->department_id = $request->department;
+        $employee->zone_id = $request->zone;
+        $employee->official_email = $request->official_email;
+        $employee->official_phone_number = $request->official_number;
+        $employee->sonic_id = $request->sonic_id;
+        $employee->pin = $request->bolt_pin;
+        $employee->update();
+
+        return back()->with(['success'=>'Employee Profile Updated Successfully']);
+    }
+
+    public function employee_directory_medical_update(Employee $employee, Request $request)
+    {
+        if($employee->medical_infos->count() > 0)
+        {
+            $employee->medical_infos()->delete();
+        }
+        foreach ($request->name as $key => $value)
+        {
+            $medical_info = new EmployeeMedicalInformation();
+            $medical_info->employee_id = $employee->id;
+            $medical_info->name = $request->name[$key];
+            $medical_info->relationship_id = $request->relationship[$key];
+            $medical_info->date_of_birth = $request->formatted_dob[$key];
+            $medical_info->marital_status = $request->marital_status[$key];
+            $medical_info->save();
+        }
+
+        return back()->with(['success'=>'Employee Medical Information Updated Successfully']);
+    }
+
+    public function employee_directory_education_update(Employee $employee, Request $request)
+    {
+        if($employee->education_infos->count() > 0)
+        {
+            $employee->education_infos()->delete();
+        }
+        foreach ($request->name as $key => $value)
+        {
+            $education = new EmployeeEducationalBackground();
+            $education->employee_id = $employee->id;
+            $education->name = $request->name[$key];
+            $education->degree = $request->degree[$key];
+            $education->grade = $request->grade[$key];
+            $education->passing_year = $request->formatted_passing_year[$key];
+            $education->save();
+        }
+
+        return back()->with(['success'=>'Employee Educational Information Updated Successfully']);
+    }
+
+    public function employee_directory_employment_update(Employee $employee, Request $request)
+    {
+        if($employee->employment_history->count() > 0)
+        {
+            $employee->employment_history()->delete();
+        }
+        foreach ($request->name as $key => $value)
+        {
+            $employment = new EmployeeEmployementHistory();
+            $employment->employee_id = $employee->id;
+            $employment->name = $request->name[$key];
+            $employment->designation = $request->position[$key];
+            $employment->from = $request->formatted_from[$key];
+            $employment->to = $request->formatted_to[$key];
+            $employment->reason = $request->reason[$key];
+            $employment->save();
+        }
+
+        return back()->with(['success'=>'Employee Employment History Updated Successfully']);
+    }
+
+    public function employee_directory_bank_update(Employee $employee, Request $request)
+    {
+        if($employee->bank_info()->exists())
+        {
+            $bank_info = $employee->bank_info->first();
+        }
+        else{
+            $bank_info = new EmployeeBankInformation();
+        }
+
+        $bank_info->employee_id = $employee->id;
+        $bank_info->account_title = $request->account_title;
+        $bank_info->branch_code = $request->branch_code;
+        $bank_info->account_no = $request->account_number;
+        $bank_info->bank_id = $request->bank_name;
+        $bank_info->branch_name = $request->branch_name;
+        $bank_info->iban = $request->iban_number;
+        $bank_info->save();
+
+
+        return back()->with(['success'=>'Employee Bank Information Updated Successfully']);
+    }
+
+    public function employee_directory_reference_update(Employee $employee, Request $request)
+    {
+        if($employee->reference()->exists())
+        {
+            $reference = $employee->reference->first();
+        }
+        else{
+            $reference = new EmployeeReference();
+        }
+
+        $reference->employee_id = $employee->id;
+        $reference->name = $request->name;
+        $reference->occupation = $request->occupation;
+        $reference->relationship = $request->relationship;
+        $reference->years = $request->years;
+        $reference->phone_number = $request->phone;
+        $reference->email = $request->email;
+        $reference->save();
+
+
+        return back()->with(['success'=>'Employee Reference Updated Successfully']);
+    }
+
+    public function employee_directory_attachments_update(Employee $employee, Request $request)
+    {
+        if($employee->attachments()->exists())
+        {
+            $attachments = $employee->attachments->first();
+        }
+        else{
+            $attachments = new EmployeeAttachment();
+            $attachments->employee_id = $employee->id;
+        }
+
+        $date = Carbon::now()->format('Y_m_d');
+
+        if ($request->hasFile('cv')) {
+            if($attachments->cv != NULL) {
+                Storage::disk('public')->delete($attachments->cv);
+            }
+
+            $file = $request->file('cv');
+            $filename = 'cv_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->cv = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('cnic')) {
+            if($attachments->cnic != NULL) {
+                Storage::disk('public')->delete($attachments->cnic);
+            }
+
+            $file = $request->file('cnic');
+            $filename = 'cnic_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->cnic = $directory.'/'.$filename;
+        }
+
+
+        $attachments->save();
+
+        return back()->with(['success'=>'Employee Attachments Updated Successfully']);
     }
 }

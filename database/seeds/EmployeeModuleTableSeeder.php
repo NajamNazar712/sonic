@@ -91,5 +91,13 @@ class EmployeeModuleTableSeeder extends Seeder
             array('id' => 3 ,'name'=>'Balochistan'),
             array('id' => 4 ,'name'=>'KPK'),
         ));
+
+        DB::table('employee_relationships')->truncate();
+        DB::table('employee_relationships')->insert(array(
+            array('id' => 1 ,'name'=>'Father'),
+            array('id' => 2 ,'name'=>'Mother'),
+            array('id' => 3 ,'name'=>'Brother'),
+            array('id' => 4 ,'name'=>'Sister'),
+        ));
     }
 }
