@@ -653,6 +653,15 @@ class Permission
             'settings.petty_cash.titles.edit' => 164,
             'settings.petty_cash.titles.active' => 165,
             'settings.petty_cash.titles.inactive' => 166,
+
+            'settings.petty_cash.hub-assigning.index' => 462,
+            'settings.petty_cash.hub-assigning.list' => 462,
+            'settings.petty_cash.hub-assigning.store' => 462,
+            'settings.petty_cash.hub-assigning.edit' => 462,
+            'settings.petty_cash.hub-assigning.city.index' => 462,
+            'settings.petty_cash.hub-assigning.city.check' => 462,
+            'settings.petty_cash.hub-assigning.city.update' => 462,
+
 			'settings.auto_invoice_generation_and_due_date.index' => 171,
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,

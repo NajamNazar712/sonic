@@ -149,7 +149,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'consignee_name', name: 'petty_cash_consignees.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'hub_name', name: 'hubs.name', class: 'align-middle hub_name'},
+                    {data: 'hub_name', name: 'hubs.id', class: 'align-middle hub_name'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
