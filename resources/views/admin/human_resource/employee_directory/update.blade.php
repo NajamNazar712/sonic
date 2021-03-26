@@ -720,7 +720,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="attachments" aria-labelledby="attachments-tab" >
-                        <form id="attachments-form" class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
+                        <form id="attachments-form"  class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -735,9 +735,8 @@
                                             </div>
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cv != null)
-                                                    <img src="{{asset(Storage::url($attachments->cv))}}" alt="">
                                                 <div class="form-group">
-                                                    <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                    <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cv_modal">View</button>
                                                 </div>
                                                 @endif
                                             </div>
@@ -750,9 +749,8 @@
                                             </div>
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic != null)
-                                                    <img src="{{asset(Storage::url($attachments->cnic))}}" alt="">
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -766,7 +764,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->photo != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#photo_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -780,7 +778,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->academic != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#academic_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -794,7 +792,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->experience != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#experience_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -808,7 +806,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->last_pay_slip != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#last_pay_slip_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -822,7 +820,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->nikkah_nama != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#nikkah_name_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -836,7 +834,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic_spouse != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_spouse_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -850,7 +848,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->child_b_form != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#child_b_form_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -864,7 +862,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic_nominee != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_nominee_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -878,7 +876,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->utility_bill != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#utility_bill_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -892,7 +890,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->affidavit != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#affidavit_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -906,7 +904,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cheque != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button>
+                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cheque_modal">View</button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -925,6 +923,239 @@
                                 </div>
                             </div>
                         </form>
+
+                        @if(isset($attachments) && $attachments->cnic != null)
+                        <div class="modal fade" id="cnic_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="cnic_modal_title">CNIC</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{asset(Storage::url($attachments->cnic)}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->photo != null)
+                        <div class="modal fade" id="photo_modal" data-backdrop="static" role="dialog" aria-labelledby="photo_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="photo_modal_title">Passport Size Photo</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->photo}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->experience != null)
+                        <div class="modal fade" id="experience_modal" data-backdrop="static" role="dialog" aria-labelledby="experience_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="experience_modal_title">Experience Certificate</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->experience}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->last_pay_slip != null)
+                        <div class="modal fade" id="last_pay_slip_modal" data-backdrop="static" role="dialog" aria-labelledby="last_pay_slip_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="experience_modal_title">Last Pay Slip</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->last_pay_slip}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->nikkah_nama != null)
+                        <div class="modal fade" id="nikkah_name_modal" data-backdrop="static" role="dialog" aria-labelledby="nikkah_name_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="nikkah_name_modal_title">Nikkah Nama</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->nikkah_name}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->cnic_spouse != null)
+                        <div class="modal fade" id="cnic_spouse_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_spouse_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="cnic_spouse_modal_title">CNIC Spouse</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->cnic_spouse}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->cnic_nominee != null)
+                        <div class="modal fade" id="cnic_nominee_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_nominee_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="cnic_nominee_modal_title">CNIC Nominee</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->cnic_nominee}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->child_b_form != null)
+                        <div class="modal fade" id="child_b_form_modal" data-backdrop="static" role="dialog" aria-labelledby="child_b_form_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="child_b_form_modal_title">Child B Form</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->child_b_form}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->utility_bill != null)
+                        <div class="modal fade" id="utility_bill_modal" data-backdrop="static" role="dialog" aria-labelledby="utility_bill_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="utility_bill_modal_title">Utility Bill</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->utility_bill}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->affidavit != null)
+                        <div class="modal fade" id="affidavit_modal" data-backdrop="static" role="dialog" aria-labelledby="affidavit_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="affidavit_modal_title">Affidavit</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->affidavit}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($attachments) && $attachments->cheque != null)
+                        <div class="modal fade" id="cheque_modal" data-backdrop="static" role="dialog" aria-labelledby="cheque_modal" aria-hidden="true">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="cheque_modal_title">Cheque</h4>
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{$attachments->cheque}}" style="width: 100%; max-width: 200px;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                     </div>
                 </div>
 
@@ -1359,6 +1590,15 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
+
+            $('#attachments-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
 
         });
     </script>

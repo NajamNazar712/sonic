@@ -415,6 +415,137 @@ class AdminHumanResourseController extends Controller
             $attachments->cnic = $directory.'/'.$filename;
         }
 
+        if ($request->hasFile('photo')) {
+            if($attachments->photo != NULL) {
+                Storage::disk('public')->delete($attachments->cnic);
+            }
+
+            $file = $request->file('photo');
+            $filename = 'photo_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->photo = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('academic_credentials')) {
+            if($attachments->academic != NULL) {
+                Storage::disk('public')->delete($attachments->academic);
+            }
+
+            $file = $request->file('academic_credentials');
+            $filename = 'academic_credentials_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->academic = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('experience_certificates')) {
+            if($attachments->experience != NULL) {
+                Storage::disk('public')->delete($attachments->experience);
+            }
+
+            $file = $request->file('experience_certificates');
+            $filename = 'experience_certificates_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->experience = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('pay_slip')) {
+            if($attachments->last_pay_slip != NULL) {
+                Storage::disk('public')->delete($attachments->last_pay_slip);
+            }
+
+            $file = $request->file('pay_slip');
+            $filename = 'pay_slip_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->last_pay_slip = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('nikkah_nama')) {
+            if($attachments->nikkah_nama != NULL) {
+                Storage::disk('public')->delete($attachments->nikkah_nama);
+            }
+
+            $file = $request->file('nikkah_nama');
+            $filename = 'nikkah_nama_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->nikkah_nama = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('cnic_spouse')) {
+            if($attachments->cnic_spouse != NULL) {
+                Storage::disk('public')->delete($attachments->cnic_spouse);
+            }
+
+            $file = $request->file('cnic_spouse');
+            $filename = 'cnic_spouse_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->cnic_spouse = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('bform')) {
+            if($attachments->child_b_form != NULL) {
+                Storage::disk('public')->delete($attachments->child_b_form);
+            }
+
+            $file = $request->file('bform');
+            $filename = 'child_b_form_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->child_b_form = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('cnic_nominee')) {
+            if($attachments->cnic_nominee != NULL) {
+                Storage::disk('public')->delete($attachments->cnic_nominee);
+            }
+
+            $file = $request->file('cnic_nominee');
+            $filename = 'cnic_nominee_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->cnic_nominee = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('utility_bill')) {
+            if($attachments->utility_bill != NULL) {
+                Storage::disk('public')->delete($attachments->utility_bill);
+            }
+
+            $file = $request->file('utility_bill');
+            $filename = 'utility_bill_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->utility_bill = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('affidavit')) {
+            if($attachments->affidavit != NULL) {
+                Storage::disk('public')->delete($attachments->affidavit);
+            }
+
+            $file = $request->file('affidavit');
+            $filename = 'affidavit_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->affidavit = $directory.'/'.$filename;
+        }
+
+        if ($request->hasFile('cheque')) {
+            if($attachments->cheque != NULL) {
+                Storage::disk('public')->delete($attachments->cheque);
+            }
+
+            $file = $request->file('cheque');
+            $filename = 'cheque_' . $date . '.'.$file->extension();
+            $directory = 'employee_directory/employee_'. $employee->id .'';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $attachments->cheque = $directory.'/'.$filename;
+        }
 
         $attachments->save();
 
