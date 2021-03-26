@@ -16,7 +16,7 @@
 
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" autofocus autocomplete="off" form="submit_form" class="form-control" placeholder="Scan Delivery Note Number" name="delivery_note" id="scan_delivery_note">
+                            <input type="text" autofocus autocomplete="off" class="form-control" placeholder="Scan Delivery Note Number" name="delivery_note" id="scan_delivery_note">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -36,7 +36,7 @@
 
                 </div>
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-3 text-center border-right-black">
+                    <div class="col-3 text-center">
                         <span>Delivery Note #</span>
                         <span id="delivery_note_label"></span>
                     </div>
@@ -70,7 +70,9 @@
                 <div class="row mb-2 justify-content-center">
                     <form id="submit_form" action="{{route('admin.delivery.quick_receiving.submit')}}" method="post">
                         @csrf
-                        <button type="button" id="submit_button" class="btn btn-primary">Recieve</button>
+                        <input type="hidden" name="delivery_note" id="submit_delivery_note_id" value="">
+{{--                        <input type="hidden" name="tracking_numbers" id="submit_tracking_numbers" value="">--}}
+                        <button type="button" id="submit_button" class="btn btn-primary">Receive</button>
                     </form>
                 </div>
             </div>
@@ -104,6 +106,19 @@
         table.dataTable tbody tr td {
             padding-left: 0.5em;
             padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr.statusUpdated {
+            background-color:yellow;
+            color: #000;
+        }
+        table.dataTable tbody tr.statusDelivered {
+            background-color:springgreen;
+            color: #000;
+        }
+        table.dataTable tbody tr.statusReturn {
+            background-color: #ef5753;
+            color: #000;
         }
 
         table.dataTable tbody tr td.select-checkbox:before {
@@ -168,7 +183,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).on('change', function() {
                 blockPagePermanently();
                 var tracking_number = this.value;
                 var delivery_note_id = $("#scan_delivery_note").val();
@@ -194,8 +209,9 @@
                         $("#remaining_scanned").html(parseInt($("#remaining_scanned").html()) + 1);
                         var rowNo = table.rows().count();
                         var tracking_number_column = `<input type="hidden" form="submit_form" name="tracking_number[]" value="${data.details.tracking_number}">${data.details.tracking_number}`
-                        table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).node().id = data.details.row_id;
+                        var rowNode = table.row.add([rowNo + 1, tracking_number_column , data.details.status,data.details.reason,data.details.remarks,data.details.status_date, data.details.origin, data.details.destination, data.details.amount, data.details.shipper_name]).node().id = data.details.row_id;
                         table.draw(false);
+                        $('#datatable tr').last().addClass(data.details.class);
                         table.order([0, 'asc']).draw();
                     }else{
                         scan_sound(2);
@@ -210,7 +226,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function(e) {
+            }).on('change', function(e) {
                 blockPagePermanently();
                 var delivery_note_id = this.value;
                 $.ajax({
@@ -249,8 +265,13 @@
                     $("#delivery_note_error").html("Delivery Note Number Can\'t Be Empty or Invalid");
                     return;
                 }
-
-                $('#submit_form').submit();
+                if(tracking_numbers.length > 0){
+                    $('#submit_delivery_note_id').val(delivery_note);
+                    $('#submit_form').submit();
+                }
+                else{
+                    toastr.error("Please scan Tracking Number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
             });
 
         });

@@ -15,7 +15,7 @@ class CreatePettyCashConsigneesTable extends Migration
     {
         Schema::create('petty_cash_consignees', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('consignee_id')->index();
+            $table->string('consignee_name');
             $table->integer('hub_id')->index();
             $table->timestamps();
         });
