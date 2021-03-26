@@ -209,7 +209,17 @@ class AdminHumanResourseController extends Controller
 
                 $route = route("admin.human_resourse.employee_directory.edit",$result->employee_id);
                 $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
+                if (session('role_id') == 1 || in_array(426, session('permissions'))) {
+                    if($result->employee_type == 2){
+                        $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                    }
+                    else{
+                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                    }
 
+                    $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+
+                }
                 $dropdown .= '
                 </div>
               </div>

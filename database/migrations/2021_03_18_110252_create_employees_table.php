@@ -22,6 +22,8 @@ class CreateEmployeesTable extends Migration
             $table->string('cnic');
             $table->string('phone_number')->index();
             $table->integer('employee_type_id')->index();
+            $table->integer('user_request_id')->nullable()->index();
+            $table->integer('rider_request_id')->nullable()->index();
             $table->tinyInteger('request_status_id')->index()->default(1);
             $table->tinyInteger('status_id')->index()->default(0);
             $table->string('guardian_name')->nullable();
