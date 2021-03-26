@@ -207,9 +207,11 @@ class AdminHumanResourseController extends Controller
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->employee_id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
-                $route = route("admin.human_resourse.employee_directory.edit",$result->employee_id);
-                $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
-                if (session('role_id') == 1 || in_array(426, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                    $route = route("admin.human_resourse.employee_directory.edit", $result->employee_id);
+                    $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
+                }
+                if (session('role_id') == 1 || in_array(469, session('permissions'))) {
                     if($result->employee_type == 2){
                         $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                     }
