@@ -1417,7 +1417,7 @@
                     width:'100%',
                 });
 
-                $('#medical-form .validated').each(function() {
+                $('#medical_info_container .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
@@ -1489,7 +1489,7 @@
                     max: today,
                 });
 
-                $('#education-form .validated').each(function() {
+                $('#education_info_container .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
@@ -1569,7 +1569,7 @@
                     max: today,
                 });
 
-                $('#employment_history-form .validated').each(function() {
+                $('#employment_info_container .validated').each(function() {
                     $(this).rules("add",
                         {
                             required: true
