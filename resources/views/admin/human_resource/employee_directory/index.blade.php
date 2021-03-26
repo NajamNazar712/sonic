@@ -112,12 +112,14 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.rider_name);
+                                row.push(values.trax_id);
+                                row.push(values.employee_name);
+                                row.push(values.gender);
+                                row.push(values.city);
                                 row.push(values.cnic);
-                                row.push(values.phone_no);
-                                row.push(values.created_at);
-                                row.push(values.updated_at);
-                                row.push(values.city_name);
+                                row.push(values.phone_number);
+                                row.push(values.employee_type);
+                                row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
                                 body.push(row);
@@ -325,7 +327,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Riders Pending Request',
+                        title: 'Employee Directory',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -347,7 +349,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -381,7 +383,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
