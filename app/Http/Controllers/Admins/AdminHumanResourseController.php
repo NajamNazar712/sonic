@@ -259,6 +259,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
     {
+        $employee->request_status_id = 2;
         $employee->guardian_name = $request->name;
         $employee->religion_id = $request->religion;
         $employee->nationality_id = $request->nationality;
@@ -299,6 +300,12 @@ class AdminHumanResourseController extends Controller
             $medical_info->marital_status = $request->marital_status[$key];
             $medical_info->save();
         }
+        if(count($request->name) > 0)
+        {
+            $employee->request_status_id = 2;
+            $employee->update();
+        }
+
 
         return back()->with(['success'=>'Employee Medical Information Updated Successfully']);
     }
@@ -320,6 +327,11 @@ class AdminHumanResourseController extends Controller
             $education->save();
         }
 
+        if(count($request->name) > 0)
+        {
+            $employee->request_status_id = 2;
+            $employee->update();
+        }
         return back()->with(['success'=>'Employee Educational Information Updated Successfully']);
     }
 
@@ -341,6 +353,11 @@ class AdminHumanResourseController extends Controller
             $employment->save();
         }
 
+        if(count($request->name) > 0)
+        {
+            $employee->request_status_id = 2;
+            $employee->update();
+        }
         return back()->with(['success'=>'Employee Employment History Updated Successfully']);
     }
 
@@ -362,6 +379,9 @@ class AdminHumanResourseController extends Controller
         $bank_info->branch_name = $request->branch_name;
         $bank_info->iban = $request->iban_number;
         $bank_info->save();
+
+        $employee->request_status_id = 2;
+        $employee->update();
 
 
         return back()->with(['success'=>'Employee Bank Information Updated Successfully']);
@@ -386,6 +406,8 @@ class AdminHumanResourseController extends Controller
         $reference->email = $request->email;
         $reference->save();
 
+        $employee->request_status_id = 2;
+        $employee->update();
 
         return back()->with(['success'=>'Employee Reference Updated Successfully']);
     }
@@ -574,6 +596,9 @@ class AdminHumanResourseController extends Controller
             $attachments->cheque = $directory.'/'.$filename;
         }
 
+        $employee->request_status_id = 2;
+        $employee->update();
+        
         $attachments->save();
 
         return back()->with(['success'=>'Employee Attachments Updated Successfully']);
