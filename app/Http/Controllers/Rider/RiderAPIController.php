@@ -14,6 +14,7 @@ use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
@@ -2010,6 +2011,15 @@ class RiderAPIController extends Controller
                             $rider_request->pin = $request->pin;
                             $rider_request->city_id = $request->city_id;
                             $rider_request->save();
+
+                            $employee_request = new Employee();
+                            $employee_request->name = $request->name;
+                            $employee_request->cnic = $request->cnic;
+                            $employee_request->phone_number = $request->phone_number;
+                            $employee_request->pin = $request->pin;
+                            $employee_request->city_id = $request->city_id;
+                            $employee_request->employee_type_id = 2;
+                            $employee_request->save();
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
                         } catch (Exception $ex) {

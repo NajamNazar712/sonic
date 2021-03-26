@@ -406,7 +406,7 @@
                             $('#delivered').text(data.stats.delivered);
                             $('#in_process').text(data.stats.in_process);
                             $('#return').text(data.stats.return);
-                            $('#returned_intransit').text(data.stats.returned_intransit);
+                            $('#returned_intransit').text(data.stats.return_intransit);
                             $('#canceled').text(data.stats.canceled);
                             table.draw();
 

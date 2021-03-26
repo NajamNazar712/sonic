@@ -95,7 +95,7 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
-        $packaging_charges_check = FALSE;
+        $packaging_charges_check = TRUE;
 
         if (session('user_type') == 1) {
             if ($user->blacklist) {
@@ -125,9 +125,9 @@ class LoginController extends Controller
                     session(['sale_person_status' => 0]);
                 }
                 session(['account_type' => $user->account_type_id]);
-                if (PackagingCharge::where('user_id', $user->id)->exists()) {
-                    $packaging_charges_check = TRUE;
-                }
+//                if (PackagingCharge::where('user_id', $user->id)->exists()) {
+//                    $packaging_charges_check = TRUE;
+//                }
 
                 $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->id);
 
@@ -182,9 +182,9 @@ class LoginController extends Controller
                 session(['account_type' => $shipper->account_type_id]);
                 session(['restriction' => $substitute_user->restriction]);
 
-                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
-                    $packaging_charges_check = TRUE;
-                }
+//                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
+//                    $packaging_charges_check = TRUE;
+//                }
 
                 $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->user_id);
 
@@ -233,6 +233,9 @@ class LoginController extends Controller
             if(in_array($shipper_user_id, $foc_account_tags)){
                 session(['foc_account' => TRUE]);
             }
+//            else{
+//                session(['foc_account' => FALSE]);
+//            }
         }
         return redirect()->route('cod.welcome');
     }
