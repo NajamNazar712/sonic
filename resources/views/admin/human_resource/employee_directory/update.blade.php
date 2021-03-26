@@ -274,9 +274,7 @@
                                                     </div>
                                                     <div class="col-md-2">
                                                         <div class="form-body">
-                                                            @if($loop->first)
-                                                                <button type="button" id="add_family_member" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
-                                                            @else
+                                                            @if(!$loop->first)
                                                                 <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
                                                             @endif
                                                         </div>
@@ -325,7 +323,6 @@
                                                         </div>
                                                         <div class="col-md-2">
                                                             <div class="form-body">
-                                                                <button type="button" id="add_family_member" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -334,6 +331,7 @@
                                         </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
+                                        <button type="button" id="add_family_member" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Family Member</button>
                                         <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
@@ -460,10 +458,8 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-body">
-                                                    @if($loop->first)
-                                                        <button type="button" id="add_education" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
-                                                    @else
-                                                        <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
+                                                    @if(!$loop->first)
+                                                      <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
                                                     @endif
                                                 </div>
                                             </div>
@@ -511,7 +507,6 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-body">
-                                                        <button type="button" id="add_education" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -520,6 +515,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
+                                        <button type="button" id="add_education" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Another Institute</button>
                                         <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
@@ -587,9 +583,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-body">
-                                                        @if($loop->first)
-                                                    <button type="button" id="add_employment" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
-                                                        @else
+                                                        @if(!$loop->first)
                                                             <button type="button" class="btn btn-danger btn-xs mt-2 remove_employment"><i class="ft-minus"></i></button>
                                                         @endif
                                                 </div>
@@ -641,7 +635,6 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-body">
-                                                        <button type="button" id="add_employment" class="btn btn-success btn-xs mt-2"><i class="ft-plus"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -650,6 +643,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
+                                        <button type="button" id="add_employment" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Experience</button>
                                         <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
@@ -729,7 +723,7 @@
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>CV/Resume <b>(Attach Pdf)</b></label>
+                                                    <label>CV/Resume <b>(Attach PDF)</b></label>
                                                     <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -771,7 +765,7 @@
 
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>Academic Credentials <b>(Attach Pdf)</b></label>
+                                                    <label>Academic Credentials <b>(Attach PDF)</b></label>
                                                     <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -813,7 +807,7 @@
 
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>Nikkah Namma</label>
+                                                    <label>Nikkah Nama</label>
                                                     <input type="file" name="nikkah_nama" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -1235,7 +1229,7 @@
             var dob = $('#medical-form .dob_family_member').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
