@@ -39,7 +39,7 @@
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
-                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}">
+                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6">
@@ -54,7 +54,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Religion</label>
-                                                    <select name="religion" id="religion" class="select2 form-control required" style="width: 100%">
+                                                    <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
                                                         @foreach($religions as $religion)
                                                             <option value="{{$religion->id}}">{{$religion->name}}</option>
                                                         @endforeach
@@ -64,7 +64,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Nationality</label>
-                                                    <select name="nationality" id="nationality" class="select2 form-control required" style="width: 100%">
+                                                    <select name="nationality" id="nationality" class="select2 form-control " style="width: 100%">
                                                         @foreach($nationalities as $nationality)
                                                             <option value="{{$nationality->id}}">{{$nationality->name}}</option>
                                                         @endforeach
@@ -74,7 +74,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Domicile</label>
-                                                    <select name="domicile" id="domicile" class="select2 form-control required" style="width: 100%">
+                                                    <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
                                                         @foreach($domiciles as $domicile)
                                                             <option value="{{$domicile->id}}">{{$domicile->name}}</option>
                                                         @endforeach
@@ -84,7 +84,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                     <label>Marital Status</label>
-                                                    <select name="marital_status" id="marital_status" class="select2 form-control required" style="width: 100%">
+                                                    <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
                                                         @foreach($maritial_statuses as $maritial_status)
                                                             <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                                         @endforeach
@@ -145,7 +145,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Designation</label>
-                                                <select name="designation" id="designation" class="select2 form-control required" style="width: 100%">
+                                                <select name="designation" id="designation" class="select2 form-control " style="width: 100%">
                                                     @foreach($designations as $designation)
                                                         <option value="{{$designation->id}}">{{$designation->name}}</option>
                                                     @endforeach
@@ -155,7 +155,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Hub</label>
-                                                <select name="hub" id="hub" class="select2 form-control required" style="width: 100%">
+                                                <select name="hub" id="hub" class="select2 form-control " style="width: 100%">
                                                     @foreach($hubs as $hub)
                                                         <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                     @endforeach
@@ -165,7 +165,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Department</label>
-                                                <select name="department" id="department" class="select2 form-control required" style="width: 100%">
+                                                <select name="department" id="department" class="select2 form-control " style="width: 100%">
                                                     @foreach($departments as $department)
                                                         <option value="{{$department->id}}">{{$department->name}}</option>
                                                     @endforeach
@@ -175,7 +175,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Zone</label>
-                                                <select name="zone" id="zone" class="select2 form-control required" style="width: 100%">
+                                                <select name="zone" id="zone" class="select2 form-control " style="width: 100%">
                                                     @foreach($zones as $zone)
                                                         <option value="{{$zone->id}}">{{$zone->name}}</option>
                                                     @endforeach
@@ -227,7 +227,7 @@
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
                                             <div class="form-body" id="medical_info_container">
-                                                <h4 class="form-section">Medical Detail</h4>
+                                                <h4 class="form-section">Medical Details</h4>
                                                 @forelse($medical_infos as $medical_info)
                                                 <div class="row">
                                                     @if(!$loop->first)
@@ -656,7 +656,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="references" aria-labelledby="references-tab" >
-                        <form id="references-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.reference.update',$employee->id)}}">
+                        <form id="references-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.reference.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -920,7 +920,7 @@
 
                         @if(isset($attachments) && $attachments->cnic != null)
                         <div class="modal fade" id="cnic_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="cnic_modal_title">CNIC</h4>
@@ -941,7 +941,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->photo != null)
                         <div class="modal fade" id="photo_modal" data-backdrop="static" role="dialog" aria-labelledby="photo_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="photo_modal_title">Passport Size Photo</h4>
@@ -962,7 +962,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->experience != null)
                         <div class="modal fade" id="experience_modal" data-backdrop="static" role="dialog" aria-labelledby="experience_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="experience_modal_title">Experience Certificate</h4>
@@ -983,7 +983,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->last_pay_slip != null)
                         <div class="modal fade" id="last_pay_slip_modal" data-backdrop="static" role="dialog" aria-labelledby="last_pay_slip_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="experience_modal_title">Last Pay Slip</h4>
@@ -1004,7 +1004,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->nikkah_nama != null)
                         <div class="modal fade" id="nikkah_name_modal" data-backdrop="static" role="dialog" aria-labelledby="nikkah_name_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="nikkah_name_modal_title">Nikkah Nama</h4>
@@ -1025,7 +1025,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->cnic_spouse != null)
                         <div class="modal fade" id="cnic_spouse_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_spouse_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="cnic_spouse_modal_title">CNIC Spouse</h4>
@@ -1046,7 +1046,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->cnic_nominee != null)
                         <div class="modal fade" id="cnic_nominee_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_nominee_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="cnic_nominee_modal_title">CNIC Nominee</h4>
@@ -1067,7 +1067,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->child_b_form != null)
                         <div class="modal fade" id="child_b_form_modal" data-backdrop="static" role="dialog" aria-labelledby="child_b_form_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="child_b_form_modal_title">Child B Form</h4>
@@ -1088,7 +1088,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->utility_bill != null)
                         <div class="modal fade" id="utility_bill_modal" data-backdrop="static" role="dialog" aria-labelledby="utility_bill_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="utility_bill_modal_title">Utility Bill</h4>
@@ -1109,7 +1109,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->affidavit != null)
                         <div class="modal fade" id="affidavit_modal" data-backdrop="static" role="dialog" aria-labelledby="affidavit_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="affidavit_modal_title">Affidavit</h4>
@@ -1130,7 +1130,7 @@
                         @endif
                         @if(isset($attachments) && $attachments->cheque != null)
                         <div class="modal fade" id="cheque_modal" data-backdrop="static" role="dialog" aria-labelledby="cheque_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h4 class="modal-title" id="cheque_modal_title">Cheque</h4>
@@ -1402,7 +1402,7 @@
                 $('#medical-form .dob_family_member').pickadate({
                     firstDay: 1,
                     clear: '',
-                    selectYears: true,
+                    selectYears: 100,
                     selectMonths: true,
                     formatSubmit: 'yyyy-mm-dd 00:00:00',
                     hiddenPrefix: 'formatted_',
@@ -1561,6 +1561,14 @@
                $(this).closest('div.row').remove();
             });
 
+            $('#profile-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
             $('#medical-form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1586,6 +1594,14 @@
             });
 
             $('#attachments-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
+            $('#references-form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
