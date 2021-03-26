@@ -267,7 +267,7 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_reject(Request $request){
         $employee_id = $request->employee_id;
         $employee = Employee::find($employee_id);
-        $employee->status = 4;
+        $employee->request_status_id = 4;
         $employee->save();
 
         if($employee->employee_type_id == 2){
