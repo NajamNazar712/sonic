@@ -252,9 +252,9 @@
                                         containerId: 'toast-top-center'
                                     });
                                 }
+                                swal.close();
                                 table.draw('false');
                             });
-                        swal.close();
                     }
                 });
                 // var id = $(this).data('target-id');
@@ -315,9 +315,9 @@
                                         containerId: 'toast-top-center'
                                     });
                                 }
+                                swal.close();
                                 table.draw('false');
                             });
-                        swal.close();
                     }
                 });
             });

@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
@@ -687,17 +688,24 @@ class RiderManagementController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
-        if($global_setting->exists()){
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        $employee = Employee::where('rider_request_id', $request->rider_request_id);
+        if($employee->exists()){
+            $employee = $employee->first();
+            $trax_id = $employee->trax_id;
         }
         else{
-            $trax_id = null;
+            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+            if($global_setting->exists()){
+                $global_setting = $global_setting->first();
+                $trax_id = $global_setting->setting_value + 1;
+                $global_setting->setting_value = $trax_id;
+                $global_setting->save();
+                $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+            }
+            else{
+                $trax_id = null;
+            }
         }
 
         $rider = Rider::create([
