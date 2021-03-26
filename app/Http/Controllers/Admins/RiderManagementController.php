@@ -629,7 +629,8 @@ class RiderManagementController extends Controller
     public function rider_request_list(Request $request)
     {
         $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
-            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name')
+            ->join('employees as e', 'e.rider_request_id', '=', 'rider_requests.id')
+            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name', 'e.trax_id  as trax_id')
             ->where('rider_requests.status', 0);
 
         if (session('role_id') != 1) {
@@ -646,10 +647,10 @@ class RiderManagementController extends Controller
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
-
-                    if (session('role_id') == 1 || in_array(426, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
-
+                    if($rider_request->trax_id && $rider_request->trax_id != null){
+                        if (session('role_id') == 1 || in_array(426, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+                        }
                     }
                     $dropdown .= '
                         </div>

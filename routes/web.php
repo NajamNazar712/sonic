@@ -2754,7 +2754,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
-            Route::post('store', 'Admins\AdminHumanResourseController@employee_directory_store')->name('store');
+            Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
             Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
