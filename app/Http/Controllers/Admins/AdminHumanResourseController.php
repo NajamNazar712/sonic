@@ -209,34 +209,38 @@ class AdminHumanResourseController extends Controller
                 return $query->where('users.id', '=', $keyword);
             })
             ->addColumn("action", function ($result) {
-                $dropdown = '
+                if(session('role_id') == 1 || (in_array(468, session('permissions')) || (in_array(469, session('permissions')) && ($result->request_status_id == 1 || $result->request_status_id == 2)))){
+                    $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                if (session('role_id') == 1 || in_array(468, session('permissions'))) {
-                    $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                    $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
-                }
-                if($result->request_status_id == 1 || $result->request_status_id == 2){
-                    if (session('role_id') == 1 || in_array(469, session('permissions'))) {
-                        if($result->employee_type_id == 2){
-                            $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                        }
-                        else{
-                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                        }
-
-                        $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-
+                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                        $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
+                        $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
                     }
-                }
-                $dropdown .= '
+                    if($result->request_status_id == 1 || $result->request_status_id == 2){
+                        if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                            if($result->employee_type_id == 2){
+                                $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            }
+                            else{
+                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            }
+
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+
+                        }
+                    }
+                    $dropdown .= '
                 </div>
               </div>
             ';
-
-                return $dropdown;
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
             })
             ->make(true);
     }
