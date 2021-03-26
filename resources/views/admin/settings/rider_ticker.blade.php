@@ -79,7 +79,7 @@
     </div>
 
     <div class="modal fade" id="picture_modal" data-backdrop="static" role="dialog" aria-labelledby="picture_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="picture_modal_title">Picture</h4>
@@ -125,7 +125,7 @@
             $('#Image_table tbody').on('click','tr td.view button',function () {
                 var link = $(this).attr('data-link');
 
-                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 350px;" />';
 
                 $('#picture_modal .modal-body').html(image);
 

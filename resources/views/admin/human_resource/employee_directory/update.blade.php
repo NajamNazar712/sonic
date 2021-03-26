@@ -1357,13 +1357,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Family Member</label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control border-primary name_family_member" value="" name="name[]">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control border-primary name_family_member validated" value="" name="name[]">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Relationship</label>
-                                        <select name="relationship[]" data-rule-required="true" data-msg-required="Relationship is required" id="relationship_family_member_${family_member_index}" class="select2 form-control relationship_family_member" style="width: 100%">
+                                        <select name="relationship[]" data-rule-required="true" data-msg-required="Relationship is required" id="relationship_family_member_${family_member_index}" class="select2 form-control relationship_family_member validated" style="width: 100%">
                                             @foreach($relationships as $relationship)
                                                 <option value="{{$relationship->id}}">{{$relationship->name}}</option>
                                             @endforeach
@@ -1378,13 +1378,13 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                         </div>
-                                        <input type="text" name="dob[]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
+                                        <input type="text" name="dob[]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member validated" placeholder="Date Of Birth">
                                     </div>
                                 </div>
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Marital Status</label>
-                                    <select name="marital_status[]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_${family_member_index}" class="select2 form-control marital_status_family_member" style="width: 100%">
+                                    <select name="marital_status[]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_${family_member_index}" class="select2 form-control marital_status_family_member validated" style="width: 100%">
                                         @foreach($maritial_statuses as $maritial_status)
                                             <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                         @endforeach
@@ -1416,6 +1416,13 @@
                     placeholder: "Select Relationship",
                     width:'100%',
                 });
+
+                $('#medical-form .validated').each(function() {
+                    $(this).rules("add",
+                        {
+                            required: true
+                        })
+                });
             });
 
             $("#add_education").on('click',function () {
@@ -1426,19 +1433,19 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Institute</label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control border-primary name_institute" value="" name="name[]">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control border-primary name_institute validated" value="" name="name[]">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Degree Awarded</label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control border-primary degree" value="" name="degree[]">
+                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control border-primary degree validated" value="" name="degree[]">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Grade Achieved</label>
-                                        <select name="grade[]" id="grade_${education_background_index}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
+                                        <select name="grade[]" id="grade_${education_background_index}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade validated" style="width: 100%">
                                             <option>A+</option>
                                             <option>A</option>
                                             <option>B</option>
@@ -1457,7 +1464,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                         </div>
-                                        <input type="text" data-rule-required="true" data-msg-required="Graduation Year is required" name="passing_year[]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
+                                        <input type="text" data-rule-required="true" data-msg-required="Graduation Year is required" name="passing_year[]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year validated" placeholder="Graduation Year">
                                     </div>
                                 </div>
                             </div>
@@ -1482,6 +1489,12 @@
                     max: today,
                 });
 
+                $('#education-form .validated').each(function() {
+                    $(this).rules("add",
+                        {
+                            required: true
+                        })
+                });
             });
 
             $("#add_employment").on('click',function () {
@@ -1491,13 +1504,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Company/Organization Name</label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="" name="name[]">
+                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment validated" value="" name="name[]">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Position/Designation</label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="" name="position[]">
+                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment validated" value="" name="position[]">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -1508,7 +1521,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                         </div>
-                                        <input type="text" data-rule-required="true" data-msg-required="From is required" name="from[]"  class="form-control bg-primary border-primary white rounded-right pickadate from_employment" placeholder="From">
+                                        <input type="text" data-rule-required="true" data-msg-required="From is required" name="from[]"  class="form-control bg-primary border-primary white rounded-right pickadate from_employment validated" placeholder="From">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -1519,13 +1532,13 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                         </div>
-                                        <input type="text" name="to[]" data-rule-required="true" data-msg-required="To is required"  class="form-control bg-primary border-primary white rounded-right pickadate to_employment" placeholder="To">
+                                        <input type="text" name="to[]" data-rule-required="true" data-msg-required="To is required"  class="form-control bg-primary border-primary white rounded-right pickadate to_employment validated" placeholder="To">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Reason</label>
-                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[]"></textarea>
+                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment validated" name="reason[]"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1554,6 +1567,13 @@
                     formatSubmit: 'yyyy-mm-dd 00:00:00',
                     hiddenPrefix: 'formatted_',
                     max: today,
+                });
+
+                $('#employment_history-form .validated').each(function() {
+                    $(this).rules("add",
+                        {
+                            required: true
+                        })
                 });
             });
 
