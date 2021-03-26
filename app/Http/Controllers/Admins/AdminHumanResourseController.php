@@ -242,39 +242,53 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_approve(Request $request){
-        $employee_id = $request->employee_id;
-        $employee = Employee::find($employee_id);
+        if(is_array($request->employee_ids)){
+            foreach ($request->employee_ids as $employee_id) {
+                $employee = Employee::find($employee_id);
+                if(in_array($employee->request_status_id, [1, 2])) {
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
 
-        if($global_setting->exists()){
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    $employee->trax_id = $trax_id;
+                    $employee->request_status_id = 3;
+                    $employee->save();
+                }
+            }
+
+            return response()->json(['status' => 0, 'success' => 'Employee(s) Approved Successfully!']);
         }
         else{
-            $trax_id = null;
+            return response()->json(['status' => 1, 'success' => 'Invalid Selection!']);
         }
-
-        $employee->trax_id = $trax_id;
-        $employee->request_status_id = 3;
-        $employee->save();
-
-        return response()->json(['status' => 0, 'success' => 'Employee Approved Successfully!']);
     }
     public function employee_directory_reject(Request $request){
-        $employee_id = $request->employee_id;
-        $employee = Employee::find($employee_id);
-        $employee->request_status_id = 4;
-        $employee->save();
+        if(is_array($request->employee_ids)) {
+            foreach ($request->employee_ids as $employee_id) {
+                $employee = Employee::find($employee_id);
+                if(in_array($employee->request_status_id, [1, 2])){
+                    $employee->request_status_id = 4;
+                    $employee->save();
 
-        if($employee->employee_type_id == 2){
-            RiderRequest::where('id', $employee->rider_request_id)->delete();
+                    if ($employee->employee_type_id == 2) {
+                        RiderRequest::where('id', $employee->rider_request_id)->delete();
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Employee(s) Rejected Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 1, 'success' => 'Invalid Selection!']);
         }
 
-        return response()->json(['status' => 0, 'success' => 'Employee Rejected Successfully!']);
     }
 
     public function employee_directory_edit(Employee $employee)
