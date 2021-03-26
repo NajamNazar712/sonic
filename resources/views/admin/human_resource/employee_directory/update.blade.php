@@ -12,7 +12,7 @@
             @include('admin.inc.messages')
         </div>
         <div class="card-content">
-            <div id="tabs" class="card-body">
+            <div id="tabs" class="card-body mb-5">
                 <ul class="nav nav-tabs nav-justified">
                     <li class="nav-item">
                         <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" aria-controls="active" aria-expanded="true">Employee Profile</a>
@@ -1152,10 +1152,7 @@
 
                     </div>
                 </div>
-
-
             </div>
-
         </div>
     </div>
 
