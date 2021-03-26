@@ -346,7 +346,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="bank" aria-labelledby="bank-tab" >
-                        <form id="bank-form" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.bank.update',$employee->id)}}">
+                        <form id="bank-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resourse.employee_directory.bank.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -389,7 +389,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>IBAN Number</label>
-                                                <input type="text" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
+                                                <input type="text" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
                                             </div>
                                         </div>
                                     </div>
@@ -720,7 +720,7 @@
                         </form>
                     </div>
                     <div class="tab-pane" id="attachments" aria-labelledby="attachments-tab" >
-                        <form id="attachments-form"  class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
+                        <form id="attachments-form" novalidate="novalidate" class="form form-horizontal" method="post" enctype="multipart/form-data" action="{{route('admin.human_resourse.employee_directory.attachments.update',$employee->id)}}">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
@@ -729,14 +729,14 @@
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>CV/Resume</label>
+                                                    <label>CV/Resume <b>(Attach Pdf)</b></label>
                                                     <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cv != null)
                                                 <div class="form-group">
-                                                    <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cv_modal">View</button>
+                                                    <a href="{{asset(Storage::url($attachments->cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                 </div>
                                                 @endif
                                             </div>
@@ -771,14 +771,14 @@
 
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>Academic Credentials</label>
+                                                    <label>Academic Credentials <b>(Attach Pdf)</b></label>
                                                     <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->academic != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#academic_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -936,7 +936,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->cnic)}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->cnic))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -957,7 +957,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->photo}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->photo))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -978,7 +978,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->experience}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->experience))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -999,7 +999,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->last_pay_slip}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->last_pay_slip))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1020,7 +1020,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->nikkah_name}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->nikkah_nama))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1041,7 +1041,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->cnic_spouse}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->cnic_spouse))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1062,7 +1062,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->cnic_nominee}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->cnic_nominee))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1083,7 +1083,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->child_b_form}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->child_b_form))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1104,7 +1104,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->utility_bill}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->utility_bill))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1125,7 +1125,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->affidavit}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->affidavit))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1146,7 +1146,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body text-center">
-                                        <img src="{{$attachments->cheque}}" style="width: 100%; max-width: 200px;" />
+                                        <img src="{{asset(Storage::url($attachments->cheque))}}" style="width: 100%; max-width: 200px;" />
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1598,7 +1598,6 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
-
 
         });
     </script>

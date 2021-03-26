@@ -380,6 +380,21 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_attachments_update(Employee $employee, Request $request)
     {
+        $request->validate([
+            'cv'=>'mimes:pdf',
+            'academic_credentials'=>'mimes:pdf',
+            'cnic'=>'mimes:png,jpeg,jpg',
+            'photo'=>'mimes:png,jpeg,jpg',
+            'experience_certificates'=>'mimes:png,jpeg,jpg',
+            'pay_slip'=>'mimes:png,jpeg,jpg',
+            'nikkah_nama'=>'mimes:png,jpeg,jpg',
+            'cnic_spouse'=>'mimes:png,jpeg,jpg',
+            'bform'=>'mimes:png,jpeg,jpg',
+            'cnic_nominee'=>'mimes:png,jpeg,jpg',
+            'utility_bill'=>'mimes:png,jpeg,jpg',
+            'affidavit'=>'mimes:png,jpeg,jpg',
+            'cheque'=>'mimes:png,jpeg,jpg',
+        ]);
         if($employee->attachments()->exists())
         {
             $attachments = $employee->attachments->first();
