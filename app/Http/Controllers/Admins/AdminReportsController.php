@@ -7660,8 +7660,8 @@ class AdminReportsController extends Controller
 
                 $image = '';
                 if($shipments->picture_path != null){
-                    $img_url = $shipments->picture_path;
-                    if(file_exists($img_url)){
+                    $exists = Storage::disk('public')->exists($shipments->picture_path);
+                    if($exists){
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                     }else{
 
