@@ -723,7 +723,7 @@
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>CV/Resume <b>(Attach Pdf)</b></label>
+                                                    <label>CV/Resume <b>(Attach PDF)</b></label>
                                                     <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -765,7 +765,7 @@
 
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>Academic Credentials <b>(Attach Pdf)</b></label>
+                                                    <label>Academic Credentials <b>(Attach PDF)</b></label>
                                                     <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
