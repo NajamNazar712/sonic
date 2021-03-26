@@ -3481,13 +3481,22 @@ class RiderAPIController extends Controller
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
+                            $environment = config('app.env');
 
                             if ($request->has('audio')) {
-                                $extension = $request->file('audio')->getClientOriginalExtension();
-                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
-                                Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                $rider_delivery->audio_path = $audio_path;
-                                $rider_delivery->save();
+                                if ($environment == 'production') {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_delivery->audio_path = $audio_path;
+                                    $rider_delivery->save();
+                                } else {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_delivery->audio_path = $audio_path;
+                                    $rider_delivery->save();
+                                }
                             }
 
                             if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
@@ -3627,12 +3636,22 @@ class RiderAPIController extends Controller
 
                     $rider_pickup->save();
 
+                    $environment = config('app.env');
+
                     if ($request->has('audio')) {
-                        $extension = $request->file('audio')->getClientOriginalExtension();
-                        $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
-                        Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                        $rider_pickup->audio_path = $audio_path;
-                        $rider_pickup->save();
+                        if ($environment == 'production') {
+                            $extension = $request->file('audio')->getClientOriginalExtension();
+                            $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                            Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                            $rider_pickup->audio_path = $audio_path;
+                            $rider_pickup->save();
+                        } else {
+                            $extension = $request->file('audio')->getClientOriginalExtension();
+                            $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                            Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                            $rider_pickup->audio_path = $audio_path;
+                            $rider_pickup->save();
+                        }
                     }
 
                     V2PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
@@ -3744,12 +3763,21 @@ class RiderAPIController extends Controller
                             $rider_return_delivery->picture_path = $picture_path;
                             $rider_return_delivery->save();
 
+                            $environment = config('app.env');
                             if ($request->has('audio')) {
-                                $extension = $request->file('audio')->getClientOriginalExtension();
-                                $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
-                                Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                $rider_return_delivery->audio_path = $audio_path;
-                                $rider_return_delivery->save();
+                                if ($environment == 'production') {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_return_delivery->audio_path = $audio_path;
+                                    $rider_return_delivery->save();
+                                } else {
+                                    $extension = $request->file('audio')->getClientOriginalExtension();
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                                    $rider_return_delivery->audio_path = $audio_path;
+                                    $rider_return_delivery->save();
+                                }
                             }
 
                             if (ReturnNote::where('id', $request->return_note_id)->exists()) {

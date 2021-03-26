@@ -4,11 +4,11 @@
     header("Pragma: no-cache");
 @endphp
 @extends('admin.layout.master')
-@section('title','Documents')
+@section('title','App Slider')
 
 @section('content')
     <h1 class="mb-1">
-        Rider Ticker
+        App Slider
     </h1>
 
     <div class="card">

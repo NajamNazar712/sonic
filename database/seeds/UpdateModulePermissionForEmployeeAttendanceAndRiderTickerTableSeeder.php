@@ -13,7 +13,7 @@ class UpdateModulePermissionForEmployeeAttendanceAndRiderTickerTableSeeder exten
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 465, 'name' => 'Employee Attendance - View', 'module_id' => 11),
-            array('id' => 466, 'name' => 'Rider Ticker - View', 'module_id' => 14),
+            array('id' => 466, 'name' => 'App Slider - View', 'module_id' => 14),
         ));
     }
 }

@@ -1260,7 +1260,7 @@
 
 
                                         @if (session('role_id') == 1 || in_array(466, session('permissions')))
-                                            <li><a class="menu-item" href="{{route('admin.settings.rider_ticker.index')}}">Rider Ticker</a></li>
+                                            <li><a class="menu-item" href="{{route('admin.settings.rider_ticker.index')}}">App Slider</a></li>
                                         @endif
 
                                         @if (session('role_id') == 1 || count(array_intersect([81, 85, 279,394,447], session('permissions'))) !== 0)

@@ -71,7 +71,7 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
-		Route::get('rider_ticker', 'Rider\RiderAPIController@rider_ticker_images')->name('rider_ticker');
+		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
 
@@ -147,6 +147,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 
         Route::middleware('AdminAPIToken')->group(function () {
             Route::post('verify', 'AdminAPIController@verify')->name('verify');

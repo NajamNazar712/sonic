@@ -3383,10 +3383,13 @@ class GlobalSettingsController extends Controller
             if ($request->has('rider_ticker_id_1')) {
                 $ticker_id = $request->get('rider_ticker_id_1');
                 $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
             } else {
+
                 $rider_ticker = new RiderTickerImage();
                 $rider_ticker->save();
             }
+
             $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_1));
             $rider_ticker->picture_path = $picture_path;
@@ -3396,10 +3399,13 @@ class GlobalSettingsController extends Controller
             if ($request->has('rider_ticker_id_2')) {
                 $ticker_id = $request->get('rider_ticker_id_2');
                 $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
             } else {
+
                 $rider_ticker = new RiderTickerImage();
                 $rider_ticker->save();
             }
+
             $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_2));
             $rider_ticker->picture_path = $picture_path;
@@ -3409,10 +3415,13 @@ class GlobalSettingsController extends Controller
             if ($request->has('rider_ticker_id_3')) {
                 $ticker_id = $request->get('rider_ticker_id_3');
                 $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
             } else {
+
                 $rider_ticker = new RiderTickerImage();
                 $rider_ticker->save();
             }
+
             $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_3));
             $rider_ticker->picture_path = $picture_path;
@@ -3422,10 +3431,13 @@ class GlobalSettingsController extends Controller
             if ($request->has('rider_ticker_id_4')) {
                 $ticker_id = $request->get('rider_ticker_id_4');
                 $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
             } else {
+
                 $rider_ticker = new RiderTickerImage();
                 $rider_ticker->save();
             }
+
             $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_4));
             $rider_ticker->picture_path = $picture_path;
@@ -3435,16 +3447,18 @@ class GlobalSettingsController extends Controller
             if ($request->has('rider_ticker_id_5')) {
                 $ticker_id = $request->get('rider_ticker_id_5');
                 $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
             } else {
+
                 $rider_ticker = new RiderTickerImage();
                 $rider_ticker->save();
             }
+
             $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
             Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_5));
             $rider_ticker->picture_path = $picture_path;
             $rider_ticker->save();
         }
-
         return redirect()->back()->with(['success' => 'Images Uploaded!']);
     }
 }
