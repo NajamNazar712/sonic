@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\BookingType;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -22,10 +23,11 @@ class ShipperReportsController extends Controller
     }
 
     public function sales_index(){
+        $service_types = BookingType::all();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->select('id','mode')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
-        return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes]);
+        return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes,'service_types'=>$service_types]);
     }
     public function sales_list(Request $request){
         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758])) {
@@ -161,6 +163,9 @@ class ShipperReportsController extends Controller
             }
             if($mode = $request->get('search_shipping_mode')){
                 $datatable->where('sm.id', '=', $mode);
+            }
+            if($service_type = $request->get('search_service_type')){
+                $datatable->where('shipments.booking_type_id', '=', $service_type);
             }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
