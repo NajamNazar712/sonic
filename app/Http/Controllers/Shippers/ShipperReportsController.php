@@ -23,7 +23,7 @@ class ShipperReportsController extends Controller
     }
 
     public function sales_index(){
-        $service_types = BookingType::all();
+        $service_types = BookingType::where('id','!=',4)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->select('id','mode')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
