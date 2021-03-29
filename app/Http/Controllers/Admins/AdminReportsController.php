@@ -5357,9 +5357,10 @@ class AdminReportsController extends Controller
         $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
+        $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
+        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'case_nature_types'=>$case_nature_types,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
 
     public function crm_list(Request $request){
@@ -5627,6 +5628,10 @@ class AdminReportsController extends Controller
         if($case_nature = $request->get('search_case_nature')){
             $datatable->where('crcn.id', '=', $case_nature);
         }
+        if($case_nature_type = $request->get('search_case_nature_type')){
+            $datatable->where('crcnt.id', '=', $case_nature_type);
+        }
+        
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
         }
