@@ -167,6 +167,7 @@
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Delivery Note#</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
@@ -460,6 +461,7 @@
                             head.push('S. No');
                             head.push('Delivery Note#');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
                             head.push('Total Shipment');
@@ -474,6 +476,7 @@
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.city);
+                                row.push(values.zone);
                                 row.push(values.created_at);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
@@ -489,6 +492,7 @@
 
                             footer.push('');
                             footer.push('Total');
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
@@ -545,11 +549,12 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
