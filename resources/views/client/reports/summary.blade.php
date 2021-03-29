@@ -219,6 +219,7 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
+                        <th class="border-primary border-darken-1">Booking Date</th>
 
                     </tr>
                     </thead>
@@ -480,6 +481,7 @@
                             head.push('Actual Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
+                            head.push('Booking Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -503,6 +505,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
+                                row.push(values.booking_date);
 
                                 body.push(row);
                             });
@@ -562,7 +565,8 @@
                     { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}
+                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
+                    { data:'booking_date' ,name: 'booking_date', class: 'align-middle booking_date'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
