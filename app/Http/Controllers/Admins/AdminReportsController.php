@@ -6389,7 +6389,7 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(s.id) - count(ds.id) as undelivered_shipments'), DB::raw('ROUND(((count(s.id) - count(ds.id))/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'))
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(s.id) - count(ds.id) as undelivered_shipments'), DB::raw('ROUND(((count(s.id) - count(ds.id))/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'), 'c.name as hub')
             ->groupBy('r.id');
 
 
