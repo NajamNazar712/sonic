@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -17,6 +18,12 @@ use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
@@ -32,6 +39,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\Zone;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use Illuminate\Http\Request;
@@ -4322,7 +4330,6 @@ class RiderAPIController extends Controller
         }
     }
 
-
     public function rider_ticker_images(Request $request){
         $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
         if($rider_ticker_images->exists()){
@@ -4332,6 +4339,109 @@ class RiderAPIController extends Controller
         else{
             return response()->json(['status' => 1, 'message' => 'No Images Found']);
         }
+    }
+
+    public function signup_data(Request $request){
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $designation = EmployeeDesignation::select('id', 'name')->get();
+        $domicile = EmployeeDomicile::select('id', 'name')->get();
+        $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
+        $nationality = EmployeeNationality::select('id', 'name')->get();
+        $religion = EmployeeReligion::select('id', 'name')->get();
+        $gender = EmployeeGender::select('id', 'name')->get();
+        $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $department = AdminDepartment::select('id', 'name')->get();
+        $hub = City::where('status', 1)->where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        $blood_group = ["A+", "A-", "B+", "B-", "AB+", "AB-","O+", "O-"];
+        $data = ["cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group];
+        return response()->json(['status' => 0, 'data' => $data]);
+    }
+
+    public function rider_signup_store(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'name' => ['required'],
+                'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'pin' => ['required', 'integer', 'digits:4'],
+                'city_id' => ['required', 'integer']
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic'));
+
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
+                    $rider_request = $rider_request->first();
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider_request->cnic == $request->input('cnic')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } //Check Rider Already Exist
+                else {
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic'));
+
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
+                            $message = "Phone Number & CNIC Already Exists";
+
+                        } else if ($rider->phone == $request->phone_number) {
+                            $message = "Phone Number Already Exist";
+
+                        } else if ($rider->cnic == $request->input('cnic')) {
+                            $message = "CNIC Already Exist";
+                        }
+
+                    } else {
+                        try {
+                            $rider_request = new RiderRequest();
+                            $rider_request->name = $request->name;
+                            $rider_request->cnic = $request->cnic;
+                            $rider_request->phone_no = $request->phone_number;
+                            $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
+                            $rider_request->save();
+
+                            $employee_request = new Employee();
+                            $employee_request->name = $request->name;
+                            $employee_request->cnic = $request->cnic;
+                            $employee_request->phone_number = $request->phone_number;
+                            $employee_request->pin = $request->pin;
+                            $employee_request->city_id = $request->city_id;
+                            $employee_request->employee_type_id = 2;
+                            $employee_request->rider_request_id = $rider_request->id;
+                            $employee_request->status_id = 2;
+                            $employee_request->save();
+                            $response['status'] = 0;
+                            $message = 'Rider Request Has Been Submitted and Pending for Approval';
+                        } catch (Exception $ex) {
+                            $response['message'] = $ex;
+                        }
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
 
