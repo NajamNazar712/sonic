@@ -128,7 +128,7 @@ class RiderAPIController extends Controller
     ];
 
     private $messages = [
-        'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
         'integer' => ':attribute must be an Integer.',
         'digits' => ':attribute must be of :digits Digits.',
         'exists' => 'Given :attribute is of Invalid ID.',
@@ -1993,7 +1993,8 @@ class RiderAPIController extends Controller
             if ($validate->fails()) {
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
-            } else {
+            }
+            else {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic'));
 
@@ -4350,7 +4351,8 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function signup_data(Request $request){
+    public function signup_data(Request $request)
+    {
         $cities = City::where('business_category_id', 1)->select('id', 'name')->get();
         $designation = EmployeeDesignation::select('id', 'name')->get();
         $domicile = EmployeeDomicile::select('id', 'name')->get();
@@ -4365,7 +4367,7 @@ class RiderAPIController extends Controller
         $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
-        return response()->json(['status' => 0, "cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type'=> $rider_type]);
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type]);
     }
 
     public function rider_signup_store(Request $request)
@@ -4381,7 +4383,7 @@ class RiderAPIController extends Controller
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'guardian_name' => ['required'],
                 'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
-                'nationality_id' => ['required','integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
                 'domicile_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
@@ -4394,7 +4396,7 @@ class RiderAPIController extends Controller
                 'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
                 'zone_id' => ['required', 'integer', 'digits_between:1,10', 'exists:zones,id'],
                 'official_email' => ['required', 'email'],
-                'official_phone_number' => ['required'],
+                'official_phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'sonic_id' => ['required'],
                 'place_of_birth' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['required'],
@@ -4415,19 +4417,19 @@ class RiderAPIController extends Controller
                 'account_title' => ['required'],
 
                 //Attachments
-                'cv'=>['mimes:pdf'],
-                'academic_credentials'=>['mimes:pdf'],
-                'cnic'=>['mimes:png,jpeg,jpg'],
-                'photo'=>['mimes:png,jpeg,jpg'],
-                'experience_certificates'=>['mimes:png,jpeg,jpg'],
-                'pay_slip'=>['mimes:png,jpeg,jpg'],
-                'nikkah_nama'=>['mimes:png,jpeg,jpg'],
-                'cnic_spouse'=>['mimes:png,jpeg,jpg'],
-                'bform'=>['mimes:png,jpeg,jpg'],
-                'cnic_nominee'=>['mimes:png,jpeg,jpg'],
-                'utility_bill'=>['mimes:png,jpeg,jpg'],
-                'affidavit'=>['mimes:png,jpeg,jpg'],
-                'cheque'=>['mimes:png,jpeg,jpg'],
+                'cv' => ['mimes:pdf'],
+                'academic_credentials' => ['mimes:pdf'],
+                'cnic_img' => ['mimes:png,jpeg,jpg'],
+                'photo' => ['mimes:png,jpeg,jpg'],
+                'experience_certificates' => ['mimes:png,jpeg,jpg'],
+                'pay_slip' => ['mimes:png,jpeg,jpg'],
+                'nikkah_nama' => ['mimes:png,jpeg,jpg'],
+                'cnic_spouse' => ['mimes:png,jpeg,jpg'],
+                'bform' => ['mimes:png,jpeg,jpg'],
+                'cnic_nominee' => ['mimes:png,jpeg,jpg'],
+                'utility_bill' => ['mimes:png,jpeg,jpg'],
+                'affidavit' => ['mimes:png,jpeg,jpg'],
+                'cheque' => ['mimes:png,jpeg,jpg'],
 
                 //EmploymentHistory
                 'employment_history' => ['required', 'array', 'min:1'],
@@ -4442,7 +4444,7 @@ class RiderAPIController extends Controller
                 'medical_details.*.member_name' => ['required'],
                 'medical_details.*.relationship_id' => ['required'],
                 'medical_details.*.dob' => ['required'],
-                'medical_details.*.marital_status' => ['required'],
+                'medical_details.*.marital_status_id' => ['required'],
 
 
             ];
@@ -4457,6 +4459,11 @@ class RiderAPIController extends Controller
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
             } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic'));
+
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
                     $rider_request = $rider_request->first();
                     if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
                         $message = "Phone Number & CNIC Already Exists";
@@ -4467,11 +4474,6 @@ class RiderAPIController extends Controller
                     } else if ($rider_request->cnic == $request->input('cnic')) {
                         $message = "CNIC Already Exist";
                     }
-                    $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
-                        ->orWhere('cnic', $request->input('cnic'));
-
-                    //Check RiderRequest Already Exist
-                    if ($rider_request->exists()) {
                 } //Check Rider Already Exist
                 else {
                     $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic'));
@@ -4513,7 +4515,7 @@ class RiderAPIController extends Controller
                             $employee_request->nationality_id = $request->nationality_id;
                             $employee_request->domicile_id = $request->domicile_id;
                             $employee_request->marital_status_id = $request->marital_status_id;
-                            $employee_request->blood_group = $request->blood_group;
+                            $employee_request->blood_group = $request->blood_group_id;
                             $employee_request->personal_email = $request->personal_email;
                             $employee_request->address = $request->address;
                             $employee_request->emergency_contact = $request->emergency_contact;
@@ -4530,7 +4532,7 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->save();
 
-                            foreach ($request->employment_history as $employment_history){
+                            foreach ($request->employment_history as $employment_history) {
                                 $history = new EmployeeEmployementHistory();
                                 $history->employee_id = $employee_request->id;
                                 $history->name = $employment_history['company_name'];
@@ -4541,18 +4543,18 @@ class RiderAPIController extends Controller
                                 $history->save();
                             }
 
-                            foreach ($request->medical_details as $medical_detail){
+                            foreach ($request->medical_details as $medical_detail) {
                                 $medical_info = new EmployeeMedicalInformation();
                                 $medical_info->employee_id = $employee_request->id;
                                 $medical_info->name = $medical_detail['member_name'];
-                                $medical_info->designation = $medical_detail['relationship_id'];
+                                $medical_info->relationship_id = $medical_detail['relationship_id'];
                                 $medical_info->date_of_birth = $medical_detail['dob'];
                                 $medical_info->marital_status = $medical_detail['marital_status_id'];
                                 $medical_info->save();
                             }
 
                             $employee_education = new EmployeeEducationalBackground();
-                            $employee_education->id = $employee_request->id;
+                            $employee_education->employee_id = $employee_request->id;
                             $employee_education->name = $request->institute_name;
                             $employee_education->degree = $request->degree;
                             $employee_education->grade = $request->grade;
@@ -4576,106 +4578,106 @@ class RiderAPIController extends Controller
 
                             if ($request->hasFile('cv')) {
                                 $file = $request->file('cv');
-                                $filename = 'cv_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'cv_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cv = $directory.'/'.$filename;
+                                $attachments->cv = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('cnic')) {
                                 $file = $request->file('cnic');
-                                $filename = 'cnic_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'cnic_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic = $directory.'/'.$filename;
+                                $attachments->cnic = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('photo')) {
                                 $file = $request->file('photo');
-                                $filename = 'photo_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'photo_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->photo = $directory.'/'.$filename;
+                                $attachments->photo = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('academic_credentials')) {
                                 $file = $request->file('academic_credentials');
-                                $filename = 'academic_credentials_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'academic_credentials_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->academic = $directory.'/'.$filename;
+                                $attachments->academic = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('experience_certificates')) {
                                 $file = $request->file('experience_certificates');
-                                $filename = 'experience_certificates_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'experience_certificates_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->experience = $directory.'/'.$filename;
+                                $attachments->experience = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('pay_slip')) {
                                 $file = $request->file('pay_slip');
-                                $filename = 'pay_slip_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'pay_slip_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->last_pay_slip = $directory.'/'.$filename;
+                                $attachments->last_pay_slip = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('nikkah_nama')) {
                                 $file = $request->file('nikkah_nama');
-                                $filename = 'nikkah_nama_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->nikkah_nama = $directory.'/'.$filename;
+                                $attachments->nikkah_nama = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('cnic_spouse')) {
                                 $file = $request->file('cnic_spouse');
-                                $filename = 'cnic_spouse_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic_spouse = $directory.'/'.$filename;
+                                $attachments->cnic_spouse = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('bform')) {
                                 $file = $request->file('bform');
-                                $filename = 'child_b_form_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'child_b_form_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->child_b_form = $directory.'/'.$filename;
+                                $attachments->child_b_form = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('cnic_nominee')) {
                                 $file = $request->file('cnic_nominee');
-                                $filename = 'cnic_nominee_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic_nominee = $directory.'/'.$filename;
+                                $attachments->cnic_nominee = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('utility_bill')) {
                                 $file = $request->file('utility_bill');
-                                $filename = 'utility_bill_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'utility_bill_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->utility_bill = $directory.'/'.$filename;
+                                $attachments->utility_bill = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('affidavit')) {
                                 $file = $request->file('affidavit');
-                                $filename = 'affidavit_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'affidavit_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->affidavit = $directory.'/'.$filename;
+                                $attachments->affidavit = $directory . '/' . $filename;
                             }
 
                             if ($request->hasFile('cheque')) {
                                 $file = $request->file('cheque');
-                                $filename = 'cheque_' . $date . '.'.$file->extension();
-                                $directory = 'employee_directory/employee_'. $employee_request->id .'';
+                                $filename = 'cheque_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
                                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cheque = $directory.'/'.$filename;
+                                $attachments->cheque = $directory . '/' . $filename;
                             }
                             $attachments->save();
 
