@@ -1149,8 +1149,8 @@ class ShipperReceivingSheetController extends Controller
 
         $datatable = Datatables::of($shipments);
 
-        if ($date = $request->get('search_date')) {
-            $datatable->whereDate('rs.created_at', $date);
+        if ($request->get('search_to') && $request->get('search_from')) {
+            $datatable->whereBetween('rs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
         else {
             $datatable->whereRaw('false');
