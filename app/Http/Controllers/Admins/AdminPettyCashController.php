@@ -18,6 +18,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -344,7 +345,8 @@ class AdminPettyCashController extends Controller
         } else {
             $hubs = City::where('hub', 1)->whereIn('id', session('hubs'))->get();
         }
-        return view('admin.petty_cash.statements')->with(['hubs' => $hubs]);
+        $zones = Zone::where('status', 1)->get();
+        return view('admin.petty_cash.statements')->with(['hubs' => $hubs,'zones'=>$zones]);
     }
 
     public function reference_document($reference_document)
@@ -442,6 +444,10 @@ class AdminPettyCashController extends Controller
             });
         if ($hub = $request->get('search_hub')) {
             $petty->where('h.id', '=', $hub);
+        }
+
+        if ($zone = $request->get('search_zone')) {
+            $petty->where('h.zone_id', '=', $zone);
         }
         if ($search_date = $request->get('search_creation_date')) {
             $petty->whereDate('petty_cash_statements.created_at', $search_date);

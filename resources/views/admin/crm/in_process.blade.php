@@ -47,6 +47,7 @@
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Agent</th>
+                                    <th class="border-primary border-darken-1">Arrival On</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
@@ -236,6 +237,7 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Agent');
+                            head.push('Arrival On');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
@@ -266,6 +268,7 @@
                                 row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.agent);
+                                row.push(values.arrival);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged);
@@ -573,7 +576,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[19, 'desc']],
+                order: [[20, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -590,6 +593,7 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
