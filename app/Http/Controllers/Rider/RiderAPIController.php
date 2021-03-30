@@ -20,8 +20,10 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
@@ -4377,11 +4379,10 @@ class RiderAPIController extends Controller
                 'employment_history.*.reason' => ['required'],
 
                 'medical_details' => ['required', 'array', 'min:1'],
-                'employment_history.*.member_name' => ['required'],
-                'employment_history.*.relationship' => ['required'],
-                'employment_history.*.dob' => ['required'],
-                'employment_history.*.to' => ['required'],
-                'employment_history.*.reason' => ['required'],
+                'medical_details.*.member_name' => ['required'],
+                'medical_details.*.relationship_id' => ['required'],
+                'medical_details.*.dob' => ['required'],
+                'medical_details.*.marital_status' => ['required'],
 
 
             ];
@@ -4465,6 +4466,28 @@ class RiderAPIController extends Controller
                             $employee_request->sonic_id = $request->sonic_id;
                             $employee_request->pin = $request->pin;
                             $employee_request->save();
+
+                            foreach ($request->employment_history as $employment_history){
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['company_name'];
+                                $history->designation = $employment_history['designation'];
+                                $history->from = $employment_history['from'];
+                                $history->to = $employment_history['to'];
+                                $history->reason = $employment_history['reason'];
+                                $history->save();
+                            }
+
+                            foreach ($request->medical_details as $medical_detail){
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $employment_history['member_name'];
+                                $medical_info->designation = $employment_history['relationship_id'];
+                                $medical_info->from = $employment_history['from'];
+                                $medical_info->to = $employment_history['to'];
+                                $medical_info->reason = $employment_history['reason'];
+                                $medical_info->save();
+                            }
 
 
                             $response['status'] = 0;
