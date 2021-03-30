@@ -18,6 +18,7 @@ use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -4356,7 +4357,7 @@ class RiderAPIController extends Controller
         $department = AdminDepartment::select('id', 'name')->get();
         $hub = City::where('status', 1)->where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
         $relationships = EmployeeRelationship::select('id', 'name')->get();
-        $blood_group = ["A+", "A-", "B+", "B-", "AB+", "AB-","O+", "O-"];
+        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
         $data = ["cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships];
         return response()->json(['status' => 0, 'data' => $data]);
     }
