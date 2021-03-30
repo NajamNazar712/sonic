@@ -9869,6 +9869,9 @@ class AdminDashboardController extends Controller
 
 
     public function todayActiveAccountsList(){
+        dd(Carbon::parse('-24 hours'));
+        // dd(Carbon::today('-12 hours'));
+        // dd(Carbon::today('+12 hours'));
         // $shippers = User::whereIn('status', [3, 4])->get();
         // $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
