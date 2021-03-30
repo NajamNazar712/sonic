@@ -271,14 +271,19 @@
                 }
                 if(all_tracking_numbers.length != tracking_numbers.length)
                     {
-                        var html = "You did not scanned following tracking numbers:";
+                        var html = "There are Shipments that are not scanned from delivery note number# "+delivery_note;
 
                         jQuery.grep(all_tracking_numbers, function(el) {
-                            if (jQuery.inArray(el, tracking_numbers) == -1) html += el+", ";
+                            if (jQuery.inArray(el, tracking_numbers) == -1) html += "</br>"+el;
                         });
+
+                        html += "</br>Are you sure, You want to scan incomplete delivery note?";
+
+                        var content = document.createElement('div');
+                        content.innerHTML = html;
                         swal({
                             title: 'Are you sure?',
-                            text: html,
+                            content: content,
                             icon: 'warning',
                             buttons: {
                                 cancel: {
