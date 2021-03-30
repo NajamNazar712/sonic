@@ -3,7 +3,7 @@
 @section('title', 'Today\'s Active Accounts List')
 
 @section('content')
-    <h1>Active Accounts List</h1>
+    <h1>Today's Active Accounts List</h1>
 
     <section>
         <div class="row">
@@ -18,13 +18,13 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
-                                        <th class="border-primary border-darken-1">Account ID</th>
-                                        <th class="border-primary border-darken-1">Account Type</th>
-                                        <th class="border-primary border-darken-1">Company Name</th>
+                                        <th class="border-primary border-darken-1">Account #</th>
+                                        {{-- <th class="border-primary border-darken-1">Account Type</th> --}}
+                                        <th class="border-primary border-darken-1">Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Phone #</th>
                                         <th class="border-primary border-darken-1">Email</th>
-                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
+                                        <th class="border-primary border-darken-1">Sales Person</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -70,7 +70,7 @@
                         params.length = -1;
                     }
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.accounts.active.ajax') }}',
+                        url: '{{ route('admin.accounts.active.today.ajax') }}',
                         method: 'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -80,68 +80,23 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Account ID');
-                            head.push('Account Type');
-                            head.push('Company Name');
+                            head.push('Account #');
+                            // head.push('Account Type');
+                            head.push('Name');
                             head.push('Contact Person');
-                            head.push('Address');
-                            head.push('City');
-                            head.push('Territory');
-                            head.push('Product Type');
-                            head.push('Status');
-                            head.push('Sales Person Tagged');
-                            head.push('POC Tagged');
-                            head.push('KAM Tagged');
-                            head.push('REF Tagged');
-                            head.push('Request Date');
-                            head.push('Rates Added By');
-                            head.push('Rates Updated By');
-                            head.push('Rates Status');
-                            head.push('Rates Status Remarks');
-                            head.push('Rates Approved By');
-                            head.push('Account Activated By');
-                            head.push('Account Activation Date');
-                            head.push('Account Disable Remarks');
-                            head.push('Documents Uploaded At');
-                            head.push('Documents Approved At');
-                            head.push('Documents Status');
-                            head.push('Documents Rejection Reason');
-                            head.push('Intl Rates Status');
-                            head.push('Intl Rates Status Remarks');
+                            head.push('Phone #');
+                            head.push('Email');
+                            head.push('Sales Person');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
                                 row.push(values.id_padded);
-                                row.push(values.account_type);
+                                // row.push(values.account_type);
                                 row.push(values.name);
                                 row.push(values.poc);
-                                row.push(values.address);
-                                row.push(values.city);
-                                row.push(values.territory);
-                                row.push(values.product_type);
-                                row.push(values.status);
+                                row.push(values.phone);
+                                row.push(values.email);
                                 row.push(values.admin_tag_id);
-                                row.push(values.tagged_poc);
-                                row.push(values.kam);
-                                row.push(values.ref);
-                                row.push(values.created_at);
-                                row.push(values.added_by);
-                                row.push(values.updated_by);
-                                row.push(values.rate_status);
-                                row.push(values.rejected_reason);
-                                row.push(values.approved_by);
-                                row.push(values.account_activated_by);
-                                row.push(values.activated_date);
-                                row.push(values.disable_remarks);
-                                row.push(values.documents_uploaded_at);
-                                row.push(values.documents_approved_at);
-                                row.push(values.documents_status);
-                                row.push(values.documents_rejection_reason);
-                                row.push(values.international_rate_status);
-                                row.push(values.international_rejected_reason);
-
                                 body.push(row);
                             });
                         },
@@ -162,7 +117,7 @@
 
                     {
                         extend: 'excel',
-                        title: 'Active Accounts',
+                        title: 'Today\'s Active Accounts',
                         className: 'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -179,7 +134,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                deferLoading: 0,
                order: [
                     [0, 'desc']
                 ],
@@ -194,7 +148,7 @@
                     {orderable: false,searchable: false,name: 'serial_number',class: 'align-middle serial_number',targets: 0,render: function(data, type, row) {return '';}
                     },
                     {data: 'id_padded',name: 'users.id',class: 'align-middle account_id'},
-                    {data: 'account_type',name: 'at.name',class: 'align-middle account_type'},
+                    // {data: 'account_type',name: 'at.name',class: 'align-middle account_type'},
                     {data: 'name',name: 'name',class: 'align-middle company_name'},
                     {data: 'poc',name: 'poc',class: 'align-middle contact_person'},
                     {data: 'phone',name: 'phone',class: 'align-middle phone'},
@@ -224,10 +178,8 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.action') || $(header).is(
-                                '.serial_number') || $(header).is('.disable_remarks') || $(
-                                header).is('.rate_status') || $(header).is('.duplicate') || $(
-                                header).is('.international_rejected_reason')) {
+                        if ($(header).is('.select') || $(header).is(
+                                '.serial_number') ) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -238,45 +190,6 @@
                                 current.val(column.search());
                             }
                         }
-                    });
-                    $("#documents_status_select").prepend('<option value="" selected></option>')
-                        .select2({
-                            placeholder: "Select a Status",
-                            width: '100%',
-                            containerCssClass: 'select-xs',
-                            dropdownCssClass: 'form-control-sm p-0'
-                        });
-                    $("#intl_rate_status_select").prepend('<option value="" selected></option>')
-                        .select2({
-                            placeholder: "Select International Rate Status",
-                            width: '100%',
-                            containerCssClass: 'select-xs',
-                            dropdownCssClass: 'form-control-sm p-0'
-                        });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select a Status",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data1 = $.map({!! $products !!}, function(obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $products !!}, function(obj) {
-                        obj.text = obj
-                        .product_name; // replace name with the property used for the text
-
-                        return obj;
-                    });
-
-                    $("#product_select").prepend('<option value="" selected></option>').select2({
-                        data: data1,
-                        placeholder: "Select Product",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }

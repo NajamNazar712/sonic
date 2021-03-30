@@ -9890,19 +9890,16 @@ class AdminDashboardController extends Controller
             })
             ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
             ->leftjoin('admins as poc','poc.id','=','st.poc')
-			->select(['users.phone as phone','users.email as email','users.id','ad.name as admin_tag_id', 'users.name','users.poc','users.created_at','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'users.brand_name as brand_name','poc.name as tagged_poc','users.address as address','users.email'])->whereIn('users.status',[3,4])->where('blacklist',0)
+			->select(['users.phone as phone','users.email as email','users.id','ad.name as admin_tag_id', 'users.name','users.poc','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0)
             ->where('users.activated_at', '>', Carbon::parse('-24 hours'));
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
-
-
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
@@ -9911,7 +9908,6 @@ class AdminDashboardController extends Controller
                 return $query->where('users.id', '=', $keyword);
             })
             ->make(true);
-
     }
 
 }
