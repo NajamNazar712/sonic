@@ -34,6 +34,9 @@
                                     @if (session('role_id') == 1 || session('role_id') == 4 || in_array(428, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.retail.accounts.index')}}">Retail Accounts</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(470, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.accounts.active.today')}}">Active Today</a></li>
+                                    @endif
 
                                 </ul>
                             </li>

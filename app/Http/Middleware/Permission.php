@@ -900,8 +900,10 @@ class Permission
             'human_resource.employee_directory.reject' => 469,
 
 			'attendance.index' => 465,
-            'attendance.list' => 465
-
+            'attendance.list' => 465,
+            'accounts.active.today' => 470,
+            'accounts.active.today.ajax' => 470,
+             
            
         ],
 
