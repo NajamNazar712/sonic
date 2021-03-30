@@ -11,6 +11,7 @@ use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
@@ -301,9 +302,10 @@ class AdminHumanResourseController extends Controller
         $nationalities = EmployeeNationality::all();
         $domiciles = EmployeeDomicile::all();
         $maritial_statuses = EmployeeMaritalStatus::all();
+        $blood_groups = EmployeeBloodGroup::all();
         $designations = EmployeeDesignation::all();
         $hubs = City::where('hub',1)->get();
-        $zones = Zone::all();
+        $zones = Zone::where('status', 1)->get();
         $departments = AdminDepartment::all();
         $relationships = EmployeeRelationship::all();
         $banks = BanksList::where('status',1)->get();
@@ -313,7 +315,7 @@ class AdminHumanResourseController extends Controller
         $educations = $employee->education_infos;
         $employments = $employee->employment_history;
         $attachments = $employee->attachments;
-        return view('admin.human_resource.employee_directory.update',compact('employments','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships'));
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
