@@ -256,9 +256,9 @@
                                                 <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.create.index') }}">Create Bag</a></li>
                                             @endif
 
-                                            @if (session('role_id') == 1 || in_array(26, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.create.open_bag.index') }}">Create Open Bag</a></li>
-                                            @endif
+{{--                                            @if (session('role_id') == 1 || in_array(26, session('permissions')))--}}
+{{--                                                <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.create.open_bag.index') }}">Create Open Bag</a></li>--}}
+{{--                                            @endif--}}
 
                                             @if (session('role_id') == 1 || in_array(124, session('permissions')))
                                                 <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.history.index') }}">History</a></li>
