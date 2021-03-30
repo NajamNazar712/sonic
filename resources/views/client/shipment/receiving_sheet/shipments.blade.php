@@ -18,6 +18,18 @@
 							@include('client.inc.messages')
 
 							<div id="search_form" class="row mb-2 justify-content-center">
+								<div class="col-4">
+									<div class="form-group input-group">
+										<div class="input-group-prepend">
+			                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+			                                    <span class="la la-calendar-o"></span>
+			                                </span>
+										</div>
+
+										<input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="From">
+									</div>
+								</div>
+
 			                    <div class="col-4">
 			                        <div class="form-group input-group">
 			                            <div class="input-group-prepend">
@@ -26,7 +38,7 @@
 			                                </span>
 			                            </div>
 
-			                            <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date" data-value="{{ Carbon\Carbon::today() }}">
+			                            <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="To">
 			                        </div>
 			                    </div>
 
@@ -81,13 +93,32 @@
 
 	<script>
 		$(document).ready(function() {
-			var search_date = $('#search_date').pickadate({
+			var search_to = $('#search_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted'
+                hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					if (context.select) {
+						$('#search_form #search_from').pickadate('picker').set('max', $('#search_form #search_to').pickadate('picker').get('select'));
+					}
+				}
+            });
+
+			var search_from = $('#search_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					if (context.select) {
+						$('#search_form #search_to').pickadate('picker').set('min', $('#search_form #search_from').pickadate('picker').get('select'));
+					}
+				}
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -161,7 +192,8 @@
 				ajax:{
                     url: '{{ route('cod.shipment.receiving_sheet.shipments.list') }}',
                     data: function (d) {
-                        d.search_date = $('input[name="search_date_formatted"]').val();
+                        d.search_to = $('input[name="search_to_formatted"]').val();
+                        d.search_from = $('input[name="search_from_formatted"]').val();
                     }
                 },
 				order: [[9, 'desc']],
