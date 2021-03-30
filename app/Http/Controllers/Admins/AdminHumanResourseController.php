@@ -303,7 +303,7 @@ class AdminHumanResourseController extends Controller
         $maritial_statuses = EmployeeMaritalStatus::all();
         $designations = EmployeeDesignation::all();
         $hubs = City::where('hub',1)->get();
-        $zones = Zone::where('status', 1)->get();
+        $zones = Zone::all();
         $departments = AdminDepartment::all();
         $relationships = EmployeeRelationship::all();
         $banks = BanksList::where('status',1)->get();
