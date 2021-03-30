@@ -282,7 +282,6 @@
                         var content = document.createElement('div');
                         content.innerHTML = html;
                         swal({
-                            title: 'Are you sure?',
                             content: content,
                             icon: 'warning',
                             buttons: {
