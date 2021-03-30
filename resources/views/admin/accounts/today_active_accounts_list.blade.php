@@ -22,8 +22,9 @@
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
+                                        <th class="border-primary border-darken-1">Phone #</th>
+                                        <th class="border-primary border-darken-1">Email</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
-                                        <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -196,8 +197,9 @@
                     {data: 'account_type',name: 'at.name',class: 'align-middle account_type'},
                     {data: 'name',name: 'name',class: 'align-middle company_name'},
                     {data: 'poc',name: 'poc',class: 'align-middle contact_person'},
+                    {data: 'phone',name: 'phone',class: 'align-middle phone'},
+                    {data: 'email',name: 'email',class: 'align-middle email'},
                     {data: 'admin_tag_id',name: 'ad.name',class: 'align-middle admin_tag_id'},
-                    {data: 'action',name: 'action',class: 'align-middle action',orderable: false,searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     //    var info = table.page.info();
@@ -217,27 +219,7 @@
                         '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon =
                         '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select =
-                        '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="3">Enable</option>' +
-                        '<option value="4">Disable</option>' +
-                        '</select>';
-                    var documents_drop_select =
-                        '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
-                        '<option value="0">Incomplete</option>' +
-                        '<option value="1">Pending for Approval</option>' +
-                        '<option value="2">Approved</option>' +
-                        '<option value="3">Rejected</option>' +
-                        '</select>';
-                    var intl_drop_select =
-                        '<select name="intl_rate_status_select" id="intl_rate_status_select" class="select2 form-control">' +
-                        '<option value="1">Approved</option>' +
-                        '<option value="2">Requested</option>' +
-                        '<option value="3">Rejected</option>' +
-                        '</select>';
-                    var product_select =
-                        '<select name="product_select" id="product_select" class="select2 form-control"></select>';
-
+                  
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -247,26 +229,6 @@
                                 header).is('.rate_status') || $(header).is('.duplicate') || $(
                                 header).is('.international_rejected_reason')) {
                             $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(drop_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.product_type')) {
-                            $(product_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.documents_status')) {
-                            $(documents_drop_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.international_rate_status')) {
-                            $(intl_drop_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
