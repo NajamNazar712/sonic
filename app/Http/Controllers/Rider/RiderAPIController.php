@@ -13,14 +13,17 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\BanksList;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
@@ -4358,7 +4361,8 @@ class RiderAPIController extends Controller
         $hub = City::where('status', 1)->where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
         $relationships = EmployeeRelationship::select('id', 'name')->get();
         $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
-        return response()->json(['status' => 0, "cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships]);
+        $banks = BanksList::select('id', 'name')->where('status', 1)->get();
+        return response()->json(['status' => 0, "cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks]);
     }
 
     public function rider_signup_store(Request $request)
@@ -4397,11 +4401,6 @@ class RiderAPIController extends Controller
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
             } else {
-                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic'));
-
-                //Check RiderRequest Already Exist
-                if ($rider_request->exists()) {
                     $rider_request = $rider_request->first();
                     if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
                         $message = "Phone Number & CNIC Already Exists";
@@ -4412,6 +4411,11 @@ class RiderAPIController extends Controller
                     } else if ($rider_request->cnic == $request->input('cnic')) {
                         $message = "CNIC Already Exist";
                     }
+                    $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                        ->orWhere('cnic', $request->input('cnic'));
+
+                    //Check RiderRequest Already Exist
+                    if ($rider_request->exists()) {
                 } //Check Rider Already Exist
                 else {
                     $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic'));
@@ -4487,6 +4491,25 @@ class RiderAPIController extends Controller
                                 $medical_info->marital_status = $medical_detail['marital_status_id'];
                                 $medical_info->save();
                             }
+
+                            $employee_education = new EmployeeEducationalBackground();
+                            $employee_education->id = $employee_request->id;
+                            $employee_education->name = $request->institute_name;
+                            $employee_education->degree = $request->degree;
+                            $employee_education->grade = $request->grade;
+                            $employee_education->passing_year = $request->passing_year;
+                            $employee_education->save();
+
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->branch_code = $request->branch_code;
+                            $employee_bank_info->account_no = $request->account_no;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+
 
 
                             $response['status'] = 0;
