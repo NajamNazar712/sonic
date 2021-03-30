@@ -975,6 +975,9 @@
                         @if (session('role_id') == 1 || in_array(437, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.last_mile_app.index') }}">Last Mile App</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(437, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.master_cargo.bag.in_transit.index') }}">In Transit Report Bag Wise</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

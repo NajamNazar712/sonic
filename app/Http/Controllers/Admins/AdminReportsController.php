@@ -5,6 +5,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagStatus;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
@@ -7781,6 +7783,93 @@ class AdminReportsController extends Controller
             $datatable->whereBetween('shipments.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function in_transit_index(){
+        $bag_statuses = BagStatus::select('id','name')->whereNotIn('id',[1,4,9])->get();
+        return view('admin.reports.in_transit_report_bag_wise')->with(['bag_statuses' => $bag_statuses]);
+    }
+    public function  in_transit_list(Request $request){
+        $bags = DB::connection('reports')->table('bags')
+          ->join('master_cargo_bags as mcb',function($join){
+              $join->on('mcb.bag_id','=','bags.id')
+                  ->where('mcb.created_at','=',DB::raw('(select max(created_at) from master_cargo_bags where master_cargo_bags.bag_id= bags.id)'));
+          })
+            ->join('master_cargoes as mc', 'mc.id', '=', 'mcb.master_cargo_id')
+            ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
+            ->leftjoin('admins as a', 'a.id', '=', 'bags.receiver_id')
+            ->join('admins as ad', 'ad.id', '=', 'mc.created_by')
+            ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
+            ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
+            ->join('bag_statuses as bs','bs.id','=','bags.status_id')
+            ->select(['bags.id as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
+        ->whereNotIn('bags.status_id',[1,4,9]);
+
+       $datatable = Datatables::of($bags)
+           ->editColumn('type', function($bags){
+               if($bags->type == 1){
+                   return 'Normal';
+               }
+               else{
+                   return 'Return';
+               }
+           })
+           ->addColumn('aging', function($bags){
+               if($bags->received_at != null){
+                   Carbon::setWeekendDays([
+                       Carbon::SUNDAY,
+                   ]);
+                   $received_date = Carbon::parse($bags->received_at);
+                   $transitted_date = Carbon::parse($bags->transitted_date);
+                   $days = $transitted_date->diffInDays($received_date);
+                   if($days <= 0){
+                       return '-';
+                   }
+                   else{
+                       return $days . 'days';
+                   }
+               }
+               else{
+                   return '-';
+               }
+           })
+           ->editColumn('shipments', function($bags) {
+               if ($bags->shipments!= 0) {
+                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $bags->shipments . '</button>';
+               }
+               else {
+                   return 0;
+               }
+           })
+           ->editColumn('status_id', function($bags){
+                   return $bags->status;
+           })
+           ->filterColumn('status_id',function ($query,$keyword){
+               if ($keyword != '') {
+                   $query->where('bags.status_id',$keyword);
+               }
+               else {
+                   $query->whereRaw('false');
+               }
+           });
+        return $datatable->make(true);
+    }
+
+    public function in_transit_shipments(Request $request){
+        $bag_id = $request->input('bag_id');
+        $bag = Bag::find($bag_id);
+        $bag_shipments =  $bag->shipment;
+        $shipments = array();
+        if($bag_shipments->count() != 0){
+            foreach ($bag_shipments as $bag_shipment){
+                $shipment = Shipment::find($bag_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Shipments Founds', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Shipments Found', 'shipments' => FALSE];
+        }
+
     }
 }
 

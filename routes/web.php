@@ -2048,6 +2048,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@weight_qc_list')->name('list');
         });
+        Route::prefix('master_cargo')->name('master_cargo.')->group(function (){
+            Route::prefix('bag')->name('bag.')->group(function (){
+                Route::prefix('in_transit')->name('in_transit.')->group(function (){
+                    Route::get('', 'Admins\AdminReportsController@in_transit_index')->name('index');
+                    Route::get('list', 'Admins\AdminReportsController@in_transit_list')->name('list');
+                    Route::post('shipments', 'Admins\AdminReportsController@in_transit_shipments')->name('shipments');
+                });
+            });
+        });
+
     });
 
     //Reports end
