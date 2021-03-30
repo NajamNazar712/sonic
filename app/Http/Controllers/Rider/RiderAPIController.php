@@ -23,6 +23,7 @@ use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
@@ -4352,8 +4353,9 @@ class RiderAPIController extends Controller
         $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $department = AdminDepartment::select('id', 'name')->get();
         $hub = City::where('status', 1)->where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        $relationships = EmployeeRelationship::select('id', 'name')->get();
         $blood_group = ["A+", "A-", "B+", "B-", "AB+", "AB-","O+", "O-"];
-        $data = ["cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group];
+        $data = ["cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships];
         return response()->json(['status' => 0, 'data' => $data]);
     }
 
@@ -4365,7 +4367,23 @@ class RiderAPIController extends Controller
                 'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'pin' => ['required', 'integer', 'digits:4'],
-                'city_id' => ['required', 'integer']
+                'city_id' => ['required', 'integer'],
+
+                'employment_history' => ['required', 'array', 'min:1'],
+                'employment_history.*.company_name' => ['required'],
+                'employment_history.*.designation' => ['required'],
+                'employment_history.*.from' => ['required'],
+                'employment_history.*.to' => ['required'],
+                'employment_history.*.reason' => ['required'],
+
+                'medical_details' => ['required', 'array', 'min:1'],
+                'employment_history.*.member_name' => ['required'],
+                'employment_history.*.relationship' => ['required'],
+                'employment_history.*.dob' => ['required'],
+                'employment_history.*.to' => ['required'],
+                'employment_history.*.reason' => ['required'],
+
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -4421,14 +4439,34 @@ class RiderAPIController extends Controller
 
                             $employee_request = new Employee();
                             $employee_request->name = $request->name;
+                            $employee_request->employee_gender_id = $request->employee_gender_id;
+                            $employee_request->city_id = $request->city_id;
                             $employee_request->cnic = $request->cnic;
                             $employee_request->phone_number = $request->phone_number;
-                            $employee_request->pin = $request->pin;
-                            $employee_request->city_id = $request->city_id;
                             $employee_request->employee_type_id = 2;
                             $employee_request->rider_request_id = $rider_request->id;
                             $employee_request->status_id = 2;
+                            $employee_request->guardian_name = $request->guardian_name;
+                            $employee_request->religion_id = $request->religion_id;
+                            $employee_request->nationality_id = $request->nationality_id;
+                            $employee_request->domicile_id = $request->domicile_id;
+                            $employee_request->marital_status_id = $request->marital_status_id;
+                            $employee_request->blood_group = $request->blood_group;
+                            $employee_request->personal_email = $request->personal_email;
+                            $employee_request->address = $request->address;
+                            $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                            $employee_request->designation_id = $request->designation_id;
+                            $employee_request->department_id = $request->department_id;
+                            $employee_request->zone_id = $request->zone_id;
+                            $employee_request->official_email = $request->official_email;
+                            $employee_request->official_phone_number = $request->official_phone_number;
+                            $employee_request->sonic_id = $request->sonic_id;
+                            $employee_request->pin = $request->pin;
                             $employee_request->save();
+
+
                             $response['status'] = 0;
                             $message = 'Rider Request Has Been Submitted and Pending for Approval';
                         } catch (Exception $ex) {
