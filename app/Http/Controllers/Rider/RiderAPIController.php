@@ -4358,8 +4358,7 @@ class RiderAPIController extends Controller
         $hub = City::where('status', 1)->where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
         $relationships = EmployeeRelationship::select('id', 'name')->get();
         $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
-        $data = ["cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships];
-        return response()->json(['status' => 0, 'data' => $data]);
+        return response()->json(['status' => 0, "cities"=>$cities, "designation"=>$designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships]);
     }
 
     public function rider_signup_store(Request $request)
@@ -4482,11 +4481,10 @@ class RiderAPIController extends Controller
                             foreach ($request->medical_details as $medical_detail){
                                 $medical_info = new EmployeeMedicalInformation();
                                 $medical_info->employee_id = $employee_request->id;
-                                $medical_info->name = $employment_history['member_name'];
-                                $medical_info->designation = $employment_history['relationship_id'];
-                                $medical_info->from = $employment_history['from'];
-                                $medical_info->to = $employment_history['to'];
-                                $medical_info->reason = $employment_history['reason'];
+                                $medical_info->name = $medical_detail['member_name'];
+                                $medical_info->designation = $medical_detail['relationship_id'];
+                                $medical_info->date_of_birth = $medical_detail['dob'];
+                                $medical_info->marital_status = $medical_detail['marital_status_id'];
                                 $medical_info->save();
                             }
 
