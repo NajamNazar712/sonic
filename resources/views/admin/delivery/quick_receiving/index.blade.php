@@ -158,6 +158,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var tracking_numbers = [];
+            var all_tracking_numbers = []
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: false,
@@ -242,6 +243,9 @@
                         scan_sound(1);
                         $("#delivery_note_label").html(data.delivery_note_number);
                         $("#total_to_scan").html(data.total_shipments);
+                        $.each(data.tracking_numbers,function (i,v) {
+                           all_tracking_numbers.push(v);
+                        });
                         $("#scan_delivery_note").attr("readonly",true);
                         $("#scan_tracking").attr("readonly",false);
                         $("#scan_tracking").focus();
@@ -265,13 +269,49 @@
                     $("#delivery_note_error").html("Delivery Note Number Can\'t Be Empty or Invalid");
                     return;
                 }
-                if(tracking_numbers.length > 0){
-                    $('#submit_delivery_note_id').val(delivery_note);
-                    $('#submit_form').submit();
-                }
-                else{
-                    toastr.error("Please scan Tracking Number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                if(all_tracking_numbers.length != tracking_numbers.length)
+                    {
+                        var html = "There are Shipments that are not scanned from delivery note number# "+delivery_note;
+
+                        jQuery.grep(all_tracking_numbers, function(el) {
+                            if (jQuery.inArray(el, tracking_numbers) == -1) html += "</br>"+el;
+                        });
+
+                        html += "</br>Are you sure, You want to scan incomplete delivery note?";
+
+                        var content = document.createElement('div');
+                        content.innerHTML = html;
+                        swal({
+                            content: content,
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if (confirm) {
+                                $('#submit_delivery_note_id').val(delivery_note);
+                                $('#submit_form').submit();
+                            }
+                        });
+                    }
+                    else {
+                        $('#submit_delivery_note_id').val(delivery_note);
+                        $('#submit_form').submit();
+                    }
             });
 
         });

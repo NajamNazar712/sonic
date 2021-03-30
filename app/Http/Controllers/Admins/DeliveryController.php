@@ -6232,6 +6232,7 @@ class DeliveryController extends Controller
 
     public function quick_receiving_track_delivery_note(Request $request)
     {
+        $tracking_numbers = array();
         $delivery_note_id = $request->delivery_note_id;
         $total_shipments = 0;
         $delivery_note = DeliveryNote::where('id',$delivery_note_id);
@@ -6244,6 +6245,7 @@ class DeliveryController extends Controller
         foreach ($delivery_note_shipments as $delivery_note_shipment){
             $shipment = $delivery_note_shipment->shipment;
             if(in_array($shipment->shipper_status_id, $this->undelivered_status)){
+                array_push($tracking_numbers,$shipment->tracking_number);
                 $total_shipments++;
             }
         }
@@ -6251,7 +6253,7 @@ class DeliveryController extends Controller
         {
             return response()->json(['status'=>1,'error'=>'Delivery Note doesn\'t contain any returned shipments']);
         }
-        return response()->json(['status'=>0,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
+        return response()->json(['status'=>0,'tracking_numbers'=>$tracking_numbers,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
     }
 
     public function quick_receiving_track_tracking_number(Request $request)
