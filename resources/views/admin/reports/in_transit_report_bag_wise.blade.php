@@ -217,14 +217,14 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'shipments', class: 'align-middle text-center shipments'},
                     {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
-                    {data: 'shipping_mode', name: 'sm.name', class: 'align-middle shipping_mode'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'shipments_weight', name: 'shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'transitted_date', name: 'mc.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'ad.name', class: 'align-middle transitted_date'},
                     {data: 'received_at', name: 'received_at', class: 'align-middle received_at'},
                     {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'status_id', name: 'bs.id', class: 'align-middle status_id'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
+                    {orderable : false, searchable : false, data: 'aging', name: 'aging', class: 'align-middle aging'},
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -243,7 +243,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status_id')){
                             $(status_select).appendTo($(search))
@@ -279,6 +279,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
                     this.api().table().columns.adjust();
                 }
             });

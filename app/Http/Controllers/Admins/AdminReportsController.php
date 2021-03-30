@@ -7787,7 +7787,8 @@ class AdminReportsController extends Controller
 
     public function in_transit_index(){
         $bag_statuses = BagStatus::select('id','name')->whereNotIn('id',[1,4,9])->get();
-        return view('admin.reports.in_transit_report_bag_wise')->with(['bag_statuses' => $bag_statuses]);
+        $modes = ShippingMode::select('id','mode')->get();
+        return view('admin.reports.in_transit_report_bag_wise')->with(['bag_statuses' => $bag_statuses,'modes' => $modes]);
     }
     public function  in_transit_list(Request $request){
         $bags = DB::connection('reports')->table('bags')
