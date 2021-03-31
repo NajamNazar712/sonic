@@ -1171,6 +1171,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_master_cargo_details(Request $request){
+
         $bag = Bag::find(current($request->bag_ids));
 
         $origin = $bag->origin_hub->hub_city;
@@ -1279,7 +1280,10 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->actual_weight = $request->input('actual_weight');
             $master_cargo->created_by = Auth::id();
-            if($request->onward_forwarding == 1){
+
+
+            $onward_forwarding = 1;
+            if($onward_forwarding == 1){
                 $master_cargo_status_id = 6;
                 $master_cargo->onward_forwarding = 1;
             }
@@ -1319,6 +1323,7 @@ class AdminMasterCargoController extends Controller
             NotificationsController::send(87, $master_cargo->destination_hub_id, url('/') . '/' . 'reports/master_cargo_'. str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT) .'.pdf');
             if($master_cargo_status_id == 6){
                 $text = 'Onward Forwarding';
+               NotificationsController::send(128,$master_cargo->id);
             }
             else{
                 $text = 'Master';

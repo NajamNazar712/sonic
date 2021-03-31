@@ -7872,5 +7872,39 @@ class AdminReportsController extends Controller
         }
 
     }
+
+    public function master_cargo_short_received_shipments_index(){
+        return view('admin.reports.master_cargo_short_received_shipments_reports');
+    }
+
+    public function master_cargo_short_received_shipments_list(Request $request){
+        $cargo_consignments_short_received_shipments = DB::connection('reports')->table('bags')->leftjoin('bag_shipments as bs', 'bs.bag_id', '=', 'bags.id')
+            ->join('master_cargo_bags as mcb',function($join){
+                $join->on('mcb.bag_id','=','bags.id')
+                    ->where('mcb.created_at','=',DB::raw('(select max(created_at) from master_cargo_bags where master_cargo_bags.bag_id= bags.id)'));
+            })
+            ->join('master_cargoes as mc', 'mc.id', '=', 'mcb.master_cargo_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'bags.origin_hub_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 'bags.destination_hub_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'bags.shipping_mode_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'bs.shipment_id')
+            ->select('s.tracking_number as tracking_number','bags.id as bag','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'bags.type as cargo_type','mc.id as cargo','mc.created_at as transited_at')
+            ->where('bags.status_id', 7)
+            ->whereIn('s.shipper_status_id', [3, 21])->get();
+
+        $datatables = Datatables::of($cargo_consignments_short_received_shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('cargo_type',function ($shipments){
+                if($shipments->cargo_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            });
+        return $datatables->make(true);
+    }
 }
 

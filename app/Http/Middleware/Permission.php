@@ -495,6 +495,8 @@ class Permission
             'reports.last_mile_app.index' => 437,
             'reports.weight_qc.index' => 444,
             'reports.weight_qc.list' => 444,
+            'reports.master_cargo.bag.in_transit.index' => 472,
+            'reports.master_cargo.bag.in_transit.list' => 472,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

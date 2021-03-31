@@ -7,6 +7,7 @@ use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailUser;
@@ -7079,6 +7080,58 @@ class NotificationsController extends Controller
                     }
                     $to = $phone;
                     self::sms($body,$to);
+                }
+                else if($id == 128) {
+                    $master_cargo_id = $reference_1_id;
+                    if ($master_cargo_id) {
+
+                        $master_cargo = MasterCargo::find($master_cargo_id);
+                        $destination = $master_cargo->destination_hub_id;
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Master Cargo Number</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Bags</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Junction 1</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Junction 2</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Actual Weight</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        $serial = 1;
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->bags . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->shipments . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->origin_hub['name'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->destination_hub['name']  . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_1['name']  . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_2['name']  . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->actual_weight . '</td>';
+                        $html .= '</tr>';
+
+                        $html .= '</tbody></table>';
+                    }
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $admins = Admin::where('role_id',10)->where('status',1)->get();
+                    foreach($admins as $admin){
+                        $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id',$master_cargo->destination_hub_id);
+                        if($assign_hubs->exists()){
+                            if (strpos($body, '[station_manager]') !== FALSE) {
+                                $body = str_replace('[station_manager]', $admin->name, $body);
+                            }
+                            $to = $admin->email;
+                            self::email($subject, $body, $to);
+                        }
+                    }
+
                 }
             }
         }

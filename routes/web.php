@@ -2056,6 +2056,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('shipments', 'Admins\AdminReportsController@in_transit_shipments')->name('shipments');
                 });
             });
+            Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@master_cargo_short_received_shipments_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@master_cargo_short_received_shipments_list')->name('list');
+            });
+            
         });
 
     });
