@@ -1050,7 +1050,7 @@ class AdminCargoController extends Controller
                           <td class="color primary"><strong>Route Information</strong></td>
                         </tr>
                         <tr>
-                          <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . $master_cargo->junction_hub_1->name . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
+                          <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
                         </tr>
                       </tbody>
                     </table>

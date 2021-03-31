@@ -71,6 +71,7 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
+		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
 
@@ -132,20 +133,33 @@ Route::name('api.')->group(function () {
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
+            Route::get('rider_profile', 'Rider\RiderAPIController@rider_profile')->name('rider_profile');
+
+            Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
+                Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
+                Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
+            });
 
 		});
-
-
 
 	});
 
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 
         Route::middleware('AdminAPIToken')->group(function () {
             Route::post('verify', 'AdminAPIController@verify')->name('verify');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
+
+            Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
+                Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
+                Route::post('history', 'AdminAPIController@attendance_history')->name('history');
+            });
+
         });
 
     });

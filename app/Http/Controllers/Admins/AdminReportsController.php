@@ -5675,7 +5675,8 @@ class AdminReportsController extends Controller
         $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return_intransit'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',21)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
         $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         if ($origin) {
             $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
@@ -5732,6 +5733,18 @@ class AdminReportsController extends Controller
                             ->where('cities.id', $origin);
                     });
             });
+
+            $stats['return_intransit'] = $stats['return_intransit']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+
+        
             $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -5750,6 +5763,7 @@ class AdminReportsController extends Controller
             $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
             $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
             $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['return_intransit'] = $stats['return_intransit']->where('consignee_city_id', $destination);
             $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
         }
         $stats['total'] = number_format($stats['total']->count());
@@ -5758,6 +5772,7 @@ class AdminReportsController extends Controller
         $stats['received'] = number_format($stats['received']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
+        $stats['return_intransit'] = number_format($stats['return_intransit']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
 
 
@@ -5858,7 +5873,10 @@ class AdminReportsController extends Controller
                     $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
                     break;
                 case 'returned':
-                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    $datatable->whereIn('shipments.shipper_status_id',[20,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    break;
+                case 'returned_intransit':
+                    $datatable->where('shipments.shipper_status_id',21);
                     break;
                 case 'in_process':
                     $datatable->whereIn('shipments.shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52]);

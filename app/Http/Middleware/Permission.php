@@ -152,6 +152,8 @@ class Permission
             'master_cargo.bag.create.shipment_details' => 26,
             'master_cargo.bag.create.bag_details' => 26,
             'master_cargo.bag.create.store' => 26,
+            'master_cargo.bag.create.open_bag.index' => 26,
+            'master_cargo.bag.create.open_bag.store' => 26,
             'master_cargo.bag.history.index' => 124,
             'master_cargo.bag.history.list' => 124,
             'master_cargo.bag.receive.quick.index' => 31,
@@ -192,6 +194,9 @@ class Permission
             'delivery.note.index' => 35,
             'delivery.note.shipment.info' => 35,
             'delivery.note.create' => 35,
+
+            'delivery.quick_receiving.index' => 464,
+
             'delivery.receive.index' => 36,
             'delivery.receive.list' => 36,
             'delivery.receive.shipments' => 36,
@@ -365,6 +370,9 @@ class Permission
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.approved.index' => 147,
+            'petty_cash.approved.view' => 461,
+            'petty_cash.approved.view.list' => 461,
+
 //            'petty_cash.statements.approve' => 173,
 //            'petty_cash.statements.approve' => 190,
 //            'petty_cash.statements.approve' => 191,
@@ -645,6 +653,15 @@ class Permission
             'settings.petty_cash.titles.edit' => 164,
             'settings.petty_cash.titles.active' => 165,
             'settings.petty_cash.titles.inactive' => 166,
+
+            'settings.petty_cash.consignee.index' => 462,
+            'settings.petty_cash.consignee.list' => 462,
+            'settings.petty_cash.consignee.store' => 462,
+            'settings.petty_cash.consignee.edit' => 462,
+            'settings.petty_cash.consignee.city.index' => 462,
+            'settings.petty_cash.consignee.city.check' => 462,
+            'settings.petty_cash.consignee.city.update' => 462,
+
 			'settings.auto_invoice_generation_and_due_date.index' => 171,
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
@@ -863,9 +880,28 @@ class Permission
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
-            'human_resourse.allusers' => 449,
-            'human_resourse.all_user_ajax' => 449
-            
+
+            'human_resource.allusers' => 449,
+            'human_resource.all_user_ajax' => 449,
+
+            'human_resource.employee_directory.index' => 467,
+            'human_resource.employee_directory.list' => 467,
+
+            'human_resource.employee_directory.edit' => 468,
+            'human_resource.employee_directory.profile.update' => 468,
+            'human_resource.employee_directory.medical.update' => 468,
+            'human_resource.employee_directory.bank.update' => 468,
+            'human_resource.employee_directory.reference.update' => 468,
+            'human_resource.employee_directory.education.update' => 468,
+            'human_resource.employee_directory.employment.update' => 468,
+            'human_resource.employee_directory.attachments.update' => 468,
+
+            'human_resource.employee_directory.approve' => 469,
+            'human_resource.employee_directory.reject' => 469,
+
+			'attendance.index' => 465,
+            'attendance.list' => 465
+
            
         ],
 

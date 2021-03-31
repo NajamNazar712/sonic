@@ -8,9 +8,17 @@
                 <input type="text" class="form-control" name="cityName" value="{{$city->name}}" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
+       
+
         <div class="col @if($city->hub == 0)d-none @endif" id="country_name_div">
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="countryName" value="{{$city->name}}" placeholder="Add Country Name" required data-rule-required="true" data-msg-required="This field is required">
+            </fieldset>
+        </div>
+        
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="city_code" value="{{$city->city_code}}" placeholder="Add City Code">
             </fieldset>
         </div>
         <div class="col-3">

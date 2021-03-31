@@ -16,6 +16,8 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -39,12 +41,15 @@ use App\Http\Models\Holiday;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
+use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
+use http\Env\Response;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
@@ -77,6 +82,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 class GlobalSettingsController extends Controller
 {
@@ -534,6 +540,132 @@ class GlobalSettingsController extends Controller
         } else {
             return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
         }
+    }
+
+    public function petty_cash_consignee_index(){
+        $consignees = User::where([['status',3],['blacklist',0]])->get(['id','name']);
+        $hubs = City::where('hub',1)->get(['id','name']);
+        return view('admin.settings.petty_cash.consignee_settings')->with(['consignees'=>$consignees,'hubs'=>$hubs]);
+    }
+
+    public function petty_cash_consignee_list(){
+
+        $data = PettyCashConsignee::join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
+            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.id as id','hubs.name as hub_name','petty_cash_consignees.consignee_name as consignee_name');
+        return Datatables::of($data)
+            ->addColumn('action', function ($data) {
+                    $update_city_url = route('admin.settings.petty_cash.consignee.city.index',$data->id);
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        $dropdown .= '<a href="'.$update_city_url.'"><button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Update Cities</div></button></a>';
+
+                    return $dropdown;
+
+            })
+            ->make(true);
+    }
+
+    public function petty_cash_consignee_store(Request $request)
+    {
+        $hub_error = "";
+        $hub_error_status = PettyCashConsignee::where('hub_id',$request->hub)->exists();
+        if($hub_error_status)
+        {
+            $hub_error = "Please Select a Unique Hub";
+        }
+        if($hub_error_status)
+        {
+            return response()->json(['status' => 0,'hub_error'=>$hub_error]);
+        }
+
+        $table = new PettyCashConsignee();
+        $table->consignee_name = $request->consignee;
+        $table->hub_id = $request->hub;
+        $table->save();
+
+        return response()->json(['status' => 1, 'success' => "Petty Cash Consignee Added Successfully"]);
+    }
+
+    public function petty_cash_consignee_edit(Request $request)
+    {
+        $hub_error = "";
+        $hub_error_status = PettyCashConsignee::where([['hub_id',$request->hub],['id','!=',$request->id]])->exists();
+        if($hub_error_status)
+        {
+            $hub_error = "Please Select a Unique Hub";
+        }
+        if($hub_error_status)
+        {
+            return response()->json(['status' => 0, 'hub_error'=>$hub_error]);
+        }
+
+        $table = PettyCashConsignee::find($request->id);
+        if(!$table->exists())
+        {
+            return response()->json(['status' => 0, 'error' => "Petty Cash Consignee Information Not Found, Please Try again!"]);
+        }
+
+        $table->consignee_name = $request->consignee;
+        $table->hub_id = $request->hub;
+        $table->update();
+
+        return response()->json(['status' => 1, 'success' => "Petty Cash Consignee Updated Successfully"]);
+    }
+
+    public function petty_cash_consignee_city_index($id)
+    {
+        $cities = City::all(['id','name']);
+        $consignee = PettyCashConsignee::where('petty_cash_consignees.id',$id)
+            ->join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
+            ->select('hubs.name as hub_name','petty_cash_consignees.consignee_name as consignee_name','petty_cash_consignees.id as id')
+            ->first();
+        $petty_cash_cities = PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->pluck('city_id')->toArray();
+        return view('admin.settings.petty_cash.consignee_city_update')->with(['cities'=>$cities,'petty_cash_cities'=>$petty_cash_cities,'consignee'=>$consignee]);
+    }
+
+    public function petty_cash_consignee_city_check($id, Request $request)
+    {
+        if ($request->has('cities')) {
+            if (count($request->cities) > 0) {
+                $cities = $request->cities;
+                foreach ($cities as $city_id) {
+                    if(PettyCashConsigneeHub::where([['city_id',$city_id],['petty_cash_consignee_id','!=',$id]])->exists())
+                    {
+                        return response()->json(['error'=>'Select Unique Cities, '.City::find($city_id)->name.' is already assigned to consignee']);
+                    }
+                }
+            }
+            else{
+                return response()->json(['error'=>'Cities are required']);
+            }
+        }
+        else{
+            return response()->json(['error'=>'Cities are required']);
+        }
+
+        return 0;
+    }
+
+    public function petty_cash_consignee_city_update($id, Request $request)
+    {
+        PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->delete();
+        if ($request->has('cities')) {
+            if (count($request->cities) > 0) {
+                $cities = $request->cities;
+                foreach ($cities as $city_id) {
+                    $petty_cash_consignee_city = new PettyCashConsigneeHub();
+                    $petty_cash_consignee_city->petty_cash_consignee_id = $id;
+                    $petty_cash_consignee_city->city_id = $city_id;
+                    $petty_cash_consignee_city->save();
+                }
+            }
+        }
+        return redirect()->route('admin.settings.petty_cash.consignee.index')->with('success', 'Petty Cash Consignee Cities Updated!');
     }
 
     public function walk_in_index()
@@ -3356,4 +3488,106 @@ class GlobalSettingsController extends Controller
 
     }
 
+    public function rider_ticker_index()
+    {
+        $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+    }
+
+    public function rider_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_1' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_2' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_3' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_4' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_5' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_1') && !$request->hasFile('upload_image_2') && !$request->hasFile('upload_image_3') && !$request->hasFile('upload_image_4') && !$request->hasFile('upload_image_5')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_1')) {
+            if ($request->has('rider_ticker_id_1')) {
+                $ticker_id = $request->get('rider_ticker_id_1');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_1));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_2')) {
+            if ($request->has('rider_ticker_id_2')) {
+                $ticker_id = $request->get('rider_ticker_id_2');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_2));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_3')) {
+            if ($request->has('rider_ticker_id_3')) {
+                $ticker_id = $request->get('rider_ticker_id_3');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_3));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_4')) {
+            if ($request->has('rider_ticker_id_4')) {
+                $ticker_id = $request->get('rider_ticker_id_4');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_4));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        if ($request->hasFile('upload_image_5')) {
+            if ($request->has('rider_ticker_id_5')) {
+                $ticker_id = $request->get('rider_ticker_id_5');
+                $rider_ticker = RiderTickerImage::find($ticker_id);
+                Storage::disk('public')->delete($rider_ticker->picture_path);
+            } else {
+
+                $rider_ticker = new RiderTickerImage();
+                $rider_ticker->save();
+            }
+
+            $picture_path = 'rider_ticker/' . $rider_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_5));
+            $rider_ticker->picture_path = $picture_path;
+            $rider_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
 }

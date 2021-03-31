@@ -72,7 +72,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resourse.all_user_ajax') }}',
+                        url: '{{ route('admin.human_resource.all_user_ajax') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -134,7 +134,7 @@
                 },
                 
         ajax:{
-                    url: '{{ route('admin.human_resourse.all_user_ajax') }}'
+                    url: '{{ route('admin.human_resource.all_user_ajax') }}'
                    
                 },
         columns: [

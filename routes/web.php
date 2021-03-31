@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Models\HR\Employee;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -1048,6 +1048,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
 
         });
+        Route::prefix('quick_receiving')->name('quick_receiving.')->group(function (){
+            Route::get('','Admins\DeliveryController@quick_receiving_delivery_index')->name('index');
+            Route::post('','Admins\DeliveryController@quick_receiving_submit')->name('submit');
+            Route::post('track_delivery_note','Admins\DeliveryController@quick_receiving_track_delivery_note')->name('track_delivery_note');
+            Route::post('track_tracking_number','Admins\DeliveryController@quick_receiving_track_tracking_number')->name('track_tracking_number');
+        });
 
         Route::prefix('signature')->name('signature.')->group(function () {
             Route::get('', 'Admins\DeliveryController@signature_index')->name('index');
@@ -1275,6 +1281,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('bag_details', 'Admins\AdminMasterCargoController@create_bag_details')->name('bag_details');
                 Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
+
+                Route::prefix('open_bag')->name('open_bag.')->group(function () {
+                    Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
+                    Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
+                });
             });
             Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
             Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
@@ -1328,6 +1339,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
             Route::post('receive_at_link', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link')->name('receive_at_link');
+            Route::post('receive_at_link/store', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive_at_link_store')->name('receive_at_link.store');
             Route::post('receive', 'Admins\AdminMasterCargoController@master_cargo_in_transit_receive')->name('receive');
         });
 
@@ -1626,6 +1638,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
         Route::prefix('make')->name('make.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
+            Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
@@ -1649,6 +1662,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('approved')->name('approved.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
+            Route::get('{id}/view', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view')->name('view');
+            Route::get('{id}/view/list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_view_list')->name('view.list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
             Route::post('bulk_adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_bulk_adjusted')->name('bulk_adjusted');
@@ -2084,6 +2099,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
+
+        Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
+        });
+
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
@@ -2114,6 +2135,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_titles_edit')->name('edit');
                 Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
                 Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
+            });
+            Route::prefix('hub-assigning')->name('consignee.')->group( function(){
+                Route::get('', 'Admins\GlobalSettingsController@petty_cash_consignee_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@petty_cash_consignee_list')->name('list');
+                Route::Post('', 'Admins\GlobalSettingsController@petty_cash_consignee_store')->name('store');
+                Route::Post('edit', 'Admins\GlobalSettingsController@petty_cash_consignee_edit')->name('edit');
+                Route::prefix('city')->name('city.')->group( function(){
+                    Route::get('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_index')->name('index');
+                    Route::Post('{id}/check', 'Admins\GlobalSettingsController@petty_cash_consignee_city_check')->name('check');
+                    Route::Post('{id}', 'Admins\GlobalSettingsController@petty_cash_consignee_city_update')->name('update');
+                });
             });
         });
 
@@ -2725,12 +2757,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
         });
     });
-    Route::prefix('human_resourse')->name('human_resourse.')->group(function () {
-        
+    Route::prefix('human_resource')->name('human_resource.')->group(function () {
+
         Route::get('all_user', 'Admins\AdminHumanResourseController@allusers')->name('allusers');
         Route::get('all_user_ajax', 'Admins\AdminHumanResourseController@all_user_ajax')->name('all_user_ajax');
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
+        Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
+            Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
+            Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
+            Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
+            Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
+            Route::post('{employee}/bank', 'Admins\AdminHumanResourseController@employee_directory_bank_update')->name('bank.update');
+            Route::post('{employee}/reference', 'Admins\AdminHumanResourseController@employee_directory_reference_update')->name('reference.update');
+            Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
+            Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
+            Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+        });
+
+    });
+
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
+        Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
     });
 
 });

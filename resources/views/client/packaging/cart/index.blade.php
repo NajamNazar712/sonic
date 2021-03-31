@@ -32,11 +32,11 @@
                                                             <p><b>Size: </b>{{$size->size}}</p>
                                                         </div>
                                                         <div class="col mb-1 text-center">
-                                                            @if(array_key_exists($size->id, $user_charges))
-                                                                <p><b>Charges: </b>{{$user_charges[$size->id]}}</p>
-                                                            @else
+{{--                                                            @if(array_key_exists($size->id, $user_charges))--}}
+{{--                                                                <p><b>Charges: </b>{{$user_charges[$size->id]}}</p>--}}
+{{--                                                            @else--}}
                                                                 <p><b>Charges: </b>{{$standard_charges[$size->id]}}</p>
-                                                            @endif
+{{--                                                            @endif--}}
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <p><b>Flyer: </b> {{$row}}<p>

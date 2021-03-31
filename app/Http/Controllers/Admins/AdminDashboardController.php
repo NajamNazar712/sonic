@@ -2494,26 +2494,26 @@ class AdminDashboardController extends Controller
                 ]);
             }
 
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
-                $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
-                PackagingCharge::where('user_id', $id)->delete();
-                foreach ($packaging_types as $type){
-                    if($request->has('packaging_type_'.$type->id)){
-                        $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                        foreach ($packaging_size as $size) {
-                            $key = "packaging_material_size.$size->id";
-                            $packaging_charges = new PackagingCharge();
-                            $packaging_charges->user_id = $id;
-                            $packaging_charges->type_id = $type->id;
-                            $packaging_charges->size_id = $size->id;
-                            $packaging_charges->charges = ($request->has($key) ? $request->packaging_material_size[$size->id]: 0);
-                            $packaging_charges->save();
-                        }
-
-                    }
-                }
-
-            }
+//            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+//                $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+//                PackagingCharge::where('user_id', $id)->delete();
+//                foreach ($packaging_types as $type){
+//                    if($request->has('packaging_type_'.$type->id)){
+//                        $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+//                        foreach ($packaging_size as $size) {
+//                            $key = "packaging_material_size.$size->id";
+//                            $packaging_charges = new PackagingCharge();
+//                            $packaging_charges->user_id = $id;
+//                            $packaging_charges->type_id = $type->id;
+//                            $packaging_charges->size_id = $size->id;
+//                            $packaging_charges->charges = ($request->has($key) ? $request->packaging_material_size[$size->id]: 0);
+//                            $packaging_charges->save();
+//                        }
+//
+//                    }
+//                }
+//
+//            }
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
 
@@ -6358,25 +6358,25 @@ class AdminDashboardController extends Controller
         }
 
         //Packaging Charges
-        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
-            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
-
-            foreach ($packaging_types as $type){
-                if($request->has('packaging_type_'.$type->id)){
-                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                    foreach ($packaging_size as $size) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $type->id;
-                        $packaging_charges->size_id = $size->id;
-                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
-                        $packaging_charges->save();
-                    }
-
-                }
-            }
-
-        }
+//        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+//            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+//
+//            foreach ($packaging_types as $type){
+//                if($request->has('packaging_type_'.$type->id)){
+//                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+//                    foreach ($packaging_size as $size) {
+//                        $packaging_charges = new PackagingCharge();
+//                        $packaging_charges->user_id = $id;
+//                        $packaging_charges->type_id = $type->id;
+//                        $packaging_charges->size_id = $size->id;
+//                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
+//                        $packaging_charges->save();
+//                    }
+//
+//                }
+//            }
+//
+//        }
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             if($request->has('on_default') && $request->on_default == 'on'){
@@ -8005,7 +8005,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
+            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -8117,6 +8117,7 @@ class AdminDashboardController extends Controller
                 if($request->postType == 'city'){
                     City::where('id',$id)->update([
                         'name'=>$request->cityName,
+                        'city_code'=>$request->city_code,
                         'hub'=>0,
                         'hub_id'=>$request->hubs,
                         'zone_id'=>City::find($request->hubs)->zone_id,
@@ -8169,6 +8170,7 @@ class AdminDashboardController extends Controller
                 elseif($request->postType == 'hub'){
                     City::where('id',$id)->update([
                         'name'=>$request->cityName,
+                        'city_code'=>$request->city_code,
                         'hub'=>1,
                         'hub_id'=>$id,
                         'zone_id'=>$request->zone_id,
@@ -8227,11 +8229,13 @@ class AdminDashboardController extends Controller
     }
     //update city end
     public function addCityHub(Request $request){
+        // dd($request->city_code);
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
             $city = City::create([
                 'name'=>$request->cityName,
+                'city_code'=>$request->city_code,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=> $zone_id,
@@ -8283,6 +8287,7 @@ class AdminDashboardController extends Controller
         }elseif($request->postType == 'hub'){
             $city = City::create([
                 'name'=>$request->cityName,
+                'city_code'=>$request->city_code,
                 'hub'=>1,
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
@@ -9537,6 +9542,7 @@ class AdminDashboardController extends Controller
         if($request->postType == 'city'){
             City::where('id',$id)->update([
                 'name'=>$request->cityName,
+                'city_code'=>$request->city_code,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=>City::find($request->hubs)->zone_id,
@@ -9566,6 +9572,7 @@ class AdminDashboardController extends Controller
         }elseif($request->postType == 'hub'){
             City::where('id',$id)->update([
                 'name'=>$request->countryName,
+                'city_code'=>$request->city_code,
                 'hub'=>1,
                 'hub_id'=>$id,
                 'zone_id'=>$request->zone_id,
@@ -9601,6 +9608,7 @@ class AdminDashboardController extends Controller
 
             $city = City::create([
                 'name'=>$request->cityName,
+                'city_code'=>$request->city_code,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=> $zone_id,
@@ -9633,6 +9641,7 @@ class AdminDashboardController extends Controller
         }elseif($request->postType == 'hub'){
             $city = City::create([
                 'name'=>$request->countryName,
+                'city_code'=>$request->city_code,
                 'hub'=>1,
                 'zone_id'=>$request->zone_id,
                 'pickup'=>0,

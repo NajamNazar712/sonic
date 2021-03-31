@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Models\HR;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Employee extends Model
+{
+    public function medical_infos() {
+        return $this->HasMany('App\Http\Models\HR\EmployeeMedicalInformation');
+    }
+
+    public function education_infos() {
+        return $this->HasMany('App\Http\Models\HR\EmployeeEducationalBackground');
+    }
+
+    public function employment_history() {
+        return $this->HasMany('App\Http\Models\HR\EmployeeEmployementHistory');
+    }
+
+    public function bank_info() {
+        return $this->HasOne('App\Http\Models\HR\EmployeeBankInformation');
+    }
+
+    public function reference() {
+        return $this->HasOne('App\Http\Models\HR\EmployeeReference');
+    }
+
+    public function attachments() {
+        return $this->HasOne('App\Http\Models\HR\EmployeeAttachment');
+    }
+
+}

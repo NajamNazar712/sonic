@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
@@ -629,7 +630,8 @@ class RiderManagementController extends Controller
     public function rider_request_list(Request $request)
     {
         $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
-            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name')
+            ->join('employees as e', 'e.rider_request_id', '=', 'rider_requests.id')
+            ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name', 'e.trax_id  as trax_id')
             ->where('rider_requests.status', 0);
 
         if (session('role_id') != 1) {
@@ -640,23 +642,25 @@ class RiderManagementController extends Controller
                 return ($rider_request->status == 0) ? 'Pending' : 'Processed';
             })
             ->addColumn("action", function ($rider_request) {
-                if (session('role_id') == 1 || count(array_intersect([426], session('permissions'))) !== 0) {
-                    $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                    ';
+                if($rider_request->trax_id && $rider_request->trax_id != null){
+                    if (session('role_id') == 1 || count(array_intersect([426], session('permissions'))) !== 0) {
+                        $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                            if (session('role_id') == 1 || in_array(426, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+                            }
+                        $dropdown .= '
+                            </div>
+                          </div>
+                        ';
 
-                    if (session('role_id') == 1 || in_array(426, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_request->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
-
+                        return $dropdown;
+                    } else {
+                        return '';
                     }
-                    $dropdown .= '
-                        </div>
-                      </div>
-                    ';
-
-                    return $dropdown;
                 } else {
                     return '';
                 }
@@ -684,17 +688,26 @@ class RiderManagementController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
-        if($global_setting->exists()){
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        $employee = Employee::where('rider_request_id', $request->rider_request_id);
+        if($employee->exists()){
+            $employee = $employee->first();
+            $employee->status_id = 1;
+            $employee->save();
+            $trax_id = $employee->trax_id;
         }
         else{
-            $trax_id = null;
+            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+            if($global_setting->exists()){
+                $global_setting = $global_setting->first();
+                $trax_id = $global_setting->setting_value + 1;
+                $global_setting->setting_value = $trax_id;
+                $global_setting->save();
+                $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+            }
+            else{
+                $trax_id = null;
+            }
         }
 
         $rider = Rider::create([

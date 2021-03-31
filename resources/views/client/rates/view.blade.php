@@ -22,7 +22,7 @@
                         <div class="card-content">
                             <form id="ratesAdditionForm" class="card-body card-dashboard" novalidate="novalidate">
                                 @csrf
-                                <div class="card">
+                               {{-- <div class="card">
 
                                     <div class="">
                                         @if(count($packaging_material_types) > 0)
@@ -95,7 +95,7 @@
 
                                     </div>
 
-                                </div>
+                                </div>--}}
 
                                 <div id="headingCollapse61" class="card-header border-success">
                                     <div class="row">
