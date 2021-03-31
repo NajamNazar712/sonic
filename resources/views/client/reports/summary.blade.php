@@ -522,7 +522,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Summary Reportt',
+                        title: 'Summary Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
