@@ -42,12 +42,12 @@
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Arrival On</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
@@ -232,12 +232,12 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Shipment Status');
+                            head.push('Arrival Date');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
                             head.push('Agent');
-                            head.push('Arrival On');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
@@ -263,12 +263,12 @@
                                 row.push(values.hub);
                                 row.push(values.zone);
                                 row.push(values.status);
+                                row.push(values.arrival);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.agent);
-                                row.push(values.arrival);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged);
@@ -588,12 +588,12 @@
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
