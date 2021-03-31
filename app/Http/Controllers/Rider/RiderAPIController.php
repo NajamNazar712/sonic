@@ -4353,7 +4353,7 @@ class RiderAPIController extends Controller
 
     public function signup_data(Request $request)
     {
-        $cities = City::where('business_category_id', 1)->select('id', 'name')->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $designation = EmployeeDesignation::select('id', 'name')->get();
         $domicile = EmployeeDomicile::select('id', 'name')->get();
         $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
@@ -4379,7 +4379,7 @@ class RiderAPIController extends Controller
                 'name' => ['required'],
                 'employee_gender_id' => ['required'],
                 'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-                'cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'guardian_name' => ['required'],
                 'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
@@ -4419,7 +4419,7 @@ class RiderAPIController extends Controller
                 //Attachments
                 'cv' => ['mimes:pdf'],
                 'academic_credentials' => ['mimes:pdf'],
-                'cnic_img' => ['mimes:png,jpeg,jpg'],
+                'cnic' => ['mimes:png,jpeg,jpg'],
                 'photo' => ['mimes:png,jpeg,jpg'],
                 'experience_certificates' => ['mimes:png,jpeg,jpg'],
                 'pay_slip' => ['mimes:png,jpeg,jpg'],
@@ -4460,33 +4460,33 @@ class RiderAPIController extends Controller
                 $response['errors'] = $validate->errors();
             } else {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check RiderRequest Already Exist
                 if ($rider_request->exists()) {
                     $rider_request = $rider_request->first();
-                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($rider_request->phone_no == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
 
-                    } else if ($rider_request->cnic == $request->input('cnic')) {
+                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
                 } //Check Rider Already Exist
                 else {
-                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic'));
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic_no'));
 
                     if ($rider->exists()) {
                         $rider = $rider->first();
-                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
                             $message = "Phone Number & CNIC Already Exists";
 
                         } else if ($rider->phone == $request->phone_number) {
                             $message = "Phone Number Already Exist";
 
-                        } else if ($rider->cnic == $request->input('cnic')) {
+                        } else if ($rider->cnic == $request->input('cnic_no')) {
                             $message = "CNIC Already Exist";
                         }
 
@@ -4494,7 +4494,7 @@ class RiderAPIController extends Controller
                         try {
                             $rider_request = new RiderRequest();
                             $rider_request->name = $request->name;
-                            $rider_request->cnic = $request->cnic;
+                            $rider_request->cnic = $request->cnic_no;
                             $rider_request->phone_no = $request->phone_number;
                             $rider_request->pin = $request->pin;
                             $rider_request->city_id = $request->city_id;
@@ -4505,7 +4505,7 @@ class RiderAPIController extends Controller
                             $employee_request->name = $request->name;
                             $employee_request->employee_gender_id = $request->employee_gender_id;
                             $employee_request->city_id = $request->city_id;
-                            $employee_request->cnic = $request->cnic;
+                            $employee_request->cnic = $request->cnic_no;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
                             $employee_request->rider_request_id = $rider_request->id;
