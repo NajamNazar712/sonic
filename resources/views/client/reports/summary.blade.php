@@ -212,6 +212,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Product Category</th>
                         <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -219,7 +220,6 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
-                        <th class="border-primary border-darken-1">Booking Date</th>
 
                     </tr>
                     </thead>
@@ -474,6 +474,7 @@
                             head.push('Service Type');
                             head.push('Product Category');
                             head.push('Description');
+                            head.push('Booking Date');
                             head.push('Arrival Date');
                             head.push('Origin');
                             head.push('Destination');
@@ -481,7 +482,6 @@
                             head.push('Actual Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
-                            head.push('Booking Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -498,6 +498,7 @@
                                 row.push(values.service_type);
                                 row.push(values.product_name);
                                 row.push(values.description);
+                                row.push(values.booking_date);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -505,7 +506,6 @@
                                 row.push(values.actual_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
-                                row.push(values.booking_date);
 
                                 body.push(row);
                             });
@@ -559,6 +559,7 @@
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
+                    { data:'booking_date' ,name: 'booking_date', class: 'align-middle booking_date'}
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
@@ -566,7 +567,6 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
-                    { data:'booking_date' ,name: 'booking_date', class: 'align-middle booking_date'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
