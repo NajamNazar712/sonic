@@ -559,7 +559,7 @@
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
-                    { data:'booking_date' ,name: 'booking_date', class: 'align-middle booking_date'}
+                    { data:'booking_date' ,name: 'booking_date', class: 'align-middle booking_date'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
