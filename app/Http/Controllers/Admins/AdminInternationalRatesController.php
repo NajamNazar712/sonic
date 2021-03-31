@@ -707,7 +707,7 @@ class AdminInternationalRatesController extends Controller
                 $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
                 if($fuel_surcharge->exists()){
                     $fuel_surcharge = $fuel_surcharge->first();
-                    $fuel_charges = $fuel_surcharge->setting_value;
+                    $fuel_charges = (float)$fuel_surcharge->text;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
@@ -716,7 +716,7 @@ class AdminInternationalRatesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = $exchange_rate->setting_value;
+                    $exchange_rate_charges = (float)$exchange_rate->text;;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
@@ -725,7 +725,7 @@ class AdminInternationalRatesController extends Controller
                 $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
                 if($gst_rate->exists()){
                     $gst_rate = $gst_rate->first();
-                    $gst = $gst_rate->setting_value;
+                    $gst = $gst = (float)$gst_rate->text;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
@@ -783,7 +783,7 @@ class AdminInternationalRatesController extends Controller
                 $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
                 if($fuel_surcharge->exists()){
                     $fuel_surcharge = $fuel_surcharge->first();
-                    $fuel_charges = $fuel_surcharge->setting_value;
+                    $fuel_charges = (float)$fuel_surcharge->text;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
@@ -792,7 +792,7 @@ class AdminInternationalRatesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = $exchange_rate->setting_value;
+                    $exchange_rate_charges = (float)$exchange_rate->text;;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
@@ -801,7 +801,7 @@ class AdminInternationalRatesController extends Controller
                 $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
                 if($gst_rate->exists()){
                     $gst_rate = $gst_rate->first();
-                    $gst = $gst_rate->setting_value;
+                    $gst = $gst = (float)$gst_rate->text;
                 }
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);

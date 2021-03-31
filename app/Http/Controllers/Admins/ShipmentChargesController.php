@@ -544,7 +544,7 @@ class ShipmentChargesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = $exchange_rate->setting_value;
+                    $exchange_rate_charges = (float)$exchange_rate->text;;
                 }
 
 
@@ -603,7 +603,7 @@ class ShipmentChargesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = $exchange_rate->setting_value;
+                    $exchange_rate_charges = (float)$exchange_rate->text;;
                 }
 
 
@@ -2149,7 +2149,7 @@ class ShipmentChargesController extends Controller
         $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
         if($fuel_surcharge->exists()){
             $fuel_surcharge = $fuel_surcharge->first();
-            $fuel_charge = $fuel_surcharge->setting_value;
+            $fuel_charge = (float)$fuel_surcharge->text;
             $result = array();
 
             $result['fuel_surcharge'] = ROUND((($fuel_charge / 100) * $shipment->weight_charges), 2, PHP_ROUND_HALF_DOWN);

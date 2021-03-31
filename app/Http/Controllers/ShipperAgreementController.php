@@ -708,21 +708,21 @@ otherwise it will be rejected</li>
                     $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
                     if($fuel_surcharge->exists()){
                         $fuel_surcharge = $fuel_surcharge->first();
-                        $fuel_charges = $fuel_surcharge->setting_value;
+                        $fuel_charges = (float)$fuel_surcharge->text;
                     }
 
                     $exchange_rate_charges = 0;
                     $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                     if($exchange_rate->exists()){
                         $exchange_rate = $exchange_rate->first();
-                        $exchange_rate_charges = $exchange_rate->setting_value;
+                        $exchange_rate_charges = (float)$exchange_rate->text;
                     }
 
                     $gst = 0;
                     $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
                     if($gst_rate->exists()){
                         $gst_rate = $gst_rate->first();
-                        $gst = $gst_rate->setting_value;
+                        $gst = (float)$gst_rate->text;
                     }
 
                     $intl_charges = '<div class="row"><div class="col-12"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Charges</strong></thead></table></div></div>';
