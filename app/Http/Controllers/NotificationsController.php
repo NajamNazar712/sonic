@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
@@ -7088,22 +7089,72 @@ class NotificationsController extends Controller
                         $subject = str_replace('[date]', $date, $subject);
                     }
 
-                    $logs = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
+                    $group_logs =  ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
                         ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
                         ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
+                        ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at','ar.department_id as department_id')
                         ->where('emailed',0)
-                        ->groupBy('ar.department_id')
-                        ->get();
-                    foreach ($logs as $log)
-                    {
-                        $log
-                    }
+                        ->get()
+                        ->groupBy('department_id');
 
+                    foreach ($group_logs as $key => $logs)
+                    {
+                        $head_role_id = AdminRole::where('department_id',$key)
+                            ->whereIn('id',ActivityTrailController::$department_head_ids)
+                            ->pluck('id')
+                            ->first();
+
+                        $heads =  Admin::where('role_id',$head_role_id)->get();
+
+                        if(count($heads) > 1)
+                        {
+                            $name = "Concern Head";
+                        }
+                        else{
+                            $name = $heads[0]->name;
+                        }
+                        if (strpos($body, '[contact_person]') !== FALSE) {
+                            $body = str_replace('[contact_person]', $name, $body);
+                        }
+
+                        $preview = '<table style="width:100%;">';
+                        $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
+                        $preview .= '<tbody>';
+                        foreach ($logs as $index => $log)
+                        {
+                            $preview .= '<tr>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.($index + 1).'</td>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->name.'</td>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->designation.'</td>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->screen_name.'</td>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->action.'</td>';
+                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->created_at.'</td>';
+                            $preview .= '</tr>';
+                            $log->emailed = 1;
+                            $log->update();
+                        }
+
+                        $preview .= '</tbody></table>';
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $preview, $body);
+                        }
+
+                        $to = array();
+
+                        foreach ($heads as $head)
+                        {
+                            array_push($to,$head->email);
+                        }
+
+                        self::email($subject, $body, $to);
+
+                    }
 
                 }
             }
         }
     }
+
     static public function custom($type, $subject, $body, $to) {
       if ($type == 1) {
         self::email($subject, $body, $to);

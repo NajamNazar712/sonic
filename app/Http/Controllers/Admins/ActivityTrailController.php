@@ -32,41 +32,7 @@ class ActivityTrailController extends Controller
 
     public function activity_trail_index ()
     {
-        $group_logs =  ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
-            ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
-            ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at','ar.department_id as department_id')
-            ->where('emailed',0)
-            ->get()
-            ->groupBy('department_id');
-
-        foreach ($group_logs as $key => $logs)
-        {
-             $head_role_id = AdminRole::where('department_id',$key)->whereIn('id',ActivityTrailController::$department_head_ids)->pluck('id')->first();
-             $head =  Admin::where('role_id',$head_role_id)->first();
-
-//            if (strpos($body, '[contact_person]') !== FALSE) {
-//                $body = str_replace('[contact_person]', $head->name, $body);
-//            }
-
-            $preview = '<table style="width:100%;">';
-            $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
-             foreach ($logs as $index => $log)
-             {
-                $preview .= '<tr>';
-                $preview .= '<td>'.$index.'</td>';
-                                <td>$log->name</td>
-                                <td>$log->designation</td>
-                                <td>$log->screen_name</td>
-                                <td>$log->action</td>
-                                <td>$log->created_at</td>
-                            </tr>`;
-             }
-
-             $preview .= `</table>`;
-             return $preview;
-        }
-        exit;
+        NotificationsController::send(127,null);
         return view('admin.activity_trail.index');
     }
 
