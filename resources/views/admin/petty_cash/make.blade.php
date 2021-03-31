@@ -363,6 +363,7 @@
             $('body').on('change','#datatable tr td.details_of_expense textarea,#datatable tr td.remarks textarea',function() {
                 $(this).val($(this).val().trim());
             });
+            var min_date_limit = '{{ Carbon\Carbon::now()->subDays(7)->toDateString() }}';
             function add_row() {
                 rows_count++;
                 selected_rows.push(rows_count);
@@ -431,6 +432,7 @@
                 $('#expense_date_' + rows_count).pickadate({
                     firstDay: 1,
                     today: '',
+                    min: new Date(min_date_limit),
                     max: all_max_date,
                     clear: '',
                     close: '',
