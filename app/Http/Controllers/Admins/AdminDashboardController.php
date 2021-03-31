@@ -9869,18 +9869,10 @@ class AdminDashboardController extends Controller
 
 
     public function todayActiveAccountsList(){
-        dd(Carbon::parse('-24 hours'));
+        // dd(Carbon::parse('-24 hours'));
         // dd(Carbon::today('-12 hours'));
         // dd(Carbon::today('+12 hours'));
-        // $shippers = User::whereIn('status', [3, 4])->get();
-        // $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
-        $products = Product::select('id','product_name')->get();
-        $segments = Segment::all();
-        $payment_cycles = PaymentCycle::all();
-        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        $territories = Territory::select('id','name')->get();
-        // return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
-        return view('admin.accounts.today_active_accounts_list')->with(['products'=>$products, 'payment_cycles' => $payment_cycles, 'segments' => $segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
+       return view('admin.accounts.today_active_accounts_list');
 
     }
 
