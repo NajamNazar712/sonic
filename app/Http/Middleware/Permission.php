@@ -12,6 +12,9 @@ class Permission
         'admin' => [
             'orders.shipper_recall' => 139,
 
+            'activity_trail.index' => 471,
+            'activity_trail.list' => 471,
+
             'dispute.index' => 1,
             'dispute.list' => 1,
             'dispute.create' => 2,

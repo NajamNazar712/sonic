@@ -7080,6 +7080,15 @@ class NotificationsController extends Controller
                     $to = $phone;
                     self::sms($body,$to);
                 }
+                else if($id == 127){
+                    $date = Carbon::today()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+
+                }
             }
         }
     }

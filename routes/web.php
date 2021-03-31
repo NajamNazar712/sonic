@@ -400,6 +400,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return redirect()->route('admin.login');
     });
 
+    Route::prefix('activity_trail')->name('activity_trail.')->group(function () {
+        Route::get('', 'Admins\ActivityTrailController@activity_trail_index')->name('index');
+        Route::get('list', 'Admins\ActivityTrailController@activity_trail_list')->name('list');
+    });
+
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
 

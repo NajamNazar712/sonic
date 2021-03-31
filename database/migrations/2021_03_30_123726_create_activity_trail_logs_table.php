@@ -17,6 +17,7 @@ class CreateActivityTrailLogsTable extends Migration
             $table->increments('id');
             $table->integer('admin_id')->index();
             $table->integer('action_id')->index();
+            $table->boolean('emailed')->default(0);
             $table->timestamps();
         });
     }
