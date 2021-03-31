@@ -45,24 +45,26 @@ class ActivityTrailController extends Controller
              $head_role_id = AdminRole::where('department_id',$key)->whereIn('id',ActivityTrailController::$department_head_ids)->pluck('id')->first();
              $head =  Admin::where('role_id',$head_role_id)->first();
 
-            if (strpos($body, '[contact_person]') !== FALSE) {
-                $body = str_replace('[contact_person]', $head->name, $body);
-            }
+//            if (strpos($body, '[contact_person]') !== FALSE) {
+//                $body = str_replace('[contact_person]', $head->name, $body);
+//            }
 
-            $preview = `<table>
-                           <tr>
-                            <th>S No.</th>
-                            <th>Team Member Name</th>
-                            <th>Designation</th>
-                            <th>Screen Name</th>
-                            <th>Action Performed</th>
-                            <th>Action Performed Time</th>
-                           </tr>`
-             foreach ($logs as $log)
+            $preview = '<table style="width:100%;">';
+            $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
+             foreach ($logs as $index => $log)
              {
-
+                $preview .= '<tr>';
+                $preview .= '<td>'.$index.'</td>';
+                                <td>$log->name</td>
+                                <td>$log->designation</td>
+                                <td>$log->screen_name</td>
+                                <td>$log->action</td>
+                                <td>$log->created_at</td>
+                            </tr>`;
              }
 
+             $preview .= `</table>`;
+             return $preview;
         }
         exit;
         return view('admin.activity_trail.index');

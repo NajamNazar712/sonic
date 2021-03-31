@@ -3171,7 +3171,7 @@ class NotificationsController extends Controller
                             $details .= '<tbody>';
                             $details .= '<tr>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $hub->name . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;e">' . $debriefing->delivered . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivered . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
