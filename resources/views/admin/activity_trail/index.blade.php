@@ -3,62 +3,60 @@
 @section('title', 'Activity Trail Log')
 
 @section('content')
-    <h1>Activity Trail Log</h1>
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Activity Trail Log
+                </h1>
 
-    <section>
-        <div class="row">
-
-            <div class="col-12">
                 <div class="card">
-                    @include('admin.inc.messages')
-
-                    <div class="card-content">
+                    <div class="card-content" aria-expanded="true">
                         <div class="card-body">
+                            @include('client.inc.messages')
 
-                            <div class="row mb-2 mt-1 justify-content-center">
-                                <div class="col-12 ">
-                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
-                                        <div class="col-4">
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="from_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" >
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >
-                                            </div>
+                            <div id="search_form" class="row mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+			                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+			                                    <span class="la la-calendar-o"></span>
+			                                </span>
                                         </div>
 
-                                        <div class="col-2">
-                                            <div class="form-group mt-1">
-                                                <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
-                                            </div>
+                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)">
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+			                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+			                                    <span class="la la-calendar-o"></span>
+			                                </span>
                                         </div>
-                                    </form>
+
+                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)">
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
-                                <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Team Member Name</th>
-                                    <th class="border-primary border-darken-1">Designation</th>
-                                    <th class="border-primary border-darken-1">Screen Name</th>
-                                    <th class="border-primary border-darken-1">Action Performed</th>
-                                    <th class="border-primary border-darken-1">Action Performed Time</th>
-                                </tr>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Team Member Name</th>
+                                        <th class="border-primary border-darken-1">Designation</th>
+                                        <th class="border-primary border-darken-1">Screen Name</th>
+                                        <th class="border-primary border-darken-1">Action Performed</th>
+                                        <th class="border-primary border-darken-1">Action Performed Time</th>
+                                    </tr>
                                 </thead>
                             </table>
                         </div>
@@ -66,7 +64,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
 
 @endsection
@@ -95,7 +93,7 @@
     <script type="text/javascript">
         $(function () {
 
-            var from_date = $('#from_date').pickadate({
+            var from_date = $('#search_from').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 format:'dd mmmm, yyyy',
@@ -105,11 +103,11 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                        $('#search_form #search_to').pickadate('picker').set('min', $('#search_form #search_from').pickadate('picker').get('select'));
                     }
                 }
             });
-            var to_date = $('#to_date').pickadate({
+            var to_date = $('#search_to').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 format:'dd mmmm, yyyy',
@@ -119,7 +117,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                        $('#search_form #search_from').pickadate('picker').set('max', $('#search_form #search_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -145,17 +143,14 @@
                             head.push('Action Performed');
                             head.push('Action Performed Time');
                             $.each(result.data, function(index, values) {
-                                if(values.id!=null){
-
-                                    row = [];
-                                    row.push(index + 1);
-                                    row.push(values.name);
-                                    row.push(values.designation);
-                                    row.push(values.screen);
-                                    row.push(values.action);
-                                    row.push(values.created_at);
-                                    body.push(row);
-                                }
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.designation);
+                                row.push(values.screen_name);
+                                row.push(values.action);
+                                row.push(values.created_at);
+                                body.push(row);
 
                             });
 
@@ -171,7 +166,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                "order": [[ 5, "desc" ]],
+                order: [[ 5, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {
@@ -181,6 +176,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
 
                     },
+                    'reset',
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -190,7 +186,6 @@
                 language: {
                     processing: data_table_loader
                 },
-
                 ajax:{
                     url: '{{ route('admin.activity_trail.list') }}',
                     data: function (d) {
@@ -199,13 +194,18 @@
                     }
                 },
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'trax_id', class: 'align-middle name'},
-                    {data: 'designation', name: 'name', class: 'align-middle designation'},
-                    {data: 'screen', name: 'cnic', class: 'align-middle screen'},
-                    {data: 'action', name: 'phone', class: 'align-middle action'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                ],initComplete: function() {
+                    {orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
+                    {data: 'screen_name', name: 'ata.screen_name', class: 'align-middle screen'},
+                    {data: 'action', name: 'ata.action', class: 'align-middle action'},
+                    {data: 'created_at', name: 'activity_trail_logs.created_at', class: 'align-middle created_at'},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -234,8 +234,9 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-
+            $('#search_filter_btn').on('click', function() {
+                table.draw();
+            });
         });
 
     </script>
