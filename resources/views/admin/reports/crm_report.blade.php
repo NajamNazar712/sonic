@@ -76,6 +76,16 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                @foreach($case_nature_types as $case_nature_type)
+                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_agent" id="search_agent" class="form-control select2">
                                 @foreach($agents as $agent)
                                     <option value="{{$agent->id}}">{{$agent->name}}</option>
@@ -106,6 +116,18 @@
 
 
                     <div class="col-4">
+                        {{-- <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                        </div> --}}
+                    </div>
+
+
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -115,7 +137,6 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
                         </div>
                     </div>
-
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -280,6 +301,12 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Case Nature Type',
+                width:'100%',
+                allowClear:true
+            });
+            
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
@@ -440,6 +467,7 @@
                         d.search_zone = $('#search_zone').val();
                         d.search_agent = $('#search_agent').val();
                         d.search_case_nature = $('#search_case_nature').val();
+                        d.search_case_nature_type = $('#search_case_nature_type').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_status = $('#search_status').val();
