@@ -926,7 +926,8 @@ class VisionSoftAPIController extends Controller
                                 'pin_bank' => $station_deposit_note->bank->name,
                                 'pin_amount' => $station_deposit_note->sdn_amount,
                                 'pin_adj_amount' => $station_deposit_note->adjustment_amount,
-                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id
+                                'pin_adj_stmt_head_id' => $station_deposit_note->petty_cash_statement_id,
+                                'pin_creation_date' => Carbon::parse($station_deposit_note->created_at)->format('m/d/Y')
                             ]
                         ]);
                         $status_code = $response->getStatusCode();
@@ -1080,7 +1081,7 @@ class VisionSoftAPIController extends Controller
                                         'pin_tr_date' => $today->format('m/d/Y'),
                                         'pin_ref_stmt_no' => $petty_cash_statement->reference_no,
                                         'pin_amount' => $amount,
-                                        'pin_hub_id' => $petty_cash_statement_detail->hub_id,
+                                        'pin_hub_id' => $petty_cash_statement->hub_id,
                                         'pin_account_head' => $petty_cash_statement_detail->heads->name,
                                         'pin_account_title' => $petty_cash_statement_detail->titles->name,
                                         'pin_details' => $petty_cash_statement_detail->expense_details,
@@ -1213,14 +1214,16 @@ class VisionSoftAPIController extends Controller
         $adjustments = AdjustmentLog::join('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('cities as c', 'c.id', '=', 's.consignee_city_id')
+            ->join('cities as h', 'h.id', '=', 'c.hub_id')
             ->join('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
-            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city', 'at.name as type', 's.id as shipment_id')
+            ->select('adjustment_logs.created_at as created_at', 'u.id as account_id', 's.tracking_number as tracking_number', 'adjustment_logs.adjustment_amount as amount', 'c.name as city', 'at.name as type', 's.id as shipment_id', 'h.name as hub', 's.amount as shipment_amount')
             ->whereDate('adjustment_logs.created_at', $date)
             ->get();
 
         if(count($adjustments) > 0){
             foreach ($adjustments as $adjustment) {
                 $status_date = '';
+                $cod_amount = '';
 
                 if (in_array($adjustment->type, [1, 13])) {
                     $journey = ShipmentsJourney::where('shipment_id', $adjustment->shipment_id)->where('shipper_status_id', 20)->where('verification', 1);
@@ -1238,6 +1241,8 @@ class VisionSoftAPIController extends Controller
                         $journey = $journey->latest('id')->first();
 
                         $status_date = Carbon::parse($journey->created_at)->format('m/d/Y');
+
+                        $cod_amount = $adjustment->shipment_amount;
                     }
                 }
                 else if (in_array($adjustment->type, [5, 12])) {
@@ -1263,8 +1268,9 @@ class VisionSoftAPIController extends Controller
                             'pin_account_id' => $adjustment->account_id,
                             'pin_adj_type' => $adjustment->type,
                             'pin_amount' => $adjustment->amount,
-                            'pin_destination' => $adjustment->city,
-                            'pin_status_date' => $status_date
+                            'pin_destination' => $adjustment->hub,
+                            'pin_status_date' => $status_date,
+                            'pin_cod_amount' => $cod_amount
                         ]
                     ]);
                     $status_code = $response->getStatusCode();
