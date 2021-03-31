@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
@@ -7085,6 +7086,17 @@ class NotificationsController extends Controller
 
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    $logs = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
+                        ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
+                        ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
+                        ->where('emailed',0)
+                        ->groupBy('ar.department_id')
+                        ->get();
+                    foreach ($logs as $log)
+                    {
+                        $log
                     }
 
 
