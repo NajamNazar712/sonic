@@ -470,6 +470,7 @@
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || in_array(473, session('permissions')))
                     {
                         className: 'btn btn-primary check',
                         text: 'Check',
@@ -545,6 +546,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
