@@ -7114,24 +7114,38 @@ class NotificationsController extends Controller
                         $html .= '</tr>';
 
                         $html .= '</tbody></table>';
-                    }
 
-                    if (strpos($body, '[preview]') !== FALSE) {
-                        $body = str_replace('[preview]', $html, $body);
-                    }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
 
-                    $admins = Admin::where('role_id',10)->where('status',1)->get();
-                    foreach($admins as $admin){
-                        $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id',$master_cargo->destination_hub_id);
-                        if($assign_hubs->exists()){
-                            if (strpos($body, '[station_manager]') !== FALSE) {
-                                $body = str_replace('[station_manager]', $admin->name, $body);
+                        $admins = Admin::where('role_id',10)->where('status',1)->get();
+                        foreach($admins as $admin) {
+                            if ($master_cargo->junction_hub_1_id != null) {
+                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_1_id);
+                                if ($assign_hubs->exists()) {
+                                    $to = $admin->email;
+                                    self::email($subject, $body, $to);
+                                }
                             }
-                            $to = $admin->email;
-                            self::email($subject, $body, $to);
+
+                            if ($master_cargo->junction_hub_2_id != null) {
+                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_2_id);
+                                if ($assign_hubs->exists()) {
+                                    $to = $admin->email;
+                                    self::email($subject, $body, $to);
+                                }
+                            }
+
+                            if ($master_cargo->destination_hub_id) {
+                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->destination_hub_id);
+                                if ($assign_hubs->exists()) {
+                                    $to = $admin->email;
+                                    self::email($subject, $body, $to);
+                                }
+                            }
                         }
                     }
-
                 }
             }
         }

@@ -132,7 +132,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.cargo);
-                                row.push(values.bag);
+                                row.push(values.seal_number);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.cargo_type);
@@ -169,12 +169,12 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.reports.master_cargo.short_received_shipments.list') }}',
-                order: [[6, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'cargo' ,name: 'cargo', class: 'align-middle cargo'},
-                    { data:'bag' ,name: 'bags.id', class: 'align-middle bag'},
+                    { data:'seal_number' ,name: 'seal_number', class: 'align-middle seal_number'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'cargo_type' ,name: 'bags.type', class: 'align-middle hub'},

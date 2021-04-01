@@ -7803,7 +7803,7 @@ class AdminReportsController extends Controller
             ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
             ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
             ->join('bag_statuses as bs','bs.id','=','bags.status_id')
-            ->select(['bags.id as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
+            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
         ->whereNotIn('bags.status_id',[1,4,9]);
 
        $datatable = Datatables::of($bags)
@@ -7888,7 +7888,7 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as dc', 'dc.id', '=', 'bags.destination_hub_id')
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'bags.shipping_mode_id')
             ->leftjoin('shipments as s', 's.id', '=', 'bs.shipment_id')
-            ->select('s.tracking_number as tracking_number','bags.id as bag','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'bags.type as cargo_type','mc.id as cargo','mc.created_at as transited_at')
+            ->select('s.tracking_number as tracking_number','bags.id as bag','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'bags.type as cargo_type','mc.id as cargo','mc.created_at as transited_at','bags.seal_number')
             ->where('bags.status_id', 7)
             ->whereIn('s.shipper_status_id', [3, 21])->get();
 

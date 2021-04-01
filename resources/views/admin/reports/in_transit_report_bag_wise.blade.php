@@ -164,7 +164,7 @@
                                 row.push(values.total_shipments);
                                 row.push(values.short_received);
                                 row.push(values.shipping_mode);
-                                row.push(values.shipment_weight);
+                                row.push(values.shipments_weight);
                                 row.push(values.transitted_date);
                                 row.push(values.transitted_by);
                                 row.push(values.received_at);
@@ -211,7 +211,7 @@
                 order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'bag_no', name: 'bags.id', class: 'align-middle bag_no'},
+                    {data: 'bag_no', name: 'bags.seal_number', class: 'align-middle bag_no'},
                     {data: 'type', name: 'type', class: 'align-middle type'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
