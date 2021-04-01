@@ -53,6 +53,24 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="short_received_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="short_received_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title"> Short Received Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -143,8 +161,8 @@
                             head.push('Shipments Weight');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
-                            head.push('Received Datetime');
-                            head.push('Received By');
+                            head.push('Master Cargo Received Datetime');
+                            head.push('Master Cargo Received By');
                             head.push('Status');
                             head.push('Aging');
 
@@ -325,11 +343,11 @@
                                     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                 });
                             }
-                            $('#shipments_modal .modal-body').html(html);
+                            $('#short_received_shipments_modal .modal-body').html(html);
                         }
                     });
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
+                $('#short_received_shipments_modal .modal-body').html('');
+                $('#short_received_shipments_modal').modal('show');
 
             });
 
