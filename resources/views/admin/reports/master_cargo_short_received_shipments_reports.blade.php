@@ -104,6 +104,40 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.in_transit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            @if (session('print'))
+            print('{{ session('print') }}');
+            @endif
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -155,7 +189,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Cargo Short Received Shipments Report',
+                        title: 'Master Cargo Short Received Shipments Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -173,7 +207,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
-                    { data:'cargo' ,name: 'cargo', class: 'align-middle cargo'},
+                    { data:'id_padded_link' ,name: 'cargo', class: 'align-middle cargo text-center'},
                     { data:'seal_number' ,name: 'seal_number', class: 'align-middle seal_number'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
@@ -188,6 +222,84 @@
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var cargo_id = parseInt(table.row($(this).parents('tr')).data().cargo);;
+                console.log(cargo_id);
+
+                if ($(this).hasClass('print')) {
+                  
+                    print(cargo_id);
+                }
+                        @if (session('role_id') == 1 || in_array(31, session('permissions')))
+                else if ($(this).hasClass('receive')) {
+
+                    $('#receive_form .cargo').val(cargo_id);
+
+                    $('#receive_form').submit();
+                }
+                @endif
+
+                        @if (session('role_id') == 1 || in_array(222, session('permissions')))
+                else if ($(this).hasClass('lost')) {
+                    blockPagePermanently();
+
+                    swal({
+                        text: 'Are you sure you want to update Master Cargo as Lost?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            $.ajax({
+                                url: '{{ route('admin.master_cargo.in_transit.lost') }}',
+                                method:'POST',
+                                data:{
+                                    '_token': '{{ csrf_token() }}',
+                                    'cargo_id': cargo_id
+                                }
+                            }).done(function (data) {
+                                selected_rows = [];
+                                table.rows().deselect();
+                                table.draw('false');
+
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                UnblockPagePermanently();
+                            });
+                        }
+                        else {
+                            UnblockPagePermanently();
+                        }
+                    });
+                }
+                @endif
+            });
+
+            $('#datatable tbody').on('click','tr td.cargo button.print',function () {
+                var cargo_id = parseInt(table.row($(this).parents('tr')).data().cargo);
+                print(cargo_id);
             });
 
         });

@@ -7803,7 +7803,7 @@ class AdminReportsController extends Controller
             ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
             ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
             ->join('bag_statuses as bs','bs.id','=','bags.status_id')
-            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
+            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments','bags.short_received as short_received_shipments'])
         ->whereNotIn('bags.status_id',[1,4,9]);
 
        $datatable = Datatables::of($bags)
@@ -7842,6 +7842,14 @@ class AdminReportsController extends Controller
                    return 0;
                }
            })
+           ->editColumn('short_received', function($bags) {
+               if ($bags->short_received!= 0) {
+                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $bags->short_received . '</button>';
+               }
+               else {
+                   return 0;
+               }
+           })
            ->editColumn('status_id', function($bags){
                    return $bags->status;
            })
@@ -7857,9 +7865,26 @@ class AdminReportsController extends Controller
     }
 
     public function in_transit_shipments(Request $request){
-        $bag_id = $request->input('bag_id');
-        $bag = Bag::find($bag_id);
+        $seal_number = $request->input('bag_id');
+        $bag = Bag::where('seal_number',$seal_number)->first();
         $bag_shipments =  $bag->shipment;
+        $shipments = array();
+        if($bag_shipments->count() != 0){
+            foreach ($bag_shipments as $bag_shipment){
+                $shipment = Shipment::find($bag_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Shipments Founds', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Shipments Found', 'shipments' => FALSE];
+        }
+
+    }
+
+    public function short_received_shipments(Request $request){
+        $seal_number = $request->input('bag_id');
+        $bag = Bag::where('seal_number',$seal_number)->first();
+        $bag_shipments =  $bag->shipment->where('status',0);
         $shipments = array();
         if($bag_shipments->count() != 0){
             foreach ($bag_shipments as $bag_shipment){
@@ -7896,6 +7921,9 @@ class AdminReportsController extends Controller
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('id_padded_link', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->cargo, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
             ->editColumn('cargo_type',function ($shipments){
                 if($shipments->cargo_type == 1){

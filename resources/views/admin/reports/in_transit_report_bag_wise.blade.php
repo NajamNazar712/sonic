@@ -27,8 +27,8 @@
                         <th class="border-primary border-darken-1">Shipments Weight</th>
                         <th class="border-primary border-darken-1">Transit Datetime</th>
                         <th class="border-primary border-darken-1">Transitted By</th>
-                        <th class="border-primary border-darken-1">Received Datetime</th>
-                        <th class="border-primary border-darken-1">Received By</th>
+                        <th class="border-primary border-darken-1">Master Cargo Received Datetime</th>
+                        <th class="border-primary border-darken-1">Master Cargo Received By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
 
@@ -162,7 +162,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.total_shipments);
-                                row.push(values.short_received);
+                                row.push(values.short_received_shipments);
                                 row.push(values.shipping_mode);
                                 row.push(values.shipments_weight);
                                 row.push(values.transitted_date);
@@ -216,7 +216,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'shipments', class: 'align-middle text-center shipments'},
-                    {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
+                    {data: 'short_received', name: 'short_received', class: 'align-middle short_received text-center'},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'shipments_weight', name: 'shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'transitted_date', name: 'mc.created_at', class: 'align-middle transitted_date'},
@@ -233,7 +233,7 @@
                 },
                 initComplete: function() {
 
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                   /* var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
@@ -243,7 +243,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.bag_no') || $(header).is('.type') || $(header).is('.origin') || $(header).is('.destination') || $(header).is('.aging') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status_id')){
                             $(status_select).appendTo($(search))
@@ -278,7 +278,7 @@
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    });*/
 
                     this.api().table().columns.adjust();
                 }
@@ -286,9 +286,35 @@
             var route = '{!! route('admin.tracking.index') !!}';
             $('#datatable tbody').on('click','tr td.shipments button',function () {
                 var id =  parseInt($(this).parents('tr').attr('id'));
-
                 $.ajax({
                     url: '{!! route('admin.reports.master_cargo.bag.in_transit.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'bag_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+            });
+
+            $('#datatable tbody').on('click','tr td.short_received button',function () {
+                var id =  parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.reports.master_cargo.bag.in_transit.short_received') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
