@@ -754,7 +754,7 @@
                     today: '',
                     clear: '',
                     close: '',
-                    min: new Date(min_date),
+                    min: new Date(min_date_limit),
                     max: new Date(max_date),
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
                     showMonthsShort: true,
