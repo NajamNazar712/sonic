@@ -5119,7 +5119,13 @@ class DeliveryController extends Controller
                 if ($deliveries->delivered_status == 1) {
                     $image = '';
                     if($deliveries->picture_path != null){
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        $exists = Storage::disk('public')->exists($deliveries->picture_path);
+                        if($exists){
+                            $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        }else{
+                            $img = Storage::disk('s3')->temporaryUrl($deliveries->picture_path, now()->addMinutes(5));
+                            $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                        }
 
                         return $image;
                     }
