@@ -4370,7 +4370,7 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type]);
     }
 
-    public function rider_signup_store(Request $request)
+    public function rider_signup_v2(Request $request)
     {
         if ($request->isMethod('post')) {
             $rules = [
@@ -4417,19 +4417,19 @@ class RiderAPIController extends Controller
                 'account_title' => ['nullable'],
 
                 //Attachments
-                'cv' => ['nullable','mimes:pdf'],
-                'academic_credentials' => ['mimes:pdf'],
-                'cnic' => ['nullable','mimes:png,jpeg,jpg'],
-                'photo' => ['nullable','mimes:png,jpeg,jpg'],
-                'experience_certificates' => ['mimes:png,jpeg,jpg'],
-                'pay_slip' => ['mimes:png,jpeg,jpg'],
-                'nikkah_nama' => ['mimes:png,jpeg,jpg'],
-                'cnic_spouse' => ['mimes:png,jpeg,jpg'],
-                'bform' => ['mimes:png,jpeg,jpg'],
-                'cnic_nominee' => ['nullable','mimes:png,jpeg,jpg'],
-                'utility_bill' => ['nullable','mimes:png,jpeg,jpg'],
-                'affidavit' => ['nullable','mimes:png,jpeg,jpg'],
-                'cheque' => ['nullable','mimes:png,jpeg,jpg'],
+                'cv' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'academic_credentials' => ['mimes:png,jpeg,jpg,pdf'],
+                'cnic' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'photo' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'experience_certificates' => ['mimes:png,jpeg,jpg,pdf'],
+                'pay_slip' => ['mimes:png,jpeg,jpg,pdf'],
+                'nikkah_nama' => ['mimes:png,jpeg,jpg,pdf'],
+                'cnic_spouse' => ['mimes:png,jpeg,jpg,pdf'],
+                'bform' => ['mimes:png,jpeg,jpg,pdf'],
+                'cnic_nominee' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'utility_bill' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'affidavit' => ['nullable','mimes:png,jpeg,jpg,pdf'],
+                'cheque' => ['nullable','mimes:png,jpeg,jpg,pdf'],
 
                 //EmploymentHistory
                 'employment_history' => ['nullable', 'array'],
