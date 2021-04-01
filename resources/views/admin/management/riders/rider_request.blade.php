@@ -224,7 +224,7 @@
                 placeholder: 'Select Rider Category',
                 dropdownParent: $('#approveRiderModal')
             });
-            $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled', 'disabled');
+            $('#riderInfoDiv input,#approveRiderForm textarea,#riderInfoDiv select').attr('disabled', 'disabled');
             $('#rider_trax_id').removeAttr('disabled');
 
             $('#city_list').on('change', function () {
@@ -441,13 +441,17 @@
                 var cnic = table.row($(this).parents('tr')).data().cnic;
                 var phone_no = table.row($(this).parents('tr')).data().phone_no;
                 var pin = table.row($(this).parents('tr')).data().pin;
+                var address = table.row($(this).parents('tr')).data().address;
                 var city_id = table.row($(this).parents('tr')).data().city_id;
+                var rider_type = table.row($(this).parents('tr')).data().rider_type_id;
                 $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
                 $('#rider_phone').val(phone_no);
                 $('#rider_request_id').val(id);
                 $('#rider_pin').val(pin);
+                $('#address').val(address);
                 $('#city_list').val(city_id).trigger('change');
+                $('#rider_type_list').val(rider_type).trigger('change');
                 $('#approveRiderModal').modal('show');
 
             });
