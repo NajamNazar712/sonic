@@ -1041,7 +1041,7 @@ class VisionSoftAPIController extends Controller
         $date = Carbon::now()->subDays(3)->toDateString();
         $today = Carbon::now()->subDays(3);
         $vision_daily_exp_ids = VisionSoftDailyExp::groupBy('petty_cash_statement_id')->pluck('petty_cash_statement_id')->toArray();
-        $petty_cash_statements = PettyCashStatement::where('status','>=', 3)->whereNotNull('finance_approved_by')->whereDate('finance_approved_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
+        $petty_cash_statements = PettyCashStatement::whereDate('checked_at', $date)->whereNotIn('id',$vision_daily_exp_ids);
         if($petty_cash_statements->exists()){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $petty_cash_statements = $petty_cash_statements->get();
