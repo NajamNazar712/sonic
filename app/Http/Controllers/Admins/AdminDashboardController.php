@@ -9877,7 +9877,8 @@ class AdminDashboardController extends Controller
     }
 
     public function todayActiveAccountListAjax(Request $request){
-        $users = User::leftjoin('account_types as at','at.id','=','users.account_type_id')
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
