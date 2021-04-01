@@ -32,7 +32,6 @@ class ActivityTrailController extends Controller
 
     public function activity_trail_index ()
     {
-        NotificationsController::send(127,null);
         return view('admin.activity_trail.index');
     }
 

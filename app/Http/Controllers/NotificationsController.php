@@ -7083,7 +7083,7 @@ class NotificationsController extends Controller
                     self::sms($body,$to);
                 }
                 else if($id == 127){
-                    $date = Carbon::today()->format('Y-m-d');
+                    $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $date, $subject);
@@ -7091,63 +7091,71 @@ class NotificationsController extends Controller
 
                     $group_logs =  ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
                         ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
+                        ->leftjoin('admin_departments as ad','ad.id','=','ar.department_id')
                         ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-                        ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at','ar.department_id as department_id')
+                        ->select('ad.name as department','activity_trail_logs.id as id','a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at','ar.department_id as department_id')
                         ->where('emailed',0)
                         ->get()
                         ->groupBy('department_id');
 
                     foreach ($group_logs as $key => $logs)
                     {
+                        $body = $notification->body;
                         $head_role_id = AdminRole::where('department_id',$key)
                             ->whereIn('id',ActivityTrailController::$department_head_ids)
                             ->pluck('id')
                             ->first();
 
-                        $heads =  Admin::where('role_id',$head_role_id)->get();
-
-                        if(count($heads) > 1)
+                        if($head_role_id == null)
                         {
-                            $name = "Concern Head";
+                            echo "No Department Head is found for department ".$logs[0]->department." | ";
+//                            foreach ($logs as $index => $log) {
+//                                ActivityTrailLog::find($log->id)
+//                                    ->update(['emailed' => 1]);
+//                            }
                         }
-                        else{
-                            $name = $heads[0]->name;
+                        else {
+                            $heads = Admin::where('role_id', $head_role_id)->get();
+
+                            if (count($heads) > 1) {
+                                $name = "Concern Head";
+                            } else {
+                                $name = $heads[0]->name;
+                            }
+                            if (strpos($body, '[contact_person]') !== FALSE) {
+                                $body = str_replace('[contact_person]', $name, $body);
+                            }
+
+                            $preview = '<table style="width:100%;">';
+                            $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
+                            $preview .= '<tbody>';
+                            foreach ($logs as $index => $log) {
+                                $preview .= '<tr>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ($index + 1) . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->name . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->designation . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->screen_name . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->action . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->created_at . '</td>';
+                                $preview .= '</tr>';
+                                ActivityTrailLog::find($log->id)
+                                    ->update(['emailed' => 1]);
+                            }
+
+                            $preview .= '</tbody></table>';
+                            if (strpos($body, '[preview]') !== FALSE) {
+                                $body = str_replace('[preview]', $preview, $body);
+                            }
+
+                            $to = array();
+
+                            foreach ($heads as $head) {
+                                array_push($to, $head->email);
+                            }
+
+                            self::email($subject, $body, $to);
+                            echo "Email for department ".$log->department." is sent successfully | ";
                         }
-                        if (strpos($body, '[contact_person]') !== FALSE) {
-                            $body = str_replace('[contact_person]', $name, $body);
-                        }
-
-                        $preview = '<table style="width:100%;">';
-                        $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
-                        $preview .= '<tbody>';
-                        foreach ($logs as $index => $log)
-                        {
-                            $preview .= '<tr>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.($index + 1).'</td>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->name.'</td>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->designation.'</td>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->screen_name.'</td>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->action.'</td>';
-                            $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$log->created_at.'</td>';
-                            $preview .= '</tr>';
-                            $log->emailed = 1;
-                            $log->update();
-                        }
-
-                        $preview .= '</tbody></table>';
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $preview, $body);
-                        }
-
-                        $to = array();
-
-                        foreach ($heads as $head)
-                        {
-                            array_push($to,$head->email);
-                        }
-
-                        self::email($subject, $body, $to);
-
                     }
 
                 }

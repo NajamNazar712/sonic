@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityTrailLog extends Model
 {
-    //
+    protected $fillable = ['emailed'];
 }
