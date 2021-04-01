@@ -164,7 +164,6 @@
             });
             $('#search_filter_btn').on('click',function (){
                 table.draw();
-                table.columns.adjust().draw();
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -447,7 +446,6 @@
                                                 table.button('.operation').disable();
                                                 table.button('.check').disable();
                                                 table.draw(true);
-                                                table.columns.adjust().draw();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else
@@ -524,7 +522,6 @@
                                                 table.button('.operation').disable();
                                                 table.button('.check').disable();
                                                 table.draw(true);
-                                                table.columns.adjust().draw();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else
@@ -717,8 +714,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    // this.api().table().columns.station();
-                    // this.api().table().columns.operation();
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -783,7 +779,6 @@
                             }).done(function(data){
                                 if(data.status){
                                     table.draw(true);
-                                    table.columns.adjust().draw();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
