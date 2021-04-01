@@ -7798,12 +7798,12 @@ class AdminReportsController extends Controller
           })
             ->join('master_cargoes as mc', 'mc.id', '=', 'mcb.master_cargo_id')
             ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
-            ->leftjoin('admins as a', 'a.id', '=', 'bags.receiver_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'mc.received_by')
             ->join('admins as ad', 'ad.id', '=', 'mc.created_by')
             ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
             ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
             ->join('bag_statuses as bs','bs.id','=','bags.status_id')
-            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','bags.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
+            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','mc.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments'])
         ->whereNotIn('bags.status_id',[1,4,9]);
 
        $datatable = Datatables::of($bags)
@@ -7823,12 +7823,7 @@ class AdminReportsController extends Controller
                    $received_date = Carbon::parse($bags->received_at);
                    $transitted_date = Carbon::parse($bags->transitted_date);
                    $days = $transitted_date->diffInDays($received_date);
-                   if($days <= 0){
-                       return '-';
-                   }
-                   else{
-                       return $days . 'days';
-                   }
+                   return $days . ' days';
                }
                else{
                    return '-';
