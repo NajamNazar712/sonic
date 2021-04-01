@@ -1282,8 +1282,7 @@ class AdminMasterCargoController extends Controller
             $master_cargo->created_by = Auth::id();
 
 
-            $onward_forwarding = 1;
-            if($onward_forwarding == 1){
+            if($request->onward_forwarding == 1){
                 $master_cargo_status_id = 6;
                 $master_cargo->onward_forwarding = 1;
             }
