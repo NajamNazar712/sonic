@@ -82,6 +82,8 @@
                         <th class="border-primary border-darken-1">Operation Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">Checked At</th>
+                        <th class="border-primary border-darken-1">Checked By</th>
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
@@ -162,6 +164,7 @@
             });
             $('#search_filter_btn').on('click',function (){
                 table.draw();
+                table.columns.adjust().draw();
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -190,6 +193,8 @@
                             head.push('Operation Approved At');
                             head.push('Status');
                             head.push('Tracking Number');
+                            head.push('Checked At');
+                            head.push('Checked By');
 
 
                             $.each(result.data, function(index, values) {
@@ -210,6 +215,8 @@
                                 row.push(values.operation_approved_at);
                                 row.push(values.status);
                                 row.push(values.tracking_number);
+                                row.push(values.checked_at);
+                                row.push(values.checked_by);
 
                                 body.push(row);
                             });
@@ -234,7 +241,10 @@
                             $('input:hidden[name=statement_ids]').val(selected_rows);
 
                             if(selected_rows.length === 0){
+                                table.button('.finance').disable();
                                 table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
                                 return false;
                             }
                             else if(selected_rows !== ''){
@@ -272,8 +282,12 @@
                                             if(data.status == 0){
                                                 table.rows().deselect();
                                                 selected_rows = [];
+                                                table.button('.finance').disable();
                                                 table.button('.station').disable();
+                                                table.button('.operation').disable();
+                                                table.button('.check').disable();
                                                 table.draw(true);
+                                                table.columns.adjust().draw();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else
@@ -288,7 +302,10 @@
                             }else{
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.finance').disable();
                                 table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
                             }
                         }
                     },
@@ -304,7 +321,10 @@
                             $('input:hidden[name=statement_ids]').val(selected_rows);
 
                             if(selected_rows.length === 0){
+                                table.button('.finance').disable();
+                                table.button('.station').disable();
                                 table.button('.operation').disable();
+                                table.button('.check').disable();
                                 return false;
                             }
                             else if(selected_rows !== ''){
@@ -342,8 +362,12 @@
                                             if(data.status == 0){
                                                 table.rows().deselect();
                                                 selected_rows = [];
+                                                table.button('.finance').disable();
+                                                table.button('.station').disable();
                                                 table.button('.operation').disable();
+                                                table.button('.check').disable();
                                                 table.draw(true);
+                                                table.columns.adjust().draw();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else
@@ -359,7 +383,10 @@
                             }else{
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.finance').disable();
+                                table.button('.station').disable();
                                 table.button('.operation').disable();
+                                table.button('.check').disable();
                             }
                         }
                     },
@@ -375,6 +402,9 @@
 
                             if(selected_rows.length === 0){
                                 table.button('.finance').disable();
+                                table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
                                 return false;
                             }
                             else if(selected_rows !== ''){
@@ -413,7 +443,11 @@
                                                 table.rows().deselect();
                                                 selected_rows = [];
                                                 table.button('.finance').disable();
+                                                table.button('.station').disable();
+                                                table.button('.operation').disable();
+                                                table.button('.check').disable();
                                                 table.draw(true);
+                                                table.columns.adjust().draw();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else
@@ -429,18 +463,97 @@
                                 var error = 'Statement ID Not Found, Please Try again!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 table.button('.finance').disable();
+                                table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
                             }
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || in_array(473, session('permissions')))
+                    {
+                        className: 'btn btn-primary check',
+                        text: 'Check',
+                        enabled: false,
+
+                        action: function (e, dt, node, config) {
+
+                            if(selected_rows.length === 0){
+                                table.button('.finance').disable();
+                                table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
+                                return false;
+                            }
+                            else if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.petty_cash.statements.check') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'statement_ids': selected_rows,
+                                            }
+                                        }).done(function(data){
+                                            if(data.status == 0){
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                table.button('.finance').disable();
+                                                table.button('.station').disable();
+                                                table.button('.operation').disable();
+                                                table.button('.check').disable();
+                                                table.draw(true);
+                                                table.columns.adjust().draw();
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else
+                                            {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+
+                                        });
+                                    }
+                                });
+
+                            }else{
+                                var error = 'Statement ID Not Found, Please Try again!';
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                table.button('.finance').disable();
+                                table.button('.station').disable();
+                                table.button('.operation').disable();
+                                table.button('.check').disable();
+                            }
+                        }
+                    },
+                    @endif
                     {
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
                         action: function (e, dt, node, config) {
                             window.location = '{{ route('admin.petty_cash.make.index')  }}'
                         }
-                    },
-                    {
+                    },{
                         extend: 'selectAll',
                         text: 'Select All',
                         className: 'select_all',
@@ -450,31 +563,21 @@
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
                                     id = parseInt(row.id());
 
-                                    hub_id = $(row.node()).data('id');
+                                    var index = $.inArray(id, selected_rows);
 
-                                    var allow = false;
-
-                                    if(hub_ids.length == 0) {
-                                        hub_ids.push(hub_id);
-
-                                        allow = true;
-                                    }
-                                    else if(hub_ids[0] == hub_id) {
-                                        allow = true;
+                                    if (index === -1) {
+                                        selected_rows.push(id);
                                     }
 
-                                    if (allow) {
-                                        row.select();
-
-                                        var index = $.inArray(id, selected_rows);
-
-                                        if (index === -1) {
-                                            selected_rows.push(id);
-                                        }
-                                    }
+                                    table.button('.finance').enable();
+                                    table.button('.station').enable();
+                                    table.button('.operation').enable();
+                                    table.button('.check').enable();
                                 }
                             });
                         }
@@ -488,7 +591,7 @@
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.deselect();
 
                                     id = parseInt(row.id());
@@ -500,9 +603,10 @@
                                     }
 
                                     if (selected_rows.length == 0) {
-                                        table.button('.assign_rider').disable();
-
-                                        hub_ids.splice(index, 1);
+                                        table.button('.finance').disable();
+                                        table.button('.station').disable();
+                                        table.button('.operation').disable();
+                                        table.button('.check').disable();
                                     }
                                 }
                             });
@@ -557,6 +661,8 @@
                     {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'checked_at', name: 'petty_cash_statements.checked_at', class: 'align-middle checked_at'},
+                    {data: 'checked_by', name: 'petty_cash_statements.checked_by', class: 'align-middle checked_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -629,22 +735,15 @@
                 }
                 if (selected_rows.length > 0) {
                     table.button('.finance').enable();
+                    table.button('.station').enable();
+                    table.button('.operation').enable();
+                    table.button('.check').enable();
                 }
                 else {
                     table.button('.finance').disable();
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.station').enable();
-                }
-                else {
                     table.button('.station').disable();
-                }
-                if (selected_rows.length > 0) {
-                    table.button('.operation').enable();
-                }
-                else {
                     table.button('.operation').disable();
+                    table.button('.check').disable();
                 }
             });
 
@@ -684,6 +783,7 @@
                             }).done(function(data){
                                 if(data.status){
                                     table.draw(true);
+                                    table.columns.adjust().draw();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
