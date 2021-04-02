@@ -8283,6 +8283,27 @@ class AdminDashboardController extends Controller
                 }
             }
 
+            $zones = Zone::where('business_category_id', 1)->get();
+            foreach ($zones as $zone){
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 1;
+
+                $zone_class_city->save();
+
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 2;
+
+                $zone_class_city->save();
+            }
+
             return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
             $city = City::create([
@@ -8333,6 +8354,27 @@ class AdminDashboardController extends Controller
                         'shipping_mode_id'=>$shipping_mode_id,
                     ]);
                 }
+            }
+
+            $zones = Zone::where('business_category_id', 1)->get();
+            foreach ($zones as $zone){
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 1;
+
+                $zone_class_city->save();
+
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 2;
+
+                $zone_class_city->save();
             }
             return redirect()->back()->with('success','Hub city added successfully');
         }
