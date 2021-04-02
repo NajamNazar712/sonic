@@ -2264,17 +2264,20 @@ class AdminMasterCargoController extends Controller
 //        dispute start for junction
         $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
         $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
-
-        if($cargo_consignment->origin_hub_id != $junction_hub_1_id && $cargo_consignment->destination_hub_id != $junction_hub_1_id) {
-            $junction1 = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_1_id])->exists();
-            if(!$junction1){
-                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id, 1);
+        if($junction_hub_1_id != null){
+            if($cargo_consignment->origin_hub_id != $junction_hub_1_id && $cargo_consignment->destination_hub_id != $junction_hub_1_id) {
+                $junction1 = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_1_id])->exists();
+                if(!$junction1){
+                    DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id, 1);
+                }
             }
         }
-        if($junction_hub_2_id && $cargo_consignment->origin_hub_id != $junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
-            $junction2 = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_2_id])->exists();
-            if(!$junction2){
-                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_2_id, 1);
+        if($junction_hub_2_id != null) {
+            if ($junction_hub_2_id && $cargo_consignment->origin_hub_id != $junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
+                $junction2 = MasterCargoJunctionReceival::where(['master_cargo_id' => $cargo_consignment_id, 'junction_id' => $junction_hub_2_id])->exists();
+                if (!$junction2) {
+                    DisputeController::add_junction_dispute($cargo_consignment_id, $junction_hub_2_id, 1);
+                }
             }
         }
         //dispute end for junction
