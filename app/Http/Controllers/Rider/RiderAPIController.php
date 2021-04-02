@@ -4334,6 +4334,102 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function login_v2(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($rider->exists()) {
+                $rider = $rider->first();
+
+                if ($rider->status) {
+                    if (Hash::check($request->input('pin'), $rider->pin)) {
+                        $information = array();
+
+                        $information['name'] = $rider->name;
+                        $information['role'] = 'rider';
+                        $rider->device_token = $request->get('device_token');
+
+                        if ($rider->api_token) {
+                            $information['api_token'] = $rider->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(str_random(60)));
+
+                            $rider->api_token = $api_token;
+
+                            $information['api_token'] = $api_token;
+                        }
+                        $rider->save();
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+                if ($rider_request->exists()) {
+                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
+            }
+        }
+    }
+
+    public function test()
+    {
+        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+        $token = 'eqVqcsY7Som7scvGF4cvl8:APA91bEoQdeDbnVNSsvmAvZxdTB_ZHvAGTL6BpXQnLcaK_E5UTCWeGX1wYyHixWVCR6a_eDtZb7qtxcve8p0Miw2t_tpyV_0g2B6RRs5ZN21-6E4PU-zMWMCqCB_XhdYVIyjd0_D8CAK';
+
+
+        $notification = [
+            'title' => 'bolt',
+            'body' => 'this is test6',
+            'sound' => true,
+        ];
+
+//        $extraNotificationData = ["message" => $notification, "moredata" => 'dd'];
+
+        $fcmNotification = [
+            //'registration_ids' => $tokenList, //multple token array
+            'to' => $token, //single token
+            'notification' => $notification,
+            'data' => $notification
+        ];
+
+        $headers = [
+            'Authorization: key=AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL',
+            'Content-Type: application/json'
+        ];
+
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return response()->json($result);
+    }
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
