@@ -26,7 +26,7 @@
 
                             <input type="hidden" id="shipper_id" name="shipper_id" value="{{ $shipper->id }}">
 
-                            <div class="col form-group">
+                            <div class="col-4 form-group">
                                 <label><strong>Fuel Surcharge</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" data-rule-required="true" data-msg-required="Fuel Surcharge is required" disabled value="{{$fuel_surcharge}}">
@@ -35,7 +35,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col form-group">
+                            <div class="col-4 form-group">
                                 <label><strong>Exchange Rate</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="exchange_rate" value="{{$exchange_charges}}" class="form-control amount"  placeholder="Exchange Rate*" data-rule-required="true" data-msg-required="Exchange Rate is required" disabled>
@@ -44,19 +44,111 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col form-group">
-                                <label><strong>Margin</strong></label>
+                            <div class="col-4 form-group">
+                                <label><strong>GST</strong></label>
                                 <div class="input-group">
-                                    <input type="text" name="margin" class="form-control margin decimal" placeholder="Margin*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}" disabled>
                                     <div class="input-group-append">
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col form-group">
-                                <label><strong>GST</strong></label>
+
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 1</strong></label>
                                 <div class="input-group">
-                                    <input type="text" name="gst" class="form-control gst decimal" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" value="{{ $gst }}" disabled>
+                                    <input type="text" name="margin1" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 2</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin2" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 3</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin3" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 4</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin4" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 5</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin4" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 6</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin4" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 7</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin1" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 8</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin2" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 9</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin3" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 10</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin4" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 form-group">
+                                <label><strong>Margin 11</strong></label>
+                                <div class="input-group">
+                                    <input type="text" name="margin4" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">%</span>
                                     </div>
