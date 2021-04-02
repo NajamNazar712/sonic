@@ -75,7 +75,6 @@ Route::name('api.')->group(function () {
 		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
-        Route::get('test', 'Rider\RiderAPIController@test')->name('test');
 
 		Route::middleware('RiderAPIToken')->group(function () {
 			Route::prefix('pickup')->name('pickup.')->group(function () {

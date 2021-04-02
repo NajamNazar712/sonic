@@ -4403,44 +4403,6 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function test()
-    {
-        $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
-        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $token = 'fR_t3RTCSVuBwULKe8Jhq3:APA91bGd_a9R8wc2EOh0pQU6FwjFnW3z0a7R-Fa60Y5ouWXmFhp-w0gFlVS3h7zIy7FMT3ZbzeKvyDwUAN9DEm2ujBwHyF42-ZFuO3qEKHzoCK6etQfgnFv';
-
-        $notification = [
-            'title' => 'bolt',
-            'body' => 'this is test6',
-            'sound' => true,
-        ];
-
-        $fcmNotification = [
-            //'registration_ids' => $tokenList, //multple token array
-            'to' => $token, //single token
-            'notification' => $notification,
-            'data' => $notification
-        ];
-
-        $headers = [
-            'Authorization: key=' . $server_key,
-            'Content-Type: application/json'
-        ];
-
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return response()->json($result);
-    }
-
-
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
