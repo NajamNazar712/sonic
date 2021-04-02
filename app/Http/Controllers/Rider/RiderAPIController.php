@@ -4393,17 +4393,15 @@ class RiderAPIController extends Controller
 
     public function test()
     {
+        $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
         $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $token = 'eqVqcsY7Som7scvGF4cvl8:APA91bEoQdeDbnVNSsvmAvZxdTB_ZHvAGTL6BpXQnLcaK_E5UTCWeGX1wYyHixWVCR6a_eDtZb7qtxcve8p0Miw2t_tpyV_0g2B6RRs5ZN21-6E4PU-zMWMCqCB_XhdYVIyjd0_D8CAK';
-
+        $token = 'fR_t3RTCSVuBwULKe8Jhq3:APA91bGd_a9R8wc2EOh0pQU6FwjFnW3z0a7R-Fa60Y5ouWXmFhp-w0gFlVS3h7zIy7FMT3ZbzeKvyDwUAN9DEm2ujBwHyF42-ZFuO3qEKHzoCK6etQfgnFv';
 
         $notification = [
             'title' => 'bolt',
             'body' => 'this is test6',
             'sound' => true,
         ];
-
-//        $extraNotificationData = ["message" => $notification, "moredata" => 'dd'];
 
         $fcmNotification = [
             //'registration_ids' => $tokenList, //multple token array
@@ -4413,7 +4411,7 @@ class RiderAPIController extends Controller
         ];
 
         $headers = [
-            'Authorization: key=AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL',
+            'Authorization: key=' . $server_key,
             'Content-Type: application/json'
         ];
 

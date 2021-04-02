@@ -7091,4 +7091,39 @@ class NotificationsController extends Controller
     static public function custom_sms($body, $to){
         self::sms($body, $to);
     }
+
+    static public function bolt_app_notification($device_token, $notification_title, $notification_body)
+    {
+        $server_key = 'AAAA3sL4DyU:APA91bGZtgVBy2GlFNcbO6s7uflQ__wtLsKJ-NiqGzYmX-ynwAJe53kU2iTiV7k1PF35mhLX5SBBbbrnRvl7KU3Q3kp2lrSTHC55HUQv-hCgoXzXjTH1pYxRzB7p_4ZUD8NokW3JdDAe';
+        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+        $token = $device_token;
+
+        $notification = [
+            'title' => $notification_title,
+            'body' => $notification_body,
+            'sound' => true,
+        ];
+
+        $fcmNotification = [
+            //'registration_ids' => $tokenList, //multple token array
+            'to' => $token, //single token
+            'notification' => $notification,
+            'data' => $notification
+        ];
+
+        $headers = [
+            'Authorization: key=' . $server_key,
+            'Content-Type: application/json'
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+        $result = curl_exec($ch);
+        curl_close($ch);
+    }
 }

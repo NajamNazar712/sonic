@@ -149,6 +149,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
+        Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 
         Route::middleware('AdminAPIToken')->group(function () {
