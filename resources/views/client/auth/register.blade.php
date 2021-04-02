@@ -122,10 +122,10 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="shipper_phone">Phone Number 1:
+                                                        <label for="phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="@if(old('shipper_phone') != null){{old('shipper_phone')}}@elseif($lead != null){{$lead->phone_number}}@else{{old('shipper_phone')}}@endif">
+                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="phone" value="@if(old('phone') != null){{old('phone')}}@elseif($lead != null){{$lead->phone_number}}@else{{old('phone')}}@endif">
                                                     </div>
                                                 </div>
                                             </div>
@@ -139,8 +139,8 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="text" class="form-control" placeholder="0345-9999999 / 0213-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
+                                                        <label for="phone2">Phone Number 2:</label>
+                                                        <input type="text" class="form-control" placeholder="0345-9999999 / 0213-9999999"  value="{{ old('phone2') }}" name="phone2">
                                                     </div>
                                                 </div>
                                             </div>
@@ -1004,7 +1004,7 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='phone'],input[name='phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
 
         $('#shipInfo').perfectScrollbar({
