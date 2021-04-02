@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
-
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -1379,6 +1379,7 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),1);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
@@ -7466,6 +7467,10 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(Request $request){
 
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),61);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
