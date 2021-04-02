@@ -380,7 +380,7 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(106, $riders, $pickup_request_id);
                         NotificationsController::send(107, $riders, $pickup_request_id);
                     }
-                    if ($riders['old_rider_id'] != null) {
+                    /*if ($riders['old_rider_id'] != null) {
                         $rider_device_token = EmployeeDeviceToken::where('employee_id', $riders['old_rider_id'])
                             ->where('employee_type_id', 2)
                             ->select('device_token');
@@ -404,7 +404,7 @@ class V2AdminPickupsController extends Controller
                             $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Assigned To You";
                             NotificationsController::bolt_app_notification($device_token, $title, $message);
                         }
-                    }
+                    }*/
 
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
