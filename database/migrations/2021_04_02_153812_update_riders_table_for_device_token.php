@@ -14,7 +14,7 @@ class UpdateRidersTableForDeviceToken extends Migration
     public function up()
     {
         Schema::table('riders', function (Blueprint $table) {
-            $table->string('device_token')->nullable();
+            $table->string('device_token', 500)->nullable();
         });
     }
 
