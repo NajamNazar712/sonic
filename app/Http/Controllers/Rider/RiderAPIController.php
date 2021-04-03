@@ -4532,7 +4532,8 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->save();
 
-                            foreach ($request->employment_history as $employment_history) {
+                            $employment_histories = json_decode($request->employment_history->json()->all());
+                            foreach ($employment_histories as $employment_history) {
                                 $history = new EmployeeEmployementHistory();
                                 $history->employee_id = $employee_request->id;
                                 $history->name = $employment_history['company_name'];
@@ -4543,7 +4544,8 @@ class RiderAPIController extends Controller
                                 $history->save();
                             }
 
-                            foreach ($request->medical_details as $medical_detail) {
+                            $medical_details = json_decode($request->medical_details->json()->all());
+                            foreach ($medical_details as $medical_detail) {
                                 $medical_info = new EmployeeMedicalInformation();
                                 $medical_info->employee_id = $employee_request->id;
                                 $medical_info->name = $medical_detail['member_name'];
