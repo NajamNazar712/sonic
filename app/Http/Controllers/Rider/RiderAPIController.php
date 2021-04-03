@@ -4432,7 +4432,7 @@ class RiderAPIController extends Controller
                 'cheque' => ['nullable','mimes:png,jpeg,jpg,pdf'],
 
                 //EmploymentHistory
-                'employment_history' => ['nullable', 'array'],
+                'employment_history' => ['nullable'],
                 'employment_history.*.company_name' => ['nullable'],
                 'employment_history.*.designation' => ['nullable'],
                 'employment_history.*.from' => ['nullable'],
@@ -4440,7 +4440,7 @@ class RiderAPIController extends Controller
                 'employment_history.*.reason' => ['nullable'],
 
                 //MedicalDetails
-                'medical_details' => ['nullable', 'array'],
+                'medical_details' => ['nullable'],
                 'medical_details.*.member_name' => ['nullable'],
                 'medical_details.*.relationship_id' => ['nullable'],
                 'medical_details.*.dob' => ['nullable'],
