@@ -77,6 +77,7 @@ Route::name('api.')->group(function () {
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
@@ -155,6 +156,7 @@ Route::name('api.')->group(function () {
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('store', 'AdminAPIController@admin_signup')->name('store');
+            Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
