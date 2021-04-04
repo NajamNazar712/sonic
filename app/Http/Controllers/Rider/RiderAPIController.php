@@ -4432,21 +4432,9 @@ class RiderAPIController extends Controller
                 'cheque' => ['nullable','mimes:png,jpeg,jpg,pdf'],
 
                 //EmploymentHistory
-                'employment_history' => ['nullable', 'array'],
-                'employment_history.company_name' => ['nullable'],
-                'employment_history.*.designation' => ['nullable'],
-                'employment_history.*.from' => ['nullable'],
-                'employment_history.*.to' => ['nullable'],
-                'employment_history.*.reason' => ['nullable'],
-
+                'employment_history' => ['nullable'],
                 //MedicalDetails
                 'medical_details' => ['nullable'],
-                'medical_details.*.member_name' => ['nullable'],
-                'medical_details.*.relationship_id' => ['nullable'],
-                'medical_details.*.dob' => ['nullable'],
-                'medical_details.*.marital_status_id' => ['nullable'],
-
-
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -4532,28 +4520,33 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->save();
 
-                            $employment_histories = json_decode($request->employment_history, true);
-                            foreach ($employment_histories as $employment_history) {
-                                $history = new EmployeeEmployementHistory();
-                                $history->employee_id = $employee_request->id;
-                                $history->name = $employment_history['organization_company_name'];
-                                $history->designation = $employment_history['position_designation'];
-                                $history->from = $employment_history['from_date'];
-                                $history->to = $employment_history['to_date'];
-                                $history->reason = $employment_history['reason'];
-                                $history->save();
+                            if($request->has('employment_history')){
+                                $employment_histories = json_decode($request->employment_history, true);
+                                foreach ($employment_histories as $employment_history) {
+                                    $history = new EmployeeEmployementHistory();
+                                    $history->employee_id = $employee_request->id;
+                                    $history->name = $employment_history['organization_company_name'];
+                                    $history->designation = $employment_history['position_designation'];
+                                    $history->from = $employment_history['from_date'];
+                                    $history->to = $employment_history['to_date'];
+                                    $history->reason = $employment_history['reason'];
+                                    $history->save();
+                                }
                             }
 
-                            $medical_details = json_decode($request->medical_details, true);
-                            foreach ($medical_details as $medical_detail) {
-                                $medical_info = new EmployeeMedicalInformation();
-                                $medical_info->employee_id = $employee_request->id;
-                                $medical_info->name = $medical_detail['name_of_family_member'];
-                                $medical_info->relationship_id = $medical_detail['relation_ship'];
-                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
-                                $medical_info->marital_status = $medical_detail['marital_status'];
-                                $medical_info->save();
+                            if($request->has('medical_details')){
+                                $medical_details = json_decode($request->medical_details, true);
+                                foreach ($medical_details as $medical_detail) {
+                                    $medical_info = new EmployeeMedicalInformation();
+                                    $medical_info->employee_id = $employee_request->id;
+                                    $medical_info->name = $medical_detail['name_of_family_member'];
+                                    $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                    $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                    $medical_info->marital_status = $medical_detail['marital_status'];
+                                    $medical_info->save();
+                                }
                             }
+
 
                             $employee_education = new EmployeeEducationalBackground();
                             $employee_education->employee_id = $employee_request->id;
