@@ -4730,25 +4730,13 @@ class RiderAPIController extends Controller
         return response()->json($response);
     }
 
- public function login_v2(Request $request)
+    public function login_v2(Request $request)
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
             'device_token' => ['required']
         ];
-
-
-
-
-
-
-
-
-
-
-
-
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -4769,11 +4757,11 @@ class RiderAPIController extends Controller
                         $information['name'] = $rider->name;
                         $information['role'] = 'rider';
 
-                        $employee_device_token = EmployeeDeviceToken::where('employee_id',$rider->id)
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
                             ->where('employee_type_id', 2);
-                        if($employee_device_token->exists()){
+                        if ($employee_device_token->exists()) {
                             $employee_device_token = $employee_device_token->first();
-                        }else{
+                        } else {
                             $employee_device_token = new EmployeeDeviceToken();
                             $employee_device_token->employee_id = $rider->id;
                             $employee_device_token->employee_type_id = 2;
@@ -4809,7 +4797,6 @@ class RiderAPIController extends Controller
             }
         }
     }
-
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
