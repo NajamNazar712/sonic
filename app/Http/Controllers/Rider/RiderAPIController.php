@@ -4403,18 +4403,16 @@ class RiderAPIController extends Controller
                 'pin' => ['nullable', 'integer', 'digits:4'],
 
                 //EducationalDetails
-                'institute_name' => ['nullable'],
-                'degree' => ['nullable'],
-                'grade' => ['nullable'],
-                'passing_year' => ['nullable'],
+                'education_details' => ['nullable'],
 
                 //BankInformation
-                'iban' => ['nullable'],
-                'branch_name' => ['nullable'],
-                'bank_id' => ['nullable'],
-                'account_no' => ['nullable'],
-                'branch_code' => ['nullable'],
-                'account_title' => ['nullable'],
+                'bank_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
 
                 //Attachments
                 'cv' => ['nullable','mimes:png,jpeg,jpg,pdf'],
@@ -4431,10 +4429,6 @@ class RiderAPIController extends Controller
                 'affidavit' => ['nullable','mimes:png,jpeg,jpg,pdf'],
                 'cheque' => ['nullable','mimes:png,jpeg,jpg,pdf'],
 
-                //EmploymentHistory
-                'employment_history' => ['nullable'],
-                //MedicalDetails
-                'medical_details' => ['nullable'],
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -4547,136 +4541,35 @@ class RiderAPIController extends Controller
                                 }
                             }
 
-
-                            $employee_education = new EmployeeEducationalBackground();
-                            $employee_education->employee_id = $employee_request->id;
-                            $employee_education->name = $request->institute_name;
-                            $employee_education->degree = $request->degree;
-                            $employee_education->grade = $request->grade;
-                            $employee_education->passing_year = $request->passing_year;
-                            $employee_education->save();
-
-                            $employee_bank_info = new EmployeeBankInformation();
-                            $employee_bank_info->employee_id = $employee_request->id;
-                            $employee_bank_info->account_title = $request->account_title;
-                            $employee_bank_info->branch_code = $request->branch_code;
-                            $employee_bank_info->account_no = $request->account_no;
-                            $employee_bank_info->bank_id = $request->bank_id;
-                            $employee_bank_info->branch_name = $request->branch_name;
-                            $employee_bank_info->iban = $request->iban;
-                            $employee_bank_info->save();
-
-
-                            $date = Carbon::now()->format('Y_m_d');
-                            $attachments = new EmployeeAttachment();
-                            $attachments->employee_id = $employee_request->id;
-
-                            if ($request->hasFile('cv')) {
-                                $file = $request->file('cv');
-                                $filename = 'cv_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cv = $directory . '/' . $filename;
+                            if($request->has('education_details')){
+                                $education_details = json_decode($request->education_details, true);
+                                foreach ($education_details as $education_detail) {
+                                    $employee_education = new EmployeeEducationalBackground();
+                                    $employee_education->employee_id = $employee_request->id;
+                                    $employee_education->name = $education_detail['institute'];
+                                    $employee_education->degree = $education_detail['degree'];
+                                    $employee_education->grade = $education_detail['position_grade'];
+                                    $employee_education->passing_year = $education_detail['graduation_year'];
+                                    $employee_education->save();
+                                }
                             }
 
-                            if ($request->hasFile('cnic')) {
-                                $file = $request->file('cnic');
-                                $filename = 'cnic_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic = $directory . '/' . $filename;
+                            if($request->has('bank_details')){
+                                $bank_details = json_decode($request->bank_details, true);
+                                foreach ($bank_details as $bank_detail) {
+                                    $employee_bank_info = new EmployeeBankInformation();
+                                    $employee_bank_info->employee_id = $employee_request->id;
+                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                    $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                    $employee_bank_info->account_no = $bank_detail['account_number'];
+                                    $employee_bank_info->bank_id = $bank_detail['bank'];
+                                    $employee_bank_info->branch_name = $bank_detail['branch'];
+                                    $employee_bank_info->iban = $bank_detail['iban_no'];
+                                    $employee_bank_info->save();
+                                }
                             }
-
-                            if ($request->hasFile('photo')) {
-                                $file = $request->file('photo');
-                                $filename = 'photo_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->photo = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('academic_credentials')) {
-                                $file = $request->file('academic_credentials');
-                                $filename = 'academic_credentials_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->academic = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('experience_certificates')) {
-                                $file = $request->file('experience_certificates');
-                                $filename = 'experience_certificates_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->experience = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('pay_slip')) {
-                                $file = $request->file('pay_slip');
-                                $filename = 'pay_slip_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->last_pay_slip = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('nikkah_nama')) {
-                                $file = $request->file('nikkah_nama');
-                                $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->nikkah_nama = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('cnic_spouse')) {
-                                $file = $request->file('cnic_spouse');
-                                $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic_spouse = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('bform')) {
-                                $file = $request->file('bform');
-                                $filename = 'child_b_form_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->child_b_form = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('cnic_nominee')) {
-                                $file = $request->file('cnic_nominee');
-                                $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cnic_nominee = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('utility_bill')) {
-                                $file = $request->file('utility_bill');
-                                $filename = 'utility_bill_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->utility_bill = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('affidavit')) {
-                                $file = $request->file('affidavit');
-                                $filename = 'affidavit_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->affidavit = $directory . '/' . $filename;
-                            }
-
-                            if ($request->hasFile('cheque')) {
-                                $file = $request->file('cheque');
-                                $filename = 'cheque_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_request->id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $attachments->cheque = $directory . '/' . $filename;
-                            }
-                            $attachments->save();
-
                             $response['status'] = 0;
+                            $response['employee_id'] = $employee_request->id;
                             $message = 'Request Has Been Submitted and Pending for Approval';
                         } catch (Exception $ex) {
                             $response['message'] = $ex;
@@ -4686,6 +4579,154 @@ class RiderAPIController extends Controller
             }
         } else {
             $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
+    }
+
+    public function rider_attachements_store(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'cv' => ['mimes:png,jpeg,jpg,pdf'],
+            'academic_credentials' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic' => ['mimes:png,jpeg,jpg,pdf'],
+            'photo' => ['mimes:png,jpeg,jpg,pdf'],
+            'experience_certificates' => ['mimes:png,jpeg,jpg,pdf'],
+            'pay_slip' => ['mimes:png,jpeg,jpg,pdf'],
+            'nikkah_nama' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic_spouse' => ['mimes:png,jpeg,jpg,pdf'],
+            'bform' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic_nominee' => ['mimes:png,jpeg,jpg,pdf'],
+            'utility_bill' => ['mimes:png,jpeg,jpg,pdf'],
+            'affidavit' => ['mimes:png,jpeg,jpg,pdf'],
+            'cheque' => ['mimes:png,jpeg,jpg,pdf'],
+        ];
+        $response = ['status' => 1];
+        $message = 'Unknown';
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            $response['errors'] = $validate->errors();
+        } else {
+            $date = Carbon::now()->format('Y_m_d');
+            $attachments = new EmployeeAttachment();
+            $employee_id = $request->employee_id;
+            $attachments->employee_id = $employee_id;
+
+
+            if ($request->hasFile('cv')) {
+                $file = $request->file('cv');
+                $filename = 'cv_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cv = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('cnic')) {
+                $file = $request->file('cnic');
+                $filename = 'cnic_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $filename = 'photo_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->photo = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('academic_credentials')) {
+                $file = $request->file('academic_credentials');
+                $filename = 'academic_credentials_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->academic = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('experience_certificates')) {
+                $file = $request->file('experience_certificates');
+                $filename = 'experience_certificates_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->experience = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('pay_slip')) {
+                $file = $request->file('pay_slip');
+                $filename = 'pay_slip_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->last_pay_slip = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('nikkah_nama')) {
+                $file = $request->file('nikkah_nama');
+                $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->nikkah_nama = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('cnic_spouse')) {
+                $file = $request->file('cnic_spouse');
+                $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic_spouse = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('bform')) {
+                $file = $request->file('bform');
+                $filename = 'child_b_form_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->child_b_form = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('cnic_nominee')) {
+                $file = $request->file('cnic_nominee');
+                $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic_nominee = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('utility_bill')) {
+                $file = $request->file('utility_bill');
+                $filename = 'utility_bill_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->utility_bill = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('affidavit')) {
+                $file = $request->file('affidavit');
+                $filename = 'affidavit_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->affidavit = $directory . '/' . $filename;
+            }
+
+            if ($request->hasFile('cheque')) {
+                $file = $request->file('cheque');
+                $filename = 'cheque_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cheque = $directory . '/' . $filename;
+            }
+            $attachments->save();
+
+            $response['status'] = 0;
+            $message = 'Documents Has Been Submited';
         }
         $response['message'] = $message;
         return response()->json($response);
