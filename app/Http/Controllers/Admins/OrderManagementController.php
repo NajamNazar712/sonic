@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -44,6 +44,7 @@ class OrderManagementController extends Controller
 
     public function index(){
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(),44);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
@@ -613,6 +614,7 @@ class OrderManagementController extends Controller
 
     public function supply_chain_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),11);
         $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,4,20,21])->get();
         $service_type = BookingType::all();
         $shippers = User::select('id','name')->get();
@@ -620,6 +622,10 @@ class OrderManagementController extends Controller
         return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products ,'shippers' =>$shippers ]);;
     }
     public function supply_chain_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),71);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

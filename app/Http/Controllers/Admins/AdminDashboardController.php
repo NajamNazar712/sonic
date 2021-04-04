@@ -1388,6 +1388,7 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),2);
         $shippers = User::whereIn('status', [3, 4])->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
@@ -7175,6 +7176,10 @@ class AdminDashboardController extends Controller
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function activeAccountListAjax(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),62);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p','p.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')

@@ -2506,7 +2506,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
-            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+                Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
             Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
             Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
         });

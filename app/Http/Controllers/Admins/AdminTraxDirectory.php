@@ -6,7 +6,9 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\City;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminTraxDirectory extends Controller
 {
@@ -17,10 +19,15 @@ class AdminTraxDirectory extends Controller
     }
     public function index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),52);
         $hubs=City::select('id','name')->where('hub',1)->get();
         return view('admin.trax_directory.index')->with(['hubs'=>$hubs]);
     }
-    public function list(){
+    public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),112);
+        }
         $admin = Admin::join('admin_roles as ar','admins.role_id','=','ar.id')
             ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')

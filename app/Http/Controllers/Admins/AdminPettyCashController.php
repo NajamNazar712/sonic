@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\File;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class AdminPettyCashController extends Controller
@@ -339,6 +340,7 @@ class AdminPettyCashController extends Controller
 
     public function petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),39);
         if (session('role_id') == 1) {
             $hubs = City::where('hub', 1)->get();
         } else {
@@ -368,6 +370,11 @@ class AdminPettyCashController extends Controller
 
     public function petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),99);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
@@ -706,11 +713,17 @@ class AdminPettyCashController extends Controller
 
     public function approved_petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),40);
         return view('admin.petty_cash.approved');
     }
 
     public function approved_petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),100);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
@@ -893,11 +906,17 @@ class AdminPettyCashController extends Controller
 
     public function rejected_petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),41);
         return view('admin.petty_cash.rejected');
     }
 
     public function rejected_petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),101);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')

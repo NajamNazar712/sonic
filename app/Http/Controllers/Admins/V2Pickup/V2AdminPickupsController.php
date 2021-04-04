@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminNsaAccountShipmentController;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -52,11 +53,11 @@ use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-use Auth;
 
 
 class V2AdminPickupsController extends Controller
@@ -67,6 +68,9 @@ class V2AdminPickupsController extends Controller
         $this->middleware('Permission');
     }
     public function pending_index() {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),6);
+
         $riders = Rider::where('status',1)->select(['id', 'name']);
         $pickup_statuses = V2PickupRequestStatus::all();
         $rider_statuses = V2PickupRequestRiderStatus::all();
@@ -96,7 +100,10 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pending_list(Request $request) {
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),66);
+        }
         $today = Carbon::now()->startOfDay();
         $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
@@ -1768,6 +1775,7 @@ class V2AdminPickupsController extends Controller
     }
 
     public function v2_pickups_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),7);
         $pickup_types = [['id' => 0, 'text' => 'Not Pick'], ['id' => 1, 'text' => 'Pick']];
         $pickup_not_pick_reasons = V2PickupRequestNotPickReason::all();
 
@@ -1776,6 +1784,12 @@ class V2AdminPickupsController extends Controller
 
     public function pickups_list_v2(Request $request) {
 
+        $excel = false;
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            $excel = true;
+            ActivityTrailController::createActivityTrailLog(Auth::id(),67);
+        }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -1815,58 +1829,72 @@ class V2AdminPickupsController extends Controller
                     return 'Pick';
                 }
             })
-            ->editColumn('distance_from_start_to_actual', function ($rider_pickup) {
+            ->editColumn('distance_from_start_to_actual', function ($rider_pickup) use ($excel) {
                 $distance_from_start_to_actual = $rider_pickup->distance_from_start_to_actual;
 
                 if ($distance_from_start_to_actual == 0) {
                     $distance_from_start_to_actual = 0;
                 }
 
+                if($excel)
+                {
+                    return $distance_from_start_to_actual;
+                }
                 return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->start_location_latitude . ',' . $rider_pickup->start_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_start_to_actual . '</a>';
             })
-            ->editColumn('distance_from_current_to_actual', function ($rider_pickup) {
+            ->editColumn('distance_from_current_to_actual', function ($rider_pickup) use ($excel) {
                 $distance_from_current_to_actual = $rider_pickup->distance_from_current_to_actual;
 
                 if ($distance_from_current_to_actual == 0) {
                     $distance_from_current_to_actual = 0;
                 }
 
-                if ($rider_pickup->current_location_latitude && $rider_pickup->current_location_longitude) {
+                if ($rider_pickup->current_location_latitude && $rider_pickup->current_location_longitude && !$excel) {
                     return '<a class="btn btn-sm btn-outline-info align-middle" href="http://maps.google.com/maps?saddr=' . $rider_pickup->current_location_latitude . ',' . $rider_pickup->current_location_longitude . '&daddr=' . $rider_pickup->actual_location_latitude . ',' . $rider_pickup->actual_location_longitude . '" target="_blank">' . $distance_from_current_to_actual . '</a>';
                 }
                 else {
                     return $distance_from_current_to_actual;
                 }
             })
-            ->editColumn('picture_path', function ($rider_pickup) {
+            ->editColumn('picture_path', function ($rider_pickup) use ($excel) {
                 if ($rider_pickup->pickup_type == 0) {
                     $image = '';
                     if($rider_pickup->picture_path != null){
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($rider_pickup->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
 
+                        if($excel)
+                        {
+                            return asset(Storage::url($rider_pickup->picture_path));
+                        }
                         return $image;
                     }
                 } else {
                     return '-';
                 }
             })
-            ->editColumn('signature_via_app', function ($rider_pickup) {
+            ->editColumn('signature_via_app', function ($rider_pickup) use ($excel) {
                 if ($rider_pickup->pickup_type == 1) {
                     $image = '';
                     if($rider_pickup->picture_path != null){
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm signature" data-link="' . asset(Storage::url($rider_pickup->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
-
+                        if($excel)
+                        {
+                            return asset(Storage::url($rider_pickup->picture_path));
+                        }
                         return $image;
                     }
                 } else {
                     return '-';
                 }
             })
-            ->editColumn('audio_path', function ($rider_pickup) {
+            ->editColumn('audio_path', function ($rider_pickup) use ($excel) {
                     $audio = '';
                     if($rider_pickup->audio_path != null){
                         $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($rider_pickup->audio_path)) . '"><i class="la la-file-sound-o"></i> Listen</button></div>';
-
+                        if($excel)
+                        {
+                            return asset(Storage::url($rider_pickup->audio_path));
+                        }
                         return $audio;
                     }
                  else {
@@ -1881,6 +1909,8 @@ class V2AdminPickupsController extends Controller
         return $datatables->make(true);
     }
     public function pickups_action_log_index_v2() {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),8);
         $pickup_actions = PickupAction::all();
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
@@ -1888,6 +1918,10 @@ class V2AdminPickupsController extends Controller
         return view('admin.v2_pickups.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders'=>$riders,'admins'=>$admins,'cities'=>$cities]);
     }
     public function pickups_action_log_list_v2(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),68);
+        }
         $rider_pickup_action_logs = V2RiderPickupActionLog::join('pickup_actions as pa', 'v2_rider_pickup_action_logs.type_id', 'pa.id')
             ->join('v2_pickup_notes as pn', 'v2_rider_pickup_action_logs.pickup_note_id', 'pn.id')
             ->join('v2_pickup_requests as pr', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.id')
@@ -2220,6 +2254,7 @@ class V2AdminPickupsController extends Controller
     }
 
     public function rider_receiving_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),9);
         $pickup_actions = PickupAction::all();
         $default_date = Carbon::now();
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
@@ -2465,7 +2500,10 @@ class V2AdminPickupsController extends Controller
         return $html;
     }
     public function rider_receiving_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),69);
+        }
         $rider = V2PickupNote::join('v2_pickup_note_requests as pnr','pnr.pickup_note_id','=','v2_pickup_notes.id')
             ->join('v2_pickup_requests as vpr','vpr.id','=','pnr.pickup_request_id')
             ->join('riders as r','r.id','=','v2_pickup_notes.rider_id')
@@ -2522,6 +2560,7 @@ class V2AdminPickupsController extends Controller
     }
 
     public function pickup_route_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),10);
        // $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
         $users = User::select(['id','name'])->get();
         $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
@@ -2539,7 +2578,11 @@ class V2AdminPickupsController extends Controller
      }
 
 
-    public function pickup_route_list(){
+    public function pickup_route_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),70);
+        }
         $routes = Route::join('cities','routes.city_id','=','cities.id')
             ->leftjoin('riders','riders.route_id','=','routes.id')
             ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','riders.name as rider'])->where('routes.route_type_id',1);

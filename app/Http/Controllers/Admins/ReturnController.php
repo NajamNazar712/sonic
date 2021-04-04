@@ -49,6 +49,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
+
 class ReturnController extends Controller
 {
     public function __construct()
@@ -59,6 +61,7 @@ class ReturnController extends Controller
     }
 
     public function return_view(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),26);
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
@@ -72,6 +75,11 @@ class ReturnController extends Controller
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),86);
+        }
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -810,6 +818,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_view(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),27);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -817,6 +826,11 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),87);
+        }
+
         $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46,47,48);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -2637,10 +2651,16 @@ class ReturnController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),28);
         return view('admin.return.history');
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),88);
+        }
+
         $deliveries = ReturnNote::
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')

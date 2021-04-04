@@ -67,6 +67,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminCRMController extends Controller
 {
@@ -555,6 +556,7 @@ class AdminCRMController extends Controller
     }
 
     public function launched_re_open_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),42);
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
@@ -569,6 +571,10 @@ class AdminCRMController extends Controller
     }
 
     public function launched_re_open_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),102);
+        }
         $launched_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -2652,6 +2658,7 @@ class AdminCRMController extends Controller
         return ['status' => 0, 'success' => 'Request(s) Escalated successfully!'];
     }
     public function consignee_info_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),43);
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
@@ -2669,6 +2676,10 @@ class AdminCRMController extends Controller
     }
 
     public function consignee_info_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),103);
+        }
         $consignee_info_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use DB;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class RiderManagementController extends Controller
 {
@@ -32,12 +33,16 @@ class RiderManagementController extends Controller
     }
 
     public function permanent_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),58);
         $category = RiderCategory::all();
         return view('admin.management.riders.permanent_index')->with(['categories'=>$category]);
     }
 
     public function permanent_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),118);
+        }
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
@@ -424,11 +429,16 @@ class RiderManagementController extends Controller
     }
 
     public function incentive_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),59);
         $category = RiderCategory::all();
         return view('admin.management.riders.incentive_index')->with(['categories'=>$category]);
     }
 
-    public function incentive_list(){
+    public function incentive_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),119);
+        }
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
@@ -619,6 +629,7 @@ class RiderManagementController extends Controller
 
     public function rider_request_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),60);
         $rider_type = RiderType::all();
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
@@ -629,6 +640,10 @@ class RiderManagementController extends Controller
 
     public function rider_request_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),120);
+        }
         $rider_request = RiderRequest::join('cities as c','rider_requests.city_id', '=', 'c.id')
             ->join('employees as e', 'e.rider_request_id', '=', 'rider_requests.id')
             ->select('rider_requests.id', 'rider_requests.name as rider_name', 'rider_requests.cnic', 'rider_requests.phone_no', 'rider_requests.pin', 'rider_requests.created_at', 'rider_requests.updated_at', 'rider_requests.status', 'rider_requests.city_id', 'c.name as city_name', 'e.trax_id  as trax_id')

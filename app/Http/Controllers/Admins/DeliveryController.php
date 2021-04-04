@@ -79,6 +79,7 @@ use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class DeliveryController extends Controller
@@ -93,6 +94,7 @@ class DeliveryController extends Controller
 
     public function pending_delivery_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -101,6 +103,10 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),79);
+        }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -765,12 +771,18 @@ class DeliveryController extends Controller
 
     public function delivery_note_receive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),20);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         return view('admin.delivery.receive.index')->with(['riders' => $riders]);
     }
 
     public function receive_deliveries_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),80);
+        }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
@@ -3647,11 +3659,17 @@ class DeliveryController extends Controller
     //completed deliveries
     public function pending_cash_collection_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),21);
         return view('admin.delivery.complete.pending_cash_collection');
     }
 
     public function pending_cash_collection_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),81);
+        }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
@@ -3791,11 +3809,17 @@ class DeliveryController extends Controller
 
     public function completed_deliveries_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),23);
         return view('admin.delivery.complete.index');
     }
 
     public function completed_receive_deliveries_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),83);
+        }
+
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -4002,6 +4026,7 @@ class DeliveryController extends Controller
     }
     public function sdn_view(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),25);
         $petty_cash_ids = array();
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
         $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->whereNotIn('id',$petty_cash_ids)->select('id')->get();
@@ -4011,6 +4036,11 @@ class DeliveryController extends Controller
 
     public function sdn_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),85);
+        }
+
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')

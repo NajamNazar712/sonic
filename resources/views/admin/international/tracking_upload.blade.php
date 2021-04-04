@@ -118,6 +118,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.international.tracking_upload.list') }}',
                         data: params,

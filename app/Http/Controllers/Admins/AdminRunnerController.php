@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminRunnerController extends Controller
 {
@@ -24,11 +25,16 @@ class AdminRunnerController extends Controller
     }
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),17);
         $existing_runners = RunnerDetail::where('status',0)->pluck('runner_id')->toArray();
         $runners = Runner::where('status', 1)->whereNotIn('id', $existing_runners)->get();
         return view('admin.runner.index')->with(['runners' => $runners]);
     }
     public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),77);
+        }
         $runner_details = RunnerDetail::join('runners as r', 'r.id', '=', 'runner_details.runner_id')
             ->join('admins as a', 'a.id', '=', 'runner_details.created_by')
             ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at', 'a.name as created_by','runner_details.status as status')

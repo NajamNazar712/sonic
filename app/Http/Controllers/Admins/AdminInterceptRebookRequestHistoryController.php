@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminInterceptRebookRequestHistoryController extends Controller
 {
@@ -24,10 +25,15 @@ class AdminInterceptRebookRequestHistoryController extends Controller
     }
 
     public function intercept_request_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),49);
         return view('admin.delivery.intercept.history');
     }
 
     public function  intercept_request_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),109);
+        }
         $intercept = InterceptReBookRequestHistory::join('shipments as s','s.id','=','intercept_re_book_request_histories.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
