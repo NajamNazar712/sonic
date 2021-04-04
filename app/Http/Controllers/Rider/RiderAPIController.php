@@ -19,6 +19,7 @@ use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -4727,6 +4728,86 @@ class RiderAPIController extends Controller
         }
         $response['message'] = $message;
         return response()->json($response);
+    }
+
+ public function login_v2(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['required']
+        ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($rider->exists()) {
+                $rider = $rider->first();
+
+                if ($rider->status) {
+                    if (Hash::check($request->input('pin'), $rider->pin)) {
+                        $information = array();
+
+                        $information['name'] = $rider->name;
+                        $information['role'] = 'rider';
+
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id',$rider->id)
+                            ->where('employee_type_id', 2);
+                        if($employee_device_token->exists()){
+                            $employee_device_token = $employee_device_token->first();
+                        }else{
+                            $employee_device_token = new EmployeeDeviceToken();
+                            $employee_device_token->employee_id = $rider->id;
+                            $employee_device_token->employee_type_id = 2;
+                        }
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+
+                        if ($rider->api_token) {
+                            $information['api_token'] = $rider->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(str_random(60)));
+
+                            $rider->api_token = $api_token;
+
+                            $information['api_token'] = $api_token;
+                        }
+                        $rider->save();
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+                if ($rider_request->exists()) {
+                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
+            }
+        }
     }
 
 
