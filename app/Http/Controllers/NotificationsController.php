@@ -7116,13 +7116,13 @@ class NotificationsController extends Controller
             'body' => json_encode($message)
         ]);
         $response = json_decode($response->getBody()->getContents(), true);
-        if ($response['success'] != 0) {
+        /*if ($response['success'] != 0) {
             $notification_history = new EmployeeNotification();
             $notification_history->employee_id = $employee_id;
             $notification_history->employee_type_id = $employee_type;
             $notification_history->title = $notification_title;
             $notification_history->message = $notification_body;
             $notification_history->save();
-        }
+        }*/
     }
 }
