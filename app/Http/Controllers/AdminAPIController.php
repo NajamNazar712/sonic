@@ -573,10 +573,15 @@ class AdminAPIController extends Controller
             $response['errors'] = $validate->errors();
         } else {
             $date = Carbon::now()->format('Y_m_d');
-            $attachments = new EmployeeAttachment();
-            $employee_id = $request->employee_id;
-            $attachments->employee_id = $employee_id;
 
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+            } else {
+                $attachments = new EmployeeAttachment();
+                $attachments->employee_id = $employee_id;
+            }
 
             if ($request->hasFile('cv')) {
                 $file = $request->file('cv');
