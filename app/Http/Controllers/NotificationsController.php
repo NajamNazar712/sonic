@@ -7092,38 +7092,28 @@ class NotificationsController extends Controller
         self::sms($body, $to);
     }
 
-    static public function bolt_app_notification($device_token, $notification_title, $notification_body)
+    static public function bolt_app_notification($employee_id, $employee_type, $device_token, $notification_title, $notification_body)
     {
-        $server_key = 'AAAA3sL4DyU:APA91bGZtgVBy2GlFNcbO6s7uflQ__wtLsKJ-NiqGzYmX-ynwAJe53kU2iTiV7k1PF35mhLX5SBBbbrnRvl7KU3Q3kp2lrSTHC55HUQv-hCgoXzXjTH1pYxRzB7p_4ZUD8NokW3JdDAe';
+        $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
         $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $token = $device_token;
 
-        $notification = [
-            'title' => $notification_title,
-            'body' => $notification_body,
-            'sound' => true,
+        $message = [
+            'notification' => [
+                'title' => $notification_title,
+                'body' => $notification_body
+            ],
+            'to' => $device_token
         ];
 
-        $fcmNotification = [
-            //'registration_ids' => $tokenList, //multple token array
-            'to' => $token, //single token
-            'notification' => $notification,
-            'data' => $notification
-        ];
+        $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
-        $headers = [
-            'Authorization: key=' . $server_key,
-            'Content-Type: application/json'
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
-        $result = curl_exec($ch);
-        curl_close($ch);
+        $response = $client->post('',[
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'key='.$server_key,
+            ],
+            'body' => json_encode($message)
+        ]);
+        $response = json_decode($response->getBody()->getContents(), true);
     }
 }
