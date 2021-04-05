@@ -388,7 +388,7 @@ class V2AdminPickupsController extends Controller
                 }
 
                 if ($previous_rider_id != null) {
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $pickup_request->current_rider_id)
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id',$previous_rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
                     if ($rider_device_token->exists()) {
@@ -396,7 +396,7 @@ class V2AdminPickupsController extends Controller
                         $device_token = $rider_device_token->device_token;
                         $title = "Pickup Request Removed";
                         $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Removed From Your Pickups";
-                        NotificationsController::bolt_app_notification($pickup_request->current_rider_id, 2,$device_token, $title, $message);
+                        NotificationsController::bolt_app_notification($previous_rider_id, 2,$device_token, $title, $message);
                     }
                 }
 
