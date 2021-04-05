@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -12,12 +13,27 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\RiderType;
+use App\Http\Models\BanksList;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeEducationalBackground;
+use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeeRelationship;
+use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
@@ -33,6 +49,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\Zone;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use Illuminate\Http\Request;
@@ -112,7 +129,7 @@ class RiderAPIController extends Controller
     ];
 
     private $messages = [
-        'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
         'integer' => ':attribute must be an Integer.',
         'digits' => ':attribute must be of :digits Digits.',
         'exists' => 'Given :attribute is of Invalid ID.',
@@ -1977,7 +1994,8 @@ class RiderAPIController extends Controller
             if ($validate->fails()) {
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
-            } else {
+            }
+            else {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic'));
 
@@ -4323,7 +4341,6 @@ class RiderAPIController extends Controller
         }
     }
 
-
     public function rider_ticker_images(Request $request){
         $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
         if($rider_ticker_images->exists()){
@@ -4333,6 +4350,389 @@ class RiderAPIController extends Controller
         else{
             return response()->json(['status' => 1, 'message' => 'No Images Found']);
         }
+    }
+
+    public function signup_data(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $designation = EmployeeDesignation::select('id', 'name')->get();
+        $domicile = EmployeeDomicile::select('id', 'name')->get();
+        $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
+        $nationality = EmployeeNationality::select('id', 'name')->get();
+        $religion = EmployeeReligion::select('id', 'name')->get();
+        $gender = EmployeeGender::select('id', 'name')->get();
+        $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $department = AdminDepartment::select('id', 'name')->get();
+        $hub = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $relationships = EmployeeRelationship::select('id', 'name')->get();
+        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
+        $banks = BanksList::select('id', 'name')->where('status', 1)->get();
+        $rider_type = RiderType::select('id', 'name')->get();
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type]);
+    }
+
+    public function rider_signup_v2(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
+                //Employees
+                'name' => ['nullable'],
+                'employee_gender_id' => ['nullable'],
+                'city_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'cnic_no' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'guardian_name' => ['nullable'],
+                'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+                'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+                'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+                'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+                'personal_email' => ['nullable', 'email'],
+                'address' => ['nullable'],
+                'emergency_contact' => ['nullable'],
+                'cnic_issue_date' => ['nullable'],
+                'cnic_expiry_date' => ['nullable'],
+                'designation_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
+                'department_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
+                'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
+                'official_email' => ['nullable', 'email'],
+                'official_phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'sonic_id' => ['nullable'],
+                'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'date_of_birth' => ['nullable'],
+                'pin' => ['nullable', 'integer', 'digits:4'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //BankInformation
+                'bank_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
+                    $rider_request = $rider_request->first();
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } //Check Rider Already Exist
+                else {
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic_no'));
+
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
+                            $message = "Phone Number & CNIC Already Exists";
+
+                        } else if ($rider->phone == $request->phone_number) {
+                            $message = "Phone Number Already Exist";
+
+                        } else if ($rider->cnic == $request->input('cnic_no')) {
+                            $message = "CNIC Already Exist";
+                        }
+
+                    } else {
+                        try {
+                            $rider_request = new RiderRequest();
+                            $rider_request->name = $request->name;
+                            $rider_request->cnic = $request->cnic_no;
+                            $rider_request->phone_no = $request->phone_number;
+                            $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
+                            $rider_request->rider_type_id = $request->rider_type_id;
+                            $rider_request->save();
+
+                            $employee_request = new Employee();
+                            $employee_request->name = $request->name;
+                            $employee_request->employee_gender_id = $request->employee_gender_id;
+                            $employee_request->city_id = $request->city_id;
+                            $employee_request->cnic = $request->cnic_no;
+                            $employee_request->phone_number = $request->phone_number;
+                            $employee_request->employee_type_id = 2;
+                            $employee_request->rider_request_id = $rider_request->id;
+                            $employee_request->status_id = 2;
+                            $employee_request->guardian_name = $request->guardian_name;
+                            $employee_request->religion_id = $request->religion_id;
+                            $employee_request->nationality_id = $request->nationality_id;
+                            $employee_request->domicile_id = $request->domicile_id;
+                            $employee_request->marital_status_id = $request->marital_status_id;
+                            $employee_request->blood_group = $request->blood_group_id;
+                            $employee_request->personal_email = $request->personal_email;
+                            $employee_request->address = $request->address;
+                            $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                            $employee_request->designation_id = $request->designation_id;
+                            $employee_request->department_id = $request->department_id;
+                            $employee_request->zone_id = $request->zone_id;
+                            $employee_request->official_email = $request->official_email;
+                            $employee_request->official_phone_number = $request->official_phone_number;
+                            $employee_request->sonic_id = $request->sonic_id;
+                            $employee_request->place_of_birth = $request->place_of_birth;
+                            $employee_request->date_of_birth = $request->date_of_birth;
+                            $employee_request->pin = $request->pin;
+                            $employee_request->save();
+
+                            if($request->has('employment_history')){
+                                $employment_histories = json_decode($request->employment_history, true);
+                                foreach ($employment_histories as $employment_history) {
+                                    $history = new EmployeeEmployementHistory();
+                                    $history->employee_id = $employee_request->id;
+                                    $history->name = $employment_history['organization_company_name'];
+                                    $history->designation = $employment_history['position_designation'];
+                                    $history->from = $employment_history['from_date'];
+                                    $history->to = $employment_history['to_date'];
+                                    $history->reason = $employment_history['reason'];
+                                    $history->save();
+                                }
+                            }
+
+                            if($request->has('medical_details')){
+                                $medical_details = json_decode($request->medical_details, true);
+                                foreach ($medical_details as $medical_detail) {
+                                    $medical_info = new EmployeeMedicalInformation();
+                                    $medical_info->employee_id = $employee_request->id;
+                                    $medical_info->name = $medical_detail['name_of_family_member'];
+                                    $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                    $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                    $medical_info->marital_status = $medical_detail['marital_status'];
+                                    $medical_info->save();
+                                }
+                            }
+
+                            if($request->has('education_details')){
+                                $education_details = json_decode($request->education_details, true);
+                                foreach ($education_details as $education_detail) {
+                                    $employee_education = new EmployeeEducationalBackground();
+                                    $employee_education->employee_id = $employee_request->id;
+                                    $employee_education->name = $education_detail['institute'];
+                                    $employee_education->degree = $education_detail['degree'];
+                                    $employee_education->grade = $education_detail['position_grade'];
+                                    $employee_education->passing_year = $education_detail['graduation_year'];
+                                    $employee_education->save();
+                                }
+                            }
+
+                            if($request->has('bank_details')){
+                                $bank_details = json_decode($request->bank_details, true);
+                                foreach ($bank_details as $bank_detail) {
+                                    $employee_bank_info = new EmployeeBankInformation();
+                                    $employee_bank_info->employee_id = $employee_request->id;
+                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                    $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                    $employee_bank_info->account_no = $bank_detail['account_number'];
+                                    $employee_bank_info->bank_id = $bank_detail['bank'];
+                                    $employee_bank_info->branch_name = $bank_detail['branch'];
+                                    $employee_bank_info->iban = $bank_detail['iban_no'];
+                                    $employee_bank_info->save();
+                                }
+                            }
+                            $response['status'] = 0;
+                            $response['employee_id'] = $employee_request->id;
+                            $message = 'Request Has Been Submitted and Pending for Approval';
+                        } catch (Exception $ex) {
+                            $response['message'] = $ex;
+                        }
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
+    }
+
+    public function rider_attachments_store(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'cv' => ['mimes:png,jpeg,jpg,pdf'],
+            'academic_credentials' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic' => ['mimes:png,jpeg,jpg,pdf'],
+            'photo' => ['mimes:png,jpeg,jpg,pdf'],
+            'experience_certificates' => ['mimes:png,jpeg,jpg,pdf'],
+            'pay_slip' => ['mimes:png,jpeg,jpg,pdf'],
+            'nikkah_nama' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic_spouse' => ['mimes:png,jpeg,jpg,pdf'],
+            'bform' => ['mimes:png,jpeg,jpg,pdf'],
+            'cnic_nominee' => ['mimes:png,jpeg,jpg,pdf'],
+            'utility_bill' => ['mimes:png,jpeg,jpg,pdf'],
+            'affidavit' => ['mimes:png,jpeg,jpg,pdf'],
+            'cheque' => ['mimes:png,jpeg,jpg,pdf'],
+        ];
+        $response = ['status' => 1];
+        $message = 'Unknown';
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            $response['errors'] = $validate->errors();
+        } else {
+            $date = Carbon::now()->format('Y_m_d');
+
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+            } else {
+                $attachments = new EmployeeAttachment();
+                $attachments->employee_id = $employee_id;
+            }
+
+            if ($request->hasFile('cv')) {
+                $file = $request->file('cv');
+                $filename = 'cv_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cv = $directory . '/' . $filename;
+                $response['link'] = $attachments->cv;
+            }
+
+            if ($request->hasFile('cnic')) {
+                $file = $request->file('cnic');
+                $filename = 'cnic_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic = $directory . '/' . $filename;
+                $response['link'] = $attachments->cnic;
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $filename = 'photo_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->photo = $directory . '/' . $filename;
+                $response['link'] = $attachments->photo;
+            }
+
+            if ($request->hasFile('academic_credentials')) {
+                $file = $request->file('academic_credentials');
+                $filename = 'academic_credentials_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->academic = $directory . '/' . $filename;
+                $response['link'] = $attachments->academic;
+            }
+
+            if ($request->hasFile('experience_certificates')) {
+                $file = $request->file('experience_certificates');
+                $filename = 'experience_certificates_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->experience = $directory . '/' . $filename;
+                $response['link'] = $attachments->experience;
+            }
+
+            if ($request->hasFile('pay_slip')) {
+                $file = $request->file('pay_slip');
+                $filename = 'pay_slip_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->last_pay_slip = $directory . '/' . $filename;
+                $response['link'] = $attachments->last_pay_slip;
+            }
+
+            if ($request->hasFile('nikkah_nama')) {
+                $file = $request->file('nikkah_nama');
+                $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->nikkah_nama = $directory . '/' . $filename;
+                $response['link'] = $attachments->nikkah_nama;
+            }
+
+            if ($request->hasFile('cnic_spouse')) {
+                $file = $request->file('cnic_spouse');
+                $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic_spouse = $directory . '/' . $filename;
+                $response['link'] = $attachments->cnic_spouse;
+            }
+
+            if ($request->hasFile('bform')) {
+                $file = $request->file('bform');
+                $filename = 'child_b_form_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->child_b_form = $directory . '/' . $filename;
+                $response['link'] = $attachments->child_b_form;
+            }
+
+            if ($request->hasFile('cnic_nominee')) {
+                $file = $request->file('cnic_nominee');
+                $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cnic_nominee = $directory . '/' . $filename;
+                $response['link'] = $attachments->cnic_nominee;
+            }
+
+            if ($request->hasFile('utility_bill')) {
+                $file = $request->file('utility_bill');
+                $filename = 'utility_bill_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->utility_bill = $directory . '/' . $filename;
+                $response['link'] = $attachments->utility_bill;
+            }
+
+            if ($request->hasFile('affidavit')) {
+                $file = $request->file('affidavit');
+                $filename = 'affidavit_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->affidavit = $directory . '/' . $filename;
+                $response['link'] = $attachments->affidavit;
+            }
+
+            if ($request->hasFile('cheque')) {
+                $file = $request->file('cheque');
+                $filename = 'cheque_' . $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee_id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $attachments->cheque = $directory . '/' . $filename;
+                $response['link'] = $attachments->cheque;
+            }
+            $attachments->save();
+
+            $response['status'] = 0;
+            $message = 'Document Has Been Submited';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
     public function login_v2(Request $request)
@@ -4362,11 +4762,11 @@ class RiderAPIController extends Controller
                         $information['name'] = $rider->name;
                         $information['role'] = 'rider';
 
-                        $employee_device_token = EmployeeDeviceToken::where('employee_id',$rider->id)
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
                             ->where('employee_type_id', 2);
-                        if($employee_device_token->exists()){
+                        if ($employee_device_token->exists()) {
                             $employee_device_token = $employee_device_token->first();
-                        }else{
+                        } else {
                             $employee_device_token = new EmployeeDeviceToken();
                             $employee_device_token->employee_id = $rider->id;
                             $employee_device_token->employee_type_id = 2;
