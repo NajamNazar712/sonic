@@ -1242,10 +1242,16 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-                    if($request->has('weight')){
-                        $shipment->actual_weight = $request->weight;
-                        $shipment->save();
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $shipment->actual_weight = $shipment->estimated_weight;
                     }
+                    else {
+                        if ($request->has('weight')) {
+                            $shipment->actual_weight = $request->weight;
+                        }
+                    }
+                    $shipment->save();
 
                     $details = array();
 
@@ -2001,10 +2007,17 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-                    if($request->has('weight')){
-                        $shipment->actual_weight = $request->weight;
-                        $shipment->save();
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $shipment->actual_weight = $shipment->estimated_weight;
                     }
+                    else {
+                        if ($request->has('weight')) {
+                            $shipment->actual_weight = $request->weight;
+                        }
+                    }
+                    $shipment->save();
 
                     $details = array();
 
