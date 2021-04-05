@@ -5608,7 +5608,8 @@ class AdminReportsController extends Controller
             $datatable->where('s.tracking_number', '=', $tracking);
         }
         if($rnumber = $request->get('search_request_number')){
-            $datatable->where('crm_requests.id', '=', $rnumber);
+            $rnumber = explode(',',$rnumber);
+            $datatable->whereIn('crm_requests.id', $rnumber);
         }
         if($shipper = $request->get('search_shipper')){
             $datatable->where('u.id', '=', $shipper);
