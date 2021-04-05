@@ -18,6 +18,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\http\Models\EmployeeNotification;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
@@ -7107,13 +7108,21 @@ class NotificationsController extends Controller
 
         $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
-        $response = $client->post('',[
+        $response = $client->post('', [
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'key='.$server_key,
+                'Authorization' => 'key=' . $server_key,
             ],
             'body' => json_encode($message)
         ]);
         $response = json_decode($response->getBody()->getContents(), true);
+        if ($response['success'] != 0) {
+            $notification_history = new EmployeeNotification();
+            $notification_history->employee_id = $employee_id;
+            $notification_history->employee_type_id = $employee_type;
+            $notification_history->title = $notification_title;
+            $notification_history->message = $notification_body;
+            $notification_history->save();
+        }
     }
 }

@@ -20,6 +20,7 @@ use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\EmployeeDeviceToken;
+use App\http\Models\EmployeeNotification;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -4801,6 +4802,22 @@ class RiderAPIController extends Controller
                 }
             }
         }
+    }
+
+    public function notification_history(Request $request){
+        $rider_id = $request->rider_id;
+        $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
+        $to_date = Carbon::now()->format('Y-m-d 23:59:59');
+
+        $notifiction_history = EmployeeNotification::where('employee_id', $rider_id)
+            ->where('employee_type_id', 2)
+            ->whereBetween('created_at', [$from_date, $to_date])
+            ->orderBy('created_at', 'desc');
+        if($notifiction_history->exists()){
+            $notifiction_history = $notifiction_history->get();
+            return response()->json(['status' => 0, 'data' => $notifiction_history]);
+        }
+        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
