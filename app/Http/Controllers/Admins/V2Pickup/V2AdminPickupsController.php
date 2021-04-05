@@ -383,7 +383,7 @@ class V2AdminPickupsController extends Controller
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
 
-                if ($pickup_request->current_rider_id != null) {
+                if ($pickup_request->last_rider_id != null) {
                     $rider_device_token = EmployeeDeviceToken::where('employee_id', $pickup_request->current_rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
