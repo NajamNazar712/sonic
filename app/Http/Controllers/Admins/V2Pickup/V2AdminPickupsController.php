@@ -264,21 +264,6 @@ class V2AdminPickupsController extends Controller
         $riders = array();
         $riders['new'] = $rider_id;
         $riders['new_phone'] = $rider_ids;
-
-        if ($rider_id != null) {
-            $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
-                ->where('employee_type_id', 2)
-                ->select('device_token');
-            if ($rider_device_token->exists()) {
-                $rider_device_token = $rider_device_token->first();
-                $device_token = $rider_device_token->device_token;
-                $title = "Pickup Request Assigned";
-                $message = "Dear Rider Pickup Request : Assigned To You";
-//                $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Assigned To You";
-                NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
-            }
-        }
-
         if(count($pickup_request_ids) == 0){
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
