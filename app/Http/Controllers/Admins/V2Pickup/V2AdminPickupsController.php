@@ -261,6 +261,7 @@ class V2AdminPickupsController extends Controller
         //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
         $rider_ids = $request->input('rider');
+        $previous_rider_id = null;
         $riders = array();
         $riders['new'] = $rider_id;
         $riders['new_phone'] = $rider_ids;
@@ -322,6 +323,8 @@ class V2AdminPickupsController extends Controller
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
+                $previous_rider_id = $pickup_request->current_rider_id;
+
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
@@ -348,6 +351,7 @@ class V2AdminPickupsController extends Controller
                 }
                 else
                 {
+                    $previous_rider_id = $pickup_request->current_rider_id;
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
                     $riders['new_rider_id'] = $rider_id;
 
@@ -383,7 +387,7 @@ class V2AdminPickupsController extends Controller
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
 
-                if ($pickup_request->last_rider_id != null) {
+                if ($previous_rider_id != null) {
                     $rider_device_token = EmployeeDeviceToken::where('employee_id', $pickup_request->current_rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
