@@ -20,7 +20,7 @@ use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\EmployeeDeviceToken;
-use App\http\Models\EmployeeNotification;
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -4809,7 +4809,7 @@ class RiderAPIController extends Controller
         $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
         $to_date = Carbon::now()->format('Y-m-d 23:59:59');
 
-        $notifiction_history = EmployeeNotification::where('employee_id', $rider_id)
+        $notifiction_history = EmployeeNotificationHistory::where('employee_id', $rider_id)
             ->where('employee_type_id', 2)
             ->whereBetween('created_at', [$from_date, $to_date])
             ->orderBy('created_at', 'desc');

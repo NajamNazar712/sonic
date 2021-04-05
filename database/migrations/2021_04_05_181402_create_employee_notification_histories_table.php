@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeeNotificationsTable extends Migration
+class CreateEmployeeNotificationHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateEmployeeNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_notifications', function (Blueprint $table) {
+        Schema::create('employee_notification_histories', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employee_id')->index();
             $table->integer('employee_type_id')->index();
@@ -30,6 +30,6 @@ class CreateEmployeeNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_notifications');
+        Schema::dropIfExists('employee_notification_histories');
     }
 }
