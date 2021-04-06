@@ -4600,7 +4600,6 @@ class RiderAPIController extends Controller
             $message = 'Error(s) in Input';
             $response['errors'] = $validate->errors();
         } else {
-            $date = Carbon::now()->format('Y_m_d');
 
             $employee_id = $request->employee_id;
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
@@ -4611,7 +4610,13 @@ class RiderAPIController extends Controller
                 $attachments->employee_id = $employee_id;
             }
 
+            $date = Carbon::now()->format('Y_m_d');
+
             if ($request->hasFile('cv')) {
+                if ($attachments->cv != NULL) {
+                    Storage::disk('public')->delete($attachments->cv);
+                }
+
                 $file = $request->file('cv');
                 $filename = 'cv_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4621,6 +4626,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('cnic')) {
+                if ($attachments->cnic != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic);
+                }
+
                 $file = $request->file('cnic');
                 $filename = 'cnic_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4630,6 +4639,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('photo')) {
+                if ($attachments->photo != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic);
+                }
+
                 $file = $request->file('photo');
                 $filename = 'photo_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4639,6 +4652,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('academic_credentials')) {
+                if ($attachments->academic != NULL) {
+                    Storage::disk('public')->delete($attachments->academic);
+                }
+
                 $file = $request->file('academic_credentials');
                 $filename = 'academic_credentials_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4648,6 +4665,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('experience_certificates')) {
+                if ($attachments->experience != NULL) {
+                    Storage::disk('public')->delete($attachments->experience);
+                }
+
                 $file = $request->file('experience_certificates');
                 $filename = 'experience_certificates_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4657,6 +4678,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('pay_slip')) {
+                if ($attachments->last_pay_slip != NULL) {
+                    Storage::disk('public')->delete($attachments->last_pay_slip);
+                }
+
                 $file = $request->file('pay_slip');
                 $filename = 'pay_slip_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4666,6 +4691,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('nikkah_nama')) {
+                if ($attachments->nikkah_nama != NULL) {
+                    Storage::disk('public')->delete($attachments->nikkah_nama);
+                }
+
                 $file = $request->file('nikkah_nama');
                 $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4675,6 +4704,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('cnic_spouse')) {
+                if ($attachments->cnic_spouse != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic_spouse);
+                }
+
                 $file = $request->file('cnic_spouse');
                 $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4684,6 +4717,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('bform')) {
+                if ($attachments->child_b_form != NULL) {
+                    Storage::disk('public')->delete($attachments->child_b_form);
+                }
+
                 $file = $request->file('bform');
                 $filename = 'child_b_form_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4693,6 +4730,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('cnic_nominee')) {
+                if ($attachments->cnic_nominee != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic_nominee);
+                }
+
                 $file = $request->file('cnic_nominee');
                 $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4702,6 +4743,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('utility_bill')) {
+                if ($attachments->utility_bill != NULL) {
+                    Storage::disk('public')->delete($attachments->utility_bill);
+                }
+
                 $file = $request->file('utility_bill');
                 $filename = 'utility_bill_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4711,6 +4756,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('affidavit')) {
+                if ($attachments->affidavit != NULL) {
+                    Storage::disk('public')->delete($attachments->affidavit);
+                }
+
                 $file = $request->file('affidavit');
                 $filename = 'affidavit_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4720,6 +4769,10 @@ class RiderAPIController extends Controller
             }
 
             if ($request->hasFile('cheque')) {
+                if ($attachments->cheque != NULL) {
+                    Storage::disk('public')->delete($attachments->cheque);
+                }
+
                 $file = $request->file('cheque');
                 $filename = 'cheque_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -4730,7 +4783,7 @@ class RiderAPIController extends Controller
             $attachments->save();
 
             $response['status'] = 0;
-            $message = 'Document Has Been Submited';
+            $message = 'Document Has Been Submitted';
         }
         $response['message'] = $message;
         return response()->json($response);
