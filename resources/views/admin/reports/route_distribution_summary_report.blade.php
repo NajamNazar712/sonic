@@ -268,6 +268,7 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(delivered_shipments.toFixed(2));
                             footer.push(delivered_shipments_per.toFixed(2));
@@ -284,7 +285,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',

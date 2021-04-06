@@ -647,7 +647,7 @@ class ShipperDashboardController extends Controller
 
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -659,14 +659,17 @@ class ShipperDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
             ';
 
+            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update</div></button>';
             $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
-
             if ($pickup->default_address == 1) {
                 $dropdown = 'Default Address';
             }
             else {
+                if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
+                    $dropdown .= $edit_button;
+                }
                 if ($pickup->status == 0) {
                     $dropdown .= $enable_button;
                 }
@@ -818,6 +821,36 @@ class ShipperDashboardController extends Controller
 
         }else{
             return redirect()->back()->with('error','Pickup Address not added!');
+        }
+    }
+    public function editPickup(Request $request) {
+        $id = $request->id;
+        $pickup_address = $request->pickup_address;
+        $phone = $request->phone;
+        $poc = $request->poc;
+        $vendor = $request->vendor;
+        $email = $request->email;
+        $city_id = $request->city_id;
+
+        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $id != null)
+        {
+            $user_shipping_info = UserShippingInfo::find($id);
+            if($user_shipping_info){
+                $user_shipping_info->pickup_address = $pickup_address;
+                $user_shipping_info->poc = $poc;
+                $user_shipping_info->email = $email;
+                $user_shipping_info->city_id = $city_id;
+                $user_shipping_info->phone = $phone;
+                $user_shipping_info->vendor = $vendor;
+                $user_shipping_info->save();
+                return redirect()->back()->with('success','Pickup Address updated successfully!');
+            }
+            else{
+                return redirect()->back()->with('error','Pickup Address not found!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error','Pickup Address not updated!');
         }
     }
 
@@ -1139,5 +1172,25 @@ class ShipperDashboardController extends Controller
             }
         }
 
+    }
+
+    public function shipper_phone_unique(Request $request) {
+        if ($request->filled('phone')) {
+            $user = User::where('phone', $request->input('phone'));
+
+            if ($request->has('id')) {
+                $user = $user->where('id', '!=', $request->input('id'));
+            }
+
+            if (!$user->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'true';
+        }
     }
 }

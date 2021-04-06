@@ -512,7 +512,7 @@
             var dbf_shipments = 0;
 
 
-            $('#datatable').append("<tfoot><tr><th colspan='5'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><th colspan='6'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [

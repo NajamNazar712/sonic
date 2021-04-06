@@ -299,11 +299,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('verify_pincode','Shippers\ShipperDashboardController@verifyPincode')->name('verify.pin.code');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
+    Route::post('editpickup','Shippers\ShipperDashboardController@editPickup')->name('edit.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
     Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
     Route::post('update_invoice_sort','Shippers\ShipperDashboardController@update_invoice_sort')->name('update_invoice_sort');
+    Route::get('/phone_unique', 'Shippers\ShipperDashboardController@shipper_phone_unique')->name('profile.shipper_phone_unique');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');

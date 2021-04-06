@@ -5608,7 +5608,8 @@ class AdminReportsController extends Controller
             $datatable->where('s.tracking_number', '=', $tracking);
         }
         if($rnumber = $request->get('search_request_number')){
-            $datatable->where('crm_requests.id', '=', $rnumber);
+            $rnumber = explode(',',$rnumber);
+            $datatable->whereIn('crm_requests.id', $rnumber);
         }
         if($shipper = $request->get('search_shipper')){
             $datatable->where('u.id', '=', $shipper);
@@ -7748,7 +7749,10 @@ class AdminReportsController extends Controller
 
     public function weight_qc_index(){
         $shipping_modes = ShippingMode::all();
-        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
+        $users = User::where('status', 3)->get(['id', 'name']);
+        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        $zones = Zone::where('status', 1)->get(['id', 'name']);
+        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes, 'users' => $users, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
     public function weight_qc_list(Request $request){
@@ -7778,7 +7782,7 @@ class AdminReportsController extends Controller
                     return 'Volumetric';
                 }
                 else{
-                    return 'Dense';
+                    return 'Dimensional';
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
@@ -7786,6 +7790,23 @@ class AdminReportsController extends Controller
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($user = $request->get('search_user')) {
+            $datatable->where('u.id', $user);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('dc.hub_id', $hub);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $datatable->where('dc.zone_id', $zone);
+        }
+        if ($weighted_as = $request->get('weighted_as')) {
+            if($weighted_as == 1){
+                $datatable->whereNull('shipments.length')->whereNull('shipments.breadth')->whereNull('shipments.height');
+            }
+            else{
+                $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
+            }
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
