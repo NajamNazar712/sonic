@@ -422,7 +422,7 @@
                 }
             });
 
-            $('body').on('click', '.approve_rider', function (e) {
+            $('body').on('click', '.approve', function (e) {
                 var id = $(this).data('target-id');
                 swal({
                     title: 'Are You Sure?',
