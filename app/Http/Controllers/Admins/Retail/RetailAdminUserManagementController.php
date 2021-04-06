@@ -401,7 +401,7 @@ class RetailAdminUserManagementController extends Controller
 //                }
 //            })
             ->addColumn('action', function($data) {
-                if (session('role_id') == 1 || in_array(436, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(475, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';

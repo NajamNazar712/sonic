@@ -985,7 +985,9 @@ class Permission
             'retail.franchise.index' => 431,
             'retail.franchise.list' => 431,
             'retail.trax_center.index' => 432,
-            'retail.trax_center.list' => 432
+            'retail.trax_center.list' => 432,
+            'retail.users.index' => 474,
+            'retail.users.list' => 474
         ]
     ];
 
