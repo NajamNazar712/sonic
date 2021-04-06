@@ -4960,11 +4960,12 @@ class RiderAPIController extends Controller
                                 }
                             }
                             $rider_return_delivery->save();
-
-                            $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
-                            $rider_return_delivery->picture_path = $picture_path;
-                            $rider_return_delivery->save();
+                            if($request->has('picture')){
+                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                                $rider_return_delivery->picture_path = $picture_path;
+                                $rider_return_delivery->save();
+                            }
 
                             $environment = config('app.env');
                             if ($request->has('audio')) {
