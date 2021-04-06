@@ -55,7 +55,7 @@
                             </div>
 
                             <div class="col-2 form-group">
-                                <label><strong>Margin 1</strong></label>
+                                <label><strong>Margin For Zone 1</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_1" class="form-control margin decimal" placeholder="Margin 1*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_1'] }}">
                                     <div class="input-group-append">
@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 2</strong></label>
+                                <label><strong>Margin For Zone 2</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_2" class="form-control margin decimal" placeholder="Margin 2*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_2'] }}">
                                     <div class="input-group-append">
@@ -73,7 +73,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 3</strong></label>
+                                <label><strong>Margin For Zone 3</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_3" class="form-control margin decimal" placeholder="Margin 3*" data-rule-required="true" data-msg-required="Margin is required" value="{{$margin['margin_3']}}">
                                     <div class="input-group-append">
@@ -82,7 +82,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 4</strong></label>
+                                <label><strong>Margin For Zone 4</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_4" class="form-control margin decimal" placeholder="Margin 4*" data-rule-required="true" data-msg-required="Margin is required" value="{{$margin['margin_4'] }}">
                                     <div class="input-group-append">
@@ -91,7 +91,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 5</strong></label>
+                                <label><strong>Margin For Zone 5</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_5" class="form-control margin decimal" placeholder="Margin 5*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_5'] }}">
                                     <div class="input-group-append">
@@ -100,7 +100,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 6</strong></label>
+                                <label><strong>Margin For Zone 6</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_6" class="form-control margin decimal" placeholder="Margin 6*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_6']}}">
                                     <div class="input-group-append">
@@ -110,7 +110,7 @@
                             </div>
 
                             <div class="col-2 form-group">
-                                <label><strong>Margin 7</strong></label>
+                                <label><strong>Margin For Zone 7</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_7" class="form-control margin decimal" placeholder="Margin 7*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_7'] }}">
                                     <div class="input-group-append">
@@ -119,7 +119,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 8</strong></label>
+                                <label><strong>Margin For Zone 8</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_8" class="form-control margin decimal" placeholder="Margin 8*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_8'] }}">
                                     <div class="input-group-append">
@@ -128,7 +128,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 9</strong></label>
+                                <label><strong>Margin For Zone 9</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_9" class="form-control margin decimal" placeholder="Margin 9*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_9']}}">
                                     <div class="input-group-append">
@@ -137,7 +137,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 10</strong></label>
+                                <label><strong>Margin For Zone 10</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_10" class="form-control margin decimal" placeholder="Margin 10*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_10']}}">
                                     <div class="input-group-append">
@@ -146,7 +146,7 @@
                                 </div>
                             </div>
                             <div class="col-2 form-group">
-                                <label><strong>Margin 11</strong></label>
+                                <label><strong>Margin For Zone 11</strong></label>
                                 <div class="input-group">
                                     <input type="text" name="margin_11" class="form-control margin decimal" placeholder="Margin 11*" data-rule-required="true" data-msg-required="Margin is required" value="{{ $margin['margin_11'] }}">
                                     <div class="input-group-append">
