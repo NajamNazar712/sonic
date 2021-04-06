@@ -67,7 +67,10 @@
                                     <span>Login Details</span>
                                 </p>
                                 <div class="card-body">
-                                    @include('admin.inc.messages')
+                                    @include('retail.inc.messages')
+                                    <div class="alert alert-danger d-none" id="radius_error">
+
+                                    </div>
                                     <form class="form-horizontal" id="retail_login_form" method="POST" action="{{ route('retail.login.submit') }}">
                                         {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
@@ -183,6 +186,9 @@
             if($(this).val().length == 6){
                 $('#otp_submit').attr('disabled', false);
             }
+            else{
+                $('#otp_submit').attr('disabled', true);
+            }
         });
         $('#otp_submit').on('click', function () {
             var otp = $('#otp_input').val();
@@ -273,9 +279,11 @@
                         }
                     }).done(function (data) {
                         if(data.status === 1){
+                            $('#radius_error').addClass('d-none');
                             $('#OtpModal').modal('show');
                         }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#radius_error').removeClass('d-none');
+                            $('#radius_error').text(data.error);
                         }
                     });
                     // form.submit();
