@@ -33,6 +33,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded blank-page blank-page"
@@ -66,7 +68,7 @@
                                 </p>
                                 <div class="card-body">
                                     @include('admin.inc.messages')
-                                    <form class="form-horizontal" method="POST" action="{{ route('retail.login.submit') }}">
+                                    <form class="form-horizontal" id="retail_login_form" method="POST" action="{{ route('retail.login.submit') }}">
                                         {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="text" name="name" class="form-control {{ $errors->has('name') ? ' is-invalid' : '' }}" id="name" placeholder="Name"
@@ -95,7 +97,7 @@
                                                 </fieldset>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Login</button>
+                                        <button type="button" class="btn btn-outline-info btn-block" id="login_button"><i class="ft-unlock"></i> Login</button>
                                     </form>
                                 </div>
 
@@ -104,6 +106,38 @@
                     </div>
                 </div>
             </section>
+            <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="OtpModal"
+                 aria-hidden="true" style="top:30%;">
+                <div class="modal-dialog modal-md" role="document">
+                    <div class="modal-content col">
+                        <div class="modal-header text-center">
+                            <div class="row align-items-center">
+                                <div class="col sonic_logo align-middle text-left">
+                                    <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                                </div>
+
+                                <div class="col trax_logo align-middle text-right">
+                                    <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body  text-center">
+                            <div class="row justify-content-center">
+                                <div class="form-group form-inline">
+                                    <p>We have sent a six-digit verification code on mobile,<br>Please verify by entering it below</p>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -122,6 +156,168 @@
 <!-- END MODERN JS-->
 <!-- BEGIN PAGE LEVEL JS-->
 <script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" ></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
+
 <!-- END PAGE LEVEL JS-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var latitude = null;
+        var longitude = null;
+        var name = null;
+        var password = null;
+
+
+        $('#otp_input').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'mask': '999999'
+        });
+        $('body').on('keypress change','#otp_input',function() {
+            if($(this).val().length == 6){
+                $('#otp_submit').attr('disabled', false);
+            }
+        });
+        $('#otp_submit').on('click', function () {
+            var otp = $('#otp_input').val();
+
+            if(otp.length == 6){
+                $.ajax({
+                    url: '{!! route('retail.login.verify_otp') !!}',
+                    type: 'POST',
+                    data: {
+                        'name': name,
+                        'otp': otp,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 0){
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $('#otp_input').val('');
+                        $('#otp_submit').attr('disabled', true);
+                    }else{
+                        $('#PasswordModal').modal('hide');
+                        $('#retail_login_form').submit();
+                    }
+                });
+            }
+        });
+        $('#otp_input').keypress(function (event) {
+            if(event.keyCode == 13){
+                var otp = $('#otp_input').val();
+
+                if(otp.length == 6){
+                    $.ajax({
+                        url: '{!! route('retail.login.verify_otp') !!}',
+                        type: 'POST',
+                        data: {
+                            'name': name,
+                            'otp': otp,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 0){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#otp_input').val('');
+                            $('#otp_submit').attr('disabled', true);
+                        }else{
+                            $('#OtpModal').modal('hide');
+                            $('#retail_login_form').submit();
+                        }
+                    });
+                }
+            }
+
+        });
+        $('#login_button').on('click', function () {
+            var name_check = $('#name').valid();
+            var password_check = $('#password').valid();
+            if(name_check && password_check){
+                if(latitude == null && longitude == null){
+                    swal({
+                        title: 'Location Not Found',
+                        text: 'Please allow browser to access your location!',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                text: 'Ok',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    });
+                }
+                else{
+                    getLocation();
+                    name = $('#name').val();
+                    password = $('#password').val();
+                    $.ajax({
+                        url: '{!! route('retail.login.radius') !!}',
+                        method: 'POST',
+                        data: {
+                            'name': name,
+                            'password': password,
+                            'lat': latitude,
+                            'lng': longitude,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#OtpModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                    // form.submit();
+                }
+            }
+            else{
+                $('#name-error').addClass('danger');
+                $('#password-error').addClass('danger');
+            }
+        });
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                swal({
+                    title: 'Location Not Found',
+                    text: 'Geolocation is not supported by this browser.!',
+                    icon: 'info',
+                    buttons: {
+                        confirm: {
+                            text: 'Ok',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                });
+            }
+        };
+
+        function showPosition(position) {
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+            // $('#latitude').val(latitude);
+            // $('#longitude').val(longitude);
+        }
+        getLocation();
+    });
+</script>
 </body>
 </html>

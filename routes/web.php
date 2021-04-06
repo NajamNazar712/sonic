@@ -2741,6 +2741,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@franchise_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
+            Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function(){
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -2748,8 +2749,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@trax_center_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
+            Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
         });
         Route::prefix('users')->name('users.')->group(function(){
+            Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@user_list')->name('list');
+            Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@user_enable_disable')->name('status');
+            Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@user_add')->name('add');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
         });
 
@@ -2797,6 +2803,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
     Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
     Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
+    Route::post('/radius', 'Auth\RetailLoginController@radius_check')->name('login.radius');
+    Route::post('/verify_otp', 'Auth\RetailLoginController@verify_otp')->name('login.verify_otp');
     Route::post('/logout','Auth\RetailLoginController@logout')->name('logout');
     Route::get('/dashboard', 'Retail\RetailDashboardController@dashboard')->name('dashboard.index');
 

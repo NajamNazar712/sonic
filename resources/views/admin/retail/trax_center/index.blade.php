@@ -50,19 +50,13 @@
                     <form id="add_trax_center_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.trax_center.add') }}" novalidate="novalidate">
                         {{ csrf_field()  }}
                         <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.users.name') }}" data-msg-remote="Name must be unique">
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.trax_center.name') }}" data-msg-remote="Name must be unique">
                         </div>
                         <div class="form-group">
                             <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="form-group">
                             <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" autocomplete="nope">
-                        </div>
-                        <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="add_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
-                            <div class="form-control-position" id="add_eye">
-                                <i class="la la-eye success"></i>
-                            </div>
                         </div>
                         <div class="form-group">
                             <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
@@ -112,12 +106,6 @@
                         </div>
                         <div class="form-group">
                             <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
-                        </div>
-                        <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="edit_password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                            <div class="form-control-position" id="edit_eye">
-                                <i class="la la-eye success"></i>
-                            </div>
                         </div>
                         <div class="form-group">
                             <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
@@ -176,9 +164,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#add_eye').on('mousedown',function(){$('#add_password').attr('type','text')}).on('mouseup',function(){$('#add_password').attr('type','password')});
-            $('#edit_eye').on('mousedown',function(){$('#edit_password').attr('type','text')}).on('mouseup',function(){$('#edit_password').attr('type','password')});
-
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
