@@ -95,7 +95,7 @@ class RetailLoginController extends Controller
                 $otp = mt_rand(100000,999999);
                 $retail_user->otp = $otp;
                 $retail_user->save();
-                NotificationsController::send(2, $retail_user->phone_no, $otp);
+                NotificationsController::send(129, $retail_user, $otp);
                 return response()->json(['status' => 1]);
             }
             else{
