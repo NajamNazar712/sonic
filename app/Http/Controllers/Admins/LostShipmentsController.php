@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class LostShipmentsController extends Controller
 {
@@ -28,6 +29,7 @@ class LostShipmentsController extends Controller
         $this->middleware('Permission');
     }
     public function lost_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),48);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -35,6 +37,10 @@ class LostShipmentsController extends Controller
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons]);
     }
     public function lost_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),108);
+        }
             $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

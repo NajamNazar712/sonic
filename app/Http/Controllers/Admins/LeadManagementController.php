@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\http\Models\Admin\Lead\Lead;
@@ -26,6 +27,7 @@ class LeadManagementController extends Controller
     }
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),4);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $statuses = LeadStatus::all();
         $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
@@ -94,6 +96,10 @@ class LeadManagementController extends Controller
     }
 
     public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),64);
+        }
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->leftjoin('territories as t', 't.id', '=', 'leads.territory_id')
             ->leftjoin('area_territories as at', 'at.id', '=', 'leads.territory_area_id')

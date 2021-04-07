@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Reports;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\AccountReconciliation;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Shipper\User;
@@ -134,6 +135,7 @@ class AccountReconciliationController extends Controller
     }
 
     public function account_reconciliation_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),201);
         return view('admin.reports.account_reconciliation');
     }
 
@@ -261,6 +263,7 @@ class AccountReconciliationController extends Controller
     }
 
     public function account_reconciliation_download(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),202);
         $file_name = "/reports/account_reconciliation_report".Auth::id().".xlsx";
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);

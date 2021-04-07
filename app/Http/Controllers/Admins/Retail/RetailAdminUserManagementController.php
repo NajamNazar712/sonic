@@ -118,16 +118,6 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
-            $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 0);
-            if($franchise_users->exists()){
-                $franchise_users = $franchise_users->get();
-                foreach ($franchise_users as $franchise_user){
-                    $franchise_user->status = 1;
-                    $franchise_user->updated_by = Auth::id();
-                    $franchise_user->save();
-                }
-            }
-
             return response()->json(['status' => 1, 'success' => 'Franchise Enabled Successfully']);
         }
         elseif ($request->status == 0){
@@ -151,7 +141,6 @@ class RetailAdminUserManagementController extends Controller
     public function franchise_add(Request $request){
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
 
-        $password = $request->password;
         $franchise = new RetailFranchise();
         $franchise->name = $request->name;
         $franchise->phone_no = $request->phone_number;
@@ -172,14 +161,11 @@ class RetailAdminUserManagementController extends Controller
         $franchise->code = $code;
         $franchise->save();
 
-        $user_id = $this->add_user($franchise->name, $password, $franchise->phone_no, $franchise->default_hub, $franchise->cnic, null, 1, $franchise->id);
-
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
 
         $pickup_address_id = $this->add_pickup_address($shipper_user_id, $franchise->name . ' - ' . $hub_name, $franchise->name, $franchise->phone_no, $franchise->email, $franchise->default_hub, 0, $franchise->location_latitude, $franchise->location_longitude);
 
-        $franchise->user_id = $user_id;
         $franchise->pickup_address_id = $pickup_address_id;
         $franchise->save();
 
@@ -188,14 +174,8 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_edit(Request $request){
         $id = $request->franchise_id;
-        $retail_user = RetailUser::where('name', $request->name)
-            ->where(function ($sub_query) use ($id){
-                $sub_query->where(function ($sub_sub_query) use ($id){
-                    $sub_sub_query->where('category', 1)
-                        ->where('category_id', '!=', $id);
-                })->orWhere('category', 2);
-            });
-        if(!$retail_user->exists()) {
+        $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
+        if(!$existing_franchise->exists()) {
             $franchise = RetailFranchise::find($request->franchise_id);
 
             $franchise->name = $request->name;
@@ -207,20 +187,27 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
-            $user = RetailUser::find($franchise->user_id);
-            if($user){
-                $user->name = $request->name;
-                if($request->password != null){
-                        $user->password = Hash::make($request->password);
-                }
-                $user->save();
-            }
-
 
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         }
         else{
             return redirect()->back()->with('error', 'Name must be unique!');
+        }
+    }
+
+    public function franchise_name(Request $request) {
+        if ($request->filled('name')) {
+            $franchise= RetailFranchise::where('name', $request->input('name'));
+
+            if (!$franchise->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'false';
         }
     }
 
@@ -281,15 +268,6 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->status = 1;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
-            $trax_center_users = RetailUser::where('category', 2)->where('category_id', $trax_center->id)->where('status', 0);
-            if($trax_center_users->exists()){
-                $trax_center_users = $trax_center_users->get();
-                foreach ($trax_center_users as $trax_center_user){
-                    $trax_center_user->status = 1;
-                    $trax_center_user->updated_by = Auth::id();
-                    $trax_center_user->save();
-                }
-            }
 
             return response()->json(['status' => 1, 'success' => 'Trax Center Enabled Successfully']);
         }
@@ -314,7 +292,6 @@ class RetailAdminUserManagementController extends Controller
     public function trax_center_add(Request $request){
         $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
 
-        $password = $request->password;
         $trax_center = new RetailTraxCenter();
         $trax_center->name = $request->name;
         $trax_center->phone_no = $request->phone_number;
@@ -335,29 +312,18 @@ class RetailAdminUserManagementController extends Controller
         $trax_center->code = $code;
         $trax_center->save();
 
-        $user_id = $this->add_user($trax_center->name, $password, $trax_center->phone_no, $trax_center->default_hub, $trax_center->cnic, null, 2, $trax_center->id);
-
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
 
         $pickup_address_id = $this->add_pickup_address($shipper_user_id, $trax_center->name . ' - ' . $hub_name, $trax_center->name, $trax_center->phone_no, $trax_center->email, $trax_center->default_hub, 0, $trax_center->location_latitude, $trax_center->location_longitude);
         $trax_center->pickup_address_id = $pickup_address_id;
-
-        $trax_center->user_id = $user_id;
         $trax_center->save();
         return redirect()->back()->with('success', 'Trax Center Added Successfully!');
     }
 
     public function trax_center_edit(Request $request){
-        $id = $request->trax_center_id;
-        $retail_user = RetailUser::where('name', $request->name)
-            ->where(function ($sub_query) use ($id){
-                $sub_query->where(function ($sub_query) use ($id){
-                    $sub_query->where('category', 2)
-                        ->where('category_id', '!=', $id);
-                })->orWhere('category', 1);
-            });
-        if(!$retail_user->exists()){
+        $existing_trax_center = RetailTraxCenter::where('name', $request->name)->where('id', '!=', $request->trax_center_id);
+        if(!$existing_trax_center->exists()){
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
 
             $trax_center->name = $request->name;
@@ -369,19 +335,138 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
-            $user = RetailUser::find($trax_center->user_id);
-            if($user){
-                $user->name = $request->name;
-                if($request->password != null){
-                    $user->password = Hash::make($request->password);
-                }
-                $user->save();
-            }
-
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         }
         else{
-            return redirect()->back()->with('error', 'Name must be unique!');
+            return redirect()->back()->with('error', 'Trax Center Name must be unique!');
+        }
+    }
+
+    public function trax_center_name(Request $request) {
+        if ($request->filled('name')) {
+            $trax_center= RetailTraxCenter::where('name', $request->input('name'));
+
+            if (!$trax_center->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'false';
+        }
+    }
+
+    public function user_index(){
+        $trax_centers = RetailTraxCenter::where('status', 1)->get();
+        $franchises = RetailFranchise::where('status', 1)->get();
+        return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises]);
+    }
+
+    public function user_list(){
+        $franchise = RetailUser::leftjoin('retail_franchises as rf', 'rf.id', '=', 'retail_users.category_id')
+            ->leftjoin('retail_trax_centers as rtc', 'rtc.id', '=', 'retail_users.category_id')
+            ->join('admins as ac', 'ac.id', '=', 'retail_users.created_by')
+            ->join('admins as au', 'au.id', '=', 'retail_users.updated_by')
+            ->join('cities as c', 'c.id', '=', 'retail_users.city_id')
+            ->join('cities as h', 'h.id', '=', 'retail_users.hub_id')
+            ->select('retail_users.id', 'retail_users.trax_id', 'retail_users.name', 'retail_users.phone_no', 'retail_users.cnic', 'retail_users.address', 'retail_users.category', 'retail_users.created_at', 'retail_users.updated_at', 'retail_users.status', 'c.name as city', 'h.name as hub', 'ac.name as created_by', 'au.name as updated_by');
+
+        $datatables = Datatables::of($franchise)
+            ->editColumn('status', function ($data){
+                if($data->status == 1){
+                    return 'Active';
+                }
+                else{
+                    return 'In-Active';
+                }
+            })
+            ->editColumn('category', function ($data){
+                if($data->category == 1){
+                    return 'Franchise';
+                }
+                else{
+                    return 'Trax Owned';
+                }
+            })
+//            ->addColumn('location', function ($data){
+//                $location = '<div class="text-center">';
+//                if($data->latitude != null && $data->longitude != null){
+//                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->location_latitude . ',' . $data->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+//                    return $location;
+//                }
+//                else{
+//                    return '-';
+//                }
+//            })
+            ->addColumn('action', function($data) {
+                if (session('role_id') == 1 || in_array(475, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if ($data->status == 0) {
+                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+//                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
+//          ';
+                    $dropdown .= '
+                    </div>
+                  </div>
+          ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+    public function user_enable_disable(Request $request){
+        $user = RetailUser::find($request->id);
+        if($request->status == 1){
+            if($user->store->status == 1){
+                $user->status = 1;
+                $user->updated_by = Auth::id();
+                $user->save();
+
+                return response()->json(['status' => 1, 'success' => 'User Enabled Successfully']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'User Store is Disabled']);
+            }
+        }
+        elseif ($request->status == 0){
+            $user->status = 0;
+            $user->updated_by = Auth::id();
+            $user->save();
+            return response()->json(['status' => 1, 'success' => 'User Disabled Successfully']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Request']);
+        }
+    }
+
+    public function user_add(Request $request){
+        $retail_user = RetailUser::where('name', $request->name);
+
+        if(!$retail_user->exists()) {
+            $password = $request->password;
+            if($request->store == 1){
+                $store = RetailFranchise::find($request->franchise);
+            }
+            else{
+                $store = RetailTraxCenter::find($request->trax_center);
+            }
+
+            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id);
+
+            return redirect()->back()->with('success', 'Retail User Added Successfully!');
+        }
+        else{
+            return redirect()->back()->with('success', 'Same Retail User already exists!');
         }
     }
     public function user_name(Request $request) {

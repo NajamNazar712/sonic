@@ -6,7 +6,9 @@ use App\Http\Models\Admin\MonthClosing;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminMonthClosingReportsController extends Controller
 {
@@ -17,10 +19,15 @@ class AdminMonthClosingReportsController extends Controller
     }
 
     public function month_closing_individual_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),223);
         return view('admin.reports.month_closing.individual');
     }
 
     public function month_closing_individual_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),224);
+        }
         $month_closing = MonthClosing::join('shipments', 'shipments.id', '=', 'month_closings.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -101,10 +108,15 @@ class AdminMonthClosingReportsController extends Controller
     }
 
     public function month_closing_pivot_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),225);
         return view('admin.reports.month_closing.pivot');
     }
 
     public function month_closing_pivot_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),226);
+        }
         $month_closing = MonthClosing::join('shipments', 'shipments.id', '=', 'month_closings.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

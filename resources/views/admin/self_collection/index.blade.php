@@ -40,6 +40,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Agent</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Contact</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
@@ -516,6 +517,7 @@
                             head.push('Hub');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Agent');
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
                             head.push('Consignee Address');
@@ -537,6 +539,7 @@
                                 row.push(values.hub);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.agent);
                                 row.push(values.consignee_name);
                                 row.push(values.phone.replace('<br>', ' '));
                                 row.push(values.consignee_address);
@@ -686,7 +689,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -700,6 +703,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
+                    {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},

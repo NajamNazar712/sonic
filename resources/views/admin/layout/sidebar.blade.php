@@ -784,10 +784,14 @@
                     @if (session('role_id') == 1 || in_array(398, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.international.tracking_upload.index') }}">International Tracking Upload</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(471, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.activity_trail.index') }}">Activity Trail</a></li>
+                    @endif
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356, 401, 437, 444], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 327,328,337,356, 401, 437, 444,472], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -977,6 +981,12 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(437, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.last_mile_app.index') }}">Last Mile App</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(472, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.master_cargo.bag.in_transit.index') }}">In Transit Report Bag Wise</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(319, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.master_cargo.short_received_shipments.index') }}">Master Cargo Short Received Shipments</a></li>
                         @endif
                     </ul>
                 </li>
@@ -1388,12 +1398,15 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([431, 432, 474], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Retail</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([431, 432, 474], session('permissions'))) !== 0)
                                         <li class=" nav-item"><a href="#"><span class="menu-title">Store Management</span></a>
                                             <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(474, session('permissions')))
+                                                    <li><a class="menu-item" href="{{ route('admin.retail.users.index') }}">Users</a></li>
+                                                @endif
                                                 @if (session('role_id') == 1 || in_array(431, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.franchise.index') }}">Franchise</a></li>
                                                 @endif
@@ -1438,7 +1451,7 @@
                     </ul>
                 </li>
             @endif
-            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
+            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
                     @if (session('role_id') == 1 || in_array(449, session('permissions')))

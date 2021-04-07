@@ -42,6 +42,7 @@
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -231,6 +232,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Shipment Status');
+                            head.push('Arrival Date');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -261,6 +263,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone);
                                 row.push(values.status);
+                                row.push(values.arrival);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -573,7 +576,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[19, 'desc']],
+                order: [[20, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -585,6 +588,7 @@
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},

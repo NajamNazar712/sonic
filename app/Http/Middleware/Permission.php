@@ -12,6 +12,9 @@ class Permission
         'admin' => [
             'orders.shipper_recall' => 139,
 
+            'activity_trail.index' => 471,
+            'activity_trail.list' => 471,
+
             'dispute.index' => 1,
             'dispute.list' => 1,
             'dispute.create' => 2,
@@ -495,6 +498,11 @@ class Permission
             'reports.last_mile_app.index' => 437,
             'reports.weight_qc.index' => 444,
             'reports.weight_qc.list' => 444,
+            'reports.master_cargo.bag.in_transit.index' => 472,
+            'reports.master_cargo.bag.in_transit.list' => 472,
+            'reports.master_cargo.short_received_shipments.index' =>319,
+            'reports.master_cargo.short_received_shipments.list' => 319,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -987,7 +995,9 @@ class Permission
             'retail.franchise.index' => 431,
             'retail.franchise.list' => 431,
             'retail.trax_center.index' => 432,
-            'retail.trax_center.list' => 432
+            'retail.trax_center.list' => 432,
+            'retail.users.index' => 474,
+            'retail.users.list' => 474
         ]
     ];
 

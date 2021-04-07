@@ -46,6 +46,15 @@
 
                     </div>
                     <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group input-group ">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -122,6 +131,11 @@
                 width:'100%',
                 allowClear:true
             });
+            var search_zone = $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
             var creation_date = $('#creation_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -169,6 +183,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.petty_cash.statements.list') }}',
                         data: params,
@@ -534,6 +549,7 @@
                     url: '{{ route('admin.petty_cash.statements.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_creation_date = $('input[name="creation_date_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
