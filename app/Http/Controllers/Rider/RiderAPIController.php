@@ -4920,7 +4920,7 @@ class RiderAPIController extends Controller
                 if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
                     if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) {
                         $shipments = ShipmentsJourney::select('shipper_status_id', 'status_reason_id')
-                            ->where('reference_1_id', $request->delivery_note_id)
+                            ->where('reference_1_id', $request->return_note_id)
                             ->where('shipment_id', $request->shipment_id)
                             ->where('shipper_status_id', 24)
                             ->where('status_reason_id', 62)
@@ -4975,7 +4975,7 @@ class RiderAPIController extends Controller
                                 }
                             }
                             $rider_return_delivery->save();
-                            if($request->has('picture')){
+                            if ($request->has('picture')) {
                                 $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
@@ -5041,6 +5041,8 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
                             $message = 'Shipment is marked as Undelivered Successfully';
+                        } else {
+                            $message = 'Shipment is already marked as Undelivered';
                         }
                     } else {
                         $message = 'Shipment is already marked as Undelivered';
