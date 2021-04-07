@@ -123,8 +123,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('return_assigned_shipments as ras', function ($join) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where('ras.status', '=' , 0)
-                    ->where('ras.id','=',DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.shipment_id = shipments.id)'));
+                    ->where('ras.status', '=' , 1);
             })
             ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
@@ -1705,6 +1704,7 @@ class DeliveryController extends Controller
         }
 
     }
+    //check
     public function receive_delivery_status_submit_all(Request $request){
         $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
@@ -1828,6 +1828,13 @@ class DeliveryController extends Controller
                         }
                     }
                     else{
+                        if($selected_status == 12) {
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
+                            }
+                        }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if($shipment_details->packaging_material_request == 0){
                                 ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -1905,7 +1912,7 @@ class DeliveryController extends Controller
             return response()->json(['status'=>0, 'error' => 'Delivery note not found!']);
         }
     }
-
+    //check
     public function receive_delivery_status_submit(Request $request)
     {
         $open_box_ids = array();
@@ -1979,7 +1986,13 @@ class DeliveryController extends Controller
                         }
 
                     } else {
-
+                        if($request->status_drop[$shipment] == 12) {
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
+                            }
+                        }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if($shipment_status->packaging_material_request == 0){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2522,6 +2535,7 @@ class DeliveryController extends Controller
     }
 
 
+    // Check
     public function receive_delivery_verify_status_submit(Request $request)
     {
         $delivery_note_id = $request->delivery_note_id;
