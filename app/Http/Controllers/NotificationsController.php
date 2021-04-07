@@ -7099,7 +7099,7 @@ class NotificationsController extends Controller
         $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
 
         $message = [
-            'notification' => [
+            'data' => [
                 'title' => $notification_title,
                 'body' => $notification_body
             ],
