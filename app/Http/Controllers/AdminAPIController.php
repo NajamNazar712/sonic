@@ -428,6 +428,10 @@ class AdminAPIController extends Controller
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
+                $employee = Employee::where('employee_type_id', 1)
+                    ->where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
@@ -440,102 +444,112 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_no == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
                 } else {
-                        try {
-                            $employee_request = new Employee();
-                            $employee_request->name = $request->name;
-                            $employee_request->employee_gender_id = $request->employee_gender_id;
-                            $employee_request->city_id = $request->city_id;
-                            $employee_request->cnic = $request->cnic_no;
-                            $employee_request->phone_number = $request->phone_number;
-                            $employee_request->employee_type_id = 1;
-                            $employee_request->status_id = 2;
-                            $employee_request->guardian_name = $request->guardian_name;
-                            $employee_request->religion_id = $request->religion_id;
-                            $employee_request->nationality_id = $request->nationality_id;
-                            $employee_request->domicile_id = $request->domicile_id;
-                            $employee_request->marital_status_id = $request->marital_status_id;
-                            $employee_request->blood_group = $request->blood_group_id;
-                            $employee_request->personal_email = $request->personal_email;
-                            $employee_request->address = $request->address;
-                            $employee_request->emergency_contact = $request->emergency_contact;
-                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
-                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
-                            $employee_request->designation_id = $request->designation_id;
-                            $employee_request->department_id = $request->department_id;
-                            $employee_request->zone_id = $request->zone_id;
-                            $employee_request->official_email = $request->official_email;
-                            $employee_request->official_phone_number = $request->official_phone_number;
-                            $employee_request->sonic_id = $request->sonic_id;
-                            $employee_request->place_of_birth = $request->place_of_birth;
-                            $employee_request->date_of_birth = $request->date_of_birth;
-                            $employee_request->pin = $request->pin;
-                            $employee_request->save();
+                    try {
+                        $employee_request = new Employee();
+                        $employee_request->name = $request->name;
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                        $employee_request->city_id = $request->city_id;
+                        $employee_request->cnic = $request->cnic_no;
+                        $employee_request->phone_number = $request->phone_number;
+                        $employee_request->employee_type_id = 1;
+                        $employee_request->status_id = 2;
+                        $employee_request->guardian_name = $request->guardian_name;
+                        $employee_request->religion_id = $request->religion_id;
+                        $employee_request->nationality_id = $request->nationality_id;
+                        $employee_request->domicile_id = $request->domicile_id;
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                        $employee_request->blood_group = $request->blood_group_id;
+                        $employee_request->personal_email = $request->personal_email;
+                        $employee_request->address = $request->address;
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                        $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                        $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                        $employee_request->designation_id = $request->designation_id;
+                        $employee_request->department_id = $request->department_id;
+                        $employee_request->zone_id = $request->zone_id;
+                        $employee_request->official_email = $request->official_email;
+                        $employee_request->official_phone_number = $request->official_phone_number;
+                        $employee_request->sonic_id = $request->sonic_id;
+                        $employee_request->place_of_birth = $request->place_of_birth;
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                        $employee_request->pin = $request->pin;
+                        $employee_request->save();
 
-                            if($request->has('employment_history')){
-                                $employment_histories = json_decode($request->employment_history, true);
-                                foreach ($employment_histories as $employment_history) {
-                                    $history = new EmployeeEmployementHistory();
-                                    $history->employee_id = $employee_request->id;
-                                    $history->name = $employment_history['organization_company_name'];
-                                    $history->designation = $employment_history['position_designation'];
-                                    $history->from = $employment_history['from_date'];
-                                    $history->to = $employment_history['to_date'];
-                                    $history->reason = $employment_history['reason'];
-                                    $history->save();
-                                }
+                        if ($request->has('employment_history')) {
+                            $employment_histories = json_decode($request->employment_history, true);
+                            foreach ($employment_histories as $employment_history) {
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['organization_company_name'];
+                                $history->designation = $employment_history['position_designation'];
+                                $history->from = $employment_history['from_date'];
+                                $history->to = $employment_history['to_date'];
+                                $history->reason = $employment_history['reason'];
+                                $history->save();
                             }
-
-                            if($request->has('medical_details')){
-                                $medical_details = json_decode($request->medical_details, true);
-                                foreach ($medical_details as $medical_detail) {
-                                    $medical_info = new EmployeeMedicalInformation();
-                                    $medical_info->employee_id = $employee_request->id;
-                                    $medical_info->name = $medical_detail['name_of_family_member'];
-                                    $medical_info->relationship_id = $medical_detail['relation_ship'];
-                                    $medical_info->date_of_birth = $medical_detail['date_of_birth'];
-                                    $medical_info->marital_status = $medical_detail['marital_status'];
-                                    $medical_info->save();
-                                }
-                            }
-
-                            if($request->has('education_details')){
-                                $education_details = json_decode($request->education_details, true);
-                                foreach ($education_details as $education_detail) {
-                                    $employee_education = new EmployeeEducationalBackground();
-                                    $employee_education->employee_id = $employee_request->id;
-                                    $employee_education->name = $education_detail['institute'];
-                                    $employee_education->degree = $education_detail['degree'];
-                                    $employee_education->grade = $education_detail['position_grade'];
-                                    $employee_education->passing_year = $education_detail['graduation_year'];
-                                    $employee_education->save();
-                                }
-                            }
-
-                            if($request->has('bank_details')){
-                                $bank_details = json_decode($request->bank_details, true);
-                                foreach ($bank_details as $bank_detail) {
-                                    $employee_bank_info = new EmployeeBankInformation();
-                                    $employee_bank_info->employee_id = $employee_request->id;
-                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
-                                    $employee_bank_info->branch_code = $bank_detail['branch_code'];
-                                    $employee_bank_info->account_no = $bank_detail['account_number'];
-                                    $employee_bank_info->bank_id = $bank_detail['bank'];
-                                    $employee_bank_info->branch_name = $bank_detail['branch'];
-                                    $employee_bank_info->iban = $bank_detail['iban_no'];
-                                    $employee_bank_info->save();
-                                }
-                            }
-                            $response['status'] = 0;
-                            $response['employee_id'] = $employee_request->id;
-                            $message = 'Request Has Been Submitted and Pending for Approval';
-                        } catch (Exception $ex) {
-                            $response['message'] = $ex;
                         }
+
+                        if ($request->has('medical_details')) {
+                            $medical_details = json_decode($request->medical_details, true);
+                            foreach ($medical_details as $medical_detail) {
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $medical_detail['name_of_family_member'];
+                                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                $medical_info->marital_status = $medical_detail['marital_status'];
+                                $medical_info->save();
+                            }
+                        }
+
+                        if ($request->has('education_details')) {
+                            $education_details = json_decode($request->education_details, true);
+                            foreach ($education_details as $education_detail) {
+                                $employee_education = new EmployeeEducationalBackground();
+                                $employee_education->employee_id = $employee_request->id;
+                                $employee_education->name = $education_detail['institute'];
+                                $employee_education->degree = $education_detail['degree'];
+                                $employee_education->grade = $education_detail['position_grade'];
+                                $employee_education->passing_year = $education_detail['graduation_year'];
+                                $employee_education->save();
+                            }
+                        }
+
+                        if ($request->has('bank_details')) {
+                            $bank_details = json_decode($request->bank_details, true);
+                            foreach ($bank_details as $bank_detail) {
+                                $employee_bank_info = new EmployeeBankInformation();
+                                $employee_bank_info->employee_id = $employee_request->id;
+                                $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                $employee_bank_info->account_no = $bank_detail['account_number'];
+                                $employee_bank_info->bank_id = $bank_detail['bank'];
+                                $employee_bank_info->branch_name = $bank_detail['branch'];
+                                $employee_bank_info->iban = $bank_detail['iban_no'];
+                                $employee_bank_info->save();
+                            }
+                        }
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
                     }
                 }
             }
-        else {
+        } else {
             $message = 'Post Method is Required';
         }
         $response['message'] = $message;

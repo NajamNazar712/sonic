@@ -4430,6 +4430,10 @@ class RiderAPIController extends Controller
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
+                $employee = Employee::where('employee_type_id', 1)
+                    ->where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
                 //Check RiderRequest Already Exist
                 if ($rider_request->exists()) {
                     $rider_request = $rider_request->first();
@@ -4440,6 +4444,17 @@ class RiderAPIController extends Controller
                         $message = "Phone Number Already Exist";
 
                     } else if ($rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_no == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
                 } //Check Rider Already Exist
@@ -4500,7 +4515,7 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->save();
 
-                            if($request->has('employment_history')){
+                            if ($request->has('employment_history')) {
                                 $employment_histories = json_decode($request->employment_history, true);
                                 foreach ($employment_histories as $employment_history) {
                                     $history = new EmployeeEmployementHistory();
@@ -4514,7 +4529,7 @@ class RiderAPIController extends Controller
                                 }
                             }
 
-                            if($request->has('medical_details')){
+                            if ($request->has('medical_details')) {
                                 $medical_details = json_decode($request->medical_details, true);
                                 foreach ($medical_details as $medical_detail) {
                                     $medical_info = new EmployeeMedicalInformation();
@@ -4527,7 +4542,7 @@ class RiderAPIController extends Controller
                                 }
                             }
 
-                            if($request->has('education_details')){
+                            if ($request->has('education_details')) {
                                 $education_details = json_decode($request->education_details, true);
                                 foreach ($education_details as $education_detail) {
                                     $employee_education = new EmployeeEducationalBackground();
@@ -4540,7 +4555,7 @@ class RiderAPIController extends Controller
                                 }
                             }
 
-                            if($request->has('bank_details')){
+                            if ($request->has('bank_details')) {
                                 $bank_details = json_decode($request->bank_details, true);
                                 foreach ($bank_details as $bank_detail) {
                                     $employee_bank_info = new EmployeeBankInformation();
