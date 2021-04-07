@@ -7880,23 +7880,39 @@ class AdminDashboardController extends Controller
         ]);
 
 
-        if($request->password=="" || $request->password==null)
-        {
-            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
-            AdminLogs::create([
-                'admin_id'=>Auth::id(),
-                'user_id'=>$user_id
-
-            ]);
-        }
-        else
-        {
-            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+        $flag = true;
+        $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
+        if($user){
+            if($user_id == $user->id) {
+                $flag = true;
+            }
+            else{
+                $flag = false;
+            }
         }
 
-        return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+        if($flag == true){
+            if($request->password=="" || $request->password==null)
+            {
+                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                    'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                AdminLogs::create([
+                    'admin_id'=>Auth::id(),
+                    'user_id'=>$user_id
+
+                ]);
+            }
+            else
+            {
+                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                    'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+            }
+
+            return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+        }
+        else{
+            return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
+        }
     }
 
     public function updateBankInfo(Request $request)

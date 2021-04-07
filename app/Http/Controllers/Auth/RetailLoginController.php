@@ -86,20 +86,20 @@ class RetailLoginController extends Controller
             $user_lng = $request->lng;
             $store_lat = $retail_store->location_latitude;
             $store_lng = $retail_store->location_longitude;
-            $theta = $user_lng - $store_lng;
-            $dist = sin(deg2rad($user_lat)) * sin(deg2rad($store_lat)) +  cos(deg2rad($user_lat)) * cos(deg2rad($store_lat)) * cos(deg2rad($theta));
-            $dist = acos($dist);
-            $dist = rad2deg($dist);
-            $meters = ((($dist * 60) * 1.1515) * 1.609344);
+            $km = ( 6371 * acos( cos( deg2rad($user_lat) )
+                    * cos( deg2rad( $store_lat ) )
+                    * cos( deg2rad( $store_lng ) - deg2rad($user_lng) ) + sin( deg2rad($user_lat) )
+                    * sin( deg2rad( $store_lat ) ) ) );
+            $meters = $km * 1000;
             if($meters <= 200){
                 $otp = mt_rand(100000,999999);
                 $retail_user->otp = $otp;
                 $retail_user->save();
                 NotificationsController::send(129, $retail_user, $otp);
-                return response()->json(['status' => 1]);
+                return response()->json(['status' => 1, 'km' => $km, 'meters' => $meters]);
             }
             else{
-                return response()->json(['status' => 0, 'error' => 'Location not matched!']);
+                return response()->json(['status' => 0, 'error' => 'Location not matched!', 'km' => $km, 'meters' => $meters, 'lat' => $user_lat, 'lng' => $user_lng]);
             }
         }
         else{
