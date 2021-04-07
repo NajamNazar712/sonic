@@ -123,7 +123,8 @@ class DeliveryController extends Controller
             })
             ->leftjoin('return_assigned_shipments as ras', function ($join) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where('ras.status', '=' , 1);
+                    ->where('ras.status', '=' , 0)
+                    ->where('ras.id','=',DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.shipment_id = shipments.id)'));
             })
             ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
