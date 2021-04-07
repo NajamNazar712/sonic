@@ -716,13 +716,19 @@ class V2AdminPickupsController extends Controller
                         $reference_1_id = NULL;
                     }
 
-                    if ($request->volumetric_weight == "on") {
-                        $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                        $shipment->length = $request->length;
-                        $shipment->breadth = $request->breadth;
-                        $shipment->height = $request->height;
-                    } else {
-                        $actual_weight = $request->weight;
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $actual_weight = $shipment->estimated_weight;
+                    }
+                    else{
+                        if ($request->volumetric_weight == "on") {
+                            $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                            $shipment->length = $request->length;
+                            $shipment->breadth = $request->breadth;
+                            $shipment->height = $request->height;
+                        } else {
+                            $actual_weight = $request->weight;
+                        }
                     }
                     if($shipment->booking_type_id == 4){
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
@@ -1097,13 +1103,20 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-                    if (empty($request->weight)) {
-                        $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-                        $shipment->length = $request->length;
-                        $shipment->breadth = $request->breadth;
-                        $shipment->height = $request->height;
-                    } else {
-                        $actual_weight = $request->weight;
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $actual_weight = $shipment->estimated_weight;
+                    }
+                    else{
+                        if (empty($request->weight)) {
+                            $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                            $shipment->length = $request->length;
+                            $shipment->breadth = $request->breadth;
+                            $shipment->height = $request->height;
+                        } else {
+                            $actual_weight = $request->weight;
+                        }
                     }
                     if($shipment->booking_type_id == 4){
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
@@ -1236,10 +1249,16 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-                    if($request->has('weight')){
-                        $shipment->actual_weight = $request->weight;
-                        $shipment->save();
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $shipment->actual_weight = $shipment->estimated_weight;
                     }
+                    else {
+                        if ($request->has('weight')) {
+                            $shipment->actual_weight = $request->weight;
+                        }
+                    }
+                    $shipment->save();
 
                     $details = array();
 
@@ -2022,10 +2041,17 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
-                    if($request->has('weight')){
-                        $shipment->actual_weight = $request->weight;
-                        $shipment->save();
+
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if($retail_shipment->exists()){
+                        $shipment->actual_weight = $shipment->estimated_weight;
                     }
+                    else {
+                        if ($request->has('weight')) {
+                            $shipment->actual_weight = $request->weight;
+                        }
+                    }
+                    $shipment->save();
 
                     $details = array();
 

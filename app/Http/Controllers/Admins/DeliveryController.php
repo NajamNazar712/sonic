@@ -5149,7 +5149,13 @@ class DeliveryController extends Controller
                 if ($deliveries->delivered_status == 1) {
                     $image = '';
                     if($deliveries->picture_path != null){
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        $exists = Storage::disk('public')->exists($deliveries->picture_path);
+                        if($exists){
+                            $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        }else{
+                            $img = Storage::disk('s3')->temporaryUrl($deliveries->picture_path, now()->addMinutes(5));
+                            $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                        }
 
                         return $image;
                     }
@@ -6262,6 +6268,7 @@ class DeliveryController extends Controller
 
     public function quick_receiving_track_delivery_note(Request $request)
     {
+        $tracking_numbers = array();
         $delivery_note_id = $request->delivery_note_id;
         $total_shipments = 0;
         $delivery_note = DeliveryNote::where('id',$delivery_note_id);
@@ -6274,6 +6281,7 @@ class DeliveryController extends Controller
         foreach ($delivery_note_shipments as $delivery_note_shipment){
             $shipment = $delivery_note_shipment->shipment;
             if(in_array($shipment->shipper_status_id, $this->undelivered_status)){
+                array_push($tracking_numbers,$shipment->tracking_number);
                 $total_shipments++;
             }
         }
@@ -6281,7 +6289,7 @@ class DeliveryController extends Controller
         {
             return response()->json(['status'=>1,'error'=>'Delivery Note doesn\'t contain any returned shipments']);
         }
-        return response()->json(['status'=>0,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
+        return response()->json(['status'=>0,'tracking_numbers'=>$tracking_numbers,'total_shipments'=>$total_shipments,'delivery_note_number'=>str_pad($delivery_note->id, 6, 0, STR_PAD_LEFT)]);
     }
 
     public function quick_receiving_track_tracking_number(Request $request)

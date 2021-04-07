@@ -6265,11 +6265,11 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                 }
                 else if ($id == 105) {
-                    
+
                     $pickup_request_id = $reference_1_id;
                     $reason_id = $reference_2_id;
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    
+
                     //start
                     //pickup address
                     $pickup_address = $pickup_request->pickup_address->pickup_address;
@@ -7158,6 +7158,18 @@ class NotificationsController extends Controller
                         }
                     }
 
+                }
+				else if($id == 129){
+                    $retail_user = $reference_1_id;
+                    $otp = $reference_2_id;
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $retail_user->name, $body);
+                    }
+                    if (strpos($body, '[code]') !== FALSE) {
+                        $body = str_replace('[code]', $otp, $body);
+                    }
+                    $to = $retail_user->phone_no;
+                    self::sms($body,$to);
                 }
             }
         }

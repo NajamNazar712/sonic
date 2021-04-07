@@ -12,10 +12,10 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="col-3">
+                    <div class="col-3 mb-1">
                         <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                     </div>
-                    <div class="col-3">
+                    <div class="col-3 mb-1">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $mode)
@@ -24,7 +24,42 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_user" id="search_user" class="form-control select2">
+                                @foreach($users as $user)
+                                    <option value="{{$user->id}}">{{$user->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="weighted_as" id="weighted_as" class="form-control select2">
+                                <option value="1">Dimensional</option>
+                                <option value="2">Volumetric</option>
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -34,7 +69,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -45,7 +80,7 @@
                         </div>
                     </div>
 
-                    <div class="col-2 mt-2">
+                    <div class="col-2">
                         <div class="form-group">
                             <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
@@ -130,6 +165,22 @@
             $('#search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Shipping Mode*',
+            });
+            $('#search_form #search_user').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Shipper',
+            });
+            $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Hub',
+            });
+            $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Zone',
+            });
+            $('#search_form #weighted_as').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Weighted As',
             });
 
             var from_date = $('#from_date').pickadate({
@@ -254,6 +305,10 @@
                     data: function (d) {
                         d.tracking_numbers = $('#search_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_user = $('#search_user').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.weighted_as = $('#weighted_as').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }

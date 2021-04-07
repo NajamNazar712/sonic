@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Franchise')
+@section('title', 'Retail Users')
 
 @section('content')
     <h1 class="mb-1">
-        Franchise
+        Retail Users
     </h1>
 
     <div class="card">
@@ -17,17 +17,19 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Trax ID</th>
+                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">Phone Number</th>
-                        <th class="border-primary border-darken-1">Email</th>
                         <th class="border-primary border-darken-1">CNIC</th>
-                        <th class="border-primary border-darken-1">Default Hub</th>
+                        <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Created Date/Time</th>
+                        <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Updated Date/Time</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Franchise Code</th>
-                        <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -36,88 +38,59 @@
         </div>
     </div>
 
-    <div class="modal fade" id="add_franchise" role="dialog" aria-labelledby="add_franchise_title" aria-hidden="true">
+    <div class="modal fade" id="add_user" role="dialog" aria-labelledby="add_user_title" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Add Franchise</h4>
+                    <h4 class="modal-title" id="add_remarks_title">Add User</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_franchise_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.franchise.add') }}" novalidate="novalidate">
+                    <form id="add_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.add') }}" novalidate="novalidate">
                         {{ csrf_field()  }}
                         <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Franchise Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.franchise.name') }}" data-msg-remote="Name must be unique">
+                            <select name="store" id="store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                                <option value="1">Franchise</option>
+                                <option value="2">Trax Center</option>
+                            </select>
+                        </div>
+                        <div class="form-group d-none" id="franchise_div">
+                            <select name="franchise" id="franchise" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                                @foreach($franchises as $franchise)
+                                    <option value="{{$franchise->id}}"> {{$franchise->name}} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group d-none" id="trax_center_div">
+                            <select name="trax_center" id="trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
+                                @foreach($trax_centers as $trax_center)
+                                    <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="name" id="name" class="form-control" placeholder="User Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.users.name') }}" data-msg-remote="Name must be unique">
                         </div>
                         <div class="form-group">
                             <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
-                        <div class="form-group">
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="" autocomplete="nope">
+                        <div class="form-group position-relative">
+                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
+                            <div class="form-control-position" id="eye">
+                                <i class="la la-eye success"></i>
+                            </div>
                         </div>
                         <div class="form-group">
                             <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
                         </div>
                         <div class="form-group">
-                            <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="Default Hub is required">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="lat" id="lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="long" id="long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required">
+                            <textarea name="address" id="address" class="form-control address" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="edit_franchise" role="dialog" aria-labelledby="edit_franchise_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="edit_remarks_title">Edit Franchise</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="edit_franchise_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.franchise.edit') }}" novalidate="novalidate">
-                        {{ csrf_field()  }}
-                        <input type="hidden" name="franchise_id" id="franchise_id" value="">
-                        <div class="form-group">
-                            <input type="text" name="name" id="edit_name" class="form-control" placeholder="Franchise Name*" data-rule-required="true" data-msg-required="Name is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary edit" value="Add">Edit</button>
                         </div>
                     </form>
                 </div>
@@ -164,6 +137,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -174,9 +150,35 @@
                 'clearIncomplete': true
             });
 
-            $('#add_franchise_form #hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#add_user_form #store').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Default Hub',
+                placeholder: 'Select Category*',
+                allowClear:true
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 1){
+                    $('#trax_center_div').addClass('d-none');
+                    $('#franchise_div').removeClass('d-none');
+                }
+                else if(id == 2){
+                    $('#trax_center_div').removeClass('d-none');
+                    $('#franchise_div').addClass('d-none');
+                }
+                else{
+                    $('#trax_center_div').addClass('d-none');
+                    $('#franchise_div').addClass('d-none');
+                }
+            });
+
+            $('#add_user_form #trax_center').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Trax Center*',
+                allowClear:true
+            });
+
+            $('#add_user_form #franchise').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Franchise*',
                 allowClear:true
             });
 
@@ -204,39 +206,45 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.retail.franchise.list') }}',
+                        url: '{{ route('admin.retail.users.list') }}',
                         data: params,
                         success: function (result) {
 
                             head = [];
 
                             head.push('S. No.');
+                            head.push('Trax ID');
+                            head.push('City');
+                            head.push('Hub');
                             head.push('Name');
                             head.push('Phone Number');
-                            head.push('Email');
                             head.push('CNIC');
-                            head.push('Default Hub');
+                            head.push('Address');
+                            head.push('Category');
                             head.push('Created Date/Time');
+                            head.push('Created By');
                             head.push('Updated Date/Time');
                             head.push('Updated By');
                             head.push('Status');
-                            head.push('Franchise Code');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.trax_id);
+                                row.push(values.city);
+                                row.push(values.hub);
                                 row.push(values.name);
                                 row.push(values.phone_no);
-                                row.push(values.email);
                                 row.push(values.cnic);
-                                row.push(values.default_hub);
+                                row.push(values.address);
+                                row.push(values.category);
                                 row.push(values.created_at);
+                                row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.status);
-                                row.push(values.code);
                                 body.push(row);
                             });
                         },
@@ -253,17 +261,17 @@
                 buttons: [
                         @if (session('role_id') == 1 || in_array(434, session('permissions')))
                     {
-                        text: 'Add Franchise',
+                        text: 'Add User',
                         className: 'btn btn-primary add',
                         action: function (e, dt, node, config) {
-                            $('#add_franchise').modal('show');
+                            $('#add_user').modal('show');
                         }
                     },
                         @endif
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Franchise',
+                        title: 'Users',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -276,23 +284,25 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.retail.franchise.list') }}',
+                    url: '{{ route('admin.retail.users.list') }}',
                 },
                 order: [[7, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'name' ,name: 'retail_franchises.name', class: 'align-middle text-center name'},
-                    { data:'phone_no' ,name: 'retail_franchises.phone_no', class: 'align-middle text-center phone_no'},
-                    { data:'email' ,name: 'retail_franchises.email', class: 'align-middle text-center email'},
-                    { data:'cnic' ,name: 'retail_franchises.cnic', class: 'align-middle text-center cnic'},
-                    { data:'default_hub' ,name: 'c.name', class: 'align-middle text-center default_hub'},
-                    { data:'created_at' ,name: 'retail_franchises.created_at', class: 'align-middle text-center created_at'},
-                    { data:'updated_at' ,name: 'retail_franchises.updated_at', class: 'align-middle text-center updated_at'},
-                    { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
-                    { data:'status' ,name: 'retail_franchises.status', class: 'align-middle text-center status'},
-                    { data:'code' ,name: 'retail_franchises.code', class: 'align-middle text-center code'},
-                    { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
+                    { data:'trax_id' ,name: 'retail_users.trax_id', class: 'align-middle text-center trax_id'},
+                    { data:'city' ,name: 'c.name', class: 'align-middle text-center city'},
+                    { data:'hub' ,name: 'h.name', class: 'align-middle text-center hub'},
+                    { data:'name' ,name: 'retail_users.name', class: 'align-middle text-center name'},
+                    { data:'phone_no' ,name: 'retail_users.phone_no', class: 'align-middle text-center phone_no'},
+                    { data:'cnic' ,name: 'retail_users.cnic', class: 'align-middle text-center cnic'},
+                    { data:'address' ,name: 'retail_users.address', class: 'align-middle text-center address'},
+                    { data:'category' ,name: 'retail_users.category', class: 'align-middle text-center category'},
+                    { data:'created_at' ,name: 'retail_users.created_at', class: 'align-middle text-center created_at'},
+                    { data:'created_by' ,name: 'ac.name', class: 'align-middle text-center created_by'},
+                    { data:'updated_at' ,name: 'retail_users.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'updated_by' ,name: 'au.name', class: 'align-middle text-center updated_by'},
+                    { data:'status' ,name: 'retail_users.status', class: 'align-middle text-center status'},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -309,14 +319,23 @@
                         '<option value="1">Active</option>' +
                         '<option value="0">In-Active</option>' +
                         '</select>';
+                    var category_select = '<select name="status_select" id="category_select" class="select2 form-control">' +
+                        '<option value="1">Franchise</option>' +
+                        '<option value="2">Trax Owned</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.category')){
+                            $(category_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -340,6 +359,13 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    $("#category_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Category",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
@@ -347,7 +373,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
-                    url: '{!! route('admin.retail.franchise.status') !!}',
+                    url: '{!! route('admin.retail.users.status') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -365,7 +391,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
-                    url: '{!! route('admin.retail.franchise.status') !!}',
+                    url: '{!! route('admin.retail.users.status') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -380,7 +406,7 @@
                 });
             });
 
-            $('#add_franchise').on('hide.bs.modal', function () {
+            $('#add_user').on('hide.bs.modal', function () {
                 $('#hub').val(null).trigger('change');
                 $('#name').val('');
                 $('#phone_number').val('');
@@ -390,30 +416,8 @@
                 $('#long').val('');
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                var name = table.row($(this).parents('tr')).data().name;
-                var phone_no = table.row($(this).parents('tr')).data().phone_no;
-                var cnic = table.row($(this).parents('tr')).data().cnic;
-                var email = table.row($(this).parents('tr')).data().email;
-                var default_hub_id = table.row($(this).parents('tr')).data().default_hub_id;
-                var lat = table.row($(this).parents('tr')).data().location_latitude;
-                var long = table.row($(this).parents('tr')).data().location_longitude;
-                console.log(default_hub_id);
-                $('#franchise_id').val(id);
-                $('#edit_name').val(name);
-                $('#edit_phone_number').val(phone_no);
-                $('#edit_cnic').val(cnic);
-                $('#edit_email').val(email);
-                $('#edit_lat').val(lat);
-                $('#edit_long').val(long);
-
-                $('#edit_remarks_title').text('Edit Franchise ' + name);
-                $('#edit_franchise').modal('show');
-            });
-
-            $('#add_franchise_form').validate({
-                ignore: [],
+            $('#add_user_form').validate({
+                ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -422,27 +426,7 @@
                 submitHandler: function(form) {
                     swal({
                         title: 'Please Wait!',
-                        text: 'Franchise is being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
-                }
-            });
-
-            $('#edit_franchise_form').validate({
-                ignore: [],
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Franchise is being Updated!',
+                        text: 'User is being added!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

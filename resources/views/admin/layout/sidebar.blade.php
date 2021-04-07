@@ -1389,12 +1389,15 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([431, 432, 474], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Retail</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || count(array_intersect([431, 432], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || count(array_intersect([431, 432, 474], session('permissions'))) !== 0)
                                         <li class=" nav-item"><a href="#"><span class="menu-title">Store Management</span></a>
                                             <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(474, session('permissions')))
+                                                    <li><a class="menu-item" href="{{ route('admin.retail.users.index') }}">Users</a></li>
+                                                @endif
                                                 @if (session('role_id') == 1 || in_array(431, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.franchise.index') }}">Franchise</a></li>
                                                 @endif
@@ -1439,7 +1442,7 @@
                     </ul>
                 </li>
             @endif
-            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-hand-o-right"></i>Human Resource</span></a>
+            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
                     @if (session('role_id') == 1 || in_array(449, session('permissions')))

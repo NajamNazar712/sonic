@@ -21,6 +21,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Trax ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Phone No</th>
@@ -131,6 +132,7 @@
                             head.push('S.No');
                             head.push('Trax ID');
                             head.push('City Name');
+                            head.push('Zone');
                             head.push('Hub Name');
                             head.push('Rider Name');
                             head.push('Phone No.');
@@ -151,6 +153,7 @@
                                 row.push(index + 1);
                                 row.push(values.trax_id);
                                 row.push(values.city);
+                                row.push(values.zone);
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.phone);
@@ -287,6 +290,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'zone', name: 'zone', class: 'align-middle zone'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle name'},
                     {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},

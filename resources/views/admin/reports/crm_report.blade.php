@@ -76,6 +76,16 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                @foreach($case_nature_types as $case_nature_type)
+                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_agent" id="search_agent" class="form-control select2">
                                 @foreach($agents as $agent)
                                     <option value="{{$agent->id}}">{{$agent->name}}</option>
@@ -106,6 +116,18 @@
 
 
                     <div class="col-4">
+                        {{-- <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                        </div> --}}
+                    </div>
+
+
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -115,7 +137,6 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
                         </div>
                     </div>
-
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -180,6 +201,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -237,6 +259,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -245,11 +268,36 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-            $('#search_request_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
+
+            var select = $('#search_request_number').selectize({
+                placeholder: 'Search Request Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
             });
+
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
@@ -280,6 +328,12 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Case Nature Type',
+                width:'100%',
+                allowClear:true
+            });
+            
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
@@ -441,6 +495,7 @@
                         d.search_zone = $('#search_zone').val();
                         d.search_agent = $('#search_agent').val();
                         d.search_case_nature = $('#search_case_nature').val();
+                        d.search_case_nature_type = $('#search_case_nature_type').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_status = $('#search_status').val();

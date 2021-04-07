@@ -460,7 +460,7 @@ class VisionSoftAPIController extends Controller
             })
             ->select('u.id as account_id', 'u.account_type_id', 'u.name as account_name', 'shipments.booking_type_id as service_type_id', 'usi.city_id as origin_city_id', 'shipments.weight_charges as weight_charges', 'shipments.insurance_charges as insurance_charges', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.packaging_charges as packing_charges', 'shipments.packaging_material_charges as packaging_charges', 'shipments.try_and_buy_charges as try_and_buy_charges', 'shipments.nsa_osa_charges as nsa_osa_charges', 'shipments.replacement_charges as replacement_charges', 'shipments.cash_handling_charges as cash_handling_charges', 'shipments.gst as gst', 'shipments.return_charges as return_charges', 'shipments.intercept_charges as intercept_charges', 'sj.shipper_status_id', 'pps.gst as pps_gst', 'dps.gst as dps_gst', 'pis.gst as pis_gst', 'is.gst as is_gst')
             ->whereDate('sj.created_at', $date)
-            ->where('u.id', '!=', 8761)
+            ->whereNotIn('u.id', [8761, 9358])
             ->get();
         VisionSoftDellRetRevenue::truncate();
         if(count($shipments) > 0){
@@ -740,7 +740,7 @@ class VisionSoftAPIController extends Controller
             ->leftjoin('banks_lists as bl', 'bl.id', '=', 'dp.company_bank_id')
             ->select('dp.id as payment_id', 'u.id as account_id', 'c.name as city_name', 'done_payment_calculations.amount as amount', 'done_payment_calculations.charges as charges', 'done_payment_calculations.gst as gst', 'done_payment_calculations.payable as payable', 'bl.name as bank_name', 'dp.status as status')
             ->whereDate('done_payment_calculations.created_at', $date)
-            ->where('u.id', '!=', 8761)
+            ->whereNotIn('u.id', [8761, 9358])
             ->get();
         if(count($payments) > 0){
             $client = new Client(['base_uri' => 'http://traxapi.reactivelogix.com/api/TRAX/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
@@ -1132,7 +1132,7 @@ class VisionSoftAPIController extends Controller
             })
             ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
             ->whereDate('sj.created_at', $date)
-            ->where('s.user_id', '!=', 8761)
+            ->whereNotIn('s.user_id', [8761, 9358])
             ->groupBy('hc.id')
             ->get();
         VisionSoftCodReceivable::truncate();
