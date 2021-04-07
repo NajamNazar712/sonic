@@ -21,6 +21,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Changed On</th>
                         <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Agent</th>
                         <th class="border-primary border-darken-1">Old Consignee City</th>
                         <th class="border-primary border-darken-1">Old Consignee Name</th>
                         <th class="border-primary border-darken-1">Old Consignee Address</th>
@@ -78,6 +79,7 @@
                             head.push('Shipper');
                             head.push('Changed On');
                             head.push('Origin');
+                            head.push('Agent');
                             head.push('Old Consignee City');
                             head.push('Old Consignee Name');
                             head.push('Old Consignee Address');
@@ -102,6 +104,7 @@
                                 row.push(values.shipper);
                                 row.push(values.created_at);
                                 row.push(values.origin);
+                                row.push(values.agent);
                                 row.push(values.old_consignee_city);
                                 row.push(values.old_consignee_name);
                                 row.push(values.old_consignee_address);
@@ -154,6 +157,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'created_at', name: 'intercept_re_book_request_histories.created_at', class: 'align-middle created_at'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                     {data: 'old_consignee_city', name: 'odc.name', class: 'align-middle old_consignee_city'},
                     {data: 'old_consignee_name', name: 'intercept_re_book_request_histories.old_consignee_name', class: 'align-middle old_consignee_name'},
                     {data: 'old_consignee_address', name: 'intercept_re_book_request_histories.old_consignee_address', class: 'align-middle old_consignee_address'},

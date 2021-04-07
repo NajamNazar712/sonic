@@ -40,7 +40,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as odc','odc.id','=','intercept_re_book_request_histories.old_consignee_city_id')
             ->join('cities as nc','nc.id','=','intercept_re_book_request_histories.new_consignee_city_id')
-            ->select('s.tracking_number','s.tracking_number as tracking_number_link','oc.name as origin','odc.name as old_consignee_city','nc.name as new_consignee_city','intercept_re_book_request_histories.old_consignee_name','intercept_re_book_request_histories.old_consignee_address','intercept_re_book_request_histories.old_consignee_phone_number_1','intercept_re_book_request_histories.old_consignee_phone_number_2','intercept_re_book_request_histories.old_consignee_email','intercept_re_book_request_histories.new_consignee_name','intercept_re_book_request_histories.new_consignee_address','intercept_re_book_request_histories.new_consignee_phone_number_1','intercept_re_book_request_histories.new_consignee_phone_number_2','intercept_re_book_request_histories.new_consignee_email','intercept_re_book_request_histories.created_at','intercept_re_book_request_histories.old_amount','intercept_re_book_request_histories.new_amount', 'u.name as shipper');
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 's.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
+            ->select('agent.name as agent','s.tracking_number','s.tracking_number as tracking_number_link','oc.name as origin','odc.name as old_consignee_city','nc.name as new_consignee_city','intercept_re_book_request_histories.old_consignee_name','intercept_re_book_request_histories.old_consignee_address','intercept_re_book_request_histories.old_consignee_phone_number_1','intercept_re_book_request_histories.old_consignee_phone_number_2','intercept_re_book_request_histories.old_consignee_email','intercept_re_book_request_histories.new_consignee_name','intercept_re_book_request_histories.new_consignee_address','intercept_re_book_request_histories.new_consignee_phone_number_1','intercept_re_book_request_histories.new_consignee_phone_number_2','intercept_re_book_request_histories.new_consignee_email','intercept_re_book_request_histories.created_at','intercept_re_book_request_histories.old_amount','intercept_re_book_request_histories.new_amount', 'u.name as shipper');
         if (session('role_id') != 1) {
             $intercept = $intercept->where(function ($query) {
                 $query->where(function ($sub_query) {

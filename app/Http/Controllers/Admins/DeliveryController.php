@@ -121,6 +121,11 @@ class DeliveryController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
@@ -138,7 +143,7 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
+            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
                 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
@@ -5416,6 +5421,11 @@ class DeliveryController extends Controller
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
 //            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -5427,7 +5437,7 @@ class DeliveryController extends Controller
                     ->where('sj.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
             ->where('shipments.shipper_status_id', 54)
         ->groupBy('shipments.id');
 
