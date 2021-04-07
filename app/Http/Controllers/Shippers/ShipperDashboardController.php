@@ -933,7 +933,7 @@ class ShipperDashboardController extends Controller
                     'email'=>'required|email|between:0,100',
                 ]);
                 $flag = true;
-                $user = User::where('email', $request->email)->first();
+                $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
                 if($user){
                     if(session('user_id') == $user->id) {
                         $flag = true;
@@ -947,7 +947,7 @@ class ShipperDashboardController extends Controller
                         'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
                 }
                 else{
-                    return redirect()->back()->with(['error'=>"Email Address must be unique"]);
+                    return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
                 }
             }
         else{
