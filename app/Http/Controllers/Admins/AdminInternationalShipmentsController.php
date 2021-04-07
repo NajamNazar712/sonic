@@ -22,7 +22,7 @@ class AdminInternationalShipmentsController extends Controller
     }
     public function tracking_upload_list(Request $request){
         $shipments = InternationalShipment::join('shipments', 'shipments.id', '=', 'international_shipments.shipment_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight');
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
