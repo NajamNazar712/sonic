@@ -428,6 +428,10 @@ class AdminAPIController extends Controller
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
+                $employee = Employee::where('employee_type_id', 1)
+                    ->where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
@@ -440,102 +444,112 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_no == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
                 } else {
-                        try {
-                            $employee_request = new Employee();
-                            $employee_request->name = $request->name;
-                            $employee_request->employee_gender_id = $request->employee_gender_id;
-                            $employee_request->city_id = $request->city_id;
-                            $employee_request->cnic = $request->cnic_no;
-                            $employee_request->phone_number = $request->phone_number;
-                            $employee_request->employee_type_id = 1;
-                            $employee_request->status_id = 2;
-                            $employee_request->guardian_name = $request->guardian_name;
-                            $employee_request->religion_id = $request->religion_id;
-                            $employee_request->nationality_id = $request->nationality_id;
-                            $employee_request->domicile_id = $request->domicile_id;
-                            $employee_request->marital_status_id = $request->marital_status_id;
-                            $employee_request->blood_group = $request->blood_group_id;
-                            $employee_request->personal_email = $request->personal_email;
-                            $employee_request->address = $request->address;
-                            $employee_request->emergency_contact = $request->emergency_contact;
-                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
-                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
-                            $employee_request->designation_id = $request->designation_id;
-                            $employee_request->department_id = $request->department_id;
-                            $employee_request->zone_id = $request->zone_id;
-                            $employee_request->official_email = $request->official_email;
-                            $employee_request->official_phone_number = $request->official_phone_number;
-                            $employee_request->sonic_id = $request->sonic_id;
-                            $employee_request->place_of_birth = $request->place_of_birth;
-                            $employee_request->date_of_birth = $request->date_of_birth;
-                            $employee_request->pin = $request->pin;
-                            $employee_request->save();
+                    try {
+                        $employee_request = new Employee();
+                        $employee_request->name = $request->name;
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                        $employee_request->city_id = $request->city_id;
+                        $employee_request->cnic = $request->cnic_no;
+                        $employee_request->phone_number = $request->phone_number;
+                        $employee_request->employee_type_id = 1;
+                        $employee_request->status_id = 2;
+                        $employee_request->guardian_name = $request->guardian_name;
+                        $employee_request->religion_id = $request->religion_id;
+                        $employee_request->nationality_id = $request->nationality_id;
+                        $employee_request->domicile_id = $request->domicile_id;
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                        $employee_request->blood_group = $request->blood_group_id;
+                        $employee_request->personal_email = $request->personal_email;
+                        $employee_request->address = $request->address;
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                        $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                        $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                        $employee_request->designation_id = $request->designation_id;
+                        $employee_request->department_id = $request->department_id;
+                        $employee_request->zone_id = $request->zone_id;
+                        $employee_request->official_email = $request->official_email;
+                        $employee_request->official_phone_number = $request->official_phone_number;
+                        $employee_request->sonic_id = $request->sonic_id;
+                        $employee_request->place_of_birth = $request->place_of_birth;
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                        $employee_request->pin = $request->pin;
+                        $employee_request->save();
 
-                            if($request->has('employment_history')){
-                                $employment_histories = json_decode($request->employment_history, true);
-                                foreach ($employment_histories as $employment_history) {
-                                    $history = new EmployeeEmployementHistory();
-                                    $history->employee_id = $employee_request->id;
-                                    $history->name = $employment_history['organization_company_name'];
-                                    $history->designation = $employment_history['position_designation'];
-                                    $history->from = $employment_history['from_date'];
-                                    $history->to = $employment_history['to_date'];
-                                    $history->reason = $employment_history['reason'];
-                                    $history->save();
-                                }
+                        if ($request->has('employment_history')) {
+                            $employment_histories = json_decode($request->employment_history, true);
+                            foreach ($employment_histories as $employment_history) {
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['organization_company_name'];
+                                $history->designation = $employment_history['position_designation'];
+                                $history->from = $employment_history['from_date'];
+                                $history->to = $employment_history['to_date'];
+                                $history->reason = $employment_history['reason'];
+                                $history->save();
                             }
-
-                            if($request->has('medical_details')){
-                                $medical_details = json_decode($request->medical_details, true);
-                                foreach ($medical_details as $medical_detail) {
-                                    $medical_info = new EmployeeMedicalInformation();
-                                    $medical_info->employee_id = $employee_request->id;
-                                    $medical_info->name = $medical_detail['name_of_family_member'];
-                                    $medical_info->relationship_id = $medical_detail['relation_ship'];
-                                    $medical_info->date_of_birth = $medical_detail['date_of_birth'];
-                                    $medical_info->marital_status = $medical_detail['marital_status'];
-                                    $medical_info->save();
-                                }
-                            }
-
-                            if($request->has('education_details')){
-                                $education_details = json_decode($request->education_details, true);
-                                foreach ($education_details as $education_detail) {
-                                    $employee_education = new EmployeeEducationalBackground();
-                                    $employee_education->employee_id = $employee_request->id;
-                                    $employee_education->name = $education_detail['institute'];
-                                    $employee_education->degree = $education_detail['degree'];
-                                    $employee_education->grade = $education_detail['position_grade'];
-                                    $employee_education->passing_year = $education_detail['graduation_year'];
-                                    $employee_education->save();
-                                }
-                            }
-
-                            if($request->has('bank_details')){
-                                $bank_details = json_decode($request->bank_details, true);
-                                foreach ($bank_details as $bank_detail) {
-                                    $employee_bank_info = new EmployeeBankInformation();
-                                    $employee_bank_info->employee_id = $employee_request->id;
-                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
-                                    $employee_bank_info->branch_code = $bank_detail['branch_code'];
-                                    $employee_bank_info->account_no = $bank_detail['account_number'];
-                                    $employee_bank_info->bank_id = $bank_detail['bank'];
-                                    $employee_bank_info->branch_name = $bank_detail['branch'];
-                                    $employee_bank_info->iban = $bank_detail['iban_no'];
-                                    $employee_bank_info->save();
-                                }
-                            }
-                            $response['status'] = 0;
-                            $response['employee_id'] = $employee_request->id;
-                            $message = 'Request Has Been Submitted and Pending for Approval';
-                        } catch (Exception $ex) {
-                            $response['message'] = $ex;
                         }
+
+                        if ($request->has('medical_details')) {
+                            $medical_details = json_decode($request->medical_details, true);
+                            foreach ($medical_details as $medical_detail) {
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $medical_detail['name_of_family_member'];
+                                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                $medical_info->marital_status = $medical_detail['marital_status'];
+                                $medical_info->save();
+                            }
+                        }
+
+                        if ($request->has('education_details')) {
+                            $education_details = json_decode($request->education_details, true);
+                            foreach ($education_details as $education_detail) {
+                                $employee_education = new EmployeeEducationalBackground();
+                                $employee_education->employee_id = $employee_request->id;
+                                $employee_education->name = $education_detail['institute'];
+                                $employee_education->degree = $education_detail['degree'];
+                                $employee_education->grade = $education_detail['position_grade'];
+                                $employee_education->passing_year = $education_detail['graduation_year'];
+                                $employee_education->save();
+                            }
+                        }
+
+                        if ($request->has('bank_details')) {
+                            $bank_details = json_decode($request->bank_details, true);
+                            foreach ($bank_details as $bank_detail) {
+                                $employee_bank_info = new EmployeeBankInformation();
+                                $employee_bank_info->employee_id = $employee_request->id;
+                                $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                $employee_bank_info->account_no = $bank_detail['account_number'];
+                                $employee_bank_info->bank_id = $bank_detail['bank'];
+                                $employee_bank_info->branch_name = $bank_detail['branch'];
+                                $employee_bank_info->iban = $bank_detail['iban_no'];
+                                $employee_bank_info->save();
+                            }
+                        }
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
                     }
                 }
             }
-        else {
+        } else {
             $message = 'Post Method is Required';
         }
         $response['message'] = $message;
@@ -572,7 +586,6 @@ class AdminAPIController extends Controller
             $message = 'Error(s) in Input';
             $response['errors'] = $validate->errors();
         } else {
-            $date = Carbon::now()->format('Y_m_d');
 
             $employee_id = $request->employee_id;
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
@@ -583,7 +596,13 @@ class AdminAPIController extends Controller
                 $attachments->employee_id = $employee_id;
             }
 
+            $date = Carbon::now()->format('Y_m_d');
+
             if ($request->hasFile('cv')) {
+                if ($attachments->cv != NULL) {
+                    Storage::disk('public')->delete($attachments->cv);
+                }
+
                 $file = $request->file('cv');
                 $filename = 'cv_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -593,6 +612,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('cnic')) {
+                if ($attachments->cnic != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic);
+                }
+
                 $file = $request->file('cnic');
                 $filename = 'cnic_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -602,6 +625,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('photo')) {
+                if ($attachments->photo != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic);
+                }
+
                 $file = $request->file('photo');
                 $filename = 'photo_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -611,6 +638,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('academic_credentials')) {
+                if ($attachments->academic != NULL) {
+                    Storage::disk('public')->delete($attachments->academic);
+                }
+
                 $file = $request->file('academic_credentials');
                 $filename = 'academic_credentials_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -620,6 +651,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('experience_certificates')) {
+                if ($attachments->experience != NULL) {
+                    Storage::disk('public')->delete($attachments->experience);
+                }
+
                 $file = $request->file('experience_certificates');
                 $filename = 'experience_certificates_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -629,6 +664,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('pay_slip')) {
+                if ($attachments->last_pay_slip != NULL) {
+                    Storage::disk('public')->delete($attachments->last_pay_slip);
+                }
+
                 $file = $request->file('pay_slip');
                 $filename = 'pay_slip_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -638,6 +677,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('nikkah_nama')) {
+                if ($attachments->nikkah_nama != NULL) {
+                    Storage::disk('public')->delete($attachments->nikkah_nama);
+                }
+
                 $file = $request->file('nikkah_nama');
                 $filename = 'nikkah_nama_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -647,6 +690,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('cnic_spouse')) {
+                if ($attachments->cnic_spouse != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic_spouse);
+                }
+
                 $file = $request->file('cnic_spouse');
                 $filename = 'cnic_spouse_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -656,6 +703,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('bform')) {
+                if ($attachments->child_b_form != NULL) {
+                    Storage::disk('public')->delete($attachments->child_b_form);
+                }
+
                 $file = $request->file('bform');
                 $filename = 'child_b_form_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -665,6 +716,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('cnic_nominee')) {
+                if ($attachments->cnic_nominee != NULL) {
+                    Storage::disk('public')->delete($attachments->cnic_nominee);
+                }
+
                 $file = $request->file('cnic_nominee');
                 $filename = 'cnic_nominee_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -674,6 +729,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('utility_bill')) {
+                if ($attachments->utility_bill != NULL) {
+                    Storage::disk('public')->delete($attachments->utility_bill);
+                }
+
                 $file = $request->file('utility_bill');
                 $filename = 'utility_bill_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -683,6 +742,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('affidavit')) {
+                if ($attachments->affidavit != NULL) {
+                    Storage::disk('public')->delete($attachments->affidavit);
+                }
+
                 $file = $request->file('affidavit');
                 $filename = 'affidavit_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -692,6 +755,10 @@ class AdminAPIController extends Controller
             }
 
             if ($request->hasFile('cheque')) {
+                if ($attachments->cheque != NULL) {
+                    Storage::disk('public')->delete($attachments->cheque);
+                }
+
                 $file = $request->file('cheque');
                 $filename = 'cheque_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee_id . '';
@@ -702,7 +769,7 @@ class AdminAPIController extends Controller
             $attachments->save();
 
             $response['status'] = 0;
-            $message = 'Document Has Been Submited';
+            $message = 'Document Has Been Submitted';
         }
         $response['message'] = $message;
         return response()->json($response);
