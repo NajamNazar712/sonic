@@ -20,6 +20,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
@@ -7182,5 +7183,38 @@ class NotificationsController extends Controller
     }
     static public function custom_sms($body, $to){
         self::sms($body, $to);
+    }
+
+    static public function bolt_app_notification($employee_id, $employee_type, $device_token, $notification_title, $notification_body)
+    {
+        $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
+        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+
+        $message = [
+            'data' => [
+                'title' => $notification_title,
+                'body' => $notification_body
+            ],
+            'to' => $device_token
+        ];
+
+        $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+
+        $response = $client->post('', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'key=' . $server_key,
+            ],
+            'body' => json_encode($message)
+        ]);
+        $response = json_decode($response->getBody()->getContents(), true);
+        if ($response['success'] != 0) {
+            $notification_history = new EmployeeNotificationHistory();
+            $notification_history->employee_id = $employee_id;
+            $notification_history->employee_type_id = $employee_type;
+            $notification_history->title = $notification_title;
+            $notification_history->message = $notification_body;
+            $notification_history->save();
+        }
     }
 }

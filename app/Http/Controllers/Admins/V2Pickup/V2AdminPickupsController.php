@@ -26,6 +26,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\ReceivingSheetReceived;
@@ -267,6 +268,7 @@ class V2AdminPickupsController extends Controller
         //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
         $rider_ids = $request->input('rider');
+        $previous_rider_id = null;
         $riders = array();
         $riders['new'] = $rider_id;
         $riders['new_phone'] = $rider_ids;
@@ -328,6 +330,8 @@ class V2AdminPickupsController extends Controller
             if(!$existing_pickup_request_attempt->exists()){
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
+                $previous_rider_id = $pickup_request->current_rider_id;
+
                 $pickup_request->rider_status = 2;
                 $pickup_request->attempts = $pickup_request->attempts + 1;
                 $pickup_request->current_rider_id = $rider_id;
@@ -354,6 +358,7 @@ class V2AdminPickupsController extends Controller
                 }
                 else
                 {
+                    $previous_rider_id = $pickup_request->current_rider_id;
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
                     $riders['new_rider_id'] = $rider_id;
 
@@ -387,6 +392,32 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(107, $riders, $pickup_request_id);
                     }
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
+                }
+
+                if ($previous_rider_id != null) {
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id',$previous_rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Removed";
+                        $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Removed From Your Pickups";
+                        NotificationsController::bolt_app_notification($previous_rider_id, 2,$device_token, $title, $message);
+                    }
+                }
+
+                if ($rider_id != null) {
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Assigned";
+                        $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Assigned To You";
+                        NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
+                    }
                 }
 
             }
