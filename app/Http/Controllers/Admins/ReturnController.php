@@ -49,6 +49,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
+
 class ReturnController extends Controller
 {
     public function __construct()
@@ -59,6 +61,7 @@ class ReturnController extends Controller
     }
 
     public function return_view(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),26);
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
@@ -72,6 +75,11 @@ class ReturnController extends Controller
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),86);
+        }
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -386,12 +394,12 @@ class ReturnController extends Controller
 
                         AdminFinanceController::done_payment($shipment, 1);
                     }
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
-                    if($return_assign_shipment->exists()){
-                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
-                    }
+//                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
+//                    if($return_assign_shipment->exists()){
+//                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
+//                        $return_assign_shipment->status = 0;
+//                        $return_assign_shipment->save();
+//                    }
 
                 }
 
@@ -443,11 +451,11 @@ class ReturnController extends Controller
                     $parcel->save();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                    if($return_assign_shipment){
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
-                    }
+//                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+//                    if($return_assign_shipment){
+//                        $return_assign_shipment->status = 0;
+//                        $return_assign_shipment->save();
+//                    }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
                 }
@@ -493,12 +501,12 @@ class ReturnController extends Controller
 
                     AdminFinanceController::done_payment($request->shipment_id, 1);
                 }
-                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                if($return_assign_shipment->exists()){
-                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                    $return_assign_shipment->status = 0;
-                    $return_assign_shipment->save();
-                }
+//                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+//                if($return_assign_shipment->exists()){
+//                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
+//                    $return_assign_shipment->status = 0;
+//                    $return_assign_shipment->save();
+//                }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }
@@ -538,11 +546,11 @@ class ReturnController extends Controller
 
                     ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
 
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-                    if($return_assign_shipment){
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
-                    }
+//                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+//                    if($return_assign_shipment){
+//                        $return_assign_shipment->status = 0;
+//                        $return_assign_shipment->save();
+//                    }
 
                     NotificationsController::send(15, 0, $request->shipment_id);
                     NotificationsController::send(16, 0, $request->shipment_id);
@@ -776,11 +784,11 @@ class ReturnController extends Controller
                         $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
-                        if($return_assign_shipment){
-                            $return_assign_shipment->status = 0;
-                            $return_assign_shipment->save();
-                        }
+//                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
+//                        if($return_assign_shipment){
+//                            $return_assign_shipment->status = 0;
+//                            $return_assign_shipment->save();
+//                        }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
@@ -810,6 +818,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_view(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),27);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -817,6 +826,11 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),87);
+        }
+
         $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46,47,48);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -2637,10 +2651,16 @@ class ReturnController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),28);
         return view('admin.return.history');
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),88);
+        }
+
         $deliveries = ReturnNote::
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')

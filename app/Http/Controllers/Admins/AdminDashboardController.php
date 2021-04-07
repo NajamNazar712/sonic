@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
-
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -1379,6 +1379,7 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),1);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
@@ -1387,6 +1388,7 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),2);
         $shippers = User::whereIn('status', [3, 4])->get();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
@@ -7174,6 +7176,10 @@ class AdminDashboardController extends Controller
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function activeAccountListAjax(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),62);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p','p.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -7466,6 +7472,10 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(Request $request){
 
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),61);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -7870,23 +7880,39 @@ class AdminDashboardController extends Controller
         ]);
 
 
-        if($request->password=="" || $request->password==null)
-        {
-            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
-            AdminLogs::create([
-                'admin_id'=>Auth::id(),
-                'user_id'=>$user_id
-
-            ]);
-        }
-        else
-        {
-            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+        $flag = true;
+        $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
+        if($user){
+            if($user_id == $user->id) {
+                $flag = true;
+            }
+            else{
+                $flag = false;
+            }
         }
 
-        return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+        if($flag == true){
+            if($request->password=="" || $request->password==null)
+            {
+                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                    'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+                AdminLogs::create([
+                    'admin_id'=>Auth::id(),
+                    'user_id'=>$user_id
+
+                ]);
+            }
+            else
+            {
+                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                    'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+            }
+
+            return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+        }
+        else{
+            return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
+        }
     }
 
     public function updateBankInfo(Request $request)
@@ -8283,6 +8309,27 @@ class AdminDashboardController extends Controller
                 }
             }
 
+            $zones = Zone::where('business_category_id', 1)->get();
+            foreach ($zones as $zone){
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 1;
+
+                $zone_class_city->save();
+
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 2;
+
+                $zone_class_city->save();
+            }
+
             return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
             $city = City::create([
@@ -8333,6 +8380,27 @@ class AdminDashboardController extends Controller
                         'shipping_mode_id'=>$shipping_mode_id,
                     ]);
                 }
+            }
+
+            $zones = Zone::where('business_category_id', 1)->get();
+            foreach ($zones as $zone){
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 1;
+
+                $zone_class_city->save();
+
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city->id;
+                $zone_class_city->class = 3;
+                $zone_class_city->zone_classification_id = 2;
+
+                $zone_class_city->save();
             }
             return redirect()->back()->with('success','Hub city added successfully');
         }

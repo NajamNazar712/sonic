@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
@@ -19,6 +21,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
@@ -3171,7 +3174,7 @@ class NotificationsController extends Controller
                             $details .= '<tbody>';
                             $details .= '<tr>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $hub->name . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;e">' . $debriefing->delivered . '</td>';
+                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivered . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
                             $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
@@ -6264,11 +6267,11 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                 }
                 else if ($id == 105) {
-                    
+
                     $pickup_request_id = $reference_1_id;
                     $reason_id = $reference_2_id;
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    
+
                     //start
                     //pickup address
                     $pickup_address = $pickup_request->pickup_address->pickup_address;
@@ -7081,7 +7084,84 @@ class NotificationsController extends Controller
                     $to = $phone;
                     self::sms($body,$to);
                 }
-                else if($id == 128) {
+                else if($id == 127){
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    $group_logs =  ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
+                        ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
+                        ->leftjoin('admin_departments as ad','ad.id','=','ar.department_id')
+                        ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
+                        ->select('ad.name as department','activity_trail_logs.id as id','a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at','ar.department_id as department_id')
+                        ->where('emailed',0)
+                        ->get()
+                        ->groupBy('department_id');
+
+                    foreach ($group_logs as $key => $logs)
+                    {
+                        $body = $notification->body;
+                        $head_role_id = AdminRole::where('department_id',$key)
+                            ->whereIn('id',ActivityTrailController::$department_head_ids)
+                            ->pluck('id')
+                            ->first();
+
+                        if($head_role_id == null)
+                        {
+                            echo "No Department Head is found for department ".$logs[0]->department." | ";
+//                            foreach ($logs as $index => $log) {
+//                                ActivityTrailLog::find($log->id)
+//                                    ->update(['emailed' => 1]);
+//                            }
+                        }
+                        else {
+                            $heads = Admin::where('role_id', $head_role_id)->get();
+
+                            if (count($heads) > 1) {
+                                $name = "Concern Head";
+                            } else {
+                                $name = $heads[0]->name;
+                            }
+                            if (strpos($body, '[contact_person]') !== FALSE) {
+                                $body = str_replace('[contact_person]', $name, $body);
+                            }
+
+                            $preview = '<table style="width:100%;">';
+                            $preview .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Team Member Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Screen Name</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Action Performed Time</th></tr></thead>';
+                            $preview .= '<tbody>';
+                            foreach ($logs as $index => $log) {
+                                $preview .= '<tr>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ($index + 1) . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->name . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->designation . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->screen_name . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->action . '</td>';
+                                $preview .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $log->created_at . '</td>';
+                                $preview .= '</tr>';
+                                ActivityTrailLog::find($log->id)
+                                    ->update(['emailed' => 1]);
+                            }
+
+                            $preview .= '</tbody></table>';
+                            if (strpos($body, '[preview]') !== FALSE) {
+                                $body = str_replace('[preview]', $preview, $body);
+                            }
+
+                            $to = array();
+
+                            foreach ($heads as $head) {
+                                array_push($to, $head->email);
+                            }
+
+                            self::email($subject, $body, $to);
+                            echo "Email for department ".$log->department." is sent successfully | ";
+                        }
+                    }
+
+                }
+				else if($id == 128) {
                     $master_cargo_id = $reference_1_id;
                     if ($master_cargo_id) {
 
@@ -7147,9 +7227,22 @@ class NotificationsController extends Controller
                         }
                     }
                 }
+				else if($id == 129){
+                    $retail_user = $reference_1_id;
+                    $otp = $reference_2_id;
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $retail_user->name, $body);
+                    }
+                    if (strpos($body, '[code]') !== FALSE) {
+                        $body = str_replace('[code]', $otp, $body);
+                    }
+                    $to = $retail_user->phone_no;
+                    self::sms($body,$to);
+                }
             }
         }
     }
+
     static public function custom($type, $subject, $body, $to) {
       if ($type == 1) {
         self::email($subject, $body, $to);
@@ -7157,5 +7250,38 @@ class NotificationsController extends Controller
     }
     static public function custom_sms($body, $to){
         self::sms($body, $to);
+    }
+
+    static public function bolt_app_notification($employee_id, $employee_type, $device_token, $notification_title, $notification_body)
+    {
+        $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
+        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+
+        $message = [
+            'data' => [
+                'title' => $notification_title,
+                'body' => $notification_body
+            ],
+            'to' => $device_token
+        ];
+
+        $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+
+        $response = $client->post('', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'key=' . $server_key,
+            ],
+            'body' => json_encode($message)
+        ]);
+        $response = json_decode($response->getBody()->getContents(), true);
+        if ($response['success'] != 0) {
+            $notification_history = new EmployeeNotificationHistory();
+            $notification_history->employee_id = $employee_id;
+            $notification_history->employee_type_id = $employee_type;
+            $notification_history->title = $notification_title;
+            $notification_history->message = $notification_body;
+            $notification_history->save();
+        }
     }
 }

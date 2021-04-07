@@ -79,6 +79,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.outstanding_shipments.walk_in_list') }}',
                         data: params,

@@ -231,8 +231,81 @@
                 }
             });
 
-			
-			
+			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+				if ( this.context.length ) {
+					body = [];
+					var params = table.ajax.params();
+					params.start = 0;
+					params.length = -1;
+					params.excel = true;
+					var jsonResult = $.ajax({
+						url: '{{ route('admin.v2_pickups.rider.list') }}',
+						data: params,
+						success: function (result) {
+							head = [];
+
+							head.push('Added At');
+							head.push('Rider');
+							head.push('Shipper');
+							head.push('Address');
+							head.push('City');
+							head.push('Type');
+							head.push('Updated At');
+							head.push('Start Location Latitude');
+							head.push('Start Location Longitude');
+							head.push('Actual Location Latitude');
+							head.push('Actual Location Longitude');
+							head.push('Distance (Start to Actual)');
+							head.push('Current Location Latitude');
+							head.push('Current Location Longitude');
+							head.push('Distance (Current to Actual)');
+							head.push('Shipment(s)');
+							head.push('Reason');
+							head.push('Remark(s)');
+							head.push('Picture');
+							head.push('Audio');
+							head.push('Shipper Signature Via App');
+							head.push('Pickup Note ID');
+							head.push('Pickup Request ID');
+
+
+							$.each(result.data, function(index, values) {
+								row = [];
+
+								row.push(values.added_at);
+								row.push(values.rider);
+								row.push(values.shipper);
+								row.push(values.pickup_address);
+								row.push(values.city);
+								row.push(values.pickup_type);
+								row.push(values.created_at);
+								row.push(values.start_location_latitude);
+								row.push(values.start_location_longitude);
+								row.push(values.actual_location_latitude);
+								row.push(values.actual_location_longitude);
+								row.push(values.distance_from_start_to_actual);
+								row.push(values.current_location_latitude);
+								row.push(values.current_location_longitude);
+								row.push(values.distance_from_current_to_actual);
+								row.push(values.shipments);
+								row.push(values.reason);
+								row.push(values.rider_remarks);
+								row.push(values.picture_path);
+								row.push(values.audio_path);
+								row.push(values.signature_via_app);
+								row.push(values.pickup_note_id);
+								row.push(values.pickup_request_id);
+
+								body.push(row);
+							});
+						},
+						async: false
+					});
+
+					return {body: body, header: head};
+				}
+			} );
+
 			table = $('#datatable').DataTable({
 			dom: '<"d-inline-block"l><"pull-right"B>tipr',
 			buttons: [{

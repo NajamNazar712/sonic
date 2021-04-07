@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Retail;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
@@ -23,11 +24,17 @@ class RetailCompletedDeliveries extends Controller
 
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),24);
         return view('admin.retail.completed.index');
     }
 
     public function list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),84);
+        }
+
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')

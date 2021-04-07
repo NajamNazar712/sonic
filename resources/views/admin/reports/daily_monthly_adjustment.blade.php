@@ -184,6 +184,7 @@
                     params_sum.length = -1;
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult_sum = $.ajax({
                         url: '{{ route('admin.reports.daily_monthly_adjustment.summary_list') }}',
                         data: params_sum,

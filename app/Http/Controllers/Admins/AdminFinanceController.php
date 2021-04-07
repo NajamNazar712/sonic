@@ -78,6 +78,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use NumberToWords\NumberToWords;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminFinanceController extends Controller
 {
@@ -129,6 +130,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),36);
         $banks = BanksList::where('affiliate', 1)->get();
         $all_banks = BanksList::all();
         $hubs = City::orderBy('name')->where('hub', 1)->get();
@@ -139,6 +141,11 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),96);
+        }
+
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
             ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
             ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip','station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref')
@@ -671,6 +678,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),37);
         $hubs = City::orderBy('name')->get();
         $booking_types = BookingType::all();
         $service_type = BookingType::all();
@@ -679,6 +687,11 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),97);
+        }
+
         if ($recovery_status = $request->get('recovery_status')) {
             if ($recovery_status == 7) {
                 $count = DeliveryNoteShipment::where('status', '=', 7);
@@ -1013,6 +1026,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),38);
         $shipping_modes = ShippingMode::where('id', '!=', 4)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $charges_mode_name = ChargesModes::select('id','charges_mode')->get();
@@ -1021,6 +1035,11 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),98);
+        }
+
         $shipments = Shipment::join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -2974,6 +2993,7 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),29);
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         if (session('department_id') == 7 && session('role_id') != 4) {
@@ -2990,6 +3010,11 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),89);
+        }
+
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
@@ -4078,6 +4103,7 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),30);
         if (session('department_id') == 7 && session('role_id') != 4) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
@@ -4095,6 +4121,10 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),90);
+        }
 
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
@@ -6173,12 +6203,14 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),34);
         $company_banks = BanksList::where('affiliate', 1)->get();
         $invoice_statuses = InvoiceStatus::whereIn('id',[1,2])->get();
 
         return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
     }
     public function received_invoices_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),35);
         $company_banks = BanksList::where('affiliate', 1)->get();
         $invoice_statuses = InvoiceStatus::where('id',3)->get();
 
@@ -6186,6 +6218,11 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),94);
+        }
+
         $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
@@ -6299,6 +6336,10 @@ class AdminFinanceController extends Controller
     }
 
     public function received_invoices_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),95);
+        }
         $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
@@ -7200,12 +7241,18 @@ class AdminFinanceController extends Controller
             $total_amount = PendingPaymentShipment::join('pending_payments', 'pending_payments.id','=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.amount');
             $total_charges = PendingPaymentShipment::join('pending_payments', 'pending_payments.id','=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.charges');
             $total_payable = PendingPaymentShipment::join('pending_payments', 'pending_payments.id','=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.payable');
+            ActivityTrailController::createActivityTrailLog(Auth::id(),31);
             return view('admin.finance.make_payments_pickup_wise')->with(['banks'=>$banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount,'company_banks'=>$company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers]);
         }
         return redirect()->back()->with('error', 'No settings found!');
     }
 
     public function make_payments_pickup_wise_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),91);
+        }
+
         $settings = GlobalSettings::where('type', 'pickup_wise_payment_accounts')->first();
         $pickup_wise_accounts = array();
         $shippers = array();
@@ -7513,6 +7560,7 @@ class AdminFinanceController extends Controller
 
 
     public function retail_make_payments_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),32);
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         $shippers = RetailShipperInfo::select('id', 'shipper_name')->get();
@@ -7523,6 +7571,11 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_make_payments_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),92);
+        }
+
         $pending_payments = RetailPendingPayment::join('retail_shipper_infos as rsi', 'retail_pending_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
             ->join('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
@@ -8226,7 +8279,7 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_done_payments_index() {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),33);
         $shippers = RetailShipperInfo::select('id', 'shipper_name as name')->get();
 
 
@@ -8240,6 +8293,10 @@ class AdminFinanceController extends Controller
     }
 
     public function retail_done_payments_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),93);
+        }
 
         $done_payments = RetailDonePayment::join('retail_shipper_infos as rsi', 'retail_done_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')

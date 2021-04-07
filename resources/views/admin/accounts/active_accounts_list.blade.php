@@ -402,6 +402,12 @@
                 if(params !== undefined){
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
+                }
+                else{
+                    params = {
+                        'excel':true,
+                    }
                 }
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.active.ajax') }}',

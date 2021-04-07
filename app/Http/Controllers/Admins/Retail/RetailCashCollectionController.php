@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Retail;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
@@ -21,11 +22,17 @@ class RetailCashCollectionController extends Controller
     }
 
     public function retail_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),22);
         return view('admin.retail.pending_cash_collection.index');
     }
 
     public function retail_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),82);
+        }
+
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
