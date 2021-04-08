@@ -137,6 +137,8 @@
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Statement Created At</th>
                         <th class="border-primary border-darken-1">Statement Created By</th>
+                        <th class="border-primary border-darken-1">Statement Checked At</th>
+                        <th class="border-primary border-darken-1">Statement Checked By</th>
                     </tr>
                     </thead>
                 </table>
@@ -429,7 +431,7 @@
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'checked_at', name: 'pcs.checked_at', class: 'align-middle checked_at'},
-                    {data: 'checked_by', name: 'pcs.checked_at', class: 'align-middle checked_by'}
+                    {data: 'checked_by', name: 'chb.name', class: 'align-middle checked_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
