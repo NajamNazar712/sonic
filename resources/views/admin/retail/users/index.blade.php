@@ -271,7 +271,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Users',
+                        title: 'Retail Users',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -286,7 +286,7 @@
                 ajax:{
                     url: '{{ route('admin.retail.users.list') }}',
                 },
-                order: [[7, 'desc']],
+                order: [[9, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
