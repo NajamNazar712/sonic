@@ -9,8 +9,10 @@ use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use DB;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class PettyCashExpenseSummaryReport extends Controller
 {
@@ -21,6 +23,7 @@ class PettyCashExpenseSummaryReport extends Controller
         $this->middleware('Permission');
     }
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),219);
         $petty_cash_account_title = PettyCashAccountTitle::select('id','name')->get();
         $petty_cash_account_head = PettyCashAccountHead::select('id','name')->get();
         return view('admin.petty_cash_expense.index')->with(['petty_cash_account_title' => $petty_cash_account_title,'petty_cash_account_head' => $petty_cash_account_head]);
@@ -28,6 +31,10 @@ class PettyCashExpenseSummaryReport extends Controller
 
     public function pettyCashSummaryReportProcess(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),220);
+        }
 //        $petty_cash_account_detail = [];
         if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'head'){
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_heads as pca')

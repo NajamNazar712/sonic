@@ -18,6 +18,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\File;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class AdminPettyCashController extends Controller
@@ -339,12 +341,14 @@ class AdminPettyCashController extends Controller
 
     public function petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),39);
         if (session('role_id') == 1) {
             $hubs = City::where('hub', 1)->get();
         } else {
             $hubs = City::where('hub', 1)->whereIn('id', session('hubs'))->get();
         }
-        return view('admin.petty_cash.statements')->with(['hubs' => $hubs]);
+        $zones = Zone::where('status', 1)->get();
+        return view('admin.petty_cash.statements')->with(['hubs' => $hubs,'zones'=>$zones]);
     }
 
     public function reference_document($reference_document)
@@ -368,6 +372,11 @@ class AdminPettyCashController extends Controller
 
     public function petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),99);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
@@ -443,6 +452,10 @@ class AdminPettyCashController extends Controller
             });
         if ($hub = $request->get('search_hub')) {
             $petty->where('h.id', '=', $hub);
+        }
+
+        if ($zone = $request->get('search_zone')) {
+            $petty->where('h.zone_id', '=', $zone);
         }
         if ($search_date = $request->get('search_creation_date')) {
             $petty->whereDate('petty_cash_statements.created_at', $search_date);
@@ -707,11 +720,17 @@ class AdminPettyCashController extends Controller
 
     public function approved_petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),40);
         return view('admin.petty_cash.approved');
     }
 
     public function approved_petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),100);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
@@ -894,11 +913,17 @@ class AdminPettyCashController extends Controller
 
     public function rejected_petty_cash_statements_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),41);
         return view('admin.petty_cash.rejected');
     }
 
     public function rejected_petty_cash_statements_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),101);
+        }
+
         $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')

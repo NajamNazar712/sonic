@@ -5,10 +5,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Admins\ActivityTrailController;
+
 class AdminInternationalShipmentsController extends Controller
 {
     public function __construct() {
@@ -18,9 +21,14 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function tracking_upload_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),53);
         return view('admin.international.tracking_upload');
     }
     public function tracking_upload_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),113);
+        }
         $shipments = InternationalShipment::join('shipments', 'shipments.id', '=', 'international_shipments.shipment_id')
             ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight');
 

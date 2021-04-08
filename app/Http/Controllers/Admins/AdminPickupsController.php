@@ -49,6 +49,7 @@ use App\Http\Models\PickupNoteStatus;
 use App\Http\Models\Zone;
 
 use Auth;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -2280,7 +2281,7 @@ class AdminPickupsController extends Controller
     }
 
     public function bookedvsreceived_index(){
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),121);
         if (session('role_id') == 1){
             $cities = City::select('id','name')->where('pickup',1)->get();
 
@@ -2293,7 +2294,10 @@ class AdminPickupsController extends Controller
     }
 
     public function bookedvsreceived_list(Request $request){
-        
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),122);
+        }
         $from = $request->search_from;
         $to = $request->search_to;
         $city = array();

@@ -806,20 +806,41 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
-                $margin = 0;
+                $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0);
+                
                 if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                         $international_user_rate = InternationalUserRate::where('user_id', $id);
                         if($international_user_rate->exists()){
                             $international_user_rate = $international_user_rate->first();
-                            $margin = $international_user_rate->margin;
+                            $margin['margin_1'] = $international_user_rate->margin_1;
+                            $margin['margin_2'] = $international_user_rate->margin_2;
+                            $margin['margin_3'] = $international_user_rate->margin_3;
+                            $margin['margin_4'] = $international_user_rate->margin_4;
+                            $margin['margin_5'] = $international_user_rate->margin_5;
+                            $margin['margin_6'] = $international_user_rate->margin_6;
+                            $margin['margin_7'] = $international_user_rate->margin_7;
+                            $margin['margin_8'] = $international_user_rate->margin_8;
+                            $margin['margin_9'] = $international_user_rate->margin_9;
+                            $margin['margin_10'] = $international_user_rate->margin_10;
+                            $margin['margin_11'] = $international_user_rate->margin_11;
                         }
                     }
                     else{
                         $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
                         if($international_user_rate->exists()){
                             $international_user_rate = $international_user_rate->first();
-                            $margin = $international_user_rate->margin;
+                            $margin['margin_1'] = $international_user_rate->margin_1;
+                            $margin['margin_2'] = $international_user_rate->margin_2;
+                            $margin['margin_3'] = $international_user_rate->margin_3;
+                            $margin['margin_4'] = $international_user_rate->margin_4;
+                            $margin['margin_5'] = $international_user_rate->margin_5;
+                            $margin['margin_6'] = $international_user_rate->margin_6;
+                            $margin['margin_7'] = $international_user_rate->margin_7;
+                            $margin['margin_8'] = $international_user_rate->margin_8;
+                            $margin['margin_9'] = $international_user_rate->margin_9;
+                            $margin['margin_10'] = $international_user_rate->margin_10;
+                            $margin['margin_11'] = $international_user_rate->margin_11;
                         }
                     }
                 }
@@ -834,7 +855,18 @@ class AdminInternationalRatesController extends Controller
 
     public function standard_rates_list(Request $request, $id){
 
-        $margin = 0;
+        $margin_1 = 0;
+        $margin_2 = 0;
+        $margin_3 = 0;
+        $margin_4 = 0;
+        $margin_5 = 0;
+        $margin_6 = 0;
+        $margin_7 = 0;
+        $margin_8 = 0;
+        $margin_9 = 0;
+        $margin_10 = 0;
+        $margin_11 = 0;
+
         $intl_user_information = InternationalUsersInformation::where('user_id', $id);
         if($intl_user_information->exists()){
             $user_information = $intl_user_information->first();
@@ -842,14 +874,34 @@ class AdminInternationalRatesController extends Controller
                 $international_user_rate = InternationalUserRate::where('user_id', $id);
                 if($international_user_rate->exists()){
                     $international_user_rate = $international_user_rate->first();
-                    $margin = $international_user_rate->margin;
+                    $margin_1 = $international_user_rate->margin_1;
+                    $margin_2 = $international_user_rate->margin_2;
+                    $margin_3 = $international_user_rate->margin_3;
+                    $margin_4 = $international_user_rate->margin_4;
+                    $margin_5 = $international_user_rate->margin_5;
+                    $margin_6 = $international_user_rate->margin_6;
+                    $margin_7 = $international_user_rate->margin_7;
+                    $margin_8 = $international_user_rate->margin_8;
+                    $margin_9 = $international_user_rate->margin_9;
+                    $margin_10 = $international_user_rate->margin_10;
+                    $margin_11 = $international_user_rate->margin_11;
                 }
             }
             else{
                 $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
                 if($international_user_rate->exists()){
                     $international_user_rate = $international_user_rate->first();
-                    $margin = $international_user_rate->margin;
+                    $margin_1 = $international_user_rate->margin_1;
+                    $margin_2 = $international_user_rate->margin_2;
+                    $margin_3 = $international_user_rate->margin_3;
+                    $margin_4 = $international_user_rate->margin_4;
+                    $margin_5 = $international_user_rate->margin_5;
+                    $margin_6 = $international_user_rate->margin_6;
+                    $margin_7 = $international_user_rate->margin_7;
+                    $margin_8 = $international_user_rate->margin_8;
+                    $margin_9 = $international_user_rate->margin_9;
+                    $margin_10 = $international_user_rate->margin_10;
+                    $margin_11 = $international_user_rate->margin_11;
                 }
             }
         }
@@ -857,89 +909,89 @@ class AdminInternationalRatesController extends Controller
         $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
 
         return Datatables::of($rates_list)
-            ->editColumn('zone_1', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_1, 2);
+            ->editColumn('zone_1', function ($rate) use ($margin_1){
+                if($margin_1 > 0){
+                    return round($zone = ((100 + $margin_1) / 100) * $rate->zone_1, 2);
                 }
                 else{
                     return $rate->zone_1;
                 }
             })
-            ->editColumn('zone_2', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_2, 2);
+            ->editColumn('zone_2', function ($rate) use ($margin_2){
+                if($margin_2 > 0){
+                    return round($zone = ((100 + $margin_2) / 100) * $rate->zone_2, 2);
                 }
                 else{
                     return $rate->zone_2;
                 }
             })
-            ->editColumn('zone_3', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_3, 2);
+            ->editColumn('zone_3', function ($rate) use ($margin_3){
+                if($margin_3 > 0){
+                    return round($zone = ((100 + $margin_3) / 100) * $rate->zone_3, 2);
                 }
                 else{
                     return $rate->zone_3;
                 }
             })
-            ->editColumn('zone_4', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_4, 2);
+            ->editColumn('zone_4', function ($rate) use ($margin_4){
+                if($margin_4 > 0){
+                    return round($zone = ((100 + $margin_4) / 100) * $rate->zone_4, 2);
                 }
                 else{
                     return $rate->zone_4;
                 }
             })
-            ->editColumn('zone_5', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_5, 2);
+            ->editColumn('zone_5', function ($rate) use ($margin_5){
+                if($margin_5 > 0){
+                    return round($zone = ((100 + $margin_5 ) / 100) * $rate->zone_5, 2);
                 }
                 else{
                     return $rate->zone_5;
                 }
             })
-            ->editColumn('zone_6', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_6, 2);
+            ->editColumn('zone_6', function ($rate) use ($margin_6){
+                if($margin_6 > 0){
+                    return round($zone = ((100 + $margin_6) / 100) * $rate->zone_6, 2);
                 }
                 else{
                     return $rate->zone_6;
                 }
             })
-            ->editColumn('zone_7', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_7, 2);
+            ->editColumn('zone_7', function ($rate) use ($margin_7){
+                if($margin_7 > 0){
+                    return round($zone = ((100 + $margin_7) / 100) * $rate->zone_7, 2);
                 }
                 else{
                     return $rate->zone_7;
                 }
             })
-            ->editColumn('zone_8', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_8, 2);
+            ->editColumn('zone_8', function ($rate) use ($margin_8){
+                if($margin_8 > 0){
+                    return round($zone = ((100 + $margin_8) / 100) * $rate->zone_8, 2);
                 }
                 else{
                     return $rate->zone_8;
                 }
             })
-            ->editColumn('zone_9', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_9, 2);
+            ->editColumn('zone_9', function ($rate) use ($margin_9){
+                if($margin_9 > 0){
+                    return round($zone = ((100 + $margin_9) / 100) * $rate->zone_9, 2);
                 }
                 else{
                     return $rate->zone_9;
                 }
             })
-            ->editColumn('zone_10', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_10, 2);
+            ->editColumn('zone_10', function ($rate) use ($margin_10){
+                if($margin_10 > 0){
+                    return round($zone = ((100 + $margin_10) / 100) * $rate->zone_10, 2);
                 }
                 else{
                     return $rate->zone_10;
                 }
             })
-            ->editColumn('zone_11', function ($rate) use ($margin){
-                if($margin > 0){
-                    return round($zone = ((100 + $margin) / 100) * $rate->zone_11, 2);
+            ->editColumn('zone_11', function ($rate) use ($margin_11){
+                if($margin_11 > 0){
+                    return round($zone = ((100 + $margin_11) / 100) * $rate->zone_11, 2);
                 }
                 else{
                     return $rate->zone_11;
@@ -982,7 +1034,18 @@ class AdminInternationalRatesController extends Controller
             if($previous_rate_status = InternationalUserRate::where('user_id', $shipper_id)->first()){
                 $history_international_user_rate = new HistoryInternationalUserRate();
                 $history_international_user_rate->user_id = $previous_rate_status->user_id;
-                $history_international_user_rate->margin = $previous_rate_status->margin;
+                $history_international_user_rate->margin_1 = $previous_rate_status->margin_1;
+                $history_international_user_rate->margin_2 = $previous_rate_status->margin_2;
+                $history_international_user_rate->margin_3 = $previous_rate_status->margin_3;
+                $history_international_user_rate->margin_4 = $previous_rate_status->margin_4;
+                $history_international_user_rate->margin_5 = $previous_rate_status->margin_5;
+                $history_international_user_rate->margin_6 = $previous_rate_status->margin_6;
+                $history_international_user_rate->margin_7 = $previous_rate_status->margin_7;
+                $history_international_user_rate->margin_8 = $previous_rate_status->margin_8;
+                $history_international_user_rate->margin_9 = $previous_rate_status->margin_9;
+                $history_international_user_rate->margin_10 = $previous_rate_status->margin_10;
+                $history_international_user_rate->margin_11 = $previous_rate_status->margin_11;
+
                 $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
                 $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
                 $history_international_user_rate->save();
@@ -995,7 +1058,17 @@ class AdminInternationalRatesController extends Controller
             if($pending_rate_statuses = PendingInternationalUserRate::where('user_id', $shipper_id)->first()){
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $pending_rate_statuses->user_id;
-                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->margin_1 = $request->margin_1;
+                    $international_user_rates->margin_2 = $request->margin_2;
+                    $international_user_rates->margin_3 = $request->margin_3;
+                    $international_user_rates->margin_4 = $request->margin_4;
+                    $international_user_rates->margin_5 = $request->margin_5;
+                    $international_user_rates->margin_6 = $request->margin_6;
+                    $international_user_rates->margin_7 = $request->margin_7;
+                    $international_user_rates->margin_8 = $request->margin_8;
+                    $international_user_rates->margin_9 = $request->margin_9;
+                    $international_user_rates->margin_10 = $request->margin_10;
+                    $international_user_rates->margin_11 = $request->margin_11;
                     $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
                     $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
                     $international_user_rates->save();
@@ -1034,7 +1107,17 @@ class AdminInternationalRatesController extends Controller
 
                 $international_user_rates = new PendingInternationalUserRate();
                 $international_user_rates->user_id = $shipper_id;
-                $international_user_rates->margin = $request->margin;
+                $international_user_rates->margin_1 = $request->margin_1;
+                $international_user_rates->margin_2 = $request->margin_2;
+                $international_user_rates->margin_3 = $request->margin_3;
+                $international_user_rates->margin_4 = $request->margin_4;
+                $international_user_rates->margin_5 = $request->margin_5;
+                $international_user_rates->margin_6 = $request->margin_6;
+                $international_user_rates->margin_7 = $request->margin_7;
+                $international_user_rates->margin_8 = $request->margin_8;
+                $international_user_rates->margin_9 = $request->margin_9;
+                $international_user_rates->margin_10 = $request->margin_10;
+                $international_user_rates->margin_11 = $request->margin_11;
                 $international_user_rates->updated_by = Auth::id();
                 $international_user_rates->rates_updated_at = Carbon::now();
                 $international_user_rates->save();
@@ -1043,7 +1126,17 @@ class AdminInternationalRatesController extends Controller
                 $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
                 if($international_user_rates->exists()){
                     $international_user_rates = $international_user_rates->first();
-                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->margin_1 = $request->margin_1;
+                    $international_user_rates->margin_2 = $request->margin_2;
+                    $international_user_rates->margin_3 = $request->margin_3;
+                    $international_user_rates->margin_4 = $request->margin_4;
+                    $international_user_rates->margin_5 = $request->margin_5;
+                    $international_user_rates->margin_6 = $request->margin_6;
+                    $international_user_rates->margin_7 = $request->margin_7;
+                    $international_user_rates->margin_8 = $request->margin_8;
+                    $international_user_rates->margin_9 = $request->margin_9;
+                    $international_user_rates->margin_10 = $request->margin_10;
+                    $international_user_rates->margin_11 = $request->margin_11;
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
 
@@ -1051,7 +1144,17 @@ class AdminInternationalRatesController extends Controller
                 else{
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $shipper_id;
-                    $international_user_rates->margin = $request->margin;
+                    $international_user_rates->margin_1 = $request->margin_1;
+                    $international_user_rates->margin_2 = $request->margin_2;
+                    $international_user_rates->margin_3 = $request->margin_3;
+                    $international_user_rates->margin_4 = $request->margin_4;
+                    $international_user_rates->margin_5 = $request->margin_5;
+                    $international_user_rates->margin_6 = $request->margin_6;
+                    $international_user_rates->margin_7 = $request->margin_7;
+                    $international_user_rates->margin_8 = $request->margin_8;
+                    $international_user_rates->margin_9 = $request->margin_9;
+                    $international_user_rates->margin_10 = $request->margin_10;
+                    $international_user_rates->margin_11 = $request->margin_11;
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
                 }

@@ -600,6 +600,7 @@ class AdminCommissionController extends Controller
             $stats['commission'] = number_format($total_commission,2,'.','');
 
             $sales_tier = SalesTier::get();
+            ActivityTrailController::createActivityTrailLog(Auth::id(),55);
             return view('admin.commission.overall_commission_dashboard')->with(['stats' => $stats, 'sales_tier' => $sales_tier, 'shippers' => $shippers, 'first_day' => $first_day, 'last_day' => $last_day, 'admins' => $admins]);
         }else{
             return redirect(route('admin.dashboard.index'))->with('error', 'No data found!');
@@ -607,6 +608,10 @@ class AdminCommissionController extends Controller
     }
 
     public function overall_commission_dashboard_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),115);
+        }
         $date = Carbon::now();
         $sales_tier = $request->sales_tier;
 

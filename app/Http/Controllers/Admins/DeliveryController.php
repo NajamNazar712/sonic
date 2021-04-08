@@ -79,6 +79,7 @@ use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class DeliveryController extends Controller
@@ -93,6 +94,7 @@ class DeliveryController extends Controller
 
     public function pending_delivery_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -101,6 +103,10 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),79);
+        }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -115,6 +121,11 @@ class DeliveryController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
@@ -132,7 +143,7 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
+            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
                 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
@@ -765,12 +776,18 @@ class DeliveryController extends Controller
 
     public function delivery_note_receive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),20);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         return view('admin.delivery.receive.index')->with(['riders' => $riders]);
     }
 
     public function receive_deliveries_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),80);
+        }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
@@ -1687,6 +1704,7 @@ class DeliveryController extends Controller
         }
 
     }
+    //check
     public function receive_delivery_status_submit_all(Request $request){
         $open_box_ids = array();
         $delivery_note_id = $request->delivery_note_id;
@@ -1810,6 +1828,13 @@ class DeliveryController extends Controller
                         }
                     }
                     else{
+                        if($selected_status == 12) {
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
+                            }
+                        }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if($shipment_details->packaging_material_request == 0){
                                 ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -1887,7 +1912,7 @@ class DeliveryController extends Controller
             return response()->json(['status'=>0, 'error' => 'Delivery note not found!']);
         }
     }
-
+    //check
     public function receive_delivery_status_submit(Request $request)
     {
         $open_box_ids = array();
@@ -1961,7 +1986,13 @@ class DeliveryController extends Controller
                         }
 
                     } else {
-
+                        if($request->status_drop[$shipment] == 12) {
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
+                            }
+                        }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if($shipment_status->packaging_material_request == 0){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2504,6 +2535,7 @@ class DeliveryController extends Controller
     }
 
 
+    // Check
     public function receive_delivery_verify_status_submit(Request $request)
     {
         $delivery_note_id = $request->delivery_note_id;
@@ -3647,11 +3679,17 @@ class DeliveryController extends Controller
     //completed deliveries
     public function pending_cash_collection_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),21);
         return view('admin.delivery.complete.pending_cash_collection');
     }
 
     public function pending_cash_collection_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),81);
+        }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
@@ -3791,11 +3829,17 @@ class DeliveryController extends Controller
 
     public function completed_deliveries_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),23);
         return view('admin.delivery.complete.index');
     }
 
     public function completed_receive_deliveries_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),83);
+        }
+
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -4002,6 +4046,7 @@ class DeliveryController extends Controller
     }
     public function sdn_view(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),25);
         $petty_cash_ids = array();
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id','!=',null)->pluck('petty_cash_statement_id')->toArray();
         $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->whereNotIn('id',$petty_cash_ids)->select('id')->get();
@@ -4011,6 +4056,11 @@ class DeliveryController extends Controller
 
     public function sdn_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),85);
+        }
+
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
@@ -5386,6 +5436,11 @@ class DeliveryController extends Controller
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
 //            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -5397,7 +5452,7 @@ class DeliveryController extends Controller
                     ->where('sj.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
             ->where('shipments.shipper_status_id', 54)
         ->groupBy('shipments.id');
 

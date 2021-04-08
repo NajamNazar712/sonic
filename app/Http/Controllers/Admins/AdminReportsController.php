@@ -5,6 +5,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagStatus;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
@@ -43,6 +45,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminReportsController extends Controller
 {
@@ -52,6 +55,7 @@ class AdminReportsController extends Controller
         $this->middleware('Permission');
     }
     public function qsr_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),137);
         if (session('department_id') == 7 && session('role_id') != 4) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
@@ -66,6 +70,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.qsr_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'shippimg_modes'=>$shippimg_modes, 'types' => $types]);
     }
     public function qsr_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),138);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -199,6 +207,7 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
     public function return_note_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),131);
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -206,6 +215,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
     }
     public function return_note_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),132);
+        }
         $return_note = DB::connection('reports')->table('return_notes')
             ->join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders','riders.id','=','return_notes.rider_id')
@@ -293,6 +306,7 @@ class AdminReportsController extends Controller
         }
     }
     public function pickup_note_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),123);
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
@@ -300,6 +314,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.pickup_notes_report')->with(['riders'=>$riders,'admins'=>$admins,'cities'=>$cities,'shipping_modes'=>$shipping_modes]);
     }
     public function pickup_note_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),124);
+        }
         $pickup_note = DB::connection('reports')->table('pickup_notes')->join('cities','cities.id','=','pickup_notes.city_id')
             ->leftjoin('riders','riders.id','=','pickup_notes.rider_id')
             ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
@@ -403,11 +421,16 @@ class AdminReportsController extends Controller
     }
 
     public function cargo_received_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),127);
         $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
         return view('admin.reports.cargo_received_report')->with(['cities'=>$cities,'shippimg_modes'=>$shippimg_modes]);
     }
     public function cargo_received_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),128);
+        }
         $cargo_received = DB::connection('reports')->table('cargo_consignments')->join('cities as oc','oc.id','=','cargo_consignments.origin_hub_id')
             ->join('cities as h','h.id','=','cargo_consignments.destination_hub_id')
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
@@ -497,12 +520,17 @@ class AdminReportsController extends Controller
 
 
     public function multiple_iban_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),125);
         $iban_no = DB::connection('reports')->table('user_bank_infos')->get();
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
         return view('admin.reports.multiple_IBAN_no_change')->with(['iban'=>$iban_no,'shippers'=>$shippers]);
     }
 
     public function multiple_iban_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),126);
+        }
         $iban_received = DB::connection('reports')->table('user_bank_infos')->join('users as u','u.id','=','user_bank_infos.user_id')
             ->join('cities AS oc', 'user_bank_infos.city_id', '=', 'oc.id')
             ->join('banks_lists AS bl', 'bl.id', '=', 'user_bank_infos.bank_name')
@@ -539,6 +567,7 @@ class AdminReportsController extends Controller
 
 
     public function lead_time_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),135);
 //        $shippers = User$generator::all(['id','name']);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
         $shipper = DB::connection('reports')->table('users')->get(['id','name']);
@@ -548,6 +577,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper, 'shipping_modes' => $shipping_modes]);
     }
     public function lead_time_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),136);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
 //            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -830,10 +863,15 @@ class AdminReportsController extends Controller
     }
 
     public function qa_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),139);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         return view('admin.reports.qa_report')->with('shipping_modes', $shipping_modes);
     }
     public function qa_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),140);
+        }
         $from = $request->search_date_from;
         $to = $request->search_date_to;
         $mode = $request->search_shipping_mode;
@@ -1026,11 +1064,16 @@ class AdminReportsController extends Controller
         return $qa_data;
     }
     public function outstanding_shipments_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),133);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.outstanding_shipments_report')->with(['hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
     }
     public function outstanding_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),134);
+        }
         if (Auth::id() == 3) {
             $connection = 'mysql';
         }
@@ -1245,6 +1288,7 @@ class AdminReportsController extends Controller
 
     public function daily_pickup_sales_index(Request $request){
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(),145);
         if (session('role_id') == 1){
             $cities = DB::connection('reports')->table('cities')->select('id','name')->where('pickup',1)->get();
         }else{
@@ -1264,6 +1308,7 @@ class AdminReportsController extends Controller
 
     public function daily_pickup_sales_export_to_excel(Request $request){
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(),146);
         $response = self::daily_pickup_sales_report_create($request->city,$request->date,$request->sales_person,$request->sales_tagging);
 
 //         if($response['status']){
@@ -2560,6 +2605,7 @@ class AdminReportsController extends Controller
 //    }
 
     public function customer_sales_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),147);
         if (session('role_id') == 1){
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
@@ -2807,6 +2853,7 @@ class AdminReportsController extends Controller
         return response()->json(['success'=>1,'file'=>'customer_sales_report.xlsx']);
     }
     public function customer_sales_download(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),148);
         $file_name = "/reports/customer_sales_report".Auth::id().".xlsx";
 
         $file = public_path().$file_name;
@@ -2814,6 +2861,7 @@ class AdminReportsController extends Controller
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
     }
     public function completed_delivery_notes_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),129);
         $riders = DB::connection('reports')->table('riders')->get(['id','name','cnic']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -2822,7 +2870,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs,'shipping_modes'=>$shipping_modes,'couriers' => $couriers]);
     }
     public function completed_delivery_notes_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),130);
+        }
         $deliveries = DB::connection('reports')->table('delivery_notes')->
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->leftjoin('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
@@ -2975,6 +3026,7 @@ class AdminReportsController extends Controller
     }
 
     public function customer_retention_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),143);
         if (session('role_id') == 1) {
             $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
@@ -3222,12 +3274,14 @@ class AdminReportsController extends Controller
 
     }
     public function customer_retention_download(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),144);
         $file_name = "/reports/customer_retention_report".Auth::id().".xlsx";
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
     public function overall_sales_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),149);
         if (session('department_id') == 7 && session('role_id') != 4) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
@@ -3244,6 +3298,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories]);
     }
     public function overall_sales_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),150);
+        }
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->setTimeFromTimeString('05:59:59');
         $to = $request->get('search_date_to');
@@ -3531,6 +3589,8 @@ class AdminReportsController extends Controller
     }
 
     public function sales_person_performance_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),151);
         if (session('role_id') == 1) {
             $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
@@ -3774,6 +3834,7 @@ class AdminReportsController extends Controller
 
     }
     public function sales_person_performance_download(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),152);
         $file_name = "/reports/sales_person_performance".Auth::id().".xlsx";
 
         $file = public_path().$file_name;
@@ -3783,6 +3844,7 @@ class AdminReportsController extends Controller
 
     public function negative_balance_customers_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),153);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes'=>$shipping_modes,'salesperson' => $salesperson]);
@@ -3790,6 +3852,10 @@ class AdminReportsController extends Controller
     }
     public function negative_balance_customers_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),154);
+        }
         $date = Carbon::now();
         $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
 
@@ -3851,12 +3917,17 @@ class AdminReportsController extends Controller
     }
     public function call_verification_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),157);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.call_verification_report')->with(['shipping_modes'=>$shipping_modes]);
 
     }
     public function call_verification_list(request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),158);
+        }
         $call_verification_report = DB::connection('reports')->table('delivery_notes')->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('admins as ad','ad.id','=','delivery_notes.verified_by')
@@ -3896,6 +3967,7 @@ class AdminReportsController extends Controller
     }
 
     public function petty_cash_statements_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),155);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $heads = DB::connection('reports')->table('petty_cash_account_heads')->select('id', 'name')->get();
         $titles = DB::connection('reports')->table('petty_cash_account_titles')->select('id', 'name')->get();
@@ -3903,6 +3975,10 @@ class AdminReportsController extends Controller
     }
 
     public function petty_cash_statements_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),156);
+        }
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs','pcs.id','=','petty_cash_statement_details.petty_cash_statement_id')
             ->join('cities as dc','dc.id','=', 'petty_cash_statement_details.hub_id')
             ->join('cities as h','h.id','=', 'pcs.hub_id')
@@ -3979,6 +4055,7 @@ class AdminReportsController extends Controller
     }
 
     public function fake_status_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),159);
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
@@ -3986,6 +4063,10 @@ class AdminReportsController extends Controller
     }
 
     public function fake_status_list(request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),160);
+        }
         $delivery_note = DB::connection('reports')->table('delivery_notes')->join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
@@ -4099,6 +4180,8 @@ class AdminReportsController extends Controller
     }
 
     public function debriefing_index() {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),161);
         $hubs = DB::table('cities')->where('hub', 1)->select('id','name')->get();
         $zones = DB::table('zones')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
@@ -4495,6 +4578,7 @@ class AdminReportsController extends Controller
     }
 
     static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type) {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),162);
         $file_name = 'debriefing_report_';
 
         $file_name .= $date;
@@ -4769,11 +4853,16 @@ class AdminReportsController extends Controller
     }
 
     public function cargo_returns_shipment_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),163);
         $cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.cargo_returns_shipment_report')->with(['cities' => $cities, 'shipping_modes' => $shipping_modes]);
     }
     public function cargo_returns_shipment_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),164);
+        }
         $cargo_returns_Shipment = DB::connection('reports')->table('shipments')->join('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id' , '=', 'shipments.id')
                 ->where('sj.id' , '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipment_id = shipments.id and shipments_journey.shipper_status_id in (20, 30, 37))'));
@@ -4858,12 +4947,17 @@ class AdminReportsController extends Controller
 
 
     public function return_reattempt_ratio_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),165);
         $cities = DB::connection('reports')->table('cities')->where('status', 1)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities, 'shipping_modes' => $shipping_modes]);
     }
 
     public function return_reattempt_ratio_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),166);
+        }
         $shipments = DB::connection('reports')->table('return_reattempt_ratios')->join('shipments','shipments.id','=','return_reattempt_ratios.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -4942,9 +5036,14 @@ class AdminReportsController extends Controller
     }
 
     public function multiple_payment_report_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),167);
         return view('admin.reports.multiple_payment_report');
     }
     public function multiple_payment_report_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),168);
+        }
         $payments = DB::connection('reports')->table('done_payment_shipments')->join('shipments as s','s.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges','s.insurance_charges as insurance_charges','s.return_charges as return_charges','s.fuel_surcharge as fuel_surcharge','s.replacement_charges as replacement_charges','s.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status', 's.nsa_osa_charges as nsa_osa_charges']);
         $datatable = Datatables::of($payments)
             ->addColumn('id_padded', function ($shipments) {
@@ -5005,6 +5104,7 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
     public function revenue_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),169);
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -5013,7 +5113,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses,'shipping_modes'=>$shipping_modes]);
     }
     public function revenue_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),170);
+        }
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -5306,10 +5409,15 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
     public function gst_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),171);
         return view('admin.reports.gst_report');
     }
 
     public function gst_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),172);
+        }
         $gst = DB::connection('reports')->table('done_payments')->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
             ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
             ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'))
@@ -5356,7 +5464,7 @@ class AdminReportsController extends Controller
     }
 
     public function crm_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),173);
         $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id','name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -5364,12 +5472,17 @@ class AdminReportsController extends Controller
         $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
+        $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
+        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'case_nature_types'=>$case_nature_types,'statuses'=>$statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
 
     public function crm_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),174);
+        }
         $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s','s.id','=','crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id' , '=', 's.shipper_status_id')
             ->leftjoin('crm_request_statuses as crs', 'crs.id' , '=', 'crm_requests.status_id')
@@ -5614,7 +5727,8 @@ class AdminReportsController extends Controller
             $datatable->where('s.tracking_number', '=', $tracking);
         }
         if($rnumber = $request->get('search_request_number')){
-            $datatable->where('crm_requests.id', '=', $rnumber);
+            $rnumber = explode(',',$rnumber);
+            $datatable->whereIn('crm_requests.id', $rnumber);
         }
         if($shipper = $request->get('search_shipper')){
             $datatable->where('u.id', '=', $shipper);
@@ -5634,6 +5748,10 @@ class AdminReportsController extends Controller
         if($case_nature = $request->get('search_case_nature')){
             $datatable->where('crcn.id', '=', $case_nature);
         }
+        if($case_nature_type = $request->get('search_case_nature_type')){
+            $datatable->where('crcnt.id', '=', $case_nature_type);
+        }
+        
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
         }
@@ -5653,6 +5771,7 @@ class AdminReportsController extends Controller
     }
 
     public function summary_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),175);
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
         $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
@@ -5787,6 +5906,10 @@ class AdminReportsController extends Controller
 
     }
     public function summary_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),176);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -5898,10 +6021,15 @@ class AdminReportsController extends Controller
     }
 
     public function account_activation_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),177);
         return view('admin.reports.account_activation');
     }
 
     public function account_activation_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),178);
+        }
         $users = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
             ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
             ->select(['users.id','users.name as shipper','sp.name as sale_person','users.activated_at'])
@@ -5917,12 +6045,17 @@ class AdminReportsController extends Controller
     }
 
     public function adjustments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),179);
         $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.adjustments')->with(['shippers' => $shippers, 'shipping_modes' => $shipping_modes]);
     }
 
     public function adjustments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),180);
+        }
         $adjustments = DB::connection('reports')->table('adjustment_logs')
             ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
@@ -5973,12 +6106,17 @@ class AdminReportsController extends Controller
 
     public function sdn_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),181);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         return view('admin.reports.station_deposit_notes')->with(['hubs' => $hubs]);
     }
 
     public function sdn_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),182);
+        }
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
@@ -6086,10 +6224,15 @@ class AdminReportsController extends Controller
     }
 
     public function account_edit_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),183);
         return view('admin.reports.account_edit');
     }
 
     public function account_edit_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),184);
+        }
         $users = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
             ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
             ->where('spt.status', '=', 0);
@@ -6117,11 +6260,16 @@ class AdminReportsController extends Controller
     }
 
     public function bank_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),185);
         $shippers = User::where('status', 3)->select('id', 'name')->get();
         return view('admin.reports.shipper_bank_history')->with(['shippers' => $shippers]);
     }
 
     public function bank_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),186);
+        }
         $users = DB::connection('reports')->table('history_shipper_bank_accounts')
             ->join('users', 'users.id', '=', 'history_shipper_bank_accounts.user_id')
             ->join('banks_lists', 'history_shipper_bank_accounts.bank_id', '=', 'banks_lists.id')
@@ -6141,10 +6289,15 @@ class AdminReportsController extends Controller
     }
 
     public function consignee_details_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),187);
         return view('admin.reports.consignee_details_history');
     }
 
     public function consignee_details_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),188);
+        }
         $shipments = DB::connection('reports')->table('shipment_information_logs')
             ->leftJoin('shipments as s','s.id','=','shipment_information_logs.shipment_id')
             ->leftJoin('users as u','u.id','=','s.user_id')
@@ -6168,6 +6321,7 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
     public function booked_and_cancelled_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),189);
         $shippers = DB::connection('reports')->table('users')->get(['id','name']);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $service_types = DB::connection('reports')->table('booking_types')->get();
@@ -6177,6 +6331,10 @@ class AdminReportsController extends Controller
 
     public function booked_and_cancelled_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),190);
+        }
         $shipments = DB::connection('reports')->table('shipments')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
@@ -6232,6 +6390,7 @@ class AdminReportsController extends Controller
     }
 
     public function fake_status_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),191);
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
@@ -6240,6 +6399,10 @@ class AdminReportsController extends Controller
     }
 
     public function fake_status_shipments_list(request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),192);
+        }
         $delivery_note = DB::connection('reports')->table('delivery_note_shipments')->join('delivery_notes as dn','dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
@@ -6279,9 +6442,14 @@ class AdminReportsController extends Controller
     }
 
     public function daily_visit_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),193);
         return view('admin.reports.daily_visit_report');
     }
     public function daily_visit_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),194);
+        }
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
@@ -6322,6 +6490,7 @@ class AdminReportsController extends Controller
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),195);
         $toDays = Carbon::now();
         $fromDays = Carbon::now()->subDays(29);
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
@@ -6330,6 +6499,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.delivered_shipment_report')->with(['cities' => $cities, 'riders' => $riders, 'fromDays' => $fromDays, 'toDays' => $toDays, 'shipping_modes' => $shipping_modes]);
     }
     public function delivered_shipment_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),196);
+        }
         $from = $request->search_date_from;
         $to = $request->search_date_to;
         if($from == null || $to == null){
@@ -6374,6 +6547,7 @@ class AdminReportsController extends Controller
     }
 
     public function route_distribution_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),197);
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->where('status', 1)->get();
         $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
         $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
@@ -6381,6 +6555,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
     }
     public function route_distribution_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+        }
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
@@ -6396,7 +6574,7 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'))
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
 
@@ -6435,12 +6613,17 @@ class AdminReportsController extends Controller
         return $datatables->make(true);
     }
     public function destination_delivery_received_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),199);
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->get();
         $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
         $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
         return view('admin.reports.arrived_at_destination_out_for_delivery_and_received_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones]);
     }
     public function destination_delivery_received_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),200);
+        }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
@@ -6599,9 +6782,14 @@ class AdminReportsController extends Controller
     }
 
     public function cargo_short_received_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),203);
         return view('admin.reports.cargo_short_received_shipments');
     }
     public function cargo_short_received_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),204);
+        }
         $cargo_consignments_short_received_shipments = DB::connection('reports')->table('cargo_consignments')->leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'cargo_consignments.origin_hub_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 'cargo_consignments.destination_hub_id')
@@ -6629,7 +6817,7 @@ class AdminReportsController extends Controller
     }
 
     public function last_mile_status_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),205);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
         $zones = DB::connection('reports')->table('zones')->get();
@@ -6637,7 +6825,10 @@ class AdminReportsController extends Controller
         return view('admin.reports.last_mile_status')->with(['destinations' => $cities, 'hubs' => $hubs, 'zones' => $zones, 'riders' => $riders]);
     }
     public function last_mile_status_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),206);
+        }
         $date_from = $request->get('search_date_from');
         $date_to = $request->get('search_date_to');
         $search_destination = $request->get('search_destination');
@@ -6784,10 +6975,15 @@ class AdminReportsController extends Controller
     }
 
     public function completed_aging_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),209);
         return view('admin.reports.completed_aging_report');
     }
 
     public function completed_aging_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),210);
+        }
         $today = Carbon::now()->startOfDay();
         $aging_report = DB::connection('reports')->table('completed_aging_reports')
             ->join('cities AS c', 'completed_aging_reports.hub_id', '=', 'c.id')
@@ -6807,10 +7003,15 @@ class AdminReportsController extends Controller
 
     }
     public function pending_cash_collection_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),211);
         return view('admin.reports.pending_cash_collection_report');
     }
 
     public function pending_cash_collection_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),212);
+        }
         $today = Carbon::now()->startOfDay();
         $aging_report = DB::connection('reports')->table('pending_cash_collection_aging_reports')
             ->join('cities AS c', 'pending_cash_collection_aging_reports.hub_id', '=', 'c.id')
@@ -6829,10 +7030,15 @@ class AdminReportsController extends Controller
         return $report->make(true);
     }
     public function not_attempted_aging_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),215);
         return view('admin.reports.not_attempted_aging_report');
     }
 
     public function not_attempted_aging_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),216);
+        }
         if ($request->has('date')) {
             $date = $request->get('date');
             $date_from = Carbon::parse($date)->startOfDay()->toDateTimeString();
@@ -6848,11 +7054,16 @@ class AdminReportsController extends Controller
     }
 
     public function station_recovery_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),213);
         $banks_list = BanksList::where('status', 1)->select('id', 'name')->get();
         return view('admin.reports.station_recovery')->with('banks_lists', $banks_list);
     }
 
     public function station_recovery_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),214);
+        }
         $station_recovery = DB::connection('reports')->table('station_recovery_reports')->join('cities as h', 'h.id', '=', 'station_recovery_reports.city_id')
             ->join('zones', 'zones.id', '=', 'station_recovery_reports.zone_id')
 
@@ -6960,10 +7171,15 @@ class AdminReportsController extends Controller
     }
 
     public function daily_monthly_adjustment_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),217);
         return view('admin.reports.daily_monthly_adjustment');
     }
 
     public function daily_monthly_adjustment_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),218);
+        }
         $adjustments = DB::connection('reports')->table('adjustment_logs')
             ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
@@ -7015,11 +7231,16 @@ class AdminReportsController extends Controller
     }
 
     public function app_efficiency_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),221);
         $riders = Rider::select('id','name')->get();
         return view('admin.reports.app_efficiency')->with(['riders' => $riders]);
     }
     public function app_efficiency_list(Request $request){
 
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),222);
+        }
         $v2_rider_pickups = V2RiderPickup::join('v2_pickup_requests as vpr','vpr.id', '=' ,'v2_rider_pickups.pickup_request_id')
             ->join('v2_pickup_notes as vpn','vpn.id','=','v2_rider_pickups.pickup_note_id')
             ->join('riders as r','r.id','=','vpn.rider_id')
@@ -7581,17 +7802,23 @@ class AdminReportsController extends Controller
     }
 
     public function last_mile_app_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),227);
         $riders = Rider::where('status', 1)->get();
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $hubs = City::where('status', 1)->where('hub', 1)->where('business_category_id', 1)->get();
         return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
     }
     public function last_mile_app_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),228);
+        }
         $date = Carbon::createFromDate('2021','02','19')->toDateString();
         $deliveries = DB::connection('reports')->table('delivery_notes')
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
+            ->join('zones as z','z.id','=','c.zone_id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
+            ->select('delivery_notes.id as delivery_note_id','z.name as zone', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
             ->whereDate('delivery_notes.created_at', '>', $date);
 
 
@@ -7761,11 +7988,19 @@ class AdminReportsController extends Controller
     }
 
     public function weight_qc_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),141);
         $shipping_modes = ShippingMode::all();
-        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes]);
+        $users = User::where('status', 3)->get(['id', 'name']);
+        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        $zones = Zone::where('status', 1)->get(['id', 'name']);
+        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes, 'users' => $users, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
     public function weight_qc_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),142);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -7792,7 +8027,7 @@ class AdminReportsController extends Controller
                     return 'Volumetric';
                 }
                 else{
-                    return 'Dense';
+                    return 'Dimensional';
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
@@ -7801,12 +8036,173 @@ class AdminReportsController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
+        if ($user = $request->get('search_user')) {
+            $datatable->where('u.id', $user);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('dc.hub_id', $hub);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $datatable->where('dc.zone_id', $zone);
+        }
+        if ($weighted_as = $request->get('weighted_as')) {
+            if($weighted_as == 1){
+                $datatable->whereNull('shipments.length')->whereNull('shipments.breadth')->whereNull('shipments.height');
+            }
+            else{
+                $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
+            }
+        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('shipments.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function in_transit_index(){
+        $bag_statuses = BagStatus::select('id','name')->whereNotIn('id',[1,4,9])->get();
+        $modes = ShippingMode::select('id','mode')->get();
+        return view('admin.reports.in_transit_report_bag_wise')->with(['bag_statuses' => $bag_statuses,'modes' => $modes]);
+    }
+    public function  in_transit_list(Request $request){
+        $bags = DB::connection('reports')->table('bags')
+          ->join('master_cargo_bags as mcb',function($join){
+              $join->on('mcb.bag_id','=','bags.id')
+                  ->where('mcb.created_at','=',DB::raw('(select max(created_at) from master_cargo_bags where master_cargo_bags.bag_id= bags.id)'));
+          })
+            ->join('master_cargoes as mc', 'mc.id', '=', 'mcb.master_cargo_id')
+            ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
+            ->leftjoin('admins as a', 'a.id', '=', 'mc.received_by')
+            ->join('admins as ad', 'ad.id', '=', 'mc.created_by')
+            ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
+            ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
+            ->join('bag_statuses as bs','bs.id','=','bags.status_id')
+            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','mc.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments','bags.short_received as short_received_shipments'])->whereNotIn('bags.status_id',[1,4,9]);
+
+       $datatable = Datatables::of($bags)
+           ->editColumn('type', function($bags){
+               if($bags->type == 1){
+                   return 'Normal';
+               }
+               else{
+                   return 'Return';
+               }
+           })
+           ->addColumn('aging', function($bags){
+               if($bags->received_at != null){
+                   Carbon::setWeekendDays([
+                       Carbon::SUNDAY,
+                   ]);
+                   $received_date = Carbon::parse($bags->received_at);
+                   $transitted_date = Carbon::parse($bags->transitted_date);
+                   $days = $transitted_date->diffInDays($received_date);
+                   return $days . ' days';
+               }
+               else{
+                   return '-';
+               }
+           })
+           ->editColumn('shipments', function($bags) {
+               if ($bags->shipments!= 0) {
+                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $bags->shipments . '</button>';
+               }
+               else {
+                   return 0;
+               }
+           })
+           ->editColumn('short_received', function($bags) {
+               if ($bags->short_received!= 0) {
+                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $bags->short_received . '</button>';
+               }
+               else {
+                   return 0;
+               }
+           })
+           ->editColumn('status_id', function($bags){
+                   return $bags->status;
+           })
+           ->filterColumn('status_id',function ($query,$keyword){
+               if ($keyword != '') {
+                   $query->where('bags.status_id',$keyword);
+               }
+               else {
+                   $query->whereRaw('false');
+               }
+           });
+        return $datatable->make(true);
+    }
+
+    public function in_transit_shipments(Request $request){
+        $seal_number = $request->input('bag_id');
+        $bag = Bag::where('seal_number',$seal_number)->first();
+        $bag_shipments =  $bag->shipment;
+        $shipments = array();
+        if($bag_shipments->count() != 0){
+            foreach ($bag_shipments as $bag_shipment){
+                $shipment = Shipment::find($bag_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Shipments Founds', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Shipments Found', 'shipments' => FALSE];
+        }
+
+    }
+
+    public function short_received_shipments(Request $request){
+        $seal_number = $request->input('bag_id');
+        $bag = Bag::where('seal_number',$seal_number)->first();
+        $bag_shipments =  $bag->shipment->where('status',0);
+        $shipments = array();
+        if($bag_shipments->count() != 0){
+            foreach ($bag_shipments as $bag_shipment){
+                $shipment = Shipment::find($bag_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Shipments Founds', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Shipments Found', 'shipments' => FALSE];
+        }
+
+    }
+
+    public function master_cargo_short_received_shipments_index(){
+        return view('admin.reports.master_cargo_short_received_shipments_reports');
+    }
+
+    public function master_cargo_short_received_shipments_list(Request $request){
+        $cargo_consignments_short_received_shipments = DB::connection('reports')->table('bags')->leftjoin('bag_shipments as bs', 'bs.bag_id', '=', 'bags.id')
+            ->join('master_cargo_bags as mcb',function($join){
+                $join->on('mcb.bag_id','=','bags.id')
+                    ->where('mcb.created_at','=',DB::raw('(select max(created_at) from master_cargo_bags where master_cargo_bags.bag_id= bags.id)'));
+            })
+            ->join('master_cargoes as mc', 'mc.id', '=', 'mcb.master_cargo_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'bags.origin_hub_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 'bags.destination_hub_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'bags.shipping_mode_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'bs.shipment_id')
+            ->select('s.tracking_number as tracking_number','bags.id as bag','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'bags.type as cargo_type','mc.id as cargo','mc.created_at as transited_at','bags.seal_number')
+            ->where('bags.status_id', 7)
+            ->whereIn('s.shipper_status_id', [3, 21])->get();
+
+        $datatables = Datatables::of($cargo_consignments_short_received_shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('id_padded_link', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->cargo, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('cargo_type',function ($shipments){
+                if($shipments->cargo_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            });
+        return $datatables->make(true);
     }
 }
 

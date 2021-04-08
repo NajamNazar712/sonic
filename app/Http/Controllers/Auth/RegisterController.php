@@ -104,7 +104,7 @@ class RegisterController extends Controller
                 'password' => 'required|string|min:6',
                 'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
-                'shipper_phone'=>'required|string|max:255',
+                'phone'=>'required|string|max:255|unique:users',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
                 'sale_person' => 'required',
@@ -141,7 +141,7 @@ class RegisterController extends Controller
                 'password' => 'required|string|min:6',
                 'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'company_address'=>'required|string|max:255',
-                'shipper_phone'=>'required|string|max:255',
+                'phone'=>'required|string|max:255|unique:users',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
                 'sale_person' => 'required',
@@ -360,8 +360,8 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'address' => $data['company_address'],
             'poc' => $data['shipper_poc'],
-            'phone'=>$data['shipper_phone'],
-            'phone2'=>$data['shipper_phone2'],
+            'phone'=>$data['phone'],
+            'phone2'=>$data['phone2'],
             'cnic' => $data['cnic'],
             'ntn_no' => $data['ntn_no'],
             'strn_no' => $data['strn_no'],
@@ -484,7 +484,7 @@ class RegisterController extends Controller
                 ]);
             }
         }
-        self::duplicate_user_info($newUser->id, $data['name'], $data['shipper_phone'], $data['shipper_phone2'], $data['cnic'], $iban_array);
+        self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
 
         $token = uniqid(base64_encode(str_random(60)));
         $crf_terms_and_conditions = new CRFTermsConditions();

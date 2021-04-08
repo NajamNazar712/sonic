@@ -340,6 +340,19 @@
                                         className:'btn btn-primary',
                                         title: 'Booked VS Received VS Delivered VS Returned',
                                         text:'<i class="la la-file-excel-o"></i> Excel',
+                                        action: function (e, dt, node, config) {
+                                            var that = this;
+                                            $.ajax({
+                                                url: '{!! route('admin.pickups.bookedvsreceived.list') !!}',
+                                                method: 'POST',
+                                                data: {
+                                                    '_token': '{{ csrf_token() }}',
+                                                    'excel': true,
+                                                }
+                                            }).done(function (data) {
+                                                $.fn.dataTable.ext.buttons.excelHtml5.action.call(that,e, dt, node, config);
+                                            });
+                                        },
                                     },
                                 ],
                                 paging:false,
