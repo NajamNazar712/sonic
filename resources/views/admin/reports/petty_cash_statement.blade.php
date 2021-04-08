@@ -335,6 +335,8 @@
                             head.push('Statement Reference No.');
                             head.push('Statement Created At');
                             head.push('Statement Created By');
+                            head.push('Statement Checked At');
+                            head.push('Statement Checked By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -359,6 +361,8 @@
                                 row.push(values.statement_reference_no);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
+                                row.push(values.checked_at);
+                                row.push(values.checked_by);
 
                                 body.push(row);
                             });
@@ -398,8 +402,8 @@
                         d.search_date_created = $('input[name="search_date_created_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        d.search_date_from = $('input[name="checked_search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="checked_search_date_to_formatted"]').val();
+                        d.checked_search_date_from = $('input[name="checked_search_date_from_formatted"]').val();
+                        d.checked_search_date_to = $('input[name="checked_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[13, 'desc']],
@@ -424,6 +428,8 @@
                     {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
+                    {data: 'checked_at', name: 'pcs.checked_at', class: 'align-middle checked_at'},
+                    {data: 'checked_by', name: 'pcs.checked_at', class: 'align-middle checked_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
