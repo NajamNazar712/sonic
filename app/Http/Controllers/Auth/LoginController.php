@@ -158,7 +158,7 @@ class LoginController extends Controller
             $shipper_user_id = $user->id;
         }
         else {
-            $shipper = User::find($user->user_id);
+            $shipper = User::find($user->id);
 
             if ($shipper->blacklist) {
                 auth('substitute_users')->logout();
