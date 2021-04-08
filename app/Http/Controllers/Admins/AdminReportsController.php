@@ -3973,7 +3973,7 @@ class AdminReportsController extends Controller
         if ($request->get('checked_search_date_from') && $request->get('checked_search_date_to')) {
             $checked_from = $request->get('checked_search_date_from');
             $checked_to = $request->get('checked_search_date_to');
-            $petty->whereBetween('pcs.checked_at', [$from,$to]);
+            $petty->whereBetween('pcs.checked_at', [$checked_from,$checked_to]);
         }
         return $petty->make(true);
     }
