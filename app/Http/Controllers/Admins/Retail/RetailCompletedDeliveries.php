@@ -40,8 +40,8 @@ class RetailCompletedDeliveries extends Controller
             ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->join('admins as cc', 'cc.id', '=', 'retail_pickup_notes.cash_collected_by')
             ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
-            ->leftJoin('retail_franchises as rf', 'rf.user_id', '=', 'ru.id')
-            ->leftJoin('retail_trax_centers as rc', 'rc.user_id', '=', 'ru.id')
+            ->leftJoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
+            ->leftJoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
             ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at'])
             ->where('retail_pickup_notes.status', 4)
             ->where('retail_pickup_notes.pncc_status', '=', 0);
