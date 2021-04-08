@@ -213,7 +213,6 @@ class AdminInternationalShipmentsController extends Controller
                 $details['id'] = $international_shipment->id;
                 $details['tracking_number'] = $shipment->tracking_number;
                 $details['international_tracking_number'] = $international_shipment->international_tracking_number;
-                $details['actual_weight'] = $international_shipment->actual_weight;
                 return response()->json(['status' => 0, 'details' => $details]);
             }
         }
@@ -223,7 +222,6 @@ class AdminInternationalShipmentsController extends Controller
     public function tracking_upload_edit(Request $request){
         $international_shipment_id = $request->international_shipment_id;
         $tracking_number = $request->tracking_number;
-        $actual_weight = $request->actual_weight;
         $international_tracking_number = $request->international_tracking_number;
         if($international_shipment_id){
             $international_shipment = InternationalShipment::find($international_shipment_id);
@@ -234,7 +232,6 @@ class AdminInternationalShipmentsController extends Controller
                         $shipment_id = $shipment->id;
                         $international_shipment->shipment_id = $shipment_id;
                         $international_shipment->international_tracking_number = $international_tracking_number;
-                        $international_shipment->actual_weight = $actual_weight;
                         $international_shipment->save();
                         return redirect()->back()->with('success', 'Shipment successfully updated!');
                     }

@@ -75,10 +75,6 @@
                             <label class="label" for="tracking_number">International Tracking Number</label>
                             <input type="text"  class="form-control" name="international_tracking_number" id="edit_international_tracking_number" data-rule-required="true" data-msg-required="Internatioanl Tracking No. is required">
                         </div>
-                        <div class="form-group">
-                            <label class="label" for="actual_weight">Actual Weight</label>
-                            <input type="text"  class="form-control" name="actual_weight" id="actual_weight" data-rule-required="true" data-msg-required="Actual Weight is required">
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
