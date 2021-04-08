@@ -3968,6 +3968,12 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $petty->whereBetween('petty_cash_statement_details.created_at', [$from,$to]);
         }
+
+        if ($request->get('checked_search_date_from') && $request->get('checked_search_date_to')) {
+            $checked_from = $request->get('checked_search_date_from');
+            $checked_to = $request->get('checked_search_date_to');
+            $petty->whereBetween('pcs.checked_at', [$from,$to]);
+        }
         return $petty->make(true);
     }
 

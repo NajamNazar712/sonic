@@ -78,6 +78,30 @@
                         </div>
 
                     </div>
+                    <div class="col-4 ">
+
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="checked_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_from" placeholder="Checked Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="checked_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_to" placeholder="Checked Date (To)">
+                        </div>
+
+                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
@@ -254,6 +278,32 @@
                     }
                 }
             });
+            $('#checked_search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#checked_search_date_to').pickadate('picker').set('min', $('#checked_search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#checked_search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#checked_search_date_from').pickadate('picker').set('max', $('#checked_search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -348,6 +398,8 @@
                         d.search_date_created = $('input[name="search_date_created_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_date_from = $('input[name="checked_search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="checked_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[13, 'desc']],
