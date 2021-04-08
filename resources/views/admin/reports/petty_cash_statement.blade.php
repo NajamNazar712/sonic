@@ -78,6 +78,30 @@
                         </div>
 
                     </div>
+                    <div class="col-4 ">
+
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="checked_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_from" placeholder="Checked Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="checked_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_to" placeholder="Checked Date (To)">
+                        </div>
+
+                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
@@ -113,6 +137,8 @@
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Statement Created At</th>
                         <th class="border-primary border-darken-1">Statement Created By</th>
+                        <th class="border-primary border-darken-1">Statement Checked At</th>
+                        <th class="border-primary border-darken-1">Statement Checked By</th>
                     </tr>
                     </thead>
                 </table>
@@ -254,6 +280,32 @@
                     }
                 }
             });
+            $('#checked_search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#checked_search_date_to').pickadate('picker').set('min', $('#checked_search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#checked_search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#checked_search_date_from').pickadate('picker').set('max', $('#checked_search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -285,6 +337,8 @@
                             head.push('Statement Reference No.');
                             head.push('Statement Created At');
                             head.push('Statement Created By');
+                            head.push('Statement Checked At');
+                            head.push('Statement Checked By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -309,6 +363,8 @@
                                 row.push(values.statement_reference_no);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
+                                row.push(values.checked_at);
+                                row.push(values.checked_by);
 
                                 body.push(row);
                             });
@@ -348,6 +404,8 @@
                         d.search_date_created = $('input[name="search_date_created_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.checked_search_date_from = $('input[name="checked_search_date_from_formatted"]').val();
+                        d.checked_search_date_to = $('input[name="checked_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[13, 'desc']],
@@ -372,6 +430,8 @@
                     {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
+                    {data: 'checked_at', name: 'pcs.checked_at', class: 'align-middle checked_at'},
+                    {data: 'checked_by', name: 'chb.name', class: 'align-middle checked_by'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
