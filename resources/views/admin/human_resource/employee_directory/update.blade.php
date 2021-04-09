@@ -137,7 +137,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? date('Y/m/d',strtotime($employee->date_of_birth)) : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
+                                                <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
