@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ReturnNote;
@@ -432,6 +433,9 @@ class AdminAPIController extends Controller
                     ->where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
+                $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
@@ -453,6 +457,17 @@ class AdminAPIController extends Controller
                         $message = "Phone Number Already Exist";
 
                     } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($user_request->exists()) {
+                    $user_request = $user_request->first();
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($user_request->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
                 } else {
