@@ -178,7 +178,50 @@
                 }
             });
 
-			
+			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+				if ( this.context.length ) {
+					body = [];
+					var params = table.ajax.params();
+					params.start = 0;
+					params.length = -1;
+					params.excel = true;
+					var jsonResult = $.ajax({
+						url: '{{ route('admin.v2_pickups.action_log.list') }}',
+						data: params,
+						success: function (result) {
+							head = [];
+
+							head.push('Logged At');
+							head.push('Rider');
+							head.push('Shipper');
+							head.push('Address');
+							head.push('City');
+							head.push('Action Type');
+							head.push('Pickup Note ID');
+							head.push('Pickup Request ID');
+
+
+							$.each(result.data, function(index, values) {
+								row = [];
+
+								row.push(values.logged_at);
+								row.push(values.rider);
+								row.push(values.shipper);
+								row.push(values.pickup_address);
+								row.push(values.city);
+								row.push(values.type);
+								row.push(values.pickup_note_id);
+								row.push(values.pickup_request_id);
+
+								body.push(row);
+							});
+						},
+						async: false
+					});
+
+					return {body: body, header: head};
+				}
+			} );
 	
 			
 			var table = $('#datatable').DataTable({

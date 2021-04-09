@@ -28,7 +28,7 @@ use App\Http\Models\Shipment;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminMonthClosingController extends Controller
 {
@@ -117,6 +117,7 @@ class AdminMonthClosingController extends Controller
      }
 
     public function pending_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),45);
         $closing_types = MonthClosingType::all();
         $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->with(['role.department'])->get();
         $riders = Rider::where('status',1)->get();
@@ -124,6 +125,10 @@ class AdminMonthClosingController extends Controller
     }
 
     public function pending_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),105);
+        }
 //        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
         $date = Carbon::now()->startOfMonth()->subMonth()->addDays(20)->toDateString();
 
@@ -314,9 +319,14 @@ class AdminMonthClosingController extends Controller
     }
 
     public function resolved_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),46);
         return view('admin.month_closing.resolved');
     }
     public function resolved_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),106);
+        }
         $month_closing = MonthClosing::leftjoin('shipments', 'shipments.id', '=', 'month_closings.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

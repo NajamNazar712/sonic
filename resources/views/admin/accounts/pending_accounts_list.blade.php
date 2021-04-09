@@ -307,8 +307,15 @@
                 if(params !== undefined){
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
+                }
+                else{
+                    params = {
+                        'excel':true,
+                    };
                 }
 
+                console.log(params);
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.pending.ajax') }}',
                     data: params,

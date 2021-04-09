@@ -380,6 +380,19 @@
                                     footer: true,
                                     title: 'QA Report',
                                     text:'<i class="la la-file-excel-o"></i> Excel',
+                                    action: function (e, dt, node, config) {
+                                        var that = this;
+                                        $.ajax({
+                                            url: '{!! route('admin.reports.qa.list') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'excel': true,
+                                            }
+                                        }).done(function (data) {
+                                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(that,e, dt, node, config);
+                                        });
+                                    },
 
                                     customize: function (xlsx) {
                                         var sheet = xlsx.xl.worksheets['sheet1.xml'];

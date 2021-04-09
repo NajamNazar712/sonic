@@ -99,6 +99,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
         $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();

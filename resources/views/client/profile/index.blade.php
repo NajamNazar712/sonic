@@ -261,7 +261,7 @@
                                                 <div class="form-group col-md-9">
                                                     <label>Phone Number 1:</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required>
+                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required data-rule-remote="{{ route('cod.profile.shipper_phone_unique', ['id' => $user->id]) }}" data-msg-remote="Phone must be unique">
                                                 </div>
                                             </div>
                                         </div>
@@ -413,6 +413,57 @@
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button id="AddPickup" type="submit" class="btn btn-primary btn-block">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="EditPickup" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditPickup"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Pickup Address</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit_pickup_form" action="{{route('cod.edit.pickup')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <input type="hidden" name="id" id="edit_user_shipping_info_id" value="">
+                                <div class="col-6 form-group">
+                                    <textarea type="text" name="pickup_address" id="edit_pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required></textarea>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="phone" id="edit_phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="poc" id="edit_poc" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="vendor" id="edit_vendor" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters" placeholder="Vendor">
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="email" name="email" id="edit_email" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Email Address is required" placeholder="Email Address" required>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <select name="city_id" id="edit_city_id" class="select2 form-control required" data-rule-required="true" data-msg-required="City is required" style="width: 100%" required>
+                                        @foreach($pickup_city_list as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="editPickup" type="submit" class="btn btn-primary btn-block">Update</button>
                                 </div>
                             </div>
                         </div>
@@ -989,7 +1040,24 @@
 
                 }
 
+                if ($(this).hasClass('edit')) {
+                    var id = parseInt($(this).parents('tr').attr('id'));
+                    var pickup_address = table.row($(this).parents('tr')).data().pickup_address;
+                    var phone_number = table.row($(this).parents('tr')).data().phone;
+                    var poc = table.row($(this).parents('tr')).data().poc;
+                    var vendor = table.row($(this).parents('tr')).data().vendor;
+                    var email_address = table.row($(this).parents('tr')).data().email;
+                    var city_id = table.row($(this).parents('tr')).data().city_id;
 
+                    $('#edit_user_shipping_info_id').val(id);
+                    $('#edit_pickup_address').val(pickup_address);
+                    $('#edit_phone').val(phone_number);
+                    $('#edit_poc').val(poc);
+                    $('#edit_vendor').val(vendor);
+                    $('#edit_email').val(email_address);
+                    $('#edit_city_id').val(city_id).trigger('change');
+                    $('#EditPickup').modal('show');
+                }
             });
 
 
@@ -997,9 +1065,27 @@
                 placeholder:'Select City',
                 dropdownParent:$('#add_pickup_form')
             });
+            $('#edit_city_id').select2({
+                placeholder:'Select City',
+                dropdownParent:$('#edit_pickup_form')
+            });
 
 
             $( "#add_pickup_form" ).validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    form.submit();
+
+                }
+            });
+            $( "#edit_pickup_form" ).validate({
                 errorClass:"danger",
                 normalizer: function(value) {
                     return $.trim(value);
