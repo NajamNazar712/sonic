@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\MisroutedHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class MisroutedHistoryController extends Controller
 {
@@ -15,9 +17,14 @@ class MisroutedHistoryController extends Controller
         $this->middleware('Permission');
     }
     public function misrouted_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),47);
         return view('admin.delivery.misroute.history');
     }
     public function misrouted_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),107);
+        }
         $misrouted = MisroutedHistory::join('shipments as s','s.id','=','misrouted_history.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')

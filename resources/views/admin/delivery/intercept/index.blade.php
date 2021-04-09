@@ -24,6 +24,7 @@
                         <th class="border-primary border-darken-1">Old Destination</th>
                         <th class="border-primary border-darken-1">New Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Agent</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
@@ -211,6 +212,7 @@
                             head.push('Old Destination');
                             head.push('New Destination');
                             head.push('Hub');
+                            head.push('Agent');
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Consignee Address');
@@ -231,6 +233,7 @@
                                 row.push(values.old_destination);
                                 row.push(values.new_destination);
                                 row.push(values.hub);
+                                row.push(values.agent);
                                 row.push(values.consignee_name);
                                 row.push(values.phone);
                                 row.push(values.consignee_address);
@@ -427,7 +430,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.intercept.list') }}',
                 rowId: 'shId',
-                order: [[16, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -438,6 +441,7 @@
                     {data: 'old_destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'new_destination', name: 'odc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                     {data: 'consignee_name', name: 'irbr.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'irbr.consignee_phone_number_1', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'irbr.consignee_address', class: 'align-middle consignee_address'},

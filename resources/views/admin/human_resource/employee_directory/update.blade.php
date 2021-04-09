@@ -93,8 +93,12 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Blood Group</label>
-                                                    <input type="text" id="blood_group" class="form-control border-primary" value="{{$employee->blood_group}}" name="blood_group">
+                                                <label>Blood Group</label>
+                                                <select name="blood_group" id="blood_group" class="select2 form-control " style="width: 100%">
+                                                    @foreach($blood_groups as $blood_group)
+                                                        <option value="{{$blood_group->id}}">{{$blood_group->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -1278,6 +1282,12 @@
                 width:'100%',
             });
             $("#marital_status").val("{{$employee->marital_status_id ?? ''}}").trigger('change');
+
+            $("#blood_group").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Blood Group",
+                width:'100%',
+            });
+            $("#blood_group").val("{{$employee->blood_group ?? ''}}").trigger('change');
 
             $("#nationality").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Nationality",

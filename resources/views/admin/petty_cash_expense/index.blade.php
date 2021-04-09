@@ -146,6 +146,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.petty_cash_expense_summary.petty_cash_summary_report') }}',
                         data: params,

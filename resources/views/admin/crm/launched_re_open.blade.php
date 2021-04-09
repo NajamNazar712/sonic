@@ -248,6 +248,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = -1;
                     var jsonResult =
                         $.ajax({
                             url: '{{ route('admin.crm.launched_re_open.list') }}',
