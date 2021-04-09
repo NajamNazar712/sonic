@@ -4484,13 +4484,10 @@ class RiderAPIController extends Controller
                             $rider_request->rider_type_id = $request->rider_type_id;
                             $rider_request->save();
 
-                            $city_hub = City::where('id', $request->city_id)->first();
-                            $hub_id = $city_hub->hub_id;
-
                             $employee_request = new Employee();
                             $employee_request->name = $request->name;
                             $employee_request->employee_gender_id = $request->employee_gender_id;
-                            $employee_request->city_id = $hub_id;
+                            $employee_request->city_id = $request->city_id;
                             $employee_request->cnic = $request->cnic_no;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
