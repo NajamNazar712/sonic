@@ -54,8 +54,17 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_service_type" id="search_service_type" class="form-control select2">
+                                @foreach($service_types as $service_type)
+                                    <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -66,7 +75,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Arrival Date (From)">
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -247,6 +256,11 @@
             });
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_service_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Service Type',
                 width:'100%',
                 allowClear:true
             });
@@ -467,6 +481,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_status = $('#search_status').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_service_type = $('#search_service_type').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
