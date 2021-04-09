@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\ReturnNote;
@@ -17,7 +18,7 @@ use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
@@ -86,6 +87,8 @@ class AdminShipmentPieceController extends Controller
     }
 
     public function hold_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),5);
+
         $riders = Rider::where('status', 1);
 
         if (session('role_id') != 1) {
@@ -110,6 +113,10 @@ class AdminShipmentPieceController extends Controller
     }
 
     public function hold_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),65);
+        }
         $shipments = ShipmentPiecesRequest::join('shipments', 'shipments.id', '=', 'shipment_pieces_requests.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

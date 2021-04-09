@@ -34,7 +34,7 @@ use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 use Auth;
 
 class AdminHumanResourseController extends Controller
@@ -52,17 +52,19 @@ class AdminHumanResourseController extends Controller
     }
     public function allusers()
     {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),54);
         // $riders = Rider::where('status', 1)->get();
         //         $admins = Admin::where('status', 1)->get();
         $roles = ['Admin', 'Rider'];
         $roles = collect($roles);
         return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
-    public function all_user_ajax()
+    public function all_user_ajax(Request $request)
     {
-
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),114);
+        }
         $assigned_hubs = session('hubs');
         if (session('role_id') != 1) {
             if (count($assigned_hubs) > 0) {
@@ -183,6 +185,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),57);
         $rider_type = RiderType::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
@@ -191,6 +194,10 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),117);
+        }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
             ->join('employee_types as et','et.id','=','employees.employee_type_id')

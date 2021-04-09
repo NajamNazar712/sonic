@@ -16,6 +16,7 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Module;
 
 use Auth;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -277,6 +278,7 @@ class UserManagementController extends Controller
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
 
         if ($user->role_id != 1) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
             return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
         }
         else {
@@ -292,6 +294,10 @@ class UserManagementController extends Controller
             $admin->email = $request->input('email');
             $admin->phone_number = $request->input('phone_number');
             $admin->cnic = $request->input('cnic');
+            if($admin->role_id != $request->input('role_id'))
+            {
+                ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
+            }
             $admin->role_id = $request->input('role_id');
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
@@ -403,6 +409,7 @@ class UserManagementController extends Controller
         $role = AdminRole::find($id);
         $permissions = $role->module_permissions->pluck('permission_id')->toArray();
         if ($role->id != 1) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),229,1);
             return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
         }
         else {
@@ -411,6 +418,7 @@ class UserManagementController extends Controller
     }
 
     public function role_update_store(Request $request, $id) {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),230,1);
         $admin_role = AdminRole::find($id);
 
         $admin_role->name = $request->input('name');

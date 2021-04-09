@@ -342,6 +342,10 @@
                     s_columns.push({data:value.tier_name.replace(/ /g, '').toLowerCase() + 'amount', class:'align-middle text-center counts', orderable: false, searchable: false});
                 }
             });
+            let params  = {
+                '_token': "{{csrf_token()}}",
+                'excel' : true,
+            }
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -353,6 +357,17 @@
                         className: 'btn btn-primary',
                         exportOptions: {
                             columns: export_col
+                        },
+                        action: function (e, dt, node, config) {
+                            var that = this;
+                                $.ajax({
+                                    'url': "{{ route('admin.dashboard.overall.commission.list') }}",
+                                    data : params,
+                                    method: 'post',
+
+                                }).done(function(data) {
+                                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(that,e, dt, node, config);
+                                });
                         }
                     },
                     'reset'
@@ -422,6 +437,17 @@
                         className: 'btn btn-primary',
                         exportOptions: {
                             columns: s_export_col
+                        },
+                        action: function (e, dt, node, config) {
+                            var that = this;
+                            $.ajax({
+                                'url': "{{ route('admin.dashboard.overall.commission.list') }}",
+                                data : params,
+                                method: 'post',
+
+                            }).done(function(data) {
+                                $.fn.dataTable.ext.buttons.excelHtml5.action.call(that,e, dt, node, config);
+                            });
                         }
                     },
                     'reset'

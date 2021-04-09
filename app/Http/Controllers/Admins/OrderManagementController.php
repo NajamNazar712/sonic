@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -44,6 +44,7 @@ class OrderManagementController extends Controller
 
     public function index(){
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(),44);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
@@ -496,7 +497,12 @@ class OrderManagementController extends Controller
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'sj.created_at as arrival_date', 'u.phone as shipper_phone','u.phone2 as shipper_phone2', 'sm.mode as shipping_mode', 'h.name as hub'])
+            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where('ras.status', '=' , 1);
+            })
+            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
+            ->select(['agent.name as agent','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'sj.created_at as arrival_date', 'u.phone as shipper_phone','u.phone2 as shipper_phone2', 'sm.mode as shipping_mode', 'h.name as hub'])
         ->where('shipments.shipper_status_id', '=', 15);
 
         if(session('department_id') == 7){
@@ -613,6 +619,7 @@ class OrderManagementController extends Controller
 
     public function supply_chain_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),11);
         $shipment_status = ShipmentStatus::select('id','name')->whereIn('id',[1,2,3,4,20,21])->get();
         $service_type = BookingType::all();
         $shippers = User::select('id','name')->get();
@@ -620,6 +627,10 @@ class OrderManagementController extends Controller
         return view('admin.supply_chain.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products ,'shippers' =>$shippers ]);;
     }
     public function supply_chain_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),71);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
