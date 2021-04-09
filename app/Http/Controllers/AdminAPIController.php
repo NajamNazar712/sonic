@@ -8,6 +8,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -472,10 +473,13 @@ class AdminAPIController extends Controller
                     }
                 } else {
                     try {
+                        $city_hub = City::where('id', $request->city_id)->first();
+                        $hub_id = $city_hub->hub_id;
+
                         $employee_request = new Employee();
                         $employee_request->name = $request->name;
                         $employee_request->employee_gender_id = $request->employee_gender_id;
-                        $employee_request->city_id = $request->city_id;
+                        $employee_request->city_id = $hub_id;
                         $employee_request->cnic = $request->cnic_no;
                         $employee_request->phone_number = $request->phone_number;
                         $employee_request->employee_type_id = 1;
