@@ -111,7 +111,7 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
 
-                            @if (session('user_type') == 1 || in_array(13, session('permissions')))
+                            @if (in_array(13, session('permissions')))
                         <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment Report</a></li>
                             @endif
 
