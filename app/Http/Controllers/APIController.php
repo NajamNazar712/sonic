@@ -23,6 +23,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 
 use Illuminate\Support\Facades\Log;
 use Validator;
@@ -1052,9 +1053,13 @@ class APIController extends Controller
     public function shipment_status(Request $request) {
       $user_id = $request->user_id;
 
+      $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
+
+      $user_ids[] = $user_id;
+
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_ids) {
+          $query->whereIn('user_id', $user_ids);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -1070,7 +1075,7 @@ class APIController extends Controller
         $tracking_number = $request->tracking_number;
         $type = $request->type;
 
-        $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $tracking_number)->first();
+        $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
         if ($type == 0) {
           $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
@@ -1100,9 +1105,13 @@ class APIController extends Controller
     public function shipment_track(Request $request) {
       $user_id = $request->user_id;
 
+      $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
+
+      $user_ids[] = $user_id;
+
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_ids) {
+          $query->whereIn('user_id', $user_ids);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -1118,7 +1127,7 @@ class APIController extends Controller
         $tracking_number = $request->tracking_number;
         $type = $request->type;
 
-        $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $tracking_number)->first();
+        $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
         $details = array();
 
@@ -2423,9 +2432,13 @@ class APIController extends Controller
     public function shipment_track_order_id(Request $request) {
       $user_id = $request->user_id;
 
+      $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
+
+      $user_ids[] = $user_id;
+
       $rules = [
-        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_ids) {
+          $query->whereIn('user_id', $user_ids);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -2441,7 +2454,7 @@ class APIController extends Controller
         $order_id = $request->order_id;
         $type = $request->type;
 
-        $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+        $shipments = Shipment::whereIn('user_id', $user_ids)->where('order_id', $order_id)->get();
 
         $details = array();
 
@@ -2540,9 +2553,13 @@ class APIController extends Controller
     public function shipment_status_order_id(Request $request) {
       $user_id = $request->user_id;
 
+      $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
+
+      $user_ids[] = $user_id;
+
       $rules = [
-        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_ids) {
+          $query->whereIn('user_id', $user_ids);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -2558,7 +2575,7 @@ class APIController extends Controller
         $order_id = $request->order_id;
         $type = $request->type;
 
-        $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+        $shipments = Shipment::whereIn('user_id', $user_ids)->where('order_id', $order_id)->get();
 
         $details = array();
 
