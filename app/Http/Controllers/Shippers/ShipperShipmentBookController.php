@@ -2167,7 +2167,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
-                        if ($consignee_city->id == 1244 && ($user_id != 5982 || $user_id != 3324)) {
+                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -2284,7 +2284,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if ($pickup_consignee_city->id == 1244 && ($user_id != 5982 || $user_id != 3324)) {
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -3739,7 +3739,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
-                        if ($consignee_city->id == 1244 && ($user_id != 5982 || $user_id != 3324)) {
+                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
