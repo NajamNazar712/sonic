@@ -2536,4 +2536,63 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Tracking of Shipment - Order ID #' . $order_id, 'details' => $details]);
       }
     }
+
+    public function shipment_status_order_id(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'order_id' => ['required', Rule::exists('shipments', 'order_id')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'type' => ['required', 'boolean']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $order_id = $request->order_id;
+        $type = $request->type;
+
+        $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+
+        $details = array();
+
+        foreach ($shipments as $shipment) {
+          $detail = array();
+
+          if ($type == 0) {
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+            if ($shipment_journey) {
+              $current_status = $shipment_journey->shipment_status_shipper->name;
+            }
+            else {
+              $current_status = $shipment->status_shipper->name;
+            }
+          }
+          else {
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
+
+            if ($shipment_journey) {
+              $current_status = $shipment_journey->shipment_status_consignee->name;
+            }
+            else {
+              $current_status = $shipment->status_consignee->name;
+            }
+          }
+
+          $detail['tracking_number'] = $shipment->tracking_number;
+          $detail['status'] = $current_status;
+
+          $details[] = $detail;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Order ID #' . $order_id, 'details' => $details]);
+      }
+    }
 }
