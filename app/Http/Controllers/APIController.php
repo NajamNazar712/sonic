@@ -2612,4 +2612,67 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Order ID #' . $order_id, 'details' => $details]);
       }
     }
+
+    public function shipment_status_consingee_phone_number(Request $request) {
+      $user_id = $request->user_id;
+
+      $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
+
+      $user_ids[] = $user_id;
+
+      $rules = [
+        'phone_number' => ['required', Rule::exists('shipments', 'consignee_phone_number_1')->where(function($query) use($user_ids) {
+          $query->whereIn('user_id', $user_ids);
+        })],
+        'type' => ['required', 'boolean']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $phone_number = $request->phone_number;
+        $type = $request->type;
+
+        $shipments = Shipment::whereIn('user_id', $user_ids)->where('consignee_phone_number_1', $phone_number)->get();
+
+        $details = array();
+
+        foreach ($shipments as $shipment) {
+          $detail = array();
+
+          if ($type == 0) {
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+            if ($shipment_journey) {
+              $current_status = $shipment_journey->shipment_status_shipper->name;
+            }
+            else {
+              $current_status = $shipment->status_shipper->name;
+            }
+          }
+          else {
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
+
+            if ($shipment_journey) {
+              $current_status = $shipment_journey->shipment_status_consignee->name;
+            }
+            else {
+              $current_status = $shipment->status_consignee->name;
+            }
+          }
+
+          $detail['tracking_number'] = $shipment->tracking_number;
+          $detail['status'] = $current_status;
+
+          $details[] = $detail;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Consignee Phone Number #' . $phone_number, 'details' => $details]);
+      }
+    }
 }

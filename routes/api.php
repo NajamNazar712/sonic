@@ -30,6 +30,7 @@ Route::name('api.')->group(function () {
             Route::prefix('status')->name('status.')->group(function() {
                 Route::get('', 'APIController@shipment_status')->name('status');
                 Route::get('order_id', 'APIController@shipment_status_order_id')->name('order_id');
+                Route::get('consingee_phone_number', 'APIController@shipment_status_consingee_phone_number')->name('consingee_phone_number');
             });
 
             Route::prefix('track')->name('track.')->group(function() {
