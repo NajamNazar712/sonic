@@ -70,7 +70,7 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-4">
+                    <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -79,8 +79,16 @@
                             </select>
                         </fieldset>
                     </div>
-
-                    <div class="col-4">
+                    <div class="col-5">
+                        <fieldset class="form-group">
+                            <select name="search_business_category" id="search_business_category" class="form-control select2">
+                                @foreach($business_categories as $bc)
+                                    <option value="{{$bc->id}}">{{$bc->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-5">
 
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
@@ -92,7 +100,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-5 ">
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -126,15 +134,7 @@
                             <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Delivered/Returned Date (To)">
                         </div>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_business_category" id="search_business_category" class="form-control select2">
-                                @foreach($business_categories as $bc)
-                                    <option value="{{$bc->id}}">{{$bc->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
