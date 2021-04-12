@@ -6318,9 +6318,9 @@ class AdminFinanceController extends Controller
                     $dropdown .= $email_reminder_button;
                 }
 
-                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
-                    $dropdown .= $mark_as_received_button;
-                }
+//                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
+//                    $dropdown .= $mark_as_received_button;
+//                }
 
                 $dropdown .= $origin_wise_print_button;
 
@@ -6574,6 +6574,26 @@ class AdminFinanceController extends Controller
         }
 
         return redirect()->route('admin.finance.invoices.index')->with('success', 'Invoice has been marked as Received');
+    }
+
+    public function invoices_mark_as_received_all(Request $request) {
+        foreach ($request->id as $id)
+        {
+            $invoice = Invoice::find($id);
+
+            if ($invoice) {
+                $invoice->received_date = Carbon::now()->format('Y-m-d 00:00:00');
+                $invoice->company_bank_id = 29;
+                $invoice->received_amount = $invoice->total_invoice_amount;
+                $invoice->tax_amount = null;
+                $invoice->deposit_date = Carbon::now()->format('Y-m-d 00:00:00');
+                $invoice->status_id = 3;
+
+                $invoice->save();
+            }
+        }
+
+        return 1;
     }
 
     public function invoice_for_reimbursement_index(Request $request) {
