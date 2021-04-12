@@ -8078,7 +8078,12 @@ class AdminReportsController extends Controller
                    $received_date = Carbon::parse($bags->received_at);
                    $transitted_date = Carbon::parse($bags->transitted_date);
                    $days = $transitted_date->diffInDays($received_date);
-                   return $days . ' days';
+                   if($days > 0 ){
+                       return $days . ' days';
+                   }
+                   else{
+                       return '-';
+                   }
                }
                else{
                    return '-';

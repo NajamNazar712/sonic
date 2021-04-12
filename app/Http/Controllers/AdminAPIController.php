@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -432,13 +434,16 @@ class AdminAPIController extends Controller
                     ->where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
+                $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
-                    if ($admin->phone_no == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
 
-                    } else if ($admin->phone_no == $request->input('phone_number')) {
+                    } else if ($admin->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
 
                     } else if ($admin->cnic == $request->input('cnic_no')) {
@@ -446,13 +451,24 @@ class AdminAPIController extends Controller
                     }
                 } else if ($employee->exists()) {
                     $employee = $employee->first();
-                    if ($employee->phone_no == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
 
-                    } else if ($employee->phone_no == $request->input('phone_number')) {
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
 
                     } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($user_request->exists()) {
+                    $user_request = $user_request->first();
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($user_request->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
                 } else {

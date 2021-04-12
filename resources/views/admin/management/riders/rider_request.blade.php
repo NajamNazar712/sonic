@@ -224,7 +224,7 @@
                 placeholder: 'Select Rider Category',
                 dropdownParent: $('#approveRiderModal')
             });
-            $('#riderInfoDiv input,#approveRiderForm textarea,#riderInfoDiv select').attr('disabled', 'disabled');
+            $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled', 'disabled');
             $('#rider_trax_id').removeAttr('disabled');
 
             $('#city_list').on('change', function () {

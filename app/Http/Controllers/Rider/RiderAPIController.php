@@ -4448,10 +4448,10 @@ class RiderAPIController extends Controller
                     }
                 } else if ($employee->exists()) {
                     $employee = $employee->first();
-                    if ($employee->phone_no == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
 
-                    } else if ($employee->phone_no == $request->input('phone_number')) {
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
 
                     } else if ($employee->cnic == $request->input('cnic_no')) {

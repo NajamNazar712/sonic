@@ -120,6 +120,27 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Place Of Birth</label>
+                                                <select name="place_of_birth" id="place_of_birth" class="select2 form-control " style="width: 100%">
+                                                    @foreach($place_of_birth_cities as $place_of_birth_city)
+                                                        <option value="{{$place_of_birth_city->id}}">{{$place_of_birth_city->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label>Date Of Birth</label>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <label>CNIC Issue Date</label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
@@ -158,10 +179,10 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Hub</label>
-                                                <select name="hub" id="hub" class="select2 form-control " style="width: 100%">
-                                                    @foreach($hubs as $hub)
-                                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                <label>City</label>
+                                                <select name="city" id="city" class="select2 form-control " style="width: 100%">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -727,7 +748,7 @@
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>CV/Resume <b>(Attach PDF)</b></label>
+                                                    <label>CV/Resume</label>
                                                     <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -748,7 +769,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -762,14 +783,14 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->photo != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#photo_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
 
                                             <div class="col-md-10">
                                                 <div class="form-group">
-                                                    <label>Academic Credentials <b>(Attach PDF)</b></label>
+                                                    <label>Academic Credentials</label>
                                                     <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                                 </div>
                                             </div>
@@ -790,7 +811,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->experience != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#experience_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->experience))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -804,7 +825,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->last_pay_slip != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#last_pay_slip_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -818,7 +839,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->nikkah_nama != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#nikkah_name_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -832,7 +853,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic_spouse != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_spouse_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -846,7 +867,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->child_b_form != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#child_b_form_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -860,7 +881,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cnic_nominee != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cnic_nominee_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -874,7 +895,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->utility_bill != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#utility_bill_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -888,7 +909,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->affidavit != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#affidavit_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -902,7 +923,7 @@
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cheque != null)
                                                     <div class="form-group">
-                                                        <button type="button" class="btn btn-primary btn-block mt-3 w-100" data-toggle="modal" data-target="#cheque_modal">View</button>
+                                                        <a href="{{asset(Storage::url($attachments->cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
                                                     </div>
                                                 @endif
                                             </div>
@@ -1215,6 +1236,16 @@
                 }
             });
 
+            var date_of_birth = $('#profile-form #date_of_birth').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
             var cnic_expiry_date = $('#profile-form #cnic_expiry_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1301,11 +1332,17 @@
             });
             $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
 
-            $("#hub").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Hub",
+            $("#city").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select City",
                 width:'100%',
             });
-            $("#hub").val("{{$employee->city_id ?? ''}}").trigger('change');
+            $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
+
+            $("#place_of_birth").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Place of Birth",
+                width:'100%',
+            });
+            $("#place_of_birth").val("{{$employee->place_of_birth ?? ''}}").trigger('change');
 
             $("#zone").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Zone",
