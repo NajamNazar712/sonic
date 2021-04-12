@@ -166,7 +166,6 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
-                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.master_cargo.bag.in_transit.list') }}',
                         data: params,

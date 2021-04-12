@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateEmployeeTableBloodGroupColumn extends Migration
+class UpdatePettyCashStatementCheckAtIndexTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class UpdateEmployeeTableBloodGroupColumn extends Migration
      */
     public function up()
     {
-//        Schema::table('employees', function (Blueprint $table) {
-//            $table->integer('blood_group')->index()->change();
-//        });
+        Schema::table('petty_cash_statements', function (Blueprint $table) {
+            $table->index('checked_at');
+        });
     }
 
     /**

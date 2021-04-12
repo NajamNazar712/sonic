@@ -31,7 +31,7 @@ class CreateEmployeesTable extends Migration
             $table->integer('nationality_id')->index()->nullable();
             $table->integer('domicile_id')->index()->nullable();
             $table->integer('marital_status_id')->index()->nullable();
-            $table->string('blood_group')->nullable();
+            $table->integer('blood_group')->index()->nullable();
             $table->string('personal_email')->nullable();
             $table->string('address')->nullable();
             $table->string('emergency_contact')->nullable();

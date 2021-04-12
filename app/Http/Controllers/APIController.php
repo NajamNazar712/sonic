@@ -987,11 +987,11 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
         'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
-        'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1053,7 +1053,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
@@ -1101,7 +1101,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
@@ -1212,7 +1212,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1324,7 +1324,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1358,7 +1358,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1496,7 +1496,7 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1537,7 +1537,7 @@ class APIController extends Controller
 
       $rules = [
         'tracking_numbers' => ['required', 'array', 'min:1'],
-        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1800,10 +1800,10 @@ class APIController extends Controller
 
       $rules = [
         'tracking_numbers' => ['required', 'array', 'min:2'],
-        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
-        'default_tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'default_tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -1880,7 +1880,7 @@ class APIController extends Controller
 
     public function shipment_track_public(Request $request) {
         $rules = [
-            'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', 'exists:shipments,tracking_number']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1980,7 +1980,7 @@ class APIController extends Controller
     public function return_confirmation_pending_update(Request $request){
         $user_id = $request->user_id;
         $rules = [
-            'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })],
             'status' => ['required','numeric', Rule::in(1,2)],
@@ -2356,7 +2356,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_numbers' => ['required', 'array', 'min:1'],
-            'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+            'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
             })],
             'orders' => ['required','array', 'min:1']

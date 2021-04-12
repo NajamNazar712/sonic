@@ -3987,7 +3987,8 @@ class AdminReportsController extends Controller
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number');
+            ->leftjoin('admins as chb','chb.id','=', 'pcs.checked_by')
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -4043,6 +4044,12 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $petty->whereBetween('petty_cash_statement_details.created_at', [$from,$to]);
+        }
+
+        if ($request->get('checked_search_date_from') && $request->get('checked_search_date_to')) {
+            $checked_from = $request->get('checked_search_date_from');
+            $checked_to = $request->get('checked_search_date_to');
+            $petty->whereBetween('pcs.checked_at', [$checked_from,$checked_to]);
         }
         return $petty->make(true);
     }
@@ -6567,11 +6574,23 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('ROUND((count(ds.id)/count(s.id))*100, 2) as delivered_shipments_per'), DB::raw('count(s.id) - count(ds.id) as undelivered_shipments'), DB::raw('ROUND(((count(s.id) - count(ds.id))/count(s.id))*100, 2) as undelivered_shipments_per'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('ROUND((count(cps.id)/count(s.id))*100, 2) as confirmation_pending_shipments_per'), 'c.name as hub')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
 
-        $datatables = Datatables::of($route_distribution_summary);
+        $datatables = Datatables::of($route_distribution_summary)
+        ->addColumn('delivered_shipments_per', function ($entry) {
+            return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
+        })
+        ->addColumn('undelivered_shipments', function ($entry) {
+            return round($entry->shipments_count - $entry->delivered_shipments);
+        })
+        ->addColumn('undelivered_shipments_per', function ($entry) {
+            return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+        })
+        ->addColumn('confirmation_pending_shipments_per', function ($entry) {
+            return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+        });
 
         if($rider = $request->get('search_rider')){
             $datatables = $datatables->where('r.id', '=', $rider);
@@ -6590,6 +6609,7 @@ class AdminReportsController extends Controller
             $to = $request->get('search_to');
             $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
+
         return $datatables->make(true);
     }
     public function destination_delivery_received_index(){
