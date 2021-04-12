@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
@@ -862,7 +861,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public  function history_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),12);
         $shipping_mode = ShippingMode::all();
         $bag_statuses = BagStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -871,10 +869,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function history_list(Request $request) {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),72);
-        }
         $bags = Bag::join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
@@ -1177,7 +1171,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_master_cargo_details(Request $request){
-
         $bag = Bag::find(current($request->bag_ids));
 
         $origin = $bag->origin_hub->hub_city;
@@ -1286,8 +1279,6 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->actual_weight = $request->input('actual_weight');
             $master_cargo->created_by = Auth::id();
-
-
             if($request->onward_forwarding == 1){
                 $master_cargo_status_id = 6;
                 $master_cargo->onward_forwarding = 1;
@@ -1328,7 +1319,6 @@ class AdminMasterCargoController extends Controller
             NotificationsController::send(87, $master_cargo->destination_hub_id, url('/') . '/' . 'reports/master_cargo_'. str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT) .'.pdf');
             if($master_cargo_status_id == 6){
                 $text = 'Onward Forwarding';
-               NotificationsController::send(128,$master_cargo->id);
             }
             else{
                 $text = 'Master';
@@ -1346,7 +1336,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),13);
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -1355,10 +1344,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),73);
-        }
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
@@ -2524,7 +2509,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_received_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),15);
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -2533,10 +2517,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_received_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),75);
-        }
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
@@ -2625,7 +2605,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_history_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),16);
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -2634,10 +2613,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_history_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),76);
-        }
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
@@ -2725,7 +2700,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_bag_index() {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),14);
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
@@ -2734,10 +2708,6 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_bag_list(Request $request) {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),74);
-        }
         $bags = Bag::join('master_cargo_bags as mcb', function ($join) {
             $join->on('mcb.bag_id', '=', 'bags.id')
                 ->where('mcb.id', '=',

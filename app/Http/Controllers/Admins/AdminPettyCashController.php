@@ -382,8 +382,9 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
+            ->leftjoin('admins as pccb', 'pccb.id', '=', 'petty_cash_statements.checked_by')
             ->leftjoin('shipments', 'shipments.id', '=', 'petty_cash_statements.shipment_id')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount', 'shipments.tracking_number', 'sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount', 'shipments.tracking_number', 'sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.checked_at', 'pccb.name as checked_by')
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
@@ -1779,6 +1780,25 @@ class AdminPettyCashController extends Controller
             else {
                 return response()->json(['status' => 1, 'error' => 'Already approved / Previous status not updated!']);
             }
+        }
+        return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);
+    }
+
+    public function petty_cash_statement_check(Request $request){
+        $statement_ids = $request->statement_ids;
+        if (count($statement_ids) > 0) {
+            foreach ($statement_ids as $statement_id) {
+                $petty = PettyCashStatement::find($statement_id);
+                if ($petty)
+                {
+                    if($petty->checked_by == null){
+                        $petty->checked_by = Auth::id();
+                        $petty->checked_at = Carbon::now();
+                        $petty->save();
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Checked!']);
         }
         return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);
     }

@@ -3445,19 +3445,19 @@ class GlobalSettingsController extends Controller
         $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
         if($fuel_surcharge->exists()){
             $fuel_surcharge = $fuel_surcharge->first();
-            $fuel_charges = $fuel_surcharge->setting_value;
+            $fuel_charges = (float)$fuel_surcharge->text;
         }
         $exchange_rate_charges = '';
         $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
         if($exchange_rate->exists()){
             $exchange_rate = $exchange_rate->first();
-            $exchange_rate_charges = $exchange_rate->setting_value;
+            $exchange_rate_charges = (float)$exchange_rate->text;
         }
         $gst = '';
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
         if($gst_charges->exists()){
             $gst_charges = $gst_charges->first();
-            $gst = $gst_charges->setting_value;
+            $gst = (float)$gst_charges->text;
         }
        return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges, 'gst' => $gst]);
     }
@@ -3473,6 +3473,7 @@ class GlobalSettingsController extends Controller
             $fuel_surcharge_rate->type = 'international_fuel_surcharge';
         }
         $fuel_surcharge_rate->setting_value = $request->fuel_surcharge;
+        $fuel_surcharge_rate->text = $request->fuel_surcharge;
         $fuel_surcharge_rate->save();
         $exchange_rate_value = GlobalSettings::where('type', 'international_exchange_rate');
         if($exchange_rate_value->exists()){
@@ -3483,6 +3484,7 @@ class GlobalSettingsController extends Controller
             $exchange_rate_value->type = 'international_exchange_rate';
         }
         $exchange_rate_value->setting_value = $request->exchange_rate;
+        $exchange_rate_value->text = $request->exchange_rate;
         $exchange_rate_value->save();
 
         $gst = GlobalSettings::where('type', 'international_gst_rate');
@@ -3494,6 +3496,7 @@ class GlobalSettingsController extends Controller
             $gst->type = 'international_gst_rate';
         }
         $gst->setting_value = $request->gst;
+        $gst->text = $request->gst;
         $gst->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');

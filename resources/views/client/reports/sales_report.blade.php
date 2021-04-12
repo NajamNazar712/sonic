@@ -54,8 +54,17 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_service_type" id="search_service_type" class="form-control select2">
+                                @foreach($service_types as $service_type)
+                                    <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -66,7 +75,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Arrival Date (From)">
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -113,6 +122,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Order Date</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
@@ -249,6 +259,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_service_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Service Type',
+                width:'100%',
+                allowClear:true
+            });
 
 
             var from_date = $('#search_date_from').pickadate({
@@ -368,6 +383,7 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
+                            head.push('Vendor');
                             head.push('Order ID');
                             head.push('Order Date');
                             head.push('Consignee Name');
@@ -402,6 +418,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
+                                row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.order_date);
                                 row.push(values.consignee_name);
@@ -464,18 +481,20 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_status = $('#search_status').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_service_type = $('#search_service_type').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'order_date' ,name: 'sod.order_date', class: 'align-middle order_date'},
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
