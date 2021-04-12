@@ -1319,6 +1319,7 @@ class AdminMasterCargoController extends Controller
             NotificationsController::send(87, $master_cargo->destination_hub_id, url('/') . '/' . 'reports/master_cargo_'. str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT) .'.pdf');
             if($master_cargo_status_id == 6){
                 $text = 'Onward Forwarding';
+                NotificationsController::send(128,$master_cargo->id);
             }
             else{
                 $text = 'Master';
