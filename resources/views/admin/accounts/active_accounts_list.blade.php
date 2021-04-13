@@ -74,15 +74,22 @@
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
+                                        <th class="border-primary border-darken-1">Rate Added At</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
+                                        <th class="border-primary border-darken-1">Rate Approved At</th>
+                                        <th class="border-primary border-darken-1">Rates Rejected By</th>
+                                        <th class="border-primary border-darken-1">Rates Rejected At</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
+                                        <th class="border-primary border-darken-1">Documents Approved By</th>
                                         <th class="border-primary border-darken-1">Document Approved At</th>
+                                        <th class="border-primary border-darken-1">Documents Rejected By</th>
+                                        <th class="border-primary border-darken-1">Documents Rejected At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
@@ -435,15 +442,22 @@
                         head.push('REF Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
+                        head.push('Rates Added At');
                         head.push('Rates Updated By');
                         head.push('Rates Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Approved By');
+                        head.push('Rates Approved At');
+                        head.push('Rates Rejected By');
+                        head.push('Rates Rejected At');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
                         head.push('Account Disable Remarks');
                         head.push('Documents Uploaded At');
+                        head.push('Documents Approved By');
                         head.push('Documents Approved At');
+                        head.push('Documents Rejected By');
+                        head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
                         head.push('Intl Rates Status');
@@ -468,15 +482,22 @@
                             row.push(values.ref);
                             row.push(values.created_at);
                             row.push(values.added_by);
+                            row.push(values.rates_added_at);
                             row.push(values.updated_by);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.approved_by);
+                            row.push(values.rates_approved_at);
+                            row.push(values.rates_rejected_by);
+                            row.push(values.rates_rejected_at);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_remarks);
                             row.push(values.documents_uploaded_at);
+                            row.push(values.documents_approved_by);
                             row.push(values.documents_approved_at);
+                            row.push(values.documents_rejected_by);
+                            row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
                             row.push(values.international_rate_status);
@@ -992,15 +1013,22 @@
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
+                {data: 'rates_added_at', name: 'users.rates_added_at', class: 'align-middle rates_added_at'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
                 {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
+                {data: 'rates_approved_at', name: 'users.rates_approved_at', class: 'align-middle rates_approved_at'},
+                {data: 'rates_rejected_by', name: 'rrb.name', class: 'align-middle rates_rejected_by'},
+                {data: 'rates_rejected_at', name: 'users.rates_rejected_at', class: 'align-middle rates_rejected_at'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
+                {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},
                 {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at', searchable: false},
+                {data: 'documents_rejected_by', name: 'drb.name', class: 'align-middle documents_rejected_by', searchable: false},
+                {data: 'documents_rejected_at', name: 'uda,rejected_at', class: 'align-middle documents_rejected_at', searchable: false},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},

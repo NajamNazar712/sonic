@@ -479,7 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
-        Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
+        Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
