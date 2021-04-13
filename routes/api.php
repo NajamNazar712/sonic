@@ -26,7 +26,12 @@ Route::name('api.')->group(function () {
 			Route::post('book', 'APIController@shipment_book')->name('book');
 			Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
 			Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
-			Route::get('status', 'APIController@shipment_status')->name('status');
+
+            Route::prefix('status')->name('status.')->group(function() {
+                Route::get('', 'APIController@shipment_status')->name('status');
+                Route::get('order_id', 'APIController@shipment_status_order_id')->name('order_id');
+                Route::get('consingee_phone_number', 'APIController@shipment_status_consingee_phone_number')->name('consingee_phone_number');
+            });
 
             Route::prefix('track')->name('track.')->group(function() {
                 Route::get('', 'APIController@shipment_track')->name('track');

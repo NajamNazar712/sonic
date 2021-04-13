@@ -3384,8 +3384,8 @@ class AdminReportsController extends Controller
             $sales = $sales->whereIn('shipments.user_id',$search_shipper);
         }
 
-        if (session('role_id') != 1) {
-            if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('role_id') != 1 && session('role_id') != 4) {
+            if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
             else {
@@ -5193,8 +5193,8 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereNotIn('u.id', [8761, 9358]);
 
-        if (session('role_id') != 1) {
-            if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('role_id') != 1 && session('role_id') != 4) {
+            if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
             else {
