@@ -99,7 +99,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <select name="junction_1" class="select2 junction_1">
+                                                            <select name="junction_1" class="select2 junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
                                                             </select>
                                                         </div>
                                                     </div>
@@ -143,7 +143,7 @@
 
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>
+                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
@@ -155,7 +155,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit_form" class="btn btn-primary btn-block" value="submit_form">Submit</button>
+                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
                                             </div>
                                         </form>
                                     </div>
@@ -497,7 +497,7 @@
                             $('#cargo_consignment form .junction_1').val(data.junction_1);
                             $('#cargo_consignment form .junction_1').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1'
+                                placeholder: 'Junction 1*'
                             }).bind('change', function() {
                                 $(this).valid();
                             });
@@ -505,7 +505,7 @@
                         else{
                             $('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1'
+                                placeholder: 'Junction 1*'
                             }).bind('change', function() {
                                 $(this).valid();
                             });
@@ -601,10 +601,6 @@
                             }
                         });
                         $('#cargo_consignment form .transport_mode').val(2).trigger('change');
-                        $('#cargo_consignment form .transport_mode').prop("disabled", true);
-                        $('#cargo_consignment form .shipping_mode_select').val(1).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').prop("disabled",true);
                         UnblockPagePermanently();
                     }
                 });
@@ -656,8 +652,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                            $('#cargo_consignment form .transport_mode').prop("disabled", false);
-                            $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+
                             form.submit();
                         }
                         else {
