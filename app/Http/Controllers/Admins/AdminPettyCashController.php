@@ -224,8 +224,9 @@ class AdminPettyCashController extends Controller
 
             })
             ->addColumn('account_title', function ($petty_details) {
-
-                $titles = PettyCashAccountTitle::select('id', 'name')->get();
+                $account_head_id = $petty_details->account_head_id;
+                $petty_cash_account_title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id', $account_head_id)->pluck('petty_cash_account_title_id')->toArray();
+                $titles = PettyCashAccountTitle::select('id', 'name')->whereIn('id', $petty_cash_account_title_ids)->get();
                 $drops = '';
                 $selected = '';
                 foreach ($titles as $status) {
