@@ -231,6 +231,16 @@
                                                 <input type="text" id="bolt_pin" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" >
                                             </div>
                                         </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Reporting Location</label>
+                                                <select name="reporting_location" id="reporting_location" class="select2 form-control " style="width: 100%">
+                                                    @foreach($reporting_locations as $reporting_location)
+                                                        <option value="{{$reporting_location->id}}">{{$reporting_location->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -1337,6 +1347,13 @@
                 width:'100%',
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
+
+
+            $("#reporting_location").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reporting Location",
+                width:'100%',
+            });
+            $("#reporting_location").val("{{$employee->reporting_location_id ?? ''}}").trigger('change');
 
             $("#place_of_birth").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Place of Birth",

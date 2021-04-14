@@ -2810,6 +2810,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
         });
 
+        Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@reporting_location_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@reporting_location_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@reporting_location_status')->name('status');
+            Route::post('add_location', 'Admins\AdminHumanResourseController@reporting_location_add')->name('add_location');
+            Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
