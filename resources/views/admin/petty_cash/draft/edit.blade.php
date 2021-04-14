@@ -136,7 +136,31 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        let main_hub = '';
+        let main_hub_id = '';
         $(document).ready(function () {
+            $('#select_statement_hub').on('change',function () {
+                var value = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: '{!! route('admin.petty_cash.make.destination') !!}', // script to validate in server side
+                    data: {hub_id: value,'_token': '{!! csrf_token() !!}'},
+                    success: function (response) {
+                        if(response.status == 1)
+                        {
+                            main_hub = response.data.name;
+                            main_hub_id = response.data.id;
+                        }
+                        else{
+                            main_hub = '';
+                            main_hub_id = '';
+                        }
+                        $('.hub_select').val(main_hub);
+                        $('.hub_select_id').val(main_hub_id);
+                    }
+                });
+            });
+
             $('.reference_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -153,6 +177,8 @@
             $('#select_statement_hub').val('{!! $petty_statement_draft->hub_id!!}').trigger('change');
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
             var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
+
+
 
             $('#edit_statement_form #select_date_from').pickadate({
                 firstDay: 1,
@@ -263,7 +289,7 @@
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var hub_select = '<input type="hidden" value="'+main_hub_id+'" class="hub_select_id"  name="hub['+rows_count+']"></input><input type="text" readonly value="'+main_hub+'" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
@@ -663,6 +689,7 @@
                         var head = '{{$data->account_head_id}}';
                         var title = '{{$data->account_title_id}}';
                         var hub = '{{$data->hub_id}}';
+                        var hub_name = '{{$data->hub->name}}';
                         var date = '{{$data->date}}';
                         var expense = '{{str_replace(array("\n", "\r"), '',$data->expense_details)}}';
                         var amount = '{{$data->amount}}';
@@ -670,18 +697,18 @@
                         var remarks = '{{str_replace(array("\n", "\r"), '',$data->remarks)}}';
                         var reference_document = $.trim('{{$data->reference_document}}');
 
-                    load_row(head, title, hub, date, expense, amount, reference_no, remarks, reference_document);
+                    load_row(head, title, hub,hub_name, date, expense, amount, reference_no, remarks, reference_document);
                 @endforeach
             }
             load_data();
 
-            function load_row(head, title, hub, date, expense, amount, reference, remarks, reference_document) {
+            function load_row(head, title, hub,hub_name, date, expense, amount, reference, remarks, reference_document) {
                 var image_url = '{{asset('/storage/petty_cash_statement_details_draft')}}';
                 rows_count++;
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var hub_select = '<input type="hidden" value="'+hub+'" class="hub_select_id"  name="hub['+rows_count+']"></input><input type="text" readonly value="'+hub_name+'" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required" data-value="'+ date +'"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">'+ expense +'</textarea>';
