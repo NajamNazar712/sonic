@@ -81,6 +81,7 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Delivered</th>
                             <th class="border-primary border-darken-1">Delivered %</th>
@@ -230,6 +231,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.route_distribution.list') }}',
                         data: params,
@@ -239,6 +241,7 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
+                            head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Delivered');
                             head.push('Delivered %');
@@ -252,6 +255,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.courier_name);
+                                row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
                                 row.push(values.delivered_shipments_per);
@@ -265,6 +269,7 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(delivered_shipments.toFixed(2));
                             footer.push(delivered_shipments_per.toFixed(2));
@@ -281,7 +286,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -317,6 +322,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
+                    { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'delivered_shipments', class: 'align-middle delivered_shipments', orderable: false, searchable: false},
                     { data:'delivered_shipments_per', class: 'align-middle delivered_shipments_per', orderable: false, searchable: false},

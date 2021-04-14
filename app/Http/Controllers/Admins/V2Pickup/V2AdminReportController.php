@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -196,7 +197,7 @@ class V2AdminReportController extends Controller
     }    
 
     public function pickup_report_index(){
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),207);
         $stats = array();
         $today = Carbon::today();  
         
@@ -235,6 +236,10 @@ class V2AdminReportController extends Controller
     }
 
     public function pickup_report_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),208);
+        }
         $today = Carbon::today();
         $pickup_report = V2PickupReport::join('v2_pickup_requests as v', 'v2_pickup_reports.pickup_request_id', '=', 'v.id')
              ->leftjoin('v2_pickup_request_statuses as vprs','vprs.id','=','v2_pickup_reports.status_id')

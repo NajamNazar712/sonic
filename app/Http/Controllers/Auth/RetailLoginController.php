@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
 
 class RetailLoginController extends Controller
@@ -67,5 +70,56 @@ class RetailLoginController extends Controller
         }
         return redirect()->route('retail.login');
 
+    }
+
+    public function radius_check(Request $request){
+        $retail_user = RetailUser::where('name', $request->name);
+        if($retail_user->exists()){
+            $retail_user = $retail_user->first();
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
+        if(Hash::check($request->input('password'), $retail_user->password)){
+            $retail_store = $retail_user->store;
+            $user_lat = $request->lat;
+            $user_lng = $request->lng;
+            $store_lat = $retail_store->location_latitude;
+            $store_lng = $retail_store->location_longitude;
+            $km = ( 6371 * acos( cos( deg2rad($user_lat) )
+                    * cos( deg2rad( $store_lat ) )
+                    * cos( deg2rad( $store_lng ) - deg2rad($user_lng) ) + sin( deg2rad($user_lat) )
+                    * sin( deg2rad( $store_lat ) ) ) );
+            $meters = $km * 1000;
+            if($meters <= 200){
+                $otp = mt_rand(100000,999999);
+                $retail_user->otp = $otp;
+                $retail_user->save();
+                NotificationsController::send(129, $retail_user, $otp);
+                return response()->json(['status' => 1, 'km' => $km, 'meters' => $meters]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Location not matched!', 'km' => $km, 'meters' => $meters, 'lat' => $user_lat, 'lng' => $user_lng]);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
+    }
+
+    public function verify_otp(Request $request){
+        $retail_user = RetailUser::where('name', $request->name);
+        if($retail_user->exists()){
+            $retail_user = $retail_user->first();
+            if($retail_user->otp == $request->otp){
+                return response()->json(['status' => 1]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
     }
 }

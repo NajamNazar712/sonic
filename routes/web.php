@@ -299,11 +299,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('verify_pincode','Shippers\ShipperDashboardController@verifyPincode')->name('verify.pin.code');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
+    Route::post('editpickup','Shippers\ShipperDashboardController@editPickup')->name('edit.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
     Route::get('contacts','Shippers\ShipperDashboardController@contacts')->name('contacts');
     Route::post('update_invoice_sort','Shippers\ShipperDashboardController@update_invoice_sort')->name('update_invoice_sort');
+    Route::get('/phone_unique', 'Shippers\ShipperDashboardController@shipper_phone_unique')->name('profile.shipper_phone_unique');
 
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
@@ -400,6 +402,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return redirect()->route('admin.login');
     });
 
+    Route::prefix('activity_trail')->name('activity_trail.')->group(function () {
+        Route::get('', 'Admins\ActivityTrailController@activity_trail_index')->name('index');
+        Route::get('list', 'Admins\ActivityTrailController@activity_trail_list')->name('list');
+    });
+
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
 
@@ -488,7 +495,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
-
+        Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
+        Route::post('active_today/ajax', 'Admins\AdminDashboardController@todayActiveAccountListAjax')->name('active.today.ajax');
+        
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
             Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
@@ -2049,6 +2058,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@weight_qc_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@weight_qc_list')->name('list');
         });
+        Route::prefix('master_cargo')->name('master_cargo.')->group(function (){
+            Route::prefix('bag')->name('bag.')->group(function (){
+                Route::prefix('in_transit')->name('in_transit.')->group(function (){
+                    Route::get('', 'Admins\AdminReportsController@in_transit_index')->name('index');
+                    Route::get('list', 'Admins\AdminReportsController@in_transit_list')->name('list');
+                    Route::post('shipments', 'Admins\AdminReportsController@in_transit_shipments')->name('shipments');
+                    Route::post('short_received', 'Admins\AdminReportsController@short_received_shipments')->name('short_received');
+                });
+            });
+            Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@master_cargo_short_received_shipments_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@master_cargo_short_received_shipments_list')->name('list');
+            });
+            
+        });
+
     });
 
     //Reports end
@@ -2502,7 +2527,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
-            Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
+                Route::get('', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_index')->name('index');
             Route::get('list', 'Admins\AdminReceivingSheetHistoryController@receiving_sheet_list')->name('list');
             Route::post('print', 'Admins\AdminReceivingSheetHistoryController@print')->name('print');
         });
@@ -2740,6 +2765,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@franchise_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
+            Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function(){
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -2747,8 +2773,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@trax_center_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
+            Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
         });
         Route::prefix('users')->name('users.')->group(function(){
+            Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@user_list')->name('list');
+            Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@user_enable_disable')->name('status');
+            Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@user_add')->name('add');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
         });
 
@@ -2796,6 +2827,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
     Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
     Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
+    Route::post('/radius', 'Auth\RetailLoginController@radius_check')->name('login.radius');
+    Route::post('/verify_otp', 'Auth\RetailLoginController@verify_otp')->name('login.verify_otp');
     Route::post('/logout','Auth\RetailLoginController@logout')->name('logout');
     Route::get('/dashboard', 'Retail\RetailDashboardController@dashboard')->name('dashboard.index');
 

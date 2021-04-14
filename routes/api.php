@@ -76,9 +76,16 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
+		Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
 		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
+
+        Route::prefix('register_request')->name('register_request.')->group(function () {
+            Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
+        });
 
 		Route::middleware('RiderAPIToken')->group(function () {
 			Route::prefix('pickup')->name('pickup.')->group(function () {
@@ -134,11 +141,13 @@ Route::name('api.')->group(function () {
                 Route::post('undelivered', 'Rider\RiderAPIController@return_shipment_undelivered')->name('undelivered');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@return_shipment_undelivered_v2')->name('undelivered_v2');
+                Route::post('undelivered_v3', 'Rider\RiderAPIController@return_shipment_undelivered_v3')->name('undelivered_v3');
                 Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
             Route::get('rider_profile', 'Rider\RiderAPIController@rider_profile')->name('rider_profile');
+            Route::get('notification_history', 'Rider\RiderAPIController@notification_history')->name('notification_history');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
@@ -152,7 +161,13 @@ Route::name('api.')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
+        Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::prefix('register_request')->name('register_request.')->group(function () {
+            Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::post('store', 'AdminAPIController@admin_signup')->name('store');
+            Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
+        });
 
         Route::middleware('AdminAPIToken')->group(function () {
             Route::post('verify', 'AdminAPIController@verify')->name('verify');

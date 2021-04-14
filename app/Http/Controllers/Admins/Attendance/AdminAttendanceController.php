@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Attendance;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -24,6 +25,7 @@ class AdminAttendanceController extends Controller
     }
 
     public function admin_attendance_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),56);
         $cities = City::select('id','name')->get();
         $departments = AdminDepartment::select('id','name')->get();
         $users = Admin::select('id','name')->get();
@@ -36,6 +38,10 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),116);
+        }
         $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')

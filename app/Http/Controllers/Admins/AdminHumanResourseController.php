@@ -34,7 +34,7 @@ use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 use Auth;
 
 class AdminHumanResourseController extends Controller
@@ -52,17 +52,19 @@ class AdminHumanResourseController extends Controller
     }
     public function allusers()
     {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),54);
         // $riders = Rider::where('status', 1)->get();
         //         $admins = Admin::where('status', 1)->get();
         $roles = ['Admin', 'Rider'];
         $roles = collect($roles);
         return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
-    public function all_user_ajax()
+    public function all_user_ajax(Request $request)
     {
-
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),114);
+        }
         $assigned_hubs = session('hubs');
         if (session('role_id') != 1) {
             if (count($assigned_hubs) > 0) {
@@ -183,6 +185,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),57);
         $rider_type = RiderType::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
@@ -191,6 +194,10 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),117);
+        }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
@@ -222,12 +229,8 @@ class AdminHumanResourseController extends Controller
                     }
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
-                            if($result->employee_type_id == 2){
-                                $dropdown .= '<button type="button" class="dropdown-item approve_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                            }
-                            else{
-                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                            }
+
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
 
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
@@ -304,7 +307,7 @@ class AdminHumanResourseController extends Controller
         $maritial_statuses = EmployeeMaritalStatus::all();
         $blood_groups = EmployeeBloodGroup::all();
         $designations = EmployeeDesignation::all();
-        $hubs = City::where('hub',1)->get();
+        $cities = City::where('status',1)->where('business_category_id',1)->get();
         $zones = Zone::where('status', 1)->get();
         $departments = AdminDepartment::all();
         $relationships = EmployeeRelationship::all();
@@ -315,7 +318,8 @@ class AdminHumanResourseController extends Controller
         $educations = $employee->education_infos;
         $employments = $employee->employment_history;
         $attachments = $employee->attachments;
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships'));
+        $place_of_birth_cities = City::where('business_category_id',1)->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships', 'place_of_birth_cities','cities'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -333,13 +337,15 @@ class AdminHumanResourseController extends Controller
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
         $employee->designation_id = $request->designation;
-        $employee->city_id = $request->hub;
+        $employee->city_id = $request->city;
         $employee->department_id = $request->department;
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
         $employee->sonic_id = $request->sonic_id;
         $employee->pin = $request->bolt_pin;
+        $employee->place_of_birth = $request->place_of_birth;
+        $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->update();
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
@@ -477,19 +483,19 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_attachments_update(Employee $employee, Request $request)
     {
         $request->validate([
-            'cv'=>'mimes:pdf',
-            'academic_credentials'=>'mimes:pdf',
-            'cnic'=>'mimes:png,jpeg,jpg',
-            'photo'=>'mimes:png,jpeg,jpg',
-            'experience_certificates'=>'mimes:png,jpeg,jpg',
-            'pay_slip'=>'mimes:png,jpeg,jpg',
-            'nikkah_nama'=>'mimes:png,jpeg,jpg',
-            'cnic_spouse'=>'mimes:png,jpeg,jpg',
-            'bform'=>'mimes:png,jpeg,jpg',
-            'cnic_nominee'=>'mimes:png,jpeg,jpg',
-            'utility_bill'=>'mimes:png,jpeg,jpg',
-            'affidavit'=>'mimes:png,jpeg,jpg',
-            'cheque'=>'mimes:png,jpeg,jpg',
+            'cv'=>'mimes:pdf,png,jpeg,jpg',
+            'academic_credentials'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic'=>'mimes:pdf,png,jpeg,jpg',
+            'photo'=>'mimes:pdf,png,jpeg,jpg',
+            'experience_certificates'=>'mimes:pdf,png,jpeg,jpg',
+            'pay_slip'=>'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse'=>'mimes:pdf,png,jpeg,jpg',
+            'bform'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee'=>'mimes:pdf,png,jpeg,jpg',
+            'utility_bill'=>'mimes:pdf,png,jpeg,jpg',
+            'affidavit'=>'mimes:pdf,png,jpeg,jpg',
+            'cheque'=>'mimes:pdf,png,jpeg,jpg',
         ]);
         if($employee->attachments()->exists())
         {

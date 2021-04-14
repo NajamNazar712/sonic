@@ -84,6 +84,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
+
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -1790,6 +1792,7 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),50);
         $sales = DB::table('admins')->whereExists(function ($query) {
             $query->from('admin_roles')
                 ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
@@ -1850,6 +1853,10 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),110);
+        }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
             ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
 
@@ -1859,11 +1866,16 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_history()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),51);
         return view('admin.settings.sales_person.history');
     }
 
     public function sales_person_targets_history_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),111);
+        }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
             ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');

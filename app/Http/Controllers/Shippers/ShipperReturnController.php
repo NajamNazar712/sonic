@@ -305,12 +305,12 @@ class ShipperReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     AdminFinanceController::add_payment($request->shipment_id, 1);
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                    if($return_assign_shipment->exists()){
-                        $return_assign_shipment = $return_assign_shipment->latest()->first();
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
-                    }
+//                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+//                    if($return_assign_shipment->exists()){
+//                        $return_assign_shipment = $return_assign_shipment->latest()->first();
+//                        $return_assign_shipment->status = 0;
+//                        $return_assign_shipment->save();
+//                    }
 
                 }
                 else {

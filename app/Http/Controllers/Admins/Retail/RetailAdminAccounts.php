@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Retail;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipment;
@@ -19,11 +20,17 @@ class RetailAdminAccounts extends Controller
     }
 
     public function index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),3);
         $banks = BanksList::where('status',1)->get();
       return view('admin.retail.accounts.index')->with(['banks' => $banks]);
     }
 
-    public function list(){
+    public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),63);
+        }
         $retail_shipper_info = RetailShipperInfo::leftjoin('cities as c','c.id','=','retail_shipper_infos.city_id')
             ->leftjoin('banks_lists as b','b.id','=','retail_shipper_infos.bank_id')
         ->select('retail_shipper_infos.id as id','retail_shipper_infos.shipper_name as shipper','retail_shipper_infos.shipper_address as address','retail_shipper_infos.shipper_phone_no as number','city_id','retail_shipper_infos.completed_status as document_status','c.name as city','retail_shipper_infos.created_at as added_at','retail_shipper_infos.iban as iban');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Retail;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
@@ -21,17 +22,23 @@ class RetailCashCollectionController extends Controller
     }
 
     public function retail_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),22);
         return view('admin.retail.pending_cash_collection.index');
     }
 
     public function retail_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),82);
+        }
+
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
-            ->leftjoin('retail_franchises as rf', 'rf.user_id', '=', 'ru.id')
-            ->leftjoin('retail_trax_centers as rc', 'rc.user_id', '=', 'ru.id')
+            ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
+            ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
             ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status'])
            ->whereIn('retail_pickup_notes.status', [1,2,3])
            ->where('retail_pickup_notes.pncc_status', '=', 0);

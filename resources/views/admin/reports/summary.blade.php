@@ -253,6 +253,7 @@
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Booking Date</th>
 
+
                         </tr>
                         </thead>
                     </table>
@@ -433,6 +434,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.summary.list') }}',
                         data: params,
@@ -457,6 +459,7 @@
                             head.push('Booking Date');
 
 
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -476,6 +479,7 @@
                                 row.push(values.consignee_address);
                                 row.push(values.collection_amount);
                                 row.push(values.booking_date);
+
                                 body.push(row);
                             });
                         },
@@ -517,7 +521,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -535,6 +539,7 @@
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data: 'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
                     { data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
