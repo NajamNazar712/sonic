@@ -5413,7 +5413,7 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
-    public function revenue_excel_download(){
+    public static function revenue_excel_download(){
         $now = Carbon::now();
         $to = $now->year."-".$now->month."-01".' 00:00:00';
         $from = $now->year."-".($now->month-1)."-01".' 00:00:00';
@@ -5475,7 +5475,6 @@ class AdminReportsController extends Controller
             ->whereBetween('sj.created_at', [$from,$to])
             ->get();
 
-        return $sales;
 
         $filename = 'sonic_monthly_shipper_revenue_report.xlsx';
 
@@ -5486,10 +5485,12 @@ class AdminReportsController extends Controller
         $serial_number = 1;
         foreach ($sales as $index => $sale)
         {
-            $insurance_charges = number_format($sale->insurance_charges, 2);
             if ($sale->dr_status_id == 20)
             {
                 $cash_handling_charges = "-";
+                $return_charges =  number_format($sale->return_charges, 2);
+                $replacement_charges =  "-";
+                $try_and_buy_charges = "-";
             }
             else{
                 if($sale->cash_handling_charges != null){
@@ -5498,79 +5499,157 @@ class AdminReportsController extends Controller
                 else{
                     $cash_handling_charges = "-";
                 }
-            }
-            $account_number = str_pad($sale->account_no, 6, '0', STR_PAD_LEFT);
-            if ($shipment->dr_status_id != 20) {
                 $return_charges =  "-";
+                $replacement_charges =  number_format($sale->replacement_charges, 2);
+                $try_and_buy_charges =  number_format($sale->try_and_buy_charges, 2);
             }
-            else {
-                $return_charges =  number_format($sale->return_charges, 2);
-            }
+
+            $insurance_charges = number_format($sale->insurance_charges, 2);
+            $account_number = str_pad($sale->account_no, 6, '0', STR_PAD_LEFT);
             $intercept_charges = number_format($sale->intercept_charges, 2);
             $weight_charges = number_format($sale->weight_charges, 2);
             $fuel_surcharge = number_format($sale->fuel_surcharge, 2);
-            if ($sale->dr_status_id == 20) {
-                $replacement_charges =  "-";
-            }
-            else {
-                $replacement_charges =  number_format($sale->replacement_charges, 2);
-            }
-            if ($sale->dr_status_id == 20) {
-                $try_and_buy_charges = "-";
-            }
-            else {
-                $try_and_buy_charges =  number_format($sale->try_and_buy_charges, 2);
-            }
             $nsa_osa_charges = number_format($sale->nsa_osa_charges, 2);
             $packaging_material_charges = number_format($sale->packaging_material_charges, 2);
             $p_total_charges = number_format($sale->p_total_charges, 2);
             $d_total_charges = number_format($sale->d_total_charges, 2);
-
-
+            $p_net_payable = number_format($sale->p_net_payable, 2);
+            $d_net_payable = number_format($sale->d_net_payable, 2);
+            $d_gst = number_format($sale->d_gst, 2);
+            $packaging_charges = number_format($sale->packaging_charges, 2);
+            $s_collection_amount = number_format($sale->s_collection_amount, 2);
+            $d_collection_amount = number_format($sale->d_collection_amount, 2);
+            if ($sale->booking_type_id == 4) {
+                $shipper = $sale->shipper .' (' . $sale->poc . ')';
+            }
+            else {
+                $shipper = $sale->shipper;
+            }
+            $amount = '';
+            if($sale->p_collection_amount != null){
+                $amount = $sale->p_collection_amount;
+            }else if($sale->d_collection_amount != null){
+                $amount = $sale->d_collection_amount;
+            }else{
+                $amount = $sale->s_collection_amount;
+            }
+            $collection_amount = number_format($amount);
+            $gst = '';
+            if($sale->account_type_id == 1){
+                if($sale->p_gst != null){
+                    $gst = $sale->p_gst;
+                }else if($sale->d_gst != null){
+                    $gst = $sale->d_gst;
+                }
+            }
+            else{
+                if($sale->pis_gst != null){
+                    $gst = $sale->pis_gst;
+                }else if($sale->is_gst != null){
+                    $gst = $sale->is_gst;
+                }
+            }
+            $gst = number_format((float)$gst, 2);
+            $total = '';
+            if($sale->p_total_charges != null){
+                $total = $sale->p_total_charges;
+            }else if($sale->d_total_charges != null){
+                $total = $sale->d_total_charges;
+            }
+            $total_charges = number_format((float)$total, 2);
+            $estimated = '';
+            $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0) + (($sale->intercept_charges != null)? $sale->intercept_charges:0);
+            $estimated_charges =  number_format((float)$estimated, 2);
+            $payable = '';
+            if($sale->p_net_payable != null){
+                $payable = $sale->p_net_payable;
+            }else if($sale->d_net_payable != null){
+                $payable = $sale->d_net_payable;
+            }
+            $net_payable = number_format((float)$payable, 2);
+            $class = '';
+            if ($sale->origin_city_id != $sale->destination_city_id) {
+                switch ($sale->class) {
+                    case 0:
+                        $class = 'Class A';
+                        break;
+                    case 1:
+                        $class = 'Class B';
+                        break;
+                    case 2:
+                        $class = 'Class C';
+                        break;
+                    case 3:
+                        $class = 'Class D';
+                        break;
+                }
+            }else{
+                $class = 'Local';
+            }
 
             $row = array();
 
             $row[] = $serial_number;
             $row[] = $sale->tracking_number;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
-            $row[] = ;
+            $row[] = $account_number;
+            $row[] = $sale->buisness_category;
+            $row[] = $shipper;
+            $row[] = $sale->order_id;
+            $row[] = $sale->current_status;
+            $row[] = $sale->payment_status;
+            $row[] = $sale->payment_number;
+            $row[] = $sale->sdn_number;
+            $row[] = $sale->service_type;
+            $row[] = $sale->arrival_date;
+            $row[] = $sale->origin;
+            $row[] = $sale->destination;
+            $row[] = $sale->hub;
+            $row[] = $sale->zone;
+            $row[] = $class;
+            $row[] = $sale->shipping_mode;
+            $row[] = $collection_amount;
+            $row[] = $sale->actual_weight;
+            $row[] = $sale->chargeable_weight;
+            $row[] = $weight_charges;
+            $row[] = $cash_handling_charges;
+            $row[] = $insurance_charges;
+            $row[] = $packaging_material_charges;
+            $row[] = $fuel_surcharge;
+            $row[] = $return_charges;
+            $row[] = $replacement_charges;
+            $row[] = $packaging_charges;
+            $row[] = $try_and_buy_charges;
+            $row[] = $nsa_osa_charges;
+            $row[] = $intercept_charges;
+            $row[] = $gst;
+            $row[] = $total_charges;
+            $row[] = $estimated_charges;
+            $row[] = $net_payable;
+            $row[] = $sale->delivered_or_returned;
 
             $details[] = $row;
             $serial_number++;
         }
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
+
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
     }
     public function gst_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),171);

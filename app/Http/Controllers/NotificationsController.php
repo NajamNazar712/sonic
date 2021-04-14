@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
@@ -7238,6 +7239,29 @@ class NotificationsController extends Controller
                     }
                     $to = $retail_user->phone_no;
                     self::sms($body,$to);
+                }
+				else if($id == 130) {
+                    $now = Carbon::now();
+                    $to_date = $now->year . "-" . $now->month . "-01";
+                    $from_date = $now->year . "-" . ($now->month - 1) . "-01";
+
+                    if (strpos($subject, '[from]') !== FALSE) {
+                        $subject = str_replace('[from]', $from_date, $subject);
+                    }
+
+                    if (strpos($subject, '[to]') !== FALSE) {
+                        $subject = str_replace('[to]', $to_date, $subject);
+                    }
+
+                    $link = AdminReportsController::revenue_excel_download();
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['fawad.ahmed@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+
+                    self::email($subject, $body, $to);
                 }
             }
         }
