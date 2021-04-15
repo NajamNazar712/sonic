@@ -708,11 +708,13 @@ class RiderManagementController extends Controller
                 ->withErrors($validate);
         }
         $employee = Employee::where('rider_request_id', $request->rider_request_id);
+        $employee_id = null;
         if($employee->exists()){
             $employee = $employee->first();
             $employee->status_id = 1;
             $employee->save();
             $trax_id = $employee->trax_id;
+            $employee_id = $employee->id;
         }
         else{
             $global_setting = GlobalSettings::where('type', 'latest_employee_id');
@@ -741,6 +743,7 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
+            'employee_id' => $employee_id,
             'rider_type_id'  => $request->rider_type,
             'operation_rider_id'  => $request->category
         ]);
