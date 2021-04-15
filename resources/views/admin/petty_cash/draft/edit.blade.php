@@ -719,7 +719,12 @@
                 if(reference_document != ''){
                     upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document +'" target="_blank">View</a></button><input type="hidden" name="image_'+ rows_count +'" value="'+reference_document+'">';
                 }
-                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Reference Document is required"  value="'+reference_document+'" value=""></div>';
+                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."';
+                if(reference_document == ''){
+                    upload_image += ' data-rule-required="true" data-msg-required="Reference Document is required"';
+                }
+
+                upload_image += '  value="'+reference_document+'" value=""></div>';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
