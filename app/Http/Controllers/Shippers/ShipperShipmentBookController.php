@@ -2511,7 +2511,7 @@ class ShipperShipmentBookController extends Controller
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
+        $charges_modes = ChargesModes::whereIn('id', [3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
         if($air_waybill->exists()){
@@ -3268,7 +3268,7 @@ class ShipperShipmentBookController extends Controller
         $products = Product::all();
         $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
-        $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
+        $charges_modes = ChargesModes::whereIn('id', [3])->get();
         $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
 
         $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -3445,7 +3445,7 @@ class ShipperShipmentBookController extends Controller
             })->where('hidden', 0)],
             'delivery_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2,3]);
+                $query->whereIn('id', [3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
@@ -3953,7 +3953,7 @@ class ShipperShipmentBookController extends Controller
                 })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
                 $products = Product::pluck('product_name','id');
                 $delivery_types = DeliveryType::pluck('delivery_type','id');;
-                $charges_modes = ChargesModes::whereIn('id' , [2, 3])->pluck('charges_mode','id');
+                $charges_modes = ChargesModes::whereIn('id' , [3])->pluck('charges_mode','id');
 
                 $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
 
