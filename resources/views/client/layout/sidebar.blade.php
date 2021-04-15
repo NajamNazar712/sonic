@@ -4,10 +4,6 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
 
-            @if (session('user_id') == 3324)
-                <li class=" nav-item"><a href="{{route('cod.telenor.data_conversion.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Telenor - Data Conversion</span></a></li>
-            @endif
-
             @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
