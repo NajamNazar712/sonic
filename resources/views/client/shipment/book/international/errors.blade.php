@@ -294,11 +294,11 @@
 
             $('.phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
 
-            $('.postal_code').inputmask({
+            /*$('.postal_code').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            });
+            });*/
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');
