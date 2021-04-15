@@ -244,8 +244,32 @@ class AdminPettyCashController extends Controller
 
             })
             ->addColumn('hub_name', function ($petty_details) {
-                $input = '<input type="hidden" value="" class="hub_select_id"  name="hub['.$petty_details->statement_detail_id.']"></input><input type="text" readonly value="" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
-                return $input;
+                if ($petty_details->hub_id != null) {
+                    $hubs = City::select('id', 'name')->get();
+                    $drops = '';
+                    $selected = '';
+                    foreach ($hubs as $hub) {
+                        if ($hub->id == $petty_details->hub_id) {
+                            $selected = 'selected';
+                        } else {
+                            $selected = '';
+                        }
+                        $drops .= '<option value="' . $hub->id . '" ' . $selected . '>' . $hub->name . '</option>';
+                    }
+                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
+                    return $select;
+                } else {
+                    $hubs = City::where('hub', 1)->select('id', 'name')->get();
+                    $drops = '';
+
+                    foreach ($hubs as $hub) {
+                        $drops .= '<option value="" selected></option>';
+                        $drops .= '<option value="' . $hub->id . '">' . $hub->name . '</option>';
+                    }
+                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
+                    return $select;
+                }
+
             })
             ->editColumn('date', function ($petty_details) {
                 return Carbon::parse($petty_details->date)->toDateString();
@@ -1500,8 +1524,6 @@ class AdminPettyCashController extends Controller
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details_draft/' . $filename);
 
                                 $petty_cash_draft_detail->reference_document = $filename;
-
-
                             }
                         }
 
@@ -1593,7 +1615,7 @@ class AdminPettyCashController extends Controller
 
     public function create_shipment($petty_cash_statement_id)
     {
-            $user_id = 1690;
+        $user_id = 1690;
         $user = User::find($user_id);
 
         if ($petty_cash_statement_id) {
