@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
+use App\Http\Models\HR\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -206,6 +207,8 @@ class UserManagementController extends Controller
 
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
+            $employee = Employee::where('trax_id', $request->trax_id);
+
         }
         else{
             $global_setting = GlobalSettings::where('type', 'latest_employee_id');
