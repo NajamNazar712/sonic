@@ -574,8 +574,6 @@
                             main_hub = '';
                             main_hub_id = '';
                         }
-                        console.log(main_hub);
-                        console.log(response.status);
                         $('.hub_select').val(main_hub);
                         $('.hub_select_id').val(main_hub_id);
                     }
