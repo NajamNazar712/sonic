@@ -2810,6 +2810,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
         });
 
+        Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@reporting_location_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@reporting_location_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@reporting_location_status')->name('status');
+            Route::post('add_location', 'Admins\AdminHumanResourseController@reporting_location_add')->name('add_location');
+            Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
+        });
+
+        Route::prefix('designation')->name('designation.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@designation_status')->name('status');
+            Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
+        });
+        Route::prefix('department')->name('department.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@department_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@department_list')->name('list');
+            Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {

@@ -5110,7 +5110,8 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses,'shipping_modes'=>$shipping_modes]);
+        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        return view('admin.reports.revenue')->with(['business_categories'=>$business_categories,'shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses,'shipping_modes'=>$shipping_modes]);
     }
     public function revenue_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -5406,6 +5407,9 @@ class AdminReportsController extends Controller
             $datatable->whereRaw('false');
         }
 
+        if($search_business_category = $request->get('search_business_category')){
+            $datatable->where('shipments.business_category_id', '=', $search_business_category);
+        }
         return $datatable->make(true);
     }
     public function gst_index(){
