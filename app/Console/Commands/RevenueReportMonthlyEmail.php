@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 
@@ -38,6 +39,10 @@ class RevenueReportMonthlyEmail extends Command
      */
     public function handle()
     {
-        NotificationsController::send(130,null);
+        $response = AdminReportsController::revenue_excel_download();
+        if($response)
+        {
+            NotificationsController::send(130,null);
+        }
     }
 }

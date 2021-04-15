@@ -7253,7 +7253,8 @@ class NotificationsController extends Controller
                         $subject = str_replace('[to]', $to_date, $subject);
                     }
 
-                    $link = AdminReportsController::revenue_excel_download();
+                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
