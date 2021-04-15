@@ -410,7 +410,7 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 130)
         {
-            $details['fields'] = ['from','to','link'];
+            $details['fields'] = ['month','year','link'];
         }
 
 		return $details;

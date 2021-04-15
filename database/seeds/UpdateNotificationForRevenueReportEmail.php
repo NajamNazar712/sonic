@@ -14,7 +14,7 @@ class UpdateNotificationForRevenueReportEmail extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 130, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Revenue Monthly Report', 'type_id' => 1, 'subject' => ' Revenue Monthly Report  | (Dated: [from] - [to])' , 'body' => 'Dear Concern,'. PHP_EOL .PHP_EOL.'Please download the report from the following link: [link].', 'updated_by' => 7, 'status' => 0)
+            array('id' => 130, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Revenue Monthly Report', 'type_id' => 1, 'subject' => ' Revenue Monthly Report  | (For Month Of [month] [year])' , 'body' => 'Dear Concern,'. PHP_EOL .PHP_EOL.'Please download the report from the following link: [link].', 'updated_by' => 7, 'status' => 0)
         ));
     }
 }

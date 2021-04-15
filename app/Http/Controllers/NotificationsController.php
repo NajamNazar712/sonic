@@ -7242,19 +7242,18 @@ class NotificationsController extends Controller
                 }
 				else if($id == 130) {
                     $now = Carbon::now();
-                    $to_date = $now->year . "-" . $now->month . "-01";
-                    $from_date = $now->year . "-" . ($now->month - 1) . "-01";
+                    $month = $now->subMonth()->format('F');
 
-                    if (strpos($subject, '[from]') !== FALSE) {
-                        $subject = str_replace('[from]', $from_date, $subject);
+                    if (strpos($subject, '[month]') !== FALSE) {
+                        $subject = str_replace('[month]', $month, $subject);
                     }
 
-                    if (strpos($subject, '[to]') !== FALSE) {
-                        $subject = str_replace('[to]', $to_date, $subject);
+                    if (strpos($subject, '[year]') !== FALSE) {
+                        $subject = str_replace('[year]', $now->year, $subject);
                     }
 
                     $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
