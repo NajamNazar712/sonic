@@ -767,4 +767,133 @@ class AdminHumanResourseController extends Controller
         $location->save();
         return redirect()->back()->with('success', 'Location Updated Successfully!');
     }
+    public function designation_index(){
+        return view('admin.human_resource.designation');
+    }
+
+    public function designation_list(Request $request){
+        $designations = EmployeeDesignation::select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description']);
+
+        return Datatables::of($designations)
+            ->editColumn('status', function ($data) {
+                if($data->status == 0){
+                    return 'In-Active';
+                }
+                else{
+                    return 'Active';
+                }
+            })
+            ->addColumn("action", function ($data) {
+                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(468, session('permissions'))){
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                        if($data->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function designation_status(Request $request){
+        $id = $request->id;
+        $designation = EmployeeDesignation::find($id);
+        if($request->status == 0){
+            $status = 'Disabled';
+        }
+        else{
+            $status = 'Enabled';
+        }
+        $designation->status = $request->status;
+        $designation->save();
+        return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
+    }
+
+    public function designation_add(Request $request){
+        $designation = new EmployeeDesignation();
+        $designation->name = $request->name;
+        $designation->description = $request->description;
+        $designation->save();
+
+        $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
+        $designation->save();
+        return redirect()->back()->with('success', 'Designation Added Successfully!');
+    }
+
+    public function designation_edit(Request $request){
+        $designation = EmployeeDesignation::find($request->designation_id);
+        $designation->name = $request->name;
+        $designation->description = $request->description;
+        $designation->save();
+        return redirect()->back()->with('success', 'Designation Updated Successfully!');
+    }
+    public function department_index(){
+        return view('admin.human_resource.department');
+    }
+
+    public function department_list(Request $request){
+        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description'])
+        ->where('id', '!=', 1);
+
+        return Datatables::of($departments)
+            ->addColumn("action", function ($data) {
+                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(468, session('permissions'))){
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function department_add(Request $request){
+        $department = new AdminDepartment();
+        $department->name = $request->name;
+        $department->description = $request->description;
+        $department->save();
+
+        $department->code = 'Dep'. str_pad($department->id, 3, '0', STR_PAD_LEFT);
+        $department->save();
+        return redirect()->back()->with('success', 'Department Added Successfully!');
+    }
+
+    public function department_edit(Request $request){
+        $department = AdminDepartment::find($request->department_id);
+        $department->name = $request->name;
+        $department->description = $request->description;
+        $department->save();
+        return redirect()->back()->with('success', 'Department Updated Successfully!');
+    }
 }

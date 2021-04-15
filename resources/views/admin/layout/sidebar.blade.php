@@ -1468,6 +1468,14 @@
                         @if (session('role_id') == 1 || in_array(467, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.reporting_location.index')}}">Reporting Location</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(467, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.designation.index')}}">Designation</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(467, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.department.index')}}">Department</a></li>
+                        @endif
                 </ul>
             </li>
             <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a>
