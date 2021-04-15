@@ -906,7 +906,7 @@
                     }
                 }
 
-            })
+            });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var request_id = $(this).parents('tr').attr('id');
