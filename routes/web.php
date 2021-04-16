@@ -2495,6 +2495,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
 
+            Route::prefix('upload')->name('upload.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@international_standard_dhl_rates_list')->name('list');
+                Route::post('excel', 'Admins\GlobalSettingsController@international_rates_upload_excel')->name('excel');
+
+            });
         });
 
 
