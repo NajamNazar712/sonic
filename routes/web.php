@@ -584,7 +584,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('default')->name('default.')->group(function (){
             Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_default_submit')->name('add.rates');
-            Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_default_submit')->name('edit.rates');
+            Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_default')->name('edit.rates');
+            Route::get('{id}/edit/rates/view','Admins\AdminCorporateAccountsController@edit_rates_default')->name('view.rates');
+            Route::put('{id}/edit/rates/update','Admins\AdminCorporateAccountsController@edit_rates_default_submit')->name('edit.rates.submit');
         });
     });
     //ajax request
