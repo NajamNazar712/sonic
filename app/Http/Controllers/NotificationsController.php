@@ -408,7 +408,7 @@ class NotificationsController extends Controller
 //                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
 //              }
 
-                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
                             $query->whereIn('hub_id', $origin_hub_ids);
                         });
 

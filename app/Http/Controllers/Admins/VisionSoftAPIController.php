@@ -1047,7 +1047,7 @@ class VisionSoftAPIController extends Controller
             $petty_cash_statements = $petty_cash_statements->get();
             if(count($petty_cash_statements) > 0){
                 foreach ($petty_cash_statements as $petty_cash_statement){
-                    $petty_cash_statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash_statement->id)->where('status', 2);
+                    $petty_cash_statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash_statement->id);
                     if($petty_cash_statement_details->exists()){
                         $petty_cash_statement_details = $petty_cash_statement_details->get();
                         foreach ($petty_cash_statement_details as $petty_cash_statement_detail) {
