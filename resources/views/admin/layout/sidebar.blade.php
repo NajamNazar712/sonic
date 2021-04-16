@@ -1425,6 +1425,10 @@
                                     @if (session('role_id') == 1 || in_array(438, session('permissions')))
                                         <li class=" nav-item"><a href="{{route('admin.settings.international_rates.index')}}"><span class="menu-title">Rate Setting</span></a> </li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(477, session('permissions')))
+                                        <li class=" nav-item"><a href="{{route('admin.settings.international_rates.upload.index')}}"><span class="menu-title">Rate Upload</span></a> </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

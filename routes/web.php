@@ -479,7 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
-        Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
+        Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
@@ -2495,6 +2495,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
 
+            Route::prefix('upload')->name('upload.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@international_standard_dhl_rates_list')->name('list');
+                Route::post('excel', 'Admins\GlobalSettingsController@international_rates_upload_excel')->name('excel');
+
+            });
         });
 
 
