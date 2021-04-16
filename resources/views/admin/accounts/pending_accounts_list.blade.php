@@ -782,7 +782,7 @@
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by'},
                 {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at'},
                 {data: 'documents_rejected_by', name: 'drb.name', class: 'align-middle documents_rejected_by'},
-                {data: 'documents_rejected_at', name: 'uda,rejected_at', class: 'align-middle documents_rejected_at'},
+                {data: 'documents_rejected_at', name: 'uda.rejected_at', class: 'align-middle documents_rejected_at'},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
