@@ -143,7 +143,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(469, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(482, session('permissions')))
                     {
                         text: 'Add Designation',
                         className: 'btn btn-primary add_designation',
