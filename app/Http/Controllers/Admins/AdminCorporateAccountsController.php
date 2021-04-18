@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
@@ -20,7 +21,16 @@ use App\Http\Models\CorporateDefaultBookingTypeCharge;
 use App\Http\Models\CorporateDefaultCashHandlingCharge;
 use App\Http\Models\CorporateDefaultDiscountCharge;
 use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultHistoryBookingTypeCharges;
+use App\Http\Models\CorporateDefaultHistoryCashHandlingCharge;
+use App\Http\Models\CorporateDefaultHistoryDiscountCharge;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\CorporateDefaultHistoryInsuranceCharge;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\CorporateDefaultHistoryReturnCharge;
+use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateDefaultRateHistory;
 use App\Http\Models\CorporateDefaultRateRemarks;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
@@ -124,6 +134,7 @@ use App\Http\Models\RateRemark;
 use App\Http\Models\PendingCorporateDefaultDiscountCharge;
 use App\Http\Models\PendingCorporateDefaultInsuranceCharges;
 use App\Http\Models\PendingCorporateDefaultCashHandlingCharges;
+
 
 class AdminCorporateAccountsController extends Controller
 {
@@ -13855,6 +13866,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_default_submit(Request $request, $id){
+
         $user = User::find($id);
         if ($user['status']!=3) {
             $messages = [
@@ -14488,13 +14500,13 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on') {
                         if ($request->on_fuel_record != null) {
-                            FuelSurcharge::where(['id' => $request->on_fuel_record])->update([
+                            CorporateDefaultFuelSurcharge::where(['id' => $request->on_fuel_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'fuel_surcharge' => $request->overnight_fuel_surcharge
                             ]);
                         } elseif ($request->on_fuel_record == null) {
-                            FuelSurcharge::create([
+                            CorporateDefaultFuelSurcharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'fuel_surcharge' => $request->overnight_fuel_surcharge
@@ -14502,7 +14514,6 @@ class AdminCorporateAccountsController extends Controller
                         }
 
                     }
-
 
                     $discount_cash = 0;
                     $discount_weight = 0;
@@ -14537,7 +14548,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
                         if ($request->on_discount_record != null) {
-                            DiscountCharge::where(['id' => $request->on_discount_record])->update([
+                            CorporateDefaultDiscountCharge::where(['id' => $request->on_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'title' => $request->on_discount_title,
@@ -14551,7 +14562,7 @@ class AdminCorporateAccountsController extends Controller
                                 'added_by' => Auth::id()
                             ]);
                         } elseif ($request->on_discount_record == null) {
-                            DiscountCharge::create([
+                            CorporateDefaultDiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'title' => $request->on_discount_title,
@@ -14565,7 +14576,6 @@ class AdminCorporateAccountsController extends Controller
                                 'added_by' => Auth::id()
                             ]);
                         }
-
                     }
 
                 }
@@ -14581,7 +14591,7 @@ class AdminCorporateAccountsController extends Controller
                     ]);
                 }
 
-                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
+                $ONRateAlready = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
 
@@ -14738,13 +14748,13 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
                         if ($request->ol_fuel_record != null) {
-                            FuelSurcharge::where(['id' => $request->ol_fuel_record])->update([
+                            CorporateDefaultFuelSurcharge::where(['id' => $request->ol_fuel_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'fuel_surcharge' => $request->overland_fuel_surcharge
                             ]);
                         } elseif ($request->ol_fuel_record == null) {
-                            FuelSurcharge::create([
+                            CorporateDefaultFuelSurcharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'fuel_surcharge' => $request->overland_fuel_surcharge
@@ -14786,7 +14796,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
                         if ($request->ol_discount_record != null) {
-                            DiscountCharge::where(['id' => $request->ol_discount_record])->update([
+                            CorporateDefaultDiscountCharge::where(['id' => $request->ol_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'title' => $request->ol_discount_title,
@@ -14800,7 +14810,7 @@ class AdminCorporateAccountsController extends Controller
                                 'added_by' => Auth::id()
                             ]);
                         } elseif ($request->ol_discount_record == null) {
-                            DiscountCharge::create([
+                            CorporateDefaultDiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'title' => $request->ol_discount_title,
@@ -14829,7 +14839,7 @@ class AdminCorporateAccountsController extends Controller
                         'default_shipping_mode' => 3
                     ]);
                 }
-                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
+                $ONRateAlready = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
 
@@ -14961,7 +14971,7 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
                         if ($request->detain_return_record != null) {
-                            ReturnCharge::where(['id' => $request->detain_return_record])->update([
+                            CorporateDefaultReturnCharge::where(['id' => $request->detain_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'local' => $request->detain_return_local_charges,
@@ -14986,19 +14996,18 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
                         if ($request->detain_fuel_record != null) {
-                            FuelSurcharge::where(['id' => $request->detain_fuel_record])->update([
+                            CorporateDefaultFuelSurcharge::where(['id' => $request->detain_fuel_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'fuel_surcharge' => $request->detain_fuel_surcharge
                             ]);
                         } elseif ($request->detain_fuel_record == null) {
-                            FuelSurcharge::create([
+                            CorporateDefaultFuelSurcharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'fuel_surcharge' => $request->detain_fuel_surcharge
                             ]);
                         }
-
                     }
 
                     $discount_cash = 0;
@@ -15034,7 +15043,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
                         if ($request->detain_discount_record != null) {
-                            DiscountCharge::where(['id' => $request->detain_discount_record])->update([
+                            CorporateDefaultDiscountCharge::where(['id' => $request->detain_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'title' => $request->detain_discount_title,
@@ -15048,7 +15057,7 @@ class AdminCorporateAccountsController extends Controller
                                 'added_by' => Auth::id()
                             ]);
                         } elseif ($request->detain_discount_record == null) {
-                            DiscountCharge::create([
+                            CorporateDefaultDiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'title' => $request->detain_discount_title,
@@ -15078,7 +15087,7 @@ class AdminCorporateAccountsController extends Controller
                     ]);
                 }
 
-                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
+                $ONRateAlready = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
 
@@ -15210,7 +15219,7 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on') {
                         if ($request->sameday_return_record != null) {
-                            ReturnCharge::where(['id' => $request->sameday_return_record])->update([
+                            CorporateDefaultReturnCharge::where(['id' => $request->sameday_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
@@ -15235,13 +15244,13 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
                         if ($request->sameday_fuel_record != null) {
-                            FuelSurcharge::where(['id' => $request->sameday_fuel_record])->update([
+                            CorporateDefaultFuelSurcharge::where(['id' => $request->sameday_fuel_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'fuel_surcharge' => $request->sameday_fuel_surcharge
                             ]);
                         } elseif ($request->sameday_fuel_record == null) {
-                            FuelSurcharge::create([
+                            CorporateDefaultFuelSurcharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'fuel_surcharge' => $request->sameday_fuel_surcharge
@@ -15283,7 +15292,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
                         if ($request->sameday_discount_record != null) {
-                            DiscountCharge::where(['id' => $request->sameday_discount_record])->update([
+                            CorporateDefaultDiscountCharge::where(['id' => $request->sameday_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'title' => $request->sameday_discount_title,
@@ -15297,7 +15306,7 @@ class AdminCorporateAccountsController extends Controller
                                 'added_by' => Auth::id()
                             ]);
                         } elseif ($request->sameday_discount_record == null) {
-                            DiscountCharge::create([
+                            CorporateDefaultDiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'title' => $request->sameday_discount_title,
@@ -15920,9 +15929,9 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateDefaultCashHandlingCharges::where('user_id', $id)->delete();
             PendingCorporateDefaultInsuranceCharges::where('user_id', $id)->delete();
             PendingCorporateDefaultReturnCharge::where('user_id', $id)->delete();
-            PendingFuelSurcharge::where('user_id', $id)->delete();
+            PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
-            PendingDiscountCharge::where('user_id', $id)->delete();
+            PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
 
             if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
@@ -16041,7 +16050,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Return Charges
                     if ($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on') {
-                        PendingFuelSurcharge::create([
+                        PendingCorporateFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'fuel_surcharge' => $request->overnight_fuel_surcharge
@@ -16081,7 +16090,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
-                        PendingDiscountCharge::create([
+                        PendingCorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'title' => $request->on_discount_title,
@@ -16196,7 +16205,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                     if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
-                        PendingFuelSurcharge::create([
+                        PendingCorporateFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'fuel_surcharge' => $request->overland_fuel_surcharge
@@ -16236,7 +16245,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
-                        PendingDiscountCharge::create([
+                        PendingCorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'title' => $request->ol_discount_title,
@@ -16351,7 +16360,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                     if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
-                        PendingFuelSurcharge::create([
+                        PendingCorporateFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'fuel_surcharge' => $request->detain_fuel_surcharge
@@ -16391,7 +16400,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
-                        PendingDiscountCharge::create([
+                        PendingCorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'title' => $request->detain_discount_title,
@@ -16504,7 +16513,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                     if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
-                        PendingFuelSurcharge::create([
+                        PendingCorporateFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'fuel_surcharge' => $request->sameday_fuel_surcharge
@@ -16544,7 +16553,7 @@ class AdminCorporateAccountsController extends Controller
                         $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
-                        PendingDiscountCharge::create([
+                        PendingCorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'title' => $request->sameday_discount_title,
@@ -16628,9 +16637,9 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
                 $user = User::find($id);
 
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
+                if($switches = CorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
 
-                    HistoryRateStatus::create([
+                    CorporateDefaultHistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
                         'status' => $switches['status'],
@@ -16640,8 +16649,8 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    HistoryRateStatus::create([
+                if($switches = CorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                    CorporateDefaultHistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
                         'status' => $switches['status'],
@@ -16651,8 +16660,8 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    HistoryRateStatus::create([
+                if($switches = CorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                    CorporateDefaultHistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'status' => $switches['status'],
@@ -16662,8 +16671,8 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    HistoryRateStatus::create([
+                if($switches = CorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                    CorporateDefaultHistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
                         'status' => $switches['status'],
@@ -16673,9 +16682,9 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($weights = CorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($weights as $weight) {
-                        HistoryWeightCharge::create([
+                        CorporateDefaultHistoryWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $weight['range_up'],
@@ -16690,9 +16699,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($weights = CorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($weights as $weight) {
-                        HistoryWeightCharge::create([
+                        CorporateDefaultHistoryWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $weight['range_up'],
@@ -16707,9 +16716,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($weights = CorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($weights as $weight) {
-                        HistoryWeightCharge::create([
+                        CorporateDefaultHistoryWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $weight['range_up'],
@@ -16724,9 +16733,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($weights = CorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($weights as $weight) {
-                        HistoryWeightCharge::create([
+                        CorporateDefaultHistoryWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $weight['range_up'],
@@ -16741,9 +16750,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($bookingTypes = CorporateDefaultBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($bookingTypes as $bookingType) {
-                        HistoryBookingTypeCharges::create([
+                        CorporateDefaultHistoryBookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $bookingType['replacement_charges'],
@@ -16751,9 +16760,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($bookingTypes = CorporateDefaultBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($bookingTypes as $bookingType) {
-                        HistoryBookingTypeCharges::create([
+                        CorporateDefaultHistoryBookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $bookingType['replacement_charges'],
@@ -16761,9 +16770,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($bookingTypes = CorporateDefaultBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($bookingTypes as $bookingType) {
-                        HistoryBookingTypeCharges::create([
+                        CorporateDefaultHistoryBookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $bookingType['replacement_charges'],
@@ -16771,9 +16780,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($bookingTypes = CorporateDefaultBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($bookingTypes as $bookingType) {
-                        HistoryBookingTypeCharges::create([
+                        CorporateDefaultHistoryBookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $bookingType['replacement_charges'],
@@ -16782,9 +16791,9 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($cashs = CorporateDefaultCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCashHandlingCharge::create([
+                        CorporateDefaultHistoryCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $cash['range_up'],
@@ -16793,9 +16802,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($cashs = CorporateDefaultCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCashHandlingCharge::create([
+                        CorporateDefaultHistoryCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $cash['range_up'],
@@ -16804,9 +16813,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($cashs = CorporateDefaultCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCashHandlingCharge::create([
+                        CorporateDefaultHistoryCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $cash['range_up'],
@@ -16815,9 +16824,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($cashs = CorporateDefaultCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCashHandlingCharge::create([
+                        CorporateDefaultHistoryCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $cash['range_up'],
@@ -16828,7 +16837,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($insurances = CorporateDefaultInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryInsuranceCharge::create([
+                        CorporateDefaultHistoryInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $insurance['range_up'],
@@ -16839,7 +16848,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($insurances = CorporateDefaultInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryInsuranceCharge::create([
+                        CorporateDefaultHistoryInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $insurance['range_up'],
@@ -16850,7 +16859,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($insurances = CorporateDefaultInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryInsuranceCharge::create([
+                        CorporateDefaultHistoryInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $insurance['range_up'],
@@ -16861,7 +16870,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($insurances = CorporateDefaultInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryInsuranceCharge::create([
+                        CorporateDefaultHistoryInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $insurance['range_up'],
@@ -16872,7 +16881,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($returns = CorporateDefaultReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($returns as $return) {
-                        HistoryReturnCharge::create([
+                        CorporateDefaultHistoryReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $return['local'],
@@ -16885,7 +16894,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($returns = CorporateDefaultReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($returns as $return) {
-                        HistoryReturnCharge::create([
+                        CorporateDefaultHistoryReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $return['local'],
@@ -16898,7 +16907,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($returns = CorporateDefaultReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($returns as $return) {
-                        HistoryReturnCharge::create([
+                        CorporateDefaultHistoryReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $return['local'],
@@ -16911,7 +16920,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($returns = CorporateDefaultReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($returns as $return) {
-                        HistoryReturnCharge::create([
+                        CorporateDefaultHistoryReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $return['local'],
@@ -16922,36 +16931,37 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($fuels = CorporateDefaultFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+
                     foreach ($fuels as $fuel) {
-                        HistoryFuelSurcharge::create([
+                        CorporateDefaultHistoryFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'fuel_surcharge' => $fuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($fuels = CorporateDefaultFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($fuels as $fuel) {
-                        HistoryFuelSurcharge::create([
+                        CorporateDefaultHistoryFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'fuel_surcharge' => $fuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($fuels = CorporateDefaultFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($fuels as $fuel) {
-                        HistoryFuelSurcharge::create([
+                        CorporateDefaultHistoryFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'fuel_surcharge' => $fuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($fuels = CorporateDefaultFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($fuels as $fuel) {
-                        HistoryFuelSurcharge::create([
+                        CorporateDefaultHistoryFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'fuel_surcharge' => $fuel['fuel_surcharge']
@@ -16998,9 +17008,9 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($discounts = CorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($discounts as $discount) {
-                        HistoryDiscountCharge::create([
+                        CorporateDefaultHistoryDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'title' => $discount['title'],
@@ -17015,9 +17025,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($discounts = CorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($discounts as $discount) {
-                        HistoryDiscountCharge::create([
+                        CorporateDefaultHistoryDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'title' => $discount['title'],
@@ -17032,9 +17042,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($discounts = CorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($discounts as $discount) {
-                        HistoryDiscountCharge::create([
+                        CorporateDefaultHistoryDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'title' => $discount['title'],
@@ -17049,9 +17059,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($discounts = CorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($discounts as $discount) {
-                        HistoryDiscountCharge::create([
+                        CorporateDefaultHistoryDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'title' => $discount['title'],
@@ -17066,8 +17076,8 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                $s = RateStatus::where(['user_id' => $id ])->first();
-                RateHistory::create([
+                $s = CorporateDefaultRateStatus::where(['user_id' => $id ])->first();
+                CorporateDefaultRateHistory::create([
                     'user_id' => $id,
                     'updated_by' => $user['rates_updated_by'],
                     'approved_by' => $user['rates_authorized_by'],
@@ -17136,18 +17146,18 @@ class AdminCorporateAccountsController extends Controller
                 WmsPackingCharge::where('user_id', $id)->delete();
                 WmsLabellingCharge::where('user_id', $id)->delete();
 
-                RateStatus::where('user_id', $id)->delete();
-                WeightCharge::where('user_id', $id)->delete();
-                BookingTypeCharges::where('user_id', $id)->delete();
-                CashHandlingCharge::where('user_id', $id)->delete();
+                CorporateDefaultRateStatus::where('user_id', $id)->delete();
+                CorporateDefaultWeightCharge::where('user_id', $id)->delete();
+                CorporateDefaultBookingTypeCharge::where('user_id', $id)->delete();
+                CorporateDefaultCashHandlingCharge::where('user_id', $id)->delete();
                 CorporateDefaultInsuranceCharge::where('user_id', $id)->delete();
                 CorporateDefaultReturnCharge::where('user_id', $id)->delete();
-                FuelSurcharge::where('user_id', $id)->delete();
+                CorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
                 PackagingCharge::where('user_id', $id)->delete();
-                DiscountCharge::where('user_id', $id)->delete();
+                CorporateDefaultDiscountCharge::where('user_id', $id)->delete();
 
                 if($pendingswitchs = PendingCorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                    RateStatus::create([
+                    CorporateDefaultRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
                         'status' => $pendingswitchs['status'],
@@ -17158,7 +17168,7 @@ class AdminCorporateAccountsController extends Controller
                     ]);
                 }
                 if($pendingswitchs = PendingCorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    RateStatus::create([
+                    CorporateDefaultRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
                         'status' => $pendingswitchs['status'],
@@ -17169,7 +17179,7 @@ class AdminCorporateAccountsController extends Controller
                     ]);
                 }
                 if($pendingswitchs = PendingCorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    RateStatus::create([
+                    CorporateDefaultRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'status' => $pendingswitchs['status'],
@@ -17180,7 +17190,7 @@ class AdminCorporateAccountsController extends Controller
                     ]);
                 }
                 if($pendingswitchs = PendingCorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    RateStatus::create([
+                    CorporateDefaultRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
                         'status' => $pendingswitchs['status'],
@@ -17192,7 +17202,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingweights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingweights as $pendingweight) {
-                        WeightCharge::create([
+                        CorporateDefaultWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $pendingweight['range_up'],
@@ -17209,7 +17219,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingweights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingweights as $pendingweight) {
-                        WeightCharge::create([
+                        CorporateDefaultWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $pendingweight['range_up'],
@@ -17226,7 +17236,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingweights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingweights as $pendingweight) {
-                        WeightCharge::create([
+                        CorporateDefaultWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $pendingweight['range_up'],
@@ -17243,7 +17253,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingweights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingweights as $pendingweight) {
-                        WeightCharge::create([
+                        CorporateDefaultWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $pendingweight['range_up'],
@@ -17260,7 +17270,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingbookingTypes = PendingCorporateDefaultBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
-                        BookingTypeCharges::create([
+                        CorporateDefaultBookingTypeCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
@@ -17270,7 +17280,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingbookingTypes = PendingCorporateDefaultBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
-                        BookingTypeCharges::create([
+                        CorporateDefaultBookingTypeCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
@@ -17280,7 +17290,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingbookingTypes = PendingCorporateDefaultBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
-                        BookingTypeCharges::create([
+                        CorporateDefaultBookingTypeCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
@@ -17290,7 +17300,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingbookingTypes = PendingCorporateDefaultBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
-                        BookingTypeCharges::create([
+                        CorporateDefaultBookingTypeCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
@@ -17311,7 +17321,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingcashs = PendingCorporateDefaultCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CashHandlingCharge::create([
+                        CorporateDefaultCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $pendingcash['range_up'],
@@ -17322,7 +17332,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingcashs = PendingCorporateDefaultCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CashHandlingCharge::create([
+                        CorporateDefaultCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $pendingcash['range_up'],
@@ -17333,7 +17343,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pendingcashs = PendingCorporateDefaultCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CashHandlingCharge::create([
+                        CorporateDefaultCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $pendingcash['range_up'],
@@ -17438,36 +17448,36 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($pendingfuels = PendingCorporateFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
-                        FuelSurcharge::create([
+                        CorporateDefaultFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'fuel_surcharge' => $pendingfuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($pendingfuels = PendingCorporateFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
-                        FuelSurcharge::create([
+                        CorporateDefaultFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'fuel_surcharge' => $pendingfuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendingfuels = PendingCorporateFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
-                        FuelSurcharge::create([
+                        CorporateDefaultFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'fuel_surcharge' => $pendingfuel['fuel_surcharge']
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($pendingfuels = PendingCorporateFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
-                        FuelSurcharge::create([
+                        CorporateDefaultFuelSurcharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'fuel_surcharge' => $pendingfuel['fuel_surcharge']
@@ -17484,9 +17494,9 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($pendingdiscounts = PendingCorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
-                        DiscountCharge::create([
+                        CorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'title' => $pendingdiscount['title'],
@@ -17501,9 +17511,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($pendingdiscounts = PendingCorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
-                        DiscountCharge::create([
+                        CorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'title' => $pendingdiscount['title'],
@@ -17518,9 +17528,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendingdiscounts = PendingCorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
-                        DiscountCharge::create([
+                        CorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'title' => $pendingdiscount['title'],
@@ -17535,9 +17545,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($pendingdiscounts = PendingCorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
-                        DiscountCharge::create([
+                        CorporateDefaultDiscountCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'title' => $pendingdiscount['title'],
@@ -17620,9 +17630,9 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDefaultCashHandlingCharges::where('user_id', $id)->delete();
                 PendingCorporateDefaultInsuranceCharges::where('user_id', $id)->delete();
                 PendingCorporateDefaultReturnCharge::where('user_id', $id)->delete();
-                PendingFuelSurcharge::where('user_id', $id)->delete();
+                PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                 PendingPackagingCharge::where('user_id', $id)->delete();
-                PendingDiscountCharge::where('user_id', $id)->delete();
+                PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
@@ -17689,7 +17699,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             if($request->has('rate_remarks') && $request->rate_remarks != null){
-                $rate_remark = new RateRemark();
+                $rate_remark = new CorporateDefaultRateRemarks();
                 $rate_remark->user_id = $id;
                 $rate_remark->remarks = $request->rate_remarks;
                 $rate_remark->admin_id = Auth::id();
