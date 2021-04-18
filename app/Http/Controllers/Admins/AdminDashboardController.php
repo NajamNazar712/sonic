@@ -9638,7 +9638,14 @@ class AdminDashboardController extends Controller
 
             return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
-            City::where('id',$id)->update([
+            $city = City::where('id',$id)->first();
+            if($city->zone_id != $request->zone_id)
+            {
+                $city->hub_cities()->update([
+                    'zone_id'=>$request->zone_id,
+                ]);
+            }
+            $city->update([
                 'name'=>$request->countryName,
                 'city_code'=>$request->city_code,
                 'hub'=>1,
@@ -9665,7 +9672,6 @@ class AdminDashboardController extends Controller
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
-
             return redirect()->back()->with('success','Hub/city updated successfully');
         }
     }
