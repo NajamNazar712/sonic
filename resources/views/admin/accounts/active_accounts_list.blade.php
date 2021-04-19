@@ -344,6 +344,29 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="ChangeRateType" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ChangeRateTypeModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Change Rate Type</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="form-group text-center">
+                            <input type="text" hidden name="user_id" class="user_id">
+                            <select name="corporate_rate_type" id="corporate_rate_type" class="form-control select2" data-rule-required="true" data-msg-required="Rate Type is required">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -1522,6 +1545,11 @@
             width:'100%',
             //allowClear:true
         });
+        $('#corporate_rate_type').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Change Rate Type',
+            width:'100%',
+            //allowClear:true
+        });
         var redirect = '{!! url('/admin') !!}';
 
         $('#RateHistoryModal').on('hide.bs.modal', function (e) {
@@ -1556,7 +1584,7 @@
                         $('#RateHistoryModal #old_rate_date').bind('change', function () {
                             var date = $(this).val();
                             if (date != '') {
-                                console.log(data);
+
                                 if(data.account_type == 1){
 
                                     var id = user_id;
@@ -1583,9 +1611,53 @@
             }
         });
 
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+            var user_id = table.row( $(this).parents('tr') ).data().id;
+            var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
+
+
+            if ($(this).hasClass('change_rate_type')) {
+
+                $.ajax({
+                    url: '{!! route('admin.corporate.default.rate_type') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                        'rate_type_id': rate_type_id
+                    }
+                }).done(function(data){
+                    if (data.status == 1) {
+                        $.each(data.rate_types,function(key,value){
+                            var newOption = new Option(value.name, value.id, false, false);
+                            $('#corporate_rate_type').append(newOption).trigger('change');
+                        });
+                        $('#ChangeRateType').modal('show');
+
+                        $('#ChangeRateType #corporate_rate_type').bind('change', function () {
+                            var rate_type_id = $(this).val();
+                            if (rate_type_id) {
+                                var url = redirect + '/corporate/default/'+ user_id + '/corporate_rate_type/' + rate_type_id + '/change';
+                                window.location = url; }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
+                });
+            }
+        });
+
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                 console.log(id);
+              
                 var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
