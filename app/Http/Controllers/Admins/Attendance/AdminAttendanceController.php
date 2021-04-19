@@ -108,9 +108,9 @@ class AdminAttendanceController extends Controller
             })
             ->addColumn('clock_in_status', function ($employee) {
                 if ($employee->clock_in_status == 2) {
-                    return "ON-SITE";
+                    return "On-site";
                 } else if ($employee->clock_in_status == 1) {
-                    return "OFF-SITE";
+                    return "Off-site";
                 } else {
                     return "";
                 }
@@ -126,9 +126,9 @@ class AdminAttendanceController extends Controller
             })
             ->addColumn('clock_out_status', function ($employee) {
                 if ($employee->clock_out_status == 2) {
-                    return "ON-SITE";
+                    return "On-site";
                 } else if ($employee->clock_out_status == 1) {
-                    return "OFF-SITE";
+                    return "Off-site";
                 } else {
                     return "";
                 }

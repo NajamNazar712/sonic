@@ -112,10 +112,10 @@
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
                                     <th class="border-primary border-darken-1">Clock In Time</th>
-                                    <th class="border-primary border-darken-1">Clock In Status</th>
+                                    <th class="border-primary border-darken-1">Clock In Radius</th>
                                     <th class="border-primary border-darken-1">Clock In Location</th>
                                     <th class="border-primary border-darken-1">Clock Out Time</th>
-                                    <th class="border-primary border-darken-1">Clock Out Status</th>
+                                    <th class="border-primary border-darken-1">Clock Out Radius</th>
                                     <th class="border-primary border-darken-1">Clock Out Location</th>
                                 </tr>
                                 </thead>
