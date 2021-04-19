@@ -700,16 +700,16 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(468, session('permissions'))){
+                if(session('role_id') == 1 || in_array(479, session('permissions')) || in_array(480, session('permissions'))){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(479, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                    if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(480, session('permissions'))) {
                         if($data->status == 0) {
                             $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                         }
@@ -784,16 +784,16 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(468, session('permissions'))){
+                if(session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(482, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                    if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(483, session('permissions'))) {
                         if($data->status == 0) {
                             $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                         }
@@ -856,15 +856,15 @@ class AdminHumanResourseController extends Controller
 
         return Datatables::of($departments)
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(468, session('permissions'))){
+                if(session('role_id') == 1 || in_array(485, session('permissions'))){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                    }
+
+                    $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
                     $dropdown .= '
                 </div>
               </div>

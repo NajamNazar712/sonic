@@ -907,6 +907,13 @@ class Permission
             'human_resource.employee_directory.approve' => 469,
             'human_resource.employee_directory.reject' => 469,
 
+            'human_resource.reporting_location.index' => 478,
+            'human_resource.reporting_location.list' => 478,
+            'human_resource.designation.index' => 481,
+            'human_resource.designation.list' => 481,
+            'human_resource.department.index' => 484,
+            'human_resource.department.list' => 484,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
