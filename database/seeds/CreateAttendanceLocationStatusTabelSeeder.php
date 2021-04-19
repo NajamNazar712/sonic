@@ -12,8 +12,8 @@ class CreateAttendanceLocationStatusTabelSeeder extends Seeder
     public function run()
     {
         DB::table('attendance_location_statuses')->insert(array(
-            array('id'=>1, 'name'=>'OFF-Site'),
-            array('id'=>2, 'name'=>'ON-Site')
+            array('id'=>1, 'name'=>'OFF-SITE'),
+            array('id'=>2, 'name'=>'ON-SITE')
         ));
     }
 }

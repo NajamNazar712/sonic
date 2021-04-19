@@ -174,7 +174,7 @@
                 allowClear:true
             });
             $('#search_trax_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search TraxID',
+                placeholder:'Search Trax ID',
                 width:'100%',
                 allowClear:true
             });
