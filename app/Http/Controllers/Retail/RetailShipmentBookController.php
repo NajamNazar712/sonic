@@ -23,6 +23,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\Shipper\UserShippingInfo;
+use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -572,6 +573,10 @@ class RetailShipmentBookController extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
+            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
+            if(!file_exists($url)){
+                $this::save_slip($shipment->id);
+            }
                     $slip = '
                       <div class="position-relative">
                         <table class="table table-sm table-bordered border twice">
@@ -580,7 +585,7 @@ class RetailShipmentBookController extends Controller
 
                     $slip .= '
                           <tr>
-                            <td rowspan="2" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
                             <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
                             <td colspan="2" class="color primary"><strong>Origin</strong></td>
@@ -591,6 +596,14 @@ class RetailShipmentBookController extends Controller
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                          </tr>
+                          <tr>
+                            <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
+                            <td colspan="1" class="color primary border"><strong>Bank</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
                           </tr>
                 ';
 
@@ -692,7 +705,6 @@ class RetailShipmentBookController extends Controller
                   <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
                   <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                 ';
-
             $shipment_details .= $slip;
 
             //airway_bill_start
@@ -1100,5 +1112,269 @@ class RetailShipmentBookController extends Controller
 
         return $html;
     }
+    public static function save_slip($shipment_id){
+        $html = '';
 
+        $html .= '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . file_get_contents(public_path('app-assets/fonts/line-awesome/css/line-awesome.min.css')) . '">
+        ';
+        $html .= '
+                <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+        ';
+
+        $html .= '
+                <title>Slip</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        width: 12.5% !important;
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .border.twice {
+                        border-width: 2px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 2px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 2px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 2px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 2px !important;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+
+                      .void {
+                        top: 0;
+                        bottom: 0;
+                        right: 0;
+                        left: 0;
+                        height: 80px;
+                        font-size: 5rem;
+                        line-height: 3.5rem;
+                        opacity: 0.25;
+                      }
+                       div.page
+                        {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
+                        .piece_number{
+                            font-size: 2.5rem;
+                        }
+                    </style>
+              </head>
+              <body>
+                <div>
+        ';
+
+        $html .= '
+                <style>
+                  @font-face {
+                    font-family: "Fajer Noori Nastalique";
+                    src: url("data:font/truetype;charset=utf-8;base64,' . base64_encode(file_get_contents(public_path('fonts/urdu/Fajer-Noori-Nastalique.ttf'))) . '") format("truetype");
+                    font-weight: normal;
+                    font-style: normal;
+                    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+                  }
+
+                  .urdu {
+                    font-family: "Fajer Noori Nastalique";
+                    padding-bottom: .75rem !important;
+                  }
+                </style>
+        ';
+
+            $shipment = Shipment::find($shipment_id);
+            $html = '
+                      <div class="position-relative">
+                        <table class="table table-sm table-bordered border twice">
+                            <tbody>
+                ';
+
+            $html .= '
+                          <tr>
+                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
+                            <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
+                            <td colspan="2" class="color primary"><strong>Origin</strong></td>
+                            <td colspan="4" class="border twice-right"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                        </tr>
+                          <tr>
+                            <td colspan="3" class="color primary border"><strong>Airway Bill Number</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Destination</strong></td>
+                            <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                          </tr>
+                          <tr>
+                            <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
+                            <td colspan="1" class="color primary border"><strong>Bank</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
+                          </tr>
+                ';
+
+            $html .= '
+                          <tr>
+                            <td colspan="7" class="text-center color primary border twice-top twice-left twice-right"><strong>Shipper</strong></td>
+                            <td colspan="6" class="text-center color primary border twice-top twice-left twice-right"><strong>Consignee</strong></td>
+                          </tr>
+                ';
+
+            $html .= '
+                          <tr>
+                            <td colspan="1" class="color secondary twice-left"><strong>Name</strong></td>
+                            <td colspan="2" class="border">' . $shipment->retail->shipper_name . '</td>
+                            <td colspan="2" class="color secondary border"><strong>Phone No</strong></td>
+                            <td colspan="2">' . $shipment->retail->shipper_phone_no . '</td>
+                            <td colspan="1" class="color secondary border twice-left"><strong>Name</strong></td>
+                            <td colspan="1">' . $shipment->consignee_name . '</td>
+                            <td colspan="2" class="color secondary border"><strong>Phone No</strong></td>
+                            <td colspan="2" class="border twice-right"">' . $shipment->consignee_phone_number_1 . '</td>
+                          </tr>
+                ';
+            $html .= '
+                      <tr>
+                        <td class="color secondary border twice-bottom"><strong>Address</strong></td>
+                        <td colspan="6" class="border twice-bottom twice-right">' . $shipment->retail->shipper_address . '</td>
+                        <td class="color secondary border twice-bottom twice-left"><strong>Address</strong></td>
+                        <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
+                      </tr>
+                ';
+            $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
+            $html .= '
+                              <tr>
+                                <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
+                                <td colspan="2" class="color primary"><strong>Pieces</strong></td>
+                                <td colspan="2" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="2" class="color primary"><strong>Service Charges</strong></td>
+                                <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
+                                <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                            </tr>
+                              <tr>
+                                <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                              </tr>';
+
+            foreach($shipment->items as $item){
+                if($item->insurance == 1){
+                    $insurance = '<i class="la la-check-square "> <b>Yes</b></i>';
+                }
+                else{
+                    $insurance = '<i class="la la-check-square"> <b>No</b></i>';
+                }
+                $html .= '
+                              <tr>
+                                <td colspan="1" class="color primary border twice-left twice-bottom"><strong>Product Name</strong></td>
+                                <td colspan="3" class="color border twice-bottom">'. $item->product->product_name . '</td>
+                                <td colspan="5" class="color border twice-bottom text-center mr-3"><strong>Insurance: Do you required coverage</strong> '. $insurance . '</td>
+                                <td colspan="2" class="color primary border twice-bottom"><strong>Declared Value</strong></td>
+                                <td colspan="2" class="color border twice-bottom twice-right">' . number_format(ROUND($item->price, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                            </tr>';
+            }
+
+            if($shipment->length != null && $shipment->breadth != null && $shipment->height != null){
+                $dimensions = $shipment->length . 'x' . $shipment->breadth . 'x' . $shipment->height;
+            }
+            else{
+                $dimensions = '';
+            }
+
+            $html .= '
+                              <tr>
+                                <td colspan="4" class="color primary border twice-left twice-bottom"><strong>DIMENSIONS OF SHIPMENT (LxWxD)</strong></td>
+                                <td colspan="5" class="color border twice-bottom">'. $dimensions . '</td>
+                                <td colspan="2" class="color primary border twice-left"><strong>Collection By</strong></td>
+                                <td colspan="4" class="color border twice-right">' . Auth::user()->name . '</td>
+                            </tr>';
+            $html .= '
+                              <tr>
+                                <td colspan="4" rowspan="2" class="color primary border twice-left"><strong>Shipper\'s Signature</strong></td>
+                                <td colspan="5" rowspan="2" class="color border twice-bottom"></td>
+                                <td colspan="2" class="color primary border twice-left"><strong>Code</strong></td>
+                                <td colspan="4" class="color border twice-right">' . Auth::user()->store->code . '</td>
+                            </tr>';
+            $html .= '
+                              <tr>
+                                <td colspan="2" class="color primary border twice-left"><strong>Date</strong></td>
+                                <td colspan="4" class="color border twice-bottom twice-right">' . $shipment->created_at . '</td>
+                            </tr>
+                            </tbody>
+                            </table>
+                            </div>
+                           ';
+
+            $html .= '
+                  <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
+                  <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                ';
+            $slip_image = $html;
+            $slip_image .= '</div></body></html>';
+            SnappyImage::loadHTML($slip_image)->save('storage/retail/shipment_'. $shipment->id.'.jpg');
+    }
 }
