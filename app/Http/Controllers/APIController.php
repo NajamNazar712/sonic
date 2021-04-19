@@ -1672,6 +1672,7 @@ class APIController extends Controller
               $query->where('user_id', $user_id)->where('status', 1);
           })],
           'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
+          'delivery_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
           'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000']
         ];
 
@@ -1769,9 +1770,20 @@ class APIController extends Controller
           }
         }
 
+        $delivery_type_id = NULL;
+
+        if ($user->account_type_id == 2) {
+          if ($request->has('delivery_type_id')) {
+            $delivery_type_id = $request->input('delivery_type_id');
+          }
+          else {
+            $delivery_type_id = 1;
+          }
+        }
+
         $information['charges'] = array();
 
-        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id, 1, 0);
+        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), $delivery_type_id, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id, 1, 0);
 
         if ($calculation) {
           $information['charges']['weight'] = $calculation['weight_charges'];
