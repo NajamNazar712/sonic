@@ -224,34 +224,62 @@
 						enabled: false,
 						action: function (e, dt, node, config) {
 							if(selected_rows.length > 0){
-								$.ajax({
-									url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
-									method: 'POST',
-									data: {
-										'_token': '{{ csrf_token() }}',
-										'id': selected_rows,
-									}
-								}).done(function(data) {
-										if(data == 1)
-										{
-											swal({
-												title: 'Invoice Marked as Received',
-												icon: 'success',
-												closeOnClickOutside: false,
-												closeOnEsc: false
-											});
+								swal({
+									title: 'Are You Sure?',
+									text: 'Select Yes to mark invoices recieved!',
+									icon: 'warning',
+									buttons: {
+										cancel: {
+											text: 'No',
+											value: null,
+											visible: true,
+											closeModal: true,
+										},
+										confirm: {
+											text: 'Yes',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									dangerMode: true
+								}).then(function (confirm) {
+									if (confirm) {
+										blockPagePermanently();
+										$.ajax({
+											url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
+											method: 'POST',
+											data: {
+												'_token': '{{ csrf_token() }}',
+												'id': selected_rows,
+											}
+										}).done(function(data) {
+											UnblockPagePermanently();
+											if(data == 1)
+											{
+												swal({
+													title: 'Invoice Marked as Received',
+													icon: 'success',
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
 
-											table.draw();
-										}
-										else{
-											swal({
-												title: 'Error Occurred In Marking Invoice Received',
-												icon: 'error',
-												closeOnClickOutside: false,
-												closeOnEsc: false
-											});
-										}
+												table.draw();
+											}
+											else{
+												swal({
+													title: 'Error Occurred In Marking Invoice Received',
+													icon: 'error',
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
+											}
+										});
+									}
 								});
+
 							}
 
 						}
