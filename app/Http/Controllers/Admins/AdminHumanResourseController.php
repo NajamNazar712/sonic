@@ -307,7 +307,7 @@ class AdminHumanResourseController extends Controller
         $domiciles = EmployeeDomicile::all();
         $maritial_statuses = EmployeeMaritalStatus::all();
         $blood_groups = EmployeeBloodGroup::all();
-        $designations = EmployeeDesignation::all();
+        $designations = EmployeeDesignation::where('status', 1)->get();
         $cities = City::where('status',1)->where('business_category_id',1)->get();
         $zones = Zone::where('status', 1)->get();
         $departments = AdminDepartment::all();
