@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateMasterCargoForDroppingColumns extends Migration
+class UpdateEmployeesForReportingLocationIdTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,8 @@ class UpdateMasterCargoForDroppingColumns extends Migration
      */
     public function up()
     {
-        Schema::table('master_cargoes', function (Blueprint $table) {
-            $table->dropColumn('builty_number');
-            $table->dropColumn('cnic');
-
+        Schema::table('employees', function (Blueprint $table) {
+            $table->integer('reporting_location_id')->nullable()->index();
         });
     }
 
@@ -27,9 +25,8 @@ class UpdateMasterCargoForDroppingColumns extends Migration
      */
     public function down()
     {
-        Schema::table('master_cargoes', function (Blueprint $table) {
-            $table->string('builty_number');
-            $table->string('cnic');
+        Schema::table('employees', function (Blueprint $table) {
+            $table->dropColumn('reporting_location_id');
         });
     }
 }

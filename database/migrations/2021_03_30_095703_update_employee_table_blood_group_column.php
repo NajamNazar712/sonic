@@ -13,9 +13,9 @@ class UpdateEmployeeTableBloodGroupColumn extends Migration
      */
     public function up()
     {
-        Schema::table('employees', function (Blueprint $table) {
-            $table->integer('blood_group')->index()->change();
-        });
+//        Schema::table('employees', function (Blueprint $table) {
+//            $table->integer('blood_group')->index()->change();
+//        });
     }
 
     /**

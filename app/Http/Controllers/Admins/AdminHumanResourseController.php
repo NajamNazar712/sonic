@@ -22,6 +22,7 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
@@ -306,7 +307,7 @@ class AdminHumanResourseController extends Controller
         $domiciles = EmployeeDomicile::all();
         $maritial_statuses = EmployeeMaritalStatus::all();
         $blood_groups = EmployeeBloodGroup::all();
-        $designations = EmployeeDesignation::all();
+        $designations = EmployeeDesignation::where('status', 1)->get();
         $cities = City::where('status',1)->where('business_category_id',1)->get();
         $zones = Zone::where('status', 1)->get();
         $departments = AdminDepartment::all();
@@ -319,7 +320,8 @@ class AdminHumanResourseController extends Controller
         $employments = $employee->employment_history;
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','hubs','departments','zones','relationships', 'place_of_birth_cities','cities'));
+        $reporting_locations = ReportingLocation::where('status',1)->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -346,6 +348,7 @@ class AdminHumanResourseController extends Controller
         $employee->pin = $request->bolt_pin;
         $employee->place_of_birth = $request->place_of_birth;
         $employee->date_of_birth = $request->date_of_birth_formatted;
+        $employee->reporting_location_id = $request->reporting_location;
         $employee->update();
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
@@ -670,5 +673,227 @@ class AdminHumanResourseController extends Controller
         $attachments->save();
 
         return back()->with(['success'=>'Employee Attachments Updated Successfully']);
+    }
+    public function reporting_location_index(){
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
+        return view('admin.human_resource.reporting_location')->with(['cities' => $cities]);
+    }
+
+    public function reporting_location_list(Request $request){
+        $location = ReportingLocation::join('cities as c', 'reporting_locations.city_id', '=', 'c.id')
+            ->select(['reporting_locations.id as id', 'reporting_locations.name as location_name', 'c.name as city', 'c.id as city_id', 'reporting_locations.lat', 'reporting_locations.long', 'reporting_locations.status', 'reporting_locations.address', 'reporting_locations.radius']);
+
+        if (session('role_id') != 1) {
+            $location = $location->whereIn('c.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($location)
+            ->addColumn('map', function ($data) {
+               return '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->lat . ',' . $data->long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+            })
+            ->editColumn('status', function ($data) {
+                if($data->status == 0){
+                    return 'In-Active';
+                }
+                else{
+                    return 'Active';
+                }
+            })
+            ->addColumn("action", function ($data) {
+                if(session('role_id') == 1 || in_array(479, session('permissions')) || in_array(480, session('permissions'))){
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if (session('role_id') == 1 || in_array(479, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(480, session('permissions'))) {
+                        if($data->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function reporting_location_status(Request $request){
+        $id = $request->id;
+        $location = ReportingLocation::find($id);
+        if($request->status == 0){
+            $status = 'Disabled';
+        }
+        else{
+            $status = 'Enabled';
+        }
+        $location->status = $request->status;
+        $location->save();
+        return response()->json(['status' => 1, 'success' => 'Location '. $status .' successfully!']);
+    }
+
+    public function reporting_location_add(Request $request){
+        $location = new ReportingLocation();
+        $location->city_id = $request->city;
+        $location->name = $request->name;
+        $location->address = $request->address;
+        $location->lat = $request->lat;
+        $location->long = $request->long;
+        $location->radius = $request->radius;
+        $location->save();
+        return redirect()->back()->with('success', 'Location Added Successfully!');
+    }
+
+    public function reporting_location_edit(Request $request){
+        $location = ReportingLocation::find($request->location_id);
+        $location->city_id = $request->city;
+        $location->name = $request->name;
+        $location->address = $request->address;
+        $location->lat = $request->lat;
+        $location->long = $request->long;
+        $location->radius = $request->radius;
+        $location->save();
+        return redirect()->back()->with('success', 'Location Updated Successfully!');
+    }
+    public function designation_index(){
+        return view('admin.human_resource.designation');
+    }
+
+    public function designation_list(Request $request){
+        $designations = EmployeeDesignation::select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description']);
+
+        return Datatables::of($designations)
+            ->editColumn('status', function ($data) {
+                if($data->status == 0){
+                    return 'In-Active';
+                }
+                else{
+                    return 'Active';
+                }
+            })
+            ->addColumn("action", function ($data) {
+                if(session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))){
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if (session('role_id') == 1 || in_array(482, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(483, session('permissions'))) {
+                        if($data->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                        else{
+                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function designation_status(Request $request){
+        $id = $request->id;
+        $designation = EmployeeDesignation::find($id);
+        if($request->status == 0){
+            $status = 'Disabled';
+        }
+        else{
+            $status = 'Enabled';
+        }
+        $designation->status = $request->status;
+        $designation->save();
+        return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
+    }
+
+    public function designation_add(Request $request){
+        $designation = new EmployeeDesignation();
+        $designation->name = $request->name;
+        $designation->description = $request->description;
+        $designation->save();
+
+        $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
+        $designation->save();
+        return redirect()->back()->with('success', 'Designation Added Successfully!');
+    }
+
+    public function designation_edit(Request $request){
+        $designation = EmployeeDesignation::find($request->designation_id);
+        $designation->name = $request->name;
+        $designation->description = $request->description;
+        $designation->save();
+        return redirect()->back()->with('success', 'Designation Updated Successfully!');
+    }
+    public function department_index(){
+        return view('admin.human_resource.department');
+    }
+
+    public function department_list(Request $request){
+        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description'])
+        ->where('id', '!=', 1);
+
+        return Datatables::of($departments)
+            ->addColumn("action", function ($data) {
+                if(session('role_id') == 1 || in_array(485, session('permissions'))){
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                    $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                }
+                else{
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+    public function department_add(Request $request){
+        $department = new AdminDepartment();
+        $department->name = $request->name;
+        $department->description = $request->description;
+        $department->save();
+
+        $department->code = 'Dep'. str_pad($department->id, 3, '0', STR_PAD_LEFT);
+        $department->save();
+        return redirect()->back()->with('success', 'Department Added Successfully!');
+    }
+
+    public function department_edit(Request $request){
+        $department = AdminDepartment::find($request->department_id);
+        $department->name = $request->name;
+        $department->description = $request->description;
+        $department->save();
+        return redirect()->back()->with('success', 'Department Updated Successfully!');
     }
 }

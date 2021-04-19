@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
@@ -407,7 +408,7 @@ class NotificationsController extends Controller
 //                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
 //              }
 
-                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
                             $query->whereIn('hub_id', $origin_hub_ids);
                         });
 
@@ -2390,7 +2391,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk'];
+                    $to = ['fawad.ahmed@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk'];
 
                     $bcc = ['muhammad.waqas@trax.pk','anum.khan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
@@ -7238,6 +7239,29 @@ class NotificationsController extends Controller
                     }
                     $to = $retail_user->phone_no;
                     self::sms($body,$to);
+                }
+				else if($id == 130) {
+                    $now = Carbon::now();
+                    $month = $now->subMonth()->format('F');
+
+                    if (strpos($subject, '[month]') !== FALSE) {
+                        $subject = str_replace('[month]', $month, $subject);
+                    }
+
+                    if (strpos($subject, '[year]') !== FALSE) {
+                        $subject = str_replace('[year]', $now->year, $subject);
+                    }
+
+                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['fawad.ahmed@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+
+                    self::email($subject, $body, $to);
                 }
             }
         }

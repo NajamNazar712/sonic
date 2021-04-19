@@ -57,6 +57,7 @@
                                     <th class="border-primary border-darken-1">Junction 2</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
+                                    <th class="border-primary border-darken-1">Builty No.</th>
                                     <th class="border-primary border-darken-1">Shipments Weight</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
@@ -116,7 +117,6 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
-                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.master_cargo.bag.history.list') }}',
                         data: params,
@@ -134,6 +134,7 @@
                             head.push('Junction 2');
                             head.push('Transport Mode');
                             head.push('Vendor');
+                            head.push('Builty No.');
                             head.push('Shipments Weight');
                             head.push('Actual Weight');
                             head.push('Transit Datetime');
@@ -156,6 +157,7 @@
                                 row.push(values.junction_2);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
+                                row.push(values.builty_number);
                                 row.push(values.shipments_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.transit_at);
@@ -198,7 +200,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'bags.seal_number', class: 'align-middle seal_number'},
@@ -212,6 +214,7 @@
                     {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
+                    {data: 'builty_number', name: 'bags.builty_number', class: 'align-middle builty_number'},
                     {data: 'shipments_weight', name: 'bags.shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'actual_weight', name: 'bags.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transit_at', name: 'bags.created_at', class: 'align-middle transit_at'},

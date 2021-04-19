@@ -62,14 +62,15 @@
                                     <th class="border-primary border-darken-1">Junction 2</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
+                                    <th class="border-primary border-darken-1">Builty No.</th>
                                     <th class="border-primary border-darken-1">Driver Name</th>
-                                    <th class="border-primary border-darken-1">Vehicle Number</th>
+                                    <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Contact No.</th>
                                     <th class="border-primary border-darken-1">Transit Date</th>
                                     <th class="border-primary border-darken-1">Transit By</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1">Status</th>
-{{--                                    <th class="border-primary border-darken-1"></th>--}}
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -111,7 +112,7 @@
                             </div>
 
                             <div class="form-group ml-1">
-                                <button type="submit" name="add" class="btn btn-primary add" value="Add">Scan</button>
+                                <button type="submit" name="add" class="btn btn-primary" value="Add">Scan</button>
                             </div>
                         </form>
 
@@ -128,9 +129,7 @@
                             </thead>
                         </table>
 
-                        <form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.master_cargo.in_transit.receive_at_link') }}">
-                            {{ csrf_field() }}
-                            <input type="hidden" name="cargo_ids" id="link_cargo_ids" value="">
+                        <form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
                             <div class="form-group">
                                 <select name="junction" class="select2 junction" data-rule-required="true" data-msg-required="Junction is required">
                                 </select>
@@ -215,7 +214,6 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
-                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.master_cargo.in_transit.list') }}',
                         data: params,
@@ -235,8 +233,9 @@
                             head.push('Junction 2');
                             head.push('Transport Mode');
                             head.push('Vendor');
+                            head.push('Builty No.');
                             head.push('Driver Name');
-                            head.push('Vehicle Number');
+                            head.push('Vehicle');
                             head.push('Contact No.');
                             head.push('Transit Datetime');
                             head.push('Transit By');
@@ -261,6 +260,7 @@
                                 row.push(values.junction_2);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
+                                row.push(values.builty_number);
                                 row.push(values.driver_name);
                                 row.push(values.vehicle);
                                 row.push(values.phone_number);
@@ -292,7 +292,6 @@
 
                             master_cargo_consignment_ids = [];
 
-                            $('#receive_at_link #scan_master_cargo_number button.add').prop('disabled', false);
                             $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', true);
 
                             if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
@@ -338,7 +337,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
@@ -354,6 +353,7 @@
                     {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
+                    {data: 'builty_number', name: 'master_cargoes.builty_number', class: 'align-middle builty_number'},
                     {data: 'driver_name', name: 'master_cargoes.driver_name', class: 'align-middle driver_name'},
                     {data: 'vehicle', name: 'master_cargoes.vehicle', class: 'align-middle vehicle'},
                     {data: 'phone_number', name: 'master_cargoes.phone_number', class: 'align-middle phone_number'},
@@ -361,7 +361,7 @@
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -922,14 +922,14 @@
                                             'ids': master_cargo_consignment_ids
                                         }
                                     })
-                                        .done(function(junction_data) {
+                                        .done(function(data) {
                                             if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
                                                 $('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
                                             }
 
                                             $('#receive_at_link #receive_at_link_form .junction').show();
 
-                                            $.each(junction_data, function(index, junction) {
+                                            $.each(data, function(index, junction) {
                                                 $('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
                                             });
 
@@ -940,10 +940,9 @@
                                                 $(this).valid();
                                             });
                                         });
-                                    $('#receive_at_link #scan_master_cargo_number button.add').prop('disabled', true);
                                         $('#receive_at_link #receive_at_link_form button.receive').prop('disabled', false);
 
-                                    toastr.success(data .success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                                 else {
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -965,33 +964,31 @@
                     error.addClass('w-100').insertAfter(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $('#link_cargo_ids').val(master_cargo_consignment_ids);
-                    form.submit();
-                    {{--var junction = $(form).find('.junction').val();--}}
+                    var junction = $(form).find('.junction').val();
 
-                    {{--$.ajax({--}}
-                    {{--    url: '{!! route('admin.master_cargo.in_transit.receive_at_link') !!}',--}}
-                    {{--    method: 'POST',--}}
-                    {{--    data: {--}}
-                    {{--        'master_cargo_consignment_ids': master_cargo_consignment_ids,--}}
-                    {{--        'junction': junction,--}}
-                    {{--        '_token': '{{ csrf_token() }}'--}}
-                    {{--    }--}}
-                    {{--})--}}
-                    {{--    .done(function(data) {--}}
-                    {{--        if (data.status == 0) {--}}
-                    {{--            $('#receive_at_link').modal('hide');--}}
+                    $.ajax({
+                        url: '{!! route('admin.master_cargo.in_transit.receive_at_link') !!}',
+                        method: 'POST',
+                        data: {
+                            'master_cargo_consignment_ids': master_cargo_consignment_ids,
+                            'junction': junction,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                $('#receive_at_link').modal('hide');
 
-                    {{--            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                    {{--        }--}}
-                    {{--        else {--}}
-                    {{--            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--        }--}}
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
 
-                    {{--        table.draw();--}}
-                    {{--    });--}}
+                            table.draw();
+                        });
 
-                    {{--return false;--}}
+                    return false;
                 }
             });
             @endif

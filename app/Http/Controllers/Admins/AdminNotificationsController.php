@@ -408,6 +408,10 @@ class AdminNotificationsController extends Controller
 		else if ($id == 128){
             $details['fields'] = ['station_manager'];
         }
+		else if ($id == 130)
+        {
+            $details['fields'] = ['month','year','link'];
+        }
 
 		return $details;
     }

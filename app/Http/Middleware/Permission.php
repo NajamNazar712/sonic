@@ -500,8 +500,8 @@ class Permission
             'reports.weight_qc.list' => 444,
             'reports.master_cargo.bag.in_transit.index' => 472,
             'reports.master_cargo.bag.in_transit.list' => 472,
-            'reports.master_cargo.short_received_shipments.index' =>319,
-            'reports.master_cargo.short_received_shipments.list' => 319,
+            'reports.master_cargo.short_received_shipments.index' =>476,
+            'reports.master_cargo.short_received_shipments.list' => 476,
 
 
             'packaging.index' => 76,
@@ -789,6 +789,7 @@ class Permission
             'settings.pickup_address_wise_payment_accounts.index' => 391,
 
             'settings.international_rates.index' => 438,
+            'settings.international_rates.upload.index' => 477,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -906,6 +907,13 @@ class Permission
 
             'human_resource.employee_directory.approve' => 469,
             'human_resource.employee_directory.reject' => 469,
+
+            'human_resource.reporting_location.index' => 478,
+            'human_resource.reporting_location.list' => 478,
+            'human_resource.designation.index' => 481,
+            'human_resource.designation.list' => 481,
+            'human_resource.department.index' => 484,
+            'human_resource.department.list' => 484,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

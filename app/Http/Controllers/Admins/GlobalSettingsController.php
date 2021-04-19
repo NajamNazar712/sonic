@@ -38,6 +38,8 @@ use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\InternationalStandardDhlRate;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
@@ -45,6 +47,7 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
+use App\Http\Models\Shipment;
 use App\http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
 use App\Http\Models\Zone;
@@ -83,6 +86,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 
@@ -3445,19 +3451,19 @@ class GlobalSettingsController extends Controller
         $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
         if($fuel_surcharge->exists()){
             $fuel_surcharge = $fuel_surcharge->first();
-            $fuel_charges = $fuel_surcharge->setting_value;
+            $fuel_charges = (float)$fuel_surcharge->text;
         }
         $exchange_rate_charges = '';
         $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
         if($exchange_rate->exists()){
             $exchange_rate = $exchange_rate->first();
-            $exchange_rate_charges = $exchange_rate->setting_value;
+            $exchange_rate_charges = (float)$exchange_rate->text;
         }
         $gst = '';
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
         if($gst_charges->exists()){
             $gst_charges = $gst_charges->first();
-            $gst = $gst_charges->setting_value;
+            $gst = (float)$gst_charges->text;
         }
        return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges, 'gst' => $gst]);
     }
@@ -3473,6 +3479,7 @@ class GlobalSettingsController extends Controller
             $fuel_surcharge_rate->type = 'international_fuel_surcharge';
         }
         $fuel_surcharge_rate->setting_value = $request->fuel_surcharge;
+        $fuel_surcharge_rate->text = $request->fuel_surcharge;
         $fuel_surcharge_rate->save();
         $exchange_rate_value = GlobalSettings::where('type', 'international_exchange_rate');
         if($exchange_rate_value->exists()){
@@ -3483,6 +3490,7 @@ class GlobalSettingsController extends Controller
             $exchange_rate_value->type = 'international_exchange_rate';
         }
         $exchange_rate_value->setting_value = $request->exchange_rate;
+        $exchange_rate_value->text = $request->exchange_rate;
         $exchange_rate_value->save();
 
         $gst = GlobalSettings::where('type', 'international_gst_rate');
@@ -3494,6 +3502,7 @@ class GlobalSettingsController extends Controller
             $gst->type = 'international_gst_rate';
         }
         $gst->setting_value = $request->gst;
+        $gst->text = $request->gst;
         $gst->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
@@ -3601,5 +3610,194 @@ class GlobalSettingsController extends Controller
             $rider_ticker->save();
         }
         return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function international_rates_upload_index(){
+        return view('admin.settings.international.excel_upload');
+    }
+
+    public function international_standard_dhl_rates_list(Request $request){
+        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+
+        return Datatables::of($rates_list)->make(true);
+    }
+    public function international_rates_upload_excel(Request $request){
+
+        $names = [
+            'range_up' => 'Range Up',
+            'range_down' => 'Range Down',
+            'zone_1' => 'Zone 1',
+            'zone_2' => 'Zone 2',
+            'zone_3' => 'Zone 3',
+            'zone_4' => 'Zone 4',
+            'zone_5' => 'Zone 5',
+            'zone_6' => 'Zone 6',
+            'zone_7' => 'Zone 7',
+            'zone_8' => 'Zone 8',
+            'zone_9' => 'Zone 9',
+            'zone_10' => 'Zone 10',
+            'zone_11' => 'Zone 11',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid.',
+        ];
+        $rules = [
+            'range_up' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_up')],
+            'range_down' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_down')],
+            'zone_1' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_2' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_3' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_4' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_5' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_6' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_7' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_8' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_9' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_10' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_11' => ['required', 'numeric', 'between:0,1000000'],
+        ];
+
+        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 =>  'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
+
+        if($file = $request->file('rates')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if($index == 12){
+                    }
+                    elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+                        break;
+                    }
+                }
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                }
+                else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $rate_range_ids = array();
+                $rate_range_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+
+                    if (empty($errors['Row #' . $row_id])) {
+                        if ((!empty(trim($row['range_up']))) && (!empty(trim($row['range_down'])))) {
+                            if (empty($rate_range_ids)) {
+                                $rate_range_ids[] = $row['range_up'];
+                                $rate_range_id_row[$row['range_up']] = $row_id;
+                            }
+                            else {
+                                if (in_array($row['range_up'], $rate_range_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
+                                }
+                                else {
+                                    $rate_range_ids[] = $row['range_up'];
+                                    $rate_range_id_row[$row['range_up']] = $row_id;
+                                }
+                            }
+                        }
+                        if (!InternationalStandardDhlRate::where('range_up', $row['range_up'])->where('range_down', $row['range_down'])->exists()) {
+                            $errors['Row #' . $row_id][] = 'Range does not exists at #' . $row[$row_id];
+                        }
+                    }
+                }
+                if(empty($errors)){
+                    $updated = 0;
+                    $not_updated = 0;
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $range_up = trim($row['range_up']);
+                        $range_down = trim($row['range_down']);
+                        $zone_1 = trim($row['zone_1']);
+                        $zone_2 = trim($row['zone_2']);
+                        $zone_3 = trim($row['zone_3']);
+                        $zone_4 = trim($row['zone_4']);
+                        $zone_5 = trim($row['zone_5']);
+                        $zone_6 = trim($row['zone_6']);
+                        $zone_7 = trim($row['zone_7']);
+                        $zone_8 = trim($row['zone_8']);
+                        $zone_9 = trim($row['zone_9']);
+                        $zone_10 = trim($row['zone_10']);
+                        $zone_11 = trim($row['zone_11']);
+
+                        $standard_rate = InternationalStandardDhlRate::where('range_up', $range_up)->where('range_down', $range_down);
+                        if($standard_rate->exists()){
+                            $standard_rate = $standard_rate->first();
+                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
+                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
+                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
+                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
+                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
+                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
+                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
+                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
+                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
+                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
+                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
+                            $standard_rate->save();
+                            $updated++;
+                        }
+                        else{
+                            $not_updated++;
+                        }
+
+                    }
+                    $error_msg = '';
+                    if($not_updated > 1){
+                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                    }
+
+                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                }
+                else{
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            }
+            else {
+                return redirect()->back()->with('error', 'No Rates in File');
+            }
+
+        }
     }
 }

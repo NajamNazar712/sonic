@@ -479,7 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
-        Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
+        Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
@@ -1667,6 +1667,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
             Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
             Route::post('station_operation_finance_approved','Admins\AdminPettyCashController@petty_cash_station_operation_finance_approved_all')->name('station_operation_finance_approved');
+            Route::post('check','Admins\AdminPettyCashController@petty_cash_statement_check')->name('check');
 
         });
         Route::prefix('approved')->name('approved.')->group(function (){
@@ -2495,6 +2496,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
 
+            Route::prefix('upload')->name('upload.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@international_standard_dhl_rates_list')->name('list');
+                Route::post('excel', 'Admins\GlobalSettingsController@international_rates_upload_excel')->name('excel');
+
+            });
         });
 
 
@@ -2810,6 +2817,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
         });
 
+        Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@reporting_location_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@reporting_location_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@reporting_location_status')->name('status');
+            Route::post('add_location', 'Admins\AdminHumanResourseController@reporting_location_add')->name('add_location');
+            Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
+        });
+
+        Route::prefix('designation')->name('designation.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@designation_status')->name('status');
+            Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
+        });
+        Route::prefix('department')->name('department.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@department_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@department_list')->name('list');
+            Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {

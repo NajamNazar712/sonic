@@ -256,6 +256,7 @@
             var min_date = '{{$petty_statement_draft->from}}';
             var max_date = '{{$petty_statement_draft->to}}';
             rows_count = 0;
+            var min_date_limit = '{{ Carbon\Carbon::now()->subDays(7)->toDateString() }}';
             function add_row() {
 
                 rows_count++;
@@ -320,7 +321,7 @@
                     today: '',
                     clear: '',
                     close: '',
-                    min: new Date(min_date),
+                    min: new Date(min_date_limit),
                     max: new Date(max_date),
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
                     showMonthsShort: true,
@@ -753,7 +754,7 @@
                     today: '',
                     clear: '',
                     close: '',
-                    min: new Date(min_date),
+                    min: new Date(min_date_limit),
                     max: new Date(max_date),
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
                     showMonthsShort: true,

@@ -41,8 +41,10 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Tracking No. Booking Date</th>
                         <th class="border-primary border-darken-1">Third Party Tracking Number</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -126,8 +128,10 @@
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
+                            head.push('Tracking No. Booking Date');
                             head.push('International Tracking No.');
                             head.push('Postal Code');
+                            head.push('Actual Weight');
 
 
                             $.each(result.data, function(index, values) {
@@ -135,8 +139,10 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.booking_date);
                                 row.push(values.international_tracking_number);
                                 row.push(values.postal_code);
+                                row.push(values.actual_weight);
                                 body.push(row);
                             });
                         },
@@ -165,12 +171,14 @@
                 pagingType: 'full_numbers',
                 ajax: '{{ route('admin.international.tracking_upload.list') }}',
                 rowId: 'shipment_id',
-                order: [1, 'desc'],
+                order: [2, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
+                    {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -245,6 +253,7 @@
                                 $('#edit_tracking_number').val(data.details.tracking_number);
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
+                                $('#actual_weight').val(data.details.actual_weight);
                                 $('#EditTrackingModal').modal('show');
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
