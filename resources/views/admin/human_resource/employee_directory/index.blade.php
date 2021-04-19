@@ -25,7 +25,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
-                                    <th class="border-primary border-darken-1">Type</th>
+                                    <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Request Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
@@ -105,7 +105,7 @@
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
-                            head.push('Type');
+                            head.push('Employee Type');
                             head.push('Request Status');
                             head.push('Employee Status');
                             head.push('Requested At');
@@ -380,13 +380,23 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
+                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
-                        } else {
+                        }
+                        else if($(header).is('.employee_type'))
+                        {
+                            $(employee_type).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -398,6 +408,20 @@
                     });
 
                     this.api().table().columns.adjust();
+
+                    var data = $.map({!! $employee_types !!}, function (obj) {
+                        obj.id = obj.name;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#employee_type_search").prepend('<option value="" selected></option>').select2({
+                        data: data,
+                        placeholder: "Select Employee Type",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                 }
             });
 

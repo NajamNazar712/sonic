@@ -22,6 +22,7 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\EmployeeType;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
@@ -190,7 +191,8 @@ class AdminHumanResourseController extends Controller
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $rider_categories = RiderCategory::all();
-        return view('admin.human_resource.employee_directory.index')->with(['rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category]);
+        $employee_types = EmployeeType::all();
+        return view('admin.human_resource.employee_directory.index')->with(['employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function employee_directory_list(Request $request){
