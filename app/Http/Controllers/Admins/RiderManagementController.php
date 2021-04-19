@@ -708,7 +708,6 @@ class RiderManagementController extends Controller
                 ->withErrors($validate);
         }
         $employee = Employee::where('rider_request_id', $request->rider_request_id);
-        $employee_id = null;
         if($employee->exists()){
             $employee = $employee->first();
             $employee->status_id = 1;
@@ -729,6 +728,7 @@ class RiderManagementController extends Controller
             else{
                 $trax_id = null;
             }
+            $employee_id = null;
         }
 
         $rider = Rider::create([

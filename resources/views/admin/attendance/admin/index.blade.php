@@ -112,8 +112,10 @@
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
                                     <th class="border-primary border-darken-1">Clock In Time</th>
+                                    <th class="border-primary border-darken-1">Clock In Status</th>
                                     <th class="border-primary border-darken-1">Clock In Location</th>
                                     <th class="border-primary border-darken-1">Clock Out Time</th>
+                                    <th class="border-primary border-darken-1">Clock Out Status</th>
                                     <th class="border-primary border-darken-1">Clock Out Location</th>
                                 </tr>
                                 </thead>
@@ -224,7 +226,9 @@
                             head.push('Department');
                             head.push('Date');
                             head.push('Clock In Time');
+                            head.push('Clock In Status');
                             head.push('Clock Out Time');
+                            head.push('Clock Out Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -237,7 +241,9 @@
                                 row.push(values.department);
                                 row.push(values.attendance_date);
                                 row.push(values.clock_in);
+                                row.push(values.clock_in_status);
                                 row.push(values.clock_out);
+                                row.push(values.clock_out_status);
                                 body.push(row);
                             });
                         },
@@ -303,8 +309,10 @@
                     {data: 'department', name: 'ad.id', class: 'align-middle department'},
                     {data: 'attendance_date', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_date'},
                     {data: 'clock_in', name: 'employee_attendances.clock_in', class: 'align-middle clock_in'},
+                    {data: 'clock_in_status', name: 'employee_attendances.clock_in_location', class: 'align-middle clock_in_status'},
                     {data: 'clock_in_location', name: '', class: 'align-middle clock_in_location', sortable: false},
                     {data: 'clock_out', name: 'employee_attendances.clock_out', class: 'align-middle clock_out'},
+                    {data: 'clock_out_status', name: 'employee_attendances.clock_out_location', class: 'align-middle clock_out_status'},
                     {data: 'clock_out_location', name: '', class: 'align-middle clock_out_location', sortable: false},
                 ],
                 rowCallback: function (row, data, index) {

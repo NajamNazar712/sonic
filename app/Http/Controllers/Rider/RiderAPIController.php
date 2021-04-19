@@ -37,6 +37,7 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
+use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
@@ -156,7 +157,7 @@ class RiderAPIController extends Controller
         }
     }
 
-    private function distance($origin, $destination)
+    public function distance($origin, $destination)
     {
         return $this->vincenty_distance($origin, $destination);
     }
@@ -4230,6 +4231,22 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('riders as r', 'e.id', 'r.employee_id')
+                ->where('r.id', $rider_id);
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
             $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
@@ -4250,6 +4267,7 @@ class RiderAPIController extends Controller
                 $rider_attendance->clock_in = $attendance_time;
                 $rider_attendance->clock_in_latitude = $request->latitude;
                 $rider_attendance->clock_in_longitude = $request->longitude;
+                $rider_attendance->clock_in_location = $location_status;
                 $rider_attendance->save();
 
                 $rider_attendance_action->employee_id = $rider_id;
@@ -4265,6 +4283,7 @@ class RiderAPIController extends Controller
                 $rider_attendance->clock_out = $attendance_time;
                 $rider_attendance->clock_out_latitude = $request->latitude;
                 $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->clock_out_location = $location_status;
                 $rider_attendance->save();
 
                 $rider_attendance_action->employee_id = $rider_id;

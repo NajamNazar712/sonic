@@ -194,6 +194,7 @@ class UserManagementController extends Controller
     }
 
     public function user_add_store(Request $request) {
+        $employee_id = null;
         $admin = new Admin();
 
         $admin->name = $request->input('name');
@@ -208,6 +209,10 @@ class UserManagementController extends Controller
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
             $employee = Employee::where('trax_id', $request->trax_id);
+            if($employee->exists()){
+                $employee = $employee->first();
+                $employee_id = $employee->id;
+            }
 
         }
         else{
@@ -226,6 +231,7 @@ class UserManagementController extends Controller
         }
 
         $admin->trax_id = $trax_id;
+        $admin->employee_id = $employee_id;
 
         $admin->save();
 

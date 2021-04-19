@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -15,6 +16,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\http\Models\ReportingLocation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
@@ -41,6 +43,30 @@ class AdminAPIController extends Controller
         'exists' => 'Given :attribute is of Invalid ID.',
         'image' => ':attribute must be an Image.'
     ];
+
+    private function distance($origin, $destination)
+    {
+        return $this->vincenty_distance($origin, $destination);
+    }
+
+    private function vincenty_distance($origin, $destination)
+    {
+        $earth_radius = 6371;
+
+        list($origin_latitude, $origin_longitude) = explode(',', $origin);
+        list($destination_latitude, $destination_longitude) = explode(',', $destination);
+
+        $origin_latitude = deg2rad($origin_latitude);
+        $origin_longitude = deg2rad($origin_longitude);
+        $destination_latitude = deg2rad($destination_latitude);
+        $destination_longitude = deg2rad($destination_longitude);
+
+        $longitude_delta = $destination_longitude - $origin_longitude;
+
+        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
+
+        return $distance;
+    }
 
     public function verify(Request $request)
     {
@@ -261,6 +287,24 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('admins as a', 'e.id', 'a.employee_id')
+                ->where('a.id', $admin_id);
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+
             $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
@@ -281,6 +325,7 @@ class AdminAPIController extends Controller
                 $admin_attendance->clock_in = $attendance_time;
                 $admin_attendance->clock_in_latitude = $request->latitude;
                 $admin_attendance->clock_in_longitude = $request->longitude;
+                $admin_attendance->clock_in_location = $location_status;
                 $admin_attendance->save();
 
                 $admin_attendance_action->employee_id = $admin_id;
@@ -296,6 +341,7 @@ class AdminAPIController extends Controller
                 $admin_attendance->clock_out = $attendance_time;
                 $admin_attendance->clock_out_latitude = $request->latitude;
                 $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
                 $admin_attendance->save();
 
                 $admin_attendance_action->employee_id = $admin_id;

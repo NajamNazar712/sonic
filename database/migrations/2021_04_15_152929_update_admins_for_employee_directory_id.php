@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateRidersForEmployeeDirectoryID extends Migration
+class UpdateAdminsForEmployeeDirectoryId extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class UpdateRidersForEmployeeDirectoryID extends Migration
      */
     public function up()
     {
-        Schema::table('riders', function (Blueprint $table) {
+        Schema::table('admins', function (Blueprint $table) {
             $table->integer('employee_id')->nullable()->index();
         });
     }
@@ -25,7 +25,7 @@ class UpdateRidersForEmployeeDirectoryID extends Migration
      */
     public function down()
     {
-        Schema::table('riders', function (Blueprint $table) {
+        Schema::table('admins', function (Blueprint $table) {
             $table->dropColumn('employee_id');
         });
     }

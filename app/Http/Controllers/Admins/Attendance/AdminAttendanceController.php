@@ -49,7 +49,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id', 'employee_attendances.employee_type');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status');
 
         if (session('role_id') != 1) {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
@@ -106,6 +106,15 @@ class AdminAttendanceController extends Controller
                 }
                 return $clock_in;
             })
+            ->addColumn('clock_in_status', function ($employee) {
+                if ($employee->clock_in_status == 2) {
+                    return "ON-Site";
+                } else if ($employee->clock_in_status == 1) {
+                    return "OFF-Site";
+                } else {
+                    return "";
+                }
+            })
             ->addColumn("clock_out_location", function ($employee) {
                 if ($employee->clock_out_latitude && $employee->clock_out_longitude) {
                     $clock_out = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $employee->clock_out_latitude . ',' . $employee->clock_out_longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
@@ -114,6 +123,15 @@ class AdminAttendanceController extends Controller
                 }
 
                 return $clock_out;
+            })
+            ->addColumn('clock_out_status', function ($employee) {
+                if ($employee->clock_out_status == 2) {
+                    return "ON-Site";
+                } else if ($employee->clock_out_status == 1) {
+                    return "OFF-Site";
+                } else {
+                    return "";
+                }
             });
 
         if ($search_admin = $request->get('search_admin')) {
