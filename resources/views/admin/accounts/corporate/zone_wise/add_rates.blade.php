@@ -19,11 +19,11 @@
 
 
                     <div class="card-content">
-                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.corporate.zone_wise.add.rates',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
+                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                             @csrf
 
                             <div class="card">
-
+                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
                                {{-- <div class="">
                                     @if(count($packaging_material_types) > 0)
 
@@ -3844,6 +3844,21 @@
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
         var detainSwitch = document.querySelector('.switchery.detain-main-switch');
         var samedaySwitch = document.querySelector('.switchery.sameday-main-switch');
+
+        var shipper = @json($shipper->id);
+        var rate_type = @json($corporate_rate_type_id);
+
+        if(rate_type == null){
+            console.log(1);
+            var route = '{!! route('admin.corporate.zone_wise.add.rates', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
+        else{
+            var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
 
 
         $( "#ratesAdditionForm" ).validate({

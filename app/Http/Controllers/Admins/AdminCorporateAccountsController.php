@@ -147,9 +147,9 @@ class AdminCorporateAccountsController extends Controller
     }
 
 
-    public function add_rates_index($id)
+    public function add_rates_index($id,$rate_type_id = null)
     {
-
+       
         $user = User::find($id);
         if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
             $rate_type = $user->corporate_rate_type_id;
@@ -233,16 +233,25 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
                 }
             }
-            if($rate_type == 1){
-                return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
-            }
-            else if($rate_type == 2){
-                return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
+            if($rate_type_id != null){
+                $corporate_rate_type_id = $rate_type_id;
             }
             else{
-                return view('admin.accounts.corporate.default.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+                $corporate_rate_type_id = null;
             }
 
+
+            if($rate_type == 1){
+
+                return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes,'corporate_rate_type_id' => $corporate_rate_type_id]);
+            }
+            else if($rate_type == 2){
+
+                return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'corporate_rate_type_id' => $corporate_rate_type_id]);
+            }
+            else{
+                return view('admin.accounts.corporate.default.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users,'corporate_rate_type_id' => $corporate_rate_type_id]);
+            }
         }
         return redirect()->back()->with('error', 'User rates not found!');
     }
@@ -17777,100 +17786,8 @@ class AdminCorporateAccountsController extends Controller
        }
     }
 
-  /*  public function change_corporate_rate_type($id,$rate_type_id){
-
-        if($rate_type_id == 1 || $rate_type_id == 2) {
-            $user = User::find($id);
-            if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
-                $rate_type = $user->corporate_rate_type_id;
-                $min_weight = CorporateStandardMinChargeableWeight::all()->groupBy('shipping_mode_id');
-                $sale_person = SalePersonTag::where('user_id', $id)->first();
-                $bookingType = CorporateStandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-                $cash = CorporateStandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-                $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-                $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-                $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-                $storage_types = WmsStorageType::all()->where('status', 1);
-                $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
-
-                if ($rate_type_id == 1) {
-                    $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
-                    $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
-                } else if ($rate_type_id == 2) {
-                    $weight = CorporateStandardWeightChargeZoneWise::all()->groupBy('shipping_mode_id');
-                    $return = CorporateStandardReturnChargeZoneWise::all()->groupBy('shipping_mode_id');
-                }
-            }
-        }
-        else{
-
-            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
-            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
-            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            $packaging_sizes = array();
-            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-
-            $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
-            $on = null;
-            $ol = null;
-            $det = null;
-            $same_day = null;
-            foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
-                if($minimum_chargeable_weight->shipping_mode_id == 1){
-                    $on = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 2){
-                    $ol = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 3){
-                    $det = $minimum_chargeable_weight->weight;
-                }
-                else{
-                    $same_day = $minimum_chargeable_weight->weight;
-                }
-            }
-            $commission_percentage = '';
-            $settings = GlobalSettings::where('type', 'commission_percentage');
-            if($settings->exists()){
-                $settings = $settings->first();
-                $commission_percentage = $settings->text;
-            }
-            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
-            $users = array();
-            $sales = array();
-            $all_users = array();
-            foreach ($admin_users as $u){
-                if($u->department_id != 7){
-                    $users[] = array('id' => $u->id, 'text' => $u->name);
-                }else{
-                    $sales[] = array('id' => $u->id, 'text' => $u->name);
-                }
-            }
-            $all_users['results'][0]['text'] = 'Sales';
-            $all_users['results'][0]['children'] = $sales;
-            $all_users['results'][1]['text'] = 'Admins';
-            $all_users['results'][1]['children'] = $users;
-            $all_users['pagination']['more'] = true;
-
-        }
-        if (count($packaging_material_types) > 0) {
-
-            foreach ($packaging_material_types as $type) {
-                $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-            }
-        }
-        if ($rate_type_id == 1) {
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
-        } else if ($rate_type_id == 2) {
-            return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
-        }
-
-        return redirect()->back()->with('error', 'User rates not found!');
-
-    }*/
+    public function change_corporate_rate_type($id,Request $request){
+        dd($request);
+    }
 
 }

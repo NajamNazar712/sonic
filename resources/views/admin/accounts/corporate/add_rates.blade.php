@@ -19,9 +19,8 @@
 
 
                     <div class="card-content">
-                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.corporate.add.rates',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
+                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                             @csrf
-
                             <div class="card">
 
                               {{--  <div class="">
@@ -72,6 +71,7 @@
                                     @endif
 
                                 </div>--}}
+                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
 
                             </div>
                             <div id="" class="card-header border-success">
@@ -2423,6 +2423,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
             });
@@ -3968,6 +3969,22 @@
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
         var detainSwitch = document.querySelector('.switchery.detain-main-switch');
         var samedaySwitch = document.querySelector('.switchery.sameday-main-switch');
+
+        var shipper = @json($shipper->id);
+        var rate_type = @json($corporate_rate_type_id);
+
+        if(rate_type == null){
+
+            var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
+        else{
+            var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
+
 
 
         $( "#ratesAdditionForm" ).validate({

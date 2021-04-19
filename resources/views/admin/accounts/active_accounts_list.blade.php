@@ -1638,7 +1638,8 @@
                         $('#ChangeRateType #corporate_rate_type').bind('change', function () {
                             var rate_type_id = $(this).val();
                             if (rate_type_id) {
-                                var url = redirect + '/corporate/default/'+ user_id + '/corporate_rate_type/' + rate_type_id + '/change';
+                                //var url = redirect + '/corporate/default/'+ user_id + '/corporate_rate_type/' + rate_type_id + '/change';
+                                var url = redirect + '/corporate/'+ user_id + '/add/rates/' + rate_type_id;
                                 window.location = url; }
                             else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

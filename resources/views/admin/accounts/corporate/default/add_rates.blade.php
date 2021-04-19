@@ -17,9 +17,10 @@
                         @include('admin.inc.messages')
                     </div>
 
-                    <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.corporate.default.add.rates',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
+                    <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                         @csrf
                         <div class="card-content">
+                            <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
 
                             <div id="" class="card-header border-success">
                                 <div class="row">
@@ -2023,6 +2024,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+
             //sales tier
             /* *********************
                 Move this block before submit and remove add form on submit
@@ -3666,6 +3669,25 @@
         $('#addRatesSubmit').on('click', function () {
             $('#add_user_commission_form').remove();
         });
+
+        var shipper = @json($shipper->id);
+        var rate_type = @json($corporate_rate_type_id);
+
+        if(rate_type == null){
+            console.log(1);
+            var route = '{!! route('admin.corporate.default.add.rates', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
+        else{
+            var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+            route = route.replace(':id', shipper);
+            $("#ratesAdditionForm").attr('action', route);
+        }
+
+
+
+
         $( "#ratesAdditionForm" ).validate({
             errorClass:"danger",
             errorPlacement: function(error, element) {
