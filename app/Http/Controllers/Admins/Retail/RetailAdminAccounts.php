@@ -581,14 +581,15 @@ class RetailAdminAccounts extends Controller
                               <tr>
                                 <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                     ';
+                    $amount = $shipment->amount;
 
                     if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
                         $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                     } else {
                         $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                     }
                 }
