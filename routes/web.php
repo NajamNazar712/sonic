@@ -2795,6 +2795,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
+            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@retail_bank_info')->name('bank_info');
+            Route::post('/bank_info_update', 'Admins\Retail\RetailAdminAccounts@retail_bank_info_update')->name('bank_info_update');
         });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
