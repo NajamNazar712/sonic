@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\Admins;
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
@@ -45,7 +46,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminReportsController extends Controller
 {
@@ -4574,11 +4574,11 @@ class AdminReportsController extends Controller
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
+
         return self::debriefing_data($date, $hub, $zone, NULL, $mode);
     }
 
     static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type) {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),162);
         $file_name = 'debriefing_report_';
 
         $file_name .= $date;
@@ -4772,6 +4772,7 @@ class AdminReportsController extends Controller
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
+        ActivityTrailController::createActivityTrailLog(Auth::id(),162);
         return self::debriefing_export_file($date, $hub, $zone, $mode, 0);
     }
 
