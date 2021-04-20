@@ -17805,7 +17805,7 @@ class AdminCorporateAccountsController extends Controller
                   $history_rates->shipping_mode_id = $previous_rates->shipping_mode_id;
                   $history_rates->status = $previous_rates->status;
                   $history_rates->cash_handling_charges = $previous_rates->cash_handling_charges;
-                  $history_rates->insurannce_charges = $previous_rates->insurannce_charges;
+                  $history_rates->insurance_charges = $previous_rates->insurance_charges;
                   $history_rates->return_charges = $previous_rates->return_charges;
                   $history_rates->fuel_charges = $previous_rates->fuel_charges;
                   $history_rates->save();

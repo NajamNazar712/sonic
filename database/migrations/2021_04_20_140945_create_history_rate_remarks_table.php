@@ -15,6 +15,9 @@ class CreateHistoryRateRemarksTable extends Migration
     {
         Schema::create('history_rate_remarks', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id');
+            $table->string('remarks');
+            $table->integer('admin_id');
             $table->timestamps();
         });
     }
