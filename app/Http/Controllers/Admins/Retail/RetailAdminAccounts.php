@@ -255,7 +255,7 @@ class RetailAdminAccounts extends Controller
 
             $slip .= '
                           <tr>
-                            <td rowspan="2" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
                             <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
                             <td colspan="2" class="color primary"><strong>Origin</strong></td>
@@ -266,6 +266,14 @@ class RetailAdminAccounts extends Controller
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                          </tr>
+                          <tr>
+                            <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
+                            <td colspan="1" class="color primary border"><strong>Bank</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
                           </tr>
                 ';
 
