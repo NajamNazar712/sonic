@@ -371,6 +371,7 @@
                 width:'100%',
                 placeholder:"Select Product*"
             }).bind('change', function () {
+                $('#shipper_phone_no').val('');
                 var id = parseInt($(this).val());
                 if(id === 1){
                     $('#cod_check').addClass('d-none');
@@ -578,29 +579,24 @@
                                 $('#account_details').removeClass('d-none');
                             }
                             if(complete_shipper_info == false){
-                                console.log(1);
                                 var mode = $('#shipping_mode').val();
                                 if(first_shipment == true){
-                                    console.log(2);
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
                                 else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '') && $('#shipping_mode').val() == 3){
-                                    console.log(3);
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
                                 }
                                 else if($('#shipping_mode').val() != 3){
-                                    console.log(4);
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                 }
                                 else{
-                                    console.log(5);
                                     $('#account_details').removeClass('d-none');
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
