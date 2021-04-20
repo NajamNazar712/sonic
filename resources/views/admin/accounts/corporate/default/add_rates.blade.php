@@ -20,7 +20,7 @@
                     <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                         @csrf
                         <div class="card-content">
-                            <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
+                            <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
 
                             <div id="" class="card-header border-success">
                                 <div class="row">

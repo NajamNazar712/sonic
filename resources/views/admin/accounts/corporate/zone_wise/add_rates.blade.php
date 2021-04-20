@@ -23,7 +23,7 @@
                             @csrf
 
                             <div class="card">
-                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
+                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
                                {{-- <div class="">
                                     @if(count($packaging_material_types) > 0)
 

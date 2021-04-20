@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCorporateRateTypeHistoriesTable extends Migration
+class CreateHistoryCorporateDeliveryTypeStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateCorporateRateTypeHistoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('corporate_rate_type_histories', function (Blueprint $table) {
+        Schema::create('history_corporate_delivery_type_statuses', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('corporate_rate_type_id');
             $table->integer('user_id');
-            $table->integer('admin_id');
+            $table->integer('delivery_type_id')->index();
+            $table->integer('shipping_mode_id')->index();
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateCorporateRateTypeHistoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('corporate_rate_type_histories');
+        Schema::dropIfExists('history_corporate_delivery_type_statuses');
     }
 }

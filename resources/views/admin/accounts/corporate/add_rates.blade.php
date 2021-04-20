@@ -71,7 +71,7 @@
                                     @endif
 
                                 </div>--}}
-                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}">
+                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
 
                             </div>
                             <div id="" class="card-header border-success">
