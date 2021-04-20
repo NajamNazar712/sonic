@@ -225,10 +225,10 @@
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
-                            head.push('Clock In Time');
-                            head.push('Clock In Status');
-                            head.push('Clock Out Time');
-                            head.push('Clock Out Status');
+                            head.push('Clock-in Time');
+                            head.push('Clock-in Radius');
+                            head.push('Clock-out Time');
+                            head.push('Clock-out Radius');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
