@@ -14,11 +14,20 @@ use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\DiscountCharge;
 use App\Http\Models\DonePaymentCalculation;
+use App\Http\Models\InternationalDhlZone;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
+use App\Http\Models\RateStatus;
 use App\http\Models\RetailAdjustmentLog;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\RetailDonePaymentCalculation;
@@ -32,6 +41,8 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -1870,6 +1881,38 @@ class AdminFinanceController extends Controller
         }
         else {
             return ['status' => 1, 'error' => 'No Shipment exists with given Tracking Number'];
+        }
+    }
+
+    public function change_shipment_weight_calculate_amount(Request $request) {
+        $shipment_id = $request->shipment_id;
+        $weight = $request->weight;
+        $shipment = Shipment::find($shipment_id);
+        if($shipment->business_category_id == 1){
+            $weight_result = ShipmentChargesController::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+        }
+        else{
+            $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
+            if($international_rate->exists()){
+                $international_rate = $international_rate->first();
+                $margin = $international_rate->margin;
+                $zone_id = $shipment->consignee_city->zone_id;
+                $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+                if($international_zone){
+                    $weight_result = ShipmentChargesController::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
+                }
+            }
+        }
+
+        $fuel_result = ShipmentChargesController::calculate_fuel_surcharge($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->weight_charges);
+
+        if ($fuel_result && $weight_result) {
+            $new_charges = $weight_result['weight_charges'] + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $fuel_result['fuel_surcharge'] + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+
+            return response()->json(['status' => 1, 'new_charges' => $new_charges]);
+        }
+        else{
+            return response()->json(['status' => 0]);
         }
     }
 
