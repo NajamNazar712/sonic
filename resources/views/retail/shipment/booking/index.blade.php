@@ -545,7 +545,7 @@
             var first_shipment = false;
 
             $('#shipper_phone_no').on('change', function () {
-                if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
+                if(this.value !== '' && this.value != null){
                     $.ajax({
                         url: '{!! route('retail.shipment.shipper_info') !!}',
                         method: 'POST',
