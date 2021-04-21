@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="viewdetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDetails"
+    <div class="modal fade text-left" id="EditDetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditDetails"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -47,7 +47,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="edit_shipper_details_form" action="{{route('admin.retail.accounts.bank_info_update')}}" method="post">
+                <form id="edit_shipper_details_form" action="{{route('admin.retail.accounts.bank_info_update')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="id" id="shipper_account_id" value="">
                     <div class="modal-body text-center">
@@ -75,6 +75,14 @@
                                     </select>
 
                                 </div>
+                                <div class="col mt-1">
+                                    <label for="cheque_image" class="font-weight-bold mr-2">
+                                        Cheque Image:
+                                    </label>
+                                    <div class="form-group">
+                                        <input class="form-control form-control-sm" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -83,6 +91,47 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="ViewDetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDetails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Shipper Details </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body text-center">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8 ">
+                                <div class="col">
+                                    <label for="iban" class="font-weight-bold mr-2">IBAN</label>
+                                    <div class="form-group">
+                                        <input type="text" name="view_iban" id="view_iban" class="form-control" placeholder="IBAN" disabled>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="account_no" class="font-weight-bold mr-2">Account Number</label>
+                                    <div class="form-group">
+                                        <input type="text" name="view_account_no" id="view_account_no" class="form-control" placeholder="Shipper Account" disabled>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="bank_info" class="font-weight-bold mr-2">Bank Name</label>
+                                    <input type="text" name="view_bank_info" id="view_bank_info" class="form-control" placeholder="Bank" disabled>
+                                </div>
+                                <div class="col mt-1" id="image_button">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
             </div>
         </div>
     </div>
@@ -255,7 +304,41 @@
                                 }if(iban != null){
                                     $('#iban').val(data.details.iban);
                                 }
-                                $('#viewdetails').modal('show');
+                                $('#EditDetails').modal('show');
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+                if ($(this).hasClass('view')) {
+                        $.ajax({
+                            url: '{!! route('admin.retail.accounts.bank_info') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function (data) {
+                            if(data.status == 0){
+                                $('#picture_div').remove();
+                                var bank = data.details.bank_name;
+                                var iban = data.details.iban;
+                                var account_no = data.details.account_no;
+                                var cheque_image = data.details.image;
+                                $('#shipper_account_id').val(id);
+                                if(bank != null){
+                                    $('#view_bank_info').val(bank);
+                                }
+                                if(account_no != null){
+                                    $('#view_account_no').val(data.details.account_no);
+                                }if(iban != null){
+                                    $('#view_iban').val(data.details.iban);
+                                }if(cheque_image != null){
+                                    $('#image_button').append(data.details.image);
+                                }
+                                $('#ViewDetails').modal('show');
                             }
                             else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

@@ -9,6 +9,7 @@ use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class RetailAdminAccounts extends Controller
@@ -47,6 +48,7 @@ class RetailAdminAccounts extends Controller
             ->addColumn('action', function($user) {
                 if (session('role_id') == 1 || in_array(486, session('permissions'))) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $view_button = '<button type="button" class="dropdown-item view"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View</div></button>';
 
                     $dropdown = '
                     <div class="btn-group">
@@ -55,6 +57,7 @@ class RetailAdminAccounts extends Controller
                 ';
 
                         $dropdown .= $edit_button;
+                        $dropdown .= $view_button;
 
                     $dropdown .= '
                       </div>
@@ -88,6 +91,13 @@ class RetailAdminAccounts extends Controller
             if($retail_shipper_info->bank_id != null){
 //                $bank = BanksList::find($retail_shipper_info->bank_id)->first();
                 $details['bank_id'] = $retail_shipper_info->bank_id;
+                $details['bank_name'] = $retail_shipper_info->bank->name;
+            }
+            $image = '';
+            $exists = Storage::disk('public')->exists('retail_shipper_cheque/'. $retail_shipper_info->cheque_image);
+            if($exists){
+                $image .= '<div class="text-center" id="picture_div"><a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url('retail_shipper_cheque/'. $retail_shipper_info->cheque_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle"> Cheque Image</span></a></div>';
+                $details['image'] = $image;
             }
             return response()->json(['status'=>'0','details'=> $details]);
         }
@@ -102,7 +112,15 @@ class RetailAdminAccounts extends Controller
             $shipper_account->iban = $request->iban;
             $shipper_account->account_number = $request->account_no;
             $shipper_account->bank_id = $request->bank_info;
-            $shipper_account->completed_status = 1;
+            if ($request->hasFile('cheque_image')){
+                $filename = 'retail_shipper_' . $shipper_account->id . '_cheque_image.png';
+
+                $file = $request->file('cheque_image');
+
+                Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                $shipper_account->cheque_image = $filename;
+                $shipper_account->completed_status = 1;
+            }
             $shipper_account->save();
         }
         return redirect()->back()->with('success', 'Shipper details updated successfully');
