@@ -32,7 +32,7 @@ use App\Http\Models\CorporateDefaultHistoryReturnCharge;
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateDefaultRateHistory;
-use App\Http\Models\RateRemarks;
+use App\Http\Models\RateRemark;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
@@ -133,7 +133,6 @@ use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
 use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
 use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
 use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
-use App\Http\Models\RateRemark;
 use App\Http\Models\PendingCorporateDefaultDiscountCharge;
 use App\Http\Models\PendingCorporateDefaultInsuranceCharges;
 use App\Http\Models\PendingCorporateDefaultCashHandlingCharges;
@@ -13569,7 +13568,7 @@ class AdminCorporateAccountsController extends Controller
 
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
         if($request->has('rate_remarks') && $request->rate_remarks != null){
-            $rate_remark = new RateRemarks();
+            $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
             $rate_remark->remarks = $request->rate_remarks;
             $rate_remark->admin_id = Auth::id();
@@ -13758,7 +13757,7 @@ class AdminCorporateAccountsController extends Controller
             $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-            $rate_remarks = RateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
 
@@ -13844,7 +13843,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $rate_remarks = RateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
             $packaging_charges = array();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
@@ -17711,7 +17710,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             if($request->has('rate_remarks') && $request->rate_remarks != null){
-                $rate_remark = new RateRemarks();
+                $rate_remark = new RateRemark();
                 $rate_remark->user_id = $id;
                 $rate_remark->remarks = $request->rate_remarks;
                 $rate_remark->admin_id = Auth::id();
@@ -18108,7 +18107,7 @@ class AdminCorporateAccountsController extends Controller
 
           $rate_remarks = RateRemark::where('user_id',$id)->latest()->first();
           if($rate_remarks){
-              $remarks_history = new HistoryRateRemarks();
+              $remarks_history = new HistoryRateRemark();
               $remarks_history->user_id =  $rate_remarks->user_id;
               $remarks_history->remarks =  $rate_remarks->remarks;
               $remarks_history->admin_id =  $rate_remarks->admin_id;
@@ -21786,7 +21785,7 @@ class AdminCorporateAccountsController extends Controller
 
           User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id(),'corporate_rate_type_id' => 3]);
           if($request->has('rate_remarks') && $request->rate_remarks != null){
-              $rate_remark = new RateRemarks();
+              $rate_remark = new RateRemark();
               $rate_remark->user_id = $id;
               $rate_remark->remarks = $request->rate_remarks;
               $rate_remark->admin_id = Auth::id();
@@ -21882,6 +21881,54 @@ class AdminCorporateAccountsController extends Controller
           return redirect(route('admin.accounts.active'))->with('success','Rate Type Changed');
       }
 
+    }
+
+    public function default_view_rates_index($id)
+    {
+        $user = User::find($id);
+
+        $cash = CorporateDefaultCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $insurance = CorporateDefaultInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $return = CorporateDefaultReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $fuel = CorporateDefaultFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $weight = CorporateDefaultWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $bookingType = CorporateDefaultBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $packaging = PackagingCharge::all()->where('user_id', $id);
+
+        $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
+        $packaging = PackagingCharge::all()->where('user_id', $id);
+        $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
+        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+        $storage_types = WmsStorageType::all()->where('status', 1);
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+        $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+        $packaging_charges = array();
+        if (count($packaging) > 0) {
+
+            foreach ($packaging as $charge) {
+                $packaging_charges[$charge->type_id][] = $charge;
+            }
+        }
+
+        $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+        if (session('department_id') == 7) {
+            if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
+                return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+            } else {
+                return view('admin.access_denied');
+            }
+        } else {
+            return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+        }
     }
 
 }
