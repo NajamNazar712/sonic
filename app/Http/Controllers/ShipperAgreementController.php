@@ -8,6 +8,12 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
 use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateInsuranceCharge;
@@ -389,9 +395,17 @@ otherwise it will be rejected</li>
                 }
             }
             else{
-                if(CorporateRateStatus::where('user_id', $id)->exists()){
-                    $rate_status = TRUE;
+                if($shipper->corporate_rate_type_id == 3){
+                    if(CorporateDefaultRateStatus::where('user_id', $id)->exists()){
+                        $rate_status = TRUE;
+                    }
                 }
+                else{
+                    if(CorporateRateStatus::where('user_id', $id)->exists()){
+                        $rate_status = TRUE;
+                    }
+                }
+
             }
 
 
@@ -400,8 +414,11 @@ otherwise it will be rejected</li>
                 if($shipper->corporate_rate_type_id == 1 || $shipper->corporate_rate_type_id == null){
                     $corporate_rate_type = 1;
                 }
-                else{
+                else if($shipper->corporate_rate_type_id == 2 ){
                     $corporate_rate_type = 2;
+                }
+                else{
+                    $corporate_rate_type = 3;
                 }
                /* $packaging_details = '';
                 $packaging_charges = PackagingCharge::where('user_id', $id)->get();
@@ -430,7 +447,12 @@ otherwise it will be rejected</li>
                     $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
 
                 }else if($shipper->account_type_id == 2){
-                    $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
+                    if($corporate_rate_type == 3){
+                        $rates_switch = CorporateDefaultRateStatus::where('user_id', $id)->where('status', 1)->get();
+                    }
+                    else{
+                        $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
+                    }
                 }
 
                 $rate_details = '';
@@ -453,8 +475,11 @@ otherwise it will be rejected</li>
                         if($corporate_rate_type == 1){
                             $weight_charges = CorporateWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                         }
-                        else{
+                        else if($corporate_rate_type == 2){
                             $weight_charges = CorporateWeightChargeZoneWise::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
+                        else{
+                            $weight_charges = CorporateDefaultWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                         }
 
                     }
@@ -591,7 +616,12 @@ otherwise it will be rejected</li>
                     if($shipper->account_type_id == 1){
                         $cash_handling = CashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                     }else{
-                        $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        if($corporate_rate_type == 3){
+                            $cash_handling = CorporateDefaultCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
+                        else{
+                            $cash_handling = CorporateCashHandlingCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
                     }
                     if(count($cash_handling) > 0){
                         $cash_handling_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Cash Handling Charges </strong></thead></table></div></div>';
@@ -606,7 +636,12 @@ otherwise it will be rejected</li>
                     if($shipper->account_type_id == 1){
                         $insurance_charges = InsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
                     }else{
-                        $insurance_charges = CorporateInsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        if($corporate_rate_type == 3){
+                            $insurance_charges = CorporateDefaultInsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
+                        else{
+                            $insurance_charges = CorporateInsuranceCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get();
+                        }
                     }
                     if(count($insurance_charges) > 0){
                         $insurance_charges_details = '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Insurance Charges </strong></thead></table></div></div>';
@@ -621,7 +656,12 @@ otherwise it will be rejected</li>
                     if($shipper->account_type_id == 1){
                         $fuel_surcharge = FuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                     }else{
-                        $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        if($corporate_rate_type == 3){
+                            $fuel_surcharge = CorporateDefaultFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                        else{
+                            $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
                     }
                     if($fuel_surcharge){
                         $fuel_surcharge_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Fuel Surcharge </strong></thead></table></div></div>';
@@ -637,8 +677,11 @@ otherwise it will be rejected</li>
                         if($corporate_rate_type == 1){
                             $return_charges = CorporateReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                         }
-                        else{
+                        else if($corporate_rate_type == 2){
                             $return_charges = CorporateReturnChargeZoneWise::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                        else{
+                            $return_charges = CorporateDefaultReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
                         }
                     }
                     if($return_charges){
