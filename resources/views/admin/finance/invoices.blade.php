@@ -15,6 +15,7 @@
 				<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 					<thead>
 						<tr role="row" class="bg-primary white">
+							<th class="border-primary border-darken-1"></th>
 							<th class="border-primary border-darken-1">S. No.</th>
 							<th class="border-primary border-darken-1">Invoice Number</th>
 							<th class="border-primary border-darken-1">Shipper</th>
@@ -212,16 +213,145 @@
                 }
             });
 
+            var selected_rows = [];
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    extend: 'excel',
-                    title: 'Pending Invoices',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
+                buttons: [
+					@if ((session('role_id') == 1 || in_array(122, session('permissions'))))
+					{
+						text: '<i class="ft-plus-circle"></i> Mark as Received',
+						className: 'btn btn-primary mark_as_received_all_btn',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							if(selected_rows.length > 0){
+								swal({
+									title: 'Are You Sure?',
+									text: 'Select Yes to mark invoices recieved!',
+									icon: 'warning',
+									buttons: {
+										cancel: {
+											text: 'No',
+											value: null,
+											visible: true,
+											closeModal: true,
+										},
+										confirm: {
+											text: 'Yes',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									dangerMode: true
+								}).then(function (confirm) {
+									if (confirm) {
+										blockPagePermanently();
+										$.ajax({
+											url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
+											method: 'POST',
+											data: {
+												'_token': '{{ csrf_token() }}',
+												'id': selected_rows,
+											}
+										}).done(function(data) {
+											UnblockPagePermanently();
+											if(data == 1)
+											{
+												swal({
+													title: 'Invoice Marked as Received',
+													icon: 'success',
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
+
+												table.draw();
+											}
+											else{
+												swal({
+													title: 'Error Occurred In Marking Invoice Received',
+													icon: 'error',
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
+											}
+										});
+									}
+								});
+
+							}
+
+						}
+					},
+					@endif
+					{
+						extend: 'selectAll',
+						text: 'Select All',
+						className: 'select_all',
+						action : function(e) {
+							e.preventDefault();
+
+							table.rows().nodes().each(function(index) {
+								var row = table.row(index);
+
+								if ($(row.node().firstChild).hasClass('select-checkbox')) {
+									row.select();
+
+									id = parseInt(row.id());
+
+									var index = $.inArray(id, selected_rows);
+
+									if (index === -1) {
+										selected_rows.push(id);
+									}
+
+									table.button('.mark_as_received_all_btn').enable();
+								}
+							});
+						}
+					}, {
+						extend: 'selectNone',
+						text: 'Select None',
+						className: 'select_none',
+						action : function(e) {
+							e.preventDefault();
+
+							table.rows().nodes().each(function(index) {
+								var row = table.row(index);
+
+								if ($(row.node().firstChild).hasClass('select-checkbox')) {
+									row.deselect();
+
+									id = parseInt(row.id());
+
+									var index = $.inArray(id, selected_rows);
+
+									if (index !== -1) {
+										selected_rows.splice(index, 1);
+									}
+
+									if (selected_rows.length == 0) {
+										table.button('.mark_as_received_all_btn').disable();
+									}
+								}
+							});
+						}
+					},
+					{
+						extend: 'excel',
+						title: 'Pending Invoices',
+						className: 'btn btn-primary',
+						text: '<i class="la la-file-excel-o"></i> Excel',
+					},
 				'reset'],
 				scrollX: true, scrollY: '500px',
+				select: {
+					info: false,
+					style: 'multi',
+					selector: 'td.select-checkbox',
+					className: 'selected bg-primary bg-lighten-5 primary'
+				},
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
@@ -232,8 +362,9 @@
 				serverSide: true,
 				ajax: '{{ route('admin.finance.invoices.list') }}',
 				rowId: 'id',
-				order: [[7, 'desc']],
+				order: [[8, 'desc']],
 				columns: [
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
@@ -257,7 +388,14 @@
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+					if (data.status_id != 3) {
+						$('td:eq(0)', row).addClass('select-checkbox');
+
+						if ($.inArray(data.id, selected_rows) !== -1) {
+							table.row(row).select();
+						}
+					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -272,7 +410,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else if ($(header).is('.company_bank')) {
@@ -340,6 +478,7 @@
 				}
 			});
 
+
 			$('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -372,6 +511,26 @@
 					});
                 }
             });
+
+			$('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+				var id = parseInt($(this).parent('tr').attr('id'));
+
+				var index = $.inArray(id, selected_rows);
+
+				if (index === -1) {
+					selected_rows.push(id);
+				}
+				else {
+					selected_rows.splice(index, 1);
+				}
+
+				if (selected_rows.length > 0) {
+					table.button('.mark_as_received_all_btn').enable();
+				}
+				else {
+					table.button('.mark_as_received_all_btn').disable();
+				}
+			});
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));

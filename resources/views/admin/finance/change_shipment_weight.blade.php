@@ -72,6 +72,14 @@
 											<div class="form-group">
 												<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
 											</div>
+											<div class="row justify-content-center" id="calculate_div">
+												<div class="form-group col">
+													<input type="text" name="charges" class="form-control charges" placeholder="New Charges" readonly>
+												</div>
+												<div class="form-group col-3">
+													<button type="button" name="calculate" class="btn btn-secondary calculate" value="calculate" disabled>Calculate Charges</button>
+												</div>
+											</div>
 											<div id="replacement_div" class="d-none">
 												<div class="form-group">
 													<div id="replacement_switch_div" class="form-group text-center p-1 border border-light rounded">
@@ -123,6 +131,14 @@
 
 	<script>
 		$(document).ready(function() {
+			$('.weight').on('change', function () {
+				if(this.value != '' && this.value != null){
+					$('.calculate').attr('disabled', false);
+				}
+				else{
+					$('.calculate').attr('disabled', true);
+				}
+			});
 			$('#search_form input.tracking_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
@@ -300,9 +316,11 @@
 				if(check.is(':checked')){
 					$('#replacement_weight_div').removeClass('d-none');
 					$('input[name="weight"]').addClass('d-none');
+					$('#calculate_div').addClass('d-none');
 				}else{
 					$('#replacement_weight_div').addClass('d-none');
 					$('input[name="weight"]').removeClass('d-none');
+					$('#calculate_div').removeClass('d-none');
 				}
 			});
 
@@ -331,6 +349,25 @@
 				}
 			});
 
+			$('.calculate').on('click', function () {
+				var weight = $('.weight').val();
+				if(weight != '' && weight != null && $('.shipment_id').val() != '' && $('.shipment_id').val() != null){
+					$.ajax({
+						url: '{!! route('admin.finance.change_shipment_weight.calculate_amount') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'shipment_id': $('.shipment_id').val(),
+							'weight': weight,
+						}
+					})
+						.done(function(data) {
+							if (data.status == 1) {
+								$('.charges').val(data.new_charges);
+							}
+						});
+				}
+			});
 
 		});
 	</script>

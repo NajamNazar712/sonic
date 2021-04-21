@@ -38,66 +38,75 @@ class RetailAdminAccounts extends Controller
         $datatable = Datatables::of($retail_shipper_info)
             ->editColumn('document_status',function($request){
                 if($request->document_status == 0){
-                    return 'No Documents';
-                }
-                else if($request->document_status == 1){
                     return 'Incomplete';
                 }
                 else{
                     return 'Complete';
                 }
             })
-//            ->addColumn('action', function($user) {
-//                if (session('role_id') == 1 || in_array(429, session('permissions'))) {
-//                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-//
-//                    $dropdown = '
-//                    <div class="btn-group">
-//                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-//                      <div class="dropdown-menu dropdown-menu-sm">
-//                ';
-//
-//                        $dropdown .= $edit_button;
-//
-//                    $dropdown .= '
-//                      </div>
-//                    </div>
-//                ';
-//
-//                    return $dropdown;
-//                }
-//                else {
-//                    return '';
-//                }
-//            })
+            ->addColumn('action', function($user) {
+                if (session('role_id') == 1 || in_array(486, session('permissions'))) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                        $dropdown .= $edit_button;
+
+                    $dropdown .= '
+                      </div>
+                    </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
         ;
 
         return $datatable->make(true);
 
     }
-//    public function bank_info(Request $request){
-//        $id = $request->id;
-//        if($id)
-//        {
-//            $retail_shipper_info = RetailShipperInfo::find($id);
-//            $details = array();
-//            $details['shipper_name'] =  $retail_shipper_info->shipper_name;
-//            if($retail_shipper_info->iban != null) {
-//                $details['iban'] = $retail_shipper_info->iban;
-//            }
-//            if($retail_shipper_info->account_number != null) {
-//                $details['account_no'] = $retail_shipper_info->account_number;
-//            }
-//            if($retail_shipper_info->bank_id != null){
-////                $bank = BanksList::find($retail_shipper_info->bank_id)->first();
-//                $details['bank_id'] = $retail_shipper_info->bank_id;
-//            }
-//            return response()->json(['status'=>'0','details'=> $details]);
-//        }
-//        else{
-//            return response()->json(['error'=>'No Data Found','status'=> '1']);
-//        }
-//    }
+    public function retail_bank_info(Request $request){
+        $id = $request->id;
+        if($id)
+        {
+            $retail_shipper_info = RetailShipperInfo::find($id);
+            $details = array();
+            $details['shipper_name'] =  $retail_shipper_info->shipper_name;
+            if($retail_shipper_info->iban != null) {
+                $details['iban'] = $retail_shipper_info->iban;
+            }
+            if($retail_shipper_info->account_number != null) {
+                $details['account_no'] = $retail_shipper_info->account_number;
+            }
+            if($retail_shipper_info->bank_id != null){
+//                $bank = BanksList::find($retail_shipper_info->bank_id)->first();
+                $details['bank_id'] = $retail_shipper_info->bank_id;
+            }
+            return response()->json(['status'=>'0','details'=> $details]);
+        }
+        else{
+            return response()->json(['error'=>'No Data Found','status'=> '1']);
+        }
+    }
+
+    public function retail_bank_info_update(Request $request){
+        $shipper_account = RetailShipperInfo::find($request->id);
+        if($shipper_account){
+            $shipper_account->iban = $request->iban;
+            $shipper_account->account_number = $request->account_no;
+            $shipper_account->bank_id = $request->bank_info;
+            $shipper_account->completed_status = 1;
+            $shipper_account->save();
+        }
+        return redirect()->back()->with('success', 'Shipper details updated successfully');
+    }
 
     public function retail_slip(Request $request) {
 
@@ -255,7 +264,7 @@ class RetailAdminAccounts extends Controller
 
             $slip .= '
                           <tr>
-                            <td rowspan="2" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
                             <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
                             <td colspan="2" class="color primary"><strong>Origin</strong></td>
@@ -266,6 +275,14 @@ class RetailAdminAccounts extends Controller
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->tracking_number . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                          </tr>
+                          <tr>
+                            <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
+                            <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
+                            <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
+                            <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
+                            <td colspan="1" class="color primary border"><strong>Bank</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
                           </tr>
                 ';
 

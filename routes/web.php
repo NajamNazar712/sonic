@@ -1534,6 +1534,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_weight_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
             Route::post('excel_store', 'Admins\AdminFinanceController@change_shipment_weight_excel_store')->name('excel_store');
+            Route::post('calculate_amount', 'Admins\AdminFinanceController@change_shipment_weight_calculate_amount')->name('calculate_amount');
 
         });
 
@@ -1596,6 +1597,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
+            Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
         });
@@ -2793,6 +2795,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
+            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@retail_bank_info')->name('bank_info');
+            Route::post('/bank_info_update', 'Admins\Retail\RetailAdminAccounts@retail_bank_info_update')->name('bank_info_update');
         });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
@@ -2816,6 +2820,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
         });
 
+        Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@reporting_location_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@reporting_location_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@reporting_location_status')->name('status');
+            Route::post('add_location', 'Admins\AdminHumanResourseController@reporting_location_add')->name('add_location');
+            Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
+        });
+
+        Route::prefix('designation')->name('designation.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@designation_status')->name('status');
+            Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
+        });
+        Route::prefix('department')->name('department.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@department_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@department_list')->name('list');
+            Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
+            Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
