@@ -32,7 +32,7 @@ use App\Http\Models\CorporateDefaultHistoryReturnCharge;
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateDefaultRateHistory;
-use App\Http\Models\CorporateDefaultRateRemarks;
+use App\Http\Models\RateRemarks;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
@@ -13569,7 +13569,7 @@ class AdminCorporateAccountsController extends Controller
 
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
         if($request->has('rate_remarks') && $request->rate_remarks != null){
-            $rate_remark = new CorporateDefaultRateRemarks();
+            $rate_remark = new RateRemarks();
             $rate_remark->user_id = $id;
             $rate_remark->remarks = $request->rate_remarks;
             $rate_remark->admin_id = Auth::id();
@@ -13758,7 +13758,7 @@ class AdminCorporateAccountsController extends Controller
             $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-            $rate_remarks = CorporateDefaultRateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
 
@@ -13844,7 +13844,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $rate_remarks = CorporateDefaultRateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemarks::where('user_id', $id)->orderBy('created_at','desc')->get();
             $packaging_charges = array();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
@@ -17711,7 +17711,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             if($request->has('rate_remarks') && $request->rate_remarks != null){
-                $rate_remark = new CorporateDefaultRateRemarks();
+                $rate_remark = new RateRemarks();
                 $rate_remark->user_id = $id;
                 $rate_remark->remarks = $request->rate_remarks;
                 $rate_remark->admin_id = Auth::id();
@@ -21786,7 +21786,7 @@ class AdminCorporateAccountsController extends Controller
 
           User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id(),'corporate_rate_type_id' => 3]);
           if($request->has('rate_remarks') && $request->rate_remarks != null){
-              $rate_remark = new CorporateDefaultRateRemarks();
+              $rate_remark = new RateRemarks();
               $rate_remark->user_id = $id;
               $rate_remark->remarks = $request->rate_remarks;
               $rate_remark->admin_id = Auth::id();

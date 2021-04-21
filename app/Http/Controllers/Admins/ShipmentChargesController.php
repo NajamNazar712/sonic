@@ -9,6 +9,7 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
+use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\InternationalDhlZone;
@@ -142,8 +143,12 @@ class ShipmentChargesController extends Controller
                 if($rate_type_id == 1){
                     $weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
-                else{
+                else if($rate_type_id == 2){
                     $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                }
+                else{
+                    $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+
                 }
             }
 
