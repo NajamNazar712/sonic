@@ -1628,25 +1628,23 @@
                         'rate_type_id': rate_type_id
                     }
                 }).done(function(data){
+                   
                     if (data.status == 1) {
+                       
                         $.each(data.rate_types,function(key,value){
                             var newOption = new Option(value.name, value.id, false, false);
                             $('#corporate_rate_type').append(newOption).trigger('change');
                         });
+                       
                         $('#ChangeRateType').modal('show');
 
                         $('#ChangeRateType #corporate_rate_type').bind('change', function () {
                             var rate_type_id = $(this).val();
                             if (rate_type_id) {
-                                //var url = redirect + '/corporate/default/'+ user_id + '/corporate_rate_type/' + rate_type_id + '/change';
                                 var url = redirect + '/corporate/'+ user_id + '/add/rates/' + rate_type_id;
-                                window.location = url; }
-                            else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                window.location = url;
                             }
                         });
-
-
                     }
                     else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1786,7 +1784,12 @@
 
         $('.close').on('click',function(){
                $('#territory').val('').trigger('change');
-        })
+        });
+
+        $('#ChangeRateType').on('hide.bs.modal', function (e) {
+            $('#corporate_rate_type').find('option').remove();
+            $('#corporate_rate_type').prepend('<option value="" selected="selected"></option>').trigger('change');
+        });
 
     });
 

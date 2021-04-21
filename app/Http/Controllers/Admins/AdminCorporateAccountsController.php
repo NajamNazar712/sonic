@@ -17980,7 +17980,7 @@ class AdminCorporateAccountsController extends Controller
                   $history_rates->shipping_mode_id = $previous_rates->shipping_mode_id;
                   $history_rates->status = $previous_rates->status;
                   $history_rates->cash_handling_charges = $previous_rates->cash_handling_charges;
-                  $history_rates->insurannce_charges = $previous_rates->insurannce_charges;
+                  $history_rates->insurance_charges = $previous_rates->insurance_charges;
                   $history_rates->return_charges = $previous_rates->return_charges;
                   $history_rates->fuel_charges = $previous_rates->fuel_charges;
                   $history_rates->save();
@@ -18107,7 +18107,7 @@ class AdminCorporateAccountsController extends Controller
 
           $rate_remarks = RateRemark::where('user_id',$id)->latest()->first();
           if($rate_remarks){
-              $remarks_history = new HistoryRateRemark();
+              $remarks_history = new HistoryRateRemarks();
               $remarks_history->user_id =  $rate_remarks->user_id;
               $remarks_history->remarks =  $rate_remarks->remarks;
               $remarks_history->admin_id =  $rate_remarks->admin_id;
