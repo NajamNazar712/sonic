@@ -202,10 +202,15 @@ class AdminHumanResourseController extends Controller
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
+            ->leftjoin('admins as staff','staff.trax_id','=','employees.trax_id')
+            ->leftjoin('riders as r','r.trax_id','=','employees.trax_id')
+            ->leftjoin('rider_requests as rr','rr.id','=','employees.rider_request_id')
+            ->leftjoin('rider_types as rr_rt','rr_rt.id','=','rr.rider_type_id')
+            ->leftjoin('rider_types as r_rt','r_rt.id','=','r.rider_type_id')
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
+            ->select(['rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
 
         if (session('role_id') != 1) {
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
@@ -217,6 +222,50 @@ class AdminHumanResourseController extends Controller
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
+            })
+            ->filterColumn('et.name', function ($query, $keyword) {
+                if($keyword == 1)
+                {
+                    return $query->where('et.name','=','Staff');
+                }
+                elseif ($keyword == 2)
+                {
+                    return $query->where('et.name','=','Rider')
+                        ->where(function ($q){
+                           $q->where([['employees.status_id','!=',2],['r_rt.id',1]])
+                            ->orwhere([['employees.status_id','=',2],['rr_rt.id',1]]);
+                        });
+
+                }
+                elseif ($keyword == 3)
+                {
+                    return $query->where('et.name','=','Rider')
+                        ->where(function ($q){
+                            $q->where([['employees.status_id','!=',2],['r_rt.id',2]])
+                                ->orwhere([['employees.status_id','=',2],['rr_rt.id',2]]);
+                        });
+                }
+
+                return null;
+            })
+            ->editColumn('employee_type',function ($user){
+                if($user->employee_type_id == 1)
+                {
+                    return $user->employee_type;
+                }
+                else{
+                    if($user->request_status_id == 4)
+                    {
+                        return $user->employee_type;
+                    }
+                    else {
+                        if ($user->status_id != 2) {
+                            return $user->employee_type . ' - ' . $user->active_rider_type;
+                        } else {
+                            return $user->employee_type . ' - ' . $user->inactive_rider_type;
+                        }
+                    }
+                }
             })
             ->addColumn("action", function ($result) {
                 if(session('role_id') == 1 || (in_array(468, session('permissions')) || (in_array(469, session('permissions')) && ($result->request_status_id == 1 || $result->request_status_id == 2)))){

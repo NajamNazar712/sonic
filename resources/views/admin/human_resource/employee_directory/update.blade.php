@@ -47,48 +47,48 @@
                                         <h4 class="form-section">Personal Info</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Father's/Husband Name</label>
-                                                    <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" name="name">
+                                                <label>Father's/Husband Name</label>
+                                                <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father's/Husband Name is required" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Religion</label>
-                                                    <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
-                                                        @foreach($religions as $religion)
-                                                            <option value="{{$religion->id}}">{{$religion->name}}</option>
-                                                        @endforeach
-                                                    </select>
+                                                <label>Religion</label>
+                                                <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
+                                                    @foreach($religions as $religion)
+                                                        <option value="{{$religion->id}}">{{$religion->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Nationality</label>
-                                                    <select name="nationality" id="nationality" class="select2 form-control " style="width: 100%">
-                                                        @foreach($nationalities as $nationality)
-                                                            <option value="{{$nationality->id}}">{{$nationality->name}}</option>
-                                                        @endforeach
-                                                    </select>
-                                             </div>
+                                                <label>Nationality</label>
+                                                <select name="nationality" id="nationality" class="select2 form-control " style="width: 100%">
+                                                    @foreach($nationalities as $nationality)
+                                                        <option value="{{$nationality->id}}">{{$nationality->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Domicile</label>
-                                                    <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
-                                                        @foreach($domiciles as $domicile)
-                                                            <option value="{{$domicile->id}}">{{$domicile->name}}</option>
-                                                        @endforeach
-                                                    </select>
-                                             </div>
+                                                <label>Domicile</label>
+                                                <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
+                                                    @foreach($domiciles as $domicile)
+                                                        <option value="{{$domicile->id}}">{{$domicile->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Marital Status</label>
-                                                    <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
-                                                        @foreach($maritial_statuses as $maritial_status)
-                                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
-                                                        @endforeach
-                                                    </select>
+                                                <label>Marital Status</label>
+                                                <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
+                                                    @foreach($maritial_statuses as $maritial_status)
+                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -103,20 +103,20 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Personal Email</label>
-                                                    <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
+                                                <label>Personal Email</label>
+                                                <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                    <label>Address</label>
-                                                    <textarea class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
+                                                <label>Address</label>
+                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Emergency Contact</label>
-                                                <input type="text" id="emergency_contact" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
+                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -149,8 +149,8 @@
                                                     </span>
                                                 </div>
                                                 <input type="text" name="cnic_issue_date" data-value="{{$employee->cnic_issue_date != null ? date('Y/m/d',strtotime($employee->cnic_issue_date)) : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
-                                         </div>
-                                    </div>
+                                            </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <label>CNIC Expiry Date</label>
                                             <div class="form-group input-group">
@@ -160,8 +160,8 @@
                                                     </span>
                                                 </div>
                                                 <input type="text" name="cnic_expiry_date" data-value="{{$employee->cnic_expiry_date != null ? date('Y/m/d',strtotime($employee->cnic_expiry_date)) : ''}}"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
+                                            </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -180,7 +180,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>City</label>
-                                                <select name="city" id="city" class="select2 form-control " style="width: 100%">
+                                                <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
                                                     @foreach($cities as $city)
                                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                                     @endforeach
@@ -190,7 +190,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Department</label>
-                                                <select name="department" id="department" class="select2 form-control " style="width: 100%">
+                                                <select name="department" id="department" data-rule-required="true"  data-msg-required="Department is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($departments as $department)
                                                         <option value="{{$department->id}}">{{$department->name}}</option>
                                                     @endforeach
@@ -200,7 +200,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Zone</label>
-                                                <select name="zone" id="zone" class="select2 form-control " style="width: 100%">
+                                                <select name="zone" id="zone" data-rule-required="true"  data-msg-required="Zone is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($zones as $zone)
                                                         <option value="{{$zone->id}}">{{$zone->name}}</option>
                                                     @endforeach
@@ -216,7 +216,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Official Number</label>
-                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
+                                                <input type="text" id="official_number" data-rule-required="true" data-msg-required="Official Number is required" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -228,7 +228,17 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt Pin</label>
-                                                <input type="text" id="bolt_pin" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" >
+                                                <input type="text" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Reporting Location</label>
+                                                <select name="reporting_location" id="reporting_location" class="select2 form-control " style="width: 100%">
+                                                    @foreach($reporting_locations as $reporting_location)
+                                                        <option value="{{$reporting_location->id}}">{{$reporting_location->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -251,109 +261,109 @@
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
-                                            <div class="form-body" id="medical_info_container">
-                                                <h4 class="form-section">Medical Details</h4>
-                                                @forelse($medical_infos as $index => $medical_info)
-                                                <div class="row">
-                                                    @if(!$loop->first)
+                                    <div class="form-body" id="medical_info_container">
+                                        <h4 class="form-section">Medical Details</h4>
+                                        @forelse($medical_infos as $index => $medical_info)
+                                            <div class="row">
+                                                @if(!$loop->first)
                                                     <hr style="width: 100%;">
-                                                    @endif
-                                                    <div class="col-md-10">
-                                                        <div class="col-md-12">
-                                                            <div class="form-group">
-                                                                <label>Name Of Family Member</label>
-                                                                <input type="text" class="form-control border-primary name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
-                                                            </div>
+                                                @endif
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Name Of Family Member</label>
+                                                            <input type="text" class="form-control border-primary name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
                                                         </div>
-                                                        <div class="col-md-12">
-                                                            <div class="form-group">
-                                                                <label>Relationship</label>
-                                                                <select name="relationship[{{$index}}]" id="relationship_family_member_{{$loop->index}}" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relation is required" style="width: 100%">
-                                                                    @foreach($relationships as $relationship)
-                                                                        <option value="{{$relationship->id}}">{{$relationship->name}}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Relationship</label>
+                                                            <select name="relationship[{{$index}}]" id="relationship_family_member_{{$loop->index}}" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relation is required" style="width: 100%">
+                                                                @foreach($relationships as $relationship)
+                                                                    <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
-                                                        <div class="col-md-12">
-                                                            <label>Date Of Birth</label>
-                                                            <div class="form-group input-group">
-                                                                <div class="input-group-prepend">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>Date Of Birth</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
                                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                                     </span>
-                                                                </div>
-                                                                <input type="text" data-rule-required="true" data-msg-required="Date Of Birth is required" name="dob[{{$index}}]" data-value="{{date('Y/m/d',strtotime($medical_info->date_of_birth))}}"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
                                                             </div>
-                                                        </div>
-                                                        <div class="col-md-12">
-                                                            <div class="form-group">
-                                                                <label>Marital Status</label>
-                                                                <select name="marital_status[{{$index}}]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_{{$loop->index}}" class="select2 form-control marital_status_family_member" style="width: 100%">
-                                                                    @foreach($maritial_statuses as $maritial_status)
-                                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-msg-required="Date Of Birth is required" name="dob[{{$index}}]" data-value="{{date('Y/m/d',strtotime($medical_info->date_of_birth))}}"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <div class="form-body">
-                                                            @if(!$loop->first)
-                                                                <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
-                                                            @endif
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Marital Status</label>
+                                                            <select name="marital_status[{{$index}}]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_{{$loop->index}}" class="select2 form-control marital_status_family_member" style="width: 100%">
+                                                                @foreach($maritial_statuses as $maritial_status)
+                                                                    <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                @empty
-                                                    <div class="row">
-                                                        <div class="col-md-10">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Name Of Family Member</label>
-                                                                    <input type="text" class="form-control border-primary name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Relationship</label>
-                                                                    <select name="relationship[0]" id="relationship_family_member_0" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relationship is required" style="width: 100%">
-                                                                        @foreach($relationships as $relationship)
-                                                                            <option value="{{$relationship->id}}">{{$relationship->name}}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-12">
-                                                                <label>Date Of Birth</label>
-                                                                <div class="form-group input-group">
-                                                                    <div class="input-group-prepend">
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                        @if(!$loop->first)
+                                                            <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Name Of Family Member</label>
+                                                            <input type="text" class="form-control border-primary name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Relationship</label>
+                                                            <select name="relationship[0]" id="relationship_family_member_0" class="select2 form-control relationship_family_member" data-rule-required="true" data-msg-required="Relationship is required" style="width: 100%">
+                                                                @foreach($relationships as $relationship)
+                                                                    <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>Date Of Birth</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
                                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                                     </span>
-                                                                    </div>
-                                                                    <input type="text" name="dob[0]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
-                                                                </div>
                                                             </div>
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Marital Status</label>
-                                                                    <select name="marital_status[0]" id="marital_status_family_member_0" class="select2 form-control marital_status_family_member" data-rule-required="true" data-msg-required="Marital Status is required" style="width: 100%">
-                                                                        @foreach($maritial_statuses as $maritial_status)
-                                                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <div class="form-body">
-                                                            </div>
+                                                            <input type="text" name="dob[0]" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member" placeholder="Date Of Birth">
                                                         </div>
                                                     </div>
-                                                @endforelse
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Marital Status</label>
+                                                            <select name="marital_status[0]" id="marital_status_family_member_0" class="select2 form-control marital_status_family_member" data-rule-required="true" data-msg-required="Marital Status is required" style="width: 100%">
+                                                                @foreach($maritial_statuses as $maritial_status)
+                                                                    <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endforelse
+                                    </div>
+                                </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
                                         <button type="button" id="add_family_member" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Family Member</button>
@@ -378,25 +388,25 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Account Title</label>
-                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title">
+                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Branch Code</label>
-                                                <input type="text" class="form-control border-primary" id="branch_code" value="{{$bank_info->branch_code ?? ''}}" name="branch_code">
+                                                <input type="text" class="form-control border-primary" id="branch_code" value="{{$bank_info->branch_code ?? ''}}" name="branch_code" data-rule-required="true" data-msg-required="Branch Code is required">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Account Number</label>
-                                                <input type="text" class="form-control border-primary" id="account_number" value="{{$bank_info->account_no ?? ''}}" name="account_number">
+                                                <input type="text" class="form-control border-primary" id="account_number" value="{{$bank_info->account_no ?? ''}}" name="account_number" data-rule-required="true" data-msg-required="Account Number is required">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bank Name</label>
-                                                <select name="bank_name" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                <select name="bank_name" id="bank_name" data-rule-required="true" data-msg-required="Bank Name is required" class="select2 form-control required" style="width: 100%">
                                                     @foreach($banks as $bank)
                                                         <option value="{{$bank->id}}">{{$bank->name}}</option>
                                                     @endforeach
@@ -406,13 +416,13 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Branch Name</label>
-                                                <input type="text" class="form-control border-primary" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
+                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control border-primary" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>IBAN Number</label>
-                                                <input type="text" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
+                                                <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
                                             </div>
                                         </div>
                                     </div>
@@ -442,53 +452,53 @@
                                                 <hr style="width: 100%;">
                                             @endif
                                             <div class="row">
-                                            <div class="col-md-10">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Name Of Institute</label>
-                                                        <input type="text" class="form-control border-primary name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                <div class="col-md-10">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Name Of Institute</label>
+                                                            <input type="text" class="form-control border-primary name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Degree Awarded</label>
-                                                        <input type="text" class="form-control border-primary degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Degree Awarded</label>
+                                                            <input type="text" class="form-control border-primary degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Grade Achieved</label>
-                                                        <select name="grade[{{$index}}]" id="grade_{{$loop->index}}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
-                                                            <option>A+</option>
-                                                            <option>A</option>
-                                                            <option>B</option>
-                                                            <option>C</option>
-                                                            <option>D</option>
-                                                            <option>E</option>
-                                                            <option>F</option>
-                                                        </select>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Grade Achieved</label>
+                                                            <select name="grade[{{$index}}]" id="grade_{{$loop->index}}" data-rule-required="true" data-msg-required="Grade is required" class="select2 form-control grade" style="width: 100%">
+                                                                <option>A+</option>
+                                                                <option>A</option>
+                                                                <option>B</option>
+                                                                <option>C</option>
+                                                                <option>D</option>
+                                                                <option>E</option>
+                                                                <option>F</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <label>Graduation Year</label>
-                                                    <div class="form-group input-group">
-                                                        <div class="input-group-prepend">
+                                                    <div class="col-md-12">
+                                                        <label>Graduation Year</label>
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
                                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                                     </span>
+                                                            </div>
+                                                            <input type="text" data-rule-required="true" data-value="{{date('Y/m/d',strtotime($education->passing_year))}}" data-msg-required="Graduation Year is required" name="passing_year[{{$index}}]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-value="{{date('Y/m/d',strtotime($education->passing_year))}}" data-msg-required="Graduation Year is required" name="passing_year[{{$index}}]"  class="form-control bg-primary border-primary white rounded-right pickadate passing_year" placeholder="Graduation Year">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-body">
+                                                        @if(!$loop->first)
+                                                            <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <div class="form-body">
-                                                    @if(!$loop->first)
-                                                      <button type="button" class="btn btn-danger btn-xs mt-2 remove_education"><i class="ft-minus"></i></button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
                                         @empty
                                             <div class="row">
                                                 <div class="col-md-10">
@@ -611,9 +621,9 @@
                                                         @if(!$loop->first)
                                                             <button type="button" class="btn btn-danger btn-xs mt-2 remove_employment"><i class="ft-minus"></i></button>
                                                         @endif
+                                                    </div>
                                                 </div>
-                                                </div>
-                                        </div>
+                                            </div>
                                         @empty
                                             <div class="row">
                                                 <div class="col-md-10">
@@ -754,9 +764,9 @@
                                             </div>
                                             <div class="col-md-2">
                                                 @if(isset($attachments) && $attachments->cv != null)
-                                                <div class="form-group">
-                                                    <a href="{{asset(Storage::url($attachments->cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                </div>
+                                                    <div class="form-group">
+                                                        <a href="{{asset(Storage::url($attachments->cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    </div>
                                                 @endif
                                             </div>
 
@@ -777,7 +787,7 @@
                                             <div class="col-md-10">
                                                 <div class="form-group">
                                                     <label>Passport Size Photo</label>
-                                                    <input type="file" name="photo" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    <input type="file" name="photo" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." data-rule-required="true" data-msg-required="Passport Size Photo is required">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
@@ -917,7 +927,7 @@
                                             <div class="col-md-10">
                                                 <div class="form-group">
                                                     <label>Cheque</label>
-                                                    <input type="file" name="cheque" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    <input type="file" name="cheque" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." data-rule-required="true" data-msg-required="Cheque is required">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
@@ -944,235 +954,235 @@
                         </form>
 
                         @if(isset($attachments) && $attachments->cnic != null)
-                        <div class="modal fade" id="cnic_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="cnic_modal_title">CNIC</h4>
+                            <div class="modal fade" id="cnic_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="cnic_modal_title">CNIC</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->cnic))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->cnic))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->photo != null)
-                        <div class="modal fade" id="photo_modal" data-backdrop="static" role="dialog" aria-labelledby="photo_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="photo_modal_title">Passport Size Photo</h4>
+                            <div class="modal fade" id="photo_modal" data-backdrop="static" role="dialog" aria-labelledby="photo_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="photo_modal_title">Passport Size Photo</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->photo))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->photo))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->experience != null)
-                        <div class="modal fade" id="experience_modal" data-backdrop="static" role="dialog" aria-labelledby="experience_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="experience_modal_title">Experience Certificate</h4>
+                            <div class="modal fade" id="experience_modal" data-backdrop="static" role="dialog" aria-labelledby="experience_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="experience_modal_title">Experience Certificate</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->experience))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->experience))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->last_pay_slip != null)
-                        <div class="modal fade" id="last_pay_slip_modal" data-backdrop="static" role="dialog" aria-labelledby="last_pay_slip_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="experience_modal_title">Last Pay Slip</h4>
+                            <div class="modal fade" id="last_pay_slip_modal" data-backdrop="static" role="dialog" aria-labelledby="last_pay_slip_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="experience_modal_title">Last Pay Slip</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->last_pay_slip))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->last_pay_slip))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->nikkah_nama != null)
-                        <div class="modal fade" id="nikkah_name_modal" data-backdrop="static" role="dialog" aria-labelledby="nikkah_name_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="nikkah_name_modal_title">Nikkah Nama</h4>
+                            <div class="modal fade" id="nikkah_name_modal" data-backdrop="static" role="dialog" aria-labelledby="nikkah_name_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="nikkah_name_modal_title">Nikkah Nama</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->nikkah_nama))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->nikkah_nama))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->cnic_spouse != null)
-                        <div class="modal fade" id="cnic_spouse_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_spouse_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="cnic_spouse_modal_title">CNIC Spouse</h4>
+                            <div class="modal fade" id="cnic_spouse_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_spouse_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="cnic_spouse_modal_title">CNIC Spouse</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->cnic_spouse))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->cnic_spouse))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->cnic_nominee != null)
-                        <div class="modal fade" id="cnic_nominee_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_nominee_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="cnic_nominee_modal_title">CNIC Nominee</h4>
+                            <div class="modal fade" id="cnic_nominee_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_nominee_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="cnic_nominee_modal_title">CNIC Nominee</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->cnic_nominee))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->cnic_nominee))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->child_b_form != null)
-                        <div class="modal fade" id="child_b_form_modal" data-backdrop="static" role="dialog" aria-labelledby="child_b_form_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="child_b_form_modal_title">Child B Form</h4>
+                            <div class="modal fade" id="child_b_form_modal" data-backdrop="static" role="dialog" aria-labelledby="child_b_form_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="child_b_form_modal_title">Child B Form</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->child_b_form))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->child_b_form))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->utility_bill != null)
-                        <div class="modal fade" id="utility_bill_modal" data-backdrop="static" role="dialog" aria-labelledby="utility_bill_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="utility_bill_modal_title">Utility Bill</h4>
+                            <div class="modal fade" id="utility_bill_modal" data-backdrop="static" role="dialog" aria-labelledby="utility_bill_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="utility_bill_modal_title">Utility Bill</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->utility_bill))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->utility_bill))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->affidavit != null)
-                        <div class="modal fade" id="affidavit_modal" data-backdrop="static" role="dialog" aria-labelledby="affidavit_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="affidavit_modal_title">Affidavit</h4>
+                            <div class="modal fade" id="affidavit_modal" data-backdrop="static" role="dialog" aria-labelledby="affidavit_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="affidavit_modal_title">Affidavit</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->affidavit))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->affidavit))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                         @if(isset($attachments) && $attachments->cheque != null)
-                        <div class="modal fade" id="cheque_modal" data-backdrop="static" role="dialog" aria-labelledby="cheque_modal" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="cheque_modal_title">Cheque</h4>
+                            <div class="modal fade" id="cheque_modal" data-backdrop="static" role="dialog" aria-labelledby="cheque_modal" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="cheque_modal_title">Cheque</h4>
 
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{asset(Storage::url($attachments->cheque))}}" style="width: 100%; max-width: 200px;" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="{{asset(Storage::url($attachments->cheque))}}" style="width: 100%; max-width: 200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
 
                     </div>
@@ -1212,6 +1222,11 @@
             $('#profile-form #emergency_contact , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
+            });
+
+            $('#profile-form #bolt_pin').inputmask({
+                'mask': '9999',
+                'clearIncomplete': true,
             });
 
             $('#references-form #reference_years').inputmask({
@@ -1338,6 +1353,13 @@
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
 
+
+            $("#reporting_location").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reporting Location",
+                width:'100%',
+            });
+            $("#reporting_location").val("{{$employee->reporting_location_id ?? ''}}").trigger('change');
+
             $("#place_of_birth").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Place of Birth",
                 width:'100%',
@@ -1368,9 +1390,9 @@
             });
 
             @foreach($medical_infos as $medical_info)
-                $("#marital_status_family_member_{{$loop->index}}").val({{$medical_info->marital_status}}).trigger('change');
-                $("#relationship_family_member_{{$loop->index}}").val({{$medical_info->relationship_id}}).trigger('change');
-                family_member_index = {{$loop->index}};
+            $("#marital_status_family_member_{{$loop->index}}").val({{$medical_info->marital_status}}).trigger('change');
+            $("#relationship_family_member_{{$loop->index}}").val({{$medical_info->relationship_id}}).trigger('change');
+            family_member_index = {{$loop->index}};
             @endforeach
 
             $("#bank_name").prepend('<option value="" selected></option>').select2({
@@ -1387,8 +1409,8 @@
             var education_background_index = 0;
 
             @foreach($educations as $education)
-                $("#grade_{{$loop->index}}").val("{{$education->grade}}").trigger('change');
-                education_background_index = {{$loop->index}};
+            $("#grade_{{$loop->index}}").val("{{$education->grade}}").trigger('change');
+            education_background_index = {{$loop->index}};
             @endforeach
 
             $("#add_family_member").on('click',function () {
@@ -1407,20 +1429,20 @@
                                         <label>Relationship</label>
                                         <select name="relationship[${family_member_index}]" data-rule-required="true" data-msg-required="Relationship is required" id="relationship_family_member_${family_member_index}" class="select2 form-control relationship_family_member validated" style="width: 100%">
                                             @foreach($relationships as $relationship)
-                                                <option value="{{$relationship->id}}">{{$relationship->name}}</option>
+                <option value="{{$relationship->id}}">{{$relationship->name}}</option>
                                             @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <label>Date Of Birth</label>
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o small-calender-icon"></span>
-                                            </span>
-                                        </div>
-                                        <input type="text" name="dob[${family_member_index}]" id="dob${family_member_index}" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member validated" placeholder="Date Of Birth">
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <label>Date Of Birth</label>
+            <div class="form-group input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                        <span class="la la-calendar-o small-calender-icon"></span>
+                    </span>
+                </div>
+                <input type="text" name="dob[${family_member_index}]" id="dob${family_member_index}" data-rule-required="true" data-msg-required="Date Of Birth is required"  class="form-control bg-primary border-primary white rounded-right pickadate dob_family_member validated" placeholder="Date Of Birth">
                                     </div>
                                 </div>
                             <div class="col-md-12">
@@ -1428,18 +1450,18 @@
                                     <label>Marital Status</label>
                                     <select name="marital_status[${family_member_index}]" data-rule-required="true" data-msg-required="Marital Status is required" id="marital_status_family_member_${family_member_index}" class="select2 form-control marital_status_family_member validated" style="width: 100%">
                                         @foreach($maritial_statuses as $maritial_status)
-                                            <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                         @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-body">
-                                <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
-                            </div>
-                        </div>
-                    </div>`;
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-body">
+            <button type="button" class="btn btn-danger btn-xs mt-2 remove_family_member"><i class="ft-minus"></i></button>
+        </div>
+    </div>
+</div>`;
                 $("#medical_info_container").append(html);
                 $('#medical-form .dob_family_member').pickadate({
                     firstDay: 1,
@@ -1600,7 +1622,7 @@
             });
 
             $(document).on('click',".remove_family_member , .remove_education , .remove_employment",function () {
-               $(this).closest('div.row').remove();
+                $(this).closest('div.row').remove();
             });
 
             $('#profile-form').validate({
@@ -1612,6 +1634,14 @@
             });
 
             $('#medical-form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
+            $('#bank-form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {

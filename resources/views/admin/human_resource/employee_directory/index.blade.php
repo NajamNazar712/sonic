@@ -409,11 +409,7 @@
 
                     this.api().table().columns.adjust();
 
-                    var data = $.map({!! $employee_types !!}, function (obj) {
-                        obj.id = obj.name;
-                        obj.text = obj.name;
-                        return obj;
-                    });
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
