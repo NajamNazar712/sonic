@@ -47,6 +47,12 @@
                                         <h4 class="form-section">Personal Info</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Employee Name</label>
+                                                <input type="text" id="employee_name" class="form-control border-primary" value="{{$employee->name}}" data-rule-required="true" data-msg-required="Employee Name is required" name="employee_name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Father's/Husband Name</label>
                                                 <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father's/Husband Name is required" name="name">
                                             </div>
@@ -99,6 +105,12 @@
                                                         <option value="{{$blood_group->id}}">{{$blood_group->name}}</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Personal Number</label>
+                                                <input type="text" id="personal_number" class="form-control border-primary" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -756,186 +768,1161 @@
                                     <div class="form-body" id="employment_info_container">
                                         <h4 class="form-section">Attachments</h4>
                                         <div class="row">
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>CV/Resume</label>
-                                                    <input type="file" name="cv" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->cv != null)
+                                                        @php
+                                                            $cvs = explode(',', $attachments->cv);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cv_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cvs))
+                                                                    @foreach($cvs as $cv)
+                                                                        @php
+                                                                            $pos = strpos($cv, "cv_1_");
+                                                                        @endphp
+                                                                        @if($pos !== false)
+                                                                            <a href="{{asset(Storage::url($cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                        @endif
+                                                                    @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cv_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cvs))
+                                                                    @foreach($cvs as $cv)
+                                                                        @php
+                                                                            $pos = strpos($cv, "cv_2_");
+                                                                        @endphp
+                                                                        @if($pos !== false)
+                                                                            <a href="{{asset(Storage::url($cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                        @endif
+                                                                    @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cv_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cvs))
+                                                                        @foreach($cvs as $cv)
+                                                                            @php
+                                                                                $pos = strpos($cv, "cv_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cv_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cvs))
+                                                                    @foreach($cvs as $cv)
+                                                                        @php
+                                                                            $pos = strpos($cv, "cv_4_");
+                                                                        @endphp
+                                                                        @if($pos !== false)
+                                                                            <a href="{{asset(Storage::url($cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                        @endif
+                                                                    @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->cv != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->cv))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Scanned CNIC</label>
-                                                    <input type="file" name="cnic" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->cnic != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->cnic != null)
+                                                        @php
+                                                            $cnics = explode(',', $attachments->cnic);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                    $pos = strpos($cnic, "cnic_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                    </div>
                                             </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Passport Size Photo</label>
-                                                    <input type="file" name="photo" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." data-rule-required="true" data-msg-required="Passport Size Photo is required">
+                                                    @if(isset($attachments) && $attachments->photo != null)
+                                                        @php
+                                                            $photos = explode(',', $attachments->photo);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="photo_1" class="w-100 p-1 border-primary" title="Select File" @if(!isset($attachments) || $attachments->photo == null) data-rule-required="true" data-msg-required="Atleast One Image is Required" @endif data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($photos))
+                                                                        @foreach($photos as $photo)
+                                                                            @php
+                                                                                $pos = strpos($photo, "photo_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="photo_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($photos))
+                                                                        @foreach($photos as $photo)
+                                                                            @php
+                                                                                $pos = strpos($photo, "photo_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="photo_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($photos))
+                                                                        @foreach($photos as $photo)
+                                                                            @php
+                                                                                $pos = strpos($photo, "photo_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="photo_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($photos))
+                                                                        @foreach($photos as $photo)
+                                                                            @php
+                                                                                $pos = strpos($photo, "photo_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->photo != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->photo))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Academic Credentials</label>
-                                                    <input type="file" name="academic_credentials" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->academic != null)
+                                                        @php
+                                                            $academics = explode(',', $attachments->academic);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="academic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($academics))
+                                                                        @foreach($academics as $academic)
+                                                                            @php
+                                                                                $pos = strpos($academic, "academic_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="academic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($academics))
+                                                                        @foreach($academics as $academic)
+                                                                            @php
+                                                                                $pos = strpos($academic, "academic_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="academic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($academics))
+                                                                        @foreach($academics as $academic)
+                                                                            @php
+                                                                                $pos = strpos($academic, "academic_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="academic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($academics))
+                                                                        @foreach($academics as $academic)
+                                                                            @php
+                                                                                $pos = strpos($academic, "academic_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->academic != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->academic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Experience Certificates</label>
-                                                    <input type="file" name="experience_certificates" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->experience != null)
+                                                        @php
+                                                            $experience_certificates = explode(',', $attachments->experience);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="experience_certificate_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($experience_certificates))
+                                                                        @foreach($experience_certificates as $experience_certificate)
+                                                                            @php
+                                                                                $pos = strpos($experience_certificate, "experience_certificate_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($experience_certificate))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="experience_certificate_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($experience_certificates))
+                                                                        @foreach($experience_certificates as $experience_certificate)
+                                                                            @php
+                                                                                $pos = strpos($experience_certificate, "experience_certificate_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($experience_certificate))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="experience_certificate_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($experience_certificates))
+                                                                        @foreach($experience_certificates as $experience_certificate)
+                                                                            @php
+                                                                                $pos = strpos($experience_certificate, "experience_certificate_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($experience_certificate))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="experience_certificate_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($experience_certificates))
+                                                                        @foreach($experience_certificates as $experience_certificate)
+                                                                            @php
+                                                                                $pos = strpos($experience_certificate, "experience_certificate_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($experience_certificate))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->experience != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->experience))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Last Pay Slip</label>
-                                                    <input type="file" name="pay_slip" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->last_pay_slip != null)
+                                                        @php
+                                                            $last_pay_slips = explode(',', $attachments->last_pay_slip);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="last_pay_slip_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($last_pay_slips))
+                                                                        @foreach($last_pay_slips as $last_pay_slip)
+                                                                            @php
+                                                                                $pos = strpos($last_pay_slip, "last_pay_slip_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="last_pay_slip_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($last_pay_slips))
+                                                                        @foreach($last_pay_slips as $last_pay_slip)
+                                                                            @php
+                                                                                $pos = strpos($last_pay_slip, "last_pay_slip_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="last_pay_slip_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($last_pay_slips))
+                                                                        @foreach($last_pay_slips as $last_pay_slip)
+                                                                            @php
+                                                                                $pos = strpos($last_pay_slip, "last_pay_slip_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="last_pay_slip_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($last_pay_slips))
+                                                                        @foreach($last_pay_slips as $last_pay_slip)
+                                                                            @php
+                                                                                $pos = strpos($last_pay_slip, "last_pay_slip_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->last_pay_slip != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->last_pay_slip))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Nikkah Nama</label>
-                                                    <input type="file" name="nikkah_nama" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->nikkah_nama != null)
+                                                        @php
+                                                            $nikkah_namas = explode(',', $attachments->nikkah_nama);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="nikkah_nama_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($nikkah_namas))
+                                                                        @foreach($nikkah_namas as $nikkah_nama)
+                                                                            @php
+                                                                                $pos = strpos($nikkah_nama, "nikkah_nama_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="nikkah_nama_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($nikkah_namas))
+                                                                        @foreach($nikkah_namas as $nikkah_nama)
+                                                                            @php
+                                                                                $pos = strpos($nikkah_nama, "nikkah_nama_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="nikkah_nama_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($nikkah_namas))
+                                                                        @foreach($nikkah_namas as $nikkah_nama)
+                                                                            @php
+                                                                                $pos = strpos($nikkah_nama, "nikkah_nama_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="nikkah_nama_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($nikkah_namas))
+                                                                        @foreach($nikkah_namas as $nikkah_nama)
+                                                                            @php
+                                                                                $pos = strpos($nikkah_nama, "nikkah_nama_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->nikkah_nama != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->nikkah_nama))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Scanned CNIC Spouse</label>
-                                                    <input type="file" name="cnic_spouse" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                    @if(isset($attachments) && $attachments->cnic_spouse != null)
+                                                        @php
+                                                            $cnic_spouses = explode(',', $attachments->cnic_spouse);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_spouse_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_spouses))
+                                                                        @foreach($cnic_spouses as $cnic_spouse)
+                                                                            @php
+                                                                                $pos = strpos($cnic_spouse, "cnic_spouse_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_spouse_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_spouses))
+                                                                        @foreach($cnic_spouses as $cnic_spouse)
+                                                                            @php
+                                                                                $pos = strpos($cnic_spouse, "cnic_spouse_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_spouse_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_spouses))
+                                                                        @foreach($cnic_spouses as $cnic_spouse)
+                                                                            @php
+                                                                                $pos = strpos($cnic_spouse, "cnic_spouse_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_spouse_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_spouses))
+                                                                        @foreach($cnic_spouses as $cnic_spouse)
+                                                                            @php
+                                                                                $pos = strpos($cnic_spouse, "cnic_spouse_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->cnic_spouse != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->cnic_spouse))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
-                                                    </div>
-                                                @endif
-                                            </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Children B-Form</label>
-                                                    <input type="file" name="bform" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->child_b_form != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->child_b_form != null)
+                                                        @php
+                                                            $child_b_forms = explode(',', $attachments->child_b_form);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="child_b_form_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($child_b_forms))
+                                                                        @foreach($child_b_forms as $child_b_form)
+                                                                            @php
+                                                                                $pos = strpos($child_b_form, "child_b_form_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="child_b_form_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($child_b_forms))
+                                                                        @foreach($child_b_forms as $child_b_form)
+                                                                            @php
+                                                                                $pos = strpos($child_b_form, "child_b_form_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="child_b_form_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($child_b_forms))
+                                                                        @foreach($child_b_forms as $child_b_form)
+                                                                            @php
+                                                                                $pos = strpos($child_b_form, "child_b_form_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="child_b_form_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($child_b_forms))
+                                                                        @foreach($child_b_forms as $child_b_form)
+                                                                            @php
+                                                                                $pos = strpos($child_b_form, "child_b_form_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($child_b_form))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                   </div>
                                             </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Scanned CNIC Nominee</label>
-                                                    <input type="file" name="cnic_nominee" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->cnic_nominee != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->cnic_nominee != null)
+                                                        @php
+                                                            $cnic_nominees = explode(',', $attachments->cnic_nominee);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_nominee_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_nominees))
+                                                                        @foreach($cnic_nominees as $cnic_nominee)
+                                                                            @php
+                                                                                $pos = strpos($cnic_nominee, "cnic_nominee_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_nominee_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_nominees))
+                                                                        @foreach($cnic_nominees as $cnic_nominee)
+                                                                            @php
+                                                                                $pos = strpos($cnic_nominee, "cnic_nominee_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_nominee_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_nominees))
+                                                                        @foreach($cnic_nominees as $cnic_nominee)
+                                                                            @php
+                                                                                $pos = strpos($cnic_nominee, "cnic_nominee_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_nominee_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnic_nominees))
+                                                                        @foreach($cnic_nominees as $cnic_nominee)
+                                                                            @php
+                                                                                $pos = strpos($cnic_nominee, "cnic_nominee_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic_nominee))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                  </div>
                                             </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Scanned Utility Bill</label>
-                                                    <input type="file" name="utility_bill" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->utility_bill != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->utility_bill != null)
+                                                        @php
+                                                            $utility_bills = explode(',', $attachments->utility_bill);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="utility_bill_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($utility_bills))
+                                                                        @foreach($utility_bills as $utility_bill)
+                                                                            @php
+                                                                                $pos = strpos($utility_bill, "utility_bill_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="utility_bill_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($utility_bills))
+                                                                        @foreach($utility_bills as $utility_bill)
+                                                                            @php
+                                                                                $pos = strpos($utility_bill, "utility_bill_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="utility_bill_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($utility_bills))
+                                                                        @foreach($utility_bills as $utility_bill)
+                                                                            @php
+                                                                                $pos = strpos($utility_bill, "utility_bill_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="utility_bill_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($utility_bills))
+                                                                        @foreach($utility_bills as $utility_bill)
+                                                                            @php
+                                                                                $pos = strpos($utility_bill, "utility_bill_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($utility_bill))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                    </div>
                                             </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Affidavit</label>
-                                                    <input type="file" name="affidavit" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->affidavit != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->affidavit != null)
+                                                        @php
+                                                            $affidavits = explode(',', $attachments->affidavit);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="affidavit_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($affidavits))
+                                                                        @foreach($affidavits as $affidavit)
+                                                                            @php
+                                                                                $pos = strpos($affidavit, "affidavit_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="affidavit_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($affidavits))
+                                                                        @foreach($affidavits as $affidavit)
+                                                                            @php
+                                                                                $pos = strpos($affidavit, "affidavit_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="affidavit_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($affidavits))
+                                                                        @foreach($affidavits as $affidavit)
+                                                                            @php
+                                                                                $pos = strpos($affidavit, "affidavit_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="affidavit_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($affidavits))
+                                                                        @foreach($affidavits as $affidavit)
+                                                                            @php
+                                                                                $pos = strpos($affidavit, "affidavit_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($affidavit))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                     </div>
                                             </div>
 
-                                            <div class="col-md-10">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Cheque</label>
-                                                    <input type="file" name="cheque" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="png|jpg|jpeg" data-msg-extension="Only file with extension png , jpg or jpeg allowed" data-rule-accept="image/x-png, image/jpg, image/jpeg" data-msg-accept="Only png or jpeg images are allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." data-rule-required="true" data-msg-required="Cheque is required">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                @if(isset($attachments) && $attachments->cheque != null)
-                                                    <div class="form-group">
-                                                        <a href="{{asset(Storage::url($attachments->cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block mt-3 w-100">View</button></a>
+                                                    @if(isset($attachments) && $attachments->cheque != null)
+                                                        @php
+                                                            $cheques = explode(',', $attachments->cheque);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cheque_1" class="w-100 p-1 border-primary" title="Select File" @if(!isset($attachments) || $attachments->cheque == null) data-rule-required="true" data-msg-required="Atleast One Cheque is Required" @endif data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cheques))
+                                                                        @foreach($cheques as $cheque)
+                                                                            @php
+                                                                                $pos = strpos($cheque, "cheque_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cheque_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cheques))
+                                                                        @foreach($cheques as $cheque)
+                                                                            @php
+                                                                                $pos = strpos($cheque, "cheque_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cheque_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cheques))
+                                                                        @foreach($cheques as $cheque)
+                                                                            @php
+                                                                                $pos = strpos($cheque, "cheque_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cheque_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cheques))
+                                                                        @foreach($cheques as $cheque)
+                                                                            @php
+                                                                                $pos = strpos($cheque, "cheque_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cheque))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                     </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1219,7 +2206,7 @@
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
-            $('#profile-form #emergency_contact , #profile-form #official_number , #references-form #references_phone').inputmask({
+            $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });

@@ -26,7 +26,7 @@
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
-                                    <th class="border-primary border-darken-1">Request Status</th>
+                                    <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -336,7 +336,7 @@
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Employee Type');
-                            head.push('Request Status');
+                            head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
 
@@ -637,8 +637,6 @@
                         }
                     });
 
-                    this.api().table().columns.adjust();
-
                     data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
@@ -648,6 +646,8 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
 
