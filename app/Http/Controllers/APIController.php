@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\DonePayment;
 use App\Http\Models\Invoice;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentPrebook;
@@ -2735,10 +2736,11 @@ class APIController extends Controller
         $user_id = $request->user_id;
 
         $rules = [
-            'invoice_id' => ['required', 'integer', 'digits_between:1,20', Rule::exists('invoice', 'id')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })]
+            'id' => ['required', 'integer', 'digits_between:1,20'],
+            'type' => ['required','integer', 'between:1,2']
         ];
+
+        //type = 1 => Invoice, 2 => Payment
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -2749,31 +2751,84 @@ class APIController extends Controller
         }
         else{
             $data = array();
-            $invoice = Invoice::find($request->invoice_id);
-            $data['billing_method'] = 'Corporate Invoicing Account';
-            $data['invoice_date'] = $invoice->invoicing_date;
-            $data['shipments'] = array();
-            $invoice_shipments = $invoice->invoice_shipments;
 
-            if(!$invoice_shipments->isEmpty()){
-                foreach ($invoice_shipments as $invoice_shipment){
-                    $shipment = $invoice_shipment->shipment;
-                    $data['shipments'][$shipment->tracking_number] = array();
-                    $data['shipments'][$shipment->tracking_number]['weight_charges'] = $shipment->weight_charges;
-                    $data['shipments'][$shipment->tracking_number]['cash_handling_charges'] = $shipment->cash_handling_charges;
-                    $data['shipments'][$shipment->tracking_number]['insurance_charges'] = $shipment->insurance_charges;
-                    $data['shipments'][$shipment->tracking_number]['return_charges'] = $shipment->return_charges;
-                    $data['shipments'][$shipment->tracking_number]['fuel_surcharge'] = $shipment->fuel_surcharge;
-                    $data['shipments'][$shipment->tracking_number]['replacement_charges'] = $shipment->replacement_charges;
-                    $data['shipments'][$shipment->tracking_number]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
-                    $data['shipments'][$shipment->tracking_number]['intercept_charges'] = $shipment->intercept_charges;
-                    $data['shipments'][$shipment->tracking_number]['osa_charges'] = $shipment->nsa_osa_charges;
-                    $data['shipments'][$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
-                    $data['shipments'][$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
-                    $data['shipments'][$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+            $type = $request->type;
 
+            if($type == 1){
+                $invoice = Invoice::where('id', $request->id)->where('user_id', $user_id);
+                if($invoice->exists()){
+                    $invoice = $invoice->first();
+                    $account_type_id = $invoice->shipper->account_type_id;
+                    $data['billing_method'] = 'Corporate Invoicing Account';
+                    $data['invoice_date'] = $invoice->invoicing_date;
+                    $data['shipments'] = array();
+                    $invoice_shipments = $invoice->invoice_shipments;
+
+                    if(!$invoice_shipments->isEmpty()){
+                        foreach ($invoice_shipments as $invoice_shipment){
+                            $shipment = $invoice_shipment->shipment;
+                            $data['shipments'][$shipment->tracking_number] = array();
+                            $data['shipments'][$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $data['shipments'][$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
+                            $data['shipments'][$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
+                            $data['shipments'][$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+
+                        }
+                        return response()->json(['status' => 0, 'payments' => $data]);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
+                }
+
+            }
+            else{
+
+                $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
+                if($done_payment->exists()){
+                    $done_payment = $done_payment->first();
+                    $account_type_id = $done_payment->shipper->account_type_id;
+                    $data['billing_method'] = $done_payment->shipper->account_type->name;
+                    $data['invoice_date'] = $done_payment->created_at;
+                    $data['shipments'] = array();
+                    $done_payment_shipments = $done_payment->done_payment_shipments;
+
+                    if(!$done_payment_shipments->isEmpty()){
+                        foreach ($done_payment_shipments as $done_payment_shipment){
+                            $shipment = $done_payment_shipment->shipment;
+                            $data['shipments'][$shipment->tracking_number] = array();
+                            $data['shipments'][$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $data['shipments'][$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $done_payment_shipment->charges : 0);
+                            $data['shipments'][$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
+                            $data['shipments'][$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
+                            $data['shipments'][$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+
+                        }
+                        return response()->json(['status' => 0, 'payments' => $data]);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
                 }
             }
+
+
             return response()->json(['status' => 0, 'payments' => $data]);
 
         }
