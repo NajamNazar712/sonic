@@ -1387,7 +1387,8 @@ class RetailShipmentBookController extends Controller
     public function tracking_slip_list(Request $request){
         $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
             ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.slip_image')
-        ->orderBy('retail_Shipments.created_at', 'desc');
+            ->where('retail_user_id', Auth::id())
+        ->orderBy('retail_shipments.created_at', 'desc');
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('retail.tracking.index');
@@ -1407,10 +1408,26 @@ class RetailShipmentBookController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Upload Slip</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item upload" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Upload Slip</div></button>';
 
                 return $dropdown;
             });
         return  $datatable->make(true);
+    }
+
+    public function tracking_slip_upload(Request $request){
+        $retail_shipment_id = $request->retail_shipment_id;
+        $retail_shipment = RetailShipment::find($retail_shipment_id);
+        if ($request->hasFile('upload_attachment')) {
+            $filename = 'shipment_'. $retail_shipment->shipment_id.'.jpg';
+
+            $file = $request->file('upload_attachment');
+
+            Storage::disk('public')->putFileAs('retail_slip', $file, $filename);
+
+            $retail_shipment->slip_image = $filename;
+            $retail_shipment->save();
+        }
+        return redirect()->back()->with('success', 'Slip uploaded successfully');
     }
 }
