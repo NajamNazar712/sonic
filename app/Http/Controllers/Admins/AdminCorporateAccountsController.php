@@ -6688,7 +6688,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function add_rates_zone_wise_submit(Request $request, $id)
-    {
+    {       dd(1);
 
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
@@ -17788,7 +17788,6 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function change_corporate_rate_type($id,Request $request){
-      
       $user = User::find($id);
       $corporate_id = $user->corporate_rate_type_id;
 

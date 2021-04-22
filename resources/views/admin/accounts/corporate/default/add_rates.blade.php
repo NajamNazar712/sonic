@@ -2341,7 +2341,7 @@
             });
             var shipper = @json($shipper->id);
 
-            if(rate_type != null){
+            if(rate_type != null  && rate_type != ''){
                 var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);

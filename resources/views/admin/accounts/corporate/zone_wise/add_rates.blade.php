@@ -2533,15 +2533,15 @@
             });
             var shipper = @json($shipper->id);
 
-            if(rate_type != null ){
-
+            if(rate_type !== null && rate_type != '' ){
+                console.log(1);
                 var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);
 
             }
             else{
-
+                console.log(2);
                 var route = '{!! route('admin.corporate.zone_wise.add.rates', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);

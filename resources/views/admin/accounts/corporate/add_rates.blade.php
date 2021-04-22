@@ -2658,7 +2658,7 @@
             var shipper = @json($shipper->id);
             var rate_type = @json($corporate_rate_type_id);
 
-            if(rate_type == null){
+            if(rate_type == null &&  rate_type == ''){
 
                 var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
                 route = route.replace(':id', shipper);
