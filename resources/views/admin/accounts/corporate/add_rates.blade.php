@@ -2658,14 +2658,15 @@
             var shipper = @json($shipper->id);
             var rate_type = @json($corporate_rate_type_id);
 
-            if(rate_type == null &&  rate_type == ''){
-
-                var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
+            if(rate_type != null &&  rate_type != ''){
+                console.log(1);
+                var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);
             }
             else{
-                var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+                console.log(2);
+                var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);
             }
