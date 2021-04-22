@@ -1939,50 +1939,6 @@
                                 </div>
                             </div>
                         </form>
-
-                        @if(isset($attachments) && $attachments->cnic != null)
-                            <div class="modal fade" id="cnic_modal" data-backdrop="static" role="dialog" aria-labelledby="cnic_modal" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title" id="cnic_modal_title">CNIC</h4>
-
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">×</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            <img src="{{asset(Storage::url($attachments->cnic))}}" style="width: 100%; max-width: 200px;" />
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        @if(isset($attachments) && $attachments->photo != null)
-                            <div class="modal fade" id="photo_modal" data-backdrop="static" role="dialog" aria-labelledby="photo_modal" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title" id="photo_modal_title">Passport Size Photo</h4>
-
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">×</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            <img src="{{asset(Storage::url($attachments->photo))}}" style="width: 100%; max-width: 200px;" />
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
                     </div>
                 </div>
             </div>
