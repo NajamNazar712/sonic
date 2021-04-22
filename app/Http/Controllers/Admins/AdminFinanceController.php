@@ -1889,7 +1889,7 @@ class AdminFinanceController extends Controller
         $weight = $request->weight;
         $shipment = Shipment::find($shipment_id);
         if($shipment->business_category_id == 1){
-            $weight_result = ShipmentChargesController::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+            $weight_result = ShipmentChargesController::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
             $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
@@ -1899,7 +1899,7 @@ class AdminFinanceController extends Controller
                 $zone_id = $shipment->consignee_city->zone_id;
                 $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                 if($international_zone){
-                    $weight_result = ShipmentChargesController::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
+                    $weight_result = ShipmentChargesController::calculate_international_weight($margin, $weight, $international_zone->zone_name);
                 }
             }
         }
