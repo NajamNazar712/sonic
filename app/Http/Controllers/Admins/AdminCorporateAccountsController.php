@@ -243,11 +243,9 @@ class AdminCorporateAccountsController extends Controller
             }
             
             if(($rate_type == 1 && $rate_type_id == null) || $rate_type_id == 1){
-
                 return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes,'corporate_rate_type_id' => $corporate_rate_type_id]);
             }
             else if(($rate_type == 2 && $rate_type_id == null) || $rate_type_id == 2){
-
                 return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'corporate_rate_type_id' => $corporate_rate_type_id]);
             }
             else{

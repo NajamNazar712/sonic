@@ -2822,7 +2822,7 @@
         var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
-        var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
+        // var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
 
         //Overland
 
@@ -3001,35 +3001,35 @@
             }
         };
 
-        packagingChargesSwitch.onchange = function () {
-            if(packagingChargesSwitch.checked === true){
-                $('#packaging_material_charges_div').slideDown('slow');
-                $('.packaging-charges-div').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitch.checked === false){
-                $('#packaging_material_charges_div').slideUp('slow');
-                $('.packaging-charges-div').find('input').prop('disabled',true);
+        // packagingChargesSwitch.onchange = function () {
+        //     if(packagingChargesSwitch.checked === true){
+        //         $('#packaging_material_charges_div').slideDown('slow');
+        //         $('.packaging-charges-div').find('input').prop('disabled',false);
+        //     }else if(packagingChargesSwitch.checked === false){
+        //         $('#packaging_material_charges_div').slideUp('slow');
+        //         $('.packaging-charges-div').find('input').prop('disabled',true);
+        //
+        //     }
+        // };
 
-            }
-        };
+{{--        @if(count($packaging_material_types) > 0)--}}
+{{--            @foreach($packaging_material_types as $index => $type)--}}
+{{--                var PackageSwitch = [];--}}
+{{--                var type_id_{{$index}} = '{{$type->id}}';--}}
+{{--                var type_id = '{{$type->id}}';--}}
+{{--                PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);--}}
+{{--                PackageSwitch[type_id].onchange = function () {--}}
 
-        @if(count($packaging_material_types) > 0)
-            @foreach($packaging_material_types as $index => $type)
-                var PackageSwitch = [];
-                var type_id_{{$index}} = '{{$type->id}}';
-                var type_id = '{{$type->id}}';
-                PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);
-                PackageSwitch[type_id].onchange = function () {
+{{--                    if ($(this).is(':checked') === true) {--}}
+{{--                        $('#package_type_'+type_id_{{$index}}).slideDown('slow');--}}
 
-                    if ($(this).is(':checked') === true) {
-                        $('#package_type_'+type_id_{{$index}}).slideDown('slow');
+{{--                    } else if ($(this).is(':checked') === false) {--}}
+{{--                        $('#package_type_'+type_id_{{$index}}).slideUp('slow');--}}
 
-                    } else if ($(this).is(':checked') === false) {
-                        $('#package_type_'+type_id_{{$index}}).slideUp('slow');
-
-                    }
-                };
-            @endforeach
-        @endif
+{{--                    }--}}
+{{--                };--}}
+{{--            @endforeach--}}
+{{--        @endif--}}
         //overland end
         //detain
         //var weightAdditionDetain = document.querySelector('.switchery.weightAdditionDetain0');

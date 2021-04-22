@@ -140,17 +140,20 @@ class ShipmentChargesController extends Controller
                 $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             }
             else {
-                $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id);
+                if( $rate_type_id != 3 ){
+                    $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id);
 
-                if ($min_chargeable_weight->exists()) {
-                    $min_chargeable_weight = $min_chargeable_weight->first();
+                    if ($min_chargeable_weight->exists()) {
+                        $min_chargeable_weight = $min_chargeable_weight->first();
 
-                    $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
+                        $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
 
-                    if ($weight < $min_chargeable_weight) {
-                        $weight = $min_chargeable_weight;
+                        if ($weight < $min_chargeable_weight) {
+                            $weight = $min_chargeable_weight;
+                        }
                     }
                 }
+
 
                 if($rate_type_id == 1){
                     $weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
