@@ -29,26 +29,36 @@
             </div>
         </div>
     </div>
-    <!--Shipments popup -->
-    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+    <!--Image popup -->
+    <div class="modal fade" id="image_modal" data-backdrop="static" role="dialog" aria-labelledby="image_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Total CN Number Used</h4>
+                    <h4 class="modal-title" id="shipments_modal_title">Upload Slip</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+                <form id="image_form" class="form-horizontal" method="POST" action="{{ route('retail.shipment.tracking_slip.upload') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="retail_shipment_id" id="retail_shipment_id" value="">
+                    <div class="modal-body text-center">
+                        <div class="col">
+                            <div class="form-group">
+                                <input class="form-control form-control-sm" type="file" name="upload_attachment" id="upload_attachment" data-rule-required="true" data-msg-required="Image is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!--Shipments popup -->
+    <!--Image popup -->
 
 @endsection
 @section('css')
@@ -140,36 +150,24 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-
-            var route = '{!! route('retail.tracking.index') !!}';
-
-            $('#datatable tbody').on('click','tr td.shipments_button button',function () {
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
+                if ($(this).hasClass('upload')) {
+                    $('#retail_shipment_id').val(id);
+                    $('#image_modal').modal('show');
+                }
+            });
 
-                $.ajax({
-                    url: '{!! route('retail.parcel_receiving.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'performa_no': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var html = '';
-
-                            if (data.status == 1) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(html);
-                            $('#shipments_modal').modal('show');
-                        }
-                    });
-
+            $('#image_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    blockPagePermanently();
+                    form.submit();
+                }
             });
         });
     </script>
