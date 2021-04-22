@@ -1449,7 +1449,7 @@ class AdminCorporateAccountsController extends Controller
             }
         }
 
-        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id()]);
+        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(),'rates_added_at'=>Carbon::now()]);
         if($request->has('rate_remarks') && $request->rate_remarks != null){
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
@@ -3724,7 +3724,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1]);
             if ($request->authorize == 1) {
-                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id()]);
+                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
@@ -6324,7 +6324,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
+                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -9765,7 +9765,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             User::where('id', $id)->update(['rate_status' => 1]);
             if ($request->authorize == 1) {
-                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id()]);
+                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
@@ -12224,7 +12224,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
+                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;

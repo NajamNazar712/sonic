@@ -479,7 +479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
-        Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
+        Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
@@ -1534,6 +1534,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_weight_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
             Route::post('excel_store', 'Admins\AdminFinanceController@change_shipment_weight_excel_store')->name('excel_store');
+            Route::post('calculate_amount', 'Admins\AdminFinanceController@change_shipment_weight_calculate_amount')->name('calculate_amount');
 
         });
 
@@ -1596,6 +1597,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
+            Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
         });
@@ -2495,6 +2497,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@international_rates_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@international_rates_update')->name('update');
 
+            Route::prefix('upload')->name('upload.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@international_standard_dhl_rates_list')->name('list');
+                Route::post('excel', 'Admins\GlobalSettingsController@international_rates_upload_excel')->name('excel');
+
+            });
         });
 
 
@@ -2787,6 +2795,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
+            Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@retail_bank_info')->name('bank_info');
+            Route::post('/bank_info_update', 'Admins\Retail\RetailAdminAccounts@retail_bank_info_update')->name('bank_info_update');
         });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
@@ -2862,6 +2872,11 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
+        Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@tracking_slip_index')->name('index');
+            Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
+            Route::post('/upload', 'Retail\RetailShipmentBookController@tracking_slip_upload')->name('upload');
+        });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         Route::get('', 'Retail\RetailCashDepositController@index')->name('index');

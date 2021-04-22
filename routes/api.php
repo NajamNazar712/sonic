@@ -67,6 +67,11 @@ Route::name('api.')->group(function () {
 
 		Route::get('catalyst_users', 'APIController@catalyst_users')->name('catalyst_users');
 
+		Route::post('payments', 'APIController@payments')->name('payments');
+
+		Route::get('invoice', 'APIController@invoice')->name('invoice');
+
+
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {

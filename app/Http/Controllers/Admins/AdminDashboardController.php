@@ -1538,6 +1538,8 @@ class AdminDashboardController extends Controller
         }
         $user->rejected_reason = $reject_reason;
         $user->rate_status = 2;
+        $user->rates_rejected_by = Auth::id();
+        $user->rates_rejected_at = Carbon::now();
         $user->save();
         NotificationsController::send(64, $shipper_id );
         return ['success' => 'Rates has been rejected!'];
@@ -3678,7 +3680,7 @@ class AdminDashboardController extends Controller
                 }
             }
             if($request->authorize == 1){
-                User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
+                User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
 
@@ -5818,7 +5820,7 @@ class AdminDashboardController extends Controller
                 PendingFuelSurcharge::where('user_id', $id)->delete();
                 PendingPackagingCharge::where('user_id', $id)->delete();
                 PendingDiscountCharge::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
+                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -7071,7 +7073,7 @@ class AdminDashboardController extends Controller
         }
 
 
-        User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
+        User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id(),'rates_added_at'=>Carbon::now()]);
         if($request->has('rate_remarks') && $request->rate_remarks != null){
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
@@ -7185,6 +7187,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
             ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
             ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->leftjoin('admins as rrb','rrb.id','=','users.rates_rejected_by')
             ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
             ->leftjoin('account_types as at','at.id','=','users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
@@ -7195,12 +7198,14 @@ class AdminDashboardController extends Controller
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
+            ->leftjoin('admins as dab','dab.id','=','uda.approved_by')
+            ->leftjoin('admins as drb','drb.id','=','uda.rejected_by')
             ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
             ->leftjoin('admins as poc','poc.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
             ->leftjoin('territories as t','t.id','=','users.territory_id')
-			->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory'])->whereIn('users.status',[3,4])->where('blacklist',0);
+			->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory'])->whereIn('users.status',[3,4])->where('blacklist',0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -7480,6 +7485,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
             ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->leftjoin('admins as rrb','rrb.id','=','users.rates_rejected_by')
             ->leftjoin('account_types as at','at.id','=','users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
@@ -7488,13 +7494,15 @@ class AdminDashboardController extends Controller
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
+            ->leftjoin('admins as dab','dab.id','=','uda.approved_by')
+            ->leftjoin('admins as drb','drb.id','=','uda.rejected_by')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
             ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
             ->leftjoin('admins as p','p.id','=','st.poc')
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
 			->leftjoin('territories as t','t.id','=','users.territory_id')
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email','t.name as territory','users.address as address'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email','t.name as territory','users.address as address'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9285,9 +9293,6 @@ class AdminDashboardController extends Controller
             $user_document->approved_at = Carbon::now();
             $user_document->approved_by = Auth::id();
             $user_document->save();
-            $user_document->approved_at = Carbon::now();
-            $user_document->approved_by = Auth::id();
-            $user_document->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
 
         }
@@ -9295,6 +9300,9 @@ class AdminDashboardController extends Controller
             $user->documents_status = 3;
             $user->documents_status_reason = $reason;
             $user->save();
+            $user_document->rejected_at = Carbon::now();
+            $user_document->rejected_by = Auth::id();
+            $user_document->save();
             return redirect()->back()->with(['success' => 'Files rejected successfully']);
         }
         else{

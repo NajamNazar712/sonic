@@ -27,7 +27,7 @@
                                     <th class="border-primary border-darken-1">Shipper Address</th>
                                     <th class="border-primary border-darken-1">Added Date</th>
                                     <th class="border-primary border-darken-1">Document Status</th>
-{{--                                    <th class="border-primary border-darken-1">Actions</th>--}}
+                                    <th class="border-primary border-darken-1">Actions</th>
                                 </thead>
                             </table>
                         </div>
@@ -37,59 +37,104 @@
         </div>
     </div>
 
-{{--    <div class="modal fade text-left" id="viewdetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDetails"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header bg-primary white">--}}
-{{--                    <h4 class="modal-title white">Shipper Details </h4>--}}
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">&times;</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body text-center">--}}
-{{--                    <form class="form-inline justify-content-center" method="post">--}}
-{{--                        @csrf--}}
-{{--                        @method('PUT')--}}
-{{--                        <div class="col-md-8 ">--}}
-{{--                            <div class="form-group mb-2">--}}
-{{--                                <label for="usr" class="font-weight-bold mr-2">Shipper Name</label>--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <input type="text" name="shipper_name" id="shipper_name" class="form-control" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="form-group mb-2">--}}
-{{--                                <label for="usr" class="font-weight-bold mr-2">IBAN</label>--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <input type="text" name="iban" id="iban" class="form-control" placeholder="IBAN">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="form-group mb-2">--}}
-{{--                                <label for="usr" class="font-weight-bold mr-2">Shipper Account No</label>--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <input type="text" name="account_no" id="account_no" class="form-control" placeholder="Shipper Account">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="form-group mb-2">--}}
-{{--                                <label for="usr" class="font-weight-bold mr-2">Bank Name</label>--}}
+    <div class="modal fade text-left" id="EditDetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditDetails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Shipper Details </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="edit_shipper_details_form" action="{{route('admin.retail.accounts.bank_info_update')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="id" id="shipper_account_id" value="">
+                    <div class="modal-body text-center">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8 ">
+                                <div class="col">
+                                    <label for="iban" class="font-weight-bold mr-2">IBAN</label>
+                                    <div class="form-group">
+                                        <input type="text" name="iban" id="iban" class="form-control" placeholder="IBAN*" data-rule-required="true" data-msg-required="IBAN is required">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="account_no" class="font-weight-bold mr-2">Account Number</label>
+                                    <div class="form-group">
+                                        <input type="text" name="account_no" id="account_no" class="form-control" placeholder="Shipper Account*" data-rule-required="true" data-msg-required="Account Number is required">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="bank_info" class="font-weight-bold mr-2">Bank Name</label>
 
-{{--                                    <select name="bank_info" class="select2" id="bank_info">--}}
-{{--                                        @foreach($banks as $bank)--}}
-{{--                                            <option value="{{ $bank->id }}">{{ $bank->name }}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
+                                    <select name="bank_info" class="select2" id="bank_info" data-rule-required="true" data-msg-required="Bank Name is required">
+                                        @foreach($banks as $bank)
+                                            <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                        @endforeach
+                                    </select>
 
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                        <div class="form-actions pb-0">--}}
-{{--                            <button type="submit" class="btn round btn-success btn-block btn-glow">Submit</button>--}}
-{{--                        </div>--}}
-{{--                    </form>--}}
+                                </div>
+                                <div class="col mt-1">
+                                    <label for="cheque_image" class="font-weight-bold mr-2">
+                                        Cheque Image:
+                                    </label>
+                                    <div class="form-group">
+                                        <input class="form-control form-control-sm" type="file" name="cheque_image" id="cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="ViewDetails" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDetails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Shipper Details </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body text-center">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8 ">
+                                <div class="col">
+                                    <label for="iban" class="font-weight-bold mr-2">IBAN</label>
+                                    <div class="form-group">
+                                        <input type="text" name="view_iban" id="view_iban" class="form-control" placeholder="IBAN" disabled>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="account_no" class="font-weight-bold mr-2">Account Number</label>
+                                    <div class="form-group">
+                                        <input type="text" name="view_account_no" id="view_account_no" class="form-control" placeholder="Shipper Account" disabled>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="bank_info" class="font-weight-bold mr-2">Bank Name</label>
+                                    <input type="text" name="view_bank_info" id="view_bank_info" class="form-control" placeholder="Bank" disabled>
+                                </div>
+                                <div class="col mt-1" id="image_button">
 
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -192,7 +237,7 @@
                     {data: 'address', name: 'retail_shipper_infos.shipper_address', class: 'align-middle text_center address'},
                     {data: 'added_at', name: 'retail_shipper_infos.created_at', class: 'text_center align-middle added_at'},
                     {data: 'document_status', name: 'retail_shipper_infos.completed_status', class: 'text_center align-middle document_status'},
-                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -228,51 +273,119 @@
 
             });
 
-            {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {--}}
-            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+            $('#bank_info').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Bank*'
+            });
 
-            {{--    if ($(this).hasClass('edit')) {--}}
-            {{--            $.ajax({--}}
-            {{--                url: '{!! route('admin.retail.accounts.bank_info') !!}',--}}
-            {{--                method: 'POST',--}}
-            {{--                data: {--}}
-            {{--                    'id': id,--}}
-            {{--                    '_token': '{{ csrf_token() }}'--}}
-            {{--                }--}}
-            {{--            })--}}
-            {{--            .done(function (data) {--}}
-            {{--                if(data.status == 0){--}}
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
 
-            {{--                    var bank = data.details.bank_id;--}}
-            {{--                    var iban = data.details.iban;--}}
-            {{--                    var account_no = data.details.account_no;--}}
-            {{--                    console.log(bank);--}}
-            {{--                    if(bank != null){--}}
-            {{--                        $('#bank_info').val(bank).trigger('change');--}}
-            {{--                    }--}}
-            {{--                    else{--}}
-            {{--                        $('#bank_info').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                            width: '100%',--}}
-            {{--                            placeholder: 'Select Bank'--}}
-            {{--                        });--}}
-            {{--                    }--}}
-            {{--                    if(account_no != null){--}}
-            {{--                        $('#account_no').val(data.details.account_no);--}}
-            {{--                    }if(iban != null){--}}
-            {{--                        $('#iban').val(data.details.iban);--}}
-            {{--                    }--}}
-            {{--                    $('#shipper_name').val(data.details.shipper_name);--}}
-            {{--                    $('#viewdetails').modal('show');--}}
-            {{--                }--}}
-            {{--                else{--}}
-            {{--                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--                }--}}
-            {{--            });--}}
-            {{--    }--}}
+                if ($(this).hasClass('edit')) {
+                        $.ajax({
+                            url: '{!! route('admin.retail.accounts.bank_info') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function (data) {
+                            if(data.status == 0){
+                                var bank = data.details.bank_id;
+                                var iban = data.details.iban;
+                                var account_no = data.details.account_no;
+                                $('#shipper_account_id').val(id);
+                                if(bank != null){
+                                    $('#bank_info').val(bank).trigger('change');
+                                }
+                                if(account_no != null){
+                                    $('#account_no').val(data.details.account_no);
+                                }if(iban != null){
+                                    $('#iban').val(data.details.iban);
+                                }
+                                $('#EditDetails').modal('show');
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+                if ($(this).hasClass('view')) {
+                        $.ajax({
+                            url: '{!! route('admin.retail.accounts.bank_info') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function (data) {
+                            if(data.status == 0){
+                                $('#picture_div').remove();
+                                var bank = data.details.bank_name;
+                                var iban = data.details.iban;
+                                var account_no = data.details.account_no;
+                                var cheque_image = data.details.image;
+                                $('#shipper_account_id').val(id);
+                                if(bank != null){
+                                    $('#view_bank_info').val(bank);
+                                }
+                                if(account_no != null){
+                                    $('#view_account_no').val(data.details.account_no);
+                                }if(iban != null){
+                                    $('#view_iban').val(data.details.iban);
+                                }if(cheque_image != null){
+                                    $('#image_button').append(data.details.image);
+                                }
+                                $('#ViewDetails').modal('show');
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
 
 
-            {{--});--}}
-
+            });
+            $('#edit_shipper_details_form').validate({
+                // ignore: ":not(:visible),:disabled",
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Shipper Details!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            blockPagePermanently();
+                            form.submit();
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endsection

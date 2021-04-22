@@ -122,7 +122,6 @@
                             head.push('S.No');
                             head.push('Department ID');
                             head.push('Department Name');
-                            head.push('Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];

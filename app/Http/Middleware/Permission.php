@@ -789,6 +789,7 @@ class Permission
             'settings.pickup_address_wise_payment_accounts.index' => 391,
 
             'settings.international_rates.index' => 438,
+            'settings.international_rates.upload.index' => 477,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
