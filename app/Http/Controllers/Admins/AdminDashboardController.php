@@ -7397,7 +7397,7 @@ class AdminDashboardController extends Controller
                         }
                         if($result->corporate_rate_type_id == 3){
                             if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                             }
                         }
                         else{
