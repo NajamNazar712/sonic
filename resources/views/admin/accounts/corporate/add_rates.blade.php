@@ -2423,6 +2423,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var rate_type = $('#corporate_type_id').val();
+            console.log(rate_type);
 
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
@@ -2653,6 +2655,21 @@
 
                 }
             });
+            var shipper = @json($shipper->id);
+            var rate_type = @json($corporate_rate_type_id);
+
+            if(rate_type == null){
+
+                var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+            }
+            else{
+                var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+            }
+
         });
 
 
@@ -3969,22 +3986,6 @@
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
         var detainSwitch = document.querySelector('.switchery.detain-main-switch');
         var samedaySwitch = document.querySelector('.switchery.sameday-main-switch');
-
-        var shipper = @json($shipper->id);
-        var rate_type = @json($corporate_rate_type_id);
-
-        if(rate_type == null){
-
-            var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
-            route = route.replace(':id', shipper);
-            $("#ratesAdditionForm").attr('action', route);
-        }
-        else{
-            var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
-            route = route.replace(':id', shipper);
-            $("#ratesAdditionForm").attr('action', route);
-        }
-
 
 
         $( "#ratesAdditionForm" ).validate({

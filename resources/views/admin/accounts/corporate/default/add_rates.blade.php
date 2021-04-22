@@ -2024,7 +2024,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            var rate_type = $('#corporate_type_id').val();
+            console.log(rate_type);
 
             //sales tier
             /* *********************
@@ -2338,8 +2339,18 @@
 
                 }
             });
+            var shipper = @json($shipper->id);
 
-
+            if(rate_type != null){
+                var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+            }
+            else {
+                var route = '{!! route('admin.corporate.default.add.rates', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+            }
 
         });
 
@@ -3669,23 +3680,6 @@
         $('#addRatesSubmit').on('click', function () {
             $('#add_user_commission_form').remove();
         });
-
-        var shipper = @json($shipper->id);
-        var rate_type = @json($corporate_rate_type_id);
-
-        if(rate_type == null){
-            console.log(1);
-            var route = '{!! route('admin.corporate.default.add.rates', ':id') !!}';
-            route = route.replace(':id', shipper);
-            $("#ratesAdditionForm").attr('action', route);
-        }
-        else{
-            var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
-            route = route.replace(':id', shipper);
-            $("#ratesAdditionForm").attr('action', route);
-        }
-
-
 
 
         $( "#ratesAdditionForm" ).validate({

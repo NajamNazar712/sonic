@@ -17788,7 +17788,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function change_corporate_rate_type($id,Request $request){
-
+      
       $user = User::find($id);
       $corporate_id = $user->corporate_rate_type_id;
 
