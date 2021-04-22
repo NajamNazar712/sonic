@@ -253,7 +253,7 @@
                                 }
                             }
                     @endif],
-                @elseif(session('role_id') == 1 || ($petty_statement->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                @elseif(session('role_id') == 1 || ($petty_statement->status <= 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                         @if($petty_statement->status != 6)
