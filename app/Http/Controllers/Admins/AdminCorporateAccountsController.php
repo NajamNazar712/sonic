@@ -20663,7 +20663,7 @@ class AdminCorporateAccountsController extends Controller
               }
           }
 
-          User::where('id', $id)->update(['status' => 3,'corporate_rate_type_id' => 1]);
+          User::where('id', $id)->update(['status' => 3,'corporate_rate_type_id' => 2]);
           if($request->has('rate_remarks') && $request->rate_remarks != null){
               $rate_remark = new RateRemark();
               $rate_remark->user_id = $id;
