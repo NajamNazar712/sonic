@@ -17,101 +17,93 @@
                                 <h2 class="font-large-1">{{$shipper->name}}
                                     <div class="badge badge-success pull-right">Corporate Invoicing Account</div>
                                 </h2>
-                                @include('admin.inc.messages')
+                                @include('client.inc.messages')
                             </div>
 
 
                             <div class="card-content">
-                                <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
+                                <form id="ratesAdditionForm" class="card-body card-dashboard" action="" method="post" novalidate="novalidate">
                                     @csrf
                                     @method('PUT')
 
                                     <div class="card">
 
-                                        {{--   <div class="">
-                                               @if(count($packaging_material_types) > 0)
+                                        {{--     <div class="">
+                                                 @if(count($packaging_material_types) > 0)
 
-                                                   @php
-                                                       $packaging_switch = '';
-                                                   if(count($packaging_charges) > 0){
-                                                       $packaging_switch = 'checked';
-                                                        }else{
-                                                       $packaging_switch = '';
-                                                       }
-                                                   @endphp
-                                                   <div class="card-header border-primary">
-                                                       <div class="row">
-                                                           <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
-                                                           <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}} disabled/></a></div>
+                                                     @php
+                                                         $packaging_switch = '';
+                                                     if(count($packaging_charges) > 0){
+                                                         $packaging_switch = 'checked';
+                                                          }else{
+                                                         $packaging_switch = '';
+                                                         }
+                                                     @endphp
+                                                     <div class="card-header border-primary">
+                                                         <div class="row">
+                                                             <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
+                                                             <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}} disabled/></a></div>
 
-                                                       </div>
-                                                   </div>
+                                                         </div>
+                                                     </div>
 
-                                                   <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
-                                                       @foreach($packaging_material_types as $index => $type)
-                                                           @php
-                                                               $packaging_type_switch = '';
-                                                               if(in_array($type->id, $packaging_type_ids)){
-                                                                   $packaging_type_switch = 'checked';
-                                                               }
-                                                           @endphp
-                                                           <div class="card-header border-primary">
-                                                               <div class="row">
-                                                                   <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
-                                                                   <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}} disabled/></a></a></div>
+                                                     <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
+                                                         @foreach($packaging_material_types as $index => $type)
+                                                             @php
+                                                                 $packaging_type_switch = '';
+                                                                 if(in_array($type->id, $packaging_type_ids)){
+                                                                     $packaging_type_switch = 'checked';
+                                                                 }
+                                                             @endphp
+                                                             <div class="card-header border-primary">
+                                                                 <div class="row">
+                                                                     <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
+                                                                     <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}} disabled/></a></a></div>
 
-                                                               </div>
-                                                           </div>
+                                                                 </div>
+                                                             </div>
 
-                                                           <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
-                                                               <div class="card-content">
-                                                                   <div class="card-body packaging-charges-div">
-                                                                       <div class="row">
-                                                                           @foreach($type->sizes as $ind => $size)
+                                                             <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                                 <div class="card-content">
+                                                                     <div class="card-body packaging-charges-div">
+                                                                         <div class="row">
+                                                                             @foreach($type->sizes as $ind => $size)
 
-                                                                               @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)
-                                                                                   <div class="col-md-3 text-center">
-                                                                                       <label class="card-title">{{$size->size}}</label>
-                                                                                       <fieldset class="form-group">
-                                                                                           <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}" disabled>
-                                                                                       </fieldset>
-                                                                                   </div>
-                                                                               @else
-                                                                                   <div class="col-md-3 text-center">
-                                                                                       <label class="card-title">{{$size->size}}</label>
-                                                                                       <fieldset class="form-group">
-                                                                                           <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}" disabled>
-                                                                                       </fieldset>
-                                                                                   </div>
-                                                                               @endif
+                                                                                 @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)
+                                                                                     <div class="col-md-3 text-center">
+                                                                                         <label class="card-title">{{$size->size}}</label>
+                                                                                         <fieldset class="form-group">
+                                                                                             <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}" disabled>
+                                                                                         </fieldset>
+                                                                                     </div>
+                                                                                 @else
+                                                                                     <div class="col-md-3 text-center">
+                                                                                         <label class="card-title">{{$size->size}}</label>
+                                                                                         <fieldset class="form-group">
+                                                                                             <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}" disabled>
+                                                                                         </fieldset>
+                                                                                     </div>
+                                                                                 @endif
 
-                                                                           @endforeach
-                                                                       </div>
-                                                                   </div>
-                                                               </div>
+                                                                             @endforeach
+                                                                         </div>
+                                                                     </div>
+                                                                 </div>
 
-                                                           </div>
-                                                       @endforeach
-                                                   </div>
+                                                             </div>
+                                                         @endforeach
+                                                     </div>
 
 
-                                               @endif
+                                                 @endif
 
-                                           </div>--}}
+                                             </div>--}}
 
                                     </div>
                                     <div id="" class="card-header border-success">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h3 class="display-inline card-title lead success">Overnight</h3>
-                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                                    <label class="display-inline ml-1"> Default</label>
-                                                    @if($shipper['default_shipping_mode'] == 1)
-                                                        <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" checked data-size="xs" data-switchery="true" disabled>
-                                                    @else
-                                                        <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" data-size="xs" data-switchery="true" disabled>
-                                                    @endif
-                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -162,10 +154,16 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -198,17 +196,27 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local}}" disabled name="on_door_local_charges[{{$index_row}}]">
+                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" disabled name="on_door_local_charges[{{$index_row}}]">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->same_zone}}" disabled name="on_door_same_zone_charges[{{$index_row}}]">
+                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" disabled name="on_door_class_0_charges[{{$index_row}}]">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->different_zone}}" disabled name="on_door_different_zone_charges[{{$index_row}}]">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" disabled name="on_door_class_1_charges[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" disabled name="on_door_class_2_charges[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" disabled name="on_door_class_3_charges[{{$index_row}}]">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -248,12 +256,22 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_different_zone_charges[]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_class_1_charges[]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -304,10 +322,16 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -340,17 +364,27 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local}}" name="on_hub_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_hub_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->same_zone}}" name="on_hub_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_hub_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->different_zone}}" name="on_hub_different_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" name="on_hub_class_1_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" name="on_hub_class_2_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" name="on_hub_class_3_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -391,12 +425,22 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_different_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_1_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -642,15 +686,27 @@
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Same Zone</label>
+                                                        <label class="card-title">National Charges Class A</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_same_zone_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->same_zone !== '')? $returnCharges[1][0]->same_zone : ''}}" {{$on_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Different Zone</label>
+                                                        <label class="card-title">National Charges Class B</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_different_zone_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->different_zone !== '')? $returnCharges[1][0]->different_zone : ''}}" {{$on_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class C</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class D</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                 </div>
@@ -887,14 +943,6 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h3 class="display-inline card-title lead success">Overland</h3>
-                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                                    <label class="display-inline ml-1"> Default</label>
-                                                    @if($shipper['default_shipping_mode'] == 2)
-                                                        <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" checked data-size="xs" data-switchery="true" disabled>
-                                                    @else
-                                                        <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true" disabled>
-                                                    @endif
-                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -947,10 +995,16 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -982,16 +1036,26 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local}}" name="ol_door_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_door_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->same_zone}}" name="ol_door_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_door_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div> <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->different_zone}}" name="ol_door_different_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_door_class_1_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_door_class_2_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_door_class_3_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -1031,11 +1095,21 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_same_zone_charges[0]">
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_0_charges[0]">
                                                                 </fieldset>
                                                             </div> <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_different_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_1_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -1086,10 +1160,16 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -1121,16 +1201,26 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local}}" name="ol_hub_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_hub_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->same_zone}}" name="ol_hub_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_hub_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div> <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->different_zone}}" name="ol_hub_different_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_hub_class_1_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_hub_class_2_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_hub_class_3_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -1170,11 +1260,21 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div> <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_different_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_1_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -1420,15 +1520,27 @@
                                                     </div>
 
                                                     <div class="col text-center">
-                                                        <label class="card-title">Same Zone</label>
+                                                        <label class="card-title">National Charges Class A</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_same_zone_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->same_zone !== '')? $returnCharges[2][0]->same_zone : ''}}" {{$ol_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Different Zone</label>
+                                                        <label class="card-title">National Charges Class B</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_different_zone_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->different_zone !== '')? $returnCharges[2][0]->different_zone : ''}}" {{$ol_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class C</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class D</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                 </div>
@@ -1664,14 +1776,6 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h3 class="display-inline card-title lead success">Detain</h3>
-                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                                    <label class="display-inline ml-1"> Default</label>
-                                                    @if($shipper['default_shipping_mode'] == 3)
-                                                        <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" checked data-size="xs" data-switchery="true" disabled>
-                                                    @else
-                                                        <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true" disabled>
-                                                    @endif
-                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -1724,12 +1828,17 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
                                                         </div>
-
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
+                                                        </div>
                                                         <div class="col-1"></div>
                                                     </div>
                                                     @if(isset($weight[3]))
@@ -1760,20 +1869,29 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local}}" name="detain_door_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_door_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->same_zone}}" name="detain_door_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_door_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->different_zone}}" name="detain_different_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
-
+                                                                    <div class="col">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_door_class_2_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_door_class_3_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
                                                                     <div class="col-1">
 
                                                                     </div>
@@ -1812,12 +1930,22 @@
                                                             </div>
                                                             <div class="col">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_different_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_1_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -1867,10 +1995,16 @@
                                                             <label class="card-title">Flat Charges/KG (Local)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Same-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone A)</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Flat Charges/KG (Different-Zone)</label>
+                                                            <label class="card-title">Flat Charges/KG (National-Zone B)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone C)</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Flat Charges/KG (National-Zone D)</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -1903,17 +2037,27 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local}}" name="detain_hub_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_hub_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->same_zone}}" name="detain_hub_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_hub_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->different_zone}}" name="detain_hub_different_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_hub_class_1_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_hub_class_2_charges[{{$index_row}}]" disabled>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_hub_class_3_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -1956,12 +2100,22 @@
                                                             </div>
                                                             <div class="col">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_different_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_1_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_2_charges[0]" disabled>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_class_3_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -2207,15 +2361,27 @@
                                                     </div>
 
                                                     <div class="col text-center">
-                                                        <label class="card-title">Same Zone</label>
+                                                        <label class="card-title">National Charges Class A</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_same_zone_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->same_zone !== '')? $returnCharges[3][0]->same_zone : ''}}" {{$det_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Different Zone</label>
+                                                        <label class="card-title">National Charges Class B</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_different_zone_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->different_zone !== '')? $returnCharges[3][0]->different_zone : ''}}" {{$det_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class C</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">National Charges Class D</label>
+                                                        <fieldset class="form-group">
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                 </div>
@@ -2451,14 +2617,6 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h3 class="display-inline card-title lead success">Sameday</h3>
-                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                                    <label class="display-inline ml-1"> Default</label>
-                                                    @if($shipper['default_shipping_mode'] == 4)
-                                                        <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" checked data-size="xs" data-switchery="true" disabled>
-                                                    @else
-                                                        <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true" disabled>
-                                                    @endif
-                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -2545,12 +2703,12 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local}}" name="sameday_door_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_door_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->same_zone}}" name="sameday_door_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_door_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -2591,7 +2749,7 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -2672,12 +2830,12 @@
 
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local}}" name="sameday_hub_local_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_hub_local_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col text-center">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->same_zone}}" name="sameday_hub_same_zone_charges[{{$index_row}}]" disabled>
+                                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_hub_class_0_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-1">
@@ -2716,7 +2874,7 @@
                                                             </div>
                                                             <div class="col text-center">
                                                                 <fieldset class="form-group">
-                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_same_zone_charges[0]" disabled>
+                                                                    <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_class_0_charges[0]" disabled>
                                                                 </fieldset>
                                                             </div>
                                                             <div class="col-1">
@@ -2964,7 +3122,7 @@
                                                     <div class="col-md-2 text-center">
                                                         <label class="card-title">National Charges</label>
                                                         <fieldset class="form-group">
-                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_same_zone_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->same_zone !== '')? $returnCharges[4][0]->same_zone : ''}}" {{$same_return_sw}}>
+                                                            <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
                                                         </fieldset>
                                                     </div>
                                                 </div>
@@ -3413,6 +3571,7 @@
                                             </div>
 
                                         </div>
+                                </form>
                             </div>
                         </div>
                         @else
@@ -3430,80 +3589,8 @@
                             </div>
                         @endisset
 
-                        @if($sales_commission)
-                            <div class="row justify-content-center mt-2 mb-2">
-                                <div class="col-3 border border-primary p-1"><b>Total Commission</b></div>
-                                <div class="col-3 border border-primary p-1"><b>{{$sales_commission->commission}}%</b></div>
-
-                                <div class="col-12 mt-1   ">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                        <thead>
-                                        <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">S. No.</th>
-                                            <th class="border-primary border-darken-1">User Name</th>
-                                            <th class="border-primary border-darken-1">Tier</th>
-                                            <th class="border-primary border-darken-1">Commission Percentage</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach($sales_commission->users as $index => $sales_user)
-                                            <tr>
-                                                <td>{{++$index}}</td>
-                                                @if($sales_user->tier_type_id == 1)
-                                                    <td>{{$sales_user->sales_person->name}}</td>
-                                                @else
-                                                    <td>{{$sales_user->sales_person_external->name}}</td>
-                                                @endif
-                                                <td>{{$sales_user->tier->tier_name}}</td>
-                                                <td>{{$sales_user->commission}}%</td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if(count($rate_remarks) > 0)
-                            <div class="row justify-content-center">
-                                <div class="col-6">
-                                    <div class="card">
-                                        <div class="card-header mb-0 pb-0">
-                                            <h3 class="">Remarks</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <table class="table table-stripped table-bordered datatable" style="z-index: 3">
-                                                <thead>
-                                                <tr class="bg-primary white">
-                                                    <th class="border-primary border-darken-1">Remarks</th>
-                                                    <th class="border-primary border-darken-1">Admin</th>
-                                                    <th class="border-primary border-darken-1">Date</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                @foreach($rate_remarks as $remark)
-                                                    <tr>
-                                                        <td>{{$remark->remarks}}</td>
-                                                        <td>{{$remark->admin->name}}</td>
-                                                        <td>{{$remark->created_at}}</td>
-                                                    </tr>
-                                                @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            @endif
-
-                            </form>
-
                     </div>
                 </div>
-                </div>
-                </div>
-
             </section>
 
         @else
@@ -3516,7 +3603,9 @@
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/switch.css')}}">
     <style type="text/css">
         .hide{
             display:none;
@@ -3525,13 +3614,15 @@
 
 
 @endsection
-
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-switch.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/forms/switch.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
                     @isset($wms_user_info->warehousing)
