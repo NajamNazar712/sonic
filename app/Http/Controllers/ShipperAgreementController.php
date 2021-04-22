@@ -689,7 +689,7 @@ otherwise it will be rejected</li>
                     if($return_charges){
                         $return_charges_details .= '<div class="row"><div class="col-6"><table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Charges </strong></thead></table></div></div>';
                         if($rate->shipping_mode_id != 4){
-                            if($corporate_rate_type == 1){
+                            if($corporate_rate_type == 1 || $corporate_rate_type == 3){
                                 $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
                             }
                             else{
@@ -697,7 +697,7 @@ otherwise it will be rejected</li>
                             }
 
 
-                            if($corporate_rate_type == 1){
+                            if($corporate_rate_type == 1 ||  $corporate_rate_type == 3){
                                 $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $return_charges->national_charges_class_3 . '</td></tr>';
                             }
                             else{
