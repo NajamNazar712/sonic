@@ -4609,19 +4609,19 @@ class RiderAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
-            'cv' => ['mimes:png,jpeg,jpg,pdf'],
-            'academic_credentials' => ['mimes:png,jpeg,jpg,pdf'],
-            'cnic' => ['mimes:png,jpeg,jpg,pdf'],
-            'photo' => ['mimes:png,jpeg,jpg,pdf'],
-            'experience_certificates' => ['mimes:png,jpeg,jpg,pdf'],
-            'pay_slip' => ['mimes:png,jpeg,jpg,pdf'],
-            'nikkah_nama' => ['mimes:png,jpeg,jpg,pdf'],
-            'cnic_spouse' => ['mimes:png,jpeg,jpg,pdf'],
-            'bform' => ['mimes:png,jpeg,jpg,pdf'],
-            'cnic_nominee' => ['mimes:png,jpeg,jpg,pdf'],
-            'utility_bill' => ['mimes:png,jpeg,jpg,pdf'],
-            'affidavit' => ['mimes:png,jpeg,jpg,pdf'],
-            'cheque' => ['mimes:png,jpeg,jpg,pdf'],
+            'cv' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'academic_credentials' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'cnic' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'photo' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'experience_certificates' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'pay_slip' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'nikkah_nama' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'cnic_spouse' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'bform' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'cnic_nominee' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'utility_bill' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'affidavit' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
+            'cheque' => ['mimes:png,jpeg,jpg,pdf,doc,docx'],
         ];
         $response = ['status' => 1];
         $message = 'Unknown';
