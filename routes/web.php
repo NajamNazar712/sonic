@@ -2818,6 +2818,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+
+            Route::prefix('rider')->name('rider.')->group(function () {
+                Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');
+                Route::post('permanent', 'Admins\AdminHumanResourseController@employee_directory_make_rider_permanent')->name('permanent');
+                Route::post('blacklist', 'Admins\AdminHumanResourseController@employee_directory_make_rider_blacklist')->name('blacklist');
+                Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_activate')->name('activate');
+                Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_deactivate')->name('deactivate');
+                Route::post('update', 'Admins\AdminHumanResourseController@employee_directory_make_rider_update')->name('update');
+            });
+
         });
 
         Route::prefix('reporting_location')->name('reporting_location.')->group(function () {

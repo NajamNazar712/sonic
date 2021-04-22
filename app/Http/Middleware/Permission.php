@@ -904,6 +904,12 @@ class Permission
             'human_resource.employee_directory.education.update' => 468,
             'human_resource.employee_directory.employment.update' => 468,
             'human_resource.employee_directory.attachments.update' => 468,
+            'human_resource.employee_directory.rider.update' => 98,
+            'human_resource.employee_directory.rider.deactivate' => 99,
+            'human_resource.employee_directory.rider.activate' => 99,
+            'human_resource.employee_directory.rider.incentive' => 381,
+            'human_resource.employee_directory.rider.permanent' => 381,
+            'human_resource.employee_directory.rider.blacklist' => 382,
 
             'human_resource.employee_directory.approve' => 469,
             'human_resource.employee_directory.reject' => 469,

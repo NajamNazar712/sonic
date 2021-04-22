@@ -241,16 +241,6 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Reporting Location</label>
-                                                <select name="reporting_location" id="reporting_location" class="select2 form-control " style="width: 100%">
-                                                    @foreach($reporting_locations as $reporting_location)
-                                                        <option value="{{$reporting_location->id}}">{{$reporting_location->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
