@@ -1146,7 +1146,7 @@ class AdminHumanResourseController extends Controller
                 $photo_array[3] = $directory.'/'.$filename;
             }
 
-            $attachments->photo = implode(',',$cv_array);
+            $attachments->photo = implode(',',$photo_array);
         }
 
 
