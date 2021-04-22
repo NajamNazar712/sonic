@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Invoice;
+use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -2675,4 +2677,107 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Consignee Phone Number #' . $phone_number, 'details' => $details]);
       }
     }
+
+    public function payments(Request $request) {
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })]
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $data = array();
+
+            foreach ($shipments as $shipment){
+
+                $account_type_id = $shipment->user->account_type_id;
+
+                $done_payment_shipments = $shipment->done_payment_shipments;
+
+                if (!$done_payment_shipments->isEmpty()) {
+                    $data[$shipment->tracking_number] = array();
+
+                    foreach ($done_payment_shipments as $done_payment_shipment) {
+                        $details = array();
+
+                        $details['payment_status'] = $done_payment_shipment->done_payment->payment_status->name;
+                        $details['billing_method'] = $shipment->user->account_type->name;
+                        $details['payment_date'] = $done_payment_shipment->done_payment->created_at;
+                        $details['payment_method'] = 'IBFT';
+                        $details['payment_id'] = $done_payment_shipment->done_payment->id;
+                        if($account_type_id == 2){
+                            $details['invoice_ids'] = array();
+                            $details['invoice_ids'] = ShipmentInvoice::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                        }
+                        $data[$shipment->tracking_number][] = $details;
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'payments' => $data]);
+        }
+    }
+
+    public function invoice(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'invoice_id' => ['required', 'integer', 'digits_between:1,20', Rule::exists('invoice', 'id')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })]
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else{
+            $data = array();
+            $invoice = Invoice::find($request->invoice_id);
+            $data['billing_method'] = 'Corporate Invoicing Account';
+            $data['invoice_date'] = $invoice->invoicing_date;
+            $data['shipments'] = array();
+            $invoice_shipments = $invoice->invoice_shipments;
+
+            if(!$invoice_shipments->isEmpty()){
+                foreach ($invoice_shipments as $invoice_shipment){
+                    $shipment = $invoice_shipment->shipment;
+                    $data['shipments'][$shipment->tracking_number] = array();
+                    $data['shipments'][$shipment->tracking_number]['weight_charges'] = $shipment->weight_charges;
+                    $data['shipments'][$shipment->tracking_number]['cash_handling_charges'] = $shipment->cash_handling_charges;
+                    $data['shipments'][$shipment->tracking_number]['insurance_charges'] = $shipment->insurance_charges;
+                    $data['shipments'][$shipment->tracking_number]['return_charges'] = $shipment->return_charges;
+                    $data['shipments'][$shipment->tracking_number]['fuel_surcharge'] = $shipment->fuel_surcharge;
+                    $data['shipments'][$shipment->tracking_number]['replacement_charges'] = $shipment->replacement_charges;
+                    $data['shipments'][$shipment->tracking_number]['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+                    $data['shipments'][$shipment->tracking_number]['intercept_charges'] = $shipment->intercept_charges;
+                    $data['shipments'][$shipment->tracking_number]['osa_charges'] = $shipment->nsa_osa_charges;
+                    $data['shipments'][$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
+                    $data['shipments'][$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
+                    $data['shipments'][$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+
+                }
+            }
+            return response()->json(['status' => 0, 'payments' => $data]);
+
+        }
+    }
+
+
 }
