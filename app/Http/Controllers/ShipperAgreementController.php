@@ -486,7 +486,7 @@ otherwise it will be rejected</li>
 
                     if($weight_charges){
                         $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                        if($shipper->account_type_id == 2){
+                        if($shipper->account_type_id == 2 && $corporate_rate_type != 3 ){
                             if($corporate_rate_type != 3){
                                 $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
 
@@ -590,12 +590,12 @@ otherwise it will be rejected</li>
 
 
                         }
-                        if($shipper->account_type_id == 1) {
+                        if($shipper->account_type_id == 1 || $corporate_rate_type == 3) {
                             if($rate->shipping_mode_id != 4){
                                 $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Local Charges</th><th>National Charges Class A</th><th>National Charges Class B</th><th>National Charges Class C</th><th>National Charges Class D</th></tr></thead><tbody>';
 
                                 foreach ($weight_charges as $weight_charge) {
-                                    if ($shipper->account_type_id == 1) {
+                                    if ($shipper->account_type_id == 1 || $corporate_rate_type == 3) {
                                         $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->spkg . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
                                     }
                                 }
