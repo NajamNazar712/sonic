@@ -31,6 +31,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Yajra\Datatables\Datatables;
 
 class RetailShipmentBookController extends Controller
 {
@@ -284,6 +285,7 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_cnic = $request->shipper_cnic;
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
+            $shipper_info->save();
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
@@ -573,10 +575,10 @@ class RetailShipmentBookController extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
-            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
-            if(!file_exists($url)){
-                $this::save_slip($shipment->id);
-            }
+//            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
+//            if(!file_exists($url)){
+//                $this::save_slip($shipment->id);
+//            }
                     $slip = '
                       <div class="position-relative">
                         <table class="table table-sm table-bordered border twice">
@@ -1376,5 +1378,39 @@ class RetailShipmentBookController extends Controller
             $slip_image = $html;
             $slip_image .= '</div></body></html>';
             SnappyImage::loadHTML($slip_image)->save('storage/retail/shipment_'. $shipment->id.'.jpg');
+    }
+
+    public function tracking_slip_index(){
+        return view('retail.shipment.tracking_slip');
+    }
+
+    public function tracking_slip_list(Request $request){
+        $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
+            ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.slip_image')
+        ->orderBy('retail_Shipments.created_at', 'desc');
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('retail.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('slip_image', function ($data) {
+                if ($data->slip_image != null) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/retail_slip/' . $data->slip_image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+                else {
+                    return '';
+                }
+            })
+            ->addColumn('action', function ($runner_details){
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Upload Slip</div></button>';
+
+                return $dropdown;
+            });
+        return  $datatable->make(true);
     }
 }

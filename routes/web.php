@@ -2882,6 +2882,12 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
+        Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@tracking_slip_index')->name('index');
+            Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
+            Route::post('/shipments', 'Retail\RetailShipmentBookController@shipments')->name('shipments');
+            Route::post('print','Retail\RetailShipmentBookController@print')->name('print');
+        });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         Route::get('', 'Retail\RetailCashDepositController@index')->name('index');
