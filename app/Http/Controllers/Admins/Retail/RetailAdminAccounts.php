@@ -94,8 +94,7 @@ class RetailAdminAccounts extends Controller
                 $details['bank_name'] = $retail_shipper_info->bank->name;
             }
             $image = '';
-            $exists = Storage::disk('public')->exists('retail_shipper_cheque/'. $retail_shipper_info->cheque_image);
-            if($exists){
+            if($retail_shipper_info->cheque_image != null){
                 $image .= '<div class="text-center" id="picture_div"><a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url('retail_shipper_cheque/'. $retail_shipper_info->cheque_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle"> Cheque Image</span></a></div>';
                 $details['image'] = $image;
             }
