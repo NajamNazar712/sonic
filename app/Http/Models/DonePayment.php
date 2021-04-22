@@ -21,4 +21,7 @@ class DonePayment extends Model
 	public function company_bank() {
 		return $this->belongsTo('App\Http\Models\BanksList', 'company_bank_id', 'id');
 	}
+    public function payment_status() {
+        return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'status', 'id');
+    }
 }
