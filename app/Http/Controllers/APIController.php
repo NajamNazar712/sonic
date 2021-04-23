@@ -419,7 +419,7 @@ class APIController extends Controller
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 })],
-                'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
+
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
                 'consignee_name' => ['required', 'between:1,100'],
@@ -431,9 +431,7 @@ class APIController extends Controller
                 'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
@@ -468,6 +466,18 @@ class APIController extends Controller
                 'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
         }
+         if($user_type['corporate_rate_type_id'] == 3){
+             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                 $query->where('user_id', $user_id)->where('status', 1);
+             })];
+         }
+         else{
+             $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
+             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                 $query->where('user_id', $user_id)->where('status', 1);
+             })];
+         }
+
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if($shipment_pre_book->exists()){
@@ -781,6 +791,10 @@ class APIController extends Controller
                 $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
             }
             else {
+
+                if($user_type['corporate_rate_type_id'] == 3){
+                    $delivery_type_id = 1;
+                }
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges);
             }
 

@@ -16,6 +16,13 @@ use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateDiscountCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateInsuranceCharge;
@@ -1065,38 +1072,74 @@ class ShipperDashboardController extends Controller
             }
             return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks]);
         }
-        else{
-            $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
-            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
-            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
-            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
-            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
-            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
-            $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
+        else {
+            if ($user->corporate_rate_type_id != 3) {
+                $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+                $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+                $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+                $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+                $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+                $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+                $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+                $storage_types = WmsStorageType::all()->where('status', 1);
+                $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+                $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
 
-            $packaging = PackagingCharge::all()->where('user_id', $id);
-            $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-            $packaging_charges = array();
-            if(count($packaging) > 0){
+                $packaging = PackagingCharge::all()->where('user_id', $id);
+                $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+                $packaging_charges = array();
+                if (count($packaging) > 0) {
 
-                foreach($packaging as $charge){
-                    $packaging_charges[$charge->type_id][] = $charge;
+                    foreach ($packaging as $charge) {
+                        $packaging_charges[$charge->type_id][] = $charge;
+                    }
                 }
-            }
                 return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+
+            } else {
+                $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $weight = CorporateDefaultWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $cash = CorporateDefaultCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $insurance = CorporateDefaultInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $return = CorporateDefaultReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $fuel = CorporateDefaultFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
+                $packaging = PackagingCharge::all()->where('user_id', $id);
+                $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
+                $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+                $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+                $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+                $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+                $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+                $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+                $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+                $storage_types = WmsStorageType::all()->where('status', 1);
+                $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+                $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+                $packaging_charges = array();
+                if (count($packaging) > 0) {
+
+                    foreach ($packaging as $charge) {
+                        $packaging_charges[$charge->type_id][] = $charge;
+                    }
+                }
+                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks]);
+
+            }
         }
+
     }
 
 //    public function statistics_search(Request $request){

@@ -571,7 +571,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
     Route::prefix('corporate')->name('corporate.')->group(function (){
-        Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
+        Route::get('{id}/add/rates/{rate_type_id?}','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
         Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
@@ -581,6 +581,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('zone_wise')->name('zone_wise.')->group(function (){
             Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_zone_wise_submit')->name('add.rates');
             Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_zone_wise_submit')->name('edit.rates');
+        });
+        Route::prefix('default')->name('default.')->group(function (){
+            Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_default_submit')->name('add.rates');
+            Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_default')->name('edit.rates');
+            Route::get('{id}/edit/rates/view','Admins\AdminCorporateAccountsController@edit_rates_default')->name('view.rates');
+            Route::put('{id}/edit/rates/update','Admins\AdminCorporateAccountsController@edit_rates_default_submit')->name('edit.rates.submit');
+            Route::post('check/corporate_rate_type','Admins\AdminCorporateAccountsController@check_corporate_rate_type')->name('rate_type');
+            Route::post('{id}/add/rates/submit','Admins\AdminCorporateAccountsController@change_corporate_rate_type')->name('change_rate_type');
+            Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@default_view_rates_index')->name('rates.view');
         });
     });
     //ajax request

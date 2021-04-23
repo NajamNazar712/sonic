@@ -19,11 +19,11 @@
 
 
                     <div class="card-content">
-                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.corporate.zone_wise.add.rates',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
+                        <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                             @csrf
 
                             <div class="card">
-
+                                <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
                                {{-- <div class="">
                                     @if(count($packaging_material_types) > 0)
 
@@ -2299,6 +2299,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var rate_type = $('#corporate_type_id').val();
+            console.log(rate_type);
+
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
             });
@@ -2528,6 +2531,23 @@
 
                 }
             });
+            var shipper = @json($shipper->id);
+
+            if(rate_type !== null && rate_type != '' ){
+                console.log(1);
+                var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+
+            }
+            else{
+                console.log(2);
+                var route = '{!! route('admin.corporate.zone_wise.add.rates', ':id') !!}';
+                route = route.replace(':id', shipper);
+                $("#ratesAdditionForm").attr('action', route);
+            }
+
+
         });
 
 
@@ -2802,7 +2822,7 @@
         var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
-        var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
+        // var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
 
         //Overland
 
@@ -2981,35 +3001,35 @@
             }
         };
 
-        packagingChargesSwitch.onchange = function () {
-            if(packagingChargesSwitch.checked === true){
-                $('#packaging_material_charges_div').slideDown('slow');
-                $('.packaging-charges-div').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitch.checked === false){
-                $('#packaging_material_charges_div').slideUp('slow');
-                $('.packaging-charges-div').find('input').prop('disabled',true);
+        // packagingChargesSwitch.onchange = function () {
+        //     if(packagingChargesSwitch.checked === true){
+        //         $('#packaging_material_charges_div').slideDown('slow');
+        //         $('.packaging-charges-div').find('input').prop('disabled',false);
+        //     }else if(packagingChargesSwitch.checked === false){
+        //         $('#packaging_material_charges_div').slideUp('slow');
+        //         $('.packaging-charges-div').find('input').prop('disabled',true);
+        //
+        //     }
+        // };
 
-            }
-        };
+{{--        @if(count($packaging_material_types) > 0)--}}
+{{--            @foreach($packaging_material_types as $index => $type)--}}
+{{--                var PackageSwitch = [];--}}
+{{--                var type_id_{{$index}} = '{{$type->id}}';--}}
+{{--                var type_id = '{{$type->id}}';--}}
+{{--                PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);--}}
+{{--                PackageSwitch[type_id].onchange = function () {--}}
 
-        @if(count($packaging_material_types) > 0)
-            @foreach($packaging_material_types as $index => $type)
-                var PackageSwitch = [];
-                var type_id_{{$index}} = '{{$type->id}}';
-                var type_id = '{{$type->id}}';
-                PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);
-                PackageSwitch[type_id].onchange = function () {
+{{--                    if ($(this).is(':checked') === true) {--}}
+{{--                        $('#package_type_'+type_id_{{$index}}).slideDown('slow');--}}
 
-                    if ($(this).is(':checked') === true) {
-                        $('#package_type_'+type_id_{{$index}}).slideDown('slow');
+{{--                    } else if ($(this).is(':checked') === false) {--}}
+{{--                        $('#package_type_'+type_id_{{$index}}).slideUp('slow');--}}
 
-                    } else if ($(this).is(':checked') === false) {
-                        $('#package_type_'+type_id_{{$index}}).slideUp('slow');
-
-                    }
-                };
-            @endforeach
-        @endif
+{{--                    }--}}
+{{--                };--}}
+{{--            @endforeach--}}
+{{--        @endif--}}
         //overland end
         //detain
         //var weightAdditionDetain = document.querySelector('.switchery.weightAdditionDetain0');
@@ -3844,7 +3864,6 @@
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
         var detainSwitch = document.querySelector('.switchery.detain-main-switch');
         var samedaySwitch = document.querySelector('.switchery.sameday-main-switch');
-
 
         $( "#ratesAdditionForm" ).validate({
             errorClass:"danger",
