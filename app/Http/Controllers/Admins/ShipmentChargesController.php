@@ -256,7 +256,7 @@ class ShipmentChargesController extends Controller
                             $charges = $weight_charge->local;
                         }
                     } else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
@@ -298,7 +298,7 @@ class ShipmentChargesController extends Controller
 
                     }
 
-                    if ($account_type_id == 2) {
+                    if ($account_type_id == 2 || $rate_type_id != 3) {
                         if ($base) {
                             $weight_difference = $weight - $base_weight_charge->range_down;
 
@@ -1460,7 +1460,7 @@ class ShipmentChargesController extends Controller
 
                 if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
                     if ($type_of_charges == 0) {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = $weight_charge->local_or_6hr;
                         }
                         else{
@@ -1542,7 +1542,7 @@ class ShipmentChargesController extends Controller
                     $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
                     if ($type_of_charges == 0) {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = ($weight_charge->local_or_6hr * $multiplier);
                         }
                         else{
