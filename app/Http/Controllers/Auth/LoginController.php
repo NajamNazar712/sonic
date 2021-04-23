@@ -230,6 +230,7 @@ class LoginController extends Controller
                     session(['rate_status' => TRUE]);
                 }
             }
+            session(['rate_type_id' => $rate_type_id]);
 
         }
         $international_rate_status = InternationalUsersInformation::where('user_id', $shipper_user_id)->where('status', 1);

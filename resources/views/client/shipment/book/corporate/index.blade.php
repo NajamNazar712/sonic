@@ -115,13 +115,15 @@
                                             <select name="consignee_info" class="select2" id="consignee_info">
                                             </select>
                                         </div>
-                                        <div id="delivery_type_div" class="form-group">
-                                            <select name="delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
-                                                @foreach($delivery_type as $delivery)
-                                                    <option value="{{ $delivery->id }}">{{ $delivery->delivery_type }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                        @if(Session('rate_type_id') != 3 )
+                                            <div id="delivery_type_div" class="form-group">
+                                                <select name="delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
+                                                    @foreach($delivery_type as $delivery)
+                                                        <option value="{{ $delivery->id }}">{{ $delivery->delivery_type }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
 
                                         <div class="form-group">
                                             <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
@@ -530,8 +532,8 @@
 
                         $('#shipping_same-day').addClass('d-none');
                     }
-
                     $('#shipping_mode option[value="4"]').attr('disabled', 'disabled');
+
                 }
                 else {
                     $('#shipping_mode option[value="4"]').removeAttr('disabled');

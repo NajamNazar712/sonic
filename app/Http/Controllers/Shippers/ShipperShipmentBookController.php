@@ -13,6 +13,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
+use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
@@ -2690,9 +2691,11 @@ class ShipperShipmentBookController extends Controller
                     $substitute_user_shipment->save();
                 }
                 if(Session::has('prefix')){
+
                     $tracking_number = $this->generate_prefix_tracking_number($shipment_id, $request->order_id);
                 }
                 else{
+                    
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 }
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
@@ -3299,8 +3302,16 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_shipping_modes(Request $request) {
-        $shipper_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1);
-        $user = User::where('id',session('user_id'))->first();
+        $corporate_rate_type_id = User::find(session('user_id'))->corporate_rate_type_id;
+        if($corporate_rate_type_id != 3){
+            $shipper_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1);
+            $user = User::where('id',session('user_id'))->first();
+        }
+        else{
+            $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', session('user_id'))->where('status', 1);
+            $user = User::where('id',session('user_id'))->first();
+        }
+
 
         if ($shipper_shipping_modes->exists()) {
             $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
