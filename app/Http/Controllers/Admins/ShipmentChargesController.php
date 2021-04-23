@@ -1053,7 +1053,8 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    if($rate_type_id == 3){ $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);}
+                    if($rate_type_id == 3){
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);}
                     else{
                         $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                     }
@@ -1120,7 +1121,7 @@ class ShipmentChargesController extends Controller
                         $charges = $return_charge->local;
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
@@ -1429,7 +1430,7 @@ class ShipmentChargesController extends Controller
                     else {
                         $type_of_charges = 1;
 
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
 
                             if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
@@ -1467,7 +1468,7 @@ class ShipmentChargesController extends Controller
                         }
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
@@ -1549,7 +1550,7 @@ class ShipmentChargesController extends Controller
                         }
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
