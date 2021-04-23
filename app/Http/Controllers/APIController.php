@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\DonePayment;
 use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceShipment;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\CorporateDeliveryTypeStatus;
@@ -2745,7 +2746,7 @@ class APIController extends Controller
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
                         if($account_type_id == 2){
                             $details['invoice_ids'] = array();
-                            $details['invoice_ids'] = ShipmentInvoice::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
                         }
                         $data[$shipment->tracking_number][] = $details;
                     }
