@@ -2727,7 +2727,18 @@ class APIController extends Controller
                     foreach ($done_payment_shipments as $done_payment_shipment) {
                         $details = array();
 
-                        $details['payment_status'] = $done_payment_shipment->done_payment->payment_status->name;
+                        if($done_payment_shipment->done_payment->status == 0){
+                            $details['payment_status'] = 'Processed';
+                        }
+                        else if($done_payment_shipment->done_payment->status == 1){
+                            $details['payment_status'] = 'Paid';
+                        }
+                        else if($done_payment_shipment->done_payment->status == 2){
+                            $details['payment_status'] = 'Reverted';
+                        }
+                        else{
+                            $details['payment_status'] = 'Unknown';
+                        }
                         $details['billing_method'] = $shipment->user->account_type->name;
                         $details['payment_date'] = $done_payment_shipment->done_payment->created_at;
                         $details['payment_method'] = 'IBFT';
