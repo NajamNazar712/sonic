@@ -2801,6 +2801,7 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
                             $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
                             $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $invoice_shipment->charges : 0);
                             $details[$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
