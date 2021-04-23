@@ -69,7 +69,7 @@ Route::name('api.')->group(function () {
 
 		Route::post('payments', 'APIController@payments')->name('payments');
 
-		Route::get('invoice', 'APIController@invoice')->name('invoice');
+		Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
 	});
