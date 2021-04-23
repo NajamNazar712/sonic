@@ -209,7 +209,6 @@ class ShipperShipmentBookController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
-
         $shipment->tracking_number = $tracking_number;
 
         $shipment->save();
@@ -1787,7 +1786,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_store(Request $request) {
-//        return $request;
+//         dd($request);
         $user_id = session('user_id');
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
             if ($value) {
@@ -2052,6 +2051,7 @@ class ShipperShipmentBookController extends Controller
                     $rows[] = $row;
                 }
                 $service_type_check_id = $request->service_type_check_id;
+
             }
 
             $errors = array();
@@ -2396,6 +2396,7 @@ class ShipperShipmentBookController extends Controller
                     foreach ($cities as $city) {
                         $city_name[$city->name] = $city->name;
                     }
+
                     return view('client.shipment.book.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id]);
                 }
         }
@@ -3258,6 +3259,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_excel_index() {
+
         $booking_types = BookingType::whereNotIn('id',[4])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
@@ -3274,9 +3276,14 @@ class ShipperShipmentBookController extends Controller
         $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
         $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
 
-        $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
-
+        if(session('rate_type_id') !=3){
+            $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+        }
+        else{
+            $user_shipping_modes = CorporateDefaultRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+        }
         $shipping_modes = ShippingMode::whereIn('id', $user_shipping_modes)->get();
+
 
         if (in_array(4, $user_shipping_modes)) {
             $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
@@ -3344,7 +3351,10 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_excel_store(Request $request) {
+
         $user_id = session('user_id');
+        $rate_type_id = session('rate_type_id');
+
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
             if ($value) {
                 $value = $this->phone_number($value);
@@ -3634,6 +3644,7 @@ class ShipperShipmentBookController extends Controller
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
+
                 if (!isset($row['charges_mode_id'])) {
                   $rows[$key]['charges_mode_id'] = 3;
                 }
@@ -3655,8 +3666,14 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
 
+
                 if(!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null){
                     $row['pieces_quantity'] = 1;
+                }
+                if($rate_type_id == 3){
+                    if(!isset($row['delivery_type_id']) || $row['delivery_type_id'] == null){
+                        $row['delivery_type_id'] = 1;
+                    }
                 }
 
                 $rows[$key]['pieces_quantity'] = $row['pieces_quantity'];
@@ -3712,7 +3729,7 @@ class ShipperShipmentBookController extends Controller
 
 //                        dd($errors[$row_id]['amount']);
                     if($service_type_check_id != 5){
-                        if($row['delivery_type_id'] == 2){
+                        if($row['delivery_type_id'] == 2){ 
                             $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
                             if($allowed_delivery_type->exists()){
                                 $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
@@ -3966,7 +3983,13 @@ class ShipperShipmentBookController extends Controller
                 $delivery_types = DeliveryType::pluck('delivery_type','id');;
                 $charges_modes = ChargesModes::whereIn('id' , [2, 3])->pluck('charges_mode','id');
 
-                $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+                if(session('rate_type_id') != 3){
+
+                    $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+                }
+                else{
+                    $user_shipping_modes = CorporateDefaultRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+                }
 
                 $shipping_modes = ShippingMode::whereIn('id', $user_shipping_modes)->pluck('mode','id');
 
