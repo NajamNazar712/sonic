@@ -130,7 +130,8 @@
                                         </tbody>
                                     </table>
 
-                                    <table class="table table-bordered">
+                                    @if(session('rate_type_id') != 3){
+                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
                                             <th colspan="2" class="border-primary border-darken-1">Delivery Types</th>
@@ -149,6 +150,7 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    @endif
 
                                     <table class="table table-bordered">
                                         <thead>
@@ -302,7 +304,8 @@
                                         </tbody>
                                     </table>
 
-                                    <table class="table table-bordered">
+                                    @if(session('rate_type_id') != 3){
+                                        <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
                                             <th colspan="3" class="border-primary border-darken-1">Minimum Chargeable Weight</th>
@@ -323,6 +326,7 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    @endif
 
                                     <table class="table table-bordered">
                                         <thead>
