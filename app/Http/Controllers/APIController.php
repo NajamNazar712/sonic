@@ -2741,8 +2741,18 @@ class APIController extends Controller
                             $details['payment_status'] = 'Unknown';
                         }
                         $details['billing_method'] = $shipment->user->account_type->name;
-                        $details['payment_date'] = $done_payment_shipment->done_payment->created_at;
+                        $details['payment_date'] = Carbon::parse($done_payment_shipment->done_payment->created_at)->toDateTimeString();
                         $details['payment_method'] = 'IBFT';
+                        $details['payment_type'] = $done_payment_shipment->type;
+                        if ($done_payment_shipment->type == 0) {
+                            $details['payment_type'] = 'Delivered';
+                        }
+                        else if ($done_payment_shipment->type == 1) {
+                            $details['payment_type'] = 'Returned';
+                        }
+                        else {
+                            $details['payment_type'] = 'Adjusted';
+                        }
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
                         if($account_type_id == 2){
                             $details['invoice_ids'] = array();
@@ -2784,7 +2794,7 @@ class APIController extends Controller
                     $invoice = $invoice->first();
                     $account_type_id = $invoice->shipper->account_type_id;
                     $data['billing_method'] = 'Corporate Invoicing Account';
-                    $data['invoice_date'] = $invoice->invoicing_date;
+                    $data['invoice_date'] = Carbon::parse($invoice->invoicing_date)->toDateTimeString();;
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
@@ -2823,7 +2833,7 @@ class APIController extends Controller
                     $done_payment = $done_payment->first();
                     $account_type_id = $done_payment->shipper->account_type_id;
                     $data['billing_method'] = $done_payment->shipper->account_type->name;
-                    $data['invoice_date'] = $done_payment->created_at;
+                    $data['invoice_date'] = Carbon::parse($done_payment->created_at)->toDateTimeString();;
                     $data['shipments'] = array();
                     $done_payment_shipments = $done_payment->done_payment_shipments;
 
