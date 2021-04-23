@@ -298,7 +298,7 @@ class ShipmentChargesController extends Controller
 
                     }
 
-                    if ($account_type_id == 2 || $rate_type_id != 3) {
+                    if ($account_type_id == 2 && $rate_type_id != 3) {
                         if ($base) {
                             $weight_difference = $weight - $base_weight_charge->range_down;
 
