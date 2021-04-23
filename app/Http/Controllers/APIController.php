@@ -2792,7 +2792,6 @@ class APIController extends Controller
                         foreach ($invoice_shipments as $invoice_shipment){
                             $shipment = $invoice_shipment->shipment;
                             $details = array();
-                            $details[$shipment->tracking_number] = $invoice_shipment->shipment->tracking_number;
                             $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
