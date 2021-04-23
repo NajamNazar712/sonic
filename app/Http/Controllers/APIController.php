@@ -2792,16 +2792,16 @@ class APIController extends Controller
                         foreach ($invoice_shipments as $invoice_shipment){
                             $shipment = $invoice_shipment->shipment;
                             $details = array();
-                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
-                            $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
-                            $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
-                            $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
-                            $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
-                            $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
-                            $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
-                            $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
-                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $invoice_shipment->charges : 0);
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0);
                             $details[$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
