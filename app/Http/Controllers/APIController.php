@@ -2802,6 +2802,15 @@ class APIController extends Controller
                         foreach ($invoice_shipments as $invoice_shipment){
                             $shipment = $invoice_shipment->shipment;
                             $details = array();
+                            if ($invoice_shipment->type == 0) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
+                            }
+                            else if ($invoice_shipment->type == 1) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Returned';
+                            }
+                            else {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
+                            }
                             $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
@@ -2840,20 +2849,31 @@ class APIController extends Controller
                     if(!$done_payment_shipments->isEmpty()){
                         foreach ($done_payment_shipments as $done_payment_shipment){
                             $shipment = $done_payment_shipment->shipment;
-                            $data['shipments'][$shipment->tracking_number] = array();
-                            $data['shipments'][$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
-                            $data['shipments'][$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $done_payment_shipment->charges : 0);
-                            $data['shipments'][$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
-                            $data['shipments'][$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
-                            $data['shipments'][$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+                            $details = array();
+                            if ($done_payment_shipment->type == 0) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
+                            }
+                            else if ($done_payment_shipment->type == 1) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Returned';
+                            }
+                            else {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
+                            }
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $done_payment_shipment->charges : 0);
+                            $details[$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
+                            $details[$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
+                            $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+                            $data['shipments'][] = $details;
+
 
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
