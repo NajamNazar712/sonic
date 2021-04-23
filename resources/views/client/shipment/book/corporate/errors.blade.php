@@ -523,6 +523,11 @@
                 width: '100%',
                 placeholder: 'Charges Mode'
             });
+
+            @if(session('rate_type_id') == 3)
+              $('.delivery_type_id').val(1);
+            @endif
+
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');

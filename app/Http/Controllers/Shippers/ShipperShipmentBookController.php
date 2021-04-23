@@ -3276,7 +3276,7 @@ class ShipperShipmentBookController extends Controller
         $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
         $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
 
-        if(session('rate_type_id') !=3){
+        if(session('rate_type_id') != 3){
             $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
         }
         else{
@@ -3605,6 +3605,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $rows[] = $row;
+                   // dd($rows);
                 }
 
                 unset($spreadsheet);
@@ -3969,6 +3970,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
+
                 if($user_id == 5982){
                     $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 }
@@ -3980,7 +3982,12 @@ class ShipperShipmentBookController extends Controller
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
                 })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
                 $products = Product::pluck('product_name','id');
-                $delivery_types = DeliveryType::pluck('delivery_type','id');;
+                if($rate_type_id != 3){
+                    $delivery_types = DeliveryType::pluck('delivery_type','id');
+                }
+                else{
+                    $delivery_types = DeliveryType::where('id',1)->pluck('delivery_type','id');
+                }
                 $charges_modes = ChargesModes::whereIn('id' , [2, 3])->pluck('charges_mode','id');
 
                 if(session('rate_type_id') != 3){
@@ -4005,6 +4012,7 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
+
                 return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
             }
         }
