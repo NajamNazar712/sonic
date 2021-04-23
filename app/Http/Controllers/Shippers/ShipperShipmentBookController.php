@@ -3522,9 +3522,7 @@ class ShipperShipmentBookController extends Controller
 
             'special_instructions' => ['nullable', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-            'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id)->where('status', 1);
-            })],
+
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
@@ -3537,7 +3535,17 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-        ];
+        ]          ;
+            if($rate_type_id == 3){
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
+            else{
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
 //        $form= $request->shipments;
 //        dd($form);
         if($file = $request->file('shipments')) {

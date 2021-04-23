@@ -426,9 +426,7 @@ class APIController extends Controller
                 'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
@@ -463,6 +461,17 @@ class APIController extends Controller
                 'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
         }
+         if($user_type['corporate_account_type_id'] == 3){
+             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                 $query->where('user_id', $user_id)->where('status', 1);
+             })];
+         }
+         else{
+             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                 $query->where('user_id', $user_id)->where('status', 1);
+             })];
+         }
+
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if($shipment_pre_book->exists()){
