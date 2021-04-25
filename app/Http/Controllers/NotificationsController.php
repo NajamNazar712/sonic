@@ -3491,8 +3491,9 @@ class NotificationsController extends Controller
 
                     $to = 'uzair.anees@trax.pk';
                     $cc = ['shahbaz.abbasi@trax.pk'];
+                    $bcc = ['muhammad.yousuf@trax.pk'];
 
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 47) {
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
