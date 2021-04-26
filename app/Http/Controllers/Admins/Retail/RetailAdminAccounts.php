@@ -299,7 +299,7 @@ class RetailAdminAccounts extends Controller
                             <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
                             <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
                             <td colspan="1" class="color primary border"><strong>Bank</strong></td>
-                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . (($shipment->retail->shipper->bank_id != null) ? $shipment->retail->shipper->bank->name : '') . '</strong></td>
                           </tr>
                 ';
 
