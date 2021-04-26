@@ -1996,8 +1996,7 @@ class RiderAPIController extends Controller
             if ($validate->fails()) {
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
-            }
-            else {
+            } else {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic'));
 
@@ -3295,7 +3294,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_pickups->exists()) {
-                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.id','DESC')->get();
+                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.id', 'DESC')->get();
                 return response()->json(["status" => 0, "pickups" => $rider_pickups]);
             } else {
                 return response()->json(["status" => 1, "message" => "No pickups found!"]);
@@ -3400,7 +3399,7 @@ class RiderAPIController extends Controller
                     $delivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->where('update_type', 1)->count();
                     $return_history = array();
                     $return_history['return_note_id'] = $rider_return_delivery->return_note_id;
-                    $return_history['total_shipments'] = $delivered_shipments+$undelivered_shipments;
+                    $return_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
                     $return_history['delivered_shipments'] = $delivered_shipments;
                     $return_history['undelivered_shipments'] = $undelivered_shipments;
                     $rider_return_history[] = $return_history;
@@ -3740,7 +3739,7 @@ class RiderAPIController extends Controller
                             ->where('shipper_status_id', $request->shipper_status_id)
                             ->where('status_reason_id', $request->status_reason_id)
                             ->where('rider_id', $rider_id);
-                        if (!$shipments->exists()){
+                        if (!$shipments->exists()) {
                             $shipment = Shipment::find($request->shipment_id);
                             $shipper_data = $shipment->user;
                             $pickup_address = $shipment->pickup_address;
@@ -3856,8 +3855,7 @@ class RiderAPIController extends Controller
                             }
                             $message = 'Shipment is marked as Undelivered Successfully';
                         }
-                    }
-                    else {
+                    } else {
                         $message = 'Shipment is already marked as Undelivered';
                     }
                 } else {
@@ -4201,7 +4199,8 @@ class RiderAPIController extends Controller
 
     public function rider_profile(Request $request)
     {
-        $rider_id = $request->rider_id;        $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
+        $rider_id = $request->rider_id;
+        $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('cities as c', 'c.id', '=', 'riders.city_id')
             ->join('cities as h', 'h.id', '=', 'c.hub_id')
             ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category')
@@ -4235,7 +4234,7 @@ class RiderAPIController extends Controller
             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                 ->join('riders as r', 'e.id', 'r.employee_id')
                 ->where('r.id', $rider_id);
-            if($reporting_location->exists()){
+            if ($reporting_location->exists()) {
                 $reporting_location = $reporting_location->first();
                 $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
@@ -4361,13 +4360,13 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function rider_ticker_images(Request $request){
+    public function rider_ticker_images(Request $request)
+    {
         $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
-        if($rider_ticker_images->exists()){
+        if ($rider_ticker_images->exists()) {
             $rider_ticker_images = $rider_ticker_images->get();
             return response()->json(['status' => 0, 'images' => $rider_ticker_images]);
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'message' => 'No Images Found']);
         }
     }
@@ -4891,7 +4890,8 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function notification_history(Request $request){
+    public function notification_history(Request $request)
+    {
         $rider_id = $request->rider_id;
         $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
         $to_date = Carbon::now()->format('Y-m-d 23:59:59');
@@ -4900,7 +4900,7 @@ class RiderAPIController extends Controller
             ->where('employee_type_id', 2)
             ->whereBetween('created_at', [$from_date, $to_date])
             ->orderBy('created_at', 'desc');
-        if($notifiction_history->exists()){
+        if ($notifiction_history->exists()) {
             $notifiction_history = $notifiction_history->get();
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
@@ -5073,6 +5073,74 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
 
+        }
+    }
+
+    public function validate_cnic_phone_number(Request $request)
+    {
+        $rules = [
+            'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            $employee = Employee::where('employee_type_id', 2)
+                ->where('phone_number', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            $rider = Rider::where('phone', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            //Check RiderRequest Already Exist
+            if ($rider_request->exists()) {
+                $rider_request = $rider_request->first();
+                if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($rider_request->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            } //Check Employee Already Exist
+            else if ($employee->exists()) {
+                $employee = $employee->first();
+                if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($employee->phone_number == $request->input('phone_number')) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($employee->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            } //Check Rider Already Exist
+            else if ($rider->exists()) {
+                $rider = $rider->first();
+                if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($rider->phone == $request->phone_number) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($rider->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            }
+            return response()->json(['status' => 0, 'message' => 'Success']);
         }
     }
 

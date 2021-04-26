@@ -122,7 +122,6 @@ class AdminAPIController extends Controller
         }
     }
 
-
     public function return_note_details(Request $request){
         $admin_id = $request->admin_id;
         $return_note_id = $request->return_note_id;
@@ -837,5 +836,72 @@ class AdminAPIController extends Controller
         return response()->json($response);
     }
 
+    public function validate_cnic_phone_number(Request $request)
+    {
+        $rules = [
+            //Employees
+            'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::where('phone_number', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            $employee = Employee::where('employee_type_id', 1)
+                ->where('phone_number', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
+                ->orWhere('cnic', $request->input('cnic_no'));
+
+            //Check Admin Already Exist
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($admin->phone_number == $request->input('phone_number')) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($admin->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            } //Check Employee Already Exist
+            else if ($employee->exists()) {
+                $employee = $employee->first();
+                if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($employee->phone_number == $request->input('phone_number')) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($employee->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            } //Check User Request Already Exist
+            else if ($user_request->exists()) {
+                $user_request = $user_request->first();
+                if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                    $message = "Phone Number & CNIC Already Exists";
+
+                } else if ($user_request->phone_number == $request->input('phone_number')) {
+                    $message = "Phone Number Already Exist";
+
+                } else if ($user_request->cnic == $request->input('cnic_no')) {
+                    $message = "CNIC Already Exist";
+                }
+                return response()->json(['status' => 1, 'message' => $message]);
+            }
+            return response()->json(['status' => 0, 'message' => 'Success']);
+        }
+    }
 
 }
