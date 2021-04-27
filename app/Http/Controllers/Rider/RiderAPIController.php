@@ -5158,7 +5158,6 @@ class RiderAPIController extends Controller
             'academic_3' => 'mimes:pdf,png,jpeg,jpg',
             'academic_4' => 'mimes:pdf,png,jpeg,jpg',
             'cnic_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_1' => 'mimes:pdf,png,jpeg,jpg',
             'cnic_2' => 'mimes:pdf,png,jpeg,jpg',
             'cnic_3' => 'mimes:pdf,png,jpeg,jpg',
             'cnic_4' => 'mimes:pdf,png,jpeg,jpg',
@@ -5261,28 +5260,28 @@ class RiderAPIController extends Controller
                     }
                 }
                 if ($request->hasFile('cv_1')) {
-                    $file = $request->file('cv_1');
+                    $file = file_get_contents($request->cv_1);
                     $filename = 'cv_1_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[0] = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_2')) {
-                    $file = $request->file('cv_2');
+                    $file = file_get_contents($request->cv_2);
                     $filename = 'cv_2_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[1] = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_3')) {
-                    $file = $request->file('cv_3');
+                    $file = file_get_contents($request->cv_3);
                     $filename = 'cv_3_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[2] = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_4')) {
-                    $file = $request->file('cv_4');
+                    $file = file_get_contents($request->cv_4);
                     $filename = 'cv_4_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
@@ -6106,9 +6105,10 @@ class RiderAPIController extends Controller
         return response()->json($response);
     }
 
-    public function rider_attachments_view(Request $request)
+    /*public function rider_attachments_view(Request $request)
     {
         $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
             'attachment_type' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -6119,10 +6119,42 @@ class RiderAPIController extends Controller
             $message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+
             $attachment_type = $request->attachment_type;
+            if ($attachment_type == 'cv'){
+                $document = $attachment_type->cv;
+                $doc_array = [];
+                if ($attachments->cv != NULL) {
+                    $cvs = explode(',', $attachments->cv);
+                    foreach ($cvs as $cv) {
+                        $pos = strpos($cv, "cv_1_");
+                        if ($pos !== false) {
+                            $doc_array['cv_1'] = $cv;
+                        }
+                        $pos = strpos($cv, "cv_2_");
+                        if ($pos !== false) {
+                            $doc_array['cv_2'] = $cv;
+                        }
+                        $pos = strpos($cv, "cv_3_");
+                        if ($pos !== false) {
+                            $doc_array['cv_3'] = $cv;
+                        }
+                        $pos = strpos($cv, "cv_4_");
+                        if ($pos !== false) {
+                            $doc_array['cv_4'] = $cv;
+                        }
+                    }
+                    return response()->json(['status' => 0, 'message' => 'Success']);
+                }
+            }
+        }
 
         }
-    }
+    }*/
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
