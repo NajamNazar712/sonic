@@ -91,6 +91,7 @@ Route::name('api.')->group(function () {
             Route::post('validate_data', 'Rider\RiderAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
+            Route::post('attachment_store_v2', 'Rider\RiderAPIController@rider_attachments_store_v2')->name('attachment_store_v2');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
