@@ -230,7 +230,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->brand_name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -834,7 +834,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->name), 0, 25), $body);
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->brand_name), 0, 25), $body);
                     }
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
@@ -2799,7 +2799,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
                     }
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                        $body = str_replace('[shipper_name]', $shipment->user->brand_name, $body);
                     }
                     if (strpos($body, '[receiver_name]') !== FALSE) {
                         $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by, $body);
