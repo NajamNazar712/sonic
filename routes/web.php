@@ -2514,6 +2514,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('hr')->name('hr.')->group(function () {
+            Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@rider_incentive_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@rider_incentive_list')->name('list');
+                Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_store')->name('store');
+
+            });
+        });
+
 
     });
 

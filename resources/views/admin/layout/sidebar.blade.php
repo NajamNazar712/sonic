@@ -1432,6 +1432,15 @@
                                 </ul>
                             </li>
                         @endif
+                            @if (session('role_id') == 1 || count(array_intersect([438], session('permissions'))) !== 0)
+                                <li class=" nav-item"><a href="#"><span class="menu-title">HR</span></a>
+                                    <ul class="menu-content">
+                                        @if (session('role_id') == 1 || in_array(438, session('permissions')))
+                                            <li class=" nav-item"><a href="{{route('admin.settings.hr.rider_incentive.index')}}"><span class="menu-title">Rider Incentive</span></a> </li>
+                                        @endif
+                                    </ul>
+                                </li>
+                            @endif
                     </ul>
                 </li>
             @endif

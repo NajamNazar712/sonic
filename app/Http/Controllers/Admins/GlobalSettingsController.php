@@ -43,7 +43,11 @@ use App\Http\Models\InternationalStandardDhlRate;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RidersIncentiveSetting;
+use App\Http\Models\Rider\RidersShipmentPaymentType;
+use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\RiderCategory;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
@@ -3800,4 +3804,35 @@ class GlobalSettingsController extends Controller
 
         }
     }
+
+    public function rider_incentive_index(){
+        $rider_categories = RiderCategory::whereIn('id', [1,2])->select('id', 'name')->get();
+        $shipment_payment_types = RidersShipmentPaymentType::select('id', 'name')->get();
+        $weight_ranges = RidersShipmentWeightRange::select('id', 'name')->get();
+        return view('admin.settings.rider_incentive.index')->with(['rider_categories' => $rider_categories, 'payment_types' => $shipment_payment_types, 'weight_ranges' => $weight_ranges]);
+    }
+
+    public function rider_incentive_list(Request $request)
+    {
+        $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'rider_incentive_settings.rider_category_id')
+            ->join('rider_shipment_payment_types as rspt', 'rspt.id', '=', 'rider_incentive_settings.rider_shipment_payment_type_id')
+            ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'rider_incentive_settings.rider_shipment_weight_range_id')
+            ->join('admins as ab','ab.id', '=', 'rider_incentive_settings.added_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'rider_incentive_settings.last_updated_by')
+            ->select('rider_incentive_settings.id as row_id','rider_incentive_settings.value', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'up.name as last_updated_by', 'rider_incentive_settings.created_at as added_at');
+        return Datatables::of($types)
+            ->addColumn('action', function ($types) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
 }
