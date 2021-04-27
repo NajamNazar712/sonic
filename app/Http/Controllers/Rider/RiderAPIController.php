@@ -5224,63 +5224,63 @@ class RiderAPIController extends Controller
 
             $date = Carbon::now()->format('Y_m_d');
 
-            if ($request->hasFile('cv_1') || $request->hasFile('cv_2') || $request->hasFile('cv_3') || $request->hasFile('cv_4')) {
+            if ($request->has('cv_1') || $request->has('cv_2') || $request->has('cv_3') || $request->has('cv_4')) {
                 $cv_array = [];
                 if ($attachments->cv != NULL) {
                     $cvs = explode(',', $attachments->cv);
                     foreach ($cvs as $cv) {
                         $pos = strpos($cv, "cv_1_");
                         if ($pos !== false) {
-                            if ($request->hasFile('cv_1')) {
+                            if ($request->has('cv_1')) {
                                 Storage::disk('public')->delete($cv);
                             }
                             $cv_array[0] = $cv;
                         }
                         $pos = strpos($cv, "cv_2_");
                         if ($pos !== false) {
-                            if ($request->hasFile('cv_2')) {
+                            if ($request->has('cv_2')) {
                                 Storage::disk('public')->delete($cv);
                             }
                             $cv_array[1] = $cv;
                         }
                         $pos = strpos($cv, "cv_3_");
                         if ($pos !== false) {
-                            if ($request->hasFile('cv_3')) {
+                            if ($request->has('cv_3')) {
                                 Storage::disk('public')->delete($cv);
                             }
                             $cv_array[2] = $cv;
                         }
                         $pos = strpos($cv, "cv_4_");
                         if ($pos !== false) {
-                            if ($request->hasFile('cv_4')) {
+                            if ($request->has('cv_4')) {
                                 Storage::disk('public')->delete($cv);
                             }
                             $cv_array[3] = $cv;
                         }
                     }
                 }
-                if ($request->hasFile('cv_1')) {
+                if ($request->has('cv_1')) {
                     $file = file_get_contents($request->cv_1);
                     $filename = 'cv_1_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[0] = $directory . '/' . $filename;
                 }
-                if ($request->hasFile('cv_2')) {
+                if ($request->has('cv_2')) {
                     $file = file_get_contents($request->cv_2);
                     $filename = 'cv_2_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[1] = $directory . '/' . $filename;
                 }
-                if ($request->hasFile('cv_3')) {
+                if ($request->has('cv_3')) {
                     $file = file_get_contents($request->cv_3);
                     $filename = 'cv_3_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[2] = $directory . '/' . $filename;
                 }
-                if ($request->hasFile('cv_4')) {
+                if ($request->has('cv_4')) {
                     $file = file_get_contents($request->cv_4);
                     $filename = 'cv_4_' . $date . '.' . $file->extension();
                     $directory = 'employee_directory/employee_' . $employee_id . '';
