@@ -291,6 +291,17 @@ class DeliveryController extends Controller
         return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
+    public function check_rider_dncc_status(Request $request)
+    {
+       $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]]);
+       if($delivery_note->exists())
+       {
+           return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+       }
+
+        return response()->json(['status'=> 1]);
+    }
+
 	public function note_consolidation_check(Request $request){
         $missing_shipments = array();
         foreach ($request->consolidation_ids as $id){
