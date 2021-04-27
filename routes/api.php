@@ -175,6 +175,7 @@ Route::name('api.')->group(function () {
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'AdminAPIController@admin_signup')->name('store');
             Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
+            Route::post('attachment_store_v2', 'AdminAPIController@admin_attachments_store_v2')->name('attachment_store_v2');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
