@@ -7170,7 +7170,7 @@ class AdminFinanceController extends Controller
 
                 $shipment = Shipment::find($shipment_id);
                 if($shipment->packaging_material_request == 1) {
-                    $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->where('status_id', 3)->first();
+                    $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
                     if ($packaging_material_shipment != null) {
                         $packaging_material_shipment->status_id = 3;
                         $packaging_material_shipment->save();
