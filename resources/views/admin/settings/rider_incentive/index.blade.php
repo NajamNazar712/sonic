@@ -26,7 +26,9 @@
                                     <th class="border-primary border-darken-1">Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Incentive/Shipment</th>
                                     <th class="border-primary border-darken-1">Added By</th>
+                                    <th class="border-primary border-darken-1">Added At</th>
                                     <th class="border-primary border-darken-1">Updated by</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -298,18 +300,18 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.settings.hr.rider_incentive.list') }}',
-                rowId: 'id',
+                rowId: 'row_id',
                 order: [[1, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'sales_tiers.tier_name', class: 'align-middle name'},
-                    {data: 'tier_type', name: 'tt.name', class: 'align-middle tier_type'},
-                    {data: 'added_at', name: 'sales_tiers.created_at', class: 'align-middle added_at'},
-                    {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
-                    {data: 'updated_at', name: 'sales_tiers.updated_at', class: 'align-middle updated_at'},
-                    {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
-                    {data: 'category_status', name: 'sales_tiers.status', class: 'align-middle status'},
-
+                    {data: 'rate_category', name: 'rc.name', class: 'align-middle rate_category'},
+                    {data: 'payment_type', name: 'rspt.name', class: 'align-middle payment_type'},
+                    {data: 'weight_range', name: 'rswr.name', class: 'align-middle weight_range'},
+                    {data: 'value', name: 'riders_incentive_settings.value', class: 'align-middle value'},
+                    {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
+                    {data: 'added_at', name: 'riders_incentive_settings.created_at', class: 'align-middle added_at'},
+                    {data: 'last_updated_by', name: 'ub.name', class: 'align-middle last_updated_by'},
+                    {data: 'updated_at', name: 'riders_incentive_settings.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -323,22 +325,23 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    /*var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Disable</option>' +
                         '<option value="1">Enable</option>' +
-                        '</select>';
+                        '</select>';*/
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
+                        }
+                        /*else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }
+                        }*/
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -349,12 +352,12 @@
                             }
                         }
                     });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                    /*$("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    });*/
                     this.api().table().columns.adjust();
                 }
             });

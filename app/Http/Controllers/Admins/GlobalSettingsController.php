@@ -3814,12 +3814,12 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_list(Request $request)
     {
-        $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'rider_incentive_settings.rider_category_id')
-            ->join('rider_shipment_payment_types as rspt', 'rspt.id', '=', 'rider_incentive_settings.rider_shipment_payment_type_id')
-            ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'rider_incentive_settings.rider_shipment_weight_range_id')
-            ->join('admins as ab','ab.id', '=', 'rider_incentive_settings.added_by')
-            ->leftjoin('admins as ub', 'ub.id', '=', 'rider_incentive_settings.last_updated_by')
-            ->select('rider_incentive_settings.id as row_id','rider_incentive_settings.value', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'up.name as last_updated_by', 'rider_incentive_settings.created_at as added_at');
+        $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'riders_incentive_settings.rider_category_id')
+            ->join('riders_shipment_payment_types as rspt', 'rspt.id', '=', 'riders_incentive_settings.rider_shipment_payment_type_id')
+            ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
+            ->join('admins as ab','ab.id', '=', 'riders_incentive_settings.added_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders_incentive_settings.last_updated_by')
+            ->select('riders_incentive_settings.id as row_id','riders_incentive_settings.value','rc.name as rate_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at');
         return Datatables::of($types)
             ->addColumn('action', function ($types) {
                 $dropdown = '
