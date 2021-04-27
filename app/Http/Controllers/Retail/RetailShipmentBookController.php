@@ -162,7 +162,7 @@ class RetailShipmentBookController extends Controller
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
         $consignee_phone_number_2 = NULL;
         $consignee_email_address = NULL;
-        $order_id = NULL;
+        $order_id = $request->input('order_id');
         $package_type = FALSE;
         $special_instructions = NULL;
 
