@@ -6585,16 +6585,31 @@ class AdminReportsController extends Controller
 
         $datatables = Datatables::of($route_distribution_summary)
         ->addColumn('delivered_shipments_per', function ($entry) {
-            return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
+            if ($entry->shipments_count) {
+                return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
         })
         ->addColumn('undelivered_shipments', function ($entry) {
             return round($entry->shipments_count - $entry->delivered_shipments);
         })
         ->addColumn('undelivered_shipments_per', function ($entry) {
-            return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+            if ($entry->shipments_count) {
+                return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
         })
         ->addColumn('confirmation_pending_shipments_per', function ($entry) {
-            return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+            if ($entry->shipments_count) {
+                return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
         });
 
         if($rider = $request->get('search_rider')){
