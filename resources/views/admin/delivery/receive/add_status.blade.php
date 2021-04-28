@@ -1839,7 +1839,7 @@
                                             if(data.not_suitable_for_rcp) {
                                                 var html = '<p>Since it is the first attempt for following Shipment(s):</p>';
                                                 $.each(data.not_suitable_for_rcp, function (index, shipment_id) {
-                                                    html += '<ul><li>' + shipment_id + '</li></ul><br>';
+                                                    html += '<ol><li>' + shipment_id + '</li></ol><br>';
                                                 });
                                                 html += '<p>Therefore can not apply Shipment - Return Confirmation Pending status on following Shipment(s).</p>';
                                                 content = document.createElement('div');
