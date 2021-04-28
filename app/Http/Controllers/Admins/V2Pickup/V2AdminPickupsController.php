@@ -1128,6 +1128,27 @@ class V2AdminPickupsController extends Controller
             $pickup_note->save();
 
             $pickup_note_id = $pickup_note->id;
+
+            $pickup_note_requests = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('pickup_request_id', $pickup_request_id);
+            if($pickup_note_requests->exists()){
+
+                $pickup_note_request = $pickup_note_requests->first();
+
+                $pickup_note_request->pickup_note_id = $pickup_note_id;
+                $pickup_note_request->pickup_request_id = $pickup_request_id;
+                $pickup_note_request->status = 1;
+
+                $pickup_note_request->save();
+            }
+            else{
+                $pickup_note_request = new V2PickupNoteRequest();
+
+                $pickup_note_request->pickup_note_id = $pickup_note_id;
+                $pickup_note_request->pickup_request_id = $pickup_request_id;
+                $pickup_note_request->status = 1;
+
+                $pickup_note_request->save();
+            }
         }
         else {
             $pickup_note = new V2PickupNote();
@@ -1137,15 +1158,17 @@ class V2AdminPickupsController extends Controller
             $pickup_note->save();
 
             $pickup_note_id = $pickup_note->id;
+
+            $pickup_note_request = new V2PickupNoteRequest();
+
+            $pickup_note_request->pickup_note_id = $pickup_note_id;
+            $pickup_note_request->pickup_request_id = $pickup_request_id;
+            $pickup_note_request->status = 1;
+
+            $pickup_note_request->save();
         }
 
-        $pickup_note_request = new V2PickupNoteRequest();
 
-        $pickup_note_request->pickup_note_id = $pickup_note_id;
-        $pickup_note_request->pickup_request_id = $pickup_request_id;
-        $pickup_note_request->status = 1;
-
-        $pickup_note_request->save();
 
         return $pickup_note_id;
     }
