@@ -6198,6 +6198,7 @@ class RiderAPIController extends Controller
                         $status = 1;
                     }
 
+                    $deliveries = array();
                     $shipment_status_count = ShipmentsJourney::where('shipment_id', $shipment_id)
                         ->where('shipper_status_id', 5)->count();
                     if($shipment_status_count > 1){
@@ -6206,9 +6207,6 @@ class RiderAPIController extends Controller
                     else{
                         $deliveries['rcp'] = 1;
                     }
-
-
-                    $deliveries = array();
                     $deliveries['shipment_id'] = $shipment_id;
                     $deliveries['tracking_number'] = $tracking_number;
                     $deliveries['consignee_name'] = $consignee_name;
