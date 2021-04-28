@@ -6205,7 +6205,7 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 1;
                     }
                     else{
-                        $deliveries['rcp'] = 1;
+                        $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
                     $deliveries['tracking_number'] = $tracking_number;
