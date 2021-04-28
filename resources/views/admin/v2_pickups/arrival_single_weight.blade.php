@@ -345,7 +345,7 @@
                 width:'100%'
             });
             var global_rider = parseInt({{ $global_rider_id }});
-            if(global_rider != 0){
+            if(global_rider !== 0){
                 $('#rider_select').val(global_rider).trigger('change');
             }
             var shipment_ids = [];
@@ -826,8 +826,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
-                    console.log(unassigned_pickups);
-                    console.log(unassigned_pickup_request_ids);
+
                     $('#ShipmentWeightModal').modal('hide');
                     if(unassigned_pickups){
                         $('#RiderModal').modal('show');
