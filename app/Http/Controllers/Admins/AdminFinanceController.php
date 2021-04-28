@@ -1521,6 +1521,20 @@ class AdminFinanceController extends Controller
                         }
         
                         ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                       if($shipment->packaging_material_request == 1) {
+                           $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                           if ($packaging_material_shipment != null) {
+                               $packaging_material_shipment->status_id = 3;
+                               $packaging_material_shipment->save();
+
+                               $packaging_request_history = new PackagingMaterialRequestHistory();
+                               $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                               $packaging_request_history->status = 3;
+                               $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                               $packaging_request_history->save();
+                           }
+                       }
         
                         NotificationsController::send(21, $shipment_id, Auth::id());
                        }
@@ -1672,6 +1686,20 @@ class AdminFinanceController extends Controller
                             }
 
                             ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                            if($shipment->packaging_material_request == 1) {
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                                if ($packaging_material_shipment != null) {
+                                    $packaging_material_shipment->status_id = 3;
+                                    $packaging_material_shipment->save();
+
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 3;
+                                    $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                            }
 
                             NotificationsController::send(21, $request->id, Auth::id());
 
@@ -7167,21 +7195,6 @@ class AdminFinanceController extends Controller
                 $revert_status_request_log->previous_status = $previous_status;
                 $revert_status_request_log->updated_by = Auth::id();
                 $revert_status_request_log->save();
-
-                $shipment = Shipment::find($shipment_id);
-                if($shipment->packaging_material_request == 1) {
-                    $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
-                    if ($packaging_material_shipment != null) {
-                        $packaging_material_shipment->status_id = 3;
-                        $packaging_material_shipment->save();
-
-                        $packaging_request_history = new PackagingMaterialRequestHistory();
-                        $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
-                        $packaging_request_history->status = 3;
-                        $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
-                        $packaging_request_history->save();
-                    }
-                }
 
             }
             return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
