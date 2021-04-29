@@ -5149,61 +5149,62 @@ class RiderAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
-            'cv_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cv_2' => 'mimes:pdf,png,jpeg,jpg',
-            'cv_3' => 'mimes:pdf,png,jpeg,jpg',
-            'cv_4' => 'mimes:pdf,png,jpeg,jpg',
-            'academic_1' => 'mimes:pdf,png,jpeg,jpg',
-            'academic_2' => 'mimes:pdf,png,jpeg,jpg',
-            'academic_3' => 'mimes:pdf,png,jpeg,jpg',
-            'academic_4' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_2' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_3' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_4' => 'mimes:pdf,png,jpeg,jpg',
-            'photo_1' => 'mimes:pdf,png,jpeg,jpg',
-            'photo_2' => 'mimes:pdf,png,jpeg,jpg',
-            'photo_3' => 'mimes:pdf,png,jpeg,jpg',
-            'photo_4' => 'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_1' => 'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_2' => 'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_3' => 'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_4' => 'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_1' => 'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_2' => 'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_3' => 'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_4' => 'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_1' => 'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_2' => 'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_3' => 'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_4' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_2' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_3' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_4' => 'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_1' => 'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_2' => 'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_3' => 'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_4' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_2' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_3' => 'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_4' => 'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_1' => 'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_2' => 'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_3' => 'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_4' => 'mimes:pdf,png,jpeg,jpg',
-            'affidavit_1' => 'mimes:pdf,png,jpeg,jpg',
-            'affidavit_2' => 'mimes:pdf,png,jpeg,jpg',
-            'affidavit_3' => 'mimes:pdf,png,jpeg,jpg',
-            'affidavit_4' => 'mimes:pdf,png,jpeg,jpg',
-            'cheque_1' => 'mimes:pdf,png,jpeg,jpg',
-            'cheque_2' => 'mimes:pdf,png,jpeg,jpg',
-            'cheque_3' => 'mimes:pdf,png,jpeg,jpg',
-            'cheque_4' => 'mimes:pdf,png,jpeg,jpg',
+            'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cv_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'academic_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'academic_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'academic_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'academic_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'photo_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'photo_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'photo_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'photo_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'experience_certificate_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'experience_certificate_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'experience_certificate_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'experience_certificate_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'last_pay_slip_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'last_pay_slip_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'last_pay_slip_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'last_pay_slip_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'nikkah_nama_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'nikkah_nama_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'nikkah_nama_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'nikkah_nama_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_spouse_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_spouse_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_spouse_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_spouse_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'child_b_form_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'child_b_form_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'child_b_form_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'child_b_form_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_nominee_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_nominee_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_nominee_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cnic_nominee_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'utility_bill_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'utility_bill_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'utility_bill_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'utility_bill_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'affidavit_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'affidavit_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'affidavit_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'affidavit_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cheque_1' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cheque_2' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cheque_3' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cheque_4' => 'mimes:pdf,png,jpeg,jpg,docx',
         ];
         $response = ['status' => 1];
         $message = 'Unknown';
+        $link = "";
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -5265,6 +5266,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_2')) {
                     $file = $request->file('cv_2');
@@ -5272,6 +5274,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_3')) {
                     $file = $request->file('cv_3');
@@ -5279,6 +5282,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cv_4')) {
                     $file = $request->file('cv_4');
@@ -5286,6 +5290,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cv_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->cv = implode(',', $cv_array);
@@ -5333,6 +5338,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_2')) {
                     $file = $request->file('cnic_2');
@@ -5340,6 +5346,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_3')) {
                     $file = $request->file('cnic_3');
@@ -5347,6 +5354,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_4')) {
                     $file = $request->file('cnic_4');
@@ -5354,6 +5362,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->cnic = implode(',', $cnic_array);
@@ -5401,6 +5410,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $photo_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('photo_2')) {
                     $file = $request->file('photo_2');
@@ -5408,6 +5418,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $photo_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('photo_3')) {
                     $file = $request->file('photo_3');
@@ -5415,6 +5426,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $photo_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('photo_4')) {
                     $file = $request->file('photo_4');
@@ -5422,6 +5434,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $photo_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->photo = implode(',', $photo_array);
@@ -5468,6 +5481,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $academic_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('academic_2')) {
                     $file = $request->file('academic_2');
@@ -5475,6 +5489,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $academic_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('academic_3')) {
                     $file = $request->file('academic_3');
@@ -5482,6 +5497,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $academic_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('academic_4')) {
                     $file = $request->file('academic_4');
@@ -5489,6 +5505,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $academic_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->academic = implode(',', $academic_array);
@@ -5535,6 +5552,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $experience_certificate_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('experience_certificate_2')) {
                     $file = $request->file('experience_certificate_2');
@@ -5542,6 +5560,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $experience_certificate_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('experience_certificate_3')) {
                     $file = $request->file('experience_certificate_3');
@@ -5549,6 +5568,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $experience_certificate_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('experience_certificate_4')) {
                     $file = $request->file('experience_certificate_4');
@@ -5556,6 +5576,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $experience_certificate_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->experience = implode(',', $experience_certificate_array);
@@ -5602,6 +5623,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $last_pay_slip_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('last_pay_slip_2')) {
                     $file = $request->file('last_pay_slip_2');
@@ -5609,6 +5631,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $last_pay_slip_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('last_pay_slip_3')) {
                     $file = $request->file('last_pay_slip_3');
@@ -5616,6 +5639,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $last_pay_slip_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('last_pay_slip_4')) {
                     $file = $request->file('last_pay_slip_4');
@@ -5623,6 +5647,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $last_pay_slip_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->last_pay_slip = implode(',', $last_pay_slip_array);
@@ -5669,6 +5694,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $nikkah_nama_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('nikkah_nama_2')) {
                     $file = $request->file('nikkah_nama_2');
@@ -5676,6 +5702,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $nikkah_nama_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('nikkah_nama_3')) {
                     $file = $request->file('nikkah_nama_3');
@@ -5683,6 +5710,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $nikkah_nama_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('nikkah_nama_4')) {
                     $file = $request->file('nikkah_nama_4');
@@ -5690,6 +5718,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $nikkah_nama_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->nikkah_nama = implode(',', $nikkah_nama_array);
@@ -5736,6 +5765,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_spouse_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_spouse_2')) {
                     $file = $request->file('cnic_spouse_2');
@@ -5743,6 +5773,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_spouse_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_spouse_3')) {
                     $file = $request->file('cnic_spouse_3');
@@ -5750,6 +5781,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_spouse_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_spouse_4')) {
                     $file = $request->file('cnic_spouse_4');
@@ -5757,6 +5789,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_spouse_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->cnic_spouse = implode(',', $cnic_spouse_array);
@@ -5803,6 +5836,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $child_b_form_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('child_b_form_2')) {
                     $file = $request->file('child_b_form_2');
@@ -5810,6 +5844,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $child_b_form_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('child_b_form_3')) {
                     $file = $request->file('child_b_form_3');
@@ -5817,6 +5852,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $child_b_form_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('child_b_form_4')) {
                     $file = $request->file('child_b_form_4');
@@ -5824,6 +5860,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $child_b_form_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->child_b_form = implode(',', $child_b_form_array);
@@ -5870,6 +5907,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_nominee_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_nominee_2')) {
                     $file = $request->file('cnic_nominee_2');
@@ -5877,6 +5915,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_nominee_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_nominee_3')) {
                     $file = $request->file('cnic_nominee_3');
@@ -5884,6 +5923,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_nominee_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cnic_nominee_4')) {
                     $file = $request->file('cnic_nominee_4');
@@ -5891,6 +5931,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cnic_nominee_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->cnic_nominee = implode(',', $cnic_nominee_array);
@@ -5937,6 +5978,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $utility_bill_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('utility_bill_2')) {
                     $file = $request->file('utility_bill_2');
@@ -5944,6 +5986,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $utility_bill_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('utility_bill_3')) {
                     $file = $request->file('utility_bill_3');
@@ -5951,6 +5994,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $utility_bill_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('utility_bill_4')) {
                     $file = $request->file('utility_bill_4');
@@ -5958,6 +6002,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $utility_bill_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->utility_bill = implode(',', $utility_bill_array);
@@ -6004,6 +6049,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $affidavit_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('affidavit_2')) {
                     $file = $request->file('affidavit_2');
@@ -6011,6 +6057,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $affidavit_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('affidavit_3')) {
                     $file = $request->file('affidavit_3');
@@ -6018,6 +6065,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $affidavit_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('affidavit_4')) {
                     $file = $request->file('affidavit_4');
@@ -6025,6 +6073,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $affidavit_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->affidavit = implode(',', $affidavit_array);
@@ -6071,6 +6120,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cheque_array[0] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cheque_2')) {
                     $file = $request->file('cheque_2');
@@ -6078,6 +6128,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cheque_array[1] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cheque_3')) {
                     $file = $request->file('cheque_3');
@@ -6085,6 +6136,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cheque_array[2] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
                 if ($request->hasFile('cheque_4')) {
                     $file = $request->file('cheque_4');
@@ -6092,6 +6144,7 @@ class RiderAPIController extends Controller
                     $directory = 'employee_directory/employee_' . $employee_id . '';
                     Storage::disk('public')->putFileAs($directory, $file, $filename);
                     $cheque_array[3] = $directory . '/' . $filename;
+                    $link = $directory . '/' . $filename;
                 }
 
                 $attachments->cheque = implode(',', $cheque_array);
@@ -6099,7 +6152,8 @@ class RiderAPIController extends Controller
 
             $attachments->save();
             $response['status'] = 0;
-            $message = 'Document Has Been Submitted';
+            $response['link'] = $link;
+            $message = 'Attachment Has Been Submitted';
             $response['message'] = $message;
         }
         return response()->json($response);
