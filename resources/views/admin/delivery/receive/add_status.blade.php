@@ -1834,7 +1834,24 @@
                                                     }
                                                 });
                                             }
-                                        }else {
+                                        }
+                                        else if(data.status === 3){
+                                            if(data.not_suitable_for_rcp) {
+                                                var html = '<p>Since it is the first attempt for following Shipment(s):</p><ol>';
+                                                $.each(data.not_suitable_for_rcp, function (index, shipment_id) {
+                                                    html += '<li>' + shipment_id + '</li>';
+                                                });
+                                                html += '</ol><p>Therefore can not apply Shipment - Return Confirmation Pending status on following Shipment(s).</p>';
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    title: 'Try Again',
+                                                    content: content,
+                                                    icon: 'error',
+                                                });
+                                            }
+                                        }
+                                        else {
                                             UnblockPagePermanently();
                                             toastr.error(data.error, 'Error!', {
                                                 positionClass: 'toast-top-center',

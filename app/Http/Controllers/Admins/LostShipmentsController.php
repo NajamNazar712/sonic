@@ -7,6 +7,8 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -187,6 +189,19 @@ class LostShipmentsController extends Controller
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+                    if($parcel->packaging_material_request == 1) {
+                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
+                        if ($packaging_material_shipment != null) {
+                            $packaging_material_shipment->status_id = 3;
+                            $packaging_material_shipment->save();
+
+                            $packaging_request_history = new PackagingMaterialRequestHistory();
+                            $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                            $packaging_request_history->status = 3;
+                            $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                            $packaging_request_history->save();
+                        }
+                    }
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
