@@ -178,6 +178,8 @@ Route::name('api.')->group(function () {
             Route::post('store', 'AdminAPIController@admin_signup')->name('store');
             Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
             Route::post('attachment_store_v2', 'AdminAPIController@admin_attachments_store_v2')->name('attachment_store_v2');
+            Route::post('attachment_view', 'AdminAPIController@admin_attachments_view')->name('attachment_view');
+            Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
