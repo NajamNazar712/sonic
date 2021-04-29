@@ -6151,7 +6151,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cv_array]);
+                    return response()->json(['status' => 0, 'data' => $cv_array]);
                 } elseif ($attachment_type == 'cnic') {
                     $cnic_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6178,7 +6178,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_array]);
+                    return response()->json(['status' => 0, 'data' => $cnic_array]);
                 } elseif ($attachment_type == 'photo') {
                     $photo_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6205,7 +6205,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $photo_array]);
+                    return response()->json(['status' => 0, 'data' => $photo_array]);
                 } elseif ($attachment_type == 'academic') {
                     $academic_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6232,7 +6232,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $academic_array]);
+                    return response()->json(['status' => 0, 'data' => $academic_array]);
                 } elseif ($attachment_type == 'cheque') {
                     $cheque_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6259,7 +6259,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cheque_array]);
+                    return response()->json(['status' => 0, 'data' => $cheque_array]);
                 } elseif ($attachment_type == 'affidavit') {
                     $affidavit_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6286,7 +6286,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $affidavit_array]);
+                    return response()->json(['status' => 0, 'data' => $affidavit_array]);
                 } elseif ($attachment_type == 'utility_bill') {
                     $utility_bill_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6313,7 +6313,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $utility_bill_array]);
+                    return response()->json(['status' => 0, 'data' => $utility_bill_array]);
                 } elseif ($attachment_type == 'cnic_nominee') {
                     $cnic_nominee_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6340,7 +6340,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_nominee_array]);
+                    return response()->json(['status' => 0, 'data' => $cnic_nominee_array]);
                 } elseif ($attachment_type == 'child_b_form') {
                     $child_b_form_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6367,7 +6367,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $child_b_form_array]);
+                    return response()->json(['status' => 0, 'data' => $child_b_form_array]);
                 } elseif ($attachment_type == 'cnic_spouse') {
                     $cnic_spouse_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6394,7 +6394,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_spouse_array]);
+                    return response()->json(['status' => 0, 'data' => $cnic_spouse_array]);
                 } elseif ($attachment_type == 'last_pay_slip') {
                     $last_pay_slip_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6421,7 +6421,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $last_pay_slip_array]);
+                    return response()->json(['status' => 0, 'data' => $last_pay_slip_array]);
                 } elseif ($attachment_type == 'nikkah_nama') {
                     $nikkah_nama_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6448,7 +6448,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $nikkah_nama_array]);
+                    return response()->json(['status' => 0, 'data' => $nikkah_nama_array]);
                 } elseif ($attachment_type == 'experience_certificate') {
                     $experience_certificate_array = [];
                     for ($x = 0; $x <= 3; $x++) {
@@ -6475,7 +6475,7 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-                    return response()->json(['status' => 0, 'message' => 'Success', 'data' => $experience_certificate_array]);
+                    return response()->json(['status' => 0, 'data' => $experience_certificate_array]);
                 }
             }
 
