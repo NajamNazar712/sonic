@@ -4206,18 +4206,18 @@
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
 
-                                    @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 && $shipper->new_rate_type_id == null || in_array(140, session('permissions'))))
+                                    @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))) || $shipper->status == 3 && $shipper->new_rate_type_id != null)
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
                                     @endif
                                     @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && $shipper->new_rate_type_id == null  && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
-                                    @if ($shipper->new_rate_type_id != null && $shipper->status == 3 && $shipper->rate_type_id_status == 1 && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                                 {{--   @if ($shipper->new_rate_type_id != null && $shipper->status == 3 && $shipper->rate_type_id_status == 1 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveChangeSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve Change</button>
                                     @endif
                                     @if (($shipper->new_rate_type_id != null && ($shipper->status == 3 && $shipper->rate_type_id_status == 1) && (session('role_id') == 1 || in_array(8, session('permissions')))) && (session('role_id') == 1 || in_array(140, session('permissions')))))
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Change</button>
-                                    @endif
+                                    @endif--}}
                                 </div>
                             </div>
 

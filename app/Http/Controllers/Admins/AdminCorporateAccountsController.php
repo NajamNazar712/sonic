@@ -6638,7 +6638,7 @@ class AdminCorporateAccountsController extends Controller
         }
 
         if ($user['status'] == 3 && $new_rate_type_id != null) {
-
+          
             $messages = [
                 'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
                 'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
@@ -7964,7 +7964,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             
-            if ($request->approve_change_rate_type == 1) {
+            if ($request->approve == 1) {
                
                 $user = User::find($id);
 
@@ -17525,7 +17525,7 @@ class AdminCorporateAccountsController extends Controller
 
             //dd($weightAlready);
 
-            if ($request->approve_change_rate_type == 1){
+            if ($request->approve == 1){
                 if($user->corporate_rate_type_id == 3 && $user->new_rate_type_id == 2){
 
                     //history for old rate type
@@ -26321,7 +26321,7 @@ class AdminCorporateAccountsController extends Controller
 
             //dd($weightAlready);
 
-           if($request->approve_change_rate_type == 1){
+           if($request->approve== 1){
 
                if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
@@ -26853,71 +26853,16 @@ class AdminCorporateAccountsController extends Controller
                }
 
 
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 1,
-                       'delivery_type_id' => 1,
-                       'status' => $corporate_delivery_type_status['status']
-                   ]);
+               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->get()) {
+                   foreach ($corporate_delivery_type_status as $delivery_type_status) {
+                       HistoryCorporateDeliveryTypeStatus::create([
+                           'user_id' => $id,
+                           'shipping_mode_id' => $delivery_type_status['shipping_mode_id'],
+                           'delivery_type_id' => $delivery_type_status['delivery_type_id'],
+                           'status' => $delivery_type_status['status']
+                       ]);
+                   }
                }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 2,
-                       'delivery_type_id' => 1,
-                       'status' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 3,
-                       'delivery_type_id' => 1,
-                       'status' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 4,
-                       'delivery_type_id' => 1,
-                       'min_chargeable_weight' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 1,
-                       'delivery_type_id' => 2,
-                       'min_chargeable_weight' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 2,
-                       'delivery_type_id' => 2,
-                       'min_chargeable_weight' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 3,
-                       'delivery_type_id' => 2,
-                       'min_chargeable_weight' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-               if ($corporate_delivery_type_status = CorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()) {
-                   HistoryCorporateDeliveryTypeStatus::create([
-                       'user_id' => $id,
-                       'shipping_mode_id' => 3,
-                       'delivery_type_id' => 2,
-                       'min_chargeable_weight' => $corporate_delivery_type_status['status']
-                   ]);
-               }
-
                CorporateRateStatus::where('user_id', $id)->delete();
                CorporateWeightCharge::where('user_id', $id)->delete();
                CorporateBookingTypeCharge::where('user_id', $id)->delete();
