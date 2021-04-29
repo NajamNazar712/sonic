@@ -6125,11 +6125,11 @@ class RiderAPIController extends Controller
                 $attachments = $attachments->first();
 
                 $attachment_type = $request->attachment_type;
-                $cv_array=[];
-                for ($x = 0; $x <= 3; $x++) {
-                    $cv_array[$x]['cv_'.($x+1)] = "";
-                }
                 if ($attachment_type == 'cv') {
+                    $cv_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cv_array[$x]['cv_' . ($x + 1)] = "";
+                    }
                     if ($attachments->cv != NULL) {
                         $cvs = explode(',', $attachments->cv);
                         foreach ($cvs as $cv) {
@@ -6154,291 +6154,324 @@ class RiderAPIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cv_array]);
                 } elseif ($attachment_type == 'cnic') {
                     $cnic_array = [];
-                    for ($x = 1; $x <= 4; $x++) {
-                        $cnic_array[]['cnic_'.$x] = "";
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_array[$x]['cnic_' . ($x + 1)] = "";
                     }
                     if ($attachments->cnic != NULL) {
                         $cnics = explode(',', $attachments->cnic);
                         foreach ($cnics as $cnic) {
                             $pos = strpos($cnic, "cnic_1_");
                             if ($pos !== false) {
-                                $cnic_array[]["cnic_1"] = $cnic;
+                                $cnic_array[0]["cnic_1"] = $cnic;
                             }
                             $pos = strpos($cnic, "cnic_2_");
                             if ($pos !== false) {
-                                $cnic_array[]["cnic_2"] = $cnic;
+                                $cnic_array[1]["cnic_2"] = $cnic;
                             }
                             $pos = strpos($cnic, "cnic_3_");
                             if ($pos !== false) {
-                                $cnic_array[]["cnic_3"] = $cnic;
+                                $cnic_array[2]["cnic_3"] = $cnic;
                             }
                             $pos = strpos($cnic, "cnic_4_");
                             if ($pos !== false) {
-                                $cnic_array[]["cnic_4"] = $cnic;
+                                $cnic_array[3]["cnic_4"] = $cnic;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_array]);
                 } elseif ($attachment_type == 'photo') {
-                    $photo_array = ["photo_1" => "", "photo_2" => "", "photo_3" => "", "photo_4" => ""];
+                    $photo_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_array[$x]['photo_' . ($x + 1)] = "";
+                    }
                     if ($attachments->photo != NULL) {
                         $photos = explode(',', $attachments->photo);
                         foreach ($photos as $photo) {
                             $pos = strpos($photo, "photo_1_");
                             if ($pos !== false) {
-                                $photo_array[]["photo_1"] = $photo;
+                                $photo_array[0]["photo_1"] = $photo;
                             }
                             $pos = strpos($photo, "photo_2_");
                             if ($pos !== false) {
-                                $photo_array[]["photo_2"] = $photo;
+                                $photo_array[1]["photo_2"] = $photo;
                             }
                             $pos = strpos($photo, "photo_3_");
                             if ($pos !== false) {
-                                $photo_array[]["photo_3"] = $photo;
+                                $photo_array[2]["photo_3"] = $photo;
                             }
                             $pos = strpos($photo, "photo_4_");
                             if ($pos !== false) {
-                                $photo_array[]["photo_4"] = $photo;
+                                $photo_array[3]["photo_4"] = $photo;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $photo_array]);
                 } elseif ($attachment_type == 'academic') {
-                    $academic_array = ["academic_1" => "", "academic_2" => "", "academic_3" => "", "academic_4" => ""];
+                    $academic_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $academic_array[$x]['academic_' . ($x + 1)] = "";
+                    }
                     if ($attachments->academic != NULL) {
                         $academics = explode(',', $attachments->academic);
                         foreach ($academics as $academic) {
                             $pos = strpos($academic, "academic_1_");
                             if ($pos !== false) {
-                                $academic_array[]["academic_1"] = $academic;
+                                $academic_array[0]["academic_1"] = $academic;
                             }
                             $pos = strpos($academic, "academic_2_");
                             if ($pos !== false) {
-                                $academic_array[]["academic_2"] = $academic;
+                                $academic_array[1]["academic_2"] = $academic;
                             }
                             $pos = strpos($academic, "academic_3_");
                             if ($pos !== false) {
-                                $academic_array[]["academic_3"] = $academic;
+                                $academic_array[2]["academic_3"] = $academic;
                             }
                             $pos = strpos($academic, "academic_4_");
                             if ($pos !== false) {
-                                $academic_array[]["academic_4"] = $academic;
+                                $academic_array[3]["academic_4"] = $academic;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $academic_array]);
                 } elseif ($attachment_type == 'cheque') {
-                    $cheque_array = ["cheque_1" => "", "cheque_2" => "", "cheque_3" => "", "cheque_4" => ""];
+                    $cheque_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cheque_array[$x]['cheque_' . ($x + 1)] = "";
+                    }
                     if ($attachments->cheque != NULL) {
                         $cheques = explode(',', $attachments->cheque);
                         foreach ($cheques as $cheque) {
                             $pos = strpos($cheque, "cheque_1_");
                             if ($pos !== false) {
-                                $cheque_array[]["cheque_1"] = $cheque;
+                                $cheque_array[0]["cheque_1"] = $cheque;
                             }
                             $pos = strpos($cheque, "cheque_2_");
                             if ($pos !== false) {
-                                $cheque_array[]["cheque_2"] = $cheque;
+                                $cheque_array[1]["cheque_2"] = $cheque;
                             }
                             $pos = strpos($cheque, "cheque_3_");
                             if ($pos !== false) {
-                                $cheque_array[]["cheque_3"] = $cheque;
+                                $cheque_array[2]["cheque_3"] = $cheque;
                             }
                             $pos = strpos($cheque, "cheque_4_");
                             if ($pos !== false) {
-                                $cheque_array[]["cheque_4"] = $cheque;
+                                $cheque_array[3]["cheque_4"] = $cheque;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cheque_array]);
                 } elseif ($attachment_type == 'affidavit') {
-                    $affidavit_array = ["affidavit_1" => "", "affidavit_2" => "", "affidavit_3" => "", "affidavit_4" => ""];
+                    $affidavit_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $affidavit_array[$x]['affidavit_' . ($x + 1)] = "";
+                    }
                     if ($attachments->affidavit != NULL) {
                         $affidavits = explode(',', $attachments->affidavit);
                         foreach ($affidavits as $affidavit) {
                             $pos = strpos($affidavit, "affidavit_1_");
                             if ($pos !== false) {
-                                $affidavit_array[]["affidavit_1"] = $affidavit;
+                                $affidavit_array[0]["affidavit_1"] = $affidavit;
                             }
                             $pos = strpos($affidavit, "affidavit_2_");
                             if ($pos !== false) {
-                                $affidavit_array[]["affidavit_2"] = $affidavit;
+                                $affidavit_array[1]["affidavit_2"] = $affidavit;
                             }
                             $pos = strpos($affidavit, "affidavit_3_");
                             if ($pos !== false) {
-                                $affidavit_array[]["affidavit_3"] = $affidavit;
+                                $affidavit_array[2]["affidavit_3"] = $affidavit;
                             }
                             $pos = strpos($affidavit, "affidavit_4_");
                             if ($pos !== false) {
-                                $affidavit_array[]["affidavit_4"] = $affidavit;
+                                $affidavit_array[3]["affidavit_4"] = $affidavit;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $affidavit_array]);
                 } elseif ($attachment_type == 'utility_bill') {
-                    $utility_bill_array = ["utility_bill_1" => "", "utility_bill_2" => "", "utility_bill_3" => "", "utility_bill_4" => ""];
+                    $utility_bill_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $utility_bill_array[$x]['utility_bill_' . ($x + 1)] = "";
+                    }
                     if ($attachments->utility_bill != NULL) {
                         $utility_bills = explode(',', $attachments->utility_bill);
                         foreach ($utility_bills as $utility_bill) {
                             $pos = strpos($utility_bill, "utility_bill_1_");
                             if ($pos !== false) {
-                                $utility_bill_array[]["utility_bill_1"] = $utility_bill;
+                                $utility_bill_array[0]["utility_bill_1"] = $utility_bill;
                             }
                             $pos = strpos($utility_bill, "utility_bill_2_");
                             if ($pos !== false) {
-                                $utility_bill_array[]["utility_bill_2"] = $utility_bill;
+                                $utility_bill_array[1]["utility_bill_2"] = $utility_bill;
                             }
                             $pos = strpos($utility_bill, "utility_bill_3_");
                             if ($pos !== false) {
-                                $utility_bill_array[]["utility_bill_3"] = $utility_bill;
+                                $utility_bill_array[2]["utility_bill_3"] = $utility_bill;
                             }
                             $pos = strpos($utility_bill, "utility_bill_4_");
                             if ($pos !== false) {
-                                $utility_bill_array[]["utility_bill_4"] = $utility_bill;
+                                $utility_bill_array[3]["utility_bill_4"] = $utility_bill;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $utility_bill_array]);
                 } elseif ($attachment_type == 'cnic_nominee') {
-                    $cnic_nominee_array = ["cnic_nominee_1" => "", "cnic_nominee_2" => "", "cnic_nominee_3" => "", "cnic_nominee_4" => ""];
+                    $cnic_nominee_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_nominee_array[$x]['cnic_nominee_' . ($x + 1)] = "";
+                    }
                     if ($attachments->cnic_nominee != NULL) {
                         $cnic_nominees = explode(',', $attachments->cnic_nominee);
                         foreach ($cnic_nominees as $cnic_nominee) {
                             $pos = strpos($cnic_nominee, "cnic_nominee_1_");
                             if ($pos !== false) {
-                                $cnic_nominee_array[]["cnic_nominee_1"] = $cnic_nominee;
+                                $cnic_nominee_array[0]["cnic_nominee_1"] = $cnic_nominee;
                             }
                             $pos = strpos($cnic_nominee, "cnic_nominee_2_");
                             if ($pos !== false) {
-                                $cnic_nominee_array[]["cnic_nominee_2"] = $cnic_nominee;
+                                $cnic_nominee_array[1]["cnic_nominee_2"] = $cnic_nominee;
                             }
                             $pos = strpos($cnic_nominee, "cnic_nominee_3_");
                             if ($pos !== false) {
-                                $cnic_nominee_array[]["cnic_nominee_3"] = $cnic_nominee;
+                                $cnic_nominee_array[2]["cnic_nominee_3"] = $cnic_nominee;
                             }
                             $pos = strpos($cnic_nominee, "cnic_nominee_4_");
                             if ($pos !== false) {
-                                $cnic_nominee_array[]["cnic_nominee_4"] = $cnic_nominee;
+                                $cnic_nominee_array[3]["cnic_nominee_4"] = $cnic_nominee;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_nominee_array]);
                 } elseif ($attachment_type == 'child_b_form') {
-                    $child_b_form_array = ["child_b_form_1" => "", "child_b_form_2" => "", "child_b_form_3" => "", "child_b_form_4" => ""];
+                    $child_b_form_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $child_b_form_array[$x]['child_b_form_' . ($x + 1)] = "";
+                    }
                     if ($attachments->child_b_form != NULL) {
                         $child_b_forms = explode(',', $attachments->child_b_form);
                         foreach ($child_b_forms as $child_b_form) {
                             $pos = strpos($child_b_form, "child_b_form_1_");
                             if ($pos !== false) {
-                                $child_b_form_array[]["child_b_form_1"] = $child_b_form;
+                                $child_b_form_array[0]["child_b_form_1"] = $child_b_form;
                             }
                             $pos = strpos($child_b_form, "child_b_form_2_");
                             if ($pos !== false) {
-                                $child_b_form_array[]["child_b_form_2"] = $child_b_form;
+                                $child_b_form_array[1]["child_b_form_2"] = $child_b_form;
                             }
                             $pos = strpos($child_b_form, "child_b_form_3_");
                             if ($pos !== false) {
-                                $child_b_form_array[]["child_b_form_3"] = $child_b_form;
+                                $child_b_form_array[2]["child_b_form_3"] = $child_b_form;
                             }
                             $pos = strpos($child_b_form, "child_b_form_4_");
                             if ($pos !== false) {
-                                $child_b_form_array[]["child_b_form_4"] = $child_b_form;
+                                $child_b_form_array[3]["child_b_form_4"] = $child_b_form;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $child_b_form_array]);
                 } elseif ($attachment_type == 'cnic_spouse') {
-                    $cnic_spouse_array = ["cnic_spouse_1" => "", "cnic_spouse_2" => "", "cnic_spouse_3" => "", "cnic_spouse_4" => ""];
+                    $cnic_spouse_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_spouse_array[$x]['cnic_spouse_' . ($x + 1)] = "";
+                    }
                     if ($attachments->cnic_spouse != NULL) {
                         $cnic_spouses = explode(',', $attachments->cnic_spouse);
                         foreach ($cnic_spouses as $cnic_spouse) {
                             $pos = strpos($cnic_spouse, "cnic_spouse_1_");
                             if ($pos !== false) {
-                                $cnic_spouse_array[]["cnic_spouse_1"] = $cnic_spouse;
+                                $cnic_spouse_array[0]["cnic_spouse_1"] = $cnic_spouse;
                             }
                             $pos = strpos($cnic_spouse, "cnic_spouse_2_");
                             if ($pos !== false) {
-                                $cnic_spouse_array[]["cnic_spouse_2"] = $cnic_spouse;
+                                $cnic_spouse_array[1]["cnic_spouse_2"] = $cnic_spouse;
                             }
                             $pos = strpos($cnic_spouse, "cnic_spouse_3_");
                             if ($pos !== false) {
-                                $cnic_spouse_array[]["cnic_spouse_3"] = $cnic_spouse;
+                                $cnic_spouse_array[2]["cnic_spouse_3"] = $cnic_spouse;
                             }
                             $pos = strpos($cnic_spouse, "cnic_spouse_4_");
                             if ($pos !== false) {
-                                $cnic_spouse_array[]["cnic_spouse_5"] = $cnic_spouse;
+                                $cnic_spouse_array[3]["cnic_spouse_5"] = $cnic_spouse;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cnic_spouse_array]);
                 } elseif ($attachment_type == 'last_pay_slip') {
-                    $last_pay_slip_array = ["last_pay_slip_1" => "", "last_pay_slip_2" => "", "last_pay_slip_3" => "", "last_pay_slip_4" => ""];
+                    $last_pay_slip_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $last_pay_slip_array[$x]['last_pay_slip_' . ($x + 1)] = "";
+                    }
                     if ($attachments->last_pay_slip != NULL) {
                         $last_pay_slips = explode(',', $attachments->last_pay_slip);
                         foreach ($last_pay_slips as $last_pay_slip) {
                             $pos = strpos($last_pay_slip, "last_pay_slip_1_");
                             if ($pos !== false) {
-                                $last_pay_slip_array["last_pay_slip_1"] = $last_pay_slip;
+                                $last_pay_slip_array[0]["last_pay_slip_1"] = $last_pay_slip;
                             }
                             $pos = strpos($last_pay_slip, "last_pay_slip_2_");
                             if ($pos !== false) {
-                                $last_pay_slip_array["last_pay_slip_2"] = $last_pay_slip;
+                                $last_pay_slip_array[1]["last_pay_slip_2"] = $last_pay_slip;
                             }
                             $pos = strpos($last_pay_slip, "last_pay_slip_3_");
                             if ($pos !== false) {
-                                $last_pay_slip_array["last_pay_slip_3"] = $last_pay_slip;
+                                $last_pay_slip_array[2]["last_pay_slip_3"] = $last_pay_slip;
                             }
                             $pos = strpos($last_pay_slip, "last_pay_slip_4_");
                             if ($pos !== false) {
-                                $last_pay_slip_array["last_pay_slip_4"] = $last_pay_slip;
+                                $last_pay_slip_array[3]["last_pay_slip_4"] = $last_pay_slip;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $last_pay_slip_array]);
                 } elseif ($attachment_type == 'nikkah_nama') {
-                    $nikkah_nama_array = ["nikkah_nama_1" => "", "nikkah_nama_2" => "", "nikkah_nama_3" => "", "nikkah_nama_4" => ""];
+                    $nikkah_nama_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $nikkah_nama_array[$x]['nikkah_nama_' . ($x + 1)] = "";
+                    }
                     if ($attachments->nikkah_nama != NULL) {
                         $nikkah_namas = explode(',', $attachments->nikkah_nama);
                         foreach ($nikkah_namas as $nikkah_nama) {
                             $pos = strpos($nikkah_nama, "nikkah_nama_1_");
                             if ($pos !== false) {
-                                $nikkah_nama_array["nikkah_nama_1"] = $nikkah_nama;
+                                $nikkah_nama_array[0]["nikkah_nama_1"] = $nikkah_nama;
                             }
                             $pos = strpos($nikkah_nama, "nikkah_nama_2_");
                             if ($pos !== false) {
-                                $nikkah_nama_array["nikkah_nama_2"] = $nikkah_nama;
+                                $nikkah_nama_array[1]["nikkah_nama_2"] = $nikkah_nama;
                             }
                             $pos = strpos($nikkah_nama, "nikkah_nama_3_");
                             if ($pos !== false) {
-                                $nikkah_nama_array["nikkah_nama_3"] = $nikkah_nama;
+                                $nikkah_nama_array[2]["nikkah_nama_3"] = $nikkah_nama;
                             }
                             $pos = strpos($nikkah_nama, "nikkah_nama_4_");
                             if ($pos !== false) {
-                                $nikkah_nama_array["nikkah_nama_4"] = $nikkah_nama;
+                                $nikkah_nama_array[3]["nikkah_nama_4"] = $nikkah_nama;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $nikkah_nama_array]);
                 } elseif ($attachment_type == 'experience_certificate') {
-                    $experience_certificate_array = ["experience_certificate_1" => "", "experience_certificate_2" => "", "experience_certificate_3" => "", "experience_certificate_4" => ""];
+                    $experience_certificate_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $experience_certificate_array[$x]['experience_certificate_' . ($x + 1)] = "";
+                    }
                     if ($attachments->experience != NULL) {
                         $experience_certificates = explode(',', $attachments->experience);
                         foreach ($experience_certificates as $experience_certificate) {
                             $pos = strpos($experience_certificate, "experience_certificate_1_");
                             if ($pos !== false) {
-                                $experience_certificate_array["experience_certificate_1"] = $experience_certificate;
+                                $experience_certificate_array[0]["experience_certificate_1"] = $experience_certificate;
                             }
                             $pos = strpos($experience_certificate, "experience_certificate_2_");
                             if ($pos !== false) {
-                                $experience_certificate_array["experience_certificate_2"] = $experience_certificate;
+                                $experience_certificate_array[1]["experience_certificate_2"] = $experience_certificate;
                             }
                             $pos = strpos($experience_certificate, "experience_certificate_3_");
                             if ($pos !== false) {
-                                $experience_certificate_array["experience_certificate_3"] = $experience_certificate;
+                                $experience_certificate_array[2]["experience_certificate_3"] = $experience_certificate;
                             }
                             $pos = strpos($experience_certificate, "experience_certificate_4_");
                             if ($pos !== false) {
-                                $experience_certificate_array["experience_certificate_4"] = $experience_certificate;
+                                $experience_certificate_array[3]["experience_certificate_4"] = $experience_certificate;
                             }
                         }
                     }
