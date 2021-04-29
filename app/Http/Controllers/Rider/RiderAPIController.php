@@ -6125,33 +6125,38 @@ class RiderAPIController extends Controller
                 $attachments = $attachments->first();
 
                 $attachment_type = $request->attachment_type;
-
+                $cv_array=[];
+                for ($x = 0; $x <= 3; $x++) {
+                    $cv_array[$x]['cv_'.($x+1)] = "";
+                }
                 if ($attachment_type == 'cv') {
-//                    $cv_array = ['cv_1' => '', 'cv_2' => '', 'cv_3' => '', 'cv_4' => ''];
                     if ($attachments->cv != NULL) {
                         $cvs = explode(',', $attachments->cv);
                         foreach ($cvs as $cv) {
                             $pos = strpos($cv, "cv_1_");
                             if ($pos !== false) {
-                                $cv_array[]['cv_1'] = $cv;
+                                $cv_array[0]['cv_1'] = $cv;
                             }
                             $pos = strpos($cv, "cv_2_");
                             if ($pos !== false) {
-                                $cv_array[]['cv_2'] = $cv;
+                                $cv_array[1]['cv_2'] = $cv;
                             }
                             $pos = strpos($cv, "cv_3_");
                             if ($pos !== false) {
-                                $cv_array[]['cv_3'] = $cv;
+                                $cv_array[2]['cv_3'] = $cv;
                             }
                             $pos = strpos($cv, "cv_4_");
                             if ($pos !== false) {
-                                $cv_array[]['cv_4'] = $cv;
+                                $cv_array[3]['cv_4'] = $cv;
                             }
                         }
                     }
                     return response()->json(['status' => 0, 'message' => 'Success', 'data' => $cv_array]);
                 } elseif ($attachment_type == 'cnic') {
-                    $cnic_array = ["cnic_1" => "", "cnic_2" => "", "cnic_3" => "", "cnic_4" => ""];
+                    $cnic_array = [];
+                    for ($x = 1; $x <= 4; $x++) {
+                        $cnic_array[]['cnic_'.$x] = "";
+                    }
                     if ($attachments->cnic != NULL) {
                         $cnics = explode(',', $attachments->cnic);
                         foreach ($cnics as $cnic) {
