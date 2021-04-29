@@ -77,7 +77,8 @@
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
-
+                                <input type="hidden" name="rider_id" class="rider_id">
+                                <input type="hidden" name="pickup_request_ids" class="pickup_request_ids">
                                 <div class="form-group ml-1">
                                     <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
                                 </div>
@@ -204,6 +205,36 @@
         </div>
     </div>
 
+    <div class="modal fade" id="RiderModal" data-backdrop="static" role="dialog" aria-labelledby="RiderModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Rider</h4>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="rider_selection_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <fieldset class="form-group">
+                                    <select name="rider_select" id="rider_select" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required" >
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" >Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -296,6 +327,17 @@
             var all_shipment_item_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
+
+            $('#rider_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Rider Select',
+                width:'100%'
+            });
+            var global_rider = parseInt({{ $global_rider_id }});
+            if(global_rider !== 0){
+                $('#rider_select').val(global_rider).trigger('change');
+            }
+
+
             $('#add_shipment_form input.tracking_number').focus();
 
             var table = $('#datatable').DataTable({
@@ -417,7 +459,8 @@
                 'allowPlus': false,
                 'digits': 2
             });
-
+            var unassigned_pickup_request_ids = [];
+            var unassigned_pickups = false;
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -468,6 +511,15 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
+                                        if(data.details.rider_assigned == true){
+                                            var int_pickup_request_id = data.details.pickup_request_id_unpadded;
+                                            remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
+                                            var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
+                                            if(pickup_index === -1){
+                                                unassigned_pickup_request_ids.push(int_pickup_request_id);
+                                            }
+                                            unassigned_pickups = true;
+                                        }
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
@@ -698,6 +750,15 @@
                                 var index = $.inArray(id, shipment_ids);
 
                                 if (index === -1) {
+                                    if(data.details.rider_assigned == true){
+                                        var int_pickup_request_id = data.details.pickup_request_id_unpadded;
+                                        remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
+                                        var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
+                                        if(pickup_index === -1){
+                                            unassigned_pickup_request_ids.push(int_pickup_request_id);
+                                        }
+                                        unassigned_pickups = true;
+                                    }
                                     var rowNo = table.rows().count();
                                     var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
                                     $(new_row).css('color', 'white');
@@ -745,48 +806,73 @@
                 try_and_buy_table.clear().draw();
             });
 
+            $('#rider_selection_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+
+                    var rider_id = $('#rider_select').val();
+                    $('#arrival_of_shipments_form input.rider_id').val(rider_id);
+                    $('#arrival_of_shipments_form input.pickup_request_ids').val(unassigned_pickup_request_ids);
+                    unassigned_pickups = false;
+                    $('#arrival_of_shipments_form').submit();
+
+                }
+            });
+
             $('#arrival_of_shipments_form').bind('submit', function(e) {
                 e.preventDefault();
 
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
                 var form = this;
-
-                swal({
-                    text: 'Are you sure, you want to Receive these Shipments?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
+                if(unassigned_pickups){
+                    $('#RiderModal').modal('show');
+                }
+                else{
+                    swal({
+                        text: 'Are you sure, you want to Receive these Shipments?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
                         },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Shipments are being marked arrived!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            blockPagePermanently();
+                            form.submit();
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Shipments are being marked arrived!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        blockPagePermanently();
-                        form.submit();
-                    }
-                });
+                    });
+                }
+
             });
+
+
+
 
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
@@ -959,6 +1045,15 @@
                                 var index = $.inArray(id, shipment_ids);
 
                                 if (index === -1) {
+                                    if(data.details.rider_assigned == true){
+                                        var int_pickup_request_id = data.details.pickup_request_id_unpadded;
+                                        remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
+                                        var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
+                                        if(pickup_index === -1){
+                                            unassigned_pickup_request_ids.push(int_pickup_request_id);
+                                        }
+                                        unassigned_pickups = true;
+                                    }
                                     var rowNo = table.rows().count();
                                     var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
                                     new_row.id = data.details.id;
