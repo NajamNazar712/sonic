@@ -478,18 +478,20 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
+
+            if($user_type['corporate_rate_type_id'] == 3){
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
+            else{
+                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
         }
-         if($user_type['corporate_rate_type_id'] == 3){
-             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                 $query->where('user_id', $user_id)->where('status', 1);
-             })];
-         }
-         else{
-             $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
-             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                 $query->where('user_id', $user_id)->where('status', 1);
-             })];
-         }
+
 
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);

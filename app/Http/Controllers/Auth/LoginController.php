@@ -180,7 +180,7 @@ class LoginController extends Controller
             else {
                 $substitute_user = SubstituteUser::find($user->id);
                 $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
-                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->user_id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['permissions' => $permissions]);
                 session(['user_id' => $user->user_id]);
