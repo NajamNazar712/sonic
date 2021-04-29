@@ -18,6 +18,7 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
+use App\Http\Models\Admin\RcpTatOption;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -3799,5 +3800,47 @@ class GlobalSettingsController extends Controller
             }
 
         }
+    }
+
+    public function rcp_tat_index()
+    {
+        $tat_options = RcpTatOption::all();
+        return view('admin.settings.rcp_tat_view')->with(['tat_options'=>$tat_options]);
+    }
+
+    public function rcp_tat_list(Request $request)
+    {
+        $shippers = User::join('rcp_tat_options as tat_option','users.rcp_tat_option_id','=','tat_option.id')
+            ->leftJoin('admins as a','a.id','=','users.rcp_tat_updated_by')
+            ->select(['users.id as id','users.name as shipper','users.rcp_tat_updated_at as updated_at','a.name as updated_by','tat_option.name as tat','users.rcp_tat_option_id as tat_id'])
+            ->where([['users.status',3],['users.blacklist',0]]);
+
+        return Datatables::of($shippers)
+            ->addColumn('action', function ($shippers) {
+                $dropdown = '';
+                if (session('role_id') == 1 || count(array_intersect([489], session('permissions'))) !== 0) {
+                    $dropdown = '
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+
+                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function rcp_tat_update(Request $request)
+    {
+        $shipper_ids = explode(',',$request->shipper_id);
+        User::whereIn('id',$shipper_ids)->update([
+           'rcp_tat_option_id' => $request->tat_option,
+           'rcp_tat_updated_by' => Auth::id(),
+           'rcp_tat_updated_at' => now(),
+        ]);
+
+        return back()->with(['success'=>'Shipper TAT Updated Successfully']);
     }
 }
