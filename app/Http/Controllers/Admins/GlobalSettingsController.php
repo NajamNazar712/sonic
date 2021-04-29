@@ -3819,7 +3819,7 @@ class GlobalSettingsController extends Controller
             ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
             ->join('admins as ab','ab.id', '=', 'riders_incentive_settings.added_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders_incentive_settings.last_updated_by')
-            ->select('riders_incentive_settings.id as row_id','riders_incentive_settings.value','rc.name as rate_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at');
+            ->select('riders_incentive_settings.id as row_id','riders_incentive_settings.value','rc.name as rate_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at');
         return Datatables::of($types)
             ->addColumn('action', function ($types) {
                 $dropdown = '
@@ -3835,8 +3835,64 @@ class GlobalSettingsController extends Controller
             ->make(true);
     }
 
+
     public function rider_incentive_store(Request $request){
-        return $request;
+
+        $names = [
+            'rider_category_select' => 'Rider Category',
+            'delivery_payment_select' => 'Rider Delivery Payment',
+            'weight_range_select' => 'Rider Weight Range',
+            'incentive_value' => 'Rider Incentive/Shipment',
+
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+
+        ];
+
+        $rules = [
+            'rider_category_select' => ['required','integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+            'delivery_payment_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_payment_types,id'],
+            'weight_range_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_weight_ranges,id'],
+            'incentive_value' => ['required','integer', 'digits_between:1,100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+        $validate->setAttributeNames($names);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        else {
+            $rider_category_id = $request->rider_category_select;
+            $delivery_payment_type_id = $request->delivery_payment_select;
+            $weight_range_id = $request->weight_range_select;
+            $value = $request->incentive_value;
+
+            $setting = RidersIncentiveSetting::where(['rider_category_id' => $rider_category_id, 'rider_shipment_payment_type_id' => $delivery_payment_type_id, 'rider_shipment_weight_range_id' => $weight_range_id]);
+            if($setting->exists()){
+                return redirect()->back()->with('error', 'Setting already exists!');
+            }
+            else{
+                $rider_setting = new RidersIncentiveSetting();
+                $rider_setting->rider_category_id = $rider_category_id;
+                $rider_setting->rider_shipment_payment_type_id = $delivery_payment_type_id;
+                $rider_setting->rider_shipment_weight_range_id = $weight_range_id;
+                $rider_setting->value = $value;
+                $rider_setting->added_by = Auth::id();
+                $rider_setting->save();
+
+                return redirect()->back()->with('success', 'Setting updated successfully!');
+            }
+        }
+
     }
 
     public function rider_incentive_update(Request $request){

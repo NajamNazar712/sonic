@@ -84,7 +84,7 @@
                                 </fieldset>
 
                                 <fieldset class="col-12 form-group">
-                                    <input type="text" class="form-control" name="incentive_value" data-rule-required="true" data-msg-required="Incentive/Shipment is required">
+                                    <input type="text" class="form-control incentive_value" name="incentive_value" data-rule-required="true" data-msg-required="Incentive/Shipment is required" placeholder="Incentive/Shipment">
                                 </fieldset>
                             </div>
 
@@ -204,8 +204,11 @@
                     form.submit();
                 }
             });
-
-
+            $('input.incentive_value').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
 
             $( "#edit_commission_form" ).validate({
                 errorClass:"danger",
@@ -279,7 +282,7 @@
                     }
                 }, ,{
                     extend: 'excel',
-                    title: 'Sales Tier',
+                    title: 'Rider Incentive Setting',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -294,7 +297,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.settings.hr.rider_incentive.list') }}',
                 rowId: 'row_id',
-                order: [[1, 'asc']],
+                order: [[6, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'rate_category', name: 'rc.name', class: 'align-middle rate_category'},
