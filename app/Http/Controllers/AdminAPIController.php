@@ -1996,7 +1996,7 @@ class AdminAPIController extends Controller
                 } elseif ($attachment_type == 'photo') {
                     $photo_array = [];
                     for ($x = 0; $x <= 3; $x++) {
-                        $cnic_array[$x]['photo_' . ($x + 1)] = "";
+                        $photo_array[$x]['photo_' . ($x + 1)] = "";
                     }
                     if ($attachments->photo != NULL) {
                         $photos = explode(',', $attachments->photo);
