@@ -7435,8 +7435,10 @@ class AdminDashboardController extends Controller
                         }
 
                     }
-                    if ($result->account_type_id == 2 && $result->corporate_rate_type_id != null) {
-                        $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
+                    if ((session('role_id') == 1 || in_array(487, session('permissions')))) {
+                        if ($result->account_type_id == 2 && $result->corporate_rate_type_id != null) {
+                            $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
+                        }
                     }
                     
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
