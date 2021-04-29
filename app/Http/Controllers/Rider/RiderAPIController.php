@@ -6697,7 +6697,7 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
     }
 
-public function delivery_summary_multiple_v3(Request $request)
+    public function delivery_summary_multiple_v3(Request $request)
     {
         $rider_id = $request->rider_id;
 
@@ -6793,10 +6793,9 @@ public function delivery_summary_multiple_v3(Request $request)
                     $deliveries = array();
                     $shipment_status_count = ShipmentsJourney::where('shipment_id', $shipment_id)
                         ->where('shipper_status_id', 5)->count();
-                    if($shipment_status_count > 1){
+                    if ($shipment_status_count > 1) {
                         $deliveries['rcp'] = 1;
-                    }
-                    else{
+                    } else {
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
