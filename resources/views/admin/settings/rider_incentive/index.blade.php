@@ -40,62 +40,57 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddTierModal"
+    <div class="modal fade text-left" id="AddIncentiveModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddIncentiveModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Tier</h4>
+                    <h4 class="modal-title white">Add Incentive Type</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_commission_form" action="{{route('admin.settings.commission.add')}}" method="post">
+                    <form id="add_incentive_form" action="{{route('admin.settings.hr.rider_incentive.store')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
 
                             <div class="row justify-content-center">
-                                <div class="col-6 form-group">
-                                    <input  class="form-control" id="tier_name" name="tier_name" type="text" placeholder="Enter Tier Name"
-                                            data-rule-required="true" data-msg-required="" />
-                                </div>
-                            </div>
-                            <br>
-                            <div class="row justify-content-center">
-                                <div class="col-6 form-group">
-                                    <input  class="form-control" id="tier_commission" name="tier_commission"
-                                            data-rule-required="true" data-msg-required="" placeholder="Enter Overall Commission" />
-                                </div>
-                            </div>
-                            <br>
-                            <div class="row justify-content-center">
-                                <div class="col-6 form-group">
-                                    <fieldset class="form-group">
-                                        <select name="tier_type" id="tier_type" class="form-control select2" data-rule-required="true" data-msg-required="">
-                                            @foreach($rider_categories as $category)
-                                                <option value="{{$category->id}}">{{$category->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                            </div>
 
+                                <fieldset class="col-12 form-group">
+                                    <select name="rider_category_select" id="rider_category_select" class="form-control select2" data-rule-required="true" data-msg-required="Category is required">
+                                        @foreach($rider_categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+                                <fieldset class="col-12 form-group">
+                                    <select name="delivery_payment_select" id="delivery_payment_select" class="form-control select2" data-rule-required="true" data-msg-required="Type is required">
+                                        @foreach($payment_types as $type)
+                                            <option value="{{$type->id}}">{{$type->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+
+                                <fieldset class="col-12 form-group">
+                                    <select name="weight_range_select" id="weight_range_select" class="form-control select2" data-rule-required="true" data-msg-required="Range is required">
+                                        @foreach($weight_ranges as $range)
+                                            <option value="{{$range->id}}">{{$range->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+                                <fieldset class="col-12 form-group">
+                                    <input type="text" class="form-control" name="incentive_value" data-rule-required="true" data-msg-required="Incentive/Shipment is required">
+                                </fieldset>
+                            </div>
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
-                                    <div class="form-group">
-                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-                                        <input type="checkbox" name="sales_person_checkbox" id="sales_person_checkbox" class=" sales_person_checkbox" data-size="sm" data-switchery="true">
-                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-6">
-                                    <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Tier</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Add</button>
                                 </div>
                             </div>
 
@@ -138,20 +133,6 @@
                                             data-rule-required="true" data-msg-required="" placeholder="Enter Overall Commission" />
                                 </div>
                             </div>
-                            <br>
-
-
-                            <div class="row justify-content-center">
-                                <div class="col-6">
-                                    <label class="font-medium-2 font-weight-bold block">Relates to Sales Person</label>
-                                    <div class="form-group">
-                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-
-                                        <input type="checkbox" name="sales_person_checkbox" id="edit_sales_person_checkbox" data-switchery="false" class="sales_person_checkbox" data-size="sm">
-                                        <label for="sales_person_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-                                    </div>
-                                </div>
-                            </div>
 
                             <br><br>
                             <div class="row justify-content-center">
@@ -185,13 +166,25 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#tier_type').prepend('<option value="" selected="selected"></option>').select2({
+            $('#rider_category_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Enter Tier Type*',
-                dropdownParent:$('#add_commission_form')
+                placeholder: 'Select Rider Category*',
+                dropdownParent:$('#add_incentive_form')
             });
 
-            $( "#add_commission_form" ).validate({
+            $('#delivery_payment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Payment Type*',
+                dropdownParent:$('#add_incentive_form')
+            });
+
+            $('#weight_range_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Weight Range*',
+                dropdownParent:$('#add_incentive_form')
+            });
+
+            $( "#add_incentive_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -201,7 +194,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'New Tier is being added!',
+                        text: 'New Setting is being added!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -282,7 +275,7 @@
                     text: '<i class="la la-cogs"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
-                        $('#AddTierModal').modal('show');
+                        $('#AddIncentiveModal').modal('show');
                     }
                 }, ,{
                     extend: 'excel',

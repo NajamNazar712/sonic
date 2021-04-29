@@ -3835,4 +3835,12 @@ class GlobalSettingsController extends Controller
             ->make(true);
     }
 
+    public function rider_incentive_store(Request $request){
+        return $request;
+    }
+
+    public function rider_incentive_update(Request $request){
+        return $request;
+    }
+
 }
