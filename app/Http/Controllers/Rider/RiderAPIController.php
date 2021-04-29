@@ -6697,7 +6697,7 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
     }
 
-public function delivery_summary_multiple_v3(Request $request)
+    public function delivery_summary_multiple_v3(Request $request)
     {
         $rider_id = $request->rider_id;
 
